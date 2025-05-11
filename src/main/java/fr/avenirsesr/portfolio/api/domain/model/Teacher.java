@@ -1,0 +1,38 @@
+package fr.avenirsesr.portfolio.api.domain.model;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.net.URL;
+import java.util.UUID;
+
+@Getter
+@Setter
+public class Teacher {
+    @Setter(AccessLevel.NONE)
+    private final User user;
+    private String bio;
+    private URL profilePicture;
+    private URL coverPicture;
+
+    private Teacher(User user) {
+        this.user = user;
+    }
+
+    public static Teacher create(User user) {
+        return new Teacher(user);
+    }
+
+    public static Teacher toDomain(User user, String bio, URL profilePicture, URL coverPicture) {
+        var teacher = new Teacher(user);
+        teacher.setBio(bio);
+        teacher.setProfilePicture(profilePicture);
+        teacher.setCoverPicture(coverPicture);
+        return teacher;
+    }
+
+    public UUID getId() {
+        return user.getId();
+    }
+}

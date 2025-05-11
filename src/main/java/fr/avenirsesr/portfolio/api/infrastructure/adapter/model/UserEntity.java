@@ -1,0 +1,50 @@
+package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+@Entity
+@Table(name = "users")
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserEntity {
+    @Id
+    private UUID id;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Email
+    @Column
+    private String email;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "bio", column = @Column(name = "student_bio")),
+            @AttributeOverride(name = "profile_picture", column = @Column(name = "student_profile_picture")),
+            @AttributeOverride(name = "cover_picture", column = @Column(name = "student_cover_picture"))
+    })
+    private StudentEntity student;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "bio", column = @Column(name = "teacher_bio")),
+            @AttributeOverride(name = "profile_picture", column = @Column(name = "teacher_profile_picture")),
+            @AttributeOverride(name = "cover_picture", column = @Column(name = "teacher_cover_picture"))
+    })
+    private TeacherEntity teacher;
+
+}
