@@ -6,4 +6,4 @@ on:
 
 jobs:
   call-main-ci:
-    uses: avenirs/avenirs-workflows/workflows/common-backend-worflow/workflow.yaml@feat/core-actions-workflows
+    uses: avenirs-esr/avenirs-workflows/workflows/common-backend-worflow/workflow.yaml@feat/core-actions-workflows
