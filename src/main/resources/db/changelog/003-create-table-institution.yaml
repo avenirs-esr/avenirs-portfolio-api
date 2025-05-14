@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: institution
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: enabled_fields
+                  type: TEXT
+                  constraints:
+                    nullable: true
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true

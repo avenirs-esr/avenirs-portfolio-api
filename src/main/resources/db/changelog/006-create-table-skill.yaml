@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: skill
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: program_progress_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
+
+        - addForeignKeyConstraint:
+            baseTableName: skill
+            baseColumnNames: program_progress_id
+            referencedTableName: program_progress
+            referencedColumnNames: id
+            constraintName: fk_skill_program_progress

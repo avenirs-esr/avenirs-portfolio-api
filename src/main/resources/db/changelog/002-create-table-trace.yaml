@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: trace
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
+
+        - addForeignKeyConstraint:
+            baseTableName: trace
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_trace_user
+            onDelete: CASCADE
