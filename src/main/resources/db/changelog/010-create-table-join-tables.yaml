@@ -1,0 +1,98 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-1
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: trace_skill_levels
+            columns:
+              - column:
+                  name: trace_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: skill_level_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: trace_skill_levels
+            baseColumnNames: trace_id
+            referencedTableName: trace
+            referencedColumnNames: id
+            constraintName: fk_trace_skill_levels_trace
+
+        - addForeignKeyConstraint:
+            baseTableName: trace_skill_levels
+            baseColumnNames: skill_level_id
+            referencedTableName: skill_level
+            referencedColumnNames: id
+            constraintName: fk_trace_skill_levels_skill_level
+  - changeSet:
+      id: 010-2
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: trace_ams
+            columns:
+              - column:
+                  name: trace_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: ams_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: trace_ams
+            baseColumnNames: trace_id
+            referencedTableName: trace
+            referencedColumnNames: id
+            constraintName: fk_trace_ams_trace
+
+        - addForeignKeyConstraint:
+            baseTableName: trace_ams
+            baseColumnNames: ams_id
+            referencedTableName: ams
+            referencedColumnNames: id
+            constraintName: fk_trace_ams_ams
+  - changeSet:
+      id: 010-3
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: skill_level_ams
+            columns:
+              - column:
+                  name: skill_level_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: ams_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: skill_level_ams
+            baseColumnNames: skill_level_id
+            referencedTableName: skill_level
+            referencedColumnNames: id
+            constraintName: fk_skill_level_ams_skill_level
+
+        - addForeignKeyConstraint:
+            baseTableName: skill_level_ams
+            baseColumnNames: ams_id
+            referencedTableName: ams
+            referencedColumnNames: id
+            constraintName: fk_skill_level_ams_ams
+
