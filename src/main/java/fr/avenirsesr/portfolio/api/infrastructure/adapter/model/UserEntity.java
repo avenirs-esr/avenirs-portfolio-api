@@ -34,16 +34,16 @@ public class UserEntity {
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "bio", column = @Column(name = "student_bio")),
-            @AttributeOverride(name = "profile_picture", column = @Column(name = "student_profile_picture")),
-            @AttributeOverride(name = "cover_picture", column = @Column(name = "student_cover_picture"))
+            @AttributeOverride(name = "profilePicture", column = @Column(name = "student_profile_picture")),
+            @AttributeOverride(name = "coverPicture", column = @Column(name = "student_cover_picture"))
     })
     private StudentEntity student;
 
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "bio", column = @Column(name = "teacher_bio")),
-            @AttributeOverride(name = "profile_picture", column = @Column(name = "teacher_profile_picture")),
-            @AttributeOverride(name = "cover_picture", column = @Column(name = "teacher_cover_picture"))
+            @AttributeOverride(name = "profilePicture", column = @Column(name = "teacher_profile_picture")),
+            @AttributeOverride(name = "coverPicture", column = @Column(name = "teacher_cover_picture"))
     })
     private TeacherEntity teacher;
 
