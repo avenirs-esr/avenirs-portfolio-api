@@ -1,0 +1,9 @@
+name: Main Workflow
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  call-main-ci:
+    uses: avenirs-esr/avenirs-workflows/.github/workflows/common-backend-workflow.yaml@main
