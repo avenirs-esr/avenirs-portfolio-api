@@ -1,17 +1,20 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class Teacher {
+
+  @Setter(AccessLevel.NONE)
   private final User user;
 
   private String bio;
-  private byte[] profilePicture;
-  private byte[] coverPicture;
+  private String profilePicture;
+  private String coverPicture;
 
   private Teacher(User user) {
     this.user = user;
@@ -21,7 +24,7 @@ public class Teacher {
     return new Teacher(user);
   }
 
-  public static Teacher of(User user, String bio, byte[] profilePicture, byte[] coverPicture) {
+  public static Teacher of(User user, String bio, String profilePicture, String coverPicture) {
     var teacher = new Teacher(user);
     teacher.setBio(bio);
     teacher.setProfilePicture(profilePicture);
@@ -31,7 +34,7 @@ public class Teacher {
   }
 
   public static Teacher toDomain(
-      User user, String bio, byte[] profilePicture, byte[] coverPicture) {
+      User user, String bio, String profilePicture, String coverPicture) {
     return of(user, bio, profilePicture, coverPicture);
   }
 
