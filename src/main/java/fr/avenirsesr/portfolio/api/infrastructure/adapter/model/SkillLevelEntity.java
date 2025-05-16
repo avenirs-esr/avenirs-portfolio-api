@@ -24,9 +24,6 @@ public class SkillLevelEntity {
   @Column(nullable = false)
   private String name;
 
-  @ManyToOne(optional = false)
-  private SkillEntity skill;
-
   @Column
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;

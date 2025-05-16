@@ -16,21 +16,17 @@ public class SkillLevel {
   @Setter(AccessLevel.NONE)
   private final String name;
 
-  @Setter(AccessLevel.NONE)
-  private final Skill skill;
-
   private ESkillLevelStatus status;
   private List<Trace> traces;
   private List<AMS> amses;
 
-  private SkillLevel(UUID id, String name, Skill skill) {
+  private SkillLevel(UUID id, String name) {
     this.id = id;
     this.name = name;
-    this.skill = skill;
   }
 
-  public static SkillLevel create(String name, Skill skill) {
-    var skillLevel = new SkillLevel(UUID.randomUUID(), name, skill);
+  public static SkillLevel create(String name) {
+    var skillLevel = new SkillLevel(UUID.randomUUID(), name);
     skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);
     skillLevel.setAmses(List.of());
     skillLevel.setTraces(List.of());
@@ -39,13 +35,8 @@ public class SkillLevel {
   }
 
   public static SkillLevel toDomain(
-      UUID id,
-      String name,
-      Skill skill,
-      ESkillLevelStatus status,
-      List<Trace> traces,
-      List<AMS> amses) {
-    var skillLevel = new SkillLevel(id, name, skill);
+      UUID id, String name, ESkillLevelStatus status, List<Trace> traces, List<AMS> amses) {
+    var skillLevel = new SkillLevel(id, name);
     skillLevel.setStatus(status);
     skillLevel.setTraces(traces);
     skillLevel.setAmses(amses);

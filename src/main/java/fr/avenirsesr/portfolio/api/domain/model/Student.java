@@ -13,8 +13,8 @@ public class Student {
   private final User user;
 
   private String bio;
-  private URL profilePicture;
-  private URL coverPicture;
+  private byte[] profilePicture;
+  private byte[] coverPicture;
 
   private Student(User user) {
     this.user = user;
@@ -24,7 +24,7 @@ public class Student {
     return new Student(user);
   }
 
-  public static Student toDomain(User user, String bio, URL profilePicture, URL coverPicture) {
+  public static Student toDomain(User user, String bio, byte[] profilePicture, byte[] coverPicture) {
     var student = new Student(user);
     student.setBio(bio);
     student.setProfilePicture(profilePicture);

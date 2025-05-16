@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TeacherEntity {
   @Column private String bio;
-  @Column private String profilePicture;
-  @Column private String coverPicture;
+  @Column @Lob private byte[] profilePicture;
+  @Column @Lob private byte[] coverPicture;
 }

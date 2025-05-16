@@ -118,3 +118,84 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_skill_level_ams_ams
             onDelete: CASCADE
+  - changeSet:
+      id: 010-4
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: skill_skill_levels
+            columns:
+              - column:
+                  name: skill_id
+                  type: UUID
+
+                  constraints:
+                    nullable: false
+              - column:
+                  name: skill_level_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
+
+        - addForeignKeyConstraint:
+            baseTableName: skill_skill_levels
+            baseColumnNames: skill_id
+            referencedTableName: skill
+            referencedColumnNames: id
+            constraintName: fk_skill_skill_levels_skill
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: skill_skill_levels
+            baseColumnNames: skill_level_id
+            referencedTableName: skill_level
+            referencedColumnNames: id
+            constraintName: fk_skill_skill_levels_skill_level
+            onDelete: CASCADE
+
+        - addUniqueConstraint:
+            tableName: skill_skill_levels
+            columnNames: skill_id, skill_level_id
+            constraintName: uq_skill_skill_levels
+  - changeSet:
+      id: 010-5
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: program_progress_skills
+            columns:
+              - column:
+                  name: program_progress_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: skill_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: program_progress_skills
+            baseColumnNames: program_progress_id
+            referencedTableName: program_progress
+            referencedColumnNames: id
+            constraintName: fk_program_progress_skills_program_progress
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: program_progress_skills
+            baseColumnNames: skill_id
+            referencedTableName: skill
+            referencedColumnNames: id
+            constraintName: fk_program_progress_skills_skill
+            onDelete: CASCADE
+
+
+

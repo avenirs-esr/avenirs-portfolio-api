@@ -13,8 +13,8 @@ public class Teacher {
   private final User user;
 
   private String bio;
-  private URL profilePicture;
-  private URL coverPicture;
+  private byte[] profilePicture;
+  private byte[] coverPicture;
 
   private Teacher(User user) {
     this.user = user;
@@ -24,7 +24,7 @@ public class Teacher {
     return new Teacher(user);
   }
 
-  public static Teacher toDomain(User user, String bio, URL profilePicture, URL coverPicture) {
+  public static Teacher toDomain(User user, String bio, byte[] profilePicture, byte[] coverPicture) {
     var teacher = new Teacher(user);
     teacher.setBio(bio);
     teacher.setProfilePicture(profilePicture);

@@ -14,18 +14,23 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(
     name = "external_users",
     uniqueConstraints = @UniqueConstraint(columnNames = {"eternal_id", "source"}))
-@AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class ExternalUserEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
+  @Setter(AccessLevel.NONE)
   private UUID id;
 
   @Column(nullable = false)
@@ -51,4 +56,21 @@ public class ExternalUserEntity {
 
   @Column(nullable = false)
   private String lastName;
+
+  public ExternalUserEntity(
+      String externalId,
+      EExternalSource source,
+      UserEntity user,
+      EUserCategory category,
+      String email,
+      String firstName,
+      String lastName) {
+    this.externalId = externalId;
+    this.source = source;
+    this.user = user;
+    this.category = category;
+    this.email = email;
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
 }
