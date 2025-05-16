@@ -15,6 +15,9 @@ import lombok.Setter;
 import java.util.Set;
 import java.util.UUID;
 
+import java.util.Set;
+import java.util.UUID;
+
 @Entity
 @Table(name = "program_progress")
 @AllArgsConstructor

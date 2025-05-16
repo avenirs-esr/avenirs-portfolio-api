@@ -7,12 +7,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "program")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class ProgramEntity {
   @Id private UUID id;
 
