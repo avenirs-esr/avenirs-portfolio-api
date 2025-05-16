@@ -1,0 +1,65 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: ams
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
+
+  - changeSet:
+      id: 009-1
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: ams_skill_levels
+            columns:
+              - column:
+                  name: ams_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: skill_level_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
+
+        - addForeignKeyConstraint:
+            baseTableName: ams_skill_levels
+            baseColumnNames: ams_id
+            referencedTableName: ams
+            referencedColumnNames: id
+            constraintName: fk_ams_skill_levels_ams
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: ams_skill_levels
+            baseColumnNames: skill_level_id
+            referencedTableName: skill_level
+            referencedColumnNames: id
+            constraintName: fk_ams_skill_levels_skill_level
+            onDelete: CASCADE

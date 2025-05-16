@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: program_progress
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: program_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: student_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
+
+        - addForeignKeyConstraint:
+            baseTableName: program_progress
+            baseColumnNames: program_id
+            referencedTableName: program
+            referencedColumnNames: id
+            constraintName: fk_program_progress_program
+
+        - addForeignKeyConstraint:
+            baseTableName: program_progress
+            baseColumnNames: student_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_program_progress_user

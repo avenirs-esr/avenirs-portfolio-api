@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: program
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: institution_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
+
+        - addForeignKeyConstraint:
+            baseTableName: program
+            baseColumnNames: institution_id
+            referencedTableName: institution
+            referencedColumnNames: id
+            constraintName: fk_program_institution

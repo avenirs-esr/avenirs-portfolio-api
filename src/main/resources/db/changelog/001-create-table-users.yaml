@@ -1,0 +1,51 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001
+      author: bilelbanelhaq
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+              - column:
+                  name: student_bio
+                  type: TEXT
+              - column:
+                  name: student_profile_picture
+                  type: VARCHAR(255)
+              - column:
+                  name: student_cover_picture
+                  type: VARCHAR(255)
+              - column:
+                  name: teacher_bio
+                  type: TEXT
+              - column:
+                  name: teacher_profile_picture
+                  type: VARCHAR(255)
+              - column:
+                  name: teacher_cover_picture
+                  type: VARCHAR(255)
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
