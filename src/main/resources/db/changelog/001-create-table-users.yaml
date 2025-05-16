@@ -43,3 +43,9 @@ databaseChangeLog:
               - column:
                   name: teacher_cover_picture
                   type: VARCHAR(255)
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true

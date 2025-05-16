@@ -54,6 +54,12 @@ databaseChangeLog:
                   type: VARCHAR(255)
                   constraints:
                     nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
 
         - addForeignKeyConstraint:
             baseTableName: external_users

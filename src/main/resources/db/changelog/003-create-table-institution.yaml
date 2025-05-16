@@ -24,3 +24,9 @@ databaseChangeLog:
                   type: TEXT
                   constraints:
                     nullable: true
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true

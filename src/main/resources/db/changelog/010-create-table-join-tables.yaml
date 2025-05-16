@@ -11,12 +11,17 @@ databaseChangeLog:
                   type: UUID
                   constraints:
                     nullable: false
-
               - column:
                   name: skill_level_id
                   type: UUID
                   constraints:
                     nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
 
         - addForeignKeyConstraint:
             baseTableName: trace_skill_levels
@@ -24,6 +29,7 @@ databaseChangeLog:
             referencedTableName: trace
             referencedColumnNames: id
             constraintName: fk_trace_skill_levels_trace
+            onDelete: CASCADE
 
         - addForeignKeyConstraint:
             baseTableName: trace_skill_levels
@@ -31,6 +37,8 @@ databaseChangeLog:
             referencedTableName: skill_level
             referencedColumnNames: id
             constraintName: fk_trace_skill_levels_skill_level
+            onDelete: CASCADE
+
   - changeSet:
       id: 010-2
       author: bilelbanelhaq
@@ -43,12 +51,17 @@ databaseChangeLog:
                   type: UUID
                   constraints:
                     nullable: false
-
               - column:
                   name: ams_id
                   type: UUID
                   constraints:
                     nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
 
         - addForeignKeyConstraint:
             baseTableName: trace_ams
@@ -56,6 +69,7 @@ databaseChangeLog:
             referencedTableName: trace
             referencedColumnNames: id
             constraintName: fk_trace_ams_trace
+            onDelete: CASCADE
 
         - addForeignKeyConstraint:
             baseTableName: trace_ams
@@ -63,6 +77,8 @@ databaseChangeLog:
             referencedTableName: ams
             referencedColumnNames: id
             constraintName: fk_trace_ams_ams
+            onDelete: CASCADE
+
   - changeSet:
       id: 010-3
       author: bilelbanelhaq
@@ -75,12 +91,17 @@ databaseChangeLog:
                   type: UUID
                   constraints:
                     nullable: false
-
               - column:
                   name: ams_id
                   type: UUID
                   constraints:
                     nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
 
         - addForeignKeyConstraint:
             baseTableName: skill_level_ams
@@ -88,6 +109,7 @@ databaseChangeLog:
             referencedTableName: skill_level
             referencedColumnNames: id
             constraintName: fk_skill_level_ams_skill_level
+            onDelete: CASCADE
 
         - addForeignKeyConstraint:
             baseTableName: skill_level_ams
@@ -95,4 +117,4 @@ databaseChangeLog:
             referencedTableName: ams
             referencedColumnNames: id
             constraintName: fk_skill_level_ams_ams
-
+            onDelete: CASCADE

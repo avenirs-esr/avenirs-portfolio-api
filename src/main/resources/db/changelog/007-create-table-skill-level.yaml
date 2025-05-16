@@ -28,6 +28,12 @@ databaseChangeLog:
               - column:
                   name: status
                   type: VARCHAR(50)
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true
 
         - addForeignKeyConstraint:
             baseTableName: skill_level
