@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ENavigationField;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -18,6 +19,12 @@ import java.util.Set;
 public class SeederRunner implements CommandLineRunner {
     @Value("${seeder.enabled:false}")
     private boolean seedEnabled;
+
+    private final UserRepository userRepository;
+
+    public SeederRunner(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public void run(String... args) {
@@ -76,6 +83,8 @@ public class SeederRunner implements CommandLineRunner {
                         return FakeProgramProgress.of(programs.getFirst(), student, skills).toModel();
                     })
                     .toList();
+
+            userRepository.saveAll(users);
 
             log.info("{} users created", users.size());
             log.info("{} externalUsers created", externalUsers.size());

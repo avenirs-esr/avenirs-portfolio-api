@@ -5,8 +5,6 @@ import fr.avenirsesr.portfolio.api.domain.model.Teacher;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import net.datafaker.Faker;
 
-import java.net.URI;
-
 public class FakeUser {
     private final static Faker faker = new Faker();
     private final User user;
