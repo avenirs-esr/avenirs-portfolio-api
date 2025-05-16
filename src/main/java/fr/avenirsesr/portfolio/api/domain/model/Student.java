@@ -1,5 +1,8 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.StudentEntity;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.UserEntity;
+import jakarta.persistence.Lob;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,11 +13,17 @@ import java.util.UUID;
 @Getter
 @Setter
 public class Student {
+
     @Setter(AccessLevel.NONE)
     private final User user;
+
     private String bio;
-    private URL profilePicture;
-    private URL coverPicture;
+
+    @Lob
+    private byte[] profilePicture;
+
+    @Lob
+    private byte[] coverPicture;
 
     private Student(User user) {
         this.user = user;
@@ -24,7 +33,7 @@ public class Student {
         return new Student(user);
     }
 
-    public static Student toDomain(User user, String bio, URL profilePicture, URL coverPicture) {
+    public static Student toDomain(User user, String bio, byte[] profilePicture, byte[] coverPicture) {
         var student = new Student(user);
         student.setBio(bio);
         student.setProfilePicture(profilePicture);
@@ -34,5 +43,27 @@ public class Student {
 
     public UUID getId() {
         return user.getId();
+    }
+
+    private StudentEntity modelToEntity(Student student) {
+        return new StudentEntity(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                studentModelToEntity(user.getStudent()),
+                teacherModelToEntity(user.getTeacher())
+        );
+    }
+
+    private Student entityToModel(StudentEntity studentEntity) {
+        return Student.toDomain(
+                userEntity.getId(),
+                userEntity.getFirstName(),
+                userEntity.getLastName(),
+                userEntity.getEmail(),
+                studentEntityToModel(userEntity.getStudent()),
+                teacherEntityToModel(userEntity.getTeacher())
+        );
     }
 }

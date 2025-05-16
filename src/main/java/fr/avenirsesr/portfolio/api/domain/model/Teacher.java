@@ -1,20 +1,26 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
+import jakarta.persistence.Lob;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.net.URL;
 import java.util.UUID;
 
 @Getter
 @Setter
 public class Teacher {
+
     @Setter(AccessLevel.NONE)
     private final User user;
+
     private String bio;
-    private URL profilePicture;
-    private URL coverPicture;
+
+    @Lob
+    private byte[] profilePicture;
+
+    @Lob
+    private byte[] coverPicture;
 
     private Teacher(User user) {
         this.user = user;
@@ -24,7 +30,7 @@ public class Teacher {
         return new Teacher(user);
     }
 
-    public static Teacher toDomain(User user, String bio, URL profilePicture, URL coverPicture) {
+    public static Teacher toDomain(User user, String bio, byte[] profilePicture, byte[] coverPicture) {
         var teacher = new Teacher(user);
         teacher.setBio(bio);
         teacher.setProfilePicture(profilePicture);
