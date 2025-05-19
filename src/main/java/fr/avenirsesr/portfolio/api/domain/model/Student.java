@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
-import java.net.URL;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,7 +23,8 @@ public class Student {
     return new Student(user);
   }
 
-  public static Student toDomain(User user, String bio, byte[] profilePicture, byte[] coverPicture) {
+  public static Student toDomain(
+      User user, String bio, byte[] profilePicture, byte[] coverPicture) {
     var student = new Student(user);
     student.setBio(bio);
     student.setProfilePicture(profilePicture);
