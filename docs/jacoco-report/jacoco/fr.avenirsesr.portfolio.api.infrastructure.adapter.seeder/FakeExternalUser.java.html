@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FakeExternalUser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder</a> &gt; <span class="el_source">FakeExternalUser.java</span></div><h1>FakeExternalUser.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+
+import fr.avenirsesr.portfolio.api.domain.model.ExternalUser;
+import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EExternalSource;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
+import java.util.Arrays;
+import net.datafaker.Faker;
+
+public class FakeExternalUser {
+<span class="nc" id="L11">  private static final Faker faker = new Faker();</span>
+  private final ExternalUser externalUser;
+
+<span class="nc" id="L14">  private FakeExternalUser(ExternalUser externalUser) {</span>
+<span class="nc" id="L15">    this.externalUser = externalUser;</span>
+<span class="nc" id="L16">  }</span>
+
+  public static FakeExternalUser of(User user, EUserCategory category) {
+<span class="nc bnc" id="L19" title="All 4 branches missed.">    if (category == EUserCategory.STUDENT &amp;&amp; user.getStudent() == null) {</span>
+<span class="nc" id="L20">      throw new IllegalArgumentException(&quot;Student cannot be null&quot;);</span>
+    }
+<span class="nc bnc" id="L22" title="All 4 branches missed.">    if (category == EUserCategory.TEACHER &amp;&amp; user.getTeacher() == null) {</span>
+<span class="nc" id="L23">      throw new IllegalArgumentException(&quot;Student cannot be null&quot;);</span>
+    }
+
+<span class="nc" id="L26">    return new FakeExternalUser(</span>
+<span class="nc" id="L27">        ExternalUser.create(</span>
+            user,
+<span class="nc" id="L29">            generateRandomExternalId(),</span>
+<span class="nc" id="L30">            Arrays.stream(EExternalSource.values())</span>
+<span class="nc" id="L31">                .toList()</span>
+<span class="nc" id="L32">                .get(faker.random().nextInt(EExternalSource.values().length)),</span>
+            category,
+<span class="nc" id="L34">            faker.internet().emailAddress(),</span>
+<span class="nc" id="L35">            user.getFirstName(),</span>
+<span class="nc" id="L36">            user.getLastName()));</span>
+  }
+
+  private static String generateRandomExternalId() {
+<span class="nc" id="L40">    int idType = faker.number().numberBetween(0, 3);</span>
+
+<span class="nc bnc" id="L42" title="All 4 branches missed.">    return switch (idType) {</span>
+<span class="nc" id="L43">      case 0 -&gt; faker.internet().uuid();</span>
+<span class="nc" id="L44">      case 1 -&gt; String.valueOf(faker.number().numberBetween(1, 999_999));</span>
+<span class="nc" id="L45">      case 2 -&gt; faker.regexify(&quot;[A-Z]{3}[0-9]{3}&quot;);</span>
+<span class="nc" id="L46">      default -&gt; throw new IllegalStateException(&quot;Unexpected value: &quot; + idType);</span>
+    };
+  }
+
+  public ExternalUser toModel() {
+<span class="nc" id="L51">    return externalUser;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

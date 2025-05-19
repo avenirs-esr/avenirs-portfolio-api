@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FakeUser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder</a> &gt; <span class="el_source">FakeUser.java</span></div><h1>FakeUser.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+
+import fr.avenirsesr.portfolio.api.domain.model.Student;
+import fr.avenirsesr.portfolio.api.domain.model.Teacher;
+import fr.avenirsesr.portfolio.api.domain.model.User;
+import net.datafaker.Faker;
+
+public class FakeUser {
+<span class="nc" id="L9">  private static final Faker faker = new Faker();</span>
+  private final User user;
+
+<span class="nc" id="L12">  private FakeUser(User user) {</span>
+<span class="nc" id="L13">    this.user = user;</span>
+<span class="nc" id="L14">  }</span>
+
+  public static FakeUser create() {
+<span class="nc" id="L17">    return new FakeUser(User.create(faker.name().firstName(), faker.name().lastName()));</span>
+  }
+
+  public FakeUser withEmail() {
+<span class="nc" id="L21">    user.setEmail(faker.internet().emailAddress());</span>
+<span class="nc" id="L22">    return this;</span>
+  }
+
+  public FakeUser withStudent() {
+<span class="nc" id="L26">    var student = Student.create(user);</span>
+<span class="nc" id="L27">    student.setBio(faker.lorem().paragraph());</span>
+<span class="nc" id="L28">    student.setProfilePicture(faker.internet().image().getBytes());</span>
+<span class="nc" id="L29">    student.setCoverPicture(faker.internet().image().getBytes());</span>
+
+<span class="nc" id="L31">    user.setStudent(student);</span>
+<span class="nc" id="L32">    return this;</span>
+  }
+
+  public FakeUser withTeacher() {
+<span class="nc" id="L36">    var teacher = Teacher.create(user);</span>
+<span class="nc" id="L37">    teacher.setBio(faker.lorem().paragraph());</span>
+<span class="nc" id="L38">    teacher.setProfilePicture(faker.internet().image().getBytes());</span>
+<span class="nc" id="L39">    teacher.setCoverPicture(faker.internet().image().getBytes());</span>
+
+<span class="nc" id="L41">    user.setTeacher(teacher);</span>
+<span class="nc" id="L42">    return this;</span>
+  }
+
+  public User toModel() {
+<span class="nc" id="L46">    return user;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

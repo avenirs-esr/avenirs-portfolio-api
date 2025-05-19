@@ -8,25 +8,20 @@ import lombok.Getter;
 public class Skill {
   private final UUID id;
   private final String name;
-  private final ProgramProgress programProgress;
   private final Set&lt;SkillLevel&gt; skillLevels;
 
-  private Skill(
-<span class="nc" id="L15">      UUID id, String name, ProgramProgress programProgress, Set&lt;SkillLevel&gt; skillLevels) {</span>
-<span class="nc" id="L16">    this.id = id;</span>
-<span class="nc" id="L17">    this.name = name;</span>
-<span class="nc" id="L18">    this.programProgress = programProgress;</span>
-<span class="nc" id="L19">    this.skillLevels = skillLevels;</span>
-<span class="nc" id="L20">  }</span>
+<span class="nc" id="L13">  private Skill(UUID id, String name, Set&lt;SkillLevel&gt; skillLevels) {</span>
+<span class="nc" id="L14">    this.id = id;</span>
+<span class="nc" id="L15">    this.name = name;</span>
+<span class="nc" id="L16">    this.skillLevels = skillLevels;</span>
+<span class="nc" id="L17">  }</span>
 
-  public static Skill create(
-      String name, ProgramProgress programProgress, Set&lt;SkillLevel&gt; skillLevels) {
-<span class="nc" id="L24">    return new Skill(UUID.randomUUID(), name, programProgress, skillLevels);</span>
+  public static Skill create(String name, Set&lt;SkillLevel&gt; skillLevels) {
+<span class="nc" id="L20">    return new Skill(UUID.randomUUID(), name, skillLevels);</span>
   }
 
-  public static Skill toDomain(
-      UUID id, String name, ProgramProgress programProgress, Set&lt;SkillLevel&gt; skillLevels) {
-<span class="nc" id="L29">    return new Skill(id, name, programProgress, skillLevels);</span>
+  public static Skill toDomain(UUID id, String name, Set&lt;SkillLevel&gt; skillLevels) {
+<span class="nc" id="L24">    return new Skill(id, name, skillLevels);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

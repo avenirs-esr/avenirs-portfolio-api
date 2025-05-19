@@ -16,41 +16,32 @@ public class SkillLevel {
   @Setter(AccessLevel.NONE)
   private final String name;
 
-  @Setter(AccessLevel.NONE)
-  private final Skill skill;
-
   private ESkillLevelStatus status;
   private List&lt;Trace&gt; traces;
   private List&lt;AMS&gt; amses;
 
-<span class="nc" id="L26">  private SkillLevel(UUID id, String name, Skill skill) {</span>
-<span class="nc" id="L27">    this.id = id;</span>
-<span class="nc" id="L28">    this.name = name;</span>
-<span class="nc" id="L29">    this.skill = skill;</span>
-<span class="nc" id="L30">  }</span>
+<span class="nc" id="L23">  private SkillLevel(UUID id, String name) {</span>
+<span class="nc" id="L24">    this.id = id;</span>
+<span class="nc" id="L25">    this.name = name;</span>
+<span class="nc" id="L26">  }</span>
 
-  public static SkillLevel create(String name, Skill skill) {
-<span class="nc" id="L33">    var skillLevel = new SkillLevel(UUID.randomUUID(), name, skill);</span>
-<span class="nc" id="L34">    skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);</span>
-<span class="nc" id="L35">    skillLevel.setAmses(List.of());</span>
-<span class="nc" id="L36">    skillLevel.setTraces(List.of());</span>
+  public static SkillLevel create(String name) {
+<span class="nc" id="L29">    var skillLevel = new SkillLevel(UUID.randomUUID(), name);</span>
+<span class="nc" id="L30">    skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);</span>
+<span class="nc" id="L31">    skillLevel.setAmses(List.of());</span>
+<span class="nc" id="L32">    skillLevel.setTraces(List.of());</span>
 
-<span class="nc" id="L38">    return skillLevel;</span>
+<span class="nc" id="L34">    return skillLevel;</span>
   }
 
   public static SkillLevel toDomain(
-      UUID id,
-      String name,
-      Skill skill,
-      ESkillLevelStatus status,
-      List&lt;Trace&gt; traces,
-      List&lt;AMS&gt; amses) {
-<span class="nc" id="L48">    var skillLevel = new SkillLevel(id, name, skill);</span>
-<span class="nc" id="L49">    skillLevel.setStatus(status);</span>
-<span class="nc" id="L50">    skillLevel.setTraces(traces);</span>
-<span class="nc" id="L51">    skillLevel.setAmses(amses);</span>
+      UUID id, String name, ESkillLevelStatus status, List&lt;Trace&gt; traces, List&lt;AMS&gt; amses) {
+<span class="nc" id="L39">    var skillLevel = new SkillLevel(id, name);</span>
+<span class="nc" id="L40">    skillLevel.setStatus(status);</span>
+<span class="nc" id="L41">    skillLevel.setTraces(traces);</span>
+<span class="nc" id="L42">    skillLevel.setAmses(amses);</span>
 
-<span class="nc" id="L53">    return skillLevel;</span>
+<span class="nc" id="L44">    return skillLevel;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
