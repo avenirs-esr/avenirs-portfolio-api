@@ -1,2 +1,17 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EUserCategory,0,15,0,0,0,3,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,ESkillLevelStatus,0,33,0,0,0,6,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,ENavigationField,0,15,0,0,0,3,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EExternalSource,0,9,0,0,0,2,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api,AvenirsPortfolioApiApplication,5,3,0,0,2,1,1,1,1,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,AMS,31,0,0,0,10,0,3,0,3,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,ProgramProgress,31,0,0,0,8,0,3,0,3,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,User,41,0,0,0,14,0,3,0,3,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,SkillLevel,48,0,0,0,15,0,3,0,3,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Teacher,31,0,0,0,10,0,4,0,4,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Program,26,0,0,0,7,0,3,0,3,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Student,31,0,0,0,10,0,4,0,4,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Trace,37,0,0,0,12,0,3,0,3,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Institution,32,0,0,0,10,0,3,0,3,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,ExternalUser,35,0,0,0,10,0,2,0,2,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Skill,31,0,0,0,8,0,3,0,3,0

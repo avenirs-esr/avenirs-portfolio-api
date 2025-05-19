@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Teacher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.domain.model</a> &gt; <span class="el_source">Teacher.java</span></div><h1>Teacher.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.domain.model;
+
+import java.net.URL;
+import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class Teacher {
+  @Setter(AccessLevel.NONE)
+  private final User user;
+
+  private String bio;
+  private URL profilePicture;
+  private URL coverPicture;
+
+<span class="nc" id="L19">  private Teacher(User user) {</span>
+<span class="nc" id="L20">    this.user = user;</span>
+<span class="nc" id="L21">  }</span>
+
+  public static Teacher create(User user) {
+<span class="nc" id="L24">    return new Teacher(user);</span>
+  }
+
+  public static Teacher toDomain(User user, String bio, URL profilePicture, URL coverPicture) {
+<span class="nc" id="L28">    var teacher = new Teacher(user);</span>
+<span class="nc" id="L29">    teacher.setBio(bio);</span>
+<span class="nc" id="L30">    teacher.setProfilePicture(profilePicture);</span>
+<span class="nc" id="L31">    teacher.setCoverPicture(coverPicture);</span>
+<span class="nc" id="L32">    return teacher;</span>
+  }
+
+  public UUID getId() {
+<span class="nc" id="L36">    return user.getId();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
