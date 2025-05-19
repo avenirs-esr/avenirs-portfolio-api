@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ENavigationField;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
-import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.api.domain.port.output.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -21,9 +21,26 @@ public class SeederRunner implements CommandLineRunner {
     private boolean seedEnabled;
 
     private final UserRepository userRepository;
+    private final ExternalUserRepository externalUserRepository;
+    private final InstitutionRepository institutionRepository;
+    private final ProgramRepository programRepository;
+    private final ProgramProgressRepository programProgressRepository;
+    private final SkillLevelRepository skillLevelRepository;
+    private final SkillRepository skillRepository;
+    private final TraceRepository traceRepository;
+    private final AMSRepository amsRepository;
 
-    public SeederRunner(UserRepository userRepository) {
+
+    public SeederRunner(UserRepository userRepository, ExternalUserRepository externalUserRepository, InstitutionRepository institutionRepository, ProgramRepository programRepository, ProgramProgressRepository programProgressRepository, SkillLevelRepository skillLevelRepository, SkillRepository skillRepository, TraceRepository traceRepository, AMSRepository amsRepository) {
         this.userRepository = userRepository;
+        this.externalUserRepository = externalUserRepository;
+        this.institutionRepository = institutionRepository;
+        this.programRepository = programRepository;
+        this.programProgressRepository = programProgressRepository;
+        this.skillLevelRepository = skillLevelRepository;
+        this.skillRepository = skillRepository;
+        this.traceRepository = traceRepository;
+        this.amsRepository = amsRepository;
     }
 
     @Override
@@ -84,13 +101,44 @@ public class SeederRunner implements CommandLineRunner {
                     })
                     .toList();
 
-            userRepository.saveAll(users);
+            var trace = FakeTrace.of(users.getFirst()).toModel();
+            var ams = FakeAMS.of(users.getFirst()).toModel();
 
-            log.info("{} users created", users.size());
-            log.info("{} externalUsers created", externalUsers.size());
-            log.info("{} institutions created", institutions.size());
-            log.info("{} programs created", programs.size());
-            log.info("{} programProgresses created", programProgresses.size());
+            userRepository.saveAll(users);
+            log.info("✓ {} users created", users.size());
+
+            externalUserRepository.saveAll(externalUsers);
+            log.info("✓ {} externalUsers created", externalUsers.size());
+
+            institutionRepository.saveAll(institutions);
+            log.info("✓ {} institutions created", institutions.size());
+
+            programRepository.saveAll(programs);
+            log.info("✓ {} programs created", programs.size());
+
+            var skillLevels = programProgresses.stream()
+                    .flatMap(programProgress -> programProgress.getSkills().stream())
+                    .flatMap(skills -> skills.getSkillLevels().stream())
+                    .toList();
+
+            skillLevelRepository.saveAll(skillLevels);
+            log.info("✓ {} skillLevels created", skillLevels.size());
+
+            var skills = programProgresses.stream()
+                    .flatMap(programProgress -> programProgress.getSkills().stream())
+                    .toList();
+
+            skillRepository.saveAll(skills);
+            log.info("✓ {} skills created", skills.size());
+
+            programProgressRepository.saveAll(programProgresses);
+            log.info("✓ {} programProgresses created", programProgresses.size());
+
+            traceRepository.save(trace);
+            log.info("✓ 1 trace created");
+
+            amsRepository.save(ams);
+            log.info("✓ 1 ams created");
 
             log.info("Seeding successfully finished");
 
