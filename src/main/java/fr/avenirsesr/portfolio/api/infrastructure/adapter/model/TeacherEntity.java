@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TeacherEntity {
-    @Column
-    private String bio;
-    @Column
-    private String profilePicture;
-    @Column
-    private String coverPicture;
+  @Column private String bio;
+  @Column private String profilePicture;
+  @Column private String coverPicture;
 }

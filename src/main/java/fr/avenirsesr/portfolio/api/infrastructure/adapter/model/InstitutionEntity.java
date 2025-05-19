@@ -5,23 +5,21 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
 import java.util.Set;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "institution")
 @AllArgsConstructor
 @NoArgsConstructor
 public class InstitutionEntity {
-    @Id
-    private UUID id;
+  @Id private UUID id;
 
-    @Column(nullable = false)
-    private String name;
+  @Column(nullable = false)
+  private String name;
 
-    @Column(nullable = false)
-    private Set<ENavigationField> enabledFields;
+  @Column(nullable = false)
+  private Set<ENavigationField> enabledFields;
 }
