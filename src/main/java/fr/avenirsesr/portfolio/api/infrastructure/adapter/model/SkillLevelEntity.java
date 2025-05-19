@@ -1,41 +1,37 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
 import jakarta.persistence.Column;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.util.List;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "skill_level")
 @AllArgsConstructor
 @NoArgsConstructor
 public class SkillLevelEntity {
-    @Id
-    private UUID id;
+  @Id private UUID id;
 
-    @Column(nullable = false)
-    private String name;
+  @Column(nullable = false)
+  private String name;
 
-    @ManyToOne(optional = false)
-    private SkillEntity skill;
+  @ManyToOne(optional = false)
+  private SkillEntity skill;
 
-    @Column
-    @Enumerated(EnumType.STRING)
-    private ESkillLevelStatus status;
+  @Column
+  @Enumerated(EnumType.STRING)
+  private ESkillLevelStatus status;
 
-    @ManyToMany
-    private List<TraceEntity> traces;
+  @ManyToMany private List<TraceEntity> traces;
 
-    @ManyToMany
-    private List<AMSEntity> amses;
+  @ManyToMany private List<AMSEntity> amses;
 }
