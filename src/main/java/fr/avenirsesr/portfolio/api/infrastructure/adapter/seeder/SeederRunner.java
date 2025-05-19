@@ -5,143 +5,170 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.ENavigationField;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 @Slf4j
 @Service
 public class SeederRunner implements CommandLineRunner {
-    @Value("${seeder.enabled:false}")
-    private boolean seedEnabled;
+  @Value("${seeder.enabled:false}")
+  private boolean seedEnabled;
 
-    private final UserRepository userRepository;
-    private final ExternalUserRepository externalUserRepository;
-    private final InstitutionRepository institutionRepository;
-    private final ProgramRepository programRepository;
-    private final ProgramProgressRepository programProgressRepository;
-    private final SkillLevelRepository skillLevelRepository;
-    private final SkillRepository skillRepository;
-    private final TraceRepository traceRepository;
-    private final AMSRepository amsRepository;
+  private final UserRepository userRepository;
+  private final ExternalUserRepository externalUserRepository;
+  private final InstitutionRepository institutionRepository;
+  private final ProgramRepository programRepository;
+  private final ProgramProgressRepository programProgressRepository;
+  private final SkillLevelRepository skillLevelRepository;
+  private final SkillRepository skillRepository;
+  private final TraceRepository traceRepository;
+  private final AMSRepository amsRepository;
 
+  public SeederRunner(
+      UserRepository userRepository,
+      ExternalUserRepository externalUserRepository,
+      InstitutionRepository institutionRepository,
+      ProgramRepository programRepository,
+      ProgramProgressRepository programProgressRepository,
+      SkillLevelRepository skillLevelRepository,
+      SkillRepository skillRepository,
+      TraceRepository traceRepository,
+      AMSRepository amsRepository) {
+    this.userRepository = userRepository;
+    this.externalUserRepository = externalUserRepository;
+    this.institutionRepository = institutionRepository;
+    this.programRepository = programRepository;
+    this.programProgressRepository = programProgressRepository;
+    this.skillLevelRepository = skillLevelRepository;
+    this.skillRepository = skillRepository;
+    this.traceRepository = traceRepository;
+    this.amsRepository = amsRepository;
+  }
 
-    public SeederRunner(UserRepository userRepository, ExternalUserRepository externalUserRepository, InstitutionRepository institutionRepository, ProgramRepository programRepository, ProgramProgressRepository programProgressRepository, SkillLevelRepository skillLevelRepository, SkillRepository skillRepository, TraceRepository traceRepository, AMSRepository amsRepository) {
-        this.userRepository = userRepository;
-        this.externalUserRepository = externalUserRepository;
-        this.institutionRepository = institutionRepository;
-        this.programRepository = programRepository;
-        this.programProgressRepository = programProgressRepository;
-        this.skillLevelRepository = skillLevelRepository;
-        this.skillRepository = skillRepository;
-        this.traceRepository = traceRepository;
-        this.amsRepository = amsRepository;
-    }
+  @Override
+  public void run(String... args) {
+    if (seedEnabled) {
+      log.info("Seeder is enabled: seeding stared");
+      var users =
+          List.of(
+              FakeUser.create().withEmail().withStudent().toModel(),
+              FakeUser.create().withEmail().withStudent().withTeacher().toModel());
 
-    @Override
-    public void run(String... args) {
-        if (seedEnabled) {
-            log.info("Seeder is enabled: seeding stared");
-            var users = List.of(
-                    FakeUser.create()
-                            .withEmail()
-                            .withStudent().toModel(),
-                    FakeUser.create()
-                            .withEmail()
-                            .withStudent()
-                            .withTeacher().toModel()
-            );
+      var externalUsers =
+          users.stream()
+              .map(
+                  user ->
+                      FakeExternalUser.of(
+                              user,
+                              user.getStudent() != null
+                                  ? EUserCategory.STUDENT
+                                  : EUserCategory.TEACHER)
+                          .toModel())
+              .toList();
 
-            var externalUsers = users.stream()
-                    .map(user -> FakeExternalUser.of(user, user.getStudent() != null ? EUserCategory.STUDENT : EUserCategory.TEACHER).toModel()).toList();
+      var institutions =
+          List.of(
+              FakeInstitution.create().toModel(),
+              FakeInstitution.create().withEnabledFiled(Set.of(ENavigationField.APC)).toModel(),
+              FakeInstitution.create()
+                  .withEnabledFiled(Set.of(ENavigationField.LIFE_PROJECT))
+                  .toModel());
 
-            var institutions = List.of(
-                    FakeInstitution.create().toModel(),
-                    FakeInstitution.create().withEnabledFiled(Set.of(ENavigationField.APC)).toModel(),
-                    FakeInstitution.create().withEnabledFiled(Set.of(ENavigationField.LIFE_PROJECT)).toModel()
-            );
+      var programs =
+          institutions.stream().map(institution -> FakeProgram.of(institution).toModel()).toList();
 
-            var programs = institutions.stream()
-                    .map(institution -> FakeProgram.of(institution).toModel())
-                    .toList();
+      var programProgresses =
+          users.stream()
+              .map(User::getStudent)
+              .filter(Objects::nonNull)
+              .map(
+                  student -> {
+                    var skills =
+                        Set.of(
+                            FakeSkill.of(
+                                    Set.of(
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.VALIDATED)
+                                            .toModel(),
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.FAILED)
+                                            .toModel(),
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
+                                            .toModel()))
+                                .toModel(),
+                            FakeSkill.of(
+                                    Set.of(
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.VALIDATED)
+                                            .toModel(),
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.VALIDATED)
+                                            .toModel(),
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+                                            .toModel()))
+                                .toModel(),
+                            FakeSkill.of(
+                                    Set.of(
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.VALIDATED)
+                                            .toModel(),
+                                        FakeSkillLevel.create().toModel()))
+                                .toModel());
 
-            var programProgresses = users.stream()
-                    .map(User::getStudent)
-                    .filter(Objects::nonNull)
-                    .map(student -> {
-                        var skills = Set.of(
-                                FakeSkill.of(
-                                        Set.of(
-                                                FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel(),
-                                                FakeSkillLevel.create().withStatus(ESkillLevelStatus.FAILED).toModel(),
-                                                FakeSkillLevel.create().withStatus(ESkillLevelStatus.UNDER_REVIEW).toModel()
-                                        )
-                                ).toModel(),
-                                FakeSkill.of(
-                                        Set.of(
-                                                FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel(),
-                                                FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel(),
-                                                FakeSkillLevel.create().withStatus(ESkillLevelStatus.TO_BE_EVALUATED).toModel()
-                                        )
-                                ).toModel(),
-                                FakeSkill.of(
-                                        Set.of(
-                                                FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel(),
-                                                FakeSkillLevel.create().toModel()
-                                        )
-                                ).toModel()
-                        );
+                    return FakeProgramProgress.of(programs.getFirst(), student, skills).toModel();
+                  })
+              .toList();
 
-                        return FakeProgramProgress.of(programs.getFirst(), student, skills).toModel();
-                    })
-                    .toList();
+      var trace = FakeTrace.of(users.getFirst()).toModel();
+      var ams = FakeAMS.of(users.getFirst()).toModel();
 
-            var trace = FakeTrace.of(users.getFirst()).toModel();
-            var ams = FakeAMS.of(users.getFirst()).toModel();
+      userRepository.saveAll(users);
+      log.info("✓ {} users created", users.size());
 
-            userRepository.saveAll(users);
-            log.info("✓ {} users created", users.size());
+      externalUserRepository.saveAll(externalUsers);
+      log.info("✓ {} externalUsers created", externalUsers.size());
 
-            externalUserRepository.saveAll(externalUsers);
-            log.info("✓ {} externalUsers created", externalUsers.size());
+      institutionRepository.saveAll(institutions);
+      log.info("✓ {} institutions created", institutions.size());
 
-            institutionRepository.saveAll(institutions);
-            log.info("✓ {} institutions created", institutions.size());
+      programRepository.saveAll(programs);
+      log.info("✓ {} programs created", programs.size());
 
-            programRepository.saveAll(programs);
-            log.info("✓ {} programs created", programs.size());
+      var skillLevels =
+          programProgresses.stream()
+              .flatMap(programProgress -> programProgress.getSkills().stream())
+              .flatMap(skills -> skills.getSkillLevels().stream())
+              .toList();
 
-            var skillLevels = programProgresses.stream()
-                    .flatMap(programProgress -> programProgress.getSkills().stream())
-                    .flatMap(skills -> skills.getSkillLevels().stream())
-                    .toList();
+      skillLevelRepository.saveAll(skillLevels);
+      log.info("✓ {} skillLevels created", skillLevels.size());
 
-            skillLevelRepository.saveAll(skillLevels);
-            log.info("✓ {} skillLevels created", skillLevels.size());
+      var skills =
+          programProgresses.stream()
+              .flatMap(programProgress -> programProgress.getSkills().stream())
+              .toList();
 
-            var skills = programProgresses.stream()
-                    .flatMap(programProgress -> programProgress.getSkills().stream())
-                    .toList();
+      skillRepository.saveAll(skills);
+      log.info("✓ {} skills created", skills.size());
 
-            skillRepository.saveAll(skills);
-            log.info("✓ {} skills created", skills.size());
+      programProgressRepository.saveAll(programProgresses);
+      log.info("✓ {} programProgresses created", programProgresses.size());
 
-            programProgressRepository.saveAll(programProgresses);
-            log.info("✓ {} programProgresses created", programProgresses.size());
+      traceRepository.save(trace);
+      log.info("✓ 1 trace created");
 
-            traceRepository.save(trace);
-            log.info("✓ 1 trace created");
+      amsRepository.save(ams);
+      log.info("✓ 1 ams created");
 
-            amsRepository.save(ams);
-            log.info("✓ 1 ams created");
+      log.info("Seeding successfully finished");
 
-            log.info("Seeding successfully finished");
-
-        } else log.info("Seeder is disabled: seeding skipped");
-    }
+    } else log.info("Seeder is disabled: seeding skipped");
+  }
 }
