@@ -1,52 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.infrastructure.adapter.repository</a> &gt; <span class="el_source">UserDatabaseRepository.java</span></div><h1>UserDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
 
-import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.Teacher;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.StudentEntity;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.UserEntity;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-public class UserDatabaseRepository implements UserRepository {
-
-  private final UserJpaRepository jpaRepository;
-
-  @Override
-  public void save(User user) {
-<span class="nc" id="L22">    UserEntity userEntity = toEntity(user);</span>
-<span class="nc" id="L23">    jpaRepository.save(userEntity);</span>
-<span class="nc" id="L24">  }</span>
-
-  @Override
-  public void saveAll(List&lt;User&gt; users) {
-<span class="nc" id="L28">    List&lt;UserEntity&gt; usersEntities = users.stream().map(UserDatabaseRepository::toEntity).toList();</span>
-<span class="nc" id="L29">    jpaRepository.saveAll(usersEntities);</span>
-<span class="nc" id="L30">  }</span>
-
-  public static UserEntity toEntity(User user) {
-<span class="nc" id="L33">    return new UserEntity(</span>
-<span class="nc" id="L34">        user.getId(),</span>
-<span class="nc" id="L35">        user.getFirstName(),</span>
-<span class="nc" id="L36">        user.getLastName(),</span>
-<span class="nc" id="L37">        user.getEmail(),</span>
-<span class="nc bnc" id="L38" title="All 2 branches missed.">        user.getStudent() != null ? studentModelToEntity(user.getStudent()) : null,</span>
-<span class="nc bnc" id="L39" title="All 2 branches missed.">        user.getTeacher() != null ? teacherModelToEntity(user.getTeacher()) : null);</span>
-  }
-
-  private static StudentEntity studentModelToEntity(Student student) {
-<span class="nc" id="L43">    return new StudentEntity(</span>
-<span class="nc" id="L44">        student.getBio(), student.getProfilePicture(), student.getCoverPicture());</span>
-  }
-
-  private static TeacherEntity teacherModelToEntity(Teacher teacher) {
-<span class="nc" id="L48">    return new TeacherEntity(</span>
-<span class="nc" id="L49">        teacher.getBio(), teacher.getProfilePicture(), teacher.getCoverPicture());</span>
-  }
+public class UserDatabaseRepository extends GenericJpaRepositoryAdapter&lt;User, UserEntity&gt;
+    implements UserRepository {
+  public UserDatabaseRepository(UserJpaRepository jpaRepository) {
+<span class="fc" id="L12">    super(jpaRepository, UserEntity::fromDomain);</span>
+<span class="fc" id="L13">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

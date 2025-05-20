@@ -3,33 +3,14 @@
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSEntity;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-public class AMSDatabaseRepository implements AMSRepository {
+public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter&lt;AMS, AMSEntity&gt;
+    implements AMSRepository {
 
-  private final AMSJpaRepository jpaRepository;
-
-  @Override
-  public void save(AMS ams) {
-<span class="nc" id="L18">    var entity = toEntity(ams);</span>
-<span class="nc" id="L19">    jpaRepository.save(entity);</span>
-<span class="nc" id="L20">  }</span>
-
-  @Override
-  public void saveAll(List&lt;AMS&gt; amses) {
-<span class="nc" id="L24">    var entities = amses.stream().map(AMSDatabaseRepository::toEntity).toList();</span>
-<span class="nc" id="L25">    jpaRepository.saveAll(entities);</span>
-<span class="nc" id="L26">  }</span>
-
-  public static AMSEntity toEntity(AMS ams) {
-<span class="nc" id="L29">    return new AMSEntity(</span>
-<span class="nc" id="L30">        ams.getId(),</span>
-<span class="nc" id="L31">        UserDatabaseRepository.toEntity(ams.getUser()),</span>
-<span class="nc" id="L32">        ams.getSkillLevels().stream().map(SkillLevelDatabaseRepository::toEntity).toList());</span>
-  }
+  public AMSDatabaseRepository(AMSJpaRepository repository) {
+<span class="fc" id="L13">    super(repository, AMSEntity::fromDomain);</span>
+<span class="fc" id="L14">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

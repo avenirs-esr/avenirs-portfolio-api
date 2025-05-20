@@ -3,33 +3,13 @@
 import fr.avenirsesr.portfolio.api.domain.model.Track;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.TrackRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TrackEntity;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-public class TrackDatabaseRepository implements TrackRepository {
-  private final TrackJpaRepository jpaRepository;
-
-  @Override
-  public void save(Track track) {
-<span class="nc" id="L17">    var entity = toEntity(track);</span>
-<span class="nc" id="L18">    jpaRepository.save(entity);</span>
-<span class="nc" id="L19">  }</span>
-
-  @Override
-  public void saveAll(List&lt;Track&gt; tracks) {
-<span class="nc" id="L23">    var entities = tracks.stream().map(TrackDatabaseRepository::toEntity).toList();</span>
-<span class="nc" id="L24">    jpaRepository.saveAll(entities);</span>
-<span class="nc" id="L25">  }</span>
-
-  public static TrackEntity toEntity(Track track) {
-<span class="nc" id="L28">    return new TrackEntity(</span>
-<span class="nc" id="L29">        track.getId(),</span>
-<span class="nc" id="L30">        UserDatabaseRepository.toEntity(track.getUser()),</span>
-<span class="nc" id="L31">        track.getSkillLevels().stream().map(SkillLevelDatabaseRepository::toEntity).toList(),</span>
-<span class="nc" id="L32">        track.getAmses().stream().map(AMSDatabaseRepository::toEntity).toList());</span>
-  }
+public class TrackDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Track, TrackEntity&gt;
+    implements TrackRepository {
+  public TrackDatabaseRepository(TrackJpaRepository jpaRepository) {
+<span class="fc" id="L12">    super(jpaRepository, TrackEntity::fromDomain);</span>
+<span class="fc" id="L13">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

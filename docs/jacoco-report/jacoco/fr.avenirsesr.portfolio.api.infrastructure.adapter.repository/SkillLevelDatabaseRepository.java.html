@@ -3,34 +3,14 @@
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.SkillLevelRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillLevelEntity;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-public class SkillLevelDatabaseRepository implements SkillLevelRepository {
-  private final SkillLevelJpaRepository jpaRepository;
-
-  @Override
-  public void save(SkillLevel skillLevel) {
-<span class="nc" id="L17">    var entity = toEntity(skillLevel);</span>
-<span class="nc" id="L18">    jpaRepository.save(entity);</span>
-<span class="nc" id="L19">  }</span>
-
-  @Override
-  public void saveAll(List&lt;SkillLevel&gt; skillLevels) {
-<span class="nc" id="L23">    var entities = skillLevels.stream().map(SkillLevelDatabaseRepository::toEntity).toList();</span>
-<span class="nc" id="L24">    jpaRepository.saveAll(entities);</span>
-<span class="nc" id="L25">  }</span>
-
-  public static SkillLevelEntity toEntity(SkillLevel skillLevel) {
-<span class="nc" id="L28">    return new SkillLevelEntity(</span>
-<span class="nc" id="L29">        skillLevel.getId(),</span>
-<span class="nc" id="L30">        skillLevel.getName(),</span>
-<span class="nc" id="L31">        skillLevel.getStatus(),</span>
-<span class="nc" id="L32">        skillLevel.getTracks().stream().map(TrackDatabaseRepository::toEntity).toList(),</span>
-<span class="nc" id="L33">        skillLevel.getAmses().stream().map(AMSDatabaseRepository::toEntity).toList());</span>
-  }
+public class SkillLevelDatabaseRepository
+    extends GenericJpaRepositoryAdapter&lt;SkillLevel, SkillLevelEntity&gt;
+    implements SkillLevelRepository {
+  public SkillLevelDatabaseRepository(SkillLevelJpaRepository jpaRepository) {
+<span class="fc" id="L13">    super(jpaRepository, SkillLevelEntity::fromDomain);</span>
+<span class="fc" id="L14">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

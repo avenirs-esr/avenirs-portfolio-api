@@ -3,36 +3,14 @@
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramProgressEntity;
-import java.util.List;
-import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-public class ProgramProgressDatabaseRepository implements ProgramProgressRepository {
-  private final ProgramProgressJpaRepository jpaRepository;
-
-  @Override
-  public void save(ProgramProgress progress) {
-<span class="nc" id="L18">    var entity = toEntity(progress);</span>
-<span class="nc" id="L19">    jpaRepository.save(entity);</span>
-<span class="nc" id="L20">  }</span>
-
-  @Override
-  public void saveAll(List&lt;ProgramProgress&gt; progress) {
-<span class="nc" id="L24">    var entities = progress.stream().map(ProgramProgressDatabaseRepository::toEntity).toList();</span>
-<span class="nc" id="L25">    jpaRepository.saveAll(entities);</span>
-<span class="nc" id="L26">  }</span>
-
-  public static ProgramProgressEntity toEntity(ProgramProgress programProgress) {
-<span class="nc" id="L29">    return new ProgramProgressEntity(</span>
-<span class="nc" id="L30">        programProgress.getId(),</span>
-<span class="nc" id="L31">        ProgramDatabaseRepository.toEntity(programProgress.getProgram()),</span>
-<span class="nc" id="L32">        UserDatabaseRepository.toEntity(programProgress.getStudent().getUser()),</span>
-<span class="nc" id="L33">        programProgress.getSkills().stream()</span>
-<span class="nc" id="L34">            .map(SkillDatabaseRepository::toEntity)</span>
-<span class="nc" id="L35">            .collect(Collectors.toSet()));</span>
-  }
+public class ProgramProgressDatabaseRepository
+    extends GenericJpaRepositoryAdapter&lt;ProgramProgress, ProgramProgressEntity&gt;
+    implements ProgramProgressRepository {
+  public ProgramProgressDatabaseRepository(ProgramProgressJpaRepository jpaRepository) {
+<span class="fc" id="L13">    super(jpaRepository, ProgramProgressEntity::fromDomain);</span>
+<span class="fc" id="L14">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
