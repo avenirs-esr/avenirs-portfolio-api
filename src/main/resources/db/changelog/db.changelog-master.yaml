@@ -2,7 +2,7 @@ databaseChangeLog:
   - include:
       file: db/changelog/001-create-table-users.yaml
   - include:
-      file: db/changelog/002-create-table-trace.yaml
+      file: db/changelog/002-create-table-track.yaml
   - include:
       file: db/changelog/003-create-table-institution.yaml
   - include:

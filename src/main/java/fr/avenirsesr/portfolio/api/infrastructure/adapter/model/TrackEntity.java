@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "trace")
+@Table(name = "track")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class TraceEntity {
+public class TrackEntity {
   @Id private UUID id;
 
   @ManyToOne(optional = false)

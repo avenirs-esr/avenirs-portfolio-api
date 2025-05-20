@@ -17,7 +17,7 @@ public class SkillLevel {
   private final String name;
 
   private ESkillLevelStatus status;
-  private List<Trace> traces;
+  private List<Track> tracks;
   private List<AMS> amses;
 
   private SkillLevel(UUID id, String name) {
@@ -29,16 +29,16 @@ public class SkillLevel {
     var skillLevel = new SkillLevel(UUID.randomUUID(), name);
     skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);
     skillLevel.setAmses(List.of());
-    skillLevel.setTraces(List.of());
+    skillLevel.setTracks(List.of());
 
     return skillLevel;
   }
 
   public static SkillLevel toDomain(
-      UUID id, String name, ESkillLevelStatus status, List<Trace> traces, List<AMS> amses) {
+      UUID id, String name, ESkillLevelStatus status, List<Track> tracks, List<AMS> amses) {
     var skillLevel = new SkillLevel(id, name);
     skillLevel.setStatus(status);
-    skillLevel.setTraces(traces);
+    skillLevel.setTracks(tracks);
     skillLevel.setAmses(amses);
 
     return skillLevel;
