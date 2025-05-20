@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TrackDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.infrastructure.adapter.repository</a> &gt; <span class="el_source">TrackDatabaseRepository.java</span></div><h1>TrackDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
+
+import fr.avenirsesr.portfolio.api.domain.model.Track;
+import fr.avenirsesr.portfolio.api.domain.port.output.repository.TrackRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TrackEntity;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class TrackDatabaseRepository implements TrackRepository {
+  private final TrackJpaRepository jpaRepository;
+
+  @Override
+  public void save(Track track) {
+<span class="nc" id="L17">    var entity = toEntity(track);</span>
+<span class="nc" id="L18">    jpaRepository.save(entity);</span>
+<span class="nc" id="L19">  }</span>
+
+  @Override
+  public void saveAll(List&lt;Track&gt; tracks) {
+<span class="nc" id="L23">    var entities = tracks.stream().map(TrackDatabaseRepository::toEntity).toList();</span>
+<span class="nc" id="L24">    jpaRepository.saveAll(entities);</span>
+<span class="nc" id="L25">  }</span>
+
+  public static TrackEntity toEntity(Track track) {
+<span class="nc" id="L28">    return new TrackEntity(</span>
+<span class="nc" id="L29">        track.getId(),</span>
+<span class="nc" id="L30">        UserDatabaseRepository.toEntity(track.getUser()),</span>
+<span class="nc" id="L31">        track.getSkillLevels().stream().map(SkillLevelDatabaseRepository::toEntity).toList(),</span>
+<span class="nc" id="L32">        track.getAmses().stream().map(AMSDatabaseRepository::toEntity).toList());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

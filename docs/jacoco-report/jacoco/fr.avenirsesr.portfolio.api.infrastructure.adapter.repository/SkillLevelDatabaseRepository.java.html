@@ -29,7 +29,7 @@ public class SkillLevelDatabaseRepository implements SkillLevelRepository {
 <span class="nc" id="L29">        skillLevel.getId(),</span>
 <span class="nc" id="L30">        skillLevel.getName(),</span>
 <span class="nc" id="L31">        skillLevel.getStatus(),</span>
-<span class="nc" id="L32">        skillLevel.getTraces().stream().map(TraceDatabaseRepository::toEntity).toList(),</span>
+<span class="nc" id="L32">        skillLevel.getTracks().stream().map(TrackDatabaseRepository::toEntity).toList(),</span>
 <span class="nc" id="L33">        skillLevel.getAmses().stream().map(AMSDatabaseRepository::toEntity).toList());</span>
   }
 }
