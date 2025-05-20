@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.ExternalUser;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import jakarta.persistence.Column;
@@ -15,6 +16,7 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +26,7 @@ import lombok.Setter;
     name = "external_users",
     uniqueConstraints = @UniqueConstraint(columnNames = {"eternal_id", "source"}))
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
 public class ExternalUserEntity {
@@ -71,5 +74,16 @@ public class ExternalUserEntity {
     this.email = email;
     this.firstName = firstName;
     this.lastName = lastName;
+  }
+
+  public static ExternalUserEntity fromDomain(ExternalUser externalUser) {
+    return new ExternalUserEntity(
+        externalUser.getExternalId(),
+        externalUser.getSource(),
+        UserEntity.fromDomain(externalUser.getUser()),
+        externalUser.getCategory(),
+        externalUser.getEmail(),
+        externalUser.getFirstName(),
+        externalUser.getLastName());
   }
 }
