@@ -29,7 +29,7 @@ public class SkillLevelDatabaseRepository implements SkillLevelRepository {
         skillLevel.getId(),
         skillLevel.getName(),
         skillLevel.getStatus(),
-        skillLevel.getTraces().stream().map(TraceDatabaseRepository::toEntity).toList(),
+        skillLevel.getTracks().stream().map(TrackDatabaseRepository::toEntity).toList(),
         skillLevel.getAmses().stream().map(AMSDatabaseRepository::toEntity).toList());
   }
 }

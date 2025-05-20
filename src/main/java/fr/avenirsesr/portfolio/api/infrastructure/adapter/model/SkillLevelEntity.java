@@ -31,7 +31,7 @@ public class SkillLevelEntity {
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
 
-  @ManyToMany private List<TraceEntity> traces;
+  @ManyToMany private List<TrackEntity> tracks;
 
   @ManyToMany private List<AMSEntity> amses;
 }
