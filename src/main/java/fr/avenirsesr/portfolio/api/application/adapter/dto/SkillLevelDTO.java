@@ -1,9 +1,8 @@
 package fr.avenirsesr.portfolio.api.application.adapter.dto;
 
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.UUID;
 
 @Data
 @Builder

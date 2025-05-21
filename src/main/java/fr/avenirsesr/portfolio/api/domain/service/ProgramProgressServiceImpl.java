@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
