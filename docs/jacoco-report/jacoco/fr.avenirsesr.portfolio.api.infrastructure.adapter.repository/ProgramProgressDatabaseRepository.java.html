@@ -2,15 +2,30 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramProgressEntity;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.specification.ProgramProgressSpecifications;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProgramProgressDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;ProgramProgress, ProgramProgressEntity&gt;
     implements ProgramProgressRepository {
-  public ProgramProgressDatabaseRepository(ProgramProgressJpaRepository jpaRepository) {
-<span class="fc" id="L13">    super(jpaRepository, ProgramProgressEntity::fromDomain);</span>
-<span class="fc" id="L14">  }</span>
+
+  private final ProgramProgressJpaRepository jpaRepository;
+
+  protected ProgramProgressDatabaseRepository(ProgramProgressJpaRepository jpaRepository) {
+<span class="fc" id="L20">    super(jpaRepository, ProgramProgressMapper::fromModelToEntity);</span>
+<span class="fc" id="L21">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L22">  }</span>
+
+  @Override
+  public List&lt;ProgramProgress&gt; getSkillsOverview(UUID userId) {
+<span class="nc" id="L26">    return jpaRepository.findAll(ProgramProgressSpecifications.findByUserId(userId)).stream()</span>
+<span class="nc" id="L27">        .map(ProgramProgressMapper::fromEntityToModel)</span>
+<span class="nc" id="L28">        .toList();</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

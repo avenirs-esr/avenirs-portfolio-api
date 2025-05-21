@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.util.List;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +18,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = &quot;skill_level&quot;)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -38,12 +37,12 @@ public class SkillLevelEntity {
   @ManyToMany private List&lt;AMSEntity&gt; amses;
 
   public static SkillLevelEntity fromDomain(SkillLevel skillLevel) {
-<span class="nc" id="L41">    return new SkillLevelEntity(</span>
-<span class="nc" id="L42">        skillLevel.getId(),</span>
-<span class="nc" id="L43">        skillLevel.getName(),</span>
-<span class="nc" id="L44">        skillLevel.getStatus(),</span>
-<span class="nc" id="L45">        skillLevel.getTracks().stream().map(TrackEntity::fromDomain).toList(),</span>
-<span class="nc" id="L46">        skillLevel.getAmses().stream().map(AMSEntity::fromDomain).toList());</span>
+<span class="nc" id="L40">    return new SkillLevelEntity(</span>
+<span class="nc" id="L41">        skillLevel.getId(),</span>
+<span class="nc" id="L42">        skillLevel.getName(),</span>
+<span class="nc" id="L43">        skillLevel.getStatus(),</span>
+<span class="nc" id="L44">        skillLevel.getTracks().stream().map(TrackEntity::fromDomain).toList(),</span>
+<span class="nc" id="L45">        skillLevel.getAmses().stream().map(AMSEntity::fromDomain).toList());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

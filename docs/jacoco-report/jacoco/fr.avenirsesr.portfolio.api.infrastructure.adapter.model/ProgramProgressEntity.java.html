@@ -11,7 +11,6 @@ import jakarta.persistence.Table;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +18,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = &quot;program_progress&quot;)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -40,13 +39,13 @@ public class ProgramProgressEntity {
   private Set&lt;SkillEntity&gt; skills;
 
   public static ProgramProgressEntity fromDomain(ProgramProgress programProgress) {
-<span class="nc" id="L43">    return new ProgramProgressEntity(</span>
-<span class="nc" id="L44">        programProgress.getId(),</span>
-<span class="nc" id="L45">        ProgramEntity.fromDomain(programProgress.getProgram()),</span>
-<span class="nc" id="L46">        UserEntity.fromDomain(programProgress.getStudent().getUser()),</span>
-<span class="nc" id="L47">        programProgress.getSkills().stream()</span>
-<span class="nc" id="L48">            .map(SkillEntity::fromDomain)</span>
-<span class="nc" id="L49">            .collect(Collectors.toSet()));</span>
+<span class="nc" id="L42">    return new ProgramProgressEntity(</span>
+<span class="nc" id="L43">        programProgress.getId(),</span>
+<span class="nc" id="L44">        ProgramEntity.fromDomain(programProgress.getProgram()),</span>
+<span class="nc" id="L45">        UserEntity.fromDomain(programProgress.getStudent().getUser()),</span>
+<span class="nc" id="L46">        programProgress.getSkills().stream()</span>
+<span class="nc" id="L47">            .map(SkillEntity::fromDomain)</span>
+<span class="nc" id="L48">            .collect(Collectors.toSet()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
