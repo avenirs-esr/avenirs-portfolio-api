@@ -29,6 +29,9 @@ databaseChangeLog:
                   name: student_bio
                   type: TEXT
               - column:
+                  name: student_is_active
+                  type: bool
+              - column:
                   name: student_profile_picture
                   type: VARCHAR(255)
               - column:
@@ -37,6 +40,9 @@ databaseChangeLog:
               - column:
                   name: teacher_bio
                   type: TEXT
+              - column:
+                  name: teacher_is_active
+                  type: bool
               - column:
                   name: teacher_profile_picture
                   type: VARCHAR(255)

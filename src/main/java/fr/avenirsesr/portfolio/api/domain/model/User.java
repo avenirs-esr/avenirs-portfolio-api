@@ -19,9 +19,11 @@ public class User {
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.PRIVATE)
   private String studentBio;
+
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.PRIVATE)
   private byte[] studentProfilePicture;
+
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.PRIVATE)
   private byte[] studentCoverPicture;
@@ -30,9 +32,11 @@ public class User {
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.PRIVATE)
   private String teacherBio;
+
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.PRIVATE)
   private byte[] teacherProfilePicture;
+
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.PRIVATE)
   private byte[] teacherCoverPicture;
@@ -45,7 +49,8 @@ public class User {
     var user = new User(UUID.randomUUID());
     user.setFirstName(firstName);
     user.setLastName(lastName);
-
+    user.setStudent(false);
+    user.setTeacher(false);
     return user;
   }
 
@@ -62,16 +67,23 @@ public class User {
       String firstName,
       String lastName,
       String email,
-      String studentBio, byte[] studentProfilePicture, byte[] studentCoverPicture,
-      String teacherBio, byte[]teacherProfilePicture, byte[] teacherCoverPicture
-  ) {
+      boolean isStudent,
+      String studentBio,
+      byte[] studentProfilePicture,
+      byte[] studentCoverPicture,
+      boolean isTeacher,
+      String teacherBio,
+      byte[] teacherProfilePicture,
+      byte[] teacherCoverPicture) {
     var user = new User(id);
     user.setFirstName(firstName);
     user.setLastName(lastName);
     user.setEmail(email);
+    user.setStudent(isStudent);
     user.setStudentBio(studentBio);
     user.setStudentProfilePicture(studentProfilePicture);
     user.setStudentCoverPicture(studentCoverPicture);
+    user.setTeacher(isTeacher);
     user.setTeacherBio(teacherBio);
     user.setTeacherProfilePicture(teacherProfilePicture);
     user.setTeacherCoverPicture(teacherCoverPicture);

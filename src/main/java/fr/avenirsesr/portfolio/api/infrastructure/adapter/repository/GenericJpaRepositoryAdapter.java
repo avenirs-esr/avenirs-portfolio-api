@@ -8,7 +8,7 @@ import java.util.function.Function;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public abstract class GenericJpaRepositoryAdapter<D, E> implements GenericRepositoryPort<D> {
-  private final JpaRepository<E, UUID> jpaRepository;
+  protected final JpaRepository<E, UUID> jpaRepository;
   private final Function<D, E> fromDomain;
   private final Function<E, D> toDomain;
 
