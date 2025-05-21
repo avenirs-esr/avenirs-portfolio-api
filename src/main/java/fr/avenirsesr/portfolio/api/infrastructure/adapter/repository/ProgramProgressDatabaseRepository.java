@@ -2,8 +2,11 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramProgressEntity;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.specification.ProgramProgressSpecifications;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,6 +26,13 @@ public class ProgramProgressDatabaseRepository implements ProgramProgressReposit
   public void saveAll(List<ProgramProgress> progress) {
     var entities = progress.stream().map(ProgramProgressDatabaseRepository::toEntity).toList();
     jpaRepository.saveAll(entities);
+  }
+
+  @Override
+  public List<ProgramProgress> getSkillsOverview(UUID userId) {
+    return jpaRepository.findAll(ProgramProgressSpecifications.findByUserId(userId)).stream()
+        .map(ProgramProgressMapper::fromEntityToModel)
+        .toList();
   }
 
   public static ProgramProgressEntity toEntity(ProgramProgress programProgress) {
