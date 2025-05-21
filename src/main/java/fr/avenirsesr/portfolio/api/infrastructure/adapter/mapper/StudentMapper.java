@@ -7,7 +7,10 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.UserEntity;
 public interface StudentMapper {
   static StudentEntity fromDomain(Student student) {
     return new StudentEntity(
-        student.getBio(), student.getProfilePicture(), student.getCoverPicture());
+        student.getBio(),
+        student.getUser().isStudent(),
+        student.getProfilePicture(),
+        student.getCoverPicture());
   }
 
   static Student toDomain(StudentEntity studentEntity, UserEntity userEntity) {

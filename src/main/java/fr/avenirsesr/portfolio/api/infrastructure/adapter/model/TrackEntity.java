@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 import fr.avenirsesr.portfolio.api.domain.model.Track;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -26,8 +28,17 @@ public class TrackEntity {
   @ManyToOne(optional = false)
   private UserEntity user;
 
-  @ManyToMany private List<SkillLevelEntity> skillLevels;
+  @ManyToMany
+  @JoinTable(
+      name = "track_skill_levels",
+      joinColumns = @JoinColumn(name = "track_id"),
+      inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
+  private List<SkillLevelEntity> skillLevels;
 
-  @ManyToMany private List<AMSEntity> amses;
-
+  @ManyToMany
+  @JoinTable(
+      name = "track_ams",
+      joinColumns = @JoinColumn(name = "track_id"),
+      inverseJoinColumns = @JoinColumn(name = "ams_id"))
+  private List<AMSEntity> amses;
 }
