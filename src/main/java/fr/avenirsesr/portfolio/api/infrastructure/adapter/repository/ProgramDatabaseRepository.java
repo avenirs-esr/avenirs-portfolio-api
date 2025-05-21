@@ -9,6 +9,6 @@ import org.springframework.stereotype.Component;
 public class ProgramDatabaseRepository extends GenericJpaRepositoryAdapter<Program, ProgramEntity>
     implements ProgramRepository {
   public ProgramDatabaseRepository(ProgramJpaRepository jpaRepository) {
-    super(jpaRepository, ProgramEntity::fromDomain);
+    super(jpaRepository, ProgramEntity::fromDomain, ProgramEntity::toDomain);
   }
 }

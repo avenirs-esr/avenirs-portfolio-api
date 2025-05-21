@@ -10,6 +10,6 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
     implements AMSRepository {
 
   public AMSDatabaseRepository(AMSJpaRepository repository) {
-    super(repository, AMSEntity::fromDomain);
+    super(repository, AMSEntity::fromDomain, AMSEntity::toDomain);
   }
 }

@@ -10,6 +10,6 @@ public class SkillLevelDatabaseRepository
     extends GenericJpaRepositoryAdapter<SkillLevel, SkillLevelEntity>
     implements SkillLevelRepository {
   public SkillLevelDatabaseRepository(SkillLevelJpaRepository jpaRepository) {
-    super(jpaRepository, SkillLevelEntity::fromDomain);
+    super(jpaRepository, SkillLevelEntity::fromDomain, SkillLevelEntity::toDomain);
   }
 }

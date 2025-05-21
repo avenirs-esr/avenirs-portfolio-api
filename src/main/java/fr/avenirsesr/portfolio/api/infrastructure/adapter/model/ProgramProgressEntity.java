@@ -48,4 +48,14 @@ public class ProgramProgressEntity {
             .map(SkillEntity::fromDomain)
             .collect(Collectors.toSet()));
   }
+
+  public static ProgramProgress toDomain(ProgramProgressEntity programProgressEntity) {
+    return ProgramProgress.toDomain(
+            programProgressEntity.getId(),
+            ProgramEntity.toDomain(programProgressEntity.getProgram()),
+            StudentEntity.toDomain(programProgressEntity.getStudent().getStudent(), programProgressEntity.getStudent()),
+            programProgressEntity.getSkills().stream()
+                    .map(SkillEntity::toDomain)
+                    .collect(Collectors.toSet()));
+  }
 }

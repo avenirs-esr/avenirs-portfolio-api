@@ -58,4 +58,15 @@ public class UserEntity {
         user.getStudent() != null ? StudentEntity.fromDomain(user.getStudent()) : null,
         user.getTeacher() != null ? TeacherEntity.fromDomain(user.getTeacher()) : null);
   }
+
+  public static User toDomain(UserEntity userEntity) {
+    return User.toDomain(
+            userEntity.getId(),
+            userEntity.getFirstName(),
+            userEntity.getLastName(),
+            userEntity.getEmail(),
+            userEntity.getStudent() != null ? StudentEntity.toDomain(userEntity.getStudent(), userEntity) : null,
+            userEntity.getTeacher() != null ? TeacherEntity.toDomain(userEntity.getTeacher(), userEntity) : null
+    );
+  }
 }

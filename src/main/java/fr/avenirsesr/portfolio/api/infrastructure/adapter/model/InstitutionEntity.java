@@ -60,4 +60,11 @@ public class InstitutionEntity {
     return new InstitutionEntity(
         institution.getId(), institution.getName(), institution.getEnabledFields());
   }
+
+  public static Institution toDomain(InstitutionEntity institutionEntity) {
+    return Institution.toDomain(
+        institutionEntity.getId(),
+        institutionEntity.getName(),
+        institutionEntity.getEnabledFields());
+  }
 }

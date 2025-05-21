@@ -44,4 +44,13 @@ public class SkillEntity {
             .map(SkillLevelEntity::fromDomain)
             .collect(Collectors.toSet()));
   }
+
+  public static Skill toDomain(SkillEntity skillEntity) {
+    return Skill.toDomain(
+            skillEntity.getId(),
+            skillEntity.getName(),
+            skillEntity.getSkillLevels().stream()
+                    .map(SkillLevelEntity::toDomain)
+                    .collect(Collectors.toSet()));
+  }
 }

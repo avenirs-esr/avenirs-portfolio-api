@@ -34,4 +34,12 @@ public class AMSEntity {
         UserEntity.fromDomain(ams.getUser()),
         ams.getSkillLevels().stream().map(SkillLevelEntity::fromDomain).toList());
   }
+
+  public static AMS toDomain(AMSEntity entity) {
+    return AMS.toDomain(
+            entity.getId(),
+            UserEntity.toDomain(entity.getUser()),
+            entity.getSkillLevels().stream().map(SkillLevelEntity::toDomain).toList()
+    );
+  }
 }

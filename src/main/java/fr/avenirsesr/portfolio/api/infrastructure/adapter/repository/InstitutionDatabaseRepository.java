@@ -10,6 +10,6 @@ public class InstitutionDatabaseRepository
     extends GenericJpaRepositoryAdapter<Institution, InstitutionEntity>
     implements InstitutionRepository {
   public InstitutionDatabaseRepository(InstitutionJpaRepository jpaRepository) {
-    super(jpaRepository, InstitutionEntity::fromDomain);
+    super(jpaRepository, InstitutionEntity::fromDomain, InstitutionEntity::toDomain);
   }
 }

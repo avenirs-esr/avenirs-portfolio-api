@@ -24,4 +24,13 @@ public class TeacherEntity {
     return new TeacherEntity(
         teacher.getBio(), teacher.getProfilePicture(), teacher.getCoverPicture());
   }
+
+  public static Teacher toDomain(TeacherEntity teacherEntity, UserEntity userEntity) {
+    return Teacher.toDomain(
+            UserEntity.toDomain(userEntity),
+            teacherEntity.getBio(),
+            teacherEntity.getProfilePicture(),
+            teacherEntity.getCoverPicture()
+    );
+  }
 }

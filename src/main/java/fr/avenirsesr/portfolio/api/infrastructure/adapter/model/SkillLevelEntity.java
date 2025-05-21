@@ -45,4 +45,13 @@ public class SkillLevelEntity {
         skillLevel.getTracks().stream().map(TrackEntity::fromDomain).toList(),
         skillLevel.getAmses().stream().map(AMSEntity::fromDomain).toList());
   }
+
+  public static SkillLevel toDomain(SkillLevelEntity skillLevelEntity) {
+    return SkillLevel.toDomain(
+            skillLevelEntity.getId(),
+            skillLevelEntity.getName(),
+            skillLevelEntity.getStatus(),
+            skillLevelEntity.getTracks().stream().map(TrackEntity::toDomain).toList(),
+            skillLevelEntity.getAmses().stream().map(AMSEntity::toDomain).toList());
+  }
 }

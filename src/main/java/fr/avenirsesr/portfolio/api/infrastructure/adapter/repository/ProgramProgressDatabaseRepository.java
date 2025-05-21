@@ -10,6 +10,6 @@ public class ProgramProgressDatabaseRepository
     extends GenericJpaRepositoryAdapter<ProgramProgress, ProgramProgressEntity>
     implements ProgramProgressRepository {
   public ProgramProgressDatabaseRepository(ProgramProgressJpaRepository jpaRepository) {
-    super(jpaRepository, ProgramProgressEntity::fromDomain);
+    super(jpaRepository, ProgramProgressEntity::fromDomain, ProgramProgressEntity::toDomain);
   }
 }

@@ -32,4 +32,11 @@ public class ProgramEntity {
     return new ProgramEntity(
         program.getId(), program.getName(), InstitutionEntity.fromDomain(program.getInstitution()));
   }
+
+  public static Program toDomain(ProgramEntity programEntity) {
+    return Program.toDomain(
+        programEntity.getId(),
+        InstitutionEntity.toDomain(programEntity.getInstitution()),
+        programEntity.getName());
+  }
 }

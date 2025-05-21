@@ -9,6 +9,6 @@ import org.springframework.stereotype.Component;
 public class UserDatabaseRepository extends GenericJpaRepositoryAdapter<User, UserEntity>
     implements UserRepository {
   public UserDatabaseRepository(UserJpaRepository jpaRepository) {
-    super(jpaRepository, UserEntity::fromDomain);
+    super(jpaRepository, UserEntity::fromDomain, UserEntity::toDomain);
   }
 }

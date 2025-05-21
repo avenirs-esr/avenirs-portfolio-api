@@ -86,4 +86,16 @@ public class ExternalUserEntity {
         externalUser.getFirstName(),
         externalUser.getLastName());
   }
+
+  public static ExternalUser toDomain(ExternalUserEntity externalUserEntity) {
+    return ExternalUser.create(
+            UserEntity.toDomain(externalUserEntity.getUser()),
+            externalUserEntity.getExternalId(),
+            externalUserEntity.getSource(),
+            externalUserEntity.getCategory(),
+            externalUserEntity.getEmail(),
+            externalUserEntity.getFirstName(),
+            externalUserEntity.getLastName()
+    );
+  }
 }
