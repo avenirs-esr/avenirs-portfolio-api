@@ -2,6 +2,7 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.Program;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramEntity;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class ProgramDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Program, ProgramEntity&gt;
     implements ProgramRepository {
   public ProgramDatabaseRepository(ProgramJpaRepository jpaRepository) {
-<span class="fc" id="L12">    super(jpaRepository, ProgramEntity::fromDomain);</span>
-<span class="fc" id="L13">  }</span>
+<span class="fc" id="L13">    super(jpaRepository, ProgramMapper::fromDomain, ProgramMapper::toDomain);</span>
+<span class="fc" id="L14">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

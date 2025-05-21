@@ -2,6 +2,7 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.InstitutionRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.InstitutionMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.InstitutionEntity;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +11,7 @@ public class InstitutionDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;Institution, InstitutionEntity&gt;
     implements InstitutionRepository {
   public InstitutionDatabaseRepository(InstitutionJpaRepository jpaRepository) {
-<span class="fc" id="L13">    super(jpaRepository, InstitutionEntity::fromDomain);</span>
-<span class="fc" id="L14">  }</span>
+<span class="fc" id="L14">    super(jpaRepository, InstitutionMapper::fromDomain, InstitutionMapper::toDomain);</span>
+<span class="fc" id="L15">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

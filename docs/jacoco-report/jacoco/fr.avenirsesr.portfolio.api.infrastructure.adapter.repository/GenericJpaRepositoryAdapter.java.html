@@ -2,28 +2,36 @@
 
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.GenericRepositoryPort;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public abstract class GenericJpaRepositoryAdapter&lt;D, E&gt; implements GenericRepositoryPort&lt;D&gt; {
-  private final JpaRepository&lt;E, UUID&gt; jpaRepository;
+  protected final JpaRepository&lt;E, UUID&gt; jpaRepository;
   private final Function&lt;D, E&gt; fromDomain;
+  private final Function&lt;E, D&gt; toDomain;
 
   protected GenericJpaRepositoryAdapter(
-<span class="fc" id="L14">      JpaRepository&lt;E, UUID&gt; jpaRepository, Function&lt;D, E&gt; fromDomain) {</span>
-<span class="fc" id="L15">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L16">    this.fromDomain = fromDomain;</span>
-<span class="fc" id="L17">  }</span>
+<span class="fc" id="L16">      JpaRepository&lt;E, UUID&gt; jpaRepository, Function&lt;D, E&gt; fromDomain, Function&lt;E, D&gt; toDomain) {</span>
+<span class="fc" id="L17">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L18">    this.fromDomain = fromDomain;</span>
+<span class="fc" id="L19">    this.toDomain = toDomain;</span>
+<span class="fc" id="L20">  }</span>
 
   @Override
   public void save(D domain) {
-<span class="nc" id="L21">    jpaRepository.save(fromDomain.apply(domain));</span>
-<span class="nc" id="L22">  }</span>
+<span class="nc" id="L24">    jpaRepository.save(fromDomain.apply(domain));</span>
+<span class="nc" id="L25">  }</span>
 
   @Override
   public void saveAll(List&lt;D&gt; domains) {
-<span class="nc" id="L26">    jpaRepository.saveAll(domains.stream().map(fromDomain).toList());</span>
-<span class="nc" id="L27">  }</span>
+<span class="nc" id="L29">    jpaRepository.saveAll(domains.stream().map(fromDomain).toList());</span>
+<span class="nc" id="L30">  }</span>
+
+  @Override
+  public Optional&lt;D&gt; findById(UUID id) {
+<span class="nc" id="L34">    return Optional.ofNullable(toDomain.apply(jpaRepository.findById(id).orElse(null)));</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

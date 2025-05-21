@@ -5,16 +5,20 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.UserEntity;
 
 public interface TeacherMapper {
-  static TeacherEntity fromModelToEntity(TeacherEntity TeacherEntity) {
-<span class="nc" id="L9">    return new TeacherEntity();</span>
+  static TeacherEntity fromDomain(Teacher teacher) {
+<span class="nc" id="L9">    return new TeacherEntity(</span>
+<span class="nc" id="L10">        teacher.getBio(),</span>
+<span class="nc" id="L11">        teacher.getUser().isTeacher(),</span>
+<span class="nc" id="L12">        teacher.getProfilePicture(),</span>
+<span class="nc" id="L13">        teacher.getCoverPicture());</span>
   }
 
-  static Teacher fromEntityToModel(UserEntity teacherEntity) {
-<span class="nc" id="L13">    return Teacher.toDomain(</span>
-<span class="nc" id="L14">        UserMapper.fromEntityToModel(teacherEntity),</span>
-<span class="nc" id="L15">        teacherEntity.getTeacher().getBio(),</span>
-<span class="nc" id="L16">        teacherEntity.getTeacher().getProfilePicture(),</span>
-<span class="nc" id="L17">        teacherEntity.getTeacher().getCoverPicture());</span>
+  static Teacher toDomain(TeacherEntity teacherEntity, UserEntity userEntity) {
+<span class="nc" id="L17">    return Teacher.toDomain(</span>
+<span class="nc" id="L18">        UserMapper.toDomain(userEntity),</span>
+<span class="nc" id="L19">        teacherEntity.getBio(),</span>
+<span class="nc" id="L20">        teacherEntity.getProfilePicture(),</span>
+<span class="nc" id="L21">        teacherEntity.getCoverPicture());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
