@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.User;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -9,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +18,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "users")
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @Getter
 @Setter
@@ -46,4 +48,14 @@ public class UserEntity {
     @AttributeOverride(name = "coverPicture", column = @Column(name = "teacher_cover_picture"))
   })
   private TeacherEntity teacher;
+
+  public static UserEntity fromDomain(User user) {
+    return new UserEntity(
+        user.getId(),
+        user.getFirstName(),
+        user.getLastName(),
+        user.getEmail(),
+        user.getStudent() != null ? StudentEntity.fromDomain(user.getStudent()) : null,
+        user.getTeacher() != null ? TeacherEntity.fromDomain(user.getTeacher()) : null);
+  }
 }

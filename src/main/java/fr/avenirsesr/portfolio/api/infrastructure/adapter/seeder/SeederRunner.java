@@ -26,7 +26,7 @@ public class SeederRunner implements CommandLineRunner {
   private final ProgramProgressRepository programProgressRepository;
   private final SkillLevelRepository skillLevelRepository;
   private final SkillRepository skillRepository;
-  private final TraceRepository traceRepository;
+  private final TrackRepository trackRepository;
   private final AMSRepository amsRepository;
 
   public SeederRunner(
@@ -37,7 +37,7 @@ public class SeederRunner implements CommandLineRunner {
       ProgramProgressRepository programProgressRepository,
       SkillLevelRepository skillLevelRepository,
       SkillRepository skillRepository,
-      TraceRepository traceRepository,
+      TrackRepository trackRepository,
       AMSRepository amsRepository) {
     this.userRepository = userRepository;
     this.externalUserRepository = externalUserRepository;
@@ -46,7 +46,7 @@ public class SeederRunner implements CommandLineRunner {
     this.programProgressRepository = programProgressRepository;
     this.skillLevelRepository = skillLevelRepository;
     this.skillRepository = skillRepository;
-    this.traceRepository = traceRepository;
+    this.trackRepository = trackRepository;
     this.amsRepository = amsRepository;
   }
 
@@ -126,7 +126,7 @@ public class SeederRunner implements CommandLineRunner {
                   })
               .toList();
 
-      var trace = FakeTrace.of(users.getFirst()).toModel();
+      var track = FakeTrack.of(users.getFirst()).toModel();
       var ams = FakeAMS.of(users.getFirst()).toModel();
 
       userRepository.saveAll(users);
@@ -161,8 +161,8 @@ public class SeederRunner implements CommandLineRunner {
       programProgressRepository.saveAll(programProgresses);
       log.info("✓ {} programProgresses created", programProgresses.size());
 
-      traceRepository.save(trace);
-      log.info("✓ 1 trace created");
+      trackRepository.save(track);
+      log.info("✓ 1 track created");
 
       amsRepository.save(ams);
       log.info("✓ 1 ams created");

@@ -4,10 +4,6 @@ import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import java.util.List;
 import java.util.UUID;
 
-public interface ProgramProgressRepository {
-  void save(ProgramProgress progress);
-
-  void saveAll(List<ProgramProgress> progress);
-
+public interface ProgramProgressRepository extends GenericRepositoryPort<ProgramProgress> {
   List<ProgramProgress> getSkillsOverview(UUID userId);
 }

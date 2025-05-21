@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ENavigationField;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +21,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "institution")
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
 public class InstitutionEntity {
@@ -51,5 +54,10 @@ public class InstitutionEntity {
 
   public void setEnabledFields(Set<ENavigationField> enabledFields) {
     this.enabledFieldsRaw = enabledFields.stream().map(Enum::name).collect(Collectors.joining(","));
+  }
+
+  public static InstitutionEntity fromDomain(Institution institution) {
+    return new InstitutionEntity(
+        institution.getId(), institution.getName(), institution.getEnabledFields());
   }
 }

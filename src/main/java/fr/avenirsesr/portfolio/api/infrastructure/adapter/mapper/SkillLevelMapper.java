@@ -10,7 +10,7 @@ public interface SkillLevelMapper {
         skillLevel.getId(),
         skillLevel.getName(),
         skillLevel.getStatus(),
-        skillLevel.getTraces().stream().map(TracesMapper::fromModelToEntity).toList(),
+        skillLevel.getTracks().stream().map(TracksMapper::fromModelToEntity).toList(),
         skillLevel.getAmses().stream().map(AMSMapper::fromModelToEntity).toList());
   }
 

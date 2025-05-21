@@ -9,7 +9,7 @@ public interface SkillMapper {
         .id(skill.getId())
         .name(skill.getName())
         .trackCount(
-            skill.getSkillLevels().stream().mapToInt(level -> level.getTraces().size()).sum())
+            skill.getSkillLevels().stream().mapToInt(level -> level.getTracks().size()).sum())
         .activityCount(
             skill.getSkillLevels().stream().mapToInt(level -> level.getAmses().size()).sum())
         .levels(skill.getSkillLevels().stream().map(SkillLevelMapper::fromDomainToDto).toList())

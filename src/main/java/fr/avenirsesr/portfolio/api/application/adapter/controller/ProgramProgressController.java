@@ -20,7 +20,7 @@ public class ProgramProgressController {
 
   @GetMapping("/skills/overview")
   public List<ProgramProgressDTO> getSkillsOverview() {
-    UUID uuid = UUID.fromString("9d5b4151-28d5-4f8f-b74a-8df5ca58e8b6");
+    UUID uuid = UUID.fromString("a690cd08-20a3-4c6f-a4c8-a1ef5c9eceb8");
     return programProgressService.getSkillsOverview(uuid).stream()
         .map(ProgramProgressMapper::fromDomainToDto)
         .toList();
