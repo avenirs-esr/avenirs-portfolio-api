@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.util.List;
@@ -31,7 +33,17 @@ public class SkillLevelEntity {
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
 
-  @ManyToMany private List<TrackEntity> tracks;
+  @ManyToMany
+  @JoinTable(
+      name = "track_skill_levels",
+      joinColumns = @JoinColumn(name = "track_id"),
+      inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
+  private List<TrackEntity> tracks;
 
-  @ManyToMany private List<AMSEntity> amses;
+  @ManyToMany
+  @JoinTable(
+      name = "skill_level_ams",
+      joinColumns = @JoinColumn(name = "skill_level_id"),
+      inverseJoinColumns = @JoinColumn(name = "ams_id"))
+  private List<AMSEntity> amses;
 }
