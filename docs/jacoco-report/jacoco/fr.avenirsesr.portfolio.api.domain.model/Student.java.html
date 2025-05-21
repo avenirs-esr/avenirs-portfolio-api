@@ -15,12 +15,12 @@ public class Student {
   private byte[] profilePicture;
   private byte[] coverPicture;
 
-<span class="nc" id="L18">  private Student(User user) {</span>
-<span class="nc" id="L19">    this.user = user;</span>
-<span class="nc" id="L20">  }</span>
+<span class="fc" id="L18">  private Student(User user) {</span>
+<span class="fc" id="L19">    this.user = user;</span>
+<span class="fc" id="L20">  }</span>
 
   public static Student create(User user) {
-<span class="nc" id="L23">    return new Student(user);</span>
+<span class="fc" id="L23">    return new Student(user);</span>
   }
 
   public static Student toDomain(

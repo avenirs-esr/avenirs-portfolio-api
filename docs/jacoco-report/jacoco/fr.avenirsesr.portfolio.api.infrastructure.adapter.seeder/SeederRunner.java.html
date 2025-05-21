@@ -26,7 +26,7 @@ public class SeederRunner implements CommandLineRunner {
   private final ProgramProgressRepository programProgressRepository;
   private final SkillLevelRepository skillLevelRepository;
   private final SkillRepository skillRepository;
-  private final TrackRepository trackRepository;
+  private final TraceRepository traceRepository;
   private final AMSRepository amsRepository;
 
   public SeederRunner(
@@ -37,7 +37,7 @@ public class SeederRunner implements CommandLineRunner {
       ProgramProgressRepository programProgressRepository,
       SkillLevelRepository skillLevelRepository,
       SkillRepository skillRepository,
-      TrackRepository trackRepository,
+      TraceRepository traceRepository,
 <span class="fc" id="L41">      AMSRepository amsRepository) {</span>
 <span class="fc" id="L42">    this.userRepository = userRepository;</span>
 <span class="fc" id="L43">    this.externalUserRepository = externalUserRepository;</span>
@@ -46,7 +46,7 @@ public class SeederRunner implements CommandLineRunner {
 <span class="fc" id="L46">    this.programProgressRepository = programProgressRepository;</span>
 <span class="fc" id="L47">    this.skillLevelRepository = skillLevelRepository;</span>
 <span class="fc" id="L48">    this.skillRepository = skillRepository;</span>
-<span class="fc" id="L49">    this.trackRepository = trackRepository;</span>
+<span class="fc" id="L49">    this.traceRepository = traceRepository;</span>
 <span class="fc" id="L50">    this.amsRepository = amsRepository;</span>
 <span class="fc" id="L51">  }</span>
 
@@ -126,7 +126,7 @@ public class SeederRunner implements CommandLineRunner {
                   })
 <span class="nc" id="L127">              .toList();</span>
 
-<span class="nc" id="L129">      var track = FakeTrack.of(users.getFirst()).toModel();</span>
+<span class="nc" id="L129">      var trace = FakeTrace.of(users.getFirst()).toModel();</span>
 <span class="nc" id="L130">      var ams = FakeAMS.of(users.getFirst()).toModel();</span>
 
 <span class="nc" id="L132">      userRepository.saveAll(users);</span>
@@ -161,8 +161,8 @@ public class SeederRunner implements CommandLineRunner {
 <span class="nc" id="L161">      programProgressRepository.saveAll(programProgresses);</span>
 <span class="nc" id="L162">      log.info(&quot;✓ {} programProgresses created&quot;, programProgresses.size());</span>
 
-<span class="nc" id="L164">      trackRepository.save(track);</span>
-<span class="nc" id="L165">      log.info(&quot;✓ 1 track created&quot;);</span>
+<span class="nc" id="L164">      traceRepository.save(trace);</span>
+<span class="nc" id="L165">      log.info(&quot;✓ 1 trace created&quot;);</span>
 
 <span class="nc" id="L167">      amsRepository.save(ams);</span>
 <span class="nc" id="L168">      log.info(&quot;✓ 1 ams created&quot;);</span>

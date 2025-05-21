@@ -3,13 +3,35 @@
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.SkillRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillEntity;
+import java.util.List;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Skill, SkillEntity&gt;
-    implements SkillRepository {
-  public SkillDatabaseRepository(SkillJpaRepository jpaRepository) {
-<span class="fc" id="L12">    super(jpaRepository, SkillEntity::fromDomain);</span>
-<span class="fc" id="L13">  }</span>
+@RequiredArgsConstructor
+public class SkillDatabaseRepository implements SkillRepository {
+  private final SkillJpaRepository jpaRepository;
+
+  @Override
+  public void save(Skill skill) {
+<span class="nc" id="L18">    var entity = toEntity(skill);</span>
+<span class="nc" id="L19">    jpaRepository.save(entity);</span>
+<span class="nc" id="L20">  }</span>
+
+  @Override
+  public void saveAll(List&lt;Skill&gt; skills) {
+<span class="nc" id="L24">    var entities = skills.stream().map(SkillDatabaseRepository::toEntity).toList();</span>
+<span class="nc" id="L25">    jpaRepository.saveAll(entities);</span>
+<span class="nc" id="L26">  }</span>
+
+  public static SkillEntity toEntity(Skill skill) {
+<span class="nc" id="L29">    return new SkillEntity(</span>
+<span class="nc" id="L30">        skill.getId(),</span>
+<span class="nc" id="L31">        skill.getName(),</span>
+<span class="nc" id="L32">        skill.getSkillLevels().stream()</span>
+<span class="nc" id="L33">            .map(SkillLevelDatabaseRepository::toEntity)</span>
+<span class="nc" id="L34">            .collect(Collectors.toSet()));</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

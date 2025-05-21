@@ -3,14 +3,30 @@
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.InstitutionRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.InstitutionEntity;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InstitutionDatabaseRepository
-    extends GenericJpaRepositoryAdapter&lt;Institution, InstitutionEntity&gt;
-    implements InstitutionRepository {
-  public InstitutionDatabaseRepository(InstitutionJpaRepository jpaRepository) {
-<span class="fc" id="L13">    super(jpaRepository, InstitutionEntity::fromDomain);</span>
-<span class="fc" id="L14">  }</span>
+@RequiredArgsConstructor
+public class InstitutionDatabaseRepository implements InstitutionRepository {
+  private final InstitutionJpaRepository jpaRepository;
+
+  @Override
+  public void save(Institution institution) {
+<span class="nc" id="L17">    var entity = toEntity(institution);</span>
+<span class="nc" id="L18">    jpaRepository.save(entity);</span>
+<span class="nc" id="L19">  }</span>
+
+  @Override
+  public void saveAll(List&lt;Institution&gt; institutions) {
+<span class="nc" id="L23">    var entities = institutions.stream().map(InstitutionDatabaseRepository::toEntity).toList();</span>
+<span class="nc" id="L24">    jpaRepository.saveAll(entities);</span>
+<span class="nc" id="L25">  }</span>
+
+  public static InstitutionEntity toEntity(Institution institution) {
+<span class="nc" id="L28">    return new InstitutionEntity(</span>
+<span class="nc" id="L29">        institution.getId(), institution.getName(), institution.getEnabledFields());</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -3,15 +3,36 @@
 import fr.avenirsesr.portfolio.api.domain.model.ExternalUser;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ExternalUserRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ExternalUserEntity;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ExternalUserDatabaseRepository
-    extends GenericJpaRepositoryAdapter&lt;ExternalUser, ExternalUserEntity&gt;
-    implements ExternalUserRepository {
+@RequiredArgsConstructor
+public class ExternalUserDatabaseRepository implements ExternalUserRepository {
+  private final ExternalUserJpaRepository jpaRepository;
 
-  public ExternalUserDatabaseRepository(ExternalUserJpaRepository jpaRepository) {
-<span class="fc" id="L14">    super(jpaRepository, ExternalUserEntity::fromDomain);</span>
-<span class="fc" id="L15">  }</span>
+  @Override
+  public void save(ExternalUser externalUser) {
+<span class="nc" id="L17">    var entity = toEntity(externalUser);</span>
+<span class="nc" id="L18">    jpaRepository.save(entity);</span>
+<span class="nc" id="L19">  }</span>
+
+  @Override
+  public void saveAll(List&lt;ExternalUser&gt; externalUsers) {
+<span class="nc" id="L23">    var entities = externalUsers.stream().map(ExternalUserDatabaseRepository::toEntity).toList();</span>
+<span class="nc" id="L24">    jpaRepository.saveAll(entities);</span>
+<span class="nc" id="L25">  }</span>
+
+  public static ExternalUserEntity toEntity(ExternalUser externalUser) {
+<span class="nc" id="L28">    return new ExternalUserEntity(</span>
+<span class="nc" id="L29">        externalUser.getExternalId(),</span>
+<span class="nc" id="L30">        externalUser.getSource(),</span>
+<span class="nc" id="L31">        UserDatabaseRepository.toEntity(externalUser.getUser()),</span>
+<span class="nc" id="L32">        externalUser.getCategory(),</span>
+<span class="nc" id="L33">        externalUser.getEmail(),</span>
+<span class="nc" id="L34">        externalUser.getFirstName(),</span>
+<span class="nc" id="L35">        externalUser.getLastName());</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -3,13 +3,32 @@
 import fr.avenirsesr.portfolio.api.domain.model.Program;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramEntity;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProgramDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Program, ProgramEntity&gt;
-    implements ProgramRepository {
-  public ProgramDatabaseRepository(ProgramJpaRepository jpaRepository) {
-<span class="fc" id="L12">    super(jpaRepository, ProgramEntity::fromDomain);</span>
-<span class="fc" id="L13">  }</span>
+@RequiredArgsConstructor
+public class ProgramDatabaseRepository implements ProgramRepository {
+  private final ProgramJpaRepository jpaRepository;
+
+  @Override
+  public void save(Program program) {
+<span class="nc" id="L17">    var entity = toEntity(program);</span>
+<span class="nc" id="L18">    jpaRepository.save(entity);</span>
+<span class="nc" id="L19">  }</span>
+
+  @Override
+  public void saveAll(List&lt;Program&gt; programs) {
+<span class="nc" id="L23">    var entities = programs.stream().map(ProgramDatabaseRepository::toEntity).toList();</span>
+<span class="nc" id="L24">    jpaRepository.saveAll(entities);</span>
+<span class="nc" id="L25">  }</span>
+
+  public static ProgramEntity toEntity(Program program) {
+<span class="nc" id="L28">    return new ProgramEntity(</span>
+<span class="nc" id="L29">        program.getId(),</span>
+<span class="nc" id="L30">        program.getName(),</span>
+<span class="nc" id="L31">        InstitutionDatabaseRepository.toEntity(program.getInstitution()));</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

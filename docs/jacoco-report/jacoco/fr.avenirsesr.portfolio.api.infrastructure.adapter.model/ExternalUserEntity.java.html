@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExternalUserEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.infrastructure.adapter.model</a> &gt; <span class="el_source">ExternalUserEntity.java</span></div><h1>ExternalUserEntity.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.api.domain.model.ExternalUser;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import jakarta.persistence.Column;
@@ -16,7 +15,6 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +24,6 @@ import lombok.Setter;
     name = &quot;external_users&quot;,
     uniqueConstraints = @UniqueConstraint(columnNames = {&quot;eternal_id&quot;, &quot;source&quot;}))
 @NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
 public class ExternalUserEntity {
@@ -66,25 +63,14 @@ public class ExternalUserEntity {
       EUserCategory category,
       String email,
       String firstName,
-<span class="nc" id="L69">      String lastName) {</span>
-<span class="nc" id="L70">    this.externalId = externalId;</span>
-<span class="nc" id="L71">    this.source = source;</span>
-<span class="nc" id="L72">    this.user = user;</span>
-<span class="nc" id="L73">    this.category = category;</span>
-<span class="nc" id="L74">    this.email = email;</span>
-<span class="nc" id="L75">    this.firstName = firstName;</span>
-<span class="nc" id="L76">    this.lastName = lastName;</span>
-<span class="nc" id="L77">  }</span>
-
-  public static ExternalUserEntity fromDomain(ExternalUser externalUser) {
-<span class="nc" id="L80">    return new ExternalUserEntity(</span>
-<span class="nc" id="L81">        externalUser.getExternalId(),</span>
-<span class="nc" id="L82">        externalUser.getSource(),</span>
-<span class="nc" id="L83">        UserEntity.fromDomain(externalUser.getUser()),</span>
-<span class="nc" id="L84">        externalUser.getCategory(),</span>
-<span class="nc" id="L85">        externalUser.getEmail(),</span>
-<span class="nc" id="L86">        externalUser.getFirstName(),</span>
-<span class="nc" id="L87">        externalUser.getLastName());</span>
-  }
+<span class="nc" id="L66">      String lastName) {</span>
+<span class="nc" id="L67">    this.externalId = externalId;</span>
+<span class="nc" id="L68">    this.source = source;</span>
+<span class="nc" id="L69">    this.user = user;</span>
+<span class="nc" id="L70">    this.category = category;</span>
+<span class="nc" id="L71">    this.email = email;</span>
+<span class="nc" id="L72">    this.firstName = firstName;</span>
+<span class="nc" id="L73">    this.lastName = lastName;</span>
+<span class="nc" id="L74">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
