@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -10,8 +9,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,5 +35,4 @@ public class ProgramProgressEntity {
       joinColumns = @JoinColumn(name = "program_progress_id"),
       inverseJoinColumns = @JoinColumn(name = "skill_id"))
   private Set<SkillEntity> skills;
-
 }

@@ -18,5 +18,4 @@ public class TeacherEntity {
   @Column private boolean isActive;
   @Column @Lob private byte[] profilePicture;
   @Column @Lob private byte[] coverPicture;
-
 }
