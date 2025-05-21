@@ -19,7 +19,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "program_progress")
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -39,23 +39,4 @@ public class ProgramProgressEntity {
       inverseJoinColumns = @JoinColumn(name = "skill_id"))
   private Set<SkillEntity> skills;
 
-  public static ProgramProgressEntity fromDomain(ProgramProgress programProgress) {
-    return new ProgramProgressEntity(
-        programProgress.getId(),
-        ProgramEntity.fromDomain(programProgress.getProgram()),
-        UserEntity.fromDomain(programProgress.getStudent().getUser()),
-        programProgress.getSkills().stream()
-            .map(SkillEntity::fromDomain)
-            .collect(Collectors.toSet()));
-  }
-
-  public static ProgramProgress toDomain(ProgramProgressEntity programProgressEntity) {
-    return ProgramProgress.toDomain(
-            programProgressEntity.getId(),
-            ProgramEntity.toDomain(programProgressEntity.getProgram()),
-            StudentEntity.toDomain(programProgressEntity.getStudent().getStudent(), programProgressEntity.getStudent()),
-            programProgressEntity.getSkills().stream()
-                    .map(SkillEntity::toDomain)
-                    .collect(Collectors.toSet()));
-  }
 }

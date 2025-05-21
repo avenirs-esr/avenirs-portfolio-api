@@ -19,7 +19,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "skill_level")
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -37,21 +37,4 @@ public class SkillLevelEntity {
 
   @ManyToMany private List<AMSEntity> amses;
 
-  public static SkillLevelEntity fromDomain(SkillLevel skillLevel) {
-    return new SkillLevelEntity(
-        skillLevel.getId(),
-        skillLevel.getName(),
-        skillLevel.getStatus(),
-        skillLevel.getTracks().stream().map(TrackEntity::fromDomain).toList(),
-        skillLevel.getAmses().stream().map(AMSEntity::fromDomain).toList());
-  }
-
-  public static SkillLevel toDomain(SkillLevelEntity skillLevelEntity) {
-    return SkillLevel.toDomain(
-            skillLevelEntity.getId(),
-            skillLevelEntity.getName(),
-            skillLevelEntity.getStatus(),
-            skillLevelEntity.getTracks().stream().map(TrackEntity::toDomain).toList(),
-            skillLevelEntity.getAmses().stream().map(AMSEntity::toDomain).toList());
-  }
 }

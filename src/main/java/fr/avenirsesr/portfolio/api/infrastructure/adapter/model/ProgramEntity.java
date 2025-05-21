@@ -15,7 +15,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "program")
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -27,16 +27,4 @@ public class ProgramEntity {
 
   @ManyToOne(optional = false)
   private InstitutionEntity institution;
-
-  public static ProgramEntity fromDomain(Program program) {
-    return new ProgramEntity(
-        program.getId(), program.getName(), InstitutionEntity.fromDomain(program.getInstitution()));
-  }
-
-  public static Program toDomain(ProgramEntity programEntity) {
-    return Program.toDomain(
-        programEntity.getId(),
-        InstitutionEntity.toDomain(programEntity.getInstitution()),
-        programEntity.getName());
-  }
 }

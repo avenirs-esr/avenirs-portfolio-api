@@ -16,7 +16,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "track")
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -30,19 +30,4 @@ public class TrackEntity {
 
   @ManyToMany private List<AMSEntity> amses;
 
-  public static TrackEntity fromDomain(Track track) {
-    return new TrackEntity(
-        track.getId(),
-        UserEntity.fromDomain(track.getUser()),
-        track.getSkillLevels().stream().map(SkillLevelEntity::fromDomain).toList(),
-        track.getAmses().stream().map(AMSEntity::fromDomain).toList());
-  }
-
-  public static Track toDomain(TrackEntity trackEntity) {
-    return Track.toDomain(
-            trackEntity.getId(),
-            UserEntity.toDomain(trackEntity.getUser()),
-            trackEntity.getSkillLevels().stream().map(SkillLevelEntity::toDomain).toList(),
-            trackEntity.getAmses().stream().map(AMSEntity::toDomain).toList());
-  }
 }

@@ -21,7 +21,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "institution")
 @NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @Getter
 @Setter
 public class InstitutionEntity {
@@ -54,17 +54,5 @@ public class InstitutionEntity {
 
   public void setEnabledFields(Set<ENavigationField> enabledFields) {
     this.enabledFieldsRaw = enabledFields.stream().map(Enum::name).collect(Collectors.joining(","));
-  }
-
-  public static InstitutionEntity fromDomain(Institution institution) {
-    return new InstitutionEntity(
-        institution.getId(), institution.getName(), institution.getEnabledFields());
-  }
-
-  public static Institution toDomain(InstitutionEntity institutionEntity) {
-    return Institution.toDomain(
-        institutionEntity.getId(),
-        institutionEntity.getName(),
-        institutionEntity.getEnabledFields());
   }
 }
