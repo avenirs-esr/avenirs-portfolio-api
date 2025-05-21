@@ -19,7 +19,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "skill_level")
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @Getter
 @Setter

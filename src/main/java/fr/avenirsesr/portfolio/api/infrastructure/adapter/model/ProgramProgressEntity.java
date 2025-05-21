@@ -19,7 +19,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "program_progress")
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @Getter
 @Setter
