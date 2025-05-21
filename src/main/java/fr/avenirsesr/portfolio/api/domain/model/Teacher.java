@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,7 +32,7 @@ public class Teacher {
 
   public static Teacher toDomain(
       User user, String bio, byte[] profilePicture, byte[] coverPicture) {
-    return of(user,bio,profilePicture,coverPicture);
+    return of(user, bio, profilePicture, coverPicture);
   }
 
   public UUID getId() {
