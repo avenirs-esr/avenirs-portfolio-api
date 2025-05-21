@@ -75,27 +75,4 @@ public class ExternalUserEntity {
     this.firstName = firstName;
     this.lastName = lastName;
   }
-
-  public static ExternalUserEntity fromDomain(ExternalUser externalUser) {
-    return new ExternalUserEntity(
-        externalUser.getExternalId(),
-        externalUser.getSource(),
-        UserEntity.fromDomain(externalUser.getUser()),
-        externalUser.getCategory(),
-        externalUser.getEmail(),
-        externalUser.getFirstName(),
-        externalUser.getLastName());
-  }
-
-  public static ExternalUser toDomain(ExternalUserEntity externalUserEntity) {
-    return ExternalUser.create(
-            UserEntity.toDomain(externalUserEntity.getUser()),
-            externalUserEntity.getExternalId(),
-            externalUserEntity.getSource(),
-            externalUserEntity.getCategory(),
-            externalUserEntity.getEmail(),
-            externalUserEntity.getFirstName(),
-            externalUserEntity.getLastName()
-    );
-  }
 }

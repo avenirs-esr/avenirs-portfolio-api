@@ -18,7 +18,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "users")
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -49,27 +49,4 @@ public class UserEntity {
   })
   private TeacherEntity teacher;
 
-  public static UserEntity fromDomain(User user) {
-    return new UserEntity(
-        user.getId(),
-        user.getFirstName(),
-        user.getLastName(),
-        user.getEmail(),
-        StudentEntity.fromDomain(user.toStudent()),
-        TeacherEntity.fromDomain(user.toTeacher()));
-  }
-
-  public static User toDomain(UserEntity userEntity) {
-    return User.toDomain(
-        userEntity.getId(),
-        userEntity.getFirstName(),
-        userEntity.getLastName(),
-        userEntity.getEmail(),
-        userEntity.getStudent().getBio(),
-        userEntity.getStudent().getProfilePicture(),
-        userEntity.getStudent().getCoverPicture(),
-        userEntity.getTeacher().getBio(),
-        userEntity.getTeacher().getProfilePicture(),
-        userEntity.getTeacher().getCoverPicture());
-  }
 }

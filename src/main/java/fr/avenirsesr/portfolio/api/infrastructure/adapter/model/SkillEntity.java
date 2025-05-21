@@ -19,7 +19,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "skill")
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -36,21 +36,5 @@ public class SkillEntity {
       inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
   private Set<SkillLevelEntity> skillLevels;
 
-  public static SkillEntity fromDomain(Skill skill) {
-    return new SkillEntity(
-        skill.getId(),
-        skill.getName(),
-        skill.getSkillLevels().stream()
-            .map(SkillLevelEntity::fromDomain)
-            .collect(Collectors.toSet()));
-  }
 
-  public static Skill toDomain(SkillEntity skillEntity) {
-    return Skill.toDomain(
-            skillEntity.getId(),
-            skillEntity.getName(),
-            skillEntity.getSkillLevels().stream()
-                    .map(SkillLevelEntity::toDomain)
-                    .collect(Collectors.toSet()));
-  }
 }

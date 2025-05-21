@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Embeddable
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -20,17 +20,4 @@ public class TeacherEntity {
   @Column @Lob private byte[] profilePicture;
   @Column @Lob private byte[] coverPicture;
 
-  public static TeacherEntity fromDomain(Teacher teacher) {
-    return new TeacherEntity(
-        teacher.getBio(), teacher.getProfilePicture(), teacher.getCoverPicture());
-  }
-
-  public static Teacher toDomain(TeacherEntity teacherEntity, UserEntity userEntity) {
-    return Teacher.toDomain(
-            UserEntity.toDomain(userEntity),
-            teacherEntity.getBio(),
-            teacherEntity.getProfilePicture(),
-            teacherEntity.getCoverPicture()
-    );
-  }
 }
