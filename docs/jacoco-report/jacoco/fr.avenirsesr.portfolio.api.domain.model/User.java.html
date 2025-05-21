@@ -17,16 +17,16 @@ public class User {
   private Student student;
   private Teacher teacher;
 
-<span class="fc" id="L20">  private User(UUID id) {</span>
-<span class="fc" id="L21">    this.id = id;</span>
-<span class="fc" id="L22">  }</span>
+<span class="nc" id="L20">  private User(UUID id) {</span>
+<span class="nc" id="L21">    this.id = id;</span>
+<span class="nc" id="L22">  }</span>
 
   public static User create(String firstName, String lastName) {
-<span class="fc" id="L25">    var user = new User(UUID.randomUUID());</span>
-<span class="fc" id="L26">    user.setFirstName(firstName);</span>
-<span class="fc" id="L27">    user.setLastName(lastName);</span>
+<span class="nc" id="L25">    var user = new User(UUID.randomUUID());</span>
+<span class="nc" id="L26">    user.setFirstName(firstName);</span>
+<span class="nc" id="L27">    user.setLastName(lastName);</span>
 
-<span class="fc" id="L29">    return user;</span>
+<span class="nc" id="L29">    return user;</span>
   }
 
   public static User toDomain(

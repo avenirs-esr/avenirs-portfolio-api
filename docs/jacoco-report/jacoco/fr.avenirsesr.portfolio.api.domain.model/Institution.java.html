@@ -18,16 +18,16 @@ public class Institution {
 
   private Set&lt;ENavigationField&gt; enabledFields;
 
-<span class="fc" id="L21">  private Institution(UUID id, String name) {</span>
-<span class="fc" id="L22">    this.id = id;</span>
-<span class="fc" id="L23">    this.name = name;</span>
-<span class="fc" id="L24">  }</span>
+<span class="nc" id="L21">  private Institution(UUID id, String name) {</span>
+<span class="nc" id="L22">    this.id = id;</span>
+<span class="nc" id="L23">    this.name = name;</span>
+<span class="nc" id="L24">  }</span>
 
   public static Institution create(String name) {
-<span class="fc" id="L27">    var institution = new Institution(UUID.randomUUID(), name);</span>
-<span class="fc" id="L28">    institution.setEnabledFields(Set.of(ENavigationField.values()));</span>
+<span class="nc" id="L27">    var institution = new Institution(UUID.randomUUID(), name);</span>
+<span class="nc" id="L28">    institution.setEnabledFields(Set.of(ENavigationField.values()));</span>
 
-<span class="fc" id="L30">    return institution;</span>
+<span class="nc" id="L30">    return institution;</span>
   }
 
   public static Institution toDomain(UUID id, String name, Set&lt;ENavigationField&gt; enabledFields) {
