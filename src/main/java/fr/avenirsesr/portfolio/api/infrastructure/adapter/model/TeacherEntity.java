@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 import fr.avenirsesr.portfolio.api.domain.model.Teacher;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Lob;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,9 +15,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TeacherEntity {
-  @Column private String bio;
-  @Column @Lob private byte[] profilePicture;
-  @Column @Lob private byte[] coverPicture;
+    @Column
+    private String bio;
+
+    @Column
+    private String profilePicture;
+
+    @Column
+    private String coverPicture;
 
   public static TeacherEntity fromDomain(Teacher teacher) {
     return new TeacherEntity(
