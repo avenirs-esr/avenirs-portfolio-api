@@ -20,7 +20,7 @@ public class FakeExternalUser {
       throw new IllegalArgumentException("Student cannot be null");
     }
     if (category == EUserCategory.TEACHER && !user.isTeacher()) {
-      throw new IllegalArgumentException("Student cannot be null");
+      throw new IllegalArgumentException("Teacher cannot be null");
     }
 
     return new FakeExternalUser(
