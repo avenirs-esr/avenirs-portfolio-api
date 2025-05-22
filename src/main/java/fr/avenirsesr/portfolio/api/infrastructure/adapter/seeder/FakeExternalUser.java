@@ -16,11 +16,11 @@ public class FakeExternalUser {
   }
 
   public static FakeExternalUser of(User user, EUserCategory category) {
-    if (category == EUserCategory.STUDENT && user.getStudent() == null) {
+    if (category == EUserCategory.STUDENT && !user.isStudent()) {
       throw new IllegalArgumentException("Student cannot be null");
     }
-    if (category == EUserCategory.TEACHER && user.getTeacher() == null) {
-      throw new IllegalArgumentException("Student cannot be null");
+    if (category == EUserCategory.TEACHER && !user.isTeacher()) {
+      throw new IllegalArgumentException("Teacher cannot be null");
     }
 
     return new FakeExternalUser(

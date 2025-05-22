@@ -54,10 +54,13 @@ public class SeederRunner implements CommandLineRunner {
   public void run(String... args) {
     if (seedEnabled) {
       log.info("Seeder is enabled: seeding stared");
-      var users =
+
+      var fakeUsers =
           List.of(
-              FakeUser.create().withEmail().withStudent().toModel(),
-              FakeUser.create().withEmail().withStudent().withTeacher().toModel());
+              FakeUser.create().withEmail().withStudent(),
+              FakeUser.create().withEmail().withStudent().withTeacher());
+
+      var users = fakeUsers.stream().map(FakeUser::toModel).toList();
 
       var externalUsers =
           users.stream()
@@ -65,9 +68,7 @@ public class SeederRunner implements CommandLineRunner {
                   user ->
                       FakeExternalUser.of(
                               user,
-                              user.getStudent() != null
-                                  ? EUserCategory.STUDENT
-                                  : EUserCategory.TEACHER)
+                              user.isStudent() ? EUserCategory.STUDENT : EUserCategory.TEACHER)
                           .toModel())
               .toList();
 
@@ -84,7 +85,7 @@ public class SeederRunner implements CommandLineRunner {
 
       var programProgresses =
           users.stream()
-              .map(User::getStudent)
+              .map(User::toStudent)
               .filter(Objects::nonNull)
               .map(
                   student -> {
@@ -131,6 +132,14 @@ public class SeederRunner implements CommandLineRunner {
 
       userRepository.saveAll(users);
       log.info("✓ {} users created", users.size());
+
+      var students = fakeUsers.stream().map(FakeUser::getStudent).filter(Objects::nonNull).toList();
+      userRepository.saveAllStudents(students);
+      log.info("✓ {} students synced", students.size());
+
+      var teachers = fakeUsers.stream().map(FakeUser::getTeacher).filter(Objects::nonNull).toList();
+      userRepository.saveAllTeachers(teachers);
+      log.info("✓ {} teachers synced", teachers.size());
 
       externalUserRepository.saveAll(externalUsers);
       log.info("✓ {} externalUsers created", externalUsers.size());

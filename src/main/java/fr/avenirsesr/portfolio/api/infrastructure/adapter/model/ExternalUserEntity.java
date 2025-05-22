@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.api.domain.model.ExternalUser;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import jakarta.persistence.Column;
@@ -74,16 +73,5 @@ public class ExternalUserEntity {
     this.email = email;
     this.firstName = firstName;
     this.lastName = lastName;
-  }
-
-  public static ExternalUserEntity fromDomain(ExternalUser externalUser) {
-    return new ExternalUserEntity(
-        externalUser.getExternalId(),
-        externalUser.getSource(),
-        UserEntity.fromDomain(externalUser.getUser()),
-        externalUser.getCategory(),
-        externalUser.getEmail(),
-        externalUser.getFirstName(),
-        externalUser.getLastName());
   }
 }
