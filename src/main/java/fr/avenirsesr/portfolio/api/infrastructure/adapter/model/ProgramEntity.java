@@ -1,7 +1,10 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELearningMethod;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -22,6 +25,10 @@ public class ProgramEntity {
 
   @Column(nullable = false)
   private String name;
+
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private ELearningMethod learningMethod;
 
   @ManyToOne(optional = false)
   private InstitutionEntity institution;
