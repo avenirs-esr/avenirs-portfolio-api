@@ -4,15 +4,16 @@ import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.InstitutionEntity;
 
 public interface InstitutionMapper {
-  static InstitutionEntity fromModelToEntity(Institution institution) {
-<span class="nc" id="L8">    return new InstitutionEntity();</span>
+  static InstitutionEntity fromDomain(Institution institution) {
+<span class="nc" id="L8">    return new InstitutionEntity(</span>
+<span class="nc" id="L9">        institution.getId(), institution.getName(), institution.getEnabledFields());</span>
   }
 
-  static Institution fromEntityToModel(InstitutionEntity institutionEntity) {
-<span class="nc" id="L12">    return Institution.toDomain(</span>
-<span class="nc" id="L13">        institutionEntity.getId(),</span>
-<span class="nc" id="L14">        institutionEntity.getName(),</span>
-<span class="nc" id="L15">        institutionEntity.getEnabledFields());</span>
+  static Institution toDomain(InstitutionEntity institutionEntity) {
+<span class="nc" id="L13">    return Institution.toDomain(</span>
+<span class="nc" id="L14">        institutionEntity.getId(),</span>
+<span class="nc" id="L15">        institutionEntity.getName(),</span>
+<span class="nc" id="L16">        institutionEntity.getEnabledFields());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

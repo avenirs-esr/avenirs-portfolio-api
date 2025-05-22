@@ -9,16 +9,16 @@ import java.util.Set;
 public class FakeProgramProgress {
   private final ProgramProgress programProgress;
 
-<span class="nc" id="L12">  private FakeProgramProgress(ProgramProgress programProgress) {</span>
-<span class="nc" id="L13">    this.programProgress = programProgress;</span>
-<span class="nc" id="L14">  }</span>
+<span class="fc" id="L12">  private FakeProgramProgress(ProgramProgress programProgress) {</span>
+<span class="fc" id="L13">    this.programProgress = programProgress;</span>
+<span class="fc" id="L14">  }</span>
 
   public static FakeProgramProgress of(Program program, Student student, Set&lt;Skill&gt; skills) {
-<span class="nc" id="L17">    return new FakeProgramProgress(ProgramProgress.create(program, student, skills));</span>
+<span class="fc" id="L17">    return new FakeProgramProgress(ProgramProgress.create(program, student, skills));</span>
   }
 
   public ProgramProgress toModel() {
-<span class="nc" id="L21">    return programProgress;</span>
+<span class="fc" id="L21">    return programProgress;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
