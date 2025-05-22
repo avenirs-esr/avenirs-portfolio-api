@@ -10,6 +10,6 @@ import org.springframework.stereotype.Component;
 public class TrackDatabaseRepository extends GenericJpaRepositoryAdapter<Track, TrackEntity>
     implements TrackRepository {
   public TrackDatabaseRepository(TrackJpaRepository jpaRepository) {
-    super(jpaRepository, TrackMapper::fromDomain, TrackMapper::toDomain);
+    super(jpaRepository, jpaRepository, TrackMapper::fromDomain, TrackMapper::toDomain);
   }
 }
