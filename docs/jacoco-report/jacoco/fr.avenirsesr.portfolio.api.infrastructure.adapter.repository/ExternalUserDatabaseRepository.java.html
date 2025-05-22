@@ -2,7 +2,6 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.ExternalUser;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ExternalUserRepository;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ExternalUserMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ExternalUserEntity;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +11,7 @@ public class ExternalUserDatabaseRepository
     implements ExternalUserRepository {
 
   public ExternalUserDatabaseRepository(ExternalUserJpaRepository jpaRepository) {
-<span class="fc" id="L15">    super(</span>
-        jpaRepository, jpaRepository, ExternalUserMapper::fromDomain, ExternalUserMapper::toDomain);
-<span class="fc" id="L17">  }</span>
+<span class="fc" id="L14">    super(jpaRepository, ExternalUserEntity::fromDomain);</span>
+<span class="fc" id="L15">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

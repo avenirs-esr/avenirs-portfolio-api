@@ -3,52 +3,47 @@
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.Teacher;
 import fr.avenirsesr.portfolio.api.domain.model.User;
-import lombok.Getter;
 import net.datafaker.Faker;
 
 public class FakeUser {
-<span class="fc" id="L10">  private static final Faker faker = new Faker();</span>
+<span class="nc" id="L9">  private static final Faker faker = new Faker();</span>
   private final User user;
-  @Getter private Student student;
-  @Getter private Teacher teacher;
 
-<span class="fc" id="L15">  private FakeUser(User user) {</span>
-<span class="fc" id="L16">    this.user = user;</span>
-<span class="fc" id="L17">  }</span>
+<span class="nc" id="L12">  private FakeUser(User user) {</span>
+<span class="nc" id="L13">    this.user = user;</span>
+<span class="nc" id="L14">  }</span>
 
   public static FakeUser create() {
-<span class="fc" id="L20">    return new FakeUser(User.create(faker.name().firstName(), faker.name().lastName()));</span>
+<span class="nc" id="L17">    return new FakeUser(User.create(faker.name().firstName(), faker.name().lastName()));</span>
   }
 
   public FakeUser withEmail() {
-<span class="nc" id="L24">    user.setEmail(faker.internet().emailAddress());</span>
-<span class="nc" id="L25">    return this;</span>
+<span class="nc" id="L21">    user.setEmail(faker.internet().emailAddress());</span>
+<span class="nc" id="L22">    return this;</span>
   }
 
   public FakeUser withStudent() {
-<span class="fc" id="L29">    var student = user.toStudent();</span>
-<span class="fc" id="L30">    student.setBio(faker.lorem().paragraph());</span>
-<span class="fc" id="L31">    student.setProfilePicture(faker.internet().image().getBytes());</span>
-<span class="fc" id="L32">    student.setCoverPicture(faker.internet().image().getBytes());</span>
+<span class="nc" id="L26">    var student = Student.create(user);</span>
+<span class="nc" id="L27">    student.setBio(faker.lorem().paragraph());</span>
+<span class="nc" id="L28">    student.setProfilePicture(faker.internet().image().getBytes());</span>
+<span class="nc" id="L29">    student.setCoverPicture(faker.internet().image().getBytes());</span>
 
-<span class="fc" id="L34">    this.student = student;</span>
-<span class="fc" id="L35">    user.setStudent(true);</span>
-<span class="fc" id="L36">    return this;</span>
+<span class="nc" id="L31">    user.setStudent(student);</span>
+<span class="nc" id="L32">    return this;</span>
   }
 
   public FakeUser withTeacher() {
-<span class="nc" id="L40">    var teacher = user.toTeacher();</span>
-<span class="nc" id="L41">    teacher.setBio(faker.lorem().paragraph());</span>
-<span class="nc" id="L42">    teacher.setProfilePicture(faker.internet().image().getBytes());</span>
-<span class="nc" id="L43">    teacher.setCoverPicture(faker.internet().image().getBytes());</span>
+<span class="nc" id="L36">    var teacher = Teacher.create(user);</span>
+<span class="nc" id="L37">    teacher.setBio(faker.lorem().paragraph());</span>
+<span class="nc" id="L38">    teacher.setProfilePicture(faker.internet().image().getBytes());</span>
+<span class="nc" id="L39">    teacher.setCoverPicture(faker.internet().image().getBytes());</span>
 
-<span class="nc" id="L45">    this.teacher = teacher;</span>
-<span class="nc" id="L46">    user.setTeacher(true);</span>
-<span class="nc" id="L47">    return this;</span>
+<span class="nc" id="L41">    user.setTeacher(teacher);</span>
+<span class="nc" id="L42">    return this;</span>
   }
 
   public User toModel() {
-<span class="fc" id="L51">    return user;</span>
+<span class="nc" id="L46">    return user;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
