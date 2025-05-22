@@ -20,7 +20,7 @@ public class FakeExternalUser {
 <span class="nc" id="L20">      throw new IllegalArgumentException(&quot;Student cannot be null&quot;);</span>
     }
 <span class="nc bnc" id="L22" title="All 4 branches missed.">    if (category == EUserCategory.TEACHER &amp;&amp; !user.isTeacher()) {</span>
-<span class="nc" id="L23">      throw new IllegalArgumentException(&quot;Student cannot be null&quot;);</span>
+<span class="nc" id="L23">      throw new IllegalArgumentException(&quot;Teacher cannot be null&quot;);</span>
     }
 
 <span class="nc" id="L26">    return new FakeExternalUser(</span>
