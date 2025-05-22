@@ -1,0 +1,96 @@
+package fr.avenirsesr.portfolio.api.service;
+
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELearningMethod;
+import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
+import fr.avenirsesr.portfolio.api.domain.service.InstitutionServiceImpl;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeInstitution;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeProgram;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeProgramProgress;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeUser;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.*;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class InstitutionServiceImplTest {
+    private AutoCloseable closeable;
+
+    @Mock
+    private ProgramProgressRepository programProgressRepository;
+
+    @InjectMocks
+    private InstitutionServiceImpl institutionService;
+
+    @BeforeEach
+    void setUp() {
+        closeable =  MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close();
+    }
+
+    @Test
+    void shouldReturnTrueWhenInstitutionHasEnabledNavigationField() {
+        // Given
+        var student = FakeUser.create().withStudent().toModel().toStudent();
+        var institutionAPC = FakeInstitution.create().withEnabledFiled(Set.of(ELearningMethod.APC)).toModel();
+        var programAPC = FakeProgram.of(institutionAPC).withLearningMethod(ELearningMethod.APC).toModel();
+        var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
+
+        var institutionLifeProject = FakeInstitution.create().withEnabledFiled(Set.of(ELearningMethod.LIFE_PROJECT)).toModel();
+        var programLifeProject = FakeProgram.of(institutionLifeProject).withLearningMethod(ELearningMethod.LIFE_PROJECT).toModel();
+        var progressLifeProject = FakeProgramProgress.of(programLifeProject, student, Set.of()).toModel();
+
+        when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progressAPC, progressLifeProject));
+
+        // When
+        boolean result = institutionService.isNavigationEnabledFor(student, ELearningMethod.APC);
+
+        // Then
+        assertTrue(result);
+        verify(programProgressRepository).findAllByStudent(student);
+    }
+
+    @Test
+    void shouldReturnFalseWhenNoInstitutionHasEnabledNavigationField() {
+        // Given
+        var student = FakeUser.create().withStudent().toModel().toStudent();
+        var institutionAPC = FakeInstitution.create().withEnabledFiled(Set.of(ELearningMethod.APC)).toModel();
+        var programAPC = FakeProgram.of(institutionAPC).withLearningMethod(ELearningMethod.APC).toModel();
+        var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
+
+        var institution2 = FakeInstitution.create().withEnabledFiled(Set.of(ELearningMethod.APC)).toModel();
+        var program2 = FakeProgram.of(institution2).withLearningMethod(ELearningMethod.APC).toModel();
+        var progress2 = FakeProgramProgress.of(program2, student, Set.of()).toModel();
+
+        when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progressAPC, progress2));
+
+        // When
+        boolean result = institutionService.isNavigationEnabledFor(student, ELearningMethod.LIFE_PROJECT);
+
+        // Then
+        assertFalse(result);
+        verify(programProgressRepository).findAllByStudent(student);
+    }
+
+    @Test
+    void shouldReturnFalseWhenStudentHasNoProgramProgress() {
+        // Given
+        var student = FakeUser.create().withStudent().toModel().toStudent();
+        when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of());
+
+        // When
+        boolean result = institutionService.isNavigationEnabledFor(student, ELearningMethod.APC);
+
+        // Then
+        assertFalse(result);
+        verify(programProgressRepository).findAllByStudent(student);
+    }
+}
