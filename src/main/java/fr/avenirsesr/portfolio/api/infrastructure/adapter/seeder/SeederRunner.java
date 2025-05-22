@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.api.domain.model.User;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ENavigationField;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELearningMethod;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.*;
@@ -75,9 +75,9 @@ public class SeederRunner implements CommandLineRunner {
       var institutions =
           List.of(
               FakeInstitution.create().toModel(),
-              FakeInstitution.create().withEnabledFiled(Set.of(ENavigationField.APC)).toModel(),
+              FakeInstitution.create().withEnabledFiled(Set.of(ELearningMethod.APC)).toModel(),
               FakeInstitution.create()
-                  .withEnabledFiled(Set.of(ENavigationField.LIFE_PROJECT))
+                  .withEnabledFiled(Set.of(ELearningMethod.LIFE_PROJECT))
                   .toModel());
 
       var programs =
