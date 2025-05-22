@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,8 +20,8 @@ public class ProgramProgressController {
   }
 
   @GetMapping("/skills/overview")
-  public List<ProgramProgressDTO> getSkillsOverview() {
-    UUID uuid = UUID.fromString("a690cd08-20a3-4c6f-a4c8-a1ef5c9eceb8");
+  public List<ProgramProgressDTO> getSkillsOverview(@RequestHeader("X-Context-Kid") String userId) {
+    UUID uuid = UUID.fromString(userId);
     return programProgressService.getSkillsOverview(uuid).stream()
         .map(ProgramProgressMapper::fromDomainToDto)
         .toList();

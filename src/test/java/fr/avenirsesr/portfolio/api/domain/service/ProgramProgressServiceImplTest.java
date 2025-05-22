@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeInstitution;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
@@ -117,7 +118,7 @@ public class ProgramProgressServiceImplTest {
 
   private ProgramProgress createProgramProgress(
       UUID id, String programName, List<String> skillNames) {
-    Institution institution = Institution.create("institution");
+    Institution institution = FakeInstitution.create().toModel();
     Program program = Program.create(institution, programName);
 
     User user = User.create("John", "Doe");
