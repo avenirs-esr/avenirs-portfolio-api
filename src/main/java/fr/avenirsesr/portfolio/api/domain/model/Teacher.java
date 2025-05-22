@@ -32,7 +32,7 @@ public class Teacher {
 
   public static Teacher toDomain(
       User user, String bio, byte[] profilePicture, byte[] coverPicture) {
-    return of(user,bio,profilePicture,coverPicture);
+    return of(user, bio, profilePicture, coverPicture);
   }
 
   public UUID getId() {
