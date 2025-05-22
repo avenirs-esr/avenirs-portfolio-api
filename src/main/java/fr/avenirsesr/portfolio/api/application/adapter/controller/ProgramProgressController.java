@@ -20,7 +20,7 @@ public class ProgramProgressController {
   }
 
   @GetMapping("/skills/overview")
-  public List<ProgramProgressDTO> getSkillsOverview(@RequestHeader("X-Context-Kid") String userId) {
+  public List<ProgramProgressDTO> getSkillsOverview(@RequestHeader("X-Signed-Context") String userId) {
     UUID uuid = UUID.fromString(userId);
     return programProgressService.getSkillsOverview(uuid).stream()
         .map(ProgramProgressMapper::fromDomainToDto)
