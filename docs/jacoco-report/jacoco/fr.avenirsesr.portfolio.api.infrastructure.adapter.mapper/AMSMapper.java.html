@@ -4,18 +4,15 @@ import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSEntity;
 
 public interface AMSMapper {
-  static AMSEntity fromDomain(AMS ams) {
-<span class="nc" id="L8">    return new AMSEntity(</span>
-<span class="nc" id="L9">        ams.getId(),</span>
-<span class="nc" id="L10">        UserMapper.fromDomain(ams.getUser()),</span>
-<span class="nc" id="L11">        ams.getSkillLevels().stream().map(SkillLevelMapper::fromDomain).toList());</span>
+  static AMSEntity fromModelToEntity(AMS ams) {
+<span class="nc" id="L8">    return new AMSEntity();</span>
   }
 
-  static AMS toDomain(AMSEntity entity) {
-<span class="nc" id="L15">    return AMS.toDomain(</span>
-<span class="nc" id="L16">        entity.getId(),</span>
-<span class="nc" id="L17">        UserMapper.toDomain(entity.getUser()),</span>
-<span class="nc" id="L18">        entity.getSkillLevels().stream().map(SkillLevelMapper::toDomain).toList());</span>
+  static AMS fromEntityToModel(AMSEntity amsEntity) {
+<span class="nc" id="L12">    return AMS.toDomain(</span>
+<span class="nc" id="L13">        amsEntity.getId(),</span>
+<span class="nc" id="L14">        UserMapper.fromEntityToModel(amsEntity.getUser()),</span>
+<span class="nc" id="L15">        amsEntity.getSkillLevels().stream().map(SkillLevelMapper::fromEntityToModel).toList());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

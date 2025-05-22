@@ -2,24 +2,25 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillLevelEntity;
+import java.util.ArrayList;
 
 public interface SkillLevelMapper {
-  static SkillLevelEntity fromDomain(SkillLevel skillLevel) {
-<span class="nc" id="L8">    return new SkillLevelEntity(</span>
-<span class="nc" id="L9">        skillLevel.getId(),</span>
-<span class="nc" id="L10">        skillLevel.getName(),</span>
-<span class="nc" id="L11">        skillLevel.getStatus(),</span>
-<span class="nc" id="L12">        skillLevel.getTracks().stream().map(TrackMapper::fromDomain).toList(),</span>
-<span class="nc" id="L13">        skillLevel.getAmses().stream().map(AMSMapper::fromDomain).toList());</span>
+  static SkillLevelEntity fromModelToEntity(SkillLevel skillLevel) {
+<span class="nc" id="L9">    return new SkillLevelEntity(</span>
+<span class="nc" id="L10">        skillLevel.getId(),</span>
+<span class="nc" id="L11">        skillLevel.getName(),</span>
+<span class="nc" id="L12">        skillLevel.getStatus(),</span>
+<span class="nc" id="L13">        skillLevel.getTracks().stream().map(TracksMapper::fromModelToEntity).toList(),</span>
+<span class="nc" id="L14">        skillLevel.getAmses().stream().map(AMSMapper::fromModelToEntity).toList());</span>
   }
 
-  static SkillLevel toDomain(SkillLevelEntity skillLevelEntity) {
-<span class="nc" id="L17">    return SkillLevel.toDomain(</span>
-<span class="nc" id="L18">        skillLevelEntity.getId(),</span>
-<span class="nc" id="L19">        skillLevelEntity.getName(),</span>
-<span class="nc" id="L20">        skillLevelEntity.getStatus(),</span>
-<span class="nc" id="L21">        skillLevelEntity.getTracks().stream().map(TrackMapper::toDomain).toList(),</span>
-<span class="nc" id="L22">        skillLevelEntity.getAmses().stream().map(AMSMapper::toDomain).toList());</span>
+  static SkillLevel fromEntityToModel(SkillLevelEntity skillLevelEntity) {
+<span class="nc" id="L18">    return SkillLevel.toDomain(</span>
+<span class="nc" id="L19">        skillLevelEntity.getId(),</span>
+<span class="nc" id="L20">        skillLevelEntity.getName(),</span>
+<span class="nc" id="L21">        skillLevelEntity.getStatus(),</span>
+        new ArrayList&lt;&gt;(),
+        new ArrayList&lt;&gt;());
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

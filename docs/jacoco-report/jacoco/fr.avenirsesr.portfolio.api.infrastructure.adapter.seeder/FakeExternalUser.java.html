@@ -16,11 +16,11 @@ public class FakeExternalUser {
 <span class="nc" id="L16">  }</span>
 
   public static FakeExternalUser of(User user, EUserCategory category) {
-<span class="nc bnc" id="L19" title="All 4 branches missed.">    if (category == EUserCategory.STUDENT &amp;&amp; !user.isStudent()) {</span>
+<span class="nc bnc" id="L19" title="All 4 branches missed.">    if (category == EUserCategory.STUDENT &amp;&amp; user.getStudent() == null) {</span>
 <span class="nc" id="L20">      throw new IllegalArgumentException(&quot;Student cannot be null&quot;);</span>
     }
-<span class="nc bnc" id="L22" title="All 4 branches missed.">    if (category == EUserCategory.TEACHER &amp;&amp; !user.isTeacher()) {</span>
-<span class="nc" id="L23">      throw new IllegalArgumentException(&quot;Teacher cannot be null&quot;);</span>
+<span class="nc bnc" id="L22" title="All 4 branches missed.">    if (category == EUserCategory.TEACHER &amp;&amp; user.getTeacher() == null) {</span>
+<span class="nc" id="L23">      throw new IllegalArgumentException(&quot;Student cannot be null&quot;);</span>
     }
 
 <span class="nc" id="L26">    return new FakeExternalUser(</span>

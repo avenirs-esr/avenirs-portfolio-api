@@ -5,22 +5,17 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillEntity;
 import java.util.stream.Collectors;
 
 public interface SkillMapper {
-  static SkillEntity fromDomain(Skill skill) {
-<span class="nc" id="L9">    return new SkillEntity(</span>
-<span class="nc" id="L10">        skill.getId(),</span>
-<span class="nc" id="L11">        skill.getName(),</span>
-<span class="nc" id="L12">        skill.getSkillLevels().stream()</span>
-<span class="nc" id="L13">            .map(SkillLevelMapper::fromDomain)</span>
-<span class="nc" id="L14">            .collect(Collectors.toSet()));</span>
+  static SkillEntity fromModelToEntity(Skill skill) {
+<span class="nc" id="L9">    return new SkillEntity();</span>
   }
 
-  static Skill toDomain(SkillEntity skillEntity) {
-<span class="nc" id="L18">    return Skill.toDomain(</span>
-<span class="nc" id="L19">        skillEntity.getId(),</span>
-<span class="nc" id="L20">        skillEntity.getName(),</span>
-<span class="nc" id="L21">        skillEntity.getSkillLevels().stream()</span>
-<span class="nc" id="L22">            .map(SkillLevelMapper::toDomain)</span>
-<span class="nc" id="L23">            .collect(Collectors.toSet()));</span>
+  static Skill fromEntityToModel(SkillEntity skillEntity) {
+<span class="nc" id="L13">    return Skill.toDomain(</span>
+<span class="nc" id="L14">        skillEntity.getId(),</span>
+<span class="nc" id="L15">        skillEntity.getName(),</span>
+<span class="nc" id="L16">        skillEntity.getSkillLevels().stream()</span>
+<span class="nc" id="L17">            .map(SkillLevelMapper::fromEntityToModel)</span>
+<span class="nc" id="L18">            .collect(Collectors.toSet()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

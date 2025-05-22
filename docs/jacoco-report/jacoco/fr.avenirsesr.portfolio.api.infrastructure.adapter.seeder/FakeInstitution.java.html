@@ -6,15 +6,15 @@ import java.util.Set;
 import net.datafaker.Faker;
 
 public class FakeInstitution {
-<span class="nc" id="L9">  private static final Faker faker = new Faker();</span>
+<span class="fc" id="L9">  private static final Faker faker = new Faker();</span>
   private final Institution institution;
 
-<span class="nc" id="L12">  private FakeInstitution(Institution institution) {</span>
-<span class="nc" id="L13">    this.institution = institution;</span>
-<span class="nc" id="L14">  }</span>
+<span class="fc" id="L12">  private FakeInstitution(Institution institution) {</span>
+<span class="fc" id="L13">    this.institution = institution;</span>
+<span class="fc" id="L14">  }</span>
 
   public static FakeInstitution create() {
-<span class="nc" id="L17">    return new FakeInstitution(Institution.create(faker.university().name()));</span>
+<span class="fc" id="L17">    return new FakeInstitution(Institution.create(faker.university().name()));</span>
   }
 
   public FakeInstitution withEnabledFiled(Set&lt;ENavigationField&gt; enabledFields) {
@@ -23,7 +23,7 @@ public class FakeInstitution {
   }
 
   public Institution toModel() {
-<span class="nc" id="L26">    return institution;</span>
+<span class="fc" id="L26">    return institution;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -8,87 +8,37 @@ import lombok.Setter;
 @Getter
 @Setter
 public class User {
+  @Setter(AccessLevel.NONE)
   private final UUID id;
+
   private String firstName;
   private String lastName;
   private String email;
-  private boolean isStudent;
-  private boolean isTeacher;
+  private Student student;
+  private Teacher teacher;
 
-  // -- Student --
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.PRIVATE)
-  private String studentBio;
-
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.PRIVATE)
-  private byte[] studentProfilePicture;
-
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.PRIVATE)
-  private byte[] studentCoverPicture;
-
-  // -- Teacher --
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.PRIVATE)
-  private String teacherBio;
-
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.PRIVATE)
-  private byte[] teacherProfilePicture;
-
-  @Getter(AccessLevel.NONE)
-  @Setter(AccessLevel.PRIVATE)
-  private byte[] teacherCoverPicture;
-
-<span class="nc" id="L44">  private User(UUID id) {</span>
-<span class="nc" id="L45">    this.id = id;</span>
-<span class="nc" id="L46">  }</span>
+<span class="fc" id="L20">  private User(UUID id) {</span>
+<span class="fc" id="L21">    this.id = id;</span>
+<span class="fc" id="L22">  }</span>
 
   public static User create(String firstName, String lastName) {
-<span class="nc" id="L49">    var user = new User(UUID.randomUUID());</span>
-<span class="nc" id="L50">    user.setFirstName(firstName);</span>
-<span class="nc" id="L51">    user.setLastName(lastName);</span>
-<span class="nc" id="L52">    user.setStudent(false);</span>
-<span class="nc" id="L53">    user.setTeacher(false);</span>
-<span class="nc" id="L54">    return user;</span>
-  }
+<span class="fc" id="L25">    var user = new User(UUID.randomUUID());</span>
+<span class="fc" id="L26">    user.setFirstName(firstName);</span>
+<span class="fc" id="L27">    user.setLastName(lastName);</span>
 
-  public Student toStudent() {
-<span class="nc" id="L58">    return Student.of(this, studentBio, studentProfilePicture, studentCoverPicture);</span>
-  }
-
-  public Teacher toTeacher() {
-<span class="nc" id="L62">    return Teacher.of(this, teacherBio, teacherProfilePicture, teacherCoverPicture);</span>
+<span class="fc" id="L29">    return user;</span>
   }
 
   public static User toDomain(
-      UUID id,
-      String firstName,
-      String lastName,
-      String email,
-      boolean isStudent,
-      String studentBio,
-      byte[] studentProfilePicture,
-      byte[] studentCoverPicture,
-      boolean isTeacher,
-      String teacherBio,
-      byte[] teacherProfilePicture,
-      byte[] teacherCoverPicture) {
-<span class="nc" id="L78">    var user = new User(id);</span>
-<span class="nc" id="L79">    user.setFirstName(firstName);</span>
-<span class="nc" id="L80">    user.setLastName(lastName);</span>
-<span class="nc" id="L81">    user.setEmail(email);</span>
-<span class="nc" id="L82">    user.setStudent(isStudent);</span>
-<span class="nc" id="L83">    user.setStudentBio(studentBio);</span>
-<span class="nc" id="L84">    user.setStudentProfilePicture(studentProfilePicture);</span>
-<span class="nc" id="L85">    user.setStudentCoverPicture(studentCoverPicture);</span>
-<span class="nc" id="L86">    user.setTeacher(isTeacher);</span>
-<span class="nc" id="L87">    user.setTeacherBio(teacherBio);</span>
-<span class="nc" id="L88">    user.setTeacherProfilePicture(teacherProfilePicture);</span>
-<span class="nc" id="L89">    user.setTeacherCoverPicture(teacherCoverPicture);</span>
+      UUID id, String firstName, String lastName, String email, Student student, Teacher teacher) {
+<span class="nc" id="L34">    var user = new User(id);</span>
+<span class="nc" id="L35">    user.setFirstName(firstName);</span>
+<span class="nc" id="L36">    user.setLastName(lastName);</span>
+<span class="nc" id="L37">    user.setEmail(email);</span>
+<span class="nc" id="L38">    user.setStudent(student);</span>
+<span class="nc" id="L39">    user.setTeacher(teacher);</span>
 
-<span class="nc" id="L91">    return user;</span>
+<span class="nc" id="L41">    return user;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
