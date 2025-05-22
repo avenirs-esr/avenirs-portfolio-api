@@ -10,6 +10,6 @@ import org.springframework.stereotype.Component;
 public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter<Skill, SkillEntity>
     implements SkillRepository {
   public SkillDatabaseRepository(SkillJpaRepository jpaRepository) {
-    super(jpaRepository, SkillMapper::fromDomain, SkillMapper::toDomain);
+    super(jpaRepository, jpaRepository, SkillMapper::fromDomain, SkillMapper::toDomain);
   }
 }

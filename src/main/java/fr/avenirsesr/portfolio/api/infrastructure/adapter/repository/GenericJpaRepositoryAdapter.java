@@ -6,15 +6,21 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public abstract class GenericJpaRepositoryAdapter<D, E> implements GenericRepositoryPort<D> {
   protected final JpaRepository<E, UUID> jpaRepository;
+  protected final JpaSpecificationExecutor<E> jpaSpecificationExecutor;
   private final Function<D, E> fromDomain;
   private final Function<E, D> toDomain;
 
   protected GenericJpaRepositoryAdapter(
-      JpaRepository<E, UUID> jpaRepository, Function<D, E> fromDomain, Function<E, D> toDomain) {
+      JpaRepository<E, UUID> jpaRepository,
+      JpaSpecificationExecutor<E> jpaSpecificationExecutor,
+      Function<D, E> fromDomain,
+      Function<E, D> toDomain) {
     this.jpaRepository = jpaRepository;
+    this.jpaSpecificationExecutor = jpaSpecificationExecutor;
     this.fromDomain = fromDomain;
     this.toDomain = toDomain;
   }

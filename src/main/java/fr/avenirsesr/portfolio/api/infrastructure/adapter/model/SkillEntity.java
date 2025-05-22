@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,8 +9,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +32,4 @@ public class SkillEntity {
       joinColumns = @JoinColumn(name = "skill_id"),
       inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
   private Set<SkillLevelEntity> skillLevels;
-
-
 }

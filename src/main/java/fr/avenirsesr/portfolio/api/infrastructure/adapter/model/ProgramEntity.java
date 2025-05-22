@@ -1,13 +1,11 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.api.domain.model.Program;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +22,9 @@ public class ProgramEntity {
 
   @Column(nullable = false)
   private String name;
+
+  @Column(name = "is_apc", nullable = false)
+  private boolean isAPC;
 
   @ManyToOne(optional = false)
   private InstitutionEntity institution;

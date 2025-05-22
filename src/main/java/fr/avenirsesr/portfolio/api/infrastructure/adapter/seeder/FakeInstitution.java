@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ENavigationField;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import java.util.Set;
 import net.datafaker.Faker;
 
@@ -17,7 +17,7 @@ public class FakeInstitution {
     return new FakeInstitution(Institution.create(faker.university().name()));
   }
 
-  public FakeInstitution withEnabledFiled(Set<ENavigationField> enabledFields) {
+  public FakeInstitution withEnabledFiled(Set<EPortfolioType> enabledFields) {
     institution.setEnabledFields(enabledFields);
     return this;
   }

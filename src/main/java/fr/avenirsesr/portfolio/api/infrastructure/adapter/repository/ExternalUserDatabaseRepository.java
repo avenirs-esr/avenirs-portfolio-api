@@ -12,6 +12,7 @@ public class ExternalUserDatabaseRepository
     implements ExternalUserRepository {
 
   public ExternalUserDatabaseRepository(ExternalUserJpaRepository jpaRepository) {
-    super(jpaRepository, ExternalUserMapper::fromDomain, ExternalUserMapper::toDomain);
+    super(
+        jpaRepository, jpaRepository, ExternalUserMapper::fromDomain, ExternalUserMapper::toDomain);
   }
 }
