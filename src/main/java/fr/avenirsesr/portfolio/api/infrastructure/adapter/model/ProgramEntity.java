@@ -23,7 +23,7 @@ public class ProgramEntity {
   @Column(nullable = false)
   private String name;
 
-  @Column(nullable = false)
+  @Column(name = "is_apc", nullable = false)
   private boolean isAPC;
 
   @ManyToOne(optional = false)
