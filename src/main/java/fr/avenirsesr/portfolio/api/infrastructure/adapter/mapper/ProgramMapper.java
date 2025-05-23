@@ -4,14 +4,19 @@ import fr.avenirsesr.portfolio.api.domain.model.Program;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramEntity;
 
 public interface ProgramMapper {
-  static ProgramEntity fromModelToEntity(String name, String description) {
-    return new ProgramEntity();
+  static ProgramEntity fromDomain(Program program) {
+    return new ProgramEntity(
+        program.getId(),
+        program.getName(),
+        program.isAPC(),
+        InstitutionMapper.fromDomain(program.getInstitution()));
   }
 
-  static Program fromEntityToModel(ProgramEntity programEntity) {
+  static Program toDomain(ProgramEntity programEntity) {
     return Program.toDomain(
         programEntity.getId(),
-        InstitutionMapper.fromEntityToModel(programEntity.getInstitution()),
-        programEntity.getName());
+        InstitutionMapper.toDomain(programEntity.getInstitution()),
+        programEntity.getName(),
+        programEntity.isAPC());
   }
 }

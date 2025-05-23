@@ -20,7 +20,13 @@ public class FakeProgram {
                 .formatted(
                     faker.university().prefix(),
                     faker.university().degree(),
-                    faker.number().numberBetween(1, 11))));
+                    faker.number().numberBetween(1, 11)),
+            true));
+  }
+
+  public FakeProgram isNotAPC() {
+    program.setAPC(false);
+    return this;
   }
 
   public Program toModel() {

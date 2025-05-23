@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.api.domain.model.Institution;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ENavigationField;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -21,7 +20,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "institution")
 @NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @Getter
 @Setter
 public class InstitutionEntity {
@@ -35,29 +34,24 @@ public class InstitutionEntity {
   @Setter(AccessLevel.NONE)
   private String enabledFieldsRaw;
 
-  public InstitutionEntity(UUID id, String name, Set<ENavigationField> enabledFields) {
+  public InstitutionEntity(UUID id, String name, Set<EPortfolioType> enabledFields) {
     this.id = id;
     this.name = name;
     setEnabledFields(enabledFields);
   }
 
   @Transient
-  public Set<ENavigationField> getEnabledFields() {
+  public Set<EPortfolioType> getEnabledFields() {
     if (enabledFieldsRaw == null || enabledFieldsRaw.isBlank()) {
       return new HashSet<>();
     }
     return Arrays.stream(enabledFieldsRaw.split(","))
         .map(String::trim)
-        .map(ENavigationField::valueOf)
+        .map(EPortfolioType::valueOf)
         .collect(Collectors.toSet());
   }
 
-  public void setEnabledFields(Set<ENavigationField> enabledFields) {
+  public void setEnabledFields(Set<EPortfolioType> enabledFields) {
     this.enabledFieldsRaw = enabledFields.stream().map(Enum::name).collect(Collectors.joining(","));
-  }
-
-  public static InstitutionEntity fromDomain(Institution institution) {
-    return new InstitutionEntity(
-        institution.getId(), institution.getName(), institution.getEnabledFields());
   }
 }

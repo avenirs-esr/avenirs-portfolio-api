@@ -1,9 +1,11 @@
 package fr.avenirsesr.portfolio.api.domain.port.output.repository;
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
+import fr.avenirsesr.portfolio.api.domain.model.Student;
 import java.util.List;
-import java.util.UUID;
 
 public interface ProgramProgressRepository extends GenericRepositoryPort<ProgramProgress> {
-  List<ProgramProgress> getSkillsOverview(UUID userId);
+  List<ProgramProgress> findAllByStudent(Student student);
+
+  List<ProgramProgress> findAllAPCByStudent(Student student);
 }

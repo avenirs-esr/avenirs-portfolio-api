@@ -5,15 +5,19 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.UserEntity;
 
 public interface TeacherMapper {
-  static TeacherEntity fromModelToEntity(TeacherEntity TeacherEntity) {
-    return new TeacherEntity();
+  static TeacherEntity fromDomain(Teacher teacher) {
+    return new TeacherEntity(
+        teacher.getBio(),
+        teacher.getUser().isTeacher(),
+        teacher.getProfilePicture(),
+        teacher.getCoverPicture());
   }
 
-  static Teacher fromEntityToModel(UserEntity teacherEntity) {
+  static Teacher toDomain(TeacherEntity teacherEntity, UserEntity userEntity) {
     return Teacher.toDomain(
-        UserMapper.fromEntityToModel(teacherEntity),
-        teacherEntity.getTeacher().getBio(),
-        teacherEntity.getTeacher().getProfilePicture(),
-        teacherEntity.getTeacher().getCoverPicture());
+        UserMapper.toDomain(userEntity),
+        teacherEntity.getBio(),
+        teacherEntity.getProfilePicture(),
+        teacherEntity.getCoverPicture());
   }
 }

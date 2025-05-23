@@ -4,14 +4,17 @@ import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSEntity;
 
 public interface AMSMapper {
-  static AMSEntity fromModelToEntity(AMS ams) {
-    return new AMSEntity();
+  static AMSEntity fromDomain(AMS ams) {
+    return new AMSEntity(
+        ams.getId(),
+        UserMapper.fromDomain(ams.getUser()),
+        ams.getSkillLevels().stream().map(SkillLevelMapper::fromDomain).toList());
   }
 
-  static AMS fromEntityToModel(AMSEntity amsEntity) {
+  static AMS toDomain(AMSEntity entity) {
     return AMS.toDomain(
-        amsEntity.getId(),
-        UserMapper.fromEntityToModel(amsEntity.getUser()),
-        amsEntity.getSkillLevels().stream().map(SkillLevelMapper::fromEntityToModel).toList());
+        entity.getId(),
+        UserMapper.toDomain(entity.getUser()),
+        entity.getSkillLevels().stream().map(SkillLevelMapper::toDomain).toList());
   }
 }

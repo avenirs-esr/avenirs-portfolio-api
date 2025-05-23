@@ -5,15 +5,19 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.UserEntity;
 
 public interface StudentMapper {
-  static StudentEntity fromModelToEntity(StudentEntity studentEntity) {
-    return new StudentEntity();
+  static StudentEntity fromDomain(Student student) {
+    return new StudentEntity(
+        student.getBio(),
+        student.getUser().isStudent(),
+        student.getProfilePicture(),
+        student.getCoverPicture());
   }
 
-  static Student fromEntityToModel(UserEntity studentEntity) {
+  static Student toDomain(StudentEntity studentEntity, UserEntity userEntity) {
     return Student.toDomain(
-        UserMapper.fromEntityToModel(studentEntity),
-        studentEntity.getStudent().getBio(),
-        studentEntity.getStudent().getProfilePicture(),
-        studentEntity.getStudent().getCoverPicture());
+        UserMapper.toDomain(userEntity),
+        studentEntity.getBio(),
+        studentEntity.getProfilePicture(),
+        studentEntity.getCoverPicture());
   }
 }

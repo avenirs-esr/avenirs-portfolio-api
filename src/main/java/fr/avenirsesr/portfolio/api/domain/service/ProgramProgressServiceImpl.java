@@ -52,5 +52,10 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   @Override
   public List<ProgramProgress> getSkillsOverview(UUID userId) {
     return cleanProgrammProgressList(programProgressRepository.getSkillsOverview(userId));
+    }
+  @Override
+  public boolean isStudentFollowingAPCProgram(Student student) {
+    var programProgress = programProgressRepository.findAllAPCByStudent(student);
+    return !programProgress.isEmpty();
   }
 }

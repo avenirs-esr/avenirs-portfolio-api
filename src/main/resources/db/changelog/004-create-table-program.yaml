@@ -20,6 +20,12 @@ databaseChangeLog:
                     nullable: false
 
               - column:
+                  name: is_apc
+                  type: BOOL
+                  constraints:
+                    nullable: false
+
+              - column:
                   name: institution_id
                   type: UUID
                   constraints:

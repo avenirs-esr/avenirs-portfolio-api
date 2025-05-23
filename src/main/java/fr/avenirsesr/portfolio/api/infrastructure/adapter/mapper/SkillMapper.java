@@ -5,16 +5,21 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillEntity;
 import java.util.stream.Collectors;
 
 public interface SkillMapper {
-  static SkillEntity fromModelToEntity(Skill skill) {
-    return new SkillEntity();
+  static SkillEntity fromDomain(Skill skill) {
+    return new SkillEntity(
+        skill.getId(),
+        skill.getName(),
+        skill.getSkillLevels().stream()
+            .map(SkillLevelMapper::fromDomain)
+            .collect(Collectors.toSet()));
   }
 
-  static Skill fromEntityToModel(SkillEntity skillEntity) {
+  static Skill toDomain(SkillEntity skillEntity) {
     return Skill.toDomain(
         skillEntity.getId(),
         skillEntity.getName(),
         skillEntity.getSkillLevels().stream()
-            .map(SkillLevelMapper::fromEntityToModel)
+            .map(SkillLevelMapper::toDomain)
             .collect(Collectors.toSet()));
   }
 }

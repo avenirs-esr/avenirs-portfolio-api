@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.api.domain.model.enums;
 
-public enum ENavigationField {
+public enum EPortfolioType {
   APC,
   LIFE_PROJECT;
 }

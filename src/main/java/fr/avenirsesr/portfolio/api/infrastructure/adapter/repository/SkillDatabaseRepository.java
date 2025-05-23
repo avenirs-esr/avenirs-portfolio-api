@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.SkillRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillEntity;
 import org.springframework.stereotype.Component;
 
@@ -9,6 +10,6 @@ import org.springframework.stereotype.Component;
 public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter<Skill, SkillEntity>
     implements SkillRepository {
   public SkillDatabaseRepository(SkillJpaRepository jpaRepository) {
-    super(jpaRepository, SkillEntity::fromDomain);
+    super(jpaRepository, jpaRepository, SkillMapper::fromDomain, SkillMapper::toDomain);
   }
 }
