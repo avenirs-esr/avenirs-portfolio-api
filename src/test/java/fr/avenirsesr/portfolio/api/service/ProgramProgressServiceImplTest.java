@@ -44,37 +44,30 @@ public class ProgramProgressServiceImplTest {
     var student = FakeUser.create().withStudent().toModel().toStudent();
     var institutionAPC =
         FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
-    var programAPC =
-        FakeProgram.of(institutionAPC).isNotAPC().toModel();
+    var programAPC = FakeProgram.of(institutionAPC).isNotAPC().toModel();
     var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
 
-    when(programProgressRepository.findAllAPCByStudent(student))
-        .thenReturn(List.of(progressAPC));
+    when(programProgressRepository.findAllAPCByStudent(student)).thenReturn(List.of(progressAPC));
 
     // When
-    boolean result =
-        programProgressService.isStudentFollowingAPCProgram(student);
+    boolean result = programProgressService.isStudentFollowingAPCProgram(student);
 
     // Then
     assertTrue(result);
-    verify(programProgressRepository)
-        .findAllAPCByStudent(student);
+    verify(programProgressRepository).findAllAPCByStudent(student);
   }
 
   @Test
   void shouldReturnFalseWhenStudentIsNotFollowingAnyProgramWithLearningMethod() {
     // Given
     var student = FakeUser.create().withStudent().toModel().toStudent();
-    when(programProgressRepository.findAllAPCByStudent(student))
-        .thenReturn(List.of());
+    when(programProgressRepository.findAllAPCByStudent(student)).thenReturn(List.of());
 
     // When
-    boolean result =
-        programProgressService.isStudentFollowingAPCProgram(student);
+    boolean result = programProgressService.isStudentFollowingAPCProgram(student);
 
     // Then
     assertFalse(result);
-    verify(programProgressRepository)
-        .findAllAPCByStudent(student);
+    verify(programProgressRepository).findAllAPCByStudent(student);
   }
 }

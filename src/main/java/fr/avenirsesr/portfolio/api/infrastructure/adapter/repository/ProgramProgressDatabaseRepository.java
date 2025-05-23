@@ -33,8 +33,7 @@ public class ProgramProgressDatabaseRepository
   }
 
   @Override
-  public List<ProgramProgress> findAllAPCByStudent(
-      Student student) {
+  public List<ProgramProgress> findAllAPCByStudent(Student student) {
     return jpaSpecificationExecutor
         .findAll(
             ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))

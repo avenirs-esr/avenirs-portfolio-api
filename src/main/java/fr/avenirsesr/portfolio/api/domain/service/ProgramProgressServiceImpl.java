@@ -16,8 +16,7 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
 
   @Override
   public boolean isStudentFollowingAPCProgram(Student student) {
-    var programProgress =
-        programProgressRepository.findAllAPCByStudent(student);
+    var programProgress = programProgressRepository.findAllAPCByStudent(student);
     return !programProgress.isEmpty();
   }
 }

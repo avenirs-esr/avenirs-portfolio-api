@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
-import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,13 +19,11 @@ public class Program {
     this.isAPC = isAPC;
   }
 
-  public static Program create(
-      Institution institution, String name, boolean isAPC) {
+  public static Program create(Institution institution, String name, boolean isAPC) {
     return new Program(UUID.randomUUID(), institution, name, isAPC);
   }
 
-  public static Program toDomain(
-      UUID id, Institution institution, String name, boolean isAPC) {
+  public static Program toDomain(UUID id, Institution institution, String name, boolean isAPC) {
     return new Program(id, institution, name, isAPC);
   }
 }

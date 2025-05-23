@@ -40,16 +40,12 @@ class InstitutionServiceImplTest {
     var student = FakeUser.create().withStudent().toModel().toStudent();
     var institutionAPC =
         FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
-    var programAPC =
-        FakeProgram.of(institutionAPC).isNotAPC().toModel();
+    var programAPC = FakeProgram.of(institutionAPC).isNotAPC().toModel();
     var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
 
     var institutionLifeProject =
         FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT)).toModel();
-    var programLifeProject =
-        FakeProgram.of(institutionLifeProject)
-            .isNotAPC()
-            .toModel();
+    var programLifeProject = FakeProgram.of(institutionLifeProject).isNotAPC().toModel();
     var progressLifeProject =
         FakeProgramProgress.of(programLifeProject, student, Set.of()).toModel();
 
@@ -70,8 +66,7 @@ class InstitutionServiceImplTest {
     var student = FakeUser.create().withStudent().toModel().toStudent();
     var institutionAPC =
         FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
-    var programAPC =
-        FakeProgram.of(institutionAPC).isNotAPC().toModel();
+    var programAPC = FakeProgram.of(institutionAPC).isNotAPC().toModel();
     var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
 
     var institution2 =

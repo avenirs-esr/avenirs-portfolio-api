@@ -1,10 +1,7 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;

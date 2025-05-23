@@ -43,8 +43,7 @@ public class NavigationAccessController {
     var isLifeProjectEnabledByInstitution =
         institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);
 
-    var isFollowingAPCProgram =
-        programProgressService.isStudentFollowingAPCProgram(student);
+    var isFollowingAPCProgram = programProgressService.isStudentFollowingAPCProgram(student);
 
     var navigationAccess =
         new NavigationAccessDTO(
