@@ -48,33 +48,33 @@ public class ProgramProgressServiceImplTest {
         FakeProgram.of(institutionAPC).isNotAPC().toModel();
     var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
 
-    when(programProgressRepository.findAllByStudentAndLearningMethod(student, EPortfolioType.APC))
+    when(programProgressRepository.findAllAPCByStudent(student))
         .thenReturn(List.of(progressAPC));
 
     // When
     boolean result =
-        programProgressService.isStudentFollowingAProgram(student, EPortfolioType.APC);
+        programProgressService.isStudentFollowingAPCProgram(student);
 
     // Then
     assertTrue(result);
     verify(programProgressRepository)
-        .findAllByStudentAndLearningMethod(student, EPortfolioType.APC);
+        .findAllAPCByStudent(student);
   }
 
   @Test
   void shouldReturnFalseWhenStudentIsNotFollowingAnyProgramWithLearningMethod() {
     // Given
     var student = FakeUser.create().withStudent().toModel().toStudent();
-    when(programProgressRepository.findAllByStudentAndLearningMethod(student, EPortfolioType.APC))
+    when(programProgressRepository.findAllAPCByStudent(student))
         .thenReturn(List.of());
 
     // When
     boolean result =
-        programProgressService.isStudentFollowingAProgram(student, EPortfolioType.APC);
+        programProgressService.isStudentFollowingAPCProgram(student);
 
     // Then
     assertFalse(result);
     verify(programProgressRepository)
-        .findAllByStudentAndLearningMethod(student, EPortfolioType.APC);
+        .findAllAPCByStudent(student);
   }
 }

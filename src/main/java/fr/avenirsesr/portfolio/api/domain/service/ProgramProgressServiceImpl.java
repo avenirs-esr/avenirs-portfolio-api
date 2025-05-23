@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.api.domain.service;
 
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import lombok.AllArgsConstructor;
@@ -16,9 +15,9 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   private final ProgramProgressRepository programProgressRepository;
 
   @Override
-  public boolean isStudentFollowingAProgram(Student student, EPortfolioType learningMethod) {
+  public boolean isStudentFollowingAPCProgram(Student student) {
     var programProgress =
-        programProgressRepository.findAllByStudentAndLearningMethod(student, learningMethod);
+        programProgressRepository.findAllAPCByStudent(student);
     return !programProgress.isEmpty();
   }
 }

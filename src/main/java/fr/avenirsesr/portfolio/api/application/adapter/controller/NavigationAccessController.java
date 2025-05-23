@@ -44,15 +44,12 @@ public class NavigationAccessController {
         institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);
 
     var isFollowingAPCProgram =
-        programProgressService.isStudentFollowingAProgram(student, EPortfolioType.APC);
-    var isFollowingLifeProjectProgram =
-        programProgressService.isStudentFollowingAProgram(student, EPortfolioType.LIFE_PROJECT);
+        programProgressService.isStudentFollowingAPCProgram(student);
 
     var navigationAccess =
         new NavigationAccessDTO(
-            new NavigationAccessDTO.AccessInfo(isAPCEnabledByInstitution, isFollowingAPCProgram),
-            new NavigationAccessDTO.AccessInfo(
-                isLifeProjectEnabledByInstitution, isFollowingLifeProjectProgram));
+            new NavigationAccessDTO.AccessInfoAPC(isAPCEnabledByInstitution, isFollowingAPCProgram),
+            new NavigationAccessDTO.AccessInfoLifeProject(isLifeProjectEnabledByInstitution));
 
     log.debug("Navigation access of student {} : {}", userId, navigationAccess);
     return ResponseEntity.ok(navigationAccess);
