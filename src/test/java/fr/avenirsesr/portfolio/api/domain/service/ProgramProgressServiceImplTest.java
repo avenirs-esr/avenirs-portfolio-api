@@ -8,9 +8,8 @@ import static org.mockito.Mockito.when;
 import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeInstitution;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.UUID;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeUser;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,24 +24,24 @@ public class ProgramProgressServiceImplTest {
 
   @InjectMocks private ProgramProgressServiceImpl programProgressService;
 
-  private UUID userId;
+  private Student student;
 
   @BeforeEach
   void setUp() {
-    userId = UUID.randomUUID();
+    student = FakeUser.create().toModel().toStudent();
   }
 
   @Test
   void shouldReturnEmptyListWhenRepositoryReturnsEmptyList() {
-    when(programProgressRepository.getSkillsOverview(userId)).thenReturn(List.of());
+    when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of());
 
-    List<ProgramProgress> result = programProgressService.getSkillsOverview(userId);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
 
     assertTrue(result.isEmpty());
   }
 
   @Test
-  void shouldReturnMax2ProgramsSortedByProgramName() {
+  void shouldReturn3ProgramsSortedByProgramName() {
     UUID programProgressId1 = UUID.randomUUID();
     UUID programProgressId2 = UUID.randomUUID();
     UUID programProgressId3 = UUID.randomUUID();
@@ -52,14 +51,16 @@ public class ProgramProgressServiceImplTest {
         createProgramProgress(programProgressId2, "Y", List.of("x", "y"));
     ProgramProgress programProgress3 = createProgramProgress(programProgressId3, "X", List.of("s"));
 
-    when(programProgressRepository.getSkillsOverview(any(UUID.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class)))
         .thenReturn(List.of(programProgress1, programProgress2, programProgress3));
 
-    List<ProgramProgress> result = programProgressService.getSkillsOverview(userId);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
 
-    assertEquals(2, result.size());
-    assertEquals(programProgressId3, result.get(0).getId());
-    assertEquals(programProgressId2, result.get(1).getId());
+    assertEquals(3, resultPrograms.size());
+    assertEquals(programProgressId3, resultPrograms.get(0).getId());
+    assertEquals(programProgressId2, resultPrograms.get(1).getId());
+    assertEquals(programProgressId1, resultPrograms.get(2).getId());
   }
 
   @Test
@@ -69,60 +70,66 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress programProgress2 =
         createProgramProgress(UUID.randomUUID(), "B", List.of("d", "e", "f", "g"));
 
-    when(programProgressRepository.getSkillsOverview(any(UUID.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class)))
         .thenReturn(List.of(programProgress1, programProgress2));
 
-    List<ProgramProgress> result = programProgressService.getSkillsOverview(userId);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.get(0)));
+    List<Skill> skills2 = new ArrayList<>(result.get(resultPrograms.get(1)));
 
-    assertEquals(3, result.get(0).getSkills().size());
-    assertEquals(3, result.get(1).getSkills().size());
+    assertEquals(3, skills1.size());
+    assertEquals(3, skills2.size());
 
-    assertEquals(List.of("a", "b", "c"), extractSkillNames(result.get(0)));
-    assertEquals(List.of("d", "e", "f"), extractSkillNames(result.get(1)));
+    assertEquals(List.of("a", "b", "c"), extractSkillNames(skills1));
+    assertEquals(List.of("d", "e", "f"), extractSkillNames(skills2));
   }
 
   @Test
-  void shouldLimitSkillsTo4WhenOneProgramHas2Skills() {
+  void shouldHaveATotalOf5SkillsWhenOneProgramHas2Skills() {
     ProgramProgress programProgress1 =
         createProgramProgress(UUID.randomUUID(), "A", List.of("b", "a"));
     ProgramProgress programProgress2 =
         createProgramProgress(UUID.randomUUID(), "B", List.of("d", "e", "f", "g"));
 
-    when(programProgressRepository.getSkillsOverview(any(UUID.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class)))
         .thenReturn(List.of(programProgress1, programProgress2));
 
-    List<ProgramProgress> result = programProgressService.getSkillsOverview(userId);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.get(0)));
+    List<Skill> skills2 = new ArrayList<>(result.get(resultPrograms.get(1)));
 
-    assertEquals(2, result.get(0).getSkills().size());
-    assertEquals(4, result.get(1).getSkills().size());
-    assertEquals(List.of("a", "b"), extractSkillNames(result.get(0)));
-    assertEquals(List.of("d", "e", "f", "g"), extractSkillNames(result.get(1)));
+    assertEquals(2, skills1.size());
+    assertEquals(3, skills2.size());
+    assertEquals(List.of("a", "b"), extractSkillNames(skills1));
+    assertEquals(List.of("d", "e", "f"), extractSkillNames(skills2));
   }
 
   @Test
-  void shouldLimitSkillsTo5WhenOneProgramHas1Skill() {
+  void shouldHaveATotalOf4SkillsWhenOneProgramHas1Skill() {
     ProgramProgress programProgress1 = createProgramProgress(UUID.randomUUID(), "A", List.of("b"));
     ProgramProgress programProgress2 =
         createProgramProgress(UUID.randomUUID(), "B", List.of("d", "e", "f", "g", "h"));
 
-    when(programProgressRepository.getSkillsOverview(any(UUID.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class)))
         .thenReturn(List.of(programProgress1, programProgress2));
 
-    List<ProgramProgress> result = programProgressService.getSkillsOverview(userId);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.get(0)));
+    List<Skill> skills2 = new ArrayList<>(result.get(resultPrograms.get(1)));
 
-    assertEquals(1, result.get(0).getSkills().size());
-    assertEquals(5, result.get(1).getSkills().size());
-    assertEquals(List.of("b"), extractSkillNames(result.get(0)));
-    assertEquals(List.of("d", "e", "f", "g", "h"), extractSkillNames(result.get(1)));
+    assertEquals(1, skills1.size());
+    assertEquals(3, skills2.size());
+    assertEquals(List.of("b"), extractSkillNames(skills1));
+    assertEquals(List.of("d", "e", "f"), extractSkillNames(skills2));
   }
 
   private ProgramProgress createProgramProgress(
       UUID id, String programName, List<String> skillNames) {
     Institution institution = FakeInstitution.create().toModel();
-    Program program = Program.create(institution, programName);
-
-    User user = User.create("John", "Doe");
-    Student student = Student.create(user);
+    Program program = Program.create(institution, programName, true);
 
     LinkedHashSet<Skill> skills =
         skillNames.stream()
@@ -132,7 +139,7 @@ public class ProgramProgressServiceImplTest {
     return ProgramProgress.toDomain(id, program, student, skills);
   }
 
-  private List<String> extractSkillNames(ProgramProgress progress) {
-    return progress.getSkills().stream().map(Skill::getName).collect(Collectors.toList());
+  private List<String> extractSkillNames(List<Skill> skills) {
+    return skills.stream().map(Skill::getName).collect(Collectors.toList());
   }
 }

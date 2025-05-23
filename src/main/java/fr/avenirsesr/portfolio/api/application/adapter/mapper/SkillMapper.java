@@ -5,14 +5,11 @@ import fr.avenirsesr.portfolio.api.domain.model.Skill;
 
 public interface SkillMapper {
   static SkillDTO fromDomainToDto(Skill skill) {
-    return SkillDTO.builder()
-        .id(skill.getId())
-        .name(skill.getName())
-        .trackCount(
-            skill.getSkillLevels().stream().mapToInt(level -> level.getTracks().size()).sum())
-        .activityCount(
-            skill.getSkillLevels().stream().mapToInt(level -> level.getAmses().size()).sum())
-        .levels(skill.getSkillLevels().stream().map(SkillLevelMapper::fromDomainToDto).toList())
-        .build();
+    return new SkillDTO(
+        skill.getId(),
+        skill.getName(),
+        skill.getSkillLevels().stream().mapToInt(level -> level.getTracks().size()).sum(),
+        skill.getSkillLevels().stream().mapToInt(level -> level.getAmses().size()).sum(),
+        skill.getSkillLevels().stream().map(SkillLevelMapper::fromDomainToDto).toList());
   }
 }
