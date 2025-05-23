@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,9 +24,9 @@ public class NavigationAccessController {
   private final ProgramProgressService programProgressService;
 
   @GetMapping
-  public ResponseEntity<NavigationAccessDTO> getStudentNavigationAccess() {
-    var userId =
-        UUID.fromString("65759703-5732-47bb-9a77-2b9f2c359489"); // @Todo: fetch userLoggedIn
+  public ResponseEntity<NavigationAccessDTO> getStudentNavigationAccess(
+      @RequestHeader("X-Signed-Context") String userIdRaw) {
+    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn
 
     log.info("Received request to get navigation access of student [{}]", userId);
 
