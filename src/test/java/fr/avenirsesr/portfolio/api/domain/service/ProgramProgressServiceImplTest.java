@@ -5,7 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import fr.avenirsesr.portfolio.api.domain.model.*;
+import fr.avenirsesr.portfolio.api.domain.model.Institution;
+import fr.avenirsesr.portfolio.api.domain.model.Program;
+import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
+import fr.avenirsesr.portfolio.api.domain.model.Skill;
+import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeInstitution;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeUser;
