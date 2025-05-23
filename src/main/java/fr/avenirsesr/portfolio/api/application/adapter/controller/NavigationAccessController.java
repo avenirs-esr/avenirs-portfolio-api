@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/me/navigation-access")
+@RequestMapping("/me/navigation-access")
 public class NavigationAccessController {
   private final UserRepository userRepository;
   private final InstitutionService institutionService;
