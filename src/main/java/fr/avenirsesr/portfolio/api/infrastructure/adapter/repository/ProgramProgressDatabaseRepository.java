@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELearningMethod;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.UserMapper;
@@ -35,7 +35,7 @@ public class ProgramProgressDatabaseRepository
 
   @Override
   public List<ProgramProgress> findAllByStudentAndLearningMethod(
-      Student student, ELearningMethod learningMethod) {
+      Student student, EPortfolioType learningMethod) {
     return jpaSpecificationExecutor
         .findAll(
             ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))

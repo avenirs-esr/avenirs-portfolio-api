@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.api.application.adapter.dto.NavigationAccessDTO;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELearningMethod;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
@@ -39,14 +39,14 @@ public class NavigationAccessController {
     var student = user.toStudent();
 
     var isAPCEnabledByInstitution =
-        institutionService.isNavigationEnabledFor(student, ELearningMethod.APC);
+        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
     var isLifeProjectEnabledByInstitution =
-        institutionService.isNavigationEnabledFor(student, ELearningMethod.LIFE_PROJECT);
+        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);
 
     var isFollowingAPCProgram =
-        programProgressService.isStudentFollowingAProgram(student, ELearningMethod.APC);
+        programProgressService.isStudentFollowingAProgram(student, EPortfolioType.APC);
     var isFollowingLifeProjectProgram =
-        programProgressService.isStudentFollowingAProgram(student, ELearningMethod.LIFE_PROJECT);
+        programProgressService.isStudentFollowingAProgram(student, EPortfolioType.LIFE_PROJECT);
 
     var navigationAccess =
         new NavigationAccessDTO(

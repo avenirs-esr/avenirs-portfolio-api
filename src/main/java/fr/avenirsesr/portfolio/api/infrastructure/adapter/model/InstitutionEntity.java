@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELearningMethod;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -34,24 +34,24 @@ public class InstitutionEntity {
   @Setter(AccessLevel.NONE)
   private String enabledFieldsRaw;
 
-  public InstitutionEntity(UUID id, String name, Set<ELearningMethod> enabledFields) {
+  public InstitutionEntity(UUID id, String name, Set<EPortfolioType> enabledFields) {
     this.id = id;
     this.name = name;
     setEnabledFields(enabledFields);
   }
 
   @Transient
-  public Set<ELearningMethod> getEnabledFields() {
+  public Set<EPortfolioType> getEnabledFields() {
     if (enabledFieldsRaw == null || enabledFieldsRaw.isBlank()) {
       return new HashSet<>();
     }
     return Arrays.stream(enabledFieldsRaw.split(","))
         .map(String::trim)
-        .map(ELearningMethod::valueOf)
+        .map(EPortfolioType::valueOf)
         .collect(Collectors.toSet());
   }
 
-  public void setEnabledFields(Set<ELearningMethod> enabledFields) {
+  public void setEnabledFields(Set<EPortfolioType> enabledFields) {
     this.enabledFieldsRaw = enabledFields.stream().map(Enum::name).collect(Collectors.joining(","));
   }
 }

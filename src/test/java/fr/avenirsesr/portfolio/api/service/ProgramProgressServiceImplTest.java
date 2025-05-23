@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELearningMethod;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.domain.service.ProgramProgressServiceImpl;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeInstitution;
@@ -43,38 +43,38 @@ public class ProgramProgressServiceImplTest {
     // Given
     var student = FakeUser.create().withStudent().toModel().toStudent();
     var institutionAPC =
-        FakeInstitution.create().withEnabledFiled(Set.of(ELearningMethod.APC)).toModel();
+        FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
     var programAPC =
-        FakeProgram.of(institutionAPC).withLearningMethod(ELearningMethod.APC).toModel();
+        FakeProgram.of(institutionAPC).withLearningMethod(EPortfolioType.APC).toModel();
     var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
 
-    when(programProgressRepository.findAllByStudentAndLearningMethod(student, ELearningMethod.APC))
+    when(programProgressRepository.findAllByStudentAndLearningMethod(student, EPortfolioType.APC))
         .thenReturn(List.of(progressAPC));
 
     // When
     boolean result =
-        programProgressService.isStudentFollowingAProgram(student, ELearningMethod.APC);
+        programProgressService.isStudentFollowingAProgram(student, EPortfolioType.APC);
 
     // Then
     assertTrue(result);
     verify(programProgressRepository)
-        .findAllByStudentAndLearningMethod(student, ELearningMethod.APC);
+        .findAllByStudentAndLearningMethod(student, EPortfolioType.APC);
   }
 
   @Test
   void shouldReturnFalseWhenStudentIsNotFollowingAnyProgramWithLearningMethod() {
     // Given
     var student = FakeUser.create().withStudent().toModel().toStudent();
-    when(programProgressRepository.findAllByStudentAndLearningMethod(student, ELearningMethod.APC))
+    when(programProgressRepository.findAllByStudentAndLearningMethod(student, EPortfolioType.APC))
         .thenReturn(List.of());
 
     // When
     boolean result =
-        programProgressService.isStudentFollowingAProgram(student, ELearningMethod.APC);
+        programProgressService.isStudentFollowingAProgram(student, EPortfolioType.APC);
 
     // Then
     assertFalse(result);
     verify(programProgressRepository)
-        .findAllByStudentAndLearningMethod(student, ELearningMethod.APC);
+        .findAllByStudentAndLearningMethod(student, EPortfolioType.APC);
   }
 }

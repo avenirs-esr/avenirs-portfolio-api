@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.specification;
 
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELearningMethod;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramProgressEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.criteria.Join;
@@ -12,7 +12,7 @@ public class ProgramProgressSpecification {
   }
 
   public static Specification<ProgramProgressEntity> hasLearningMethod(
-      ELearningMethod learningMethod) {
+      EPortfolioType learningMethod) {
     return (root, query, cb) -> {
       Join<Object, Object> programJoin = root.join("program");
       return cb.equal(programJoin.get("learningMethod"), learningMethod);

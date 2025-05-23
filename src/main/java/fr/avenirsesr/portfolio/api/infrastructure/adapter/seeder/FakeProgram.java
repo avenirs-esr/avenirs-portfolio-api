@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.model.Program;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELearningMethod;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import net.datafaker.Faker;
 
 public class FakeProgram {
@@ -22,10 +22,10 @@ public class FakeProgram {
                     faker.university().prefix(),
                     faker.university().degree(),
                     faker.number().numberBetween(1, 11)),
-            ELearningMethod.APC));
+            EPortfolioType.APC));
   }
 
-  public FakeProgram withLearningMethod(ELearningMethod learningMethod) {
+  public FakeProgram withLearningMethod(EPortfolioType learningMethod) {
     program.setLearningMethod(learningMethod);
     return this;
   }

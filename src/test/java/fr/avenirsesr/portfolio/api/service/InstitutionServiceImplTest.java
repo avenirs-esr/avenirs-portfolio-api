@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.api.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELearningMethod;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.domain.service.InstitutionServiceImpl;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeInstitution;
@@ -39,16 +39,16 @@ class InstitutionServiceImplTest {
     // Given
     var student = FakeUser.create().withStudent().toModel().toStudent();
     var institutionAPC =
-        FakeInstitution.create().withEnabledFiled(Set.of(ELearningMethod.APC)).toModel();
+        FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
     var programAPC =
-        FakeProgram.of(institutionAPC).withLearningMethod(ELearningMethod.APC).toModel();
+        FakeProgram.of(institutionAPC).withLearningMethod(EPortfolioType.APC).toModel();
     var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
 
     var institutionLifeProject =
-        FakeInstitution.create().withEnabledFiled(Set.of(ELearningMethod.LIFE_PROJECT)).toModel();
+        FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT)).toModel();
     var programLifeProject =
         FakeProgram.of(institutionLifeProject)
-            .withLearningMethod(ELearningMethod.LIFE_PROJECT)
+            .withLearningMethod(EPortfolioType.LIFE_PROJECT)
             .toModel();
     var progressLifeProject =
         FakeProgramProgress.of(programLifeProject, student, Set.of()).toModel();
@@ -57,7 +57,7 @@ class InstitutionServiceImplTest {
         .thenReturn(List.of(progressAPC, progressLifeProject));
 
     // When
-    boolean result = institutionService.isNavigationEnabledFor(student, ELearningMethod.APC);
+    boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
 
     // Then
     assertTrue(result);
@@ -69,14 +69,14 @@ class InstitutionServiceImplTest {
     // Given
     var student = FakeUser.create().withStudent().toModel().toStudent();
     var institutionAPC =
-        FakeInstitution.create().withEnabledFiled(Set.of(ELearningMethod.APC)).toModel();
+        FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
     var programAPC =
-        FakeProgram.of(institutionAPC).withLearningMethod(ELearningMethod.APC).toModel();
+        FakeProgram.of(institutionAPC).withLearningMethod(EPortfolioType.APC).toModel();
     var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
 
     var institution2 =
-        FakeInstitution.create().withEnabledFiled(Set.of(ELearningMethod.APC)).toModel();
-    var program2 = FakeProgram.of(institution2).withLearningMethod(ELearningMethod.APC).toModel();
+        FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
+    var program2 = FakeProgram.of(institution2).withLearningMethod(EPortfolioType.APC).toModel();
     var progress2 = FakeProgramProgress.of(program2, student, Set.of()).toModel();
 
     when(programProgressRepository.findAllByStudent(student))
@@ -84,7 +84,7 @@ class InstitutionServiceImplTest {
 
     // When
     boolean result =
-        institutionService.isNavigationEnabledFor(student, ELearningMethod.LIFE_PROJECT);
+        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);
 
     // Then
     assertFalse(result);
@@ -98,7 +98,7 @@ class InstitutionServiceImplTest {
     when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of());
 
     // When
-    boolean result = institutionService.isNavigationEnabledFor(student, ELearningMethod.APC);
+    boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
 
     // Then
     assertFalse(result);
