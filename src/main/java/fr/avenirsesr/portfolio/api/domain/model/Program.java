@@ -11,22 +11,22 @@ public class Program {
   private final UUID id;
   private final Institution institution;
   private final String name;
-  private EPortfolioType learningMethod;
+  private boolean isAPC;
 
-  private Program(UUID id, Institution institution, String name, EPortfolioType learningMethod) {
+  private Program(UUID id, Institution institution, String name, boolean isAPC) {
     this.id = id;
     this.institution = institution;
     this.name = name;
-    this.learningMethod = learningMethod;
+    this.isAPC = isAPC;
   }
 
   public static Program create(
-      Institution institution, String name, EPortfolioType learningMethod) {
-    return new Program(UUID.randomUUID(), institution, name, learningMethod);
+      Institution institution, String name, boolean isAPC) {
+    return new Program(UUID.randomUUID(), institution, name, isAPC);
   }
 
   public static Program toDomain(
-      UUID id, Institution institution, String name, EPortfolioType learningMethod) {
-    return new Program(id, institution, name, learningMethod);
+      UUID id, Institution institution, String name, boolean isAPC) {
+    return new Program(id, institution, name, isAPC);
   }
 }

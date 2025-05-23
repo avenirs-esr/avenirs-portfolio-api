@@ -27,8 +27,7 @@ public class ProgramEntity {
   private String name;
 
   @Column(nullable = false)
-  @Enumerated(EnumType.STRING)
-  private EPortfolioType learningMethod;
+  private boolean isAPC;
 
   @ManyToOne(optional = false)
   private InstitutionEntity institution;

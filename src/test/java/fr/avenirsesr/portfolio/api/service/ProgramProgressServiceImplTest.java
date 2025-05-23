@@ -45,7 +45,7 @@ public class ProgramProgressServiceImplTest {
     var institutionAPC =
         FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
     var programAPC =
-        FakeProgram.of(institutionAPC).withLearningMethod(EPortfolioType.APC).toModel();
+        FakeProgram.of(institutionAPC).isNotAPC().toModel();
     var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
 
     when(programProgressRepository.findAllByStudentAndLearningMethod(student, EPortfolioType.APC))

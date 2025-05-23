@@ -20,8 +20,8 @@ databaseChangeLog:
                     nullable: false
 
               - column:
-                  name: learning_method
-                  type: VARCHAR(255)
+                  name: is_apc
+                  type: BOOL
                   constraints:
                     nullable: false
 

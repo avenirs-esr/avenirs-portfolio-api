@@ -8,7 +8,7 @@ public interface ProgramMapper {
     return new ProgramEntity(
         program.getId(),
         program.getName(),
-        program.getLearningMethod(),
+        program.isAPC(),
         InstitutionMapper.fromDomain(program.getInstitution()));
   }
 
@@ -17,6 +17,6 @@ public interface ProgramMapper {
         programEntity.getId(),
         InstitutionMapper.toDomain(programEntity.getInstitution()),
         programEntity.getName(),
-        programEntity.getLearningMethod());
+        programEntity.isAPC());
   }
 }
