@@ -15,11 +15,12 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Service
 public class ProgramProgressServiceImpl implements ProgramProgressService {
+  private static final int MAX_SKILLS = 6;
   private final ProgramProgressRepository programProgressRepository;
 
-  private static Map<ProgramProgress, Set<Skill>> cleanProgrammProgressList(
+  private static Map<ProgramProgress, Set<Skill>> cleanProgramProgressList(
       List<ProgramProgress> programProgressList) {
-    int skillLimit = programProgressList.size() > 1 ? 3 : 6;
+    int skillLimit = !programProgressList.isEmpty() ? MAX_SKILLS / programProgressList.size() : 0;
 
     return programProgressList.stream()
         .sorted(Comparator.comparing(p -> p.getProgram().getName()))
@@ -37,7 +38,7 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
 
   @Override
   public Map<ProgramProgress, Set<Skill>> getSkillsOverview(Student student) {
-    return cleanProgrammProgressList(programProgressRepository.findAllByStudent(student));
+    return cleanProgramProgressList(programProgressRepository.findAllByStudent(student));
   }
 
   @Override
