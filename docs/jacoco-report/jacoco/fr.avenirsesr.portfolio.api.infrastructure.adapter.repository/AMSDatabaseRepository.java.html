@@ -2,6 +2,7 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.AMSRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSEntity;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +11,7 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter&lt;AMS, A
     implements AMSRepository {
 
   public AMSDatabaseRepository(AMSJpaRepository repository) {
-<span class="fc" id="L13">    super(repository, AMSEntity::fromDomain);</span>
-<span class="fc" id="L14">  }</span>
+<span class="fc" id="L14">    super(repository, repository, AMSMapper::fromDomain, AMSMapper::toDomain);</span>
+<span class="fc" id="L15">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

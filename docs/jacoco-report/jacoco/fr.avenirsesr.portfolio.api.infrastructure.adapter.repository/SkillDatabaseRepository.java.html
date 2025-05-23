@@ -2,6 +2,7 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.SkillRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillEntity;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Skill, SkillEntity&gt;
     implements SkillRepository {
   public SkillDatabaseRepository(SkillJpaRepository jpaRepository) {
-<span class="fc" id="L12">    super(jpaRepository, SkillEntity::fromDomain);</span>
-<span class="fc" id="L13">  }</span>
+<span class="fc" id="L13">    super(jpaRepository, jpaRepository, SkillMapper::fromDomain, SkillMapper::toDomain);</span>
+<span class="fc" id="L14">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

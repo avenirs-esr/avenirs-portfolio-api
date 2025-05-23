@@ -4,15 +4,20 @@ import fr.avenirsesr.portfolio.api.domain.model.Program;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramEntity;
 
 public interface ProgramMapper {
-  static ProgramEntity fromModelToEntity(String name, String description) {
-<span class="nc" id="L8">    return new ProgramEntity();</span>
+  static ProgramEntity fromDomain(Program program) {
+<span class="nc" id="L8">    return new ProgramEntity(</span>
+<span class="nc" id="L9">        program.getId(),</span>
+<span class="nc" id="L10">        program.getName(),</span>
+<span class="nc" id="L11">        program.isAPC(),</span>
+<span class="nc" id="L12">        InstitutionMapper.fromDomain(program.getInstitution()));</span>
   }
 
-  static Program fromEntityToModel(ProgramEntity programEntity) {
-<span class="nc" id="L12">    return Program.toDomain(</span>
-<span class="nc" id="L13">        programEntity.getId(),</span>
-<span class="nc" id="L14">        InstitutionMapper.fromEntityToModel(programEntity.getInstitution()),</span>
-<span class="nc" id="L15">        programEntity.getName());</span>
+  static Program toDomain(ProgramEntity programEntity) {
+<span class="nc" id="L16">    return Program.toDomain(</span>
+<span class="nc" id="L17">        programEntity.getId(),</span>
+<span class="nc" id="L18">        InstitutionMapper.toDomain(programEntity.getInstitution()),</span>
+<span class="nc" id="L19">        programEntity.getName(),</span>
+<span class="nc" id="L20">        programEntity.isAPC());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -2,25 +2,29 @@
 
 import java.util.UUID;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class Program {
   private final UUID id;
   private final Institution institution;
   private final String name;
+  private boolean isAPC;
 
-<span class="fc" id="L12">  private Program(UUID id, Institution institution, String name) {</span>
-<span class="fc" id="L13">    this.id = id;</span>
-<span class="fc" id="L14">    this.institution = institution;</span>
-<span class="fc" id="L15">    this.name = name;</span>
-<span class="fc" id="L16">  }</span>
+<span class="fc" id="L15">  private Program(UUID id, Institution institution, String name, boolean isAPC) {</span>
+<span class="fc" id="L16">    this.id = id;</span>
+<span class="fc" id="L17">    this.institution = institution;</span>
+<span class="fc" id="L18">    this.name = name;</span>
+<span class="fc" id="L19">    this.isAPC = isAPC;</span>
+<span class="fc" id="L20">  }</span>
 
-  public static Program create(Institution institution, String name) {
-<span class="fc" id="L19">    return new Program(UUID.randomUUID(), institution, name);</span>
+  public static Program create(Institution institution, String name, boolean isAPC) {
+<span class="fc" id="L23">    return new Program(UUID.randomUUID(), institution, name, isAPC);</span>
   }
 
-  public static Program toDomain(UUID id, Institution institution, String name) {
-<span class="nc" id="L23">    return new Program(id, institution, name);</span>
+  public static Program toDomain(UUID id, Institution institution, String name, boolean isAPC) {
+<span class="nc" id="L27">    return new Program(id, institution, name, isAPC);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
