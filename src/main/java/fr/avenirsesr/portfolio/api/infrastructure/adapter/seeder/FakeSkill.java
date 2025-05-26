@@ -14,7 +14,13 @@ public class FakeSkill {
   }
 
   public static FakeSkill of(Set<SkillLevel> skillLevels) {
-    return new FakeSkill(Skill.create("Skill %s".formatted(faker.lorem().word()), skillLevels));
+    var skill = Skill.create("Skill %s".formatted(faker.lorem().word()), Set.of());
+    skillLevels.forEach(
+        level -> {
+          level.setSkill(skill);
+        });
+    skill.setSkillLevels(skillLevels);
+    return new FakeSkill(skill);
   }
 
   public Skill toModel() {

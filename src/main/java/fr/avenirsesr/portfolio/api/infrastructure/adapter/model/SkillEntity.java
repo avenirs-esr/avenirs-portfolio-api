@@ -1,12 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -26,10 +20,15 @@ public class SkillEntity {
   @Column(nullable = false)
   private String name;
 
-  @OneToMany
-  @JoinTable(
-      name = "skill_skill_levels",
-      joinColumns = @JoinColumn(name = "skill_id"),
-      inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
+  @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<SkillLevelEntity> skillLevels;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "program_progress_id")
+  private ProgramProgressEntity programProgress;
+
+  @Override
+  public String toString() {
+    return "SkillEntity[%s]".formatted(id);
+  }
 }

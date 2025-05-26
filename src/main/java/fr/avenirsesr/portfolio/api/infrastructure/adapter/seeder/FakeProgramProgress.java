@@ -14,7 +14,10 @@ public class FakeProgramProgress {
   }
 
   public static FakeProgramProgress of(Program program, Student student, Set<Skill> skills) {
-    return new FakeProgramProgress(ProgramProgress.create(program, student, skills));
+    var programProgress = ProgramProgress.create(program, student, Set.of());
+    skills.forEach(skill -> skill.setProgramProgress(programProgress));
+    programProgress.setSkills(skills);
+    return new FakeProgramProgress(programProgress);
   }
 
   public ProgramProgress toModel() {

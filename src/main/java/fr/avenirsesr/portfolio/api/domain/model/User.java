@@ -15,13 +15,29 @@ public class User {
   private boolean isTeacher;
 
   // -- Student --
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.PRIVATE)
   private String studentBio;
+
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.PRIVATE)
   private String studentProfilePicture;
+
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.PRIVATE)
   private String studentCoverPicture;
 
   // -- Teacher --
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.PRIVATE)
   private String teacherBio;
+
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.PRIVATE)
   private String teacherProfilePicture;
+
+  @Getter(AccessLevel.NONE)
+  @Setter(AccessLevel.PRIVATE)
   private String teacherCoverPicture;
 
   private User(UUID id) {
