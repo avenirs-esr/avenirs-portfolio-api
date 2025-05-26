@@ -68,6 +68,12 @@
 			<artifactId>datafaker</artifactId>
 			<version>2.4.3</version>
 		</dependency>
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy-agent</artifactId>
+			<version>1.15.11</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -102,6 +108,8 @@
 				<version>0.8.12</version>
 				<executions>
 					<execution>
+						<id>default-prepare-agent</id>
+						<phase>initialize</phase>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
@@ -114,6 +122,9 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>com.diffplug.spotless</groupId>
@@ -140,10 +151,25 @@
 				<version>3.1.2</version>
 				<configuration>
 					<argLine>
-						-javaagent:"${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar"
+						${argLine} -javaagent:"${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar"
 					</argLine>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.6.3</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<phase>test</phase>
+						<goals>
+							<goal>javadoc</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 
