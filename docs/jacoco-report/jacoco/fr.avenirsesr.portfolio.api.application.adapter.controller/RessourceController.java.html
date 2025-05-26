@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RessourceController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.application.adapter.controller</a> &gt; <span class="el_source">RessourceController.java</span></div><h1>RessourceController.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.application.adapter.controller;
+
+import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.api.domain.port.input.RessourceService;
+import fr.avenirsesr.portfolio.api.domain.utils.RessourceUtils;
+import fr.avenirsesr.portfolio.api.domain.utils.UserUtils;
+import java.io.IOException;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping
+public class RessourceController {
+
+  private final RessourceService ressourceService;
+
+<span class="fc" id="L22">  public RessourceController(RessourceService ressourceService) {</span>
+<span class="fc" id="L23">    this.ressourceService = ressourceService;</span>
+<span class="fc" id="L24">  }</span>
+
+  @GetMapping(&quot;/photo/{profile}/{fileName}&quot;)
+  public ResponseEntity&lt;ByteArrayResource&gt; getPhoto(
+      @PathVariable String profile, @PathVariable String fileName) throws IOException {
+<span class="nc" id="L29">    EUserCategory userCategory = UserUtils.getUserCategory(profile);</span>
+<span class="nc" id="L30">    byte[] photo = ressourceService.getPhoto(userCategory, fileName);</span>
+<span class="nc" id="L31">    ByteArrayResource resource = new ByteArrayResource(photo);</span>
+
+<span class="nc" id="L33">    return ResponseEntity.ok()</span>
+<span class="nc" id="L34">        .contentType(RessourceUtils.getImageExtensionMediaType(fileName))</span>
+<span class="nc" id="L35">        .body(resource);</span>
+  }
+
+  @GetMapping(&quot;/cover/{profile}/{fileName}&quot;)
+  public ResponseEntity&lt;ByteArrayResource&gt; getCover(
+      @PathVariable String profile, @PathVariable String fileName) throws IOException {
+<span class="nc" id="L41">    EUserCategory userCategory = UserUtils.getUserCategory(profile);</span>
+<span class="nc" id="L42">    byte[] photo = ressourceService.getCover(userCategory, fileName);</span>
+<span class="nc" id="L43">    ByteArrayResource resource = new ByteArrayResource(photo);</span>
+
+<span class="nc" id="L45">    return ResponseEntity.ok().contentType(getMediaType(fileName)).body(resource);</span>
+  }
+
+  private MediaType getMediaType(String fileName) {
+<span class="nc" id="L49">    String extension = &quot;&quot;;</span>
+<span class="nc" id="L50">    int index = fileName.lastIndexOf('.');</span>
+
+<span class="nc bnc" id="L52" title="All 4 branches missed.">    if (index &gt; 0 &amp;&amp; index &lt; fileName.length() - 1) {</span>
+<span class="nc" id="L53">      extension = fileName.substring(index + 1);</span>
+    }
+
+<span class="nc bnc" id="L56" title="All 2 branches missed.">    if (extension.equalsIgnoreCase(&quot;png&quot;)) {</span>
+<span class="nc" id="L57">      return MediaType.IMAGE_PNG;</span>
+    }
+
+<span class="nc" id="L60">    return MediaType.IMAGE_JPEG;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RestExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.application.adapter.exception</a> &gt; <span class="el_source">RestExceptionHandler.java</span></div><h1>RestExceptionHandler.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.application.adapter.exception;
+
+import fr.avenirsesr.portfolio.api.application.adapter.response.ErrorResponse;
+import fr.avenirsesr.portfolio.api.domain.exception.BadImageSizeException;
+import fr.avenirsesr.portfolio.api.domain.exception.BadImageTypeException;
+import fr.avenirsesr.portfolio.api.domain.exception.BusinessException;
+import fr.avenirsesr.portfolio.api.domain.exception.UserCategoryNotRecognizedException;
+import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+<span class="fc" id="L15">@Slf4j</span>
+@RestControllerAdvice
+<span class="fc" id="L17">public class RestExceptionHandler {</span>
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity&lt;ErrorResponse&gt; handleGenericException(Exception ex) {
+<span class="nc" id="L21">    log.error(&quot;Erreur technique inattendue&quot;, ex);</span>
+
+<span class="nc" id="L23">    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L24">        .body(new ErrorResponse(&quot;INTERNAL_ERROR&quot;, &quot;Une erreur technique est survenue.&quot;));</span>
+  }
+
+  @ExceptionHandler(BusinessException.class)
+  public ResponseEntity&lt;ErrorResponse&gt; handleBusinessException(BusinessException ex) {
+<span class="nc" id="L29">    log.error(&quot;Erreur métier inattendue&quot;, ex);</span>
+
+<span class="nc" id="L31">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L32">        .body(new ErrorResponse(&quot;BUSINESS_ERROR&quot;, &quot;Une erreur métier est survenue.&quot;));</span>
+  }
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity&lt;ErrorResponse&gt; handleUserNotFound(UserNotFoundException ex) {
+<span class="nc" id="L37">    return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L38">        .body(new ErrorResponse(&quot;NOT_FOUND&quot;, &quot;Utilisateur non trouvé.&quot;));</span>
+  }
+
+  @ExceptionHandler(BadImageTypeException.class)
+  public ResponseEntity&lt;ErrorResponse&gt; handleUserNotFound(BadImageTypeException ex) {
+<span class="nc" id="L43">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L44">        .body(new ErrorResponse(&quot;IMAGE_TYPE_ERROR&quot;, &quot;Format d'image non accepté.&quot;));</span>
+  }
+
+  @ExceptionHandler(BadImageSizeException.class)
+  public ResponseEntity&lt;ErrorResponse&gt; handleUserNotFound(BadImageSizeException ex) {
+<span class="nc" id="L49">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L50">        .body(new ErrorResponse(&quot;IMAGE_SIZE_ERROR&quot;, &quot;La taille limite d'image a été atteinte.&quot;));</span>
+  }
+
+  @ExceptionHandler(UserCategoryNotRecognizedException.class)
+  public ResponseEntity&lt;ErrorResponse&gt; handleUserCategoryNotRecognized(
+      UserCategoryNotRecognizedException ex) {
+<span class="nc" id="L56">    return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L57">        .body(new ErrorResponse(&quot;NOT_RECOGNIZED&quot;, &quot;Catégorie de l'utilisateur non reconnue.&quot;));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
