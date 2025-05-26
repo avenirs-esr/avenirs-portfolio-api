@@ -4,14 +4,14 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.input.RessourceService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.RessourceRepository;
 import java.io.IOException;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@AllArgsConstructor
+@Service
 public class RessourceServiceImpl implements RessourceService {
 
   private final RessourceRepository ressourceRepository;
-
-<span class="fc" id="L12">  public RessourceServiceImpl(RessourceRepository ressourceRepository) {</span>
-<span class="fc" id="L13">    this.ressourceRepository = ressourceRepository;</span>
-<span class="fc" id="L14">  }</span>
 
   @Override
   public byte[] getPhoto(EUserCategory userCategory, String filename) throws IOException {

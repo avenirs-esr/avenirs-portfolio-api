@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.api.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.api.domain.utils.UserUtils;
 import java.io.IOException;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,28 +21,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/user&quot;)
 public class UserController {
 
   private final UserService userService;
 
-<span class="fc" id="L29">  public UserController(UserService userService) {</span>
-<span class="fc" id="L30">    this.userService = userService;</span>
-<span class="fc" id="L31">  }</span>
-
   @GetMapping(&quot;/{profile}/overview&quot;)
   public ResponseEntity&lt;ProfileDTO&gt; getProfile(
       @RequestHeader(&quot;X-Signed-Context&quot;) String userIdRaw, @PathVariable String profile) {
-<span class="nc" id="L36">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
+<span class="nc" id="L34">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
 
-<span class="nc" id="L38">    EUserCategory userCategory = UserUtils.getUserCategory(profile);</span>
-<span class="nc" id="L39">    User user = userService.getProfile(userId);</span>
+<span class="nc" id="L36">    EUserCategory userCategory = UserUtils.getUserCategory(profile);</span>
+<span class="nc" id="L37">    User user = userService.getProfile(userId);</span>
 
-<span class="nc bnc" id="L41" title="All 2 branches missed.">    if (userCategory == EUserCategory.STUDENT) {</span>
-<span class="nc" id="L42">      return ResponseEntity.ok(ProfileMapper.userStudentDomainToDto(user));</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">    if (userCategory == EUserCategory.STUDENT) {</span>
+<span class="nc" id="L40">      return ResponseEntity.ok(ProfileMapper.userStudentDomainToDto(user));</span>
     } else {
-<span class="nc" id="L44">      return ResponseEntity.ok(ProfileMapper.userTeacherDomainToDto(user));</span>
+<span class="nc" id="L42">      return ResponseEntity.ok(ProfileMapper.userTeacherDomainToDto(user));</span>
     }
   }
 
@@ -50,15 +48,15 @@ public class UserController {
       @RequestHeader(&quot;X-Signed-Context&quot;) String userIdRaw,
       @PathVariable String profile,
       @RequestBody ProfileUpdateRequest request) {
-<span class="nc" id="L53">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
+<span class="nc" id="L51">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
 
-<span class="nc" id="L55">    userService.updateProfile(</span>
+<span class="nc" id="L53">    userService.updateProfile(</span>
         userId,
-<span class="nc" id="L57">        request.getFirstname(),</span>
-<span class="nc" id="L58">        request.getLastname(),</span>
-<span class="nc" id="L59">        request.getEmail(),</span>
-<span class="nc" id="L60">        request.getBio());</span>
-<span class="nc" id="L61">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+<span class="nc" id="L55">        request.getFirstname(),</span>
+<span class="nc" id="L56">        request.getLastname(),</span>
+<span class="nc" id="L57">        request.getEmail(),</span>
+<span class="nc" id="L58">        request.getBio());</span>
+<span class="nc" id="L59">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 
   @PutMapping(&quot;/{profile}/update/photo&quot;)
@@ -67,10 +65,10 @@ public class UserController {
       @PathVariable String profile,
       @RequestParam(&quot;file&quot;) MultipartFile photoFile)
       throws IOException {
-<span class="nc" id="L70">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
+<span class="nc" id="L68">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
 
-<span class="nc" id="L72">    userService.updateProfilePicture(userId, photoFile);</span>
-<span class="nc" id="L73">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+<span class="nc" id="L70">    userService.updateProfilePicture(userId, photoFile);</span>
+<span class="nc" id="L71">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 
   @PutMapping(&quot;/{profile}/update/cover&quot;)
@@ -79,10 +77,10 @@ public class UserController {
       @PathVariable String profile,
       @RequestParam(&quot;file&quot;) MultipartFile coverFile)
       throws IOException {
-<span class="nc" id="L82">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
+<span class="nc" id="L80">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
 
-<span class="nc" id="L84">    userService.updateCoverPicture(userId, coverFile);</span>
-<span class="nc" id="L85">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+<span class="nc" id="L82">    userService.updateCoverPicture(userId, coverFile);</span>
+<span class="nc" id="L83">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
