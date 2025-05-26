@@ -1,11 +1,10 @@
-package fr.avenirsesr.portfolio.api.service;
+package fr.avenirsesr.portfolio.api.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
-import fr.avenirsesr.portfolio.api.domain.service.InstitutionServiceImpl;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeInstitution;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeProgram;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeProgramProgress;
