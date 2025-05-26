@@ -52,7 +52,9 @@ public class SeederRunner implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
-    if (seedEnabled) {
+    long userCont = userRepository.countAll();
+
+    if (userCont == 0 && seedEnabled) {
       log.info("Seeder is enabled: seeding stared");
 
       var fakeUsers =
@@ -178,6 +180,6 @@ public class SeederRunner implements CommandLineRunner {
 
       log.info("Seeding successfully finished");
 
-    } else log.info("Seeder is disabled: seeding skipped");
+    } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
   }
 }
