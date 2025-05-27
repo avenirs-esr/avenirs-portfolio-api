@@ -1,10 +1,12 @@
 package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.input.RessourceService;
 import fr.avenirsesr.portfolio.api.domain.utils.RessourceUtils;
 import fr.avenirsesr.portfolio.api.domain.utils.UserUtils;
 import java.io.IOException;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
@@ -41,6 +43,11 @@ public class RessourceController {
     ByteArrayResource resource = new ByteArrayResource(photo);
 
     return ResponseEntity.ok().contentType(getMediaType(fileName)).body(resource);
+  }
+
+  @GetMapping("/errors")
+  public List<EErrorCode> getAllErrorCodes() {
+    return List.of(EErrorCode.values());
   }
 
   private MediaType getMediaType(String fileName) {
