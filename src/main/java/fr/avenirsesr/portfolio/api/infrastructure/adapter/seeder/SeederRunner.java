@@ -54,9 +54,7 @@ public class SeederRunner implements CommandLineRunner {
   public void run(String... args) {
     long userCont = userRepository.countAll();
 
-    if (userCont == 0 && seedEnabled) {
-      log.info("Seeder is enabled: seeding stared");
-
+    if (seedEnabled) {
       var fakeUsers =
           List.of(
               FakeUser.create().withEmail().withStudent(),

@@ -20,8 +20,9 @@ public class ProgramProgress {
     this.skills = skills;
   }
 
-  public static ProgramProgress create(Program program, Student student, Set<Skill> skills) {
-    return new ProgramProgress(UUID.randomUUID(), program, student, skills);
+  public static ProgramProgress create(
+      UUID id, Program program, Student student, Set<Skill> skills) {
+    return new ProgramProgress(id, program, student, skills);
   }
 
   public static ProgramProgress toDomain(

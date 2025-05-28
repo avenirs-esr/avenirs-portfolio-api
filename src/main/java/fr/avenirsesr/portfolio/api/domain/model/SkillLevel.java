@@ -25,8 +25,8 @@ public class SkillLevel {
     this.name = name;
   }
 
-  public static SkillLevel create(String name) {
-    var skillLevel = new SkillLevel(UUID.randomUUID(), name);
+  public static SkillLevel create(UUID id, String name) {
+    var skillLevel = new SkillLevel(id, name);
     skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);
     skillLevel.setAmses(List.of());
     skillLevel.setTracks(List.of());

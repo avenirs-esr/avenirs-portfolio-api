@@ -23,8 +23,8 @@ public class Track {
     this.user = user;
   }
 
-  public static Track create(User user) {
-    var track = new Track(UUID.randomUUID(), user);
+  public static Track create(UUID id, User user) {
+    var track = new Track(id, user);
     track.setSkillLevels(List.of());
     track.setAmses(List.of());
 

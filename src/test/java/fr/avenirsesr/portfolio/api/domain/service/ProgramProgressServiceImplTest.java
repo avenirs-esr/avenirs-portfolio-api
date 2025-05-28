@@ -136,11 +136,11 @@ public class ProgramProgressServiceImplTest {
   private ProgramProgress createProgramProgress(
       UUID id, String programName, List<String> skillNames) {
     Institution institution = FakeInstitution.create().toModel();
-    Program program = Program.create(institution, programName, true);
+    Program program = Program.create(UUID.randomUUID(), institution, programName, true);
 
     LinkedHashSet<Skill> skills =
         skillNames.stream()
-            .map(name -> Skill.create(name, null))
+            .map(name -> Skill.create(UUID.randomUUID(), name, null))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
     return ProgramProgress.toDomain(id, program, student, skills);
