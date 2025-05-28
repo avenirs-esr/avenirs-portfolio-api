@@ -37,9 +37,9 @@ public class UserController {
 <span class="nc" id="L37">    User user = userService.getProfile(userId);</span>
 
 <span class="nc bnc" id="L39" title="All 2 branches missed.">    if (userCategory == EUserCategory.STUDENT) {</span>
-<span class="nc" id="L40">      return ResponseEntity.ok(ProfileMapper.userStudentDomainToDto(user));</span>
+<span class="nc" id="L40">      return ResponseEntity.ok(ProfileMapper.userStudentDomainToDto(user.toStudent()));</span>
     } else {
-<span class="nc" id="L42">      return ResponseEntity.ok(ProfileMapper.userTeacherDomainToDto(user));</span>
+<span class="nc" id="L42">      return ResponseEntity.ok(ProfileMapper.userTeacherDomainToDto(user.toTeacher()));</span>
     }
   }
 

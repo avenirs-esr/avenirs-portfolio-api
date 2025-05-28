@@ -4,36 +4,44 @@ import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Track;
 import fr.avenirsesr.portfolio.api.domain.model.User;
+import java.time.Instant;
 import java.util.List;
-import java.util.stream.Stream;
+import net.datafaker.Faker;
 
 public class FakeTrack {
+<span class="fc" id="L12">  private static final Faker faker = new Faker();</span>
   private final Track track;
 
-<span class="nc" id="L13">  private FakeTrack(Track track) {</span>
-<span class="nc" id="L14">    this.track = track;</span>
-<span class="nc" id="L15">  }</span>
+<span class="fc" id="L15">  private FakeTrack(Track track) {</span>
+<span class="fc" id="L16">    this.track = track;</span>
+<span class="fc" id="L17">  }</span>
 
   public static FakeTrack of(User user) {
-<span class="nc" id="L18">    return new FakeTrack(Track.create(user));</span>
+<span class="fc" id="L20">    return new FakeTrack(Track.create(user, faker.lorem().sentence(4)));</span>
   }
 
   public FakeTrack withSkillLevel(List&lt;SkillLevel&gt; skillLevels) {
-<span class="nc" id="L22">    track.setSkillLevels(skillLevels);</span>
-<span class="nc" id="L23">    skillLevels.forEach(</span>
-        skillLevel -&gt;
-<span class="nc" id="L25">            skillLevel.setTracks(</span>
-<span class="nc" id="L26">                Stream.concat(skillLevel.getTracks().stream(), Stream.of(track)).toList()));</span>
-<span class="nc" id="L27">    return this;</span>
+<span class="fc" id="L24">    track.setSkillLevels(skillLevels);</span>
+<span class="fc" id="L25">    return this;</span>
   }
 
   public FakeTrack withAMS(List&lt;AMS&gt; amses) {
-<span class="nc" id="L31">    track.setAmses(amses);</span>
-<span class="nc" id="L32">    return this;</span>
+<span class="nc" id="L29">    track.setAmses(amses);</span>
+<span class="nc" id="L30">    return this;</span>
+  }
+
+  public FakeTrack isGroup() {
+<span class="nc" id="L34">    track.setGroup(true);</span>
+<span class="nc" id="L35">    return this;</span>
+  }
+
+  public FakeTrack withCreatedAt(Instant createdAt) {
+<span class="nc" id="L39">    track.setCreatedAt(createdAt);</span>
+<span class="nc" id="L40">    return this;</span>
   }
 
   public Track toModel() {
-<span class="nc" id="L36">    return track;</span>
+<span class="fc" id="L44">    return track;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

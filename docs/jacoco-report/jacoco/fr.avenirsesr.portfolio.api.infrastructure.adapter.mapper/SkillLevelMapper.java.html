@@ -1,25 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkillLevelMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper</a> &gt; <span class="el_source">SkillLevelMapper.java</span></div><h1>SkillLevelMapper.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillLevelEntity;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TrackEntity;
+import java.util.List;
 
 public interface SkillLevelMapper {
-  static SkillLevelEntity fromDomain(SkillLevel skillLevel) {
-<span class="nc" id="L8">    return new SkillLevelEntity(</span>
-<span class="nc" id="L9">        skillLevel.getId(),</span>
-<span class="nc" id="L10">        skillLevel.getName(),</span>
-<span class="nc" id="L11">        skillLevel.getStatus(),</span>
-<span class="nc" id="L12">        skillLevel.getTracks().stream().map(TrackMapper::fromDomain).toList(),</span>
-<span class="nc" id="L13">        skillLevel.getAmses().stream().map(AMSMapper::fromDomain).toList());</span>
+  static SkillLevelEntity fromDomain(
+      SkillLevel skillLevel, SkillEntity skillEntity, List&lt;TrackEntity&gt; tracksEntities) {
+<span class="nc" id="L13">    SkillLevelEntity entity =</span>
+        new SkillLevelEntity(
+<span class="nc" id="L15">            skillLevel.getId(),</span>
+<span class="nc" id="L16">            skillLevel.getName(),</span>
+<span class="nc" id="L17">            skillLevel.getStatus(),</span>
+            tracksEntities,
+<span class="nc" id="L19">            skillLevel.getAmses().stream().map(AMSMapper::fromDomain).toList(),</span>
+            skillEntity);
+<span class="nc" id="L21">    return entity;</span>
   }
 
-  static SkillLevel toDomain(SkillLevelEntity skillLevelEntity) {
-<span class="nc" id="L17">    return SkillLevel.toDomain(</span>
-<span class="nc" id="L18">        skillLevelEntity.getId(),</span>
-<span class="nc" id="L19">        skillLevelEntity.getName(),</span>
-<span class="nc" id="L20">        skillLevelEntity.getStatus(),</span>
-<span class="nc" id="L21">        skillLevelEntity.getTracks().stream().map(TrackMapper::toDomain).toList(),</span>
-<span class="nc" id="L22">        skillLevelEntity.getAmses().stream().map(AMSMapper::toDomain).toList());</span>
+  static SkillLevel toDomain(SkillLevelEntity skillLevelEntity, Skill skill) {
+<span class="nc" id="L25">    SkillLevel skillLevel =</span>
+<span class="nc" id="L26">        SkillLevel.toDomain(</span>
+<span class="nc" id="L27">            skillLevelEntity.getId(),</span>
+<span class="nc" id="L28">            skillLevelEntity.getName(),</span>
+<span class="nc" id="L29">            skillLevelEntity.getStatus(),</span>
+<span class="nc" id="L30">            skillLevelEntity.getTracks().stream()</span>
+<span class="nc" id="L31">                .map(trackEntity -&gt; TrackMapper.toDomain(trackEntity))</span>
+<span class="nc" id="L32">                .toList(),</span>
+<span class="nc" id="L33">            skillLevelEntity.getAmses().stream().map(AMSMapper::toDomain).toList());</span>
+<span class="nc" id="L34">    skillLevel.setSkill(skill);</span>
+<span class="nc" id="L35">    return skillLevel;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
