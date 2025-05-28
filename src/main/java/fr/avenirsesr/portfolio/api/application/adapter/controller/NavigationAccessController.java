@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.api.application.adapter.dto.NavigationAccessDTO;
+import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
+import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
@@ -30,11 +32,11 @@ public class NavigationAccessController {
 
     log.info("Received request to get navigation access of student [{}]", userId);
 
-    var user = userRepository.findById(userId).orElseThrow();
+    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
     if (!user.isStudent()) {
       log.error("User {} is not a student", userId);
-      throw new RuntimeException(); // todo -> throw not allowed exception
+      throw new UserIsNotStudentException();
     }
 
     var student = user.toStudent();

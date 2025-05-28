@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.api.domain.exception.BadImageSizeException;
 import fr.avenirsesr.portfolio.api.domain.exception.BadImageTypeException;
 import fr.avenirsesr.portfolio.api.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserCategoryNotRecognizedException;
+import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -55,5 +56,11 @@ public class RestExceptionHandler {
       UserCategoryNotRecognizedException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(new ErrorResponse("NOT_RECOGNIZED", "Catégorie de l'utilisateur non reconnue."));
+  }
+
+  @ExceptionHandler(UserIsNotStudentException.class)
+  public ResponseEntity<ErrorResponse> handleUserIsNotStudent(UserIsNotStudentException ex) {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 }
