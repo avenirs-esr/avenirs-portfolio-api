@@ -7,49 +7,57 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.UserEntity;
 
 public interface UserMapper {
   static UserEntity fromDomain(User user) {
-<span class="nc" id="L10">    return new UserEntity(</span>
-<span class="nc" id="L11">        user.getId(),</span>
-<span class="nc" id="L12">        user.getFirstName(),</span>
-<span class="nc" id="L13">        user.getLastName(),</span>
-<span class="nc" id="L14">        user.getEmail(),</span>
-<span class="nc" id="L15">        StudentMapper.fromDomain(user.toStudent()),</span>
-<span class="nc" id="L16">        TeacherMapper.fromDomain(user.toTeacher()));</span>
+<span class="nc bnc" id="L10" title="All 2 branches missed.">    return user != null</span>
+<span class="nc" id="L11">        ? new UserEntity(</span>
+<span class="nc" id="L12">            user.getId(),</span>
+<span class="nc" id="L13">            user.getFirstName(),</span>
+<span class="nc" id="L14">            user.getLastName(),</span>
+<span class="nc" id="L15">            user.getEmail(),</span>
+<span class="nc" id="L16">            StudentMapper.fromDomain(user.toStudent()),</span>
+<span class="nc" id="L17">            TeacherMapper.fromDomain(user.toTeacher()))</span>
+<span class="nc" id="L18">        : null;</span>
   }
 
   static UserEntity fromDomain(Student student) {
-<span class="nc" id="L20">    return new UserEntity(</span>
-<span class="nc" id="L21">        student.getUser().getId(),</span>
-<span class="nc" id="L22">        student.getUser().getFirstName(),</span>
-<span class="nc" id="L23">        student.getUser().getLastName(),</span>
-<span class="nc" id="L24">        student.getUser().getEmail(),</span>
-<span class="nc" id="L25">        StudentMapper.fromDomain(student),</span>
-<span class="nc" id="L26">        TeacherMapper.fromDomain(student.getUser().toTeacher()));</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">    return student != null</span>
+<span class="nc" id="L23">        ? new UserEntity(</span>
+<span class="nc" id="L24">            student.getUser().getId(),</span>
+<span class="nc" id="L25">            student.getUser().getFirstName(),</span>
+<span class="nc" id="L26">            student.getUser().getLastName(),</span>
+<span class="nc" id="L27">            student.getUser().getEmail(),</span>
+<span class="nc" id="L28">            StudentMapper.fromDomain(student),</span>
+<span class="nc" id="L29">            TeacherMapper.fromDomain(student.getUser().toTeacher()))</span>
+<span class="nc" id="L30">        : null;</span>
   }
 
   static UserEntity fromDomain(Teacher teacher) {
-<span class="nc" id="L30">    return new UserEntity(</span>
-<span class="nc" id="L31">        teacher.getUser().getId(),</span>
-<span class="nc" id="L32">        teacher.getUser().getFirstName(),</span>
-<span class="nc" id="L33">        teacher.getUser().getLastName(),</span>
-<span class="nc" id="L34">        teacher.getUser().getEmail(),</span>
-<span class="nc" id="L35">        StudentMapper.fromDomain(teacher.getUser().toStudent()),</span>
-<span class="nc" id="L36">        TeacherMapper.fromDomain(teacher));</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">    return teacher != null</span>
+<span class="nc" id="L35">        ? new UserEntity(</span>
+<span class="nc" id="L36">            teacher.getUser().getId(),</span>
+<span class="nc" id="L37">            teacher.getUser().getFirstName(),</span>
+<span class="nc" id="L38">            teacher.getUser().getLastName(),</span>
+<span class="nc" id="L39">            teacher.getUser().getEmail(),</span>
+<span class="nc" id="L40">            StudentMapper.fromDomain(teacher.getUser().toStudent()),</span>
+<span class="nc" id="L41">            TeacherMapper.fromDomain(teacher))</span>
+<span class="nc" id="L42">        : null;</span>
   }
 
   static User toDomain(UserEntity userEntity) {
-<span class="nc" id="L40">    return User.toDomain(</span>
-<span class="nc" id="L41">        userEntity.getId(),</span>
-<span class="nc" id="L42">        userEntity.getFirstName(),</span>
-<span class="nc" id="L43">        userEntity.getLastName(),</span>
-<span class="nc" id="L44">        userEntity.getEmail(),</span>
-<span class="nc" id="L45">        userEntity.getStudent().isActive(),</span>
-<span class="nc" id="L46">        userEntity.getStudent().getBio(),</span>
-<span class="nc" id="L47">        userEntity.getStudent().getProfilePicture(),</span>
-<span class="nc" id="L48">        userEntity.getStudent().getCoverPicture(),</span>
-<span class="nc" id="L49">        userEntity.getTeacher().isActive(),</span>
-<span class="nc" id="L50">        userEntity.getTeacher().getBio(),</span>
-<span class="nc" id="L51">        userEntity.getTeacher().getProfilePicture(),</span>
-<span class="nc" id="L52">        userEntity.getTeacher().getCoverPicture());</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">    return userEntity != null</span>
+<span class="nc" id="L47">        ? User.toDomain(</span>
+<span class="nc" id="L48">            userEntity.getId(),</span>
+<span class="nc" id="L49">            userEntity.getFirstName(),</span>
+<span class="nc" id="L50">            userEntity.getLastName(),</span>
+<span class="nc" id="L51">            userEntity.getEmail(),</span>
+<span class="nc" id="L52">            userEntity.getStudent().isActive(),</span>
+<span class="nc" id="L53">            userEntity.getStudent().getBio(),</span>
+<span class="nc" id="L54">            userEntity.getStudent().getProfilePicture(),</span>
+<span class="nc" id="L55">            userEntity.getStudent().getCoverPicture(),</span>
+<span class="nc" id="L56">            userEntity.getTeacher().isActive(),</span>
+<span class="nc" id="L57">            userEntity.getTeacher().getBio(),</span>
+<span class="nc" id="L58">            userEntity.getTeacher().getProfilePicture(),</span>
+<span class="nc" id="L59">            userEntity.getTeacher().getCoverPicture())</span>
+<span class="nc" id="L60">        : null;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
