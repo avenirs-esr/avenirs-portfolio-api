@@ -5,13 +5,11 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.IntStream;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -58,13 +56,13 @@ public class SeederRunner implements CommandLineRunner {
   public void run(String... args) {
     long userCont = userRepository.countAll();
 
-    if (seedEnabled) {
-      var fakeUsers =new ArrayList<FakeUser>();
+    if (seedEnabled && userCont == 0) {
+      var fakeUsers = new ArrayList<FakeUser>();
       fakeUsers.add(FakeUser.create().withEmail().withStudent());
       fakeUsers.add(FakeUser.create().withEmail().withStudent().withTeacher());
       IntStream.range(0, 10)
-              .mapToObj(i -> FakeUser.create().withStudent().withStudent())
-              .forEach(fakeUsers::add);
+          .mapToObj(i -> FakeUser.create().withStudent().withStudent())
+          .forEach(fakeUsers::add);
 
       var users = fakeUsers.stream().map(FakeUser::toModel).toList();
 
