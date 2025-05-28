@@ -2,9 +2,7 @@
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,23 +15,22 @@ public class Track {
   private List&lt;SkillLevel&gt; skillLevels;
   private List&lt;AMS&gt; amses;
   private Instant createdAt;
+  private boolean isGroup;
 
-  @Getter(AccessLevel.NONE)
-  private TrackGroup group;
-
-<span class="fc" id="L24">  private Track(UUID id, User user, String title, Instant createdAt) {</span>
-<span class="fc" id="L25">    this.id = id;</span>
-<span class="fc" id="L26">    this.user = user;</span>
-<span class="fc" id="L27">    this.title = title;</span>
-<span class="fc" id="L28">    this.createdAt = createdAt;</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L20">  private Track(UUID id, User user, String title, Instant createdAt) {</span>
+<span class="fc" id="L21">    this.id = id;</span>
+<span class="fc" id="L22">    this.user = user;</span>
+<span class="fc" id="L23">    this.title = title;</span>
+<span class="fc" id="L24">    this.createdAt = createdAt;</span>
+<span class="fc" id="L25">  }</span>
 
   public static Track create(User user, String title) {
-<span class="fc" id="L32">    var track = new Track(UUID.randomUUID(), user, title, Instant.now());</span>
-<span class="fc" id="L33">    track.setSkillLevels(List.of());</span>
-<span class="fc" id="L34">    track.setAmses(List.of());</span>
+<span class="fc" id="L28">    var track = new Track(UUID.randomUUID(), user, title, Instant.now());</span>
+<span class="fc" id="L29">    track.setSkillLevels(List.of());</span>
+<span class="fc" id="L30">    track.setAmses(List.of());</span>
+<span class="fc" id="L31">    track.setGroup(false);</span>
 
-<span class="fc" id="L36">    return track;</span>
+<span class="fc" id="L33">    return track;</span>
   }
 
   public static Track toDomain(
@@ -42,18 +39,14 @@ public class Track {
       String title,
       List&lt;SkillLevel&gt; skillLevels,
       List&lt;AMS&gt; amses,
-      TrackGroup group,
+      boolean group,
       Instant createdAt) {
-<span class="nc" id="L47">    var track = new Track(id, user, title, createdAt);</span>
-<span class="nc" id="L48">    track.setSkillLevels(skillLevels);</span>
-<span class="nc" id="L49">    track.setAmses(amses);</span>
-<span class="nc" id="L50">    track.setGroup(group);</span>
+<span class="nc" id="L44">    var track = new Track(id, user, title, createdAt);</span>
+<span class="nc" id="L45">    track.setSkillLevels(skillLevels);</span>
+<span class="nc" id="L46">    track.setAmses(amses);</span>
+<span class="nc" id="L47">    track.setGroup(group);</span>
 
-<span class="nc" id="L52">    return track;</span>
-  }
-
-  public Optional&lt;TrackGroup&gt; getGroup() {
-<span class="nc" id="L56">    return Optional.ofNullable(group);</span>
+<span class="nc" id="L49">    return track;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

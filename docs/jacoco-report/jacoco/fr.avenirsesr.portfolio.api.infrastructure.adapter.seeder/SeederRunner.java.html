@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SeederRunner.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder</a> &gt; <span class="el_source">SeederRunner.java</span></div><h1>SeederRunner.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.api.domain.model.Track;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
@@ -10,14 +9,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
-<span class="fc" id="L20">@Slf4j</span>
+<span class="fc" id="L18">@Slf4j</span>
 @Service
 public class SeederRunner implements CommandLineRunner {
   @Value(&quot;${seeder.enabled:false}&quot;)
@@ -31,7 +29,6 @@ public class SeederRunner implements CommandLineRunner {
   private final SkillLevelRepository skillLevelRepository;
   private final SkillRepository skillRepository;
   private final TrackRepository trackRepository;
-  private final TrackGroupRepository trackGroupRepository;
   private final AMSRepository amsRepository;
 
   public SeederRunner(
@@ -43,133 +40,123 @@ public class SeederRunner implements CommandLineRunner {
       SkillLevelRepository skillLevelRepository,
       SkillRepository skillRepository,
       TrackRepository trackRepository,
-      TrackGroupRepository trackGroupRepository,
-<span class="fc" id="L47">      AMSRepository amsRepository) {</span>
-<span class="fc" id="L48">    this.userRepository = userRepository;</span>
-<span class="fc" id="L49">    this.externalUserRepository = externalUserRepository;</span>
-<span class="fc" id="L50">    this.institutionRepository = institutionRepository;</span>
-<span class="fc" id="L51">    this.programRepository = programRepository;</span>
-<span class="fc" id="L52">    this.programProgressRepository = programProgressRepository;</span>
-<span class="fc" id="L53">    this.skillLevelRepository = skillLevelRepository;</span>
-<span class="fc" id="L54">    this.skillRepository = skillRepository;</span>
-<span class="fc" id="L55">    this.trackRepository = trackRepository;</span>
-<span class="fc" id="L56">    this.trackGroupRepository = trackGroupRepository;</span>
-<span class="fc" id="L57">    this.amsRepository = amsRepository;</span>
-<span class="fc" id="L58">  }</span>
+<span class="fc" id="L43">      AMSRepository amsRepository) {</span>
+<span class="fc" id="L44">    this.userRepository = userRepository;</span>
+<span class="fc" id="L45">    this.externalUserRepository = externalUserRepository;</span>
+<span class="fc" id="L46">    this.institutionRepository = institutionRepository;</span>
+<span class="fc" id="L47">    this.programRepository = programRepository;</span>
+<span class="fc" id="L48">    this.programProgressRepository = programProgressRepository;</span>
+<span class="fc" id="L49">    this.skillLevelRepository = skillLevelRepository;</span>
+<span class="fc" id="L50">    this.skillRepository = skillRepository;</span>
+<span class="fc" id="L51">    this.trackRepository = trackRepository;</span>
+<span class="fc" id="L52">    this.amsRepository = amsRepository;</span>
+<span class="fc" id="L53">  }</span>
 
   @Override
   public void run(String... args) {
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">    if (seedEnabled) {</span>
-<span class="nc" id="L63">      log.info(&quot;Seeder is enabled: seeding stared&quot;);</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">    if (seedEnabled) {</span>
+<span class="nc" id="L58">      log.info(&quot;Seeder is enabled: seeding stared&quot;);</span>
 
       var fakeUsers =
-<span class="nc" id="L66">          List.of(</span>
-<span class="nc" id="L67">              FakeUser.create().withEmail().withStudent(),</span>
-<span class="nc" id="L68">              FakeUser.create().withEmail().withStudent().withTeacher());</span>
+<span class="nc" id="L61">          List.of(</span>
+<span class="nc" id="L62">              FakeUser.create().withEmail().withStudent(),</span>
+<span class="nc" id="L63">              FakeUser.create().withEmail().withStudent().withTeacher());</span>
 
-<span class="nc" id="L70">      var users = fakeUsers.stream().map(FakeUser::toModel).toList();</span>
+<span class="nc" id="L65">      var users = fakeUsers.stream().map(FakeUser::toModel).toList();</span>
 
-<span class="nc" id="L72">      userRepository.saveAll(users);</span>
-<span class="nc" id="L73">      log.info(&quot;✓ {} users created&quot;, users.size());</span>
+<span class="nc" id="L67">      userRepository.saveAll(users);</span>
+<span class="nc" id="L68">      log.info(&quot;✓ {} users created&quot;, users.size());</span>
 
-<span class="nc" id="L75">      var students = fakeUsers.stream().map(FakeUser::getStudent).filter(Objects::nonNull).toList();</span>
-<span class="nc" id="L76">      userRepository.saveAllStudents(students);</span>
-<span class="nc" id="L77">      log.info(&quot;✓ {} students synced&quot;, students.size());</span>
+<span class="nc" id="L70">      var students = fakeUsers.stream().map(FakeUser::getStudent).filter(Objects::nonNull).toList();</span>
+<span class="nc" id="L71">      userRepository.saveAllStudents(students);</span>
+<span class="nc" id="L72">      log.info(&quot;✓ {} students synced&quot;, students.size());</span>
 
-<span class="nc" id="L79">      var teachers = fakeUsers.stream().map(FakeUser::getTeacher).filter(Objects::nonNull).toList();</span>
-<span class="nc" id="L80">      userRepository.saveAllTeachers(teachers);</span>
-<span class="nc" id="L81">      log.info(&quot;✓ {} teachers synced&quot;, teachers.size());</span>
+<span class="nc" id="L74">      var teachers = fakeUsers.stream().map(FakeUser::getTeacher).filter(Objects::nonNull).toList();</span>
+<span class="nc" id="L75">      userRepository.saveAllTeachers(teachers);</span>
+<span class="nc" id="L76">      log.info(&quot;✓ {} teachers synced&quot;, teachers.size());</span>
 
-<span class="nc" id="L83">      var externalUsers =</span>
-<span class="nc" id="L84">          users.stream()</span>
-<span class="nc" id="L85">              .map(</span>
+<span class="nc" id="L78">      var externalUsers =</span>
+<span class="nc" id="L79">          users.stream()</span>
+<span class="nc" id="L80">              .map(</span>
                   user -&gt;
-<span class="nc" id="L87">                      FakeExternalUser.of(</span>
+<span class="nc" id="L82">                      FakeExternalUser.of(</span>
                               user,
-<span class="nc bnc" id="L89" title="All 2 branches missed.">                              user.isStudent() ? EUserCategory.STUDENT : EUserCategory.TEACHER)</span>
-<span class="nc" id="L90">                          .toModel())</span>
-<span class="nc" id="L91">              .toList();</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">                              user.isStudent() ? EUserCategory.STUDENT : EUserCategory.TEACHER)</span>
+<span class="nc" id="L85">                          .toModel())</span>
+<span class="nc" id="L86">              .toList();</span>
 
-<span class="nc" id="L93">      externalUserRepository.saveAll(externalUsers);</span>
-<span class="nc" id="L94">      log.info(&quot;✓ {} externalUsers created&quot;, externalUsers.size());</span>
+<span class="nc" id="L88">      externalUserRepository.saveAll(externalUsers);</span>
+<span class="nc" id="L89">      log.info(&quot;✓ {} externalUsers created&quot;, externalUsers.size());</span>
 
       var institutions =
-<span class="nc" id="L97">          List.of(</span>
-<span class="nc" id="L98">              FakeInstitution.create().toModel(),</span>
-<span class="nc" id="L99">              FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel(),</span>
-<span class="nc" id="L100">              FakeInstitution.create()</span>
-<span class="nc" id="L101">                  .withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT))</span>
-<span class="nc" id="L102">                  .toModel());</span>
+<span class="nc" id="L92">          List.of(</span>
+<span class="nc" id="L93">              FakeInstitution.create().toModel(),</span>
+<span class="nc" id="L94">              FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel(),</span>
+<span class="nc" id="L95">              FakeInstitution.create()</span>
+<span class="nc" id="L96">                  .withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT))</span>
+<span class="nc" id="L97">                  .toModel());</span>
 
-<span class="nc" id="L104">      institutionRepository.saveAll(institutions);</span>
-<span class="nc" id="L105">      log.info(&quot;✓ {} institutions created&quot;, institutions.size());</span>
+<span class="nc" id="L99">      institutionRepository.saveAll(institutions);</span>
+<span class="nc" id="L100">      log.info(&quot;✓ {} institutions created&quot;, institutions.size());</span>
 
-<span class="nc" id="L107">      var programs =</span>
-<span class="nc" id="L108">          institutions.stream().map(institution -&gt; FakeProgram.of(institution).toModel()).toList();</span>
+<span class="nc" id="L102">      var programs =</span>
+<span class="nc" id="L103">          institutions.stream().map(institution -&gt; FakeProgram.of(institution).toModel()).toList();</span>
 
-<span class="nc" id="L110">      programRepository.saveAll(programs);</span>
-<span class="nc" id="L111">      log.info(&quot;✓ {} programs created&quot;, programs.size());</span>
+<span class="nc" id="L105">      programRepository.saveAll(programs);</span>
+<span class="nc" id="L106">      log.info(&quot;✓ {} programs created&quot;, programs.size());</span>
 
       var skillLevels =
-<span class="nc" id="L114">          Set.of(FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel());</span>
+<span class="nc" id="L109">          Set.of(FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel());</span>
 
-<span class="nc" id="L116">      var skill = FakeSkill.of(skillLevels).toModel();</span>
+<span class="nc" id="L111">      var skill = FakeSkill.of(skillLevels).toModel();</span>
 
-<span class="nc" id="L118">      var programProgresses =</span>
-<span class="nc" id="L119">          users.stream()</span>
-<span class="nc" id="L120">              .map(User::toStudent)</span>
-<span class="nc" id="L121">              .filter(Objects::nonNull)</span>
-<span class="nc" id="L122">              .map(</span>
+<span class="nc" id="L113">      var programProgresses =</span>
+<span class="nc" id="L114">          users.stream()</span>
+<span class="nc" id="L115">              .map(User::toStudent)</span>
+<span class="nc" id="L116">              .filter(Objects::nonNull)</span>
+<span class="nc" id="L117">              .map(</span>
                   student -&gt;
-<span class="nc" id="L124">                      FakeProgramProgress.of(programs.getFirst(), student, Set.of(skill)).toModel())</span>
-<span class="nc" id="L125">              .toList();</span>
+<span class="nc" id="L119">                      FakeProgramProgress.of(programs.getFirst(), student, Set.of(skill)).toModel())</span>
+<span class="nc" id="L120">              .toList();</span>
 
-<span class="nc" id="L127">      programProgressRepository.saveAll(programProgresses);</span>
-<span class="nc" id="L128">      programProgressRepository.flush();</span>
-<span class="nc" id="L129">      skillRepository.saveAll(List.of(skill));</span>
-<span class="nc" id="L130">      skillRepository.flush();</span>
-<span class="nc" id="L131">      log.info(&quot;✓ {} programProgresses created&quot;, programProgresses.size());</span>
+<span class="nc" id="L122">      programProgressRepository.saveAll(programProgresses);</span>
+<span class="nc" id="L123">      programProgressRepository.flush();</span>
+<span class="nc" id="L124">      skillRepository.saveAll(List.of(skill));</span>
+<span class="nc" id="L125">      skillRepository.flush();</span>
+<span class="nc" id="L126">      log.info(&quot;✓ {} programProgresses created&quot;, programProgresses.size());</span>
 
-<span class="nc" id="L133">      var ams = FakeAMS.of(users.getFirst()).toModel();</span>
+<span class="nc" id="L128">      var ams = FakeAMS.of(users.getFirst()).toModel();</span>
 
-<span class="nc" id="L135">      amsRepository.save(ams);</span>
-<span class="nc" id="L136">      log.info(&quot;✓ 1 ams created&quot;);</span>
+<span class="nc" id="L130">      amsRepository.save(ams);</span>
+<span class="nc" id="L131">      log.info(&quot;✓ 1 ams created&quot;);</span>
 
-<span class="nc" id="L138">      var trackWithGroup =</span>
-<span class="nc" id="L139">          FakeTrack.of(users.getFirst())</span>
-<span class="nc" id="L140">              .createGroup()</span>
-<span class="nc" id="L141">              .withCreatedAt(Instant.now().minus(Duration.ofHours(3)))</span>
+<span class="nc" id="L133">      var trackWithGroup =</span>
+<span class="nc" id="L134">          FakeTrack.of(users.getFirst())</span>
+<span class="nc" id="L135">              .withCreatedAt(Instant.now().minus(Duration.ofHours(3)))</span>
+<span class="nc" id="L136">              .toModel();</span>
+<span class="nc" id="L137">      var track2 =</span>
+<span class="nc" id="L138">          FakeTrack.of(users.getFirst())</span>
+<span class="nc" id="L139">              .isGroup()</span>
+<span class="nc" id="L140">              .withAMS(List.of(ams))</span>
+<span class="nc" id="L141">              .withCreatedAt(Instant.now().minus(Duration.ofHours(2)))</span>
 <span class="nc" id="L142">              .toModel();</span>
-<span class="nc" id="L143">      var track2 =</span>
+<span class="nc" id="L143">      var track3 =</span>
 <span class="nc" id="L144">          FakeTrack.of(users.getFirst())</span>
-<span class="nc" id="L145">              .addToGroup(trackWithGroup.getGroup().orElseThrow())</span>
-<span class="nc" id="L146">              .withAMS(List.of(ams))</span>
-<span class="nc" id="L147">              .withCreatedAt(Instant.now().minus(Duration.ofHours(2)))</span>
-<span class="nc" id="L148">              .toModel();</span>
-<span class="nc" id="L149">      var track3 =</span>
-<span class="nc" id="L150">          FakeTrack.of(users.getFirst())</span>
-<span class="nc" id="L151">              .addToGroup(trackWithGroup.getGroup().orElseThrow())</span>
-<span class="nc" id="L152">              .withCreatedAt(Instant.now().minus(Duration.ofHours(1)))</span>
-<span class="nc" id="L153">              .withSkillLevel(skillLevels.stream().toList())</span>
-<span class="nc" id="L154">              .withAMS(List.of(ams))</span>
-<span class="nc" id="L155">              .toModel();</span>
+<span class="nc" id="L145">              .isGroup()</span>
+<span class="nc" id="L146">              .withCreatedAt(Instant.now().minus(Duration.ofHours(1)))</span>
+<span class="nc" id="L147">              .withSkillLevel(skillLevels.stream().toList())</span>
+<span class="nc" id="L148">              .withAMS(List.of(ams))</span>
+<span class="nc" id="L149">              .toModel();</span>
 
-<span class="nc" id="L157">      var track = FakeTrack.of(users.getFirst()).toModel();</span>
-<span class="nc" id="L158">      var tracks = List.of(track, trackWithGroup, track2, track3);</span>
+<span class="nc" id="L151">      var track = FakeTrack.of(users.getFirst()).toModel();</span>
+<span class="nc" id="L152">      var tracks = List.of(track, trackWithGroup, track2, track3);</span>
 
-<span class="nc" id="L160">      skillLevelRepository.saveAll(skillLevels.stream().toList());</span>
-<span class="nc" id="L161">      trackGroupRepository.saveAll(</span>
-<span class="nc" id="L162">          tracks.stream()</span>
-<span class="nc" id="L163">              .map(Track::getGroup)</span>
-<span class="nc" id="L164">              .filter(Optional::isPresent)</span>
-<span class="nc" id="L165">              .map(Optional::get)</span>
-<span class="nc" id="L166">              .distinct()</span>
-<span class="nc" id="L167">              .toList());</span>
-<span class="nc" id="L168">      trackRepository.saveAll(tracks);</span>
-<span class="nc" id="L169">      log.info(&quot;✓ {} tracks created&quot;, tracks.size());</span>
+<span class="nc" id="L154">      skillLevelRepository.saveAll(skillLevels.stream().toList());</span>
+<span class="nc" id="L155">      trackRepository.saveAll(tracks);</span>
+<span class="nc" id="L156">      log.info(&quot;✓ {} tracks created&quot;, tracks.size());</span>
 
-<span class="nc" id="L171">      log.info(&quot;Seeding successfully finished&quot;);</span>
-<span class="pc" id="L172">    } else log.info(&quot;Seeder is disabled: seeding skipped&quot;);</span>
-<span class="fc" id="L173">  }</span>
+<span class="nc" id="L158">      log.info(&quot;Seeding successfully finished&quot;);</span>
+<span class="pc" id="L159">    } else log.info(&quot;Seeder is disabled: seeding skipped&quot;);</span>
+<span class="fc" id="L160">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

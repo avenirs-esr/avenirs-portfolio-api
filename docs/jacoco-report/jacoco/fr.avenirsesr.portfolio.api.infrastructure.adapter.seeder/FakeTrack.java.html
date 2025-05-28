@@ -3,52 +3,45 @@
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Track;
-import fr.avenirsesr.portfolio.api.domain.model.TrackGroup;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import java.time.Instant;
 import java.util.List;
 import net.datafaker.Faker;
 
 public class FakeTrack {
-<span class="fc" id="L13">  private static final Faker faker = new Faker();</span>
+<span class="fc" id="L12">  private static final Faker faker = new Faker();</span>
   private final Track track;
-  private TrackGroup group;
 
-<span class="fc" id="L17">  private FakeTrack(Track track) {</span>
-<span class="fc" id="L18">    this.track = track;</span>
-<span class="fc" id="L19">  }</span>
+<span class="fc" id="L15">  private FakeTrack(Track track) {</span>
+<span class="fc" id="L16">    this.track = track;</span>
+<span class="fc" id="L17">  }</span>
 
   public static FakeTrack of(User user) {
-<span class="fc" id="L22">    return new FakeTrack(Track.create(user, faker.lorem().sentence(4)));</span>
+<span class="fc" id="L20">    return new FakeTrack(Track.create(user, faker.lorem().sentence(4)));</span>
   }
 
   public FakeTrack withSkillLevel(List&lt;SkillLevel&gt; skillLevels) {
-<span class="fc" id="L26">    track.setSkillLevels(skillLevels);</span>
-<span class="fc" id="L27">    return this;</span>
+<span class="fc" id="L24">    track.setSkillLevels(skillLevels);</span>
+<span class="fc" id="L25">    return this;</span>
   }
 
   public FakeTrack withAMS(List&lt;AMS&gt; amses) {
-<span class="nc" id="L31">    track.setAmses(amses);</span>
-<span class="nc" id="L32">    return this;</span>
+<span class="nc" id="L29">    track.setAmses(amses);</span>
+<span class="nc" id="L30">    return this;</span>
   }
 
-  public FakeTrack createGroup() {
-<span class="nc" id="L36">    track.setGroup(TrackGroup.create());</span>
-<span class="nc" id="L37">    return this;</span>
-  }
-
-  public FakeTrack addToGroup(TrackGroup group) {
-<span class="nc" id="L41">    track.setGroup(group);</span>
-<span class="nc" id="L42">    return this;</span>
+  public FakeTrack isGroup() {
+<span class="nc" id="L34">    track.setGroup(true);</span>
+<span class="nc" id="L35">    return this;</span>
   }
 
   public FakeTrack withCreatedAt(Instant createdAt) {
-<span class="nc" id="L46">    track.setCreatedAt(createdAt);</span>
-<span class="nc" id="L47">    return this;</span>
+<span class="nc" id="L39">    track.setCreatedAt(createdAt);</span>
+<span class="nc" id="L40">    return this;</span>
   }
 
   public Track toModel() {
-<span class="fc" id="L51">    return track;</span>
+<span class="fc" id="L44">    return track;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

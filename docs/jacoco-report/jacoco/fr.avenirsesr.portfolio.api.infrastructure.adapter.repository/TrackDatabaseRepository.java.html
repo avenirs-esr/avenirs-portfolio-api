@@ -3,7 +3,6 @@
 import fr.avenirsesr.portfolio.api.domain.model.Track;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.TrackRepository;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.TrackGroupMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.TrackMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TrackEntity;
@@ -17,27 +16,23 @@ import org.springframework.stereotype.Component;
 public class TrackDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Track, TrackEntity&gt;
     implements TrackRepository {
   public TrackDatabaseRepository(TrackJpaRepository jpaRepository) {
-<span class="fc" id="L20">    super(</span>
+<span class="fc" id="L19">    super(</span>
         jpaRepository,
         jpaRepository,
         TrackMapper::fromDomain,
-        trackEntity -&gt;
-<span class="nc" id="L25">            TrackMapper.toDomain(trackEntity, TrackGroupMapper.toDomain(trackEntity.getGroup())));</span>
-<span class="fc" id="L26">  }</span>
+<span class="nc" id="L23">        trackEntity -&gt; TrackMapper.toDomain(trackEntity));</span>
+<span class="fc" id="L24">  }</span>
 
   @Override
   public List&lt;Track&gt; findLastsOf(User user, int limit) {
-<span class="nc" id="L30">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L31">        .findAll(</span>
-<span class="nc" id="L32">            TrackSpecification.ofUser(UserMapper.fromDomain(user)),</span>
-<span class="nc" id="L33">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
-<span class="nc" id="L34">        .getContent()</span>
-<span class="nc" id="L35">        .stream()</span>
-<span class="nc" id="L36">        .map(</span>
-            trackEntity -&gt;
-<span class="nc" id="L38">                TrackMapper.toDomain(</span>
-<span class="nc" id="L39">                    trackEntity, TrackGroupMapper.toDomain(trackEntity.getGroup())))</span>
-<span class="nc" id="L40">        .toList();</span>
+<span class="nc" id="L28">    return jpaSpecificationExecutor</span>
+<span class="nc" id="L29">        .findAll(</span>
+<span class="nc" id="L30">            TrackSpecification.ofUser(UserMapper.fromDomain(user)),</span>
+<span class="nc" id="L31">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
+<span class="nc" id="L32">        .getContent()</span>
+<span class="nc" id="L33">        .stream()</span>
+<span class="nc" id="L34">        .map(trackEntity -&gt; TrackMapper.toDomain(trackEntity))</span>
+<span class="nc" id="L35">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

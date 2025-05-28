@@ -28,14 +28,11 @@ public interface SkillLevelMapper {
 <span class="nc" id="L28">            skillLevelEntity.getName(),</span>
 <span class="nc" id="L29">            skillLevelEntity.getStatus(),</span>
 <span class="nc" id="L30">            skillLevelEntity.getTracks().stream()</span>
-<span class="nc" id="L31">                .map(</span>
-                    trackEntity -&gt;
-<span class="nc" id="L33">                        TrackMapper.toDomain(</span>
-<span class="nc" id="L34">                            trackEntity, TrackGroupMapper.toDomain(trackEntity.getGroup())))</span>
-<span class="nc" id="L35">                .toList(),</span>
-<span class="nc" id="L36">            skillLevelEntity.getAmses().stream().map(AMSMapper::toDomain).toList());</span>
-<span class="nc" id="L37">    skillLevel.setSkill(skill);</span>
-<span class="nc" id="L38">    return skillLevel;</span>
+<span class="nc" id="L31">                .map(trackEntity -&gt; TrackMapper.toDomain(trackEntity))</span>
+<span class="nc" id="L32">                .toList(),</span>
+<span class="nc" id="L33">            skillLevelEntity.getAmses().stream().map(AMSMapper::toDomain).toList());</span>
+<span class="nc" id="L34">    skillLevel.setSkill(skill);</span>
+<span class="nc" id="L35">    return skillLevel;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
