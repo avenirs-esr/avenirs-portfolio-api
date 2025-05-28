@@ -5,9 +5,11 @@ import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Track;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public class FakeTrack {
+  private static final FakerProvider faker = new FakerProvider();
   private final Track track;
 
   private FakeTrack(Track track) {
@@ -15,7 +17,7 @@ public class FakeTrack {
   }
 
   public static FakeTrack of(User user) {
-    return new FakeTrack(Track.create(user));
+    return new FakeTrack(Track.create(UUID.fromString(faker.call().internet().uuid()), user));
   }
 
   public FakeTrack withSkillLevel(List<SkillLevel> skillLevels) {

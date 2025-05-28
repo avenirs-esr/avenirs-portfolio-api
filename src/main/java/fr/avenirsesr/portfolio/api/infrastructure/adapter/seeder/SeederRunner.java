@@ -5,9 +5,11 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -52,13 +54,15 @@ public class SeederRunner implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
-    if (seedEnabled) {
-      log.info("Seeder is enabled: seeding stared");
+    long userCont = userRepository.countAll();
 
-      var fakeUsers =
-          List.of(
-              FakeUser.create().withEmail().withStudent(),
-              FakeUser.create().withEmail().withStudent().withTeacher());
+    if (seedEnabled && userCont == 0) {
+      var fakeUsers = new ArrayList<FakeUser>();
+      fakeUsers.add(FakeUser.create().withEmail().withStudent());
+      fakeUsers.add(FakeUser.create().withEmail().withStudent().withTeacher());
+      IntStream.range(0, 10)
+          .mapToObj(i -> FakeUser.create().withStudent().withStudent())
+          .forEach(fakeUsers::add);
 
       var users = fakeUsers.stream().map(FakeUser::toModel).toList();
 
@@ -178,6 +182,6 @@ public class SeederRunner implements CommandLineRunner {
 
       log.info("Seeding successfully finished");
 
-    } else log.info("Seeder is disabled: seeding skipped");
+    } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
   }
 }

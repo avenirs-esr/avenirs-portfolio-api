@@ -35,4 +35,9 @@ public class UserDatabaseRepository extends GenericJpaRepositoryAdapter<User, Us
   public void saveAllTeachers(List<Teacher> teachers) {
     jpaRepository.saveAll(teachers.stream().map(UserMapper::fromDomain).toList());
   }
+
+  @Override
+  public long countAll() {
+    return jpaRepository.count();
+  }
 }

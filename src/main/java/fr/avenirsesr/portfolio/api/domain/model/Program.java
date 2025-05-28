@@ -19,8 +19,8 @@ public class Program {
     this.isAPC = isAPC;
   }
 
-  public static Program create(Institution institution, String name, boolean isAPC) {
-    return new Program(UUID.randomUUID(), institution, name, isAPC);
+  public static Program create(UUID id, Institution institution, String name, boolean isAPC) {
+    return new Program(id, institution, name, isAPC);
   }
 
   public static Program toDomain(UUID id, Institution institution, String name, boolean isAPC) {

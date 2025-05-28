@@ -2,10 +2,10 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.model.Program;
-import net.datafaker.Faker;
+import java.util.UUID;
 
 public class FakeProgram {
-  private static final Faker faker = new Faker();
+  private static final FakerProvider faker = new FakerProvider();
   private final Program program;
 
   private FakeProgram(Program program) {
@@ -15,12 +15,13 @@ public class FakeProgram {
   public static FakeProgram of(Institution institution) {
     return new FakeProgram(
         Program.create(
+            UUID.fromString(faker.call().internet().uuid()),
             institution,
             "%s %s - %s"
                 .formatted(
-                    faker.university().prefix(),
-                    faker.university().degree(),
-                    faker.number().numberBetween(1, 11)),
+                    faker.call().university().prefix(),
+                    faker.call().university().degree(),
+                    faker.call().number().numberBetween(1, 11)),
             true));
   }
 

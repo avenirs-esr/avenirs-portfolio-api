@@ -23,8 +23,8 @@ public class Institution {
     this.name = name;
   }
 
-  public static Institution create(String name) {
-    var institution = new Institution(UUID.randomUUID(), name);
+  public static Institution create(UUID id, String name) {
+    var institution = new Institution(id, name);
     institution.setEnabledFields(Set.of(EPortfolioType.values()));
 
     return institution;
