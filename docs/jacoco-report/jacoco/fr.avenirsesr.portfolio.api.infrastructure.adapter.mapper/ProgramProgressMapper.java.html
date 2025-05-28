@@ -2,42 +2,28 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramProgressEntity;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface ProgramProgressMapper {
   static ProgramProgressEntity fromDomain(ProgramProgress programProgress) {
-<span class="nc" id="L10">    var entity =</span>
-        new ProgramProgressEntity(
-<span class="nc" id="L12">            programProgress.getId(),</span>
-<span class="nc" id="L13">            ProgramMapper.fromDomain(programProgress.getProgram()),</span>
-<span class="nc" id="L14">            UserMapper.fromDomain(programProgress.getStudent().getUser()),</span>
-<span class="nc" id="L15">            Set.of());</span>
-
-<span class="nc" id="L17">    entity.setSkills(</span>
-<span class="nc" id="L18">        programProgress.getSkills().stream()</span>
-<span class="nc" id="L19">            .map(skill -&gt; SkillMapper.fromDomain(skill, entity))</span>
-<span class="nc" id="L20">            .collect(Collectors.toSet()));</span>
-
-<span class="nc" id="L22">    return entity;</span>
+<span class="nc" id="L9">    return new ProgramProgressEntity(</span>
+<span class="nc" id="L10">        programProgress.getId(),</span>
+<span class="nc" id="L11">        ProgramMapper.fromDomain(programProgress.getProgram()),</span>
+<span class="nc" id="L12">        UserMapper.fromDomain(programProgress.getStudent().getUser()),</span>
+<span class="nc" id="L13">        programProgress.getSkills().stream()</span>
+<span class="nc" id="L14">            .map(SkillMapper::fromDomain)</span>
+<span class="nc" id="L15">            .collect(Collectors.toSet()));</span>
   }
 
   static ProgramProgress toDomain(ProgramProgressEntity programProgressEntity) {
-<span class="nc" id="L26">    var programProgress =</span>
-<span class="nc" id="L27">        ProgramProgress.toDomain(</span>
-<span class="nc" id="L28">            programProgressEntity.getId(),</span>
-<span class="nc" id="L29">            ProgramMapper.toDomain(programProgressEntity.getProgram()),</span>
-<span class="nc" id="L30">            StudentMapper.toDomain(</span>
-<span class="nc" id="L31">                programProgressEntity.getStudent().getStudent(),</span>
-<span class="nc" id="L32">                programProgressEntity.getStudent()),</span>
-<span class="nc" id="L33">            Set.of());</span>
-
-<span class="nc" id="L35">    programProgress.setSkills(</span>
-<span class="nc" id="L36">        programProgressEntity.getSkills().stream()</span>
-<span class="nc" id="L37">            .map(skill -&gt; SkillMapper.toDomain(skill, programProgress))</span>
-<span class="nc" id="L38">            .collect(Collectors.toSet()));</span>
-
-<span class="nc" id="L40">    return programProgress;</span>
+<span class="nc" id="L19">    return ProgramProgress.toDomain(</span>
+<span class="nc" id="L20">        programProgressEntity.getId(),</span>
+<span class="nc" id="L21">        ProgramMapper.toDomain(programProgressEntity.getProgram()),</span>
+<span class="nc" id="L22">        StudentMapper.toDomain(</span>
+<span class="nc" id="L23">            programProgressEntity.getStudent().getStudent(), programProgressEntity.getStudent()),</span>
+<span class="nc" id="L24">        programProgressEntity.getSkills().stream()</span>
+<span class="nc" id="L25">            .map(SkillMapper::toDomain)</span>
+<span class="nc" id="L26">            .collect(Collectors.toSet()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

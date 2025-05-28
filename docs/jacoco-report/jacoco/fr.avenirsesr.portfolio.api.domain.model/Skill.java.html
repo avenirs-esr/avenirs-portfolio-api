@@ -3,33 +3,25 @@
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 public class Skill {
   private final UUID id;
   private final String name;
-  private Set&lt;SkillLevel&gt; skillLevels;
-  private ProgramProgress programProgress;
+  private final Set&lt;SkillLevel&gt; skillLevels;
 
-<span class="fc" id="L16">  private Skill(UUID id, String name, Set&lt;SkillLevel&gt; skillLevels) {</span>
-<span class="fc" id="L17">    this.id = id;</span>
-<span class="fc" id="L18">    this.name = name;</span>
-<span class="fc" id="L19">    this.skillLevels = skillLevels;</span>
-<span class="fc" id="L20">  }</span>
+<span class="fc" id="L13">  private Skill(UUID id, String name, Set&lt;SkillLevel&gt; skillLevels) {</span>
+<span class="fc" id="L14">    this.id = id;</span>
+<span class="fc" id="L15">    this.name = name;</span>
+<span class="fc" id="L16">    this.skillLevels = skillLevels;</span>
+<span class="fc" id="L17">  }</span>
 
   public static Skill create(String name, Set&lt;SkillLevel&gt; skillLevels) {
-<span class="fc" id="L23">    return new Skill(UUID.randomUUID(), name, skillLevels);</span>
+<span class="fc" id="L20">    return new Skill(UUID.randomUUID(), name, skillLevels);</span>
   }
 
   public static Skill toDomain(UUID id, String name, Set&lt;SkillLevel&gt; skillLevels) {
-<span class="nc" id="L27">    return new Skill(id, name, skillLevels);</span>
-  }
-
-  @Override
-  public String toString() {
-<span class="nc" id="L32">    return &quot;Skill[%s]&quot;.formatted(id);</span>
+<span class="nc" id="L24">    return new Skill(id, name, skillLevels);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

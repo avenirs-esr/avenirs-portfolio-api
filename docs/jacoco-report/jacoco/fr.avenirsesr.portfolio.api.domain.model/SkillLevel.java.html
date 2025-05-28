@@ -19,35 +19,29 @@ public class SkillLevel {
   private ESkillLevelStatus status;
   private List&lt;Track&gt; tracks;
   private List&lt;AMS&gt; amses;
-  private Skill skill;
 
-<span class="fc" id="L24">  private SkillLevel(UUID id, String name) {</span>
-<span class="fc" id="L25">    this.id = id;</span>
-<span class="fc" id="L26">    this.name = name;</span>
-<span class="fc" id="L27">  }</span>
+<span class="nc" id="L23">  private SkillLevel(UUID id, String name) {</span>
+<span class="nc" id="L24">    this.id = id;</span>
+<span class="nc" id="L25">    this.name = name;</span>
+<span class="nc" id="L26">  }</span>
 
   public static SkillLevel create(String name) {
-<span class="fc" id="L30">    var skillLevel = new SkillLevel(UUID.randomUUID(), name);</span>
-<span class="fc" id="L31">    skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);</span>
-<span class="fc" id="L32">    skillLevel.setAmses(List.of());</span>
-<span class="fc" id="L33">    skillLevel.setTracks(List.of());</span>
+<span class="nc" id="L29">    var skillLevel = new SkillLevel(UUID.randomUUID(), name);</span>
+<span class="nc" id="L30">    skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);</span>
+<span class="nc" id="L31">    skillLevel.setAmses(List.of());</span>
+<span class="nc" id="L32">    skillLevel.setTracks(List.of());</span>
 
-<span class="fc" id="L35">    return skillLevel;</span>
+<span class="nc" id="L34">    return skillLevel;</span>
   }
 
   public static SkillLevel toDomain(
       UUID id, String name, ESkillLevelStatus status, List&lt;Track&gt; tracks, List&lt;AMS&gt; amses) {
-<span class="nc" id="L40">    var skillLevel = new SkillLevel(id, name);</span>
-<span class="nc" id="L41">    skillLevel.setStatus(status);</span>
-<span class="nc" id="L42">    skillLevel.setTracks(tracks);</span>
-<span class="nc" id="L43">    skillLevel.setAmses(amses);</span>
+<span class="nc" id="L39">    var skillLevel = new SkillLevel(id, name);</span>
+<span class="nc" id="L40">    skillLevel.setStatus(status);</span>
+<span class="nc" id="L41">    skillLevel.setTracks(tracks);</span>
+<span class="nc" id="L42">    skillLevel.setAmses(amses);</span>
 
-<span class="nc" id="L45">    return skillLevel;</span>
-  }
-
-  @Override
-  public String toString() {
-<span class="nc" id="L50">    return &quot;SkillLevel[%s]&quot;.formatted(id);</span>
+<span class="nc" id="L44">    return skillLevel;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

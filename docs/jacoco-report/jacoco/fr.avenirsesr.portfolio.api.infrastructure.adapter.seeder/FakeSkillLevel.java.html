@@ -5,15 +5,15 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import net.datafaker.Faker;
 
 public class FakeSkillLevel {
-<span class="fc" id="L8">  private static final Faker faker = new Faker();</span>
+<span class="nc" id="L8">  private static final Faker faker = new Faker();</span>
   private final SkillLevel skillLevel;
 
-<span class="fc" id="L11">  private FakeSkillLevel(SkillLevel skillLevel) {</span>
-<span class="fc" id="L12">    this.skillLevel = skillLevel;</span>
-<span class="fc" id="L13">  }</span>
+<span class="nc" id="L11">  private FakeSkillLevel(SkillLevel skillLevel) {</span>
+<span class="nc" id="L12">    this.skillLevel = skillLevel;</span>
+<span class="nc" id="L13">  }</span>
 
   public static FakeSkillLevel create() {
-<span class="fc" id="L16">    return new FakeSkillLevel(SkillLevel.create(&quot;Niv. %s&quot;.formatted(faker.lorem().character())));</span>
+<span class="nc" id="L16">    return new FakeSkillLevel(SkillLevel.create(&quot;Niv. %s&quot;.formatted(faker.lorem().character())));</span>
   }
 
   public FakeSkillLevel withStatus(ESkillLevelStatus status) {
@@ -22,7 +22,7 @@ public class FakeSkillLevel {
   }
 
   public SkillLevel toModel() {
-<span class="fc" id="L25">    return skillLevel;</span>
+<span class="nc" id="L25">    return skillLevel;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

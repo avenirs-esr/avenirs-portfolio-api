@@ -2,10 +2,7 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.SkillLevelRepository;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.SkillLevelMapper;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.SkillMapper;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.TrackMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillLevelEntity;
 import org.springframework.stereotype.Component;
 
@@ -14,23 +11,7 @@ public class SkillLevelDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;SkillLevel, SkillLevelEntity&gt;
     implements SkillLevelRepository {
   public SkillLevelDatabaseRepository(SkillLevelJpaRepository jpaRepository) {
-<span class="fc" id="L17">    super(</span>
-        jpaRepository,
-        jpaRepository,
-        skillLevel -&gt;
-<span class="nc" id="L21">            SkillLevelMapper.fromDomain(</span>
-                skillLevel,
-<span class="nc" id="L23">                SkillMapper.fromDomain(</span>
-<span class="nc" id="L24">                    skillLevel.getSkill(),</span>
-<span class="nc" id="L25">                    ProgramProgressMapper.fromDomain(skillLevel.getSkill().getProgramProgress())),</span>
-<span class="nc" id="L26">                skillLevel.getTracks().stream().map(TrackMapper::fromDomain).toList()),</span>
-        skillLevelEntity -&gt;
-<span class="nc" id="L28">            SkillLevelMapper.toDomain(</span>
-                skillLevelEntity,
-<span class="nc" id="L30">                SkillMapper.toDomain(</span>
-<span class="nc" id="L31">                    skillLevelEntity.getSkill(),</span>
-<span class="nc" id="L32">                    ProgramProgressMapper.toDomain(</span>
-<span class="nc" id="L33">                        skillLevelEntity.getSkill().getProgramProgress()))));</span>
-<span class="fc" id="L34">  }</span>
+<span class="fc" id="L14">    super(jpaRepository, jpaRepository, SkillLevelMapper::fromDomain, SkillLevelMapper::toDomain);</span>
+<span class="fc" id="L15">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
