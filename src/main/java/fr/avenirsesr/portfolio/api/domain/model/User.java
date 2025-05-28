@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
