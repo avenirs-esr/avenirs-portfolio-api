@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.api.domain.exception.BadImageSizeException;
 import fr.avenirsesr.portfolio.api.domain.exception.BadImageTypeException;
 import fr.avenirsesr.portfolio.api.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserCategoryNotRecognizedException;
-import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -13,55 +12,49 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-<span class="fc" id="L16">@Slf4j</span>
+<span class="fc" id="L15">@Slf4j</span>
 @RestControllerAdvice
-<span class="fc" id="L18">public class RestExceptionHandler {</span>
+<span class="fc" id="L17">public class RestExceptionHandler {</span>
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity&lt;ErrorResponse&gt; handleGenericException(Exception ex) {
-<span class="nc" id="L22">    log.error(&quot;Erreur technique inattendue&quot;, ex);</span>
+<span class="nc" id="L21">    log.error(&quot;Erreur technique inattendue&quot;, ex);</span>
 
-<span class="nc" id="L24">    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L25">        .body(new ErrorResponse(&quot;INTERNAL_ERROR&quot;, &quot;Une erreur technique est survenue.&quot;));</span>
+<span class="nc" id="L23">    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L24">        .body(new ErrorResponse(&quot;INTERNAL_ERROR&quot;, &quot;Une erreur technique est survenue.&quot;));</span>
   }
 
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity&lt;ErrorResponse&gt; handleBusinessException(BusinessException ex) {
-<span class="nc" id="L30">    log.error(&quot;Erreur métier inattendue&quot;, ex);</span>
+<span class="nc" id="L29">    log.error(&quot;Erreur métier inattendue&quot;, ex);</span>
 
-<span class="nc" id="L32">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
-<span class="nc" id="L33">        .body(new ErrorResponse(&quot;BUSINESS_ERROR&quot;, &quot;Une erreur métier est survenue.&quot;));</span>
+<span class="nc" id="L31">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L32">        .body(new ErrorResponse(&quot;BUSINESS_ERROR&quot;, &quot;Une erreur métier est survenue.&quot;));</span>
   }
 
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity&lt;ErrorResponse&gt; handleUserNotFound(UserNotFoundException ex) {
-<span class="nc" id="L38">    return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
-<span class="nc" id="L39">        .body(new ErrorResponse(&quot;NOT_FOUND&quot;, &quot;Utilisateur non trouvé.&quot;));</span>
+<span class="nc" id="L37">    return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L38">        .body(new ErrorResponse(&quot;NOT_FOUND&quot;, &quot;Utilisateur non trouvé.&quot;));</span>
   }
 
   @ExceptionHandler(BadImageTypeException.class)
   public ResponseEntity&lt;ErrorResponse&gt; handleUserNotFound(BadImageTypeException ex) {
-<span class="nc" id="L44">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
-<span class="nc" id="L45">        .body(new ErrorResponse(&quot;IMAGE_TYPE_ERROR&quot;, &quot;Format d'image non accepté.&quot;));</span>
+<span class="nc" id="L43">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L44">        .body(new ErrorResponse(&quot;IMAGE_TYPE_ERROR&quot;, &quot;Format d'image non accepté.&quot;));</span>
   }
 
   @ExceptionHandler(BadImageSizeException.class)
   public ResponseEntity&lt;ErrorResponse&gt; handleUserNotFound(BadImageSizeException ex) {
-<span class="nc" id="L50">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
-<span class="nc" id="L51">        .body(new ErrorResponse(&quot;IMAGE_SIZE_ERROR&quot;, &quot;La taille limite d'image a été atteinte.&quot;));</span>
+<span class="nc" id="L49">    return ResponseEntity.status(HttpStatus.BAD_REQUEST)</span>
+<span class="nc" id="L50">        .body(new ErrorResponse(&quot;IMAGE_SIZE_ERROR&quot;, &quot;La taille limite d'image a été atteinte.&quot;));</span>
   }
 
   @ExceptionHandler(UserCategoryNotRecognizedException.class)
   public ResponseEntity&lt;ErrorResponse&gt; handleUserCategoryNotRecognized(
       UserCategoryNotRecognizedException ex) {
-<span class="nc" id="L57">    return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
-<span class="nc" id="L58">        .body(new ErrorResponse(&quot;NOT_RECOGNIZED&quot;, &quot;Catégorie de l'utilisateur non reconnue.&quot;));</span>
-  }
-
-  @ExceptionHandler(UserIsNotStudentException.class)
-  public ResponseEntity&lt;ErrorResponse&gt; handleUserIsNotStudent(UserIsNotStudentException ex) {
-<span class="nc" id="L63">    return ResponseEntity.status(HttpStatus.FORBIDDEN)</span>
-<span class="nc" id="L64">        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));</span>
+<span class="nc" id="L56">    return ResponseEntity.status(HttpStatus.NOT_FOUND)</span>
+<span class="nc" id="L57">        .body(new ErrorResponse(&quot;NOT_RECOGNIZED&quot;, &quot;Catégorie de l'utilisateur non reconnue.&quot;));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
