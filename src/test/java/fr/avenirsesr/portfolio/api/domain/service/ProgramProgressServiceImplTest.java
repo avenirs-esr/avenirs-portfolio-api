@@ -5,17 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import fr.avenirsesr.portfolio.api.domain.model.Institution;
-import fr.avenirsesr.portfolio.api.domain.model.Program;
-import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
-import fr.avenirsesr.portfolio.api.domain.model.Skill;
-import fr.avenirsesr.portfolio.api.domain.model.Student;
+import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeInstitution;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeProgram;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeProgramProgress;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeUser;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -181,5 +175,162 @@ public class ProgramProgressServiceImplTest {
     // Then
     assertFalse(result);
     verify(programProgressRepository).findAllAPCByStudent(student);
+  }
+
+  @Test
+  void shouldReturnOnlyCurrentSkillLevelBySkill() {
+    // Given
+    var student = FakeUser.create().withStudent().toModel().toStudent();
+    var institution = FakeInstitution.create().toModel();
+    var program = FakeProgram.of(institution).toModel();
+    var skillLevel1 =
+        SkillLevel.toDomain(
+            UUID.randomUUID(),
+            "Level 1",
+            ESkillLevelStatus.VALIDATED,
+            new ArrayList<>(),
+            new ArrayList<>());
+    var skillLevel2 =
+        SkillLevel.toDomain(
+            UUID.randomUUID(),
+            "Level 2",
+            ESkillLevelStatus.TO_BE_EVALUATED,
+            new ArrayList<>(),
+            new ArrayList<>());
+    var skill1 = Skill.create("Skill 1", new LinkedHashSet<>(List.of(skillLevel1, skillLevel2)));
+
+    var progress = ProgramProgress.toDomain(UUID.randomUUID(), program, student, Set.of(skill1));
+
+    when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progress));
+
+    // When
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
+    List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
+
+    // Then
+    assertEquals(1, skillLevels1.size());
+    assertEquals(ESkillLevelStatus.TO_BE_EVALUATED, skillLevels1.getFirst().getStatus());
+  }
+
+  @Test
+  void shouldReturnOnlyUnderReviewSkillLevelBySkill() {
+    // Given
+    var student = FakeUser.create().withStudent().toModel().toStudent();
+    var institution = FakeInstitution.create().toModel();
+    var program = FakeProgram.of(institution).toModel();
+    var skillLevel1 =
+        SkillLevel.toDomain(
+            UUID.randomUUID(),
+            "Level 1",
+            ESkillLevelStatus.UNDER_REVIEW,
+            new ArrayList<>(),
+            new ArrayList<>());
+    var skillLevel2 =
+        SkillLevel.toDomain(
+            UUID.randomUUID(),
+            "Level 2",
+            ESkillLevelStatus.TO_BE_EVALUATED,
+            new ArrayList<>(),
+            new ArrayList<>());
+    var skill1 = Skill.create("Skill 1", new LinkedHashSet<>(List.of(skillLevel1, skillLevel2)));
+
+    var progress = ProgramProgress.toDomain(UUID.randomUUID(), program, student, Set.of(skill1));
+
+    when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progress));
+
+    // When
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
+    List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
+
+    // Then
+    assertEquals(1, skillLevels1.size());
+    assertEquals(ESkillLevelStatus.UNDER_REVIEW, skillLevels1.getFirst().getStatus());
+  }
+
+  @Test
+  void shouldReturnOnlyToBeEvaluatedSkillLevelBySkill() {
+    // Given
+    var student = FakeUser.create().withStudent().toModel().toStudent();
+    var institution = FakeInstitution.create().toModel();
+    var program = FakeProgram.of(institution).toModel();
+    var skillLevel1 =
+        SkillLevel.toDomain(
+            UUID.randomUUID(),
+            "Level 1",
+            ESkillLevelStatus.NOT_STARTED,
+            new ArrayList<>(),
+            new ArrayList<>());
+    var skillLevel2 =
+        SkillLevel.toDomain(
+            UUID.randomUUID(),
+            "Level 2",
+            ESkillLevelStatus.TO_BE_EVALUATED,
+            new ArrayList<>(),
+            new ArrayList<>());
+    var skill1 = Skill.create("Skill 1", new LinkedHashSet<>(List.of(skillLevel1, skillLevel2)));
+
+    var progress = ProgramProgress.toDomain(UUID.randomUUID(), program, student, Set.of(skill1));
+
+    when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progress));
+
+    // When
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
+    List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
+
+    // Then
+    assertEquals(1, skillLevels1.size());
+    assertEquals(ESkillLevelStatus.TO_BE_EVALUATED, skillLevels1.getFirst().getStatus());
+  }
+
+  @Test
+  void shouldReturnOnlyNotStartedSkillLevelBySkill() {
+    // Given
+    var student = FakeUser.create().withStudent().toModel().toStudent();
+    var institution = FakeInstitution.create().toModel();
+    var program = FakeProgram.of(institution).toModel();
+    var skillLevel1 =
+        SkillLevel.toDomain(
+            UUID.randomUUID(),
+            "Level 1",
+            ESkillLevelStatus.VALIDATED,
+            new ArrayList<>(),
+            new ArrayList<>());
+    var skillLevel2 =
+        SkillLevel.toDomain(
+            UUID.randomUUID(),
+            "Level 2",
+            ESkillLevelStatus.FAILED,
+            new ArrayList<>(),
+            new ArrayList<>());
+    var skillLevel3 =
+        SkillLevel.toDomain(
+            UUID.randomUUID(),
+            "Level 3",
+            ESkillLevelStatus.NOT_STARTED,
+            new ArrayList<>(),
+            new ArrayList<>());
+    var skill1 =
+        Skill.create(
+            "Skill 1", new LinkedHashSet<>(List.of(skillLevel1, skillLevel2, skillLevel3)));
+
+    var progress = ProgramProgress.toDomain(UUID.randomUUID(), program, student, Set.of(skill1));
+
+    when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progress));
+
+    // When
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
+    List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
+
+    // Then
+    assertEquals(1, skillLevels1.size());
+    assertEquals(ESkillLevelStatus.NOT_STARTED, skillLevels1.getFirst().getStatus());
   }
 }
