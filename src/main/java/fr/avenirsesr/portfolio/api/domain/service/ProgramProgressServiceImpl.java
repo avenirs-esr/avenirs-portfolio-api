@@ -2,7 +2,9 @@ package fr.avenirsesr.portfolio.api.domain.service;
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
+import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import java.util.Comparator;
@@ -23,6 +25,26 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   private static final int MAX_SKILLS = 6;
   private final ProgramProgressRepository programProgressRepository;
 
+  private static SkillLevel findCurrentSkillLevel(Set<SkillLevel> skillLevels) {
+    if (skillLevels == null || skillLevels.isEmpty()) {
+      return null;
+    }
+    return skillLevels.stream()
+        .filter(sl -> sl.getStatus() == ESkillLevelStatus.UNDER_REVIEW)
+        .findFirst()
+        .orElseGet(
+            () ->
+                skillLevels.stream()
+                    .filter(sl -> sl.getStatus() == ESkillLevelStatus.TO_BE_EVALUATED)
+                    .findFirst()
+                    .orElseGet(
+                        () ->
+                            skillLevels.stream()
+                                .filter(sl -> sl.getStatus() == ESkillLevelStatus.NOT_STARTED)
+                                .findFirst()
+                                .orElse(null)));
+  }
+
   private static Map<ProgramProgress, Set<Skill>> cleanProgramProgressList(
       List<ProgramProgress> programProgressList) {
     int skillLimit = !programProgressList.isEmpty() ? MAX_SKILLS / programProgressList.size() : 0;
@@ -36,6 +58,17 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
                     programProgress.getSkills().stream()
                         .sorted(Comparator.comparing(Skill::getName))
                         .limit(skillLimit)
+                        .map(
+                            skill -> {
+                              SkillLevel selectedSkillLevel =
+                                  findCurrentSkillLevel(skill.getSkillLevels());
+                              Set<SkillLevel> selectedSkillLevelSet =
+                                  selectedSkillLevel != null
+                                      ? Set.of(selectedSkillLevel)
+                                      : Set.of();
+                              return Skill.toDomain(
+                                  skill.getId(), skill.getName(), selectedSkillLevelSet);
+                            })
                         .collect(Collectors.toCollection(LinkedHashSet::new)),
                 (existing, replacement) -> existing,
                 LinkedHashMap::new));

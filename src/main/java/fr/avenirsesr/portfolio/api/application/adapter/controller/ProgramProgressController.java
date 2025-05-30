@@ -2,6 +2,8 @@ package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.api.application.adapter.dto.ProgramProgressDTO;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressMapper;
+import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
+import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
@@ -27,13 +29,11 @@ public class ProgramProgressController {
   public List<ProgramProgressDTO> getSkillsOverview(
       @RequestHeader("X-Signed-Context") String userId) {
     User user =
-        userRepository
-            .findById(UUID.fromString(userId))
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        userRepository.findById(UUID.fromString(userId)).orElseThrow(UserNotFoundException::new);
 
     if (!user.isStudent()) {
       log.error("User {} is not a student", userId);
-      throw new RuntimeException(); // todo -> throw not allowed exception
+      throw new UserIsNotStudentException();
     }
 
     Student student = user.toStudent();
