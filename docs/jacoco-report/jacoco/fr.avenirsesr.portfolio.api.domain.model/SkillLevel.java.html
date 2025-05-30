@@ -37,12 +37,12 @@ public class SkillLevel {
 
   public static SkillLevel toDomain(
       UUID id, String name, ESkillLevelStatus status, List&lt;Track&gt; tracks, List&lt;AMS&gt; amses) {
-<span class="nc" id="L40">    var skillLevel = new SkillLevel(id, name);</span>
-<span class="nc" id="L41">    skillLevel.setStatus(status);</span>
-<span class="nc" id="L42">    skillLevel.setTracks(tracks);</span>
-<span class="nc" id="L43">    skillLevel.setAmses(amses);</span>
+<span class="fc" id="L40">    var skillLevel = new SkillLevel(id, name);</span>
+<span class="fc" id="L41">    skillLevel.setStatus(status);</span>
+<span class="fc" id="L42">    skillLevel.setTracks(tracks);</span>
+<span class="fc" id="L43">    skillLevel.setAmses(amses);</span>
 
-<span class="nc" id="L45">    return skillLevel;</span>
+<span class="fc" id="L45">    return skillLevel;</span>
   }
 
   @Override

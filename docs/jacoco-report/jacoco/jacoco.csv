@@ -1,9 +1,9 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.exception,RestExceptionHandler,62,7,0,0,14,2,6,2,6,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,NavigationAccessController,66,4,2,0,15,1,2,1,1,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.exception,RestExceptionHandler,75,7,0,0,16,2,7,2,7,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,NavigationAccessController,67,4,2,0,15,1,2,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,TrackController,37,4,0,0,9,1,2,1,2,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,UserController,64,0,2,0,19,0,5,0,4,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,ProgramProgressController,46,4,2,0,10,1,4,1,3,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,ProgramProgressController,41,4,2,0,9,1,3,1,2,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,RessourceController,74,0,6,0,18,0,7,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.configuration,ApplicationConfiguration,0,3,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder,FakeProgram,0,52,0,0,0,13,0,5,0,5
@@ -50,7 +50,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper,
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper,InstitutionMapper,18,0,0,0,6,0,2,0,2,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper,SkillLevelMapper,48,0,0,0,17,0,3,0,3,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper,TrackMapper,73,0,0,0,31,0,4,0,4,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,ProgramProgressServiceImpl,2,66,0,4,1,14,1,9,1,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,ProgramProgressServiceImpl,2,146,1,15,1,36,2,21,1,14
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,UserServiceImpl,121,0,12,0,36,0,12,0,6,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,InstitutionServiceImpl,0,26,0,0,0,5,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,RessourceServiceImpl,26,0,4,0,6,0,4,0,2,0
@@ -58,10 +58,9 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,TrackServiceImp
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.utils,UserUtils,14,0,2,0,5,0,3,0,2,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.utils,RessourceUtils,44,0,10,0,13,0,8,0,3,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.specification,ProgramProgressSpecification,27,0,0,0,5,0,5,0,5,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.specification,ProgramProgressSpecifications,24,0,0,0,5,0,3,0,3,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.specification,TrackSpecification,13,0,0,0,2,0,3,0,3,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,ESkillLevelStatus,0,33,0,0,0,6,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EErrorCode,110,0,0,0,17,0,2,0,2,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EErrorCode,118,0,0,0,18,0,2,0,2,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EExternalSource,0,9,0,0,0,2,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EPortfolioType,0,15,0,0,0,3,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EUserCategory,28,25,4,0,5,6,4,2,2,2
@@ -71,6 +70,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.mapper,Ski
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.mapper,TrackOverviewMapper,21,0,0,0,7,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.mapper,ProgramProgressMapper,14,0,0,0,4,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api,AvenirsPortfolioApiApplication,5,3,0,0,2,1,1,1,1,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.exception,UserIsNotStudentException,9,0,0,0,4,0,2,0,2,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.exception,UserNotFoundException,9,0,0,0,4,0,2,0,2,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.exception,BadImageTypeException,9,0,0,0,4,0,2,0,2,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.exception,BusinessException,19,0,2,0,6,0,3,0,2,0
@@ -82,8 +82,8 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,User,49,34,0,0,14
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Teacher,37,0,0,0,11,0,5,0,5,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Program,8,23,0,0,1,7,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Student,15,22,0,0,3,8,3,2,3,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,SkillLevel,27,26,0,0,6,9,2,2,2,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Skill,17,19,0,0,2,6,2,2,2,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,SkillLevel,10,43,0,0,1,14,1,3,1,3
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Skill,10,26,0,0,1,7,1,3,1,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Track,19,34,0,0,5,11,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,AMS,31,0,0,0,10,0,3,0,3,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Institution,11,21,0,0,3,7,1,2,1,2
