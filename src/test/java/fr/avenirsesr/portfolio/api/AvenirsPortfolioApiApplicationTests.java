@@ -1,16 +1,13 @@
 package fr.avenirsesr.portfolio.api;
 
+import static org.mockito.Mockito.mock;
+
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.repository.*;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.ActiveProfiles;
-
-import static org.mockito.Mockito.mock;
 
 @SpringBootTest
 @ActiveProfiles("test")

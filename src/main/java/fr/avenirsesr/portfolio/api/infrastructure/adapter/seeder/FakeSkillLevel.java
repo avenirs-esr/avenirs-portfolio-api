@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import java.util.UUID;

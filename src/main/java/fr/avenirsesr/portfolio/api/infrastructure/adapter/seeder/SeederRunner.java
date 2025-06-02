@@ -128,17 +128,22 @@ public class SeederRunner implements CommandLineRunner {
                                 .toModel());
 
                     var programProgress =
-                            FakeProgramProgress.of(programs.getFirst(), student, skills).toModel();
+                        FakeProgramProgress.of(programs.getFirst(), student, skills).toModel();
 
-                    skills.forEach(skill -> {
-                      skill.setProgramProgress(programProgress);
-                    });
+                    skills.forEach(
+                        skill -> {
+                          skill.setProgramProgress(programProgress);
+                        });
 
-                    skills.forEach(skill -> {
-                      skill.getSkillLevels().forEach(skillLevel -> {
-                        skillLevel.setSkill(skill);
-                      });
-                    });
+                    skills.forEach(
+                        skill -> {
+                          skill
+                              .getSkillLevels()
+                              .forEach(
+                                  skillLevel -> {
+                                    skillLevel.setSkill(skill);
+                                  });
+                        });
 
                     return programProgress;
                   })
@@ -171,9 +176,9 @@ public class SeederRunner implements CommandLineRunner {
       log.info("✓ {} programProgresses created", programProgresses.size());
 
       var skills =
-              programProgresses.stream()
-                      .flatMap(programProgress -> programProgress.getSkills().stream())
-                      .toList();
+          programProgresses.stream()
+              .flatMap(programProgress -> programProgress.getSkills().stream())
+              .toList();
 
       skillRepository.saveAll(skills);
       log.info("✓ {} skills created", skills.size());
