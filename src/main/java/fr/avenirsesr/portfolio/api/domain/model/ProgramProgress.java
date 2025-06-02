@@ -11,7 +11,7 @@ public class ProgramProgress {
   private final UUID id;
   private final Program program;
   private final Student student;
-  private final Set<Skill> skills;
+  private Set<Skill> skills;
 
   private ProgramProgress(UUID id, Program program, Student student, Set<Skill> skills) {
     this.id = id;

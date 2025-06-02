@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -7,6 +8,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -26,6 +28,9 @@ public class TrackEntity {
   @ManyToOne(optional = false)
   private UserEntity user;
 
+  @Column(nullable = false)
+  private String title;
+
   @ManyToMany
   @JoinTable(
       name = "track_skill_levels",
@@ -39,4 +44,10 @@ public class TrackEntity {
       joinColumns = @JoinColumn(name = "track_id"),
       inverseJoinColumns = @JoinColumn(name = "ams_id"))
   private List<AMSEntity> amses;
+
+  @Column(nullable = false)
+  private boolean isGroup;
+
+  @Column(nullable = false)
+  private Instant createdAt;
 }

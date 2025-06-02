@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.api.domain.service;
 import fr.avenirsesr.portfolio.api.domain.exception.BadImageSizeException;
 import fr.avenirsesr.portfolio.api.domain.exception.BadImageTypeException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.RessourceRepository;
@@ -46,9 +47,11 @@ public class UserServiceImpl implements UserService {
       user.setEmail(email);
     }
 
-    user.setStudentBio(bio);
-
     userRepository.save(user);
+
+    Student student = user.toStudent();
+    student.setBio(bio);
+    userRepository.save(student);
   }
 
   @Override
@@ -57,9 +60,10 @@ public class UserServiceImpl implements UserService {
 
     checkImageFormat(photoFile);
     String profilePicturePath = ressourceRepository.storeStudentProfilePicture(id, photoFile);
-    user.setStudentProfilePicture(profilePicturePath);
+    Student student = user.toStudent();
+    student.setProfilePicture(profilePicturePath);
 
-    userRepository.save(user);
+    userRepository.save(student);
   }
 
   @Override
@@ -68,9 +72,10 @@ public class UserServiceImpl implements UserService {
 
     checkImageFormat(coverFile);
     String coverPicturePath = ressourceRepository.storeStudentCoverPicture(id, coverFile);
-    user.setStudentCoverPicture(coverPicturePath);
+    Student student = user.toStudent();
+    student.setCoverPicture(coverPicturePath);
 
-    userRepository.save(user);
+    userRepository.save(student);
   }
 
   private User getUser(UUID id) {

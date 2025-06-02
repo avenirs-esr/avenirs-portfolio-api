@@ -19,6 +19,7 @@ public class SkillLevel {
   private ESkillLevelStatus status;
   private List<Track> tracks;
   private List<AMS> amses;
+  private Skill skill;
 
   private SkillLevel(UUID id, String name) {
     this.id = id;
@@ -42,5 +43,10 @@ public class SkillLevel {
     skillLevel.setAmses(amses);
 
     return skillLevel;
+  }
+
+  @Override
+  public String toString() {
+    return "SkillLevel[%s]".formatted(id);
   }
 }

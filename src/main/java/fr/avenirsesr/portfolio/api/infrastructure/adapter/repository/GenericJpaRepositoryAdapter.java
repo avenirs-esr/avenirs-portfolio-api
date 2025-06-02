@@ -39,4 +39,9 @@ public abstract class GenericJpaRepositoryAdapter<D, E> implements GenericReposi
   public Optional<D> findById(UUID id) {
     return Optional.ofNullable(toDomain.apply(jpaRepository.findById(id).orElse(null)));
   }
+
+  @Override
+  public void flush() {
+    jpaRepository.flush();
+  }
 }

@@ -10,4 +10,6 @@ public interface GenericRepositoryPort<D> {
   void save(D domain);
 
   void saveAll(List<D> collection);
+
+  void flush();
 }

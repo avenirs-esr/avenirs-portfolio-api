@@ -1,15 +1,7 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -46,4 +38,13 @@ public class SkillLevelEntity {
       joinColumns = @JoinColumn(name = "skill_level_id"),
       inverseJoinColumns = @JoinColumn(name = "ams_id"))
   private List<AMSEntity> amses;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "skill_id")
+  private SkillEntity skill;
+
+  @Override
+  public String toString() {
+    return "SkillLevelEntity[%s]".formatted(id);
+  }
 }

@@ -37,9 +37,9 @@ public class UserController {
     User user = userService.getProfile(userId);
 
     if (userCategory == EUserCategory.STUDENT) {
-      return ResponseEntity.ok(ProfileMapper.userStudentDomainToDto(user));
+      return ResponseEntity.ok(ProfileMapper.userStudentDomainToDto(user.toStudent()));
     } else {
-      return ResponseEntity.ok(ProfileMapper.userTeacherDomainToDto(user));
+      return ResponseEntity.ok(ProfileMapper.userTeacherDomainToDto(user.toTeacher()));
     }
   }
 
