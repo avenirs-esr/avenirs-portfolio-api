@@ -24,8 +24,8 @@ public class Track {
 <span class="fc" id="L24">    this.createdAt = createdAt;</span>
 <span class="fc" id="L25">  }</span>
 
-  public static Track create(User user, String title) {
-<span class="fc" id="L28">    var track = new Track(UUID.randomUUID(), user, title, Instant.now());</span>
+  public static Track create(UUID id, User user, String title) {
+<span class="fc" id="L28">    var track = new Track(id, user, title, Instant.now());</span>
 <span class="fc" id="L29">    track.setSkillLevels(List.of());</span>
 <span class="fc" id="L30">    track.setAmses(List.of());</span>
 <span class="fc" id="L31">    track.setGroup(false);</span>

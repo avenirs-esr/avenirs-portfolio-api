@@ -35,5 +35,10 @@ public class UserDatabaseRepository extends GenericJpaRepositoryAdapter&lt;User,
   public void saveAllTeachers(List&lt;Teacher&gt; teachers) {
 <span class="nc" id="L36">    jpaRepository.saveAll(teachers.stream().map(UserMapper::fromDomain).toList());</span>
 <span class="nc" id="L37">  }</span>
+
+  @Override
+  public long countAll() {
+<span class="fc" id="L41">    return jpaRepository.count();</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -4,30 +4,32 @@ import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public class FakeAMS {
+<span class="nc" id="L11">  private static final FakerProvider faker = new FakerProvider();</span>
   private final AMS ams;
 
-<span class="nc" id="L12">  private FakeAMS(AMS ams) {</span>
-<span class="nc" id="L13">    this.ams = ams;</span>
-<span class="nc" id="L14">  }</span>
+<span class="nc" id="L14">  private FakeAMS(AMS ams) {</span>
+<span class="nc" id="L15">    this.ams = ams;</span>
+<span class="nc" id="L16">  }</span>
 
   public static FakeAMS of(User user) {
-<span class="nc" id="L17">    return new FakeAMS(AMS.create(user));</span>
+<span class="nc" id="L19">    return new FakeAMS(AMS.create(UUID.fromString(faker.call().internet().uuid()), user));</span>
   }
 
   public FakeAMS withSkillLevel(List&lt;SkillLevel&gt; skillLevels) {
-<span class="nc" id="L21">    ams.setSkillLevels(skillLevels);</span>
-<span class="nc" id="L22">    skillLevels.forEach(</span>
+<span class="nc" id="L23">    ams.setSkillLevels(skillLevels);</span>
+<span class="nc" id="L24">    skillLevels.forEach(</span>
         skillLevel -&gt;
-<span class="nc" id="L24">            skillLevel.setAmses(</span>
-<span class="nc" id="L25">                Stream.concat(skillLevel.getAmses().stream(), Stream.of(ams)).toList()));</span>
-<span class="nc" id="L26">    return this;</span>
+<span class="nc" id="L26">            skillLevel.setAmses(</span>
+<span class="nc" id="L27">                Stream.concat(skillLevel.getAmses().stream(), Stream.of(ams)).toList()));</span>
+<span class="nc" id="L28">    return this;</span>
   }
 
   public AMS toModel() {
-<span class="nc" id="L30">    return ams;</span>
+<span class="nc" id="L32">    return ams;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

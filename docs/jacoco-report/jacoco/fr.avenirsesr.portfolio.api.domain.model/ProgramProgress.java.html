@@ -20,13 +20,14 @@ public class ProgramProgress {
 <span class="fc" id="L20">    this.skills = skills;</span>
 <span class="fc" id="L21">  }</span>
 
-  public static ProgramProgress create(Program program, Student student, Set&lt;Skill&gt; skills) {
-<span class="nc" id="L24">    return new ProgramProgress(UUID.randomUUID(), program, student, skills);</span>
+  public static ProgramProgress create(
+      UUID id, Program program, Student student, Set&lt;Skill&gt; skills) {
+<span class="nc" id="L25">    return new ProgramProgress(id, program, student, skills);</span>
   }
 
   public static ProgramProgress toDomain(
       UUID id, Program program, Student student, Set&lt;Skill&gt; skills) {
-<span class="fc" id="L29">    return new ProgramProgress(id, program, student, skills);</span>
+<span class="fc" id="L30">    return new ProgramProgress(id, program, student, skills);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -22,8 +22,8 @@ public class AMS {
 <span class="nc" id="L22">    this.user = user;</span>
 <span class="nc" id="L23">  }</span>
 
-  public static AMS create(User user) {
-<span class="nc" id="L26">    var ams = new AMS(UUID.randomUUID(), user);</span>
+  public static AMS create(UUID id, User user) {
+<span class="nc" id="L26">    var ams = new AMS(id, user);</span>
 <span class="nc" id="L27">    ams.setSkillLevels(List.of());</span>
 
 <span class="nc" id="L29">    return ams;</span>

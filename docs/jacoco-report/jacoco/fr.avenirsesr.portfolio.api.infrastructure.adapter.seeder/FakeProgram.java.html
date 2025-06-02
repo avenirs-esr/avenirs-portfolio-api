@@ -2,10 +2,10 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.model.Program;
-import net.datafaker.Faker;
+import java.util.UUID;
 
 public class FakeProgram {
-<span class="nc" id="L8">  private static final Faker faker = new Faker();</span>
+<span class="nc" id="L8">  private static final FakerProvider faker = new FakerProvider();</span>
   private final Program program;
 
 <span class="nc" id="L11">  private FakeProgram(Program program) {</span>
@@ -15,22 +15,23 @@ public class FakeProgram {
   public static FakeProgram of(Institution institution) {
 <span class="nc" id="L16">    return new FakeProgram(</span>
 <span class="nc" id="L17">        Program.create(</span>
+<span class="nc" id="L18">            UUID.fromString(faker.call().internet().uuid()),</span>
             institution,
             &quot;%s %s - %s&quot;
-<span class="nc" id="L20">                .formatted(</span>
-<span class="nc" id="L21">                    faker.university().prefix(),</span>
-<span class="nc" id="L22">                    faker.university().degree(),</span>
-<span class="nc" id="L23">                    faker.number().numberBetween(1, 11)),</span>
+<span class="nc" id="L21">                .formatted(</span>
+<span class="nc" id="L22">                    faker.call().university().prefix(),</span>
+<span class="nc" id="L23">                    faker.call().university().degree(),</span>
+<span class="nc" id="L24">                    faker.call().number().numberBetween(1, 11)),</span>
             true));
   }
 
   public FakeProgram isNotAPC() {
-<span class="nc" id="L28">    program.setAPC(false);</span>
-<span class="nc" id="L29">    return this;</span>
+<span class="nc" id="L29">    program.setAPC(false);</span>
+<span class="nc" id="L30">    return this;</span>
   }
 
   public Program toModel() {
-<span class="nc" id="L33">    return program;</span>
+<span class="nc" id="L34">    return program;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

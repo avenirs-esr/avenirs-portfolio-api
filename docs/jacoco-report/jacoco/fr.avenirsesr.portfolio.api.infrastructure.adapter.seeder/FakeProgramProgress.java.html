@@ -5,23 +5,24 @@ import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import java.util.Set;
+import java.util.UUID;
 
 public class FakeProgramProgress {
+<span class="nc" id="L11">  private static final FakerProvider faker = new FakerProvider();</span>
   private final ProgramProgress programProgress;
 
-<span class="nc" id="L12">  private FakeProgramProgress(ProgramProgress programProgress) {</span>
-<span class="nc" id="L13">    this.programProgress = programProgress;</span>
-<span class="nc" id="L14">  }</span>
+<span class="nc" id="L14">  private FakeProgramProgress(ProgramProgress programProgress) {</span>
+<span class="nc" id="L15">    this.programProgress = programProgress;</span>
+<span class="nc" id="L16">  }</span>
 
   public static FakeProgramProgress of(Program program, Student student, Set&lt;Skill&gt; skills) {
-<span class="nc" id="L17">    var programProgress = ProgramProgress.create(program, student, Set.of());</span>
-<span class="nc" id="L18">    skills.forEach(skill -&gt; skill.setProgramProgress(programProgress));</span>
-<span class="nc" id="L19">    programProgress.setSkills(skills);</span>
-<span class="nc" id="L20">    return new FakeProgramProgress(programProgress);</span>
+<span class="nc" id="L19">    return new FakeProgramProgress(</span>
+<span class="nc" id="L20">        ProgramProgress.create(</span>
+<span class="nc" id="L21">            UUID.fromString(faker.call().internet().uuid()), program, student, skills));</span>
   }
 
   public ProgramProgress toModel() {
-<span class="nc" id="L24">    return programProgress;</span>
+<span class="nc" id="L25">    return programProgress;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
