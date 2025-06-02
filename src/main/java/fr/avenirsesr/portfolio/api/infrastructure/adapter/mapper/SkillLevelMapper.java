@@ -22,16 +22,14 @@ public interface SkillLevelMapper {
   }
 
   static SkillLevel toDomain(SkillLevelEntity skillLevelEntity, Skill skill) {
-    SkillLevel skillLevel =
-        SkillLevel.toDomain(
-            skillLevelEntity.getId(),
-            skillLevelEntity.getName(),
-            skillLevelEntity.getStatus(),
-            skillLevelEntity.getTracks().stream()
-                .map(trackEntity -> TrackMapper.toDomain(trackEntity))
-                .toList(),
-            skillLevelEntity.getAmses().stream().map(AMSMapper::toDomain).toList());
-    skillLevel.setSkill(skill);
-    return skillLevel;
+    return SkillLevel.toDomain(
+        skillLevelEntity.getId(),
+        skillLevelEntity.getName(),
+        skillLevelEntity.getStatus(),
+        skillLevelEntity.getTracks().stream()
+            .map(trackEntity -> TrackMapper.toDomain(trackEntity))
+            .toList(),
+        skillLevelEntity.getAmses().stream().map(AMSMapper::toDomain).toList(),
+        skill);
   }
 }
