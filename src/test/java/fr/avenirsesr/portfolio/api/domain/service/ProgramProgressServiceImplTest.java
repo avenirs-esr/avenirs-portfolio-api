@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import fixtures.*;
 import fr.avenirsesr.portfolio.api.domain.model.*;
-import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.*;
@@ -29,7 +29,7 @@ public class ProgramProgressServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    student = FakeUser.create().toModel().toStudent();
+    student = UserFixture.createStudent().toModel().toStudent();
   }
 
   @Test
@@ -129,15 +129,18 @@ public class ProgramProgressServiceImplTest {
 
   private ProgramProgress createProgramProgress(
       UUID id, String programName, List<String> skillNames) {
-    Institution institution = FakeInstitution.create().toModel();
-    Program program = Program.create(institution, programName, true);
+    Program program = ProgramFixture.create().withName(programName).toModel();
 
     LinkedHashSet<Skill> skills =
         skillNames.stream()
-            .map(name -> Skill.create(name, null))
+            .map(name -> SkillFixture.create().withName(name).toModel())
             .collect(Collectors.toCollection(LinkedHashSet::new));
-
-    return ProgramProgress.toDomain(id, program, student, skills);
+    return ProgramProgressFixture.create()
+        .withId(id)
+        .withProgram(program)
+        .withStudent(student)
+        .withSkills(skills)
+        .toModel();
   }
 
   private List<String> extractSkillNames(List<Skill> skills) {
@@ -147,11 +150,7 @@ public class ProgramProgressServiceImplTest {
   @Test
   void shouldReturnTrueWhenStudentIsFollowingProgramWithLearningMethod() {
     // Given
-    var student = FakeUser.create().withStudent().toModel().toStudent();
-    var institutionAPC =
-        FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
-    var programAPC = FakeProgram.of(institutionAPC).isNotAPC().toModel();
-    var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
+    var progressAPC = ProgramProgressFixture.createWithAPC().withStudent(student).toModel();
 
     when(programProgressRepository.findAllAPCByStudent(student)).thenReturn(List.of(progressAPC));
 
@@ -166,7 +165,6 @@ public class ProgramProgressServiceImplTest {
   @Test
   void shouldReturnFalseWhenStudentIsNotFollowingAnyProgramWithLearningMethod() {
     // Given
-    var student = FakeUser.create().withStudent().toModel().toStudent();
     when(programProgressRepository.findAllAPCByStudent(student)).thenReturn(List.of());
 
     // When
@@ -180,26 +178,15 @@ public class ProgramProgressServiceImplTest {
   @Test
   void shouldReturnOnlyCurrentSkillLevelBySkill() {
     // Given
-    var student = FakeUser.create().withStudent().toModel().toStudent();
-    var institution = FakeInstitution.create().toModel();
-    var program = FakeProgram.of(institution).toModel();
-    var skillLevel1 =
-        SkillLevel.toDomain(
-            UUID.randomUUID(),
-            "Level 1",
-            ESkillLevelStatus.VALIDATED,
-            new ArrayList<>(),
-            new ArrayList<>());
-    var skillLevel2 =
-        SkillLevel.toDomain(
-            UUID.randomUUID(),
-            "Level 2",
-            ESkillLevelStatus.TO_BE_EVALUATED,
-            new ArrayList<>(),
-            new ArrayList<>());
-    var skill1 = Skill.create("Skill 1", new LinkedHashSet<>(List.of(skillLevel1, skillLevel2)));
+    SkillLevel skillLevel1 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+    SkillLevel skillLevel2 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.TO_BE_EVALUATED).toModel();
+    Skill skill1 =
+        SkillFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
 
-    var progress = ProgramProgress.toDomain(UUID.randomUUID(), program, student, Set.of(skill1));
+    ProgramProgress progress =
+        ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
     when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progress));
 
@@ -217,26 +204,15 @@ public class ProgramProgressServiceImplTest {
   @Test
   void shouldReturnOnlyUnderReviewSkillLevelBySkill() {
     // Given
-    var student = FakeUser.create().withStudent().toModel().toStudent();
-    var institution = FakeInstitution.create().toModel();
-    var program = FakeProgram.of(institution).toModel();
-    var skillLevel1 =
-        SkillLevel.toDomain(
-            UUID.randomUUID(),
-            "Level 1",
-            ESkillLevelStatus.UNDER_REVIEW,
-            new ArrayList<>(),
-            new ArrayList<>());
-    var skillLevel2 =
-        SkillLevel.toDomain(
-            UUID.randomUUID(),
-            "Level 2",
-            ESkillLevelStatus.TO_BE_EVALUATED,
-            new ArrayList<>(),
-            new ArrayList<>());
-    var skill1 = Skill.create("Skill 1", new LinkedHashSet<>(List.of(skillLevel1, skillLevel2)));
+    SkillLevel skillLevel1 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.UNDER_REVIEW).toModel();
+    SkillLevel skillLevel2 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.TO_BE_EVALUATED).toModel();
+    Skill skill1 =
+        SkillFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
 
-    var progress = ProgramProgress.toDomain(UUID.randomUUID(), program, student, Set.of(skill1));
+    ProgramProgress progress =
+        ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
     when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progress));
 
@@ -254,26 +230,15 @@ public class ProgramProgressServiceImplTest {
   @Test
   void shouldReturnOnlyToBeEvaluatedSkillLevelBySkill() {
     // Given
-    var student = FakeUser.create().withStudent().toModel().toStudent();
-    var institution = FakeInstitution.create().toModel();
-    var program = FakeProgram.of(institution).toModel();
-    var skillLevel1 =
-        SkillLevel.toDomain(
-            UUID.randomUUID(),
-            "Level 1",
-            ESkillLevelStatus.NOT_STARTED,
-            new ArrayList<>(),
-            new ArrayList<>());
-    var skillLevel2 =
-        SkillLevel.toDomain(
-            UUID.randomUUID(),
-            "Level 2",
-            ESkillLevelStatus.TO_BE_EVALUATED,
-            new ArrayList<>(),
-            new ArrayList<>());
-    var skill1 = Skill.create("Skill 1", new LinkedHashSet<>(List.of(skillLevel1, skillLevel2)));
+    SkillLevel skillLevel1 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.NOT_STARTED).toModel();
+    SkillLevel skillLevel2 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.TO_BE_EVALUATED).toModel();
+    Skill skill1 =
+        SkillFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
 
-    var progress = ProgramProgress.toDomain(UUID.randomUUID(), program, student, Set.of(skill1));
+    ProgramProgress progress =
+        ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
     when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progress));
 
@@ -291,35 +256,19 @@ public class ProgramProgressServiceImplTest {
   @Test
   void shouldReturnOnlyNotStartedSkillLevelBySkill() {
     // Given
-    var student = FakeUser.create().withStudent().toModel().toStudent();
-    var institution = FakeInstitution.create().toModel();
-    var program = FakeProgram.of(institution).toModel();
-    var skillLevel1 =
-        SkillLevel.toDomain(
-            UUID.randomUUID(),
-            "Level 1",
-            ESkillLevelStatus.VALIDATED,
-            new ArrayList<>(),
-            new ArrayList<>());
-    var skillLevel2 =
-        SkillLevel.toDomain(
-            UUID.randomUUID(),
-            "Level 2",
-            ESkillLevelStatus.FAILED,
-            new ArrayList<>(),
-            new ArrayList<>());
-    var skillLevel3 =
-        SkillLevel.toDomain(
-            UUID.randomUUID(),
-            "Level 3",
-            ESkillLevelStatus.NOT_STARTED,
-            new ArrayList<>(),
-            new ArrayList<>());
-    var skill1 =
-        Skill.create(
-            "Skill 1", new LinkedHashSet<>(List.of(skillLevel1, skillLevel2, skillLevel3)));
+    SkillLevel skillLevel1 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+    SkillLevel skillLevel2 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.FAILED).toModel();
+    SkillLevel skillLevel3 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.NOT_STARTED).toModel();
+    Skill skill1 =
+        SkillFixture.create()
+            .withSkillLevels(Set.of(skillLevel1, skillLevel2, skillLevel3))
+            .toModel();
 
-    var progress = ProgramProgress.toDomain(UUID.randomUUID(), program, student, Set.of(skill1));
+    ProgramProgress progress =
+        ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
     when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progress));
 
