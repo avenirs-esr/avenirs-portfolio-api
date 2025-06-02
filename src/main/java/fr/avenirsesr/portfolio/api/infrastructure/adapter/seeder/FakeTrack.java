@@ -17,7 +17,7 @@ public class FakeTrack {
   }
 
   public static FakeTrack of(User user) {
-    return new FakeTrack(Track.create(UUID.fromString(faker.call().internet().uuid()), user));
+    return new FakeTrack(Track.create(UUID.fromString(faker.call().internet().uuid()), user, faker.call().lorem().sentence()));
   }
 
   public FakeTrack withSkillLevel(List<SkillLevel> skillLevels) {

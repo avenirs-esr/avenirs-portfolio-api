@@ -127,7 +127,20 @@ public class SeederRunner implements CommandLineRunner {
                                         FakeSkillLevel.create().toModel()))
                                 .toModel());
 
-                    return FakeProgramProgress.of(programs.getFirst(), student, skills).toModel();
+                    var programProgress =
+                            FakeProgramProgress.of(programs.getFirst(), student, skills).toModel();
+
+                    skills.forEach(skill -> {
+                      skill.setProgramProgress(programProgress);
+                    });
+
+                    skills.forEach(skill -> {
+                      skill.getSkillLevels().forEach(skillLevel -> {
+                        skillLevel.setSkill(skill);
+                      });
+                    });
+
+                    return programProgress;
                   })
               .toList();
 
@@ -154,25 +167,25 @@ public class SeederRunner implements CommandLineRunner {
       programRepository.saveAll(programs);
       log.info("✓ {} programs created", programs.size());
 
-      var skillLevels =
-          programProgresses.stream()
-              .flatMap(programProgress -> programProgress.getSkills().stream())
-              .flatMap(skills -> skills.getSkillLevels().stream())
-              .toList();
-
-      skillLevelRepository.saveAll(skillLevels);
-      log.info("✓ {} skillLevels created", skillLevels.size());
+      programProgressRepository.saveAll(programProgresses);
+      log.info("✓ {} programProgresses created", programProgresses.size());
 
       var skills =
-          programProgresses.stream()
-              .flatMap(programProgress -> programProgress.getSkills().stream())
-              .toList();
+              programProgresses.stream()
+                      .flatMap(programProgress -> programProgress.getSkills().stream())
+                      .toList();
 
       skillRepository.saveAll(skills);
       log.info("✓ {} skills created", skills.size());
 
-      programProgressRepository.saveAll(programProgresses);
-      log.info("✓ {} programProgresses created", programProgresses.size());
+      var skillLevels =
+          programProgresses.stream()
+              .flatMap(programProgress -> programProgress.getSkills().stream())
+              .flatMap(getSkills -> getSkills.getSkillLevels().stream())
+              .toList();
+
+      skillLevelRepository.saveAll(skillLevels);
+      log.info("✓ {} skillLevels created", skillLevels.size());
 
       trackRepository.save(track);
       log.info("✓ 1 track created");
