@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.api.domain.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
@@ -10,8 +10,11 @@ import fr.avenirsesr.portfolio.api.domain.model.Program;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeInstitution;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeProgram;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeProgramProgress;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeUser;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -145,5 +148,38 @@ public class ProgramProgressServiceImplTest {
 
   private List<String> extractSkillNames(List<Skill> skills) {
     return skills.stream().map(Skill::getName).collect(Collectors.toList());
+  }
+
+  @Test
+  void shouldReturnTrueWhenStudentIsFollowingProgramWithLearningMethod() {
+    // Given
+    var student = FakeUser.create().withStudent().toModel().toStudent();
+    var institutionAPC =
+        FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
+    var programAPC = FakeProgram.of(institutionAPC).isNotAPC().toModel();
+    var progressAPC = FakeProgramProgress.of(programAPC, student, Set.of()).toModel();
+
+    when(programProgressRepository.findAllAPCByStudent(student)).thenReturn(List.of(progressAPC));
+
+    // When
+    boolean result = programProgressService.isStudentFollowingAPCProgram(student);
+
+    // Then
+    assertTrue(result);
+    verify(programProgressRepository).findAllAPCByStudent(student);
+  }
+
+  @Test
+  void shouldReturnFalseWhenStudentIsNotFollowingAnyProgramWithLearningMethod() {
+    // Given
+    var student = FakeUser.create().withStudent().toModel().toStudent();
+    when(programProgressRepository.findAllAPCByStudent(student)).thenReturn(List.of());
+
+    // When
+    boolean result = programProgressService.isStudentFollowingAPCProgram(student);
+
+    // Then
+    assertFalse(result);
+    verify(programProgressRepository).findAllAPCByStudent(student);
   }
 }

@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.Teacher;
 import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
+import java.time.Instant;
 import lombok.Getter;
 import net.datafaker.Faker;
 
@@ -28,8 +30,12 @@ public class FakeUser {
   public FakeUser withStudent() {
     var student = user.toStudent();
     student.setBio(faker.lorem().paragraph());
-    student.setProfilePicture(faker.internet().image().getBytes());
-    student.setCoverPicture(faker.internet().image().getBytes());
+    student.setProfilePicture(
+        faker.company().url()
+            + "/"
+            + getFakePictureFilename(user, EUserCategory.STUDENT, "profile"));
+    student.setCoverPicture(
+        faker.company().url() + "/" + getFakePictureFilename(user, EUserCategory.STUDENT, "cover"));
 
     this.student = student;
     user.setStudent(true);
@@ -39,8 +45,12 @@ public class FakeUser {
   public FakeUser withTeacher() {
     var teacher = user.toTeacher();
     teacher.setBio(faker.lorem().paragraph());
-    teacher.setProfilePicture(faker.internet().image().getBytes());
-    teacher.setCoverPicture(faker.internet().image().getBytes());
+    teacher.setProfilePicture(
+        faker.company().url()
+            + "/"
+            + getFakePictureFilename(user, EUserCategory.TEACHER, "profile"));
+    teacher.setCoverPicture(
+        faker.company().url() + "/" + getFakePictureFilename(user, EUserCategory.TEACHER, "cover"));
 
     this.teacher = teacher;
     user.setTeacher(true);
@@ -49,5 +59,18 @@ public class FakeUser {
 
   public User toModel() {
     return user;
+  }
+
+  private String getFakePictureFilename(
+      User user, EUserCategory userCategory, String prefixFileName) {
+    Instant instantNow = Instant.now();
+    return user.getId()
+        + "_"
+        + userCategory.name()
+        + "_"
+        + instantNow.toEpochMilli()
+        + "_"
+        + prefixFileName
+        + "_picture.jpg";
   }
 }

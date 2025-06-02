@@ -22,11 +22,11 @@ public class User {
 
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.PRIVATE)
-  private byte[] studentProfilePicture;
+  private String studentProfilePicture;
 
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.PRIVATE)
-  private byte[] studentCoverPicture;
+  private String studentCoverPicture;
 
   // -- Teacher --
   @Getter(AccessLevel.NONE)
@@ -35,11 +35,11 @@ public class User {
 
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.PRIVATE)
-  private byte[] teacherProfilePicture;
+  private String teacherProfilePicture;
 
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.PRIVATE)
-  private byte[] teacherCoverPicture;
+  private String teacherCoverPicture;
 
   private User(UUID id) {
     this.id = id;
@@ -54,14 +54,6 @@ public class User {
     return user;
   }
 
-  public Student toStudent() {
-    return Student.of(this, studentBio, studentProfilePicture, studentCoverPicture);
-  }
-
-  public Teacher toTeacher() {
-    return Teacher.of(this, teacherBio, teacherProfilePicture, teacherCoverPicture);
-  }
-
   public static User toDomain(
       UUID id,
       String firstName,
@@ -69,12 +61,12 @@ public class User {
       String email,
       boolean isStudent,
       String studentBio,
-      byte[] studentProfilePicture,
-      byte[] studentCoverPicture,
+      String studentProfilePicture,
+      String studentCoverPicture,
       boolean isTeacher,
       String teacherBio,
-      byte[] teacherProfilePicture,
-      byte[] teacherCoverPicture) {
+      String teacherProfilePicture,
+      String teacherCoverPicture) {
     var user = new User(id);
     user.setFirstName(firstName);
     user.setLastName(lastName);
@@ -89,5 +81,13 @@ public class User {
     user.setTeacherCoverPicture(teacherCoverPicture);
 
     return user;
+  }
+
+  public Student toStudent() {
+    return Student.of(this, studentBio, studentProfilePicture, studentCoverPicture);
+  }
+
+  public Teacher toTeacher() {
+    return Teacher.of(this, teacherBio, teacherProfilePicture, teacherCoverPicture);
   }
 }

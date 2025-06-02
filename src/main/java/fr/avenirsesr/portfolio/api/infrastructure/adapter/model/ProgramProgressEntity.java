@@ -1,9 +1,8 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -29,10 +28,6 @@ public class ProgramProgressEntity {
   @ManyToOne(optional = false)
   private UserEntity student;
 
-  @OneToMany
-  @JoinTable(
-      name = "program_progress_skills",
-      joinColumns = @JoinColumn(name = "program_progress_id"),
-      inverseJoinColumns = @JoinColumn(name = "skill_id"))
+  @OneToMany(mappedBy = "programProgress", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<SkillEntity> skills;
 }
