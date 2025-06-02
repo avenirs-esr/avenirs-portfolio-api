@@ -24,17 +24,17 @@ public class Institution {
 <span class="fc" id="L24">  }</span>
 
   public static Institution create(String name) {
-<span class="fc" id="L27">    var institution = new Institution(UUID.randomUUID(), name);</span>
-<span class="fc" id="L28">    institution.setEnabledFields(Set.of(EPortfolioType.values()));</span>
+<span class="nc" id="L27">    var institution = new Institution(UUID.randomUUID(), name);</span>
+<span class="nc" id="L28">    institution.setEnabledFields(Set.of(EPortfolioType.values()));</span>
 
-<span class="fc" id="L30">    return institution;</span>
+<span class="nc" id="L30">    return institution;</span>
   }
 
   public static Institution toDomain(UUID id, String name, Set&lt;EPortfolioType&gt; enabledFields) {
-<span class="nc" id="L34">    var institution = new Institution(id, name);</span>
-<span class="nc" id="L35">    institution.setEnabledFields(enabledFields);</span>
+<span class="fc" id="L34">    var institution = new Institution(id, name);</span>
+<span class="fc" id="L35">    institution.setEnabledFields(enabledFields);</span>
 
-<span class="nc" id="L37">    return institution;</span>
+<span class="fc" id="L37">    return institution;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

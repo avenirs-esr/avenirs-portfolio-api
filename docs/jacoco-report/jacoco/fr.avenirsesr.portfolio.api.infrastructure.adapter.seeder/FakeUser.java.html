@@ -28,18 +28,18 @@ public class FakeUser {
   }
 
   public FakeUser withStudent() {
-<span class="fc" id="L31">    var student = user.toStudent();</span>
-<span class="fc" id="L32">    student.setBio(faker.lorem().paragraph());</span>
-<span class="fc" id="L33">    student.setProfilePicture(</span>
-<span class="fc" id="L34">        faker.company().url()</span>
+<span class="nc" id="L31">    var student = user.toStudent();</span>
+<span class="nc" id="L32">    student.setBio(faker.lorem().paragraph());</span>
+<span class="nc" id="L33">    student.setProfilePicture(</span>
+<span class="nc" id="L34">        faker.company().url()</span>
             + &quot;/&quot;
-<span class="fc" id="L36">            + getFakePictureFilename(user, EUserCategory.STUDENT, &quot;profile&quot;));</span>
-<span class="fc" id="L37">    student.setCoverPicture(</span>
-<span class="fc" id="L38">        faker.company().url() + &quot;/&quot; + getFakePictureFilename(user, EUserCategory.STUDENT, &quot;cover&quot;));</span>
+<span class="nc" id="L36">            + getFakePictureFilename(user, EUserCategory.STUDENT, &quot;profile&quot;));</span>
+<span class="nc" id="L37">    student.setCoverPicture(</span>
+<span class="nc" id="L38">        faker.company().url() + &quot;/&quot; + getFakePictureFilename(user, EUserCategory.STUDENT, &quot;cover&quot;));</span>
 
-<span class="fc" id="L40">    this.student = student;</span>
-<span class="fc" id="L41">    user.setStudent(true);</span>
-<span class="fc" id="L42">    return this;</span>
+<span class="nc" id="L40">    this.student = student;</span>
+<span class="nc" id="L41">    user.setStudent(true);</span>
+<span class="nc" id="L42">    return this;</span>
   }
 
   public FakeUser withTeacher() {
@@ -63,12 +63,12 @@ public class FakeUser {
 
   private String getFakePictureFilename(
       User user, EUserCategory userCategory, String prefixFileName) {
-<span class="fc" id="L66">    Instant instantNow = Instant.now();</span>
-<span class="fc" id="L67">    return user.getId()</span>
+<span class="nc" id="L66">    Instant instantNow = Instant.now();</span>
+<span class="nc" id="L67">    return user.getId()</span>
         + &quot;_&quot;
-<span class="fc" id="L69">        + userCategory.name()</span>
+<span class="nc" id="L69">        + userCategory.name()</span>
         + &quot;_&quot;
-<span class="fc" id="L71">        + instantNow.toEpochMilli()</span>
+<span class="nc" id="L71">        + instantNow.toEpochMilli()</span>
         + &quot;_&quot;
         + prefixFileName
         + &quot;_picture.jpg&quot;;

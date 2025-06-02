@@ -36,18 +36,24 @@ public class SkillLevel {
   }
 
   public static SkillLevel toDomain(
-      UUID id, String name, ESkillLevelStatus status, List&lt;Track&gt; tracks, List&lt;AMS&gt; amses) {
-<span class="nc" id="L40">    var skillLevel = new SkillLevel(id, name);</span>
-<span class="nc" id="L41">    skillLevel.setStatus(status);</span>
-<span class="nc" id="L42">    skillLevel.setTracks(tracks);</span>
-<span class="nc" id="L43">    skillLevel.setAmses(amses);</span>
+      UUID id,
+      String name,
+      ESkillLevelStatus status,
+      List&lt;Track&gt; tracks,
+      List&lt;AMS&gt; amses,
+      Skill skill) {
+<span class="fc" id="L45">    var skillLevel = new SkillLevel(id, name);</span>
+<span class="fc" id="L46">    skillLevel.setStatus(status);</span>
+<span class="fc" id="L47">    skillLevel.setTracks(tracks);</span>
+<span class="fc" id="L48">    skillLevel.setAmses(amses);</span>
+<span class="fc" id="L49">    skillLevel.setSkill(skill);</span>
 
-<span class="nc" id="L45">    return skillLevel;</span>
+<span class="fc" id="L51">    return skillLevel;</span>
   }
 
   @Override
   public String toString() {
-<span class="nc" id="L50">    return &quot;SkillLevel[%s]&quot;.formatted(id);</span>
+<span class="nc" id="L56">    return &quot;SkillLevel[%s]&quot;.formatted(id);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

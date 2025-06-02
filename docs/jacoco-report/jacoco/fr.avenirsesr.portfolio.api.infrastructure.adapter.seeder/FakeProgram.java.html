@@ -5,32 +5,32 @@ import fr.avenirsesr.portfolio.api.domain.model.Program;
 import net.datafaker.Faker;
 
 public class FakeProgram {
-<span class="fc" id="L8">  private static final Faker faker = new Faker();</span>
+<span class="nc" id="L8">  private static final Faker faker = new Faker();</span>
   private final Program program;
 
-<span class="fc" id="L11">  private FakeProgram(Program program) {</span>
-<span class="fc" id="L12">    this.program = program;</span>
-<span class="fc" id="L13">  }</span>
+<span class="nc" id="L11">  private FakeProgram(Program program) {</span>
+<span class="nc" id="L12">    this.program = program;</span>
+<span class="nc" id="L13">  }</span>
 
   public static FakeProgram of(Institution institution) {
-<span class="fc" id="L16">    return new FakeProgram(</span>
-<span class="fc" id="L17">        Program.create(</span>
+<span class="nc" id="L16">    return new FakeProgram(</span>
+<span class="nc" id="L17">        Program.create(</span>
             institution,
             &quot;%s %s - %s&quot;
-<span class="fc" id="L20">                .formatted(</span>
-<span class="fc" id="L21">                    faker.university().prefix(),</span>
-<span class="fc" id="L22">                    faker.university().degree(),</span>
-<span class="fc" id="L23">                    faker.number().numberBetween(1, 11)),</span>
+<span class="nc" id="L20">                .formatted(</span>
+<span class="nc" id="L21">                    faker.university().prefix(),</span>
+<span class="nc" id="L22">                    faker.university().degree(),</span>
+<span class="nc" id="L23">                    faker.number().numberBetween(1, 11)),</span>
             true));
   }
 
   public FakeProgram isNotAPC() {
-<span class="fc" id="L28">    program.setAPC(false);</span>
-<span class="fc" id="L29">    return this;</span>
+<span class="nc" id="L28">    program.setAPC(false);</span>
+<span class="nc" id="L29">    return this;</span>
   }
 
   public Program toModel() {
-<span class="fc" id="L33">    return program;</span>
+<span class="nc" id="L33">    return program;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

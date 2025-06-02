@@ -22,17 +22,15 @@ public interface SkillLevelMapper {
   }
 
   static SkillLevel toDomain(SkillLevelEntity skillLevelEntity, Skill skill) {
-<span class="nc" id="L25">    SkillLevel skillLevel =</span>
-<span class="nc" id="L26">        SkillLevel.toDomain(</span>
-<span class="nc" id="L27">            skillLevelEntity.getId(),</span>
-<span class="nc" id="L28">            skillLevelEntity.getName(),</span>
-<span class="nc" id="L29">            skillLevelEntity.getStatus(),</span>
-<span class="nc" id="L30">            skillLevelEntity.getTracks().stream()</span>
-<span class="nc" id="L31">                .map(trackEntity -&gt; TrackMapper.toDomain(trackEntity))</span>
-<span class="nc" id="L32">                .toList(),</span>
-<span class="nc" id="L33">            skillLevelEntity.getAmses().stream().map(AMSMapper::toDomain).toList());</span>
-<span class="nc" id="L34">    skillLevel.setSkill(skill);</span>
-<span class="nc" id="L35">    return skillLevel;</span>
+<span class="nc" id="L25">    return SkillLevel.toDomain(</span>
+<span class="nc" id="L26">        skillLevelEntity.getId(),</span>
+<span class="nc" id="L27">        skillLevelEntity.getName(),</span>
+<span class="nc" id="L28">        skillLevelEntity.getStatus(),</span>
+<span class="nc" id="L29">        skillLevelEntity.getTracks().stream()</span>
+<span class="nc" id="L30">            .map(trackEntity -&gt; TrackMapper.toDomain(trackEntity))</span>
+<span class="nc" id="L31">            .toList(),</span>
+<span class="nc" id="L32">        skillLevelEntity.getAmses().stream().map(AMSMapper::toDomain).toList(),</span>
+        skill);
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
