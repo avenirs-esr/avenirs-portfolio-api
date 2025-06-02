@@ -36,11 +36,17 @@ public class SkillLevel {
   }
 
   public static SkillLevel toDomain(
-      UUID id, String name, ESkillLevelStatus status, List<Track> tracks, List<AMS> amses) {
+      UUID id,
+      String name,
+      ESkillLevelStatus status,
+      List<Track> tracks,
+      List<AMS> amses,
+      Skill skill) {
     var skillLevel = new SkillLevel(id, name);
     skillLevel.setStatus(status);
     skillLevel.setTracks(tracks);
     skillLevel.setAmses(amses);
+    skillLevel.setSkill(skill);
 
     return skillLevel;
   }
