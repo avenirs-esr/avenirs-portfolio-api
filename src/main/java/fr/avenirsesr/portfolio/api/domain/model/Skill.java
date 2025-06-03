@@ -19,8 +19,8 @@ public class Skill {
     this.skillLevels = skillLevels;
   }
 
-  public static Skill create(String name, Set<SkillLevel> skillLevels) {
-    return new Skill(UUID.randomUUID(), name, skillLevels);
+  public static Skill create(UUID id, String name, Set<SkillLevel> skillLevels) {
+    return new Skill(id, name, skillLevels);
   }
 
   public static Skill toDomain(UUID id, String name, Set<SkillLevel> skillLevels) {

@@ -45,8 +45,8 @@ public class User {
     this.id = id;
   }
 
-  public static User create(String firstName, String lastName) {
-    var user = new User(UUID.randomUUID());
+  public static User create(UUID id, String firstName, String lastName) {
+    var user = new User(id);
     user.setFirstName(firstName);
     user.setLastName(lastName);
     user.setStudent(false);

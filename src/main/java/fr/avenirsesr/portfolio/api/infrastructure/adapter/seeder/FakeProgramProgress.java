@@ -5,8 +5,10 @@ import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import java.util.Set;
+import java.util.UUID;
 
 public class FakeProgramProgress {
+  private static final FakerProvider faker = new FakerProvider();
   private final ProgramProgress programProgress;
 
   private FakeProgramProgress(ProgramProgress programProgress) {
@@ -14,10 +16,9 @@ public class FakeProgramProgress {
   }
 
   public static FakeProgramProgress of(Program program, Student student, Set<Skill> skills) {
-    var programProgress = ProgramProgress.create(program, student, Set.of());
-    skills.forEach(skill -> skill.setProgramProgress(programProgress));
-    programProgress.setSkills(skills);
-    return new FakeProgramProgress(programProgress);
+    return new FakeProgramProgress(
+        ProgramProgress.create(
+            UUID.fromString(faker.call().internet().uuid()), program, student, skills));
   }
 
   public ProgramProgress toModel() {

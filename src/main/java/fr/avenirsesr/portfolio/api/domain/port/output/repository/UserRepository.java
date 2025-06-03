@@ -13,4 +13,6 @@ public interface UserRepository extends GenericRepositoryPort<User> {
   void save(Teacher teacher);
 
   void saveAllTeachers(List<Teacher> teachers);
+
+  long countAll();
 }

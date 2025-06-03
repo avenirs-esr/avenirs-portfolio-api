@@ -5,10 +5,11 @@ import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import java.util.Arrays;
-import net.datafaker.Faker;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class FakeExternalUser {
-  private static final Faker faker = new Faker();
+  private static final FakerProvider faker = new FakerProvider();
   private final ExternalUser externalUser;
 
   private FakeExternalUser(ExternalUser externalUser) {
@@ -23,28 +24,24 @@ public class FakeExternalUser {
       throw new IllegalArgumentException("Student cannot be null");
     }
 
+    int externalIdType = faker.call().number().numberBetween(0, 3);
+
     return new FakeExternalUser(
         ExternalUser.create(
             user,
-            generateRandomExternalId(),
+            switch (externalIdType) {
+              case 0 -> faker.call().internet().uuid();
+              case 1 -> String.valueOf(faker.call().number().numberBetween(1, 999_999));
+              case 2 -> faker.call().regexify("[A-Z]{3}[0-9]{3}");
+              default -> throw new IllegalStateException("Unexpected value: " + externalIdType);
+            },
             Arrays.stream(EExternalSource.values())
                 .toList()
-                .get(faker.random().nextInt(EExternalSource.values().length)),
+                .get(faker.call().random().nextInt(EExternalSource.values().length)),
             category,
-            faker.internet().emailAddress(),
+            faker.call().internet().emailAddress(),
             user.getFirstName(),
             user.getLastName()));
-  }
-
-  private static String generateRandomExternalId() {
-    int idType = faker.number().numberBetween(0, 3);
-
-    return switch (idType) {
-      case 0 -> faker.internet().uuid();
-      case 1 -> String.valueOf(faker.number().numberBetween(1, 999_999));
-      case 2 -> faker.regexify("[A-Z]{3}[0-9]{3}");
-      default -> throw new IllegalStateException("Unexpected value: " + idType);
-    };
   }
 
   public ExternalUser toModel() {

@@ -5,11 +5,11 @@ import fr.avenirsesr.portfolio.api.domain.model.Teacher;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
-import net.datafaker.Faker;
 
 public class FakeUser {
-  private static final Faker faker = new Faker();
+  private static final FakerProvider faker = new FakerProvider();
   private final User user;
   @Getter private Student student;
   @Getter private Teacher teacher;
@@ -19,23 +19,29 @@ public class FakeUser {
   }
 
   public static FakeUser create() {
-    return new FakeUser(User.create(faker.name().firstName(), faker.name().lastName()));
+    return new FakeUser(
+        User.create(
+            UUID.fromString(faker.call().internet().uuid()),
+            faker.call().name().firstName(),
+            faker.call().name().lastName()));
   }
 
   public FakeUser withEmail() {
-    user.setEmail(faker.internet().emailAddress());
+    user.setEmail(faker.call().internet().emailAddress());
     return this;
   }
 
   public FakeUser withStudent() {
     var student = user.toStudent();
-    student.setBio(faker.lorem().paragraph());
+    student.setBio(faker.call().lorem().paragraph());
     student.setProfilePicture(
-        faker.company().url()
+        faker.call().company().url()
             + "/"
             + getFakePictureFilename(user, EUserCategory.STUDENT, "profile"));
     student.setCoverPicture(
-        faker.company().url() + "/" + getFakePictureFilename(user, EUserCategory.STUDENT, "cover"));
+        faker.call().company().url()
+            + "/"
+            + getFakePictureFilename(user, EUserCategory.STUDENT, "cover"));
 
     this.student = student;
     user.setStudent(true);
@@ -44,13 +50,15 @@ public class FakeUser {
 
   public FakeUser withTeacher() {
     var teacher = user.toTeacher();
-    teacher.setBio(faker.lorem().paragraph());
+    teacher.setBio(faker.call().lorem().paragraph());
     teacher.setProfilePicture(
-        faker.company().url()
+        faker.call().company().url()
             + "/"
             + getFakePictureFilename(user, EUserCategory.TEACHER, "profile"));
     teacher.setCoverPicture(
-        faker.company().url() + "/" + getFakePictureFilename(user, EUserCategory.TEACHER, "cover"));
+        faker.call().company().url()
+            + "/"
+            + getFakePictureFilename(user, EUserCategory.TEACHER, "cover"));
 
     this.teacher = teacher;
     user.setTeacher(true);

@@ -24,8 +24,8 @@ public class Track {
     this.createdAt = createdAt;
   }
 
-  public static Track create(User user, String title) {
-    var track = new Track(UUID.randomUUID(), user, title, Instant.now());
+  public static Track create(UUID id, User user, String title) {
+    var track = new Track(id, user, title, Instant.now());
     track.setSkillLevels(List.of());
     track.setAmses(List.of());
     track.setGroup(false);

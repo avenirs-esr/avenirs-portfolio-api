@@ -28,7 +28,7 @@ public class AMSEntity {
 
   @ManyToMany
   @JoinTable(
-      name = "skill_level_ams",
+      name = "ams_skill_levels",
       joinColumns = @JoinColumn(name = "ams_id"),
       inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
   private List<SkillLevelEntity> skillLevels;

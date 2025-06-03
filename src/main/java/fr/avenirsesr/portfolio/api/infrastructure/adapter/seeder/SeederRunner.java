@@ -5,11 +5,11 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.*;
-import java.time.Duration;
-import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -54,15 +54,103 @@ public class SeederRunner implements CommandLineRunner {
 
   @Override
   public void run(String... args) {
-    if (seedEnabled) {
-      log.info("Seeder is enabled: seeding stared");
+    long userCont = userRepository.countAll();
 
-      var fakeUsers =
-          List.of(
-              FakeUser.create().withEmail().withStudent(),
-              FakeUser.create().withEmail().withStudent().withTeacher());
+    if (seedEnabled && userCont == 0) {
+      var fakeUsers = new ArrayList<FakeUser>();
+      fakeUsers.add(FakeUser.create().withEmail().withStudent());
+      fakeUsers.add(FakeUser.create().withEmail().withStudent().withTeacher());
+      IntStream.range(0, 10)
+          .mapToObj(i -> FakeUser.create().withStudent().withStudent())
+          .forEach(fakeUsers::add);
 
       var users = fakeUsers.stream().map(FakeUser::toModel).toList();
+
+      var externalUsers =
+          users.stream()
+              .map(
+                  user ->
+                      FakeExternalUser.of(
+                              user,
+                              user.isStudent() ? EUserCategory.STUDENT : EUserCategory.TEACHER)
+                          .toModel())
+              .toList();
+
+      var institutions =
+          List.of(
+              FakeInstitution.create().toModel(),
+              FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel(),
+              FakeInstitution.create()
+                  .withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT))
+                  .toModel());
+
+      var programs =
+          institutions.stream().map(institution -> FakeProgram.of(institution).toModel()).toList();
+
+      var programProgresses =
+          users.stream()
+              .map(User::toStudent)
+              .filter(Objects::nonNull)
+              .map(
+                  student -> {
+                    var skills =
+                        Set.of(
+                            FakeSkill.of(
+                                    Set.of(
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.VALIDATED)
+                                            .toModel(),
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.FAILED)
+                                            .toModel(),
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
+                                            .toModel()))
+                                .toModel(),
+                            FakeSkill.of(
+                                    Set.of(
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.VALIDATED)
+                                            .toModel(),
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.VALIDATED)
+                                            .toModel(),
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+                                            .toModel()))
+                                .toModel(),
+                            FakeSkill.of(
+                                    Set.of(
+                                        FakeSkillLevel.create()
+                                            .withStatus(ESkillLevelStatus.VALIDATED)
+                                            .toModel(),
+                                        FakeSkillLevel.create().toModel()))
+                                .toModel());
+
+                    var programProgress =
+                        FakeProgramProgress.of(programs.getFirst(), student, skills).toModel();
+
+                    skills.forEach(
+                        skill -> {
+                          skill.setProgramProgress(programProgress);
+                        });
+
+                    skills.forEach(
+                        skill -> {
+                          skill
+                              .getSkillLevels()
+                              .forEach(
+                                  skillLevel -> {
+                                    skillLevel.setSkill(skill);
+                                  });
+                        });
+
+                    return programProgress;
+                  })
+              .toList();
+
+      var track = FakeTrack.of(users.getFirst()).toModel();
+      var ams = FakeAMS.of(users.getFirst()).toModel();
 
       userRepository.saveAll(users);
       log.info("✓ {} users created", users.size());
@@ -75,87 +163,43 @@ public class SeederRunner implements CommandLineRunner {
       userRepository.saveAllTeachers(teachers);
       log.info("✓ {} teachers synced", teachers.size());
 
-      var externalUsers =
-          users.stream()
-              .map(
-                  user ->
-                      FakeExternalUser.of(
-                              user,
-                              user.isStudent() ? EUserCategory.STUDENT : EUserCategory.TEACHER)
-                          .toModel())
-              .toList();
-
       externalUserRepository.saveAll(externalUsers);
       log.info("✓ {} externalUsers created", externalUsers.size());
-
-      var institutions =
-          List.of(
-              FakeInstitution.create().toModel(),
-              FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel(),
-              FakeInstitution.create()
-                  .withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT))
-                  .toModel());
 
       institutionRepository.saveAll(institutions);
       log.info("✓ {} institutions created", institutions.size());
 
-      var programs =
-          institutions.stream().map(institution -> FakeProgram.of(institution).toModel()).toList();
-
       programRepository.saveAll(programs);
       log.info("✓ {} programs created", programs.size());
 
-      var skillLevels =
-          Set.of(FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel());
-
-      var skill = FakeSkill.of(skillLevels).toModel();
-
-      var programProgresses =
-          users.stream()
-              .map(User::toStudent)
-              .filter(Objects::nonNull)
-              .map(
-                  student ->
-                      FakeProgramProgress.of(programs.getFirst(), student, Set.of(skill)).toModel())
-              .toList();
-
       programProgressRepository.saveAll(programProgresses);
-      programProgressRepository.flush();
-      skillRepository.saveAll(List.of(skill));
-      skillRepository.flush();
       log.info("✓ {} programProgresses created", programProgresses.size());
 
-      var ams = FakeAMS.of(users.getFirst()).toModel();
+      var skills =
+          programProgresses.stream()
+              .flatMap(programProgress -> programProgress.getSkills().stream())
+              .toList();
+
+      skillRepository.saveAll(skills);
+      log.info("✓ {} skills created", skills.size());
+
+      var skillLevels =
+          programProgresses.stream()
+              .flatMap(programProgress -> programProgress.getSkills().stream())
+              .flatMap(getSkills -> getSkills.getSkillLevels().stream())
+              .toList();
+
+      skillLevelRepository.saveAll(skillLevels);
+      log.info("✓ {} skillLevels created", skillLevels.size());
+
+      trackRepository.save(track);
+      log.info("✓ 1 track created");
 
       amsRepository.save(ams);
       log.info("✓ 1 ams created");
 
-      var trackWithGroup =
-          FakeTrack.of(users.getFirst())
-              .withCreatedAt(Instant.now().minus(Duration.ofHours(3)))
-              .toModel();
-      var track2 =
-          FakeTrack.of(users.getFirst())
-              .isGroup()
-              .withAMS(List.of(ams))
-              .withCreatedAt(Instant.now().minus(Duration.ofHours(2)))
-              .toModel();
-      var track3 =
-          FakeTrack.of(users.getFirst())
-              .isGroup()
-              .withCreatedAt(Instant.now().minus(Duration.ofHours(1)))
-              .withSkillLevel(skillLevels.stream().toList())
-              .withAMS(List.of(ams))
-              .toModel();
-
-      var track = FakeTrack.of(users.getFirst()).toModel();
-      var tracks = List.of(track, trackWithGroup, track2, track3);
-
-      skillLevelRepository.saveAll(skillLevels.stream().toList());
-      trackRepository.saveAll(tracks);
-      log.info("✓ {} tracks created", tracks.size());
-
       log.info("Seeding successfully finished");
-    } else log.info("Seeder is disabled: seeding skipped");
+
+    } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
   }
 }

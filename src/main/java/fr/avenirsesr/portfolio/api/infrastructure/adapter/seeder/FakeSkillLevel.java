@@ -2,10 +2,10 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
-import net.datafaker.Faker;
+import java.util.UUID;
 
 public class FakeSkillLevel {
-  private static final Faker faker = new Faker();
+  private static final FakerProvider faker = new FakerProvider();
   private final SkillLevel skillLevel;
 
   private FakeSkillLevel(SkillLevel skillLevel) {
@@ -13,7 +13,10 @@ public class FakeSkillLevel {
   }
 
   public static FakeSkillLevel create() {
-    return new FakeSkillLevel(SkillLevel.create("Niv. %s".formatted(faker.lorem().character())));
+    return new FakeSkillLevel(
+        SkillLevel.create(
+            UUID.fromString(faker.call().internet().uuid()),
+            "Niv. %s".formatted(faker.call().lorem().character())));
   }
 
   public FakeSkillLevel withStatus(ESkillLevelStatus status) {

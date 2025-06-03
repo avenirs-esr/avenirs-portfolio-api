@@ -22,8 +22,8 @@ public class AMS {
     this.user = user;
   }
 
-  public static AMS create(User user) {
-    var ams = new AMS(UUID.randomUUID(), user);
+  public static AMS create(UUID id, User user) {
+    var ams = new AMS(id, user);
     ams.setSkillLevels(List.of());
 
     return ams;
