@@ -28,33 +28,33 @@ public class NavigationAccessController {
   @GetMapping
   public ResponseEntity&lt;NavigationAccessDTO&gt; getStudentNavigationAccess(
       @RequestHeader(&quot;X-Signed-Context&quot;) String userIdRaw) {
-<span class="nc" id="L31">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
+<span class="fc" id="L31">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
 
-<span class="nc" id="L33">    log.info(&quot;Received request to get navigation access of student [{}]&quot;, userId);</span>
+<span class="fc" id="L33">    log.info(&quot;Received request to get navigation access of student [{}]&quot;, userId);</span>
 
-<span class="nc" id="L35">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L35">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
 
-<span class="nc bnc" id="L37" title="All 2 branches missed.">    if (!user.isStudent()) {</span>
-<span class="nc" id="L38">      log.error(&quot;User {} is not a student&quot;, userId);</span>
-<span class="nc" id="L39">      throw new UserIsNotStudentException();</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">    if (!user.isStudent()) {</span>
+<span class="fc" id="L38">      log.error(&quot;User {} is not a student&quot;, userId);</span>
+<span class="fc" id="L39">      throw new UserIsNotStudentException();</span>
     }
 
-<span class="nc" id="L42">    var student = user.toStudent();</span>
+<span class="fc" id="L42">    var student = user.toStudent();</span>
 
-<span class="nc" id="L44">    var isAPCEnabledByInstitution =</span>
-<span class="nc" id="L45">        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);</span>
-<span class="nc" id="L46">    var isLifeProjectEnabledByInstitution =</span>
-<span class="nc" id="L47">        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);</span>
+<span class="fc" id="L44">    var isAPCEnabledByInstitution =</span>
+<span class="fc" id="L45">        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);</span>
+<span class="fc" id="L46">    var isLifeProjectEnabledByInstitution =</span>
+<span class="fc" id="L47">        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);</span>
 
-<span class="nc" id="L49">    var isFollowingAPCProgram = programProgressService.isStudentFollowingAPCProgram(student);</span>
+<span class="fc" id="L49">    var isFollowingAPCProgram = programProgressService.isStudentFollowingAPCProgram(student);</span>
 
-<span class="nc" id="L51">    var navigationAccess =</span>
+<span class="fc" id="L51">    var navigationAccess =</span>
         new NavigationAccessDTO(
             new NavigationAccessDTO.AccessInfoAPC(isAPCEnabledByInstitution, isFollowingAPCProgram),
             new NavigationAccessDTO.AccessInfoLifeProject(isLifeProjectEnabledByInstitution));
 
-<span class="nc" id="L56">    log.debug(&quot;Navigation access of student {} : {}&quot;, userId, navigationAccess);</span>
-<span class="nc" id="L57">    return ResponseEntity.ok(navigationAccess);</span>
+<span class="fc" id="L56">    log.debug(&quot;Navigation access of student {} : {}&quot;, userId, navigationAccess);</span>
+<span class="fc" id="L57">    return ResponseEntity.ok(navigationAccess);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
