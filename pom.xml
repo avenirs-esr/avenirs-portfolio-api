@@ -120,13 +120,22 @@
 					</execution>
 					<execution>
 						<id>report</id>
-						<phase>test</phase>
+						<phase>verify</phase>
 						<goals>
 							<goal>report</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
+					<excludes>
+						<exclude>**/dto/*</exclude>
+						<exclude>**/mapper/*</exclude>
+						<exclude>**/fixtures/*</exclude>
+						<exclude>**/seeder/*</exclude>
+						<exclude>**/exception/*</exclude>
+						<exclude>**/config/*</exclude>
+						<exclude>**/configuration/**</exclude>
+					</excludes>
 					<outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
 				</configuration>
 			</plugin>
