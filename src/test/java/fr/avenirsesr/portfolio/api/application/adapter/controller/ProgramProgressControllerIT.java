@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.api.application.adapter.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.SeederRunner;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,12 +20,8 @@ class ProgramProgressControllerIT {
 
   @Autowired private MockMvc mockMvc;
 
-  @Autowired private UserRepository userRepository;
-
   private UUID studentId;
   private UUID teacherId;
-
-  @Autowired private SeederRunner seederRunner;
 
   @BeforeAll
   static void setup(@Autowired SeederRunner seederRunner) {

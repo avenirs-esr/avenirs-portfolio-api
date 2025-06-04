@@ -3,10 +3,9 @@ package fr.avenirsesr.portfolio.api.application.adapter.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import fixtures.UserFixture;
-import fr.avenirsesr.portfolio.api.domain.model.User;
-import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.SeederRunner;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,20 +20,18 @@ class NavigationAccessControllerIT {
 
   @Autowired private MockMvc mockMvc;
 
-  @Autowired private UserRepository userRepository;
-
   private UUID studentId;
   private UUID teacherId;
 
+  @BeforeAll
+  static void setup(@Autowired SeederRunner seederRunner) {
+    seederRunner.run();
+  }
+
   @BeforeEach
   void setUp() {
-    User student = UserFixture.createStudent().toModel();
-    userRepository.save(student);
-    studentId = student.getId();
-
-    User teacher = UserFixture.createTeacher().toModel();
-    userRepository.save(teacher);
-    teacherId = teacher.getId();
+    studentId = UUID.fromString("9fe9516a-a528-4870-8f15-89187e368610");
+    teacherId = UUID.fromString("7f15a874-339c-4679-8d09-1f6624ea9971");
   }
 
   @Test
@@ -47,7 +44,10 @@ class NavigationAccessControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.APC").exists())
-        .andExpect(jsonPath("$.LIFE_PROJECT").exists());
+        .andExpect(jsonPath("$.LIFE_PROJECT").exists())
+        .andExpect(jsonPath("$.APC.enabledByInstitution").value(true))
+        .andExpect(jsonPath("$.APC.hasProgram").value(true))
+        .andExpect(jsonPath("$.LIFE_PROJECT.enabledByInstitution").value(true));
   }
 
   @Test
