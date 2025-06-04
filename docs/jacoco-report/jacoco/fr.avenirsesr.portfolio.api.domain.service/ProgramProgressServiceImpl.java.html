@@ -40,7 +40,7 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
 <span class="fc" id="L40">                    .orElseGet(</span>
                         () -&gt;
 <span class="fc" id="L42">                            skillLevels.stream()</span>
-<span class="fc bfc" id="L43" title="All 2 branches covered.">                                .filter(sl -&gt; sl.getStatus() == ESkillLevelStatus.NOT_STARTED)</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">                                .filter(sl -&gt; sl.getStatus() == ESkillLevelStatus.NOT_STARTED)</span>
 <span class="fc" id="L44">                                .findFirst()</span>
 <span class="fc" id="L45">                                .orElse(null)));</span>
   }
