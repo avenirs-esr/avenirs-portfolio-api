@@ -15,19 +15,19 @@ public class RessourceServiceImpl implements RessourceService {
 
   @Override
   public byte[] getPhoto(EUserCategory userCategory, String filename) throws IOException {
-<span class="fc bfc" id="L18" title="All 2 branches covered.">    if (userCategory == EUserCategory.STUDENT) {</span>
-<span class="fc" id="L19">      return ressourceRepository.getStudentPhoto(filename);</span>
+<span class="nc bnc" id="L18" title="All 2 branches missed.">    if (userCategory == EUserCategory.STUDENT) {</span>
+<span class="nc" id="L19">      return ressourceRepository.getStudentPhoto(filename);</span>
     } else {
-<span class="fc" id="L21">      return ressourceRepository.getTeacherPhoto(filename);</span>
+<span class="nc" id="L21">      return ressourceRepository.getTeacherPhoto(filename);</span>
     }
   }
 
   @Override
   public byte[] getCover(EUserCategory userCategory, String filename) throws IOException {
-<span class="fc bfc" id="L27" title="All 2 branches covered.">    if (userCategory == EUserCategory.STUDENT) {</span>
-<span class="fc" id="L28">      return ressourceRepository.getStudentCover(filename);</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">    if (userCategory == EUserCategory.STUDENT) {</span>
+<span class="nc" id="L28">      return ressourceRepository.getStudentCover(filename);</span>
     } else {
-<span class="fc" id="L30">      return ressourceRepository.getTeacherCover(filename);</span>
+<span class="nc" id="L30">      return ressourceRepository.getTeacherCover(filename);</span>
     }
   }
 }
