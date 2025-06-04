@@ -3,10 +3,10 @@ package fr.avenirsesr.portfolio.api.application.adapter.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import fixtures.UserFixture;
-import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.SeederRunner;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +26,17 @@ class ProgramProgressControllerIT {
   private UUID studentId;
   private UUID teacherId;
 
+  @Autowired private SeederRunner seederRunner;
+
+  @BeforeAll
+  static void setup(@Autowired SeederRunner seederRunner) {
+    seederRunner.run();
+  }
+
   @BeforeEach
   void setUp() {
-    User student = UserFixture.createStudent().toModel();
-    userRepository.save(student);
-    User teacher = UserFixture.createTeacher().toModel();
-    userRepository.save(teacher);
-    studentId = student.getId();
-    teacherId = teacher.getId();
+    studentId = UUID.fromString("9fe9516a-a528-4870-8f15-89187e368610");
+    teacherId = UUID.fromString("7f15a874-339c-4679-8d09-1f6624ea9971");
   }
 
   @Test
@@ -45,7 +48,23 @@ class ProgramProgressControllerIT {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$").isArray());
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].id").value("33184f00-80d4-4b7a-ab7b-14b8ac6ca268"))
+        .andExpect(jsonPath("$[0].name").value("North Master - 6"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("95af3200-e5d6-4e1d-90e8-67c36ea20cf1"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill eius"))
+        .andExpect(jsonPath("$[0].skills[0].levels.size()").value(1))
+        .andExpect(
+            jsonPath("$[0].skills[0].levels[0].id").value("7050764a-3195-4ae7-8d43-510f7d7154ff"))
+        .andExpect(jsonPath("$[0].skills[0].levels[0].name").value("Niv. 1"))
+        .andExpect(jsonPath("$[0].skills[0].levels[0].status").value("UNDER_REVIEW"))
+        .andExpect(jsonPath("$[0].skills[1].id").value("721f6782-e37e-4767-b6e6-fb4fd7543803"))
+        .andExpect(jsonPath("$[0].skills[1].name").value("Skill est"))
+        .andExpect(jsonPath("$[0].skills[1].levels.size()").value(1))
+        .andExpect(
+            jsonPath("$[0].skills[1].levels[0].id").value("91511147-6488-44ac-866e-88db9a2c8a82"))
+        .andExpect(jsonPath("$[0].skills[1].levels[0].name").value("Niv. 4"))
+        .andExpect(jsonPath("$[0].skills[1].levels[0].status").value("TO_BE_EVALUATED"));
   }
 
   @Test
