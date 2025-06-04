@@ -8,14 +8,15 @@ import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.RessourceRepository;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
-import jakarta.annotation.Nullable;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
@@ -31,8 +32,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void updateProfile(
-      UUID id, String firstname, String lastname, String email, @Nullable String bio) {
+  public void updateProfile(UUID id, String firstname, String lastname, String email, String bio) {
     User user = getUser(id);
 
     if (firstname != null) {
@@ -49,9 +49,11 @@ public class UserServiceImpl implements UserService {
 
     userRepository.save(user);
 
-    Student student = user.toStudent();
-    student.setBio(bio);
-    userRepository.save(student);
+    if (bio != null) {
+      Student student = user.toStudent();
+      student.setBio(bio);
+      userRepository.save(student);
+    }
   }
 
   @Override
