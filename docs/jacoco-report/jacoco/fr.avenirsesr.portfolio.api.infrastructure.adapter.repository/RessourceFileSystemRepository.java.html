@@ -56,40 +56,40 @@ import org.springframework.web.multipart.MultipartFile;
   @Override
   public String storeStudentProfilePicture(UUID userId, MultipartFile profilePictureFile)
       throws IOException {
-<span class="nc" id="L59">    return storePicture(userId, profilePictureFile, photoStudentPath);</span>
+<span class="fc" id="L59">    return storePicture(userId, profilePictureFile, photoStudentPath);</span>
   }
 
   @Override
   public String storeStudentCoverPicture(UUID userId, MultipartFile coverPictureFile)
       throws IOException {
-<span class="nc" id="L65">    return storePicture(userId, coverPictureFile, coverStudentPath);</span>
+<span class="fc" id="L65">    return storePicture(userId, coverPictureFile, coverStudentPath);</span>
   }
 
   @Override
   public String storeTeacherProfilePicture(UUID userId, MultipartFile profilePictureFile)
       throws IOException {
-<span class="nc" id="L71">    return storePicture(userId, profilePictureFile, photoTeacherPath);</span>
+<span class="fc" id="L71">    return storePicture(userId, profilePictureFile, photoTeacherPath);</span>
   }
 
   @Override
   public String storeTeacherCoverPicture(UUID userId, MultipartFile coverPictureFile)
       throws IOException {
-<span class="nc" id="L77">    return storePicture(userId, coverPictureFile, coverTeacherPath);</span>
+<span class="fc" id="L77">    return storePicture(userId, coverPictureFile, coverTeacherPath);</span>
   }
 
   private String storePicture(UUID userId, MultipartFile pictureFile, String storagePath)
       throws IOException {
-<span class="nc" id="L82">    Instant instantNow = Instant.now();</span>
-<span class="nc" id="L83">    String filename =</span>
-<span class="nc" id="L84">        userId.toString()</span>
+<span class="fc" id="L82">    Instant instantNow = Instant.now();</span>
+<span class="fc" id="L83">    String filename =</span>
+<span class="fc" id="L84">        userId.toString()</span>
             + &quot;_&quot;
-<span class="nc" id="L86">            + instantNow.toEpochMilli()</span>
+<span class="fc" id="L86">            + instantNow.toEpochMilli()</span>
             + &quot;_&quot;
-<span class="nc" id="L88">            + pictureFile.getOriginalFilename();</span>
-<span class="nc" id="L89">    Path filePath = Paths.get(storagePath).resolve(filename);</span>
-<span class="nc" id="L90">    Files.createDirectories(filePath.getParent());</span>
-<span class="nc" id="L91">    Files.copy(pictureFile.getInputStream(), filePath);</span>
-<span class="nc" id="L92">    return baseUrl + storagePath.substring(1) + &quot;/&quot; + filename;</span>
+<span class="fc" id="L88">            + pictureFile.getOriginalFilename();</span>
+<span class="fc" id="L89">    Path filePath = Paths.get(storagePath).resolve(filename);</span>
+<span class="fc" id="L90">    Files.createDirectories(filePath.getParent());</span>
+<span class="fc" id="L91">    Files.copy(pictureFile.getInputStream(), filePath);</span>
+<span class="fc" id="L92">    return baseUrl + storagePath.substring(1) + &quot;/&quot; + filename;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
