@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.api.domain.utils.UserUtils;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +30,8 @@ public class UserController {
   private final UserService userService;
 
   @GetMapping(&quot;/{profile}/overview&quot;)
-  public ResponseEntity&lt;ProfileDTO&gt; getProfile(
-      @RequestHeader(&quot;X-Signed-Context&quot;) String userIdRaw, @PathVariable String profile) {
-<span class="nc" id="L34">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
+  public ResponseEntity&lt;ProfileDTO&gt; getProfile(Principal principal, @PathVariable String profile) {
+<span class="nc" id="L34">    var userId = UUID.fromString(principal.getName());</span>
 
 <span class="nc" id="L36">    EUserCategory userCategory = UserUtils.getUserCategory(profile);</span>
 <span class="nc" id="L37">    User user = userService.getProfile(userId);</span>
