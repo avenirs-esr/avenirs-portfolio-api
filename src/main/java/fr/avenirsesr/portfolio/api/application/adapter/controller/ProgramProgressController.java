@@ -8,6 +8,8 @@ import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -26,13 +28,14 @@ public class ProgramProgressController {
   private final UserRepository userRepository;
 
   @GetMapping("/skills/overview")
-  public List<ProgramProgressDTO> getSkillsOverview(
-      @RequestHeader("X-Signed-Context") String userId) {
+  public List<ProgramProgressDTO> getSkillsOverview(Principal principal) {
     User user =
-        userRepository.findById(UUID.fromString(userId)).orElseThrow(UserNotFoundException::new);
+        userRepository
+            .findById(UUID.fromString(principal.getName()))
+            .orElseThrow(UserNotFoundException::new);
 
     if (!user.isStudent()) {
-      log.error("User {} is not a student", userId);
+      log.error("User {} is not a student", principal.getName());
       throw new UserIsNotStudentException();
     }
 

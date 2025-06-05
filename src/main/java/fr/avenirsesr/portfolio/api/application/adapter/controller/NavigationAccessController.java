@@ -7,6 +7,8 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+
+import java.security.Principal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +29,8 @@ public class NavigationAccessController {
 
   @GetMapping
   public ResponseEntity<NavigationAccessDTO> getStudentNavigationAccess(
-      @RequestHeader("X-Signed-Context") String userIdRaw) {
-    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn
+          Principal principal) {
+    var userId = UUID.fromString(principal.getName());
 
     log.info("Received request to get navigation access of student [{}]", userId);
 
