@@ -31,7 +31,7 @@ class NavigationAccessControllerIT {
   @BeforeEach
   void setUp() {
     studentId = UUID.fromString("9fe9516a-a528-4870-8f15-89187e368610");
-    teacherId = UUID.fromString("7f15a874-339c-4679-8d09-1f6624ea9971");
+    teacherId = UUID.fromString("56a75a55-2f69-456d-a92d-323149a5ab7f");
   }
 
   @Test

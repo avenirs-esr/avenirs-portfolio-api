@@ -59,6 +59,7 @@ public class SeederRunner implements CommandLineRunner {
     if (seedEnabled && userCont == 0) {
       var fakeUsers = new ArrayList<FakeUser>();
       fakeUsers.add(FakeUser.create().withEmail().withStudent());
+      fakeUsers.add(FakeUser.create().withEmail().withTeacher());
       fakeUsers.add(FakeUser.create().withEmail().withStudent().withTeacher());
       IntStream.range(0, 10)
           .mapToObj(i -> FakeUser.create().withStudent().withStudent())

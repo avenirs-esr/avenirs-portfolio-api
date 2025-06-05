@@ -282,4 +282,22 @@ public class ProgramProgressServiceImplTest {
     assertEquals(1, skillLevels1.size());
     assertEquals(ESkillLevelStatus.NOT_STARTED, skillLevels1.getFirst().getStatus());
   }
+
+  @Test
+  void shouldReturnNullWhenSkillLevelsIsEmpty() {
+    // Given
+    Skill skill = SkillFixture.create().withSkillLevels(Set.of()).toModel();
+    ProgramProgress progress =
+        ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill)).toModel();
+
+    when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of(progress));
+    // When
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
+
+    // Then
+    assertEquals(1, skills1.size());
+    assertTrue(skills1.getFirst().getSkillLevels().isEmpty());
+  }
 }
