@@ -30,37 +30,37 @@ public class RestExceptionHandler {
     log.error("Erreur métier inattendue", ex);
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(new ErrorResponse("BUSINESS_ERROR", "Une erreur métier est survenue."));
+        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse("NOT_FOUND", "Utilisateur non trouvé."));
+        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(BadImageTypeException.class)
   public ResponseEntity<ErrorResponse> handleUserNotFound(BadImageTypeException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(new ErrorResponse("IMAGE_TYPE_ERROR", "Format d'image non accepté."));
+        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(BadImageSizeException.class)
   public ResponseEntity<ErrorResponse> handleUserNotFound(BadImageSizeException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(new ErrorResponse("IMAGE_SIZE_ERROR", "La taille limite d'image a été atteinte."));
+        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(UserCategoryNotRecognizedException.class)
   public ResponseEntity<ErrorResponse> handleUserCategoryNotRecognized(
       UserCategoryNotRecognizedException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse("NOT_RECOGNIZED", "Catégorie de l'utilisateur non reconnue."));
+        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(UserIsNotStudentException.class)
   public ResponseEntity<ErrorResponse> handleUserIsNotStudent(UserIsNotStudentException ex) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
   }
 }
