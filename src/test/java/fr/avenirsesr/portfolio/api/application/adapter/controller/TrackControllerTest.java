@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.port.input.TrackService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+import java.security.Principal;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,12 +30,14 @@ class TrackControllerTest {
   private UUID userId;
   private User user;
   private Track track;
+  private Principal principal;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
     user = UserFixture.create().withId(userId).toModel();
     track = TrackFixture.create().withUser(user).toModel();
+    principal = () -> userId.toString();
   }
 
   @Test
@@ -45,8 +48,7 @@ class TrackControllerTest {
     when(trackService.programNameOfTrack(track)).thenReturn("Program Name");
 
     // When
-    ResponseEntity<List<TrackOverviewDTO>> response =
-        controller.getTrackOverview(userId.toString());
+    ResponseEntity<List<TrackOverviewDTO>> response = controller.getTrackOverview(principal);
 
     // Then
     assertEquals(200, response.getStatusCode().value());
@@ -71,7 +73,7 @@ class TrackControllerTest {
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
     // Then
-    assertThrows(UserNotFoundException.class, () -> controller.getTrackOverview(userId.toString()));
+    assertThrows(UserNotFoundException.class, () -> controller.getTrackOverview(principal));
 
     verify(userRepository).findById(userId);
     verifyNoMoreInteractions(trackService);

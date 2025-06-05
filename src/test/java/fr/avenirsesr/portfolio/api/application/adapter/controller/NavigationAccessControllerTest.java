@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+import java.security.Principal;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,12 +32,14 @@ class NavigationAccessControllerTest {
   @InjectMocks private NavigationAccessController controller;
 
   private UUID userId;
+  private Principal principal;
   private User user;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
     user = UserFixture.createStudent().withId(userId).toModel();
+    principal = () -> userId.toString();
   }
 
   @Test
@@ -51,8 +54,7 @@ class NavigationAccessControllerTest {
     when(programProgressService.isStudentFollowingAPCProgram(any(Student.class))).thenReturn(true);
 
     // When
-    ResponseEntity<NavigationAccessDTO> response =
-        controller.getStudentNavigationAccess(userId.toString());
+    ResponseEntity<NavigationAccessDTO> response = controller.getStudentNavigationAccess(principal);
 
     // Then
     assertEquals(200, response.getStatusCode().value());
@@ -77,8 +79,7 @@ class NavigationAccessControllerTest {
 
     // Then
     assertThrows(
-        UserNotFoundException.class,
-        () -> controller.getStudentNavigationAccess(userId.toString()));
+        UserNotFoundException.class, () -> controller.getStudentNavigationAccess(principal));
 
     verify(userRepository).findById(userId);
     verifyNoMoreInteractions(institutionService, programProgressService);
@@ -92,8 +93,7 @@ class NavigationAccessControllerTest {
 
     // Then
     assertThrows(
-        UserIsNotStudentException.class,
-        () -> controller.getStudentNavigationAccess(userId.toString()));
+        UserIsNotStudentException.class, () -> controller.getStudentNavigationAccess(principal));
 
     verify(userRepository).findById(userId);
     verifyNoMoreInteractions(institutionService, programProgressService);

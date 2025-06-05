@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+import java.security.Principal;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,11 +35,13 @@ public class ProgramProgressControllerTest {
 
   private UUID userId;
   private User user;
+  private Principal principal;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
     user = UserFixture.createStudent().withId(userId).toModel();
+    principal = () -> userId.toString();
   }
 
   @Test
@@ -52,8 +55,7 @@ public class ProgramProgressControllerTest {
     when(programProgressService.getSkillsOverview(any(Student.class))).thenReturn(serviceResponse);
 
     // When
-    List<ProgramProgressDTO> result =
-        programProgressController.getSkillsOverview(userId.toString());
+    List<ProgramProgressDTO> result = programProgressController.getSkillsOverview(principal);
 
     // Then
     assertEquals(1, result.size());
@@ -68,8 +70,7 @@ public class ProgramProgressControllerTest {
 
     // Then
     assertThrows(
-        UserNotFoundException.class,
-        () -> programProgressController.getSkillsOverview(userId.toString()));
+        UserNotFoundException.class, () -> programProgressController.getSkillsOverview(principal));
   }
 
   @Test
@@ -81,6 +82,6 @@ public class ProgramProgressControllerTest {
     // Then
     assertThrows(
         UserIsNotStudentException.class,
-        () -> programProgressController.getSkillsOverview(userId.toString()));
+        () -> programProgressController.getSkillsOverview(principal));
   }
 }
