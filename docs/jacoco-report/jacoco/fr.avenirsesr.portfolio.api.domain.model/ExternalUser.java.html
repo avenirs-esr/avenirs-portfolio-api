@@ -21,15 +21,15 @@ public class ExternalUser {
       EUserCategory category,
       String email,
       String firstName,
-<span class="nc" id="L24">      String lastName) {</span>
-<span class="nc" id="L25">    this.user = user;</span>
-<span class="nc" id="L26">    this.externalId = externalId;</span>
-<span class="nc" id="L27">    this.source = source;</span>
-<span class="nc" id="L28">    this.category = category;</span>
-<span class="nc" id="L29">    this.email = email;</span>
-<span class="nc" id="L30">    this.firstName = firstName;</span>
-<span class="nc" id="L31">    this.lastName = lastName;</span>
-<span class="nc" id="L32">  }</span>
+<span class="fc" id="L24">      String lastName) {</span>
+<span class="fc" id="L25">    this.user = user;</span>
+<span class="fc" id="L26">    this.externalId = externalId;</span>
+<span class="fc" id="L27">    this.source = source;</span>
+<span class="fc" id="L28">    this.category = category;</span>
+<span class="fc" id="L29">    this.email = email;</span>
+<span class="fc" id="L30">    this.firstName = firstName;</span>
+<span class="fc" id="L31">    this.lastName = lastName;</span>
+<span class="fc" id="L32">  }</span>
 
   public static ExternalUser create(
       User user,
@@ -39,7 +39,7 @@ public class ExternalUser {
       String email,
       String firstName,
       String lastName) {
-<span class="nc" id="L42">    return new ExternalUser(user, externalId, source, category, email, firstName, lastName);</span>
+<span class="fc" id="L42">    return new ExternalUser(user, externalId, source, category, email, firstName, lastName);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

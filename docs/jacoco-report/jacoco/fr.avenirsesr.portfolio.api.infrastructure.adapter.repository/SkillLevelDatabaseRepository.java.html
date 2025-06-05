@@ -18,12 +18,12 @@ public class SkillLevelDatabaseRepository
         jpaRepository,
         jpaRepository,
         skillLevel -&gt;
-<span class="nc" id="L21">            SkillLevelMapper.fromDomain(</span>
+<span class="fc" id="L21">            SkillLevelMapper.fromDomain(</span>
                 skillLevel,
-<span class="nc" id="L23">                SkillMapper.fromDomain(</span>
-<span class="nc" id="L24">                    skillLevel.getSkill(),</span>
-<span class="nc" id="L25">                    ProgramProgressMapper.fromDomain(skillLevel.getSkill().getProgramProgress())),</span>
-<span class="nc" id="L26">                skillLevel.getTracks().stream().map(TrackMapper::fromDomain).toList()),</span>
+<span class="fc" id="L23">                SkillMapper.fromDomain(</span>
+<span class="fc" id="L24">                    skillLevel.getSkill(),</span>
+<span class="fc" id="L25">                    ProgramProgressMapper.fromDomain(skillLevel.getSkill().getProgramProgress())),</span>
+<span class="fc" id="L26">                skillLevel.getTracks().stream().map(TrackMapper::fromDomain).toList()),</span>
         skillLevelEntity -&gt;
 <span class="nc" id="L28">            SkillLevelMapper.toDomain(</span>
                 skillLevelEntity,

@@ -17,16 +17,16 @@ public class AMS {
 
   private List&lt;SkillLevel&gt; skillLevels;
 
-<span class="nc" id="L20">  private AMS(UUID id, User user) {</span>
-<span class="nc" id="L21">    this.id = id;</span>
-<span class="nc" id="L22">    this.user = user;</span>
-<span class="nc" id="L23">  }</span>
+<span class="fc" id="L20">  private AMS(UUID id, User user) {</span>
+<span class="fc" id="L21">    this.id = id;</span>
+<span class="fc" id="L22">    this.user = user;</span>
+<span class="fc" id="L23">  }</span>
 
   public static AMS create(UUID id, User user) {
-<span class="nc" id="L26">    var ams = new AMS(id, user);</span>
-<span class="nc" id="L27">    ams.setSkillLevels(List.of());</span>
+<span class="fc" id="L26">    var ams = new AMS(id, user);</span>
+<span class="fc" id="L27">    ams.setSkillLevels(List.of());</span>
 
-<span class="nc" id="L29">    return ams;</span>
+<span class="fc" id="L29">    return ams;</span>
   }
 
   public static AMS toDomain(UUID id, User user, List&lt;SkillLevel&gt; skillLevels) {

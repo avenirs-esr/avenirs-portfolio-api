@@ -25,22 +25,22 @@ public class ProgramProgressDatabaseRepository
 
   @Override
   public List&lt;ProgramProgress&gt; findAllByStudent(Student student) {
-<span class="nc" id="L28">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L29">        .findAll(ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)))</span>
-<span class="nc" id="L30">        .stream()</span>
-<span class="nc" id="L31">        .map(ProgramProgressMapper::toDomain)</span>
-<span class="nc" id="L32">        .collect(Collectors.toList());</span>
+<span class="fc" id="L28">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L29">        .findAll(ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)))</span>
+<span class="fc" id="L30">        .stream()</span>
+<span class="fc" id="L31">        .map(ProgramProgressMapper::toDomain)</span>
+<span class="fc" id="L32">        .collect(Collectors.toList());</span>
   }
 
   @Override
   public List&lt;ProgramProgress&gt; findAllAPCByStudent(Student student) {
-<span class="nc" id="L37">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L38">        .findAll(</span>
-<span class="nc" id="L39">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
-<span class="nc" id="L40">                .and(ProgramProgressSpecification.isAPC()))</span>
-<span class="nc" id="L41">        .stream()</span>
-<span class="nc" id="L42">        .map(ProgramProgressMapper::toDomain)</span>
-<span class="nc" id="L43">        .collect(Collectors.toList());</span>
+<span class="fc" id="L37">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L38">        .findAll(</span>
+<span class="fc" id="L39">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
+<span class="fc" id="L40">                .and(ProgramProgressSpecification.isAPC()))</span>
+<span class="fc" id="L41">        .stream()</span>
+<span class="fc" id="L42">        .map(ProgramProgressMapper::toDomain)</span>
+<span class="fc" id="L43">        .collect(Collectors.toList());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

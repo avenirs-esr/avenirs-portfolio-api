@@ -16,8 +16,8 @@ public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Skil
         jpaRepository,
         jpaRepository,
         skill -&gt;
-<span class="nc" id="L19">            SkillMapper.fromDomain(</span>
-<span class="nc" id="L20">                skill, ProgramProgressMapper.fromDomain(skill.getProgramProgress())),</span>
+<span class="fc" id="L19">            SkillMapper.fromDomain(</span>
+<span class="fc" id="L20">                skill, ProgramProgressMapper.fromDomain(skill.getProgramProgress())),</span>
         skill -&gt;
 <span class="nc" id="L22">            SkillMapper.toDomain(</span>
 <span class="nc" id="L23">                skill, ProgramProgressMapper.toDomain(skill.getProgramProgress())));</span>

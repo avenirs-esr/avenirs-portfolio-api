@@ -27,17 +27,17 @@ public abstract class GenericJpaRepositoryAdapter&lt;D, E&gt; implements Generic
 
   @Override
   public void save(D domain) {
-<span class="nc" id="L30">    jpaRepository.save(fromDomain.apply(domain));</span>
-<span class="nc" id="L31">  }</span>
+<span class="fc" id="L30">    jpaRepository.save(fromDomain.apply(domain));</span>
+<span class="fc" id="L31">  }</span>
 
   @Override
   public void saveAll(List&lt;D&gt; domains) {
-<span class="nc" id="L35">    jpaRepository.saveAll(domains.stream().map(fromDomain).toList());</span>
-<span class="nc" id="L36">  }</span>
+<span class="fc" id="L35">    jpaRepository.saveAll(domains.stream().map(fromDomain).toList());</span>
+<span class="fc" id="L36">  }</span>
 
   @Override
   public Optional&lt;D&gt; findById(UUID id) {
-<span class="nc" id="L40">    return Optional.ofNullable(toDomain.apply(jpaRepository.findById(id).orElse(null)));</span>
+<span class="fc" id="L40">    return Optional.ofNullable(toDomain.apply(jpaRepository.findById(id).orElse(null)));</span>
   }
 
   @Override

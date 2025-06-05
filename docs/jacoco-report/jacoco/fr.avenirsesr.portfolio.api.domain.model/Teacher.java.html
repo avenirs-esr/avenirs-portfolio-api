@@ -16,21 +16,21 @@ public class Teacher {
   private String profilePicture;
   private String coverPicture;
 
-<span class="nc" id="L19">  private Teacher(User user) {</span>
-<span class="nc" id="L20">    this.user = user;</span>
-<span class="nc" id="L21">  }</span>
+<span class="fc" id="L19">  private Teacher(User user) {</span>
+<span class="fc" id="L20">    this.user = user;</span>
+<span class="fc" id="L21">  }</span>
 
   public static Teacher create(User user) {
 <span class="nc" id="L24">    return new Teacher(user);</span>
   }
 
   public static Teacher of(User user, String bio, String profilePicture, String coverPicture) {
-<span class="nc" id="L28">    var teacher = new Teacher(user);</span>
-<span class="nc" id="L29">    teacher.setBio(bio);</span>
-<span class="nc" id="L30">    teacher.setProfilePicture(profilePicture);</span>
-<span class="nc" id="L31">    teacher.setCoverPicture(coverPicture);</span>
+<span class="fc" id="L28">    var teacher = new Teacher(user);</span>
+<span class="fc" id="L29">    teacher.setBio(bio);</span>
+<span class="fc" id="L30">    teacher.setProfilePicture(profilePicture);</span>
+<span class="fc" id="L31">    teacher.setCoverPicture(coverPicture);</span>
 
-<span class="nc" id="L33">    return teacher;</span>
+<span class="fc" id="L33">    return teacher;</span>
   }
 
   public static Teacher toDomain(

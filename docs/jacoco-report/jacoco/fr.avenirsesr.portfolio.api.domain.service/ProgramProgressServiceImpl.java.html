@@ -26,8 +26,8 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   private final ProgramProgressRepository programProgressRepository;
 
   private static SkillLevel findCurrentSkillLevel(Set&lt;SkillLevel&gt; skillLevels) {
-<span class="pc bpc" id="L29" title="2 of 4 branches missed.">    if (skillLevels == null || skillLevels.isEmpty()) {</span>
-<span class="nc" id="L30">      return null;</span>
+<span class="pc bpc" id="L29" title="1 of 4 branches missed.">    if (skillLevels == null || skillLevels.isEmpty()) {</span>
+<span class="fc" id="L30">      return null;</span>
     }
 <span class="fc" id="L32">    return skillLevels.stream()</span>
 <span class="fc bfc" id="L33" title="All 2 branches covered.">        .filter(sl -&gt; sl.getStatus() == ESkillLevelStatus.UNDER_REVIEW)</span>
@@ -63,9 +63,9 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
 <span class="fc" id="L63">                              SkillLevel selectedSkillLevel =</span>
 <span class="fc" id="L64">                                  findCurrentSkillLevel(skill.getSkillLevels());</span>
                               Set&lt;SkillLevel&gt; selectedSkillLevelSet =
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">                                  selectedSkillLevel != null</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">                                  selectedSkillLevel != null</span>
 <span class="fc" id="L67">                                      ? Set.of(selectedSkillLevel)</span>
-<span class="pc" id="L68">                                      : Set.of();</span>
+<span class="fc" id="L68">                                      : Set.of();</span>
 <span class="fc" id="L69">                              return Skill.toDomain(</span>
 <span class="fc" id="L70">                                  skill.getId(), skill.getName(), selectedSkillLevelSet);</span>
                             })

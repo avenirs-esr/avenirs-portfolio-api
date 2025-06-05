@@ -23,8 +23,8 @@ public class UserDatabaseRepository extends GenericJpaRepositoryAdapter&lt;User,
 
   @Override
   public void saveAllStudents(List&lt;Student&gt; students) {
-<span class="nc" id="L26">    jpaRepository.saveAll(students.stream().map(UserMapper::fromDomain).toList());</span>
-<span class="nc" id="L27">  }</span>
+<span class="fc" id="L26">    jpaRepository.saveAll(students.stream().map(UserMapper::fromDomain).toList());</span>
+<span class="fc" id="L27">  }</span>
 
   @Override
   public void save(Teacher teacher) {
@@ -33,8 +33,8 @@ public class UserDatabaseRepository extends GenericJpaRepositoryAdapter&lt;User,
 
   @Override
   public void saveAllTeachers(List&lt;Teacher&gt; teachers) {
-<span class="nc" id="L36">    jpaRepository.saveAll(teachers.stream().map(UserMapper::fromDomain).toList());</span>
-<span class="nc" id="L37">  }</span>
+<span class="fc" id="L36">    jpaRepository.saveAll(teachers.stream().map(UserMapper::fromDomain).toList());</span>
+<span class="fc" id="L37">  }</span>
 
   @Override
   public long countAll() {
