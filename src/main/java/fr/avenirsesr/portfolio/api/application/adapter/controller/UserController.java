@@ -30,8 +30,7 @@ public class UserController {
   private final UserService userService;
 
   @GetMapping("/{profile}/overview")
-  public ResponseEntity<ProfileDTO> getProfile(
-          Principal principal, @PathVariable String profile) {
+  public ResponseEntity<ProfileDTO> getProfile(Principal principal, @PathVariable String profile) {
     var userId = UUID.fromString(principal.getName());
 
     EUserCategory userCategory = UserUtils.getUserCategory(profile);

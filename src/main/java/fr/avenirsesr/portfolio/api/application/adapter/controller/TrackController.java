@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.api.domain.model.Track;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.input.TrackService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
-
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +14,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,8 +26,7 @@ public class TrackController {
   private final TrackService trackService;
 
   @GetMapping("/overview")
-  public ResponseEntity<List<TrackOverviewDTO>> getTrackOverview(
-          Principal principal) {
+  public ResponseEntity<List<TrackOverviewDTO>> getTrackOverview(Principal principal) {
     log.info("Received request to track overview of user [{}]", principal.getName());
     UUID userId = UUID.fromString(principal.getName());
     User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);

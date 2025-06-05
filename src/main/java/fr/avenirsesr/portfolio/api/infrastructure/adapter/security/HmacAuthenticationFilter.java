@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.util.Base64;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,7 +40,7 @@ public class HmacAuthenticationFilter extends OncePerRequestFilter {
 
     if (!payloadIsValid(userPayload)) {
       UserNotAuthorizedException exception = new UserNotAuthorizedException();
-      log.error("Invalid HMAC authentication attempt. Payload is expired or invalid. {}",payload);
+      log.error("Invalid HMAC authentication attempt. Payload is expired or invalid. {}", payload);
       throw exception;
     }
 

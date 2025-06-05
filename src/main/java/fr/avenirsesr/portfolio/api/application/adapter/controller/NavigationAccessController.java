@@ -7,14 +7,12 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
-
 import java.security.Principal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,8 +26,7 @@ public class NavigationAccessController {
   private final ProgramProgressService programProgressService;
 
   @GetMapping
-  public ResponseEntity<NavigationAccessDTO> getStudentNavigationAccess(
-          Principal principal) {
+  public ResponseEntity<NavigationAccessDTO> getStudentNavigationAccess(Principal principal) {
     var userId = UUID.fromString(principal.getName());
 
     log.info("Received request to get navigation access of student [{}]", userId);
