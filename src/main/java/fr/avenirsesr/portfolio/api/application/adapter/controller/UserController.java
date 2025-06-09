@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.api.application.adapter.dto.ProfileDTO;
-import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProfileMapper;
+import fr.avenirsesr.portfolio.api.application.adapter.dto.ProfileOverviewDTO;
+import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProfileOverviewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.request.ProfileUpdateRequest;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
@@ -29,7 +29,7 @@ public class UserController {
   private final UserService userService;
 
   @GetMapping("/{profile}/overview")
-  public ResponseEntity<ProfileDTO> getProfile(
+  public ResponseEntity<ProfileOverviewDTO> getProfile(
       @RequestHeader("X-Signed-Context") String userIdRaw, @PathVariable String profile) {
     var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn
 
@@ -37,9 +37,9 @@ public class UserController {
     User user = userService.getProfile(userId);
 
     if (userCategory == EUserCategory.STUDENT) {
-      return ResponseEntity.ok(ProfileMapper.userStudentDomainToDto(user.toStudent()));
+      return ResponseEntity.ok(ProfileOverviewMapper.userStudentDomainToDto(user.toStudent()));
     } else {
-      return ResponseEntity.ok(ProfileMapper.userTeacherDomainToDto(user.toTeacher()));
+      return ResponseEntity.ok(ProfileOverviewMapper.userTeacherDomainToDto(user.toTeacher()));
     }
   }
 

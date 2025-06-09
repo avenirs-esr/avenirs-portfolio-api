@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class TrackControllerIT {
+class TraceControllerIT {
 
   @Autowired private MockMvc mockMvc;
 
@@ -38,13 +38,13 @@ class TrackControllerIT {
   void shouldReturnTrackOverview() throws Exception {
     mockMvc
         .perform(
-            get("/me/track/overview")
+            get("/me/trace/overview")
                 .header("X-Signed-Context", studentId.toString())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].trackId").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
+        .andExpect(jsonPath("$[0].traceId").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
         .andExpect(jsonPath("$[0].title").value("Ut accusantium nostrum similique."))
         .andExpect(jsonPath("$[0].isGroup").value(false));
   }
@@ -52,7 +52,7 @@ class TrackControllerIT {
   @Test
   void shouldReturn404WhenUserNotExist() throws Exception {
     mockMvc
-        .perform(get("/me/track/overview").header("X-Signed-Context", UUID.randomUUID().toString()))
+        .perform(get("/me/trace/overview").header("X-Signed-Context", UUID.randomUUID().toString()))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.message").value("User not found"))

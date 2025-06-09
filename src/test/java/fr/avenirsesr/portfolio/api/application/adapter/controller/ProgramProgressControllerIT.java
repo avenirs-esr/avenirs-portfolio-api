@@ -40,7 +40,7 @@ class ProgramProgressControllerIT {
   void shouldReturnSkillsOverviewForStudent() throws Exception {
     mockMvc
         .perform(
-            get("/program-progress/skills/overview")
+            get("/program-progress/overview")
                 .header("X-Signed-Context", studentId.toString())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -50,25 +50,27 @@ class ProgramProgressControllerIT {
         .andExpect(jsonPath("$[0].name").value("North Master - 6"))
         .andExpect(jsonPath("$[0].skills[0].id").value("95af3200-e5d6-4e1d-90e8-67c36ea20cf1"))
         .andExpect(jsonPath("$[0].skills[0].name").value("Skill eius"))
-        .andExpect(jsonPath("$[0].skills[0].levels.size()").value(1))
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists())
         .andExpect(
-            jsonPath("$[0].skills[0].levels[0].id").value("7050764a-3195-4ae7-8d43-510f7d7154ff"))
-        .andExpect(jsonPath("$[0].skills[0].levels[0].name").value("Niv. 1"))
-        .andExpect(jsonPath("$[0].skills[0].levels[0].status").value("UNDER_REVIEW"))
+            jsonPath("$[0].skills[0].currentSkillLevel.id")
+                .value("7050764a-3195-4ae7-8d43-510f7d7154ff"))
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.name").value("Niv. 1"))
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.status").value("UNDER_REVIEW"))
         .andExpect(jsonPath("$[0].skills[1].id").value("721f6782-e37e-4767-b6e6-fb4fd7543803"))
         .andExpect(jsonPath("$[0].skills[1].name").value("Skill est"))
-        .andExpect(jsonPath("$[0].skills[1].levels.size()").value(1))
+        .andExpect(jsonPath("$[0].skills[1].currentSkillLevel").exists())
         .andExpect(
-            jsonPath("$[0].skills[1].levels[0].id").value("91511147-6488-44ac-866e-88db9a2c8a82"))
-        .andExpect(jsonPath("$[0].skills[1].levels[0].name").value("Niv. 4"))
-        .andExpect(jsonPath("$[0].skills[1].levels[0].status").value("TO_BE_EVALUATED"));
+            jsonPath("$[0].skills[1].currentSkillLevel.id")
+                .value("91511147-6488-44ac-866e-88db9a2c8a82"))
+        .andExpect(jsonPath("$[0].skills[1].currentSkillLevel.name").value("Niv. 4"))
+        .andExpect(jsonPath("$[0].skills[1].currentSkillLevel.status").value("TO_BE_EVALUATED"));
   }
 
   @Test
   void shouldReturn404WhenUserNotFound() throws Exception {
     mockMvc
         .perform(
-            get("/program-progress/skills/overview")
+            get("/program-progress/overview")
                 .header("X-Signed-Context", UUID.randomUUID().toString())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
@@ -81,7 +83,7 @@ class ProgramProgressControllerIT {
   void shouldReturn403WhenUserIsNotStudent() throws Exception {
     mockMvc
         .perform(
-            get("/program-progress/skills/overview")
+            get("/program-progress/overview")
                 .header("X-Signed-Context", teacherId.toString())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden())

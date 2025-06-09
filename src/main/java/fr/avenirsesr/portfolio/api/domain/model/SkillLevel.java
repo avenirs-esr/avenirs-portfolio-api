@@ -17,7 +17,7 @@ public class SkillLevel {
   private final String name;
 
   private ESkillLevelStatus status;
-  private List<Track> tracks;
+  private List<Trace> traces;
   private List<AMS> amses;
   private Skill skill;
 
@@ -30,7 +30,7 @@ public class SkillLevel {
     var skillLevel = new SkillLevel(id, name);
     skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);
     skillLevel.setAmses(List.of());
-    skillLevel.setTracks(List.of());
+    skillLevel.setTraces(List.of());
 
     return skillLevel;
   }
@@ -39,12 +39,12 @@ public class SkillLevel {
       UUID id,
       String name,
       ESkillLevelStatus status,
-      List<Track> tracks,
+      List<Trace> traces,
       List<AMS> amses,
       Skill skill) {
     var skillLevel = new SkillLevel(id, name);
     skillLevel.setStatus(status);
-    skillLevel.setTracks(tracks);
+    skillLevel.setTraces(traces);
     skillLevel.setAmses(amses);
     skillLevel.setSkill(skill);
 
