@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import fixtures.ProgramProgressFixture;
 import fixtures.SkillFixture;
 import fixtures.UserFixture;
-import fr.avenirsesr.portfolio.api.application.adapter.dto.ProgramProgressDTO;
+import fr.avenirsesr.portfolio.api.application.adapter.dto.ProgramProgressOverviewDTO;
 import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
@@ -55,11 +55,12 @@ public class ProgramProgressControllerTest {
     when(programProgressService.getSkillsOverview(any(Student.class))).thenReturn(serviceResponse);
 
     // When
-    List<ProgramProgressDTO> result = programProgressController.getSkillsOverview(principal);
+    List<ProgramProgressOverviewDTO> result =
+        programProgressController.getSkillsOverview(principal);
 
     // Then
     assertEquals(1, result.size());
-    ProgramProgressDTO dto = result.getFirst();
+    ProgramProgressOverviewDTO dto = result.getFirst();
     assertEquals(programProgress.getId(), dto.id());
   }
 

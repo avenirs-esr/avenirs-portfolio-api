@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-class TrackControllerIT {
+class TraceControllerIT {
 
   @Autowired private MockMvc mockMvc;
 
@@ -45,7 +45,7 @@ class TrackControllerIT {
   void shouldReturnTrackOverview() throws Exception {
     mockMvc
         .perform(
-            get("/me/track/overview")
+            get("/me/trace/overview")
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -53,7 +53,7 @@ class TrackControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].trackId").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
+        .andExpect(jsonPath("$[0].traceId").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
         .andExpect(jsonPath("$[0].title").value("Ut accusantium nostrum similique."))
         .andExpect(jsonPath("$[0].isGroup").value(false));
   }
@@ -62,7 +62,7 @@ class TrackControllerIT {
   void shouldReturn404WhenUserNotExist() throws Exception {
     mockMvc
         .perform(
-            get("/me/track/overview")
+            get("/me/trace/overview")
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature))

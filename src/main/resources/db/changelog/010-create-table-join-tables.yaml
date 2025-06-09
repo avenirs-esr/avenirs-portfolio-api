@@ -4,10 +4,10 @@ databaseChangeLog:
       author: bilelbanelhaq
       changes:
         - createTable:
-            tableName: track_skill_levels
+            tableName: trace_skill_levels
             columns:
               - column:
-                  name: track_id
+                  name: trace_id
                   type: UUID
                   constraints:
                     nullable: false
@@ -24,19 +24,19 @@ databaseChangeLog:
             stripComments: true
 
         - addForeignKeyConstraint:
-            baseTableName: track_skill_levels
-            baseColumnNames: track_id
-            referencedTableName: track
+            baseTableName: trace_skill_levels
+            baseColumnNames: trace_id
+            referencedTableName: trace
             referencedColumnNames: id
-            constraintName: fk_track_skill_levels_track
+            constraintName: fk_trace_skill_levels_trace
             onDelete: CASCADE
 
         - addForeignKeyConstraint:
-            baseTableName: track_skill_levels
+            baseTableName: trace_skill_levels
             baseColumnNames: skill_level_id
             referencedTableName: skill_level
             referencedColumnNames: id
-            constraintName: fk_track_skill_levels_skill_level
+            constraintName: fk_trace_skill_levels_skill_level
             onDelete: CASCADE
 
   - changeSet:
@@ -44,10 +44,10 @@ databaseChangeLog:
       author: bilelbanelhaq
       changes:
         - createTable:
-            tableName: track_ams
+            tableName: trace_ams
             columns:
               - column:
-                  name: track_id
+                  name: trace_id
                   type: UUID
                   constraints:
                     nullable: false
@@ -64,19 +64,19 @@ databaseChangeLog:
             stripComments: true
 
         - addForeignKeyConstraint:
-            baseTableName: track_ams
-            baseColumnNames: track_id
-            referencedTableName: track
+            baseTableName: trace_ams
+            baseColumnNames: trace_id
+            referencedTableName: trace
             referencedColumnNames: id
-            constraintName: fk_track_ams_track
+            constraintName: fk_trace_ams_trace
             onDelete: CASCADE
 
         - addForeignKeyConstraint:
-            baseTableName: track_ams
+            baseTableName: trace_ams
             baseColumnNames: ams_id
             referencedTableName: ams
             referencedColumnNames: id
-            constraintName: fk_track_ams_ams
+            constraintName: fk_trace_ams_ams
             onDelete: CASCADE
 
   - changeSet:

@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Track {
+public class Trace {
   private final UUID id;
   private final User user;
   private String title;
@@ -17,23 +17,23 @@ public class Track {
   private Instant createdAt;
   private boolean isGroup;
 
-  private Track(UUID id, User user, String title, Instant createdAt) {
+  private Trace(UUID id, User user, String title, Instant createdAt) {
     this.id = id;
     this.user = user;
     this.title = title;
     this.createdAt = createdAt;
   }
 
-  public static Track create(UUID id, User user, String title) {
-    var track = new Track(id, user, title, Instant.now());
-    track.setSkillLevels(List.of());
-    track.setAmses(List.of());
-    track.setGroup(false);
+  public static Trace create(UUID id, User user, String title) {
+    var trace = new Trace(id, user, title, Instant.now());
+    trace.setSkillLevels(List.of());
+    trace.setAmses(List.of());
+    trace.setGroup(false);
 
-    return track;
+    return trace;
   }
 
-  public static Track toDomain(
+  public static Trace toDomain(
       UUID id,
       User user,
       String title,
@@ -41,11 +41,11 @@ public class Track {
       List<AMS> amses,
       boolean group,
       Instant createdAt) {
-    var track = new Track(id, user, title, createdAt);
-    track.setSkillLevels(skillLevels);
-    track.setAmses(amses);
-    track.setGroup(group);
+    var trace = new Trace(id, user, title, createdAt);
+    trace.setSkillLevels(skillLevels);
+    trace.setAmses(amses);
+    trace.setGroup(group);
 
-    return track;
+    return trace;
   }
 }

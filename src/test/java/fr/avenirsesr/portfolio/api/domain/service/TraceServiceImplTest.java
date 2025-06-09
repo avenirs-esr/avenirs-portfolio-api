@@ -8,7 +8,7 @@ import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.Track;
+import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class TrackServiceImplTest {
-  @InjectMocks private TrackServiceImpl trackService;
+public class TraceServiceImplTest {
+  @InjectMocks private TraceServiceImpl traceService;
 
   private Student student;
 
@@ -30,10 +30,10 @@ public class TrackServiceImplTest {
   @Test
   void givenTrackWithoutSkillLevels_shouldReturnLifeProject() {
     // Given
-    Track track = TrackFixture.create().withUser(student.getUser()).toModel();
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
     // When
-    String result = trackService.programNameOfTrack(track);
+    String result = traceService.programNameOfTrace(trace);
 
     // Then
     assertEquals("LIFE_PROJECT", result);
@@ -47,14 +47,14 @@ public class TrackServiceImplTest {
         ProgramProgressFixture.create().withProgram(program).withStudent(student).toModel();
     Skill skill = SkillFixture.create().withSkillLevels(1).withProgramProgress(progress).toModel();
     SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
-    Track track =
-        TrackFixture.create()
+    Trace trace =
+        TraceFixture.create()
             .withUser(student.getUser())
             .withSkillLevels(List.of(skillLevel))
             .toModel();
 
     // When
-    String result = trackService.programNameOfTrack(track);
+    String result = traceService.programNameOfTrace(trace);
 
     // Then
     assertEquals("LIFE_PROJECT", result);
@@ -68,14 +68,14 @@ public class TrackServiceImplTest {
         ProgramProgressFixture.create().withProgram(program).withStudent(student).toModel();
     Skill skill = SkillFixture.create().withSkillLevels(1).withProgramProgress(progress).toModel();
     SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
-    Track track =
-        TrackFixture.create()
+    Trace trace =
+        TraceFixture.create()
             .withUser(student.getUser())
             .withSkillLevels(List.of(skillLevel))
             .toModel();
 
     // When
-    String result = trackService.programNameOfTrack(track);
+    String result = traceService.programNameOfTrace(trace);
 
     // Then
     assertEquals(program.getName(), result);

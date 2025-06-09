@@ -4,7 +4,7 @@ databaseChangeLog:
       author: bilelbanelhaq
       changes:
         - createTable:
-            tableName: track
+            tableName: trace
             columns:
               - column:
                   name: id
@@ -40,9 +40,9 @@ databaseChangeLog:
             stripComments: true
 
         - addForeignKeyConstraint:
-            baseTableName: track
+            baseTableName: trace
             baseColumnNames: user_id
             referencedTableName: users
             referencedColumnNames: id
-            constraintName: fk_track_user
+            constraintName: fk_trace_user
             onDelete: CASCADE

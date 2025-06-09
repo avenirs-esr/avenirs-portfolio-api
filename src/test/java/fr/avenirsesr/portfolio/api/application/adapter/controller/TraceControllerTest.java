@@ -3,12 +3,12 @@ package fr.avenirsesr.portfolio.api.application.adapter.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import fixtures.TrackFixture;
+import fixtures.TraceFixture;
 import fixtures.UserFixture;
-import fr.avenirsesr.portfolio.api.application.adapter.dto.TrackOverviewDTO;
+import fr.avenirsesr.portfolio.api.application.adapter.dto.TraceOverviewDTO;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.*;
-import fr.avenirsesr.portfolio.api.domain.port.input.TrackService;
+import fr.avenirsesr.portfolio.api.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
 import java.security.Principal;
 import java.util.*;
@@ -20,23 +20,23 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-class TrackControllerTest {
+class TraceControllerTest {
 
   @Mock private UserRepository userRepository;
-  @Mock private TrackService trackService;
+  @Mock private TraceService traceService;
 
-  @InjectMocks private TrackController controller;
+  @InjectMocks private TraceController controller;
 
   private UUID userId;
   private User user;
-  private Track track;
+  private Trace trace;
   private Principal principal;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
     user = UserFixture.create().withId(userId).toModel();
-    track = TrackFixture.create().withUser(user).toModel();
+    trace = TraceFixture.create().withUser(user).toModel();
     principal = () -> userId.toString();
   }
 
@@ -44,27 +44,27 @@ class TrackControllerTest {
   void shouldReturnTrackOverviewForUser() {
     // Given
     when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-    when(trackService.lastTracksOf(user)).thenReturn(List.of(track));
-    when(trackService.programNameOfTrack(track)).thenReturn("Program Name");
+    when(traceService.lastTracesOf(user)).thenReturn(List.of(trace));
+    when(traceService.programNameOfTrace(trace)).thenReturn("Program Name");
 
     // When
-    ResponseEntity<List<TrackOverviewDTO>> response = controller.getTrackOverview(principal);
+    ResponseEntity<List<TraceOverviewDTO>> response = controller.getTraceOverview(principal);
 
     // Then
     assertEquals(200, response.getStatusCode().value());
 
-    List<TrackOverviewDTO> body = response.getBody();
+    List<TraceOverviewDTO> body = response.getBody();
     assertNotNull(body);
     assertEquals(1, body.size());
 
-    TrackOverviewDTO dto = body.getFirst();
-    assertEquals(track.getId(), dto.trackId());
-    assertEquals(track.getTitle(), dto.title());
+    TraceOverviewDTO dto = body.getFirst();
+    assertEquals(trace.getId(), dto.traceId());
+    assertEquals(trace.getTitle(), dto.title());
     assertEquals("Program Name", dto.programName());
 
     verify(userRepository).findById(userId);
-    verify(trackService).lastTracksOf(user);
-    verify(trackService).programNameOfTrack(track);
+    verify(traceService).lastTracesOf(user);
+    verify(traceService).programNameOfTrace(trace);
   }
 
   @Test
@@ -73,9 +73,9 @@ class TrackControllerTest {
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
     // Then
-    assertThrows(UserNotFoundException.class, () -> controller.getTrackOverview(principal));
+    assertThrows(UserNotFoundException.class, () -> controller.getTraceOverview(principal));
 
     verify(userRepository).findById(userId);
-    verifyNoMoreInteractions(trackService);
+    verifyNoMoreInteractions(traceService);
   }
 }

@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.api.domain.service;
 
-import fr.avenirsesr.portfolio.api.domain.model.Track;
+import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
-import fr.avenirsesr.portfolio.api.domain.port.input.TrackService;
-import fr.avenirsesr.portfolio.api.domain.port.output.repository.TrackRepository;
+import fr.avenirsesr.portfolio.api.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.api.domain.port.output.repository.TraceRepository;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,18 +13,18 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @AllArgsConstructor
 @Service
-public class TrackServiceImpl implements TrackService {
+public class TraceServiceImpl implements TraceService {
   private static final int MAX_TRACKS_OVERVIEW = 3;
-  private final TrackRepository trackRepository;
+  private final TraceRepository traceRepository;
 
   @Override
-  public String programNameOfTrack(Track track) {
-    return track.getSkillLevels().isEmpty()
-            || track.getSkillLevels().stream()
+  public String programNameOfTrace(Trace trace) {
+    return trace.getSkillLevels().isEmpty()
+            || trace.getSkillLevels().stream()
                 .noneMatch(
                     skillLevel -> skillLevel.getSkill().getProgramProgress().getProgram().isAPC())
         ? EPortfolioType.LIFE_PROJECT.name()
-        : track.getSkillLevels().stream()
+        : trace.getSkillLevels().stream()
             .filter(skillLevel -> skillLevel.getSkill().getProgramProgress().getProgram().isAPC())
             .findAny()
             .orElseThrow()
@@ -35,7 +35,7 @@ public class TrackServiceImpl implements TrackService {
   }
 
   @Override
-  public List<Track> lastTracksOf(User user) {
-    return trackRepository.findLastsOf(user, MAX_TRACKS_OVERVIEW);
+  public List<Trace> lastTracesOf(User user) {
+    return traceRepository.findLastsOf(user, MAX_TRACKS_OVERVIEW);
   }
 }

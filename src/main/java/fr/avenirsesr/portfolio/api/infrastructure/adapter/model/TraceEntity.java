@@ -17,12 +17,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "track")
+@Table(name = "trace")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class TrackEntity {
+public class TraceEntity {
   @Id private UUID id;
 
   @ManyToOne(optional = false)
@@ -33,15 +33,15 @@ public class TrackEntity {
 
   @ManyToMany
   @JoinTable(
-      name = "track_skill_levels",
-      joinColumns = @JoinColumn(name = "track_id"),
+      name = "trace_skill_levels",
+      joinColumns = @JoinColumn(name = "trace_id"),
       inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
   private List<SkillLevelEntity> skillLevels;
 
   @ManyToMany
   @JoinTable(
-      name = "track_ams",
-      joinColumns = @JoinColumn(name = "track_id"),
+      name = "trace_ams",
+      joinColumns = @JoinColumn(name = "trace_id"),
       inverseJoinColumns = @JoinColumn(name = "ams_id"))
   private List<AMSEntity> amses;
 

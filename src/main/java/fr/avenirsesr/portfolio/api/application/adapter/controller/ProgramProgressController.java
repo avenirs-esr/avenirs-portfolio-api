@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.api.application.adapter.dto.ProgramProgressDTO;
-import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressMapper;
+import fr.avenirsesr.portfolio.api.application.adapter.dto.ProgramProgressOverviewDTO;
+import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressOverviewMapper;
 import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
@@ -25,8 +25,8 @@ public class ProgramProgressController {
   private final ProgramProgressService programProgressService;
   private final UserRepository userRepository;
 
-  @GetMapping("/skills/overview")
-  public List<ProgramProgressDTO> getSkillsOverview(Principal principal) {
+  @GetMapping("/overview")
+  public List<ProgramProgressOverviewDTO> getSkillsOverview(Principal principal) {
     User user =
         userRepository
             .findById(UUID.fromString(principal.getName()))
@@ -39,7 +39,9 @@ public class ProgramProgressController {
 
     Student student = user.toStudent();
     return programProgressService.getSkillsOverview(student).entrySet().stream()
-        .map(entry -> ProgramProgressMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
+        .map(
+            entry ->
+                ProgramProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
         .toList();
   }
 }

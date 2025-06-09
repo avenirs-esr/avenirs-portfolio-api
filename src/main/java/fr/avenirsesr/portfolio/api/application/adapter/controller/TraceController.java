@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.api.application.adapter.dto.TrackOverviewDTO;
-import fr.avenirsesr.portfolio.api.application.adapter.mapper.TrackOverviewMapper;
+import fr.avenirsesr.portfolio.api.application.adapter.dto.TraceOverviewDTO;
+import fr.avenirsesr.portfolio.api.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.api.domain.model.Track;
+import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.User;
-import fr.avenirsesr.portfolio.api.domain.port.input.TrackService;
+import fr.avenirsesr.portfolio.api.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
 import java.security.Principal;
 import java.util.List;
@@ -20,22 +20,22 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @AllArgsConstructor
 @RestController
-@RequestMapping("/me/track")
-public class TrackController {
+@RequestMapping("/me/trace")
+public class TraceController {
   private final UserRepository userRepository;
-  private final TrackService trackService;
+  private final TraceService traceService;
 
   @GetMapping("/overview")
-  public ResponseEntity<List<TrackOverviewDTO>> getTrackOverview(Principal principal) {
+  public ResponseEntity<List<TraceOverviewDTO>> getTraceOverview(Principal principal) {
     log.info("Received request to track overview of user [{}]", principal.getName());
     UUID userId = UUID.fromString(principal.getName());
     User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
-    List<Track> tracks = trackService.lastTracksOf(user);
+    List<Trace> traces = traceService.lastTracesOf(user);
 
-    List<TrackOverviewDTO> response =
-        tracks.stream()
-            .map(track -> TrackOverviewMapper.toDTO(track, trackService.programNameOfTrack(track)))
+    List<TraceOverviewDTO> response =
+        traces.stream()
+            .map(trace -> TraceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))
             .toList();
 
     return ResponseEntity.ok(response);
