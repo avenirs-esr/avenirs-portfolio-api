@@ -6,6 +6,6 @@ import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 public interface SkillLevelOverviewMapper {
   static SkillLevelOverviewDTO fromDomainToDto(SkillLevel skillLevel) {
     return new SkillLevelOverviewDTO(
-        skillLevel.getId(), skillLevel.getName(), skillLevel.getStatus().toString());
+        skillLevel.getId(), skillLevel.getName(), skillLevel.getStatus());
   }
 }
