@@ -2,15 +2,15 @@ package fixtures;
 
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.api.domain.model.Track;
+import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.User;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeTrack;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeTrace;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class TrackFixture {
+public class TraceFixture {
 
   private UUID id;
   private User user;
@@ -20,9 +20,9 @@ public class TrackFixture {
   private Instant createdAt;
   private boolean isGroup;
 
-  private TrackFixture() {
+  private TraceFixture() {
     var fakeUser = UserFixture.create().toModel();
-    var base = FakeTrack.of(fakeUser).toModel();
+    var base = FakeTrace.of(fakeUser).toModel();
     this.id = base.getId();
     this.user = base.getUser();
     this.title = base.getTitle();
@@ -32,64 +32,64 @@ public class TrackFixture {
     this.isGroup = base.isGroup();
   }
 
-  public static TrackFixture create() {
-    return new TrackFixture();
+  public static TraceFixture create() {
+    return new TraceFixture();
   }
 
-  public TrackFixture withId(UUID id) {
+  public TraceFixture withId(UUID id) {
     this.id = id;
     return this;
   }
 
-  public TrackFixture withUser(User user) {
+  public TraceFixture withUser(User user) {
     this.user = user;
     return this;
   }
 
-  public TrackFixture withTitle(String title) {
+  public TraceFixture withTitle(String title) {
     this.title = title;
     return this;
   }
 
-  public TrackFixture withSkillLevels(List<SkillLevel> skillLevels) {
+  public TraceFixture withSkillLevels(List<SkillLevel> skillLevels) {
     this.skillLevels = skillLevels;
     return this;
   }
 
-  public TrackFixture withSkillLevels(int count) {
+  public TraceFixture withSkillLevels(int count) {
     this.skillLevels = SkillLevelFixture.create().withCount(count);
     return this;
   }
 
-  public TrackFixture withAmses(List<AMS> amses) {
+  public TraceFixture withAmses(List<AMS> amses) {
     this.amses = amses;
     return this;
   }
 
-  public TrackFixture withAmses(int count) {
+  public TraceFixture withAmses(int count) {
     this.amses = AMSFixture.create().withCount(count);
     return this;
   }
 
-  public TrackFixture withCreatedAt(Instant createdAt) {
+  public TraceFixture withCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
     return this;
   }
 
-  public TrackFixture withGroup(boolean isGroup) {
+  public TraceFixture withGroup(boolean isGroup) {
     this.isGroup = isGroup;
     return this;
   }
 
-  public List<Track> withCount(int count) {
-    List<Track> tracks = new ArrayList<>();
+  public List<Trace> withCount(int count) {
+    List<Trace> traces = new ArrayList<>();
     for (int i = 0; i < count; i++) {
-      tracks.add(create().toModel());
+      traces.add(create().toModel());
     }
-    return tracks;
+    return traces;
   }
 
-  public Track toModel() {
-    return Track.toDomain(id, user, title, skillLevels, amses, isGroup, createdAt);
+  public Trace toModel() {
+    return Trace.toDomain(id, user, title, skillLevels, amses, isGroup, createdAt);
   }
 }

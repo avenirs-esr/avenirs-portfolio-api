@@ -3,7 +3,7 @@ package fixtures;
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.api.domain.model.Track;
+import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeSkillLevel;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class SkillLevelFixture {
   private UUID id;
   private String name;
   private ESkillLevelStatus status;
-  private List<Track> tracks;
+  private List<Trace> traces;
   private List<AMS> amses;
   private Skill skill;
 
@@ -24,7 +24,7 @@ public class SkillLevelFixture {
     this.id = base.getId();
     this.name = base.getName();
     this.status = base.getStatus();
-    this.tracks = base.getTracks();
+    this.traces = base.getTraces();
     this.amses = base.getAmses();
     this.skill = base.getSkill();
   }
@@ -48,8 +48,8 @@ public class SkillLevelFixture {
     return this;
   }
 
-  public SkillLevelFixture withTracks(List<Track> tracks) {
-    this.tracks = tracks;
+  public SkillLevelFixture withTrace(List<Trace> traces) {
+    this.traces = traces;
     return this;
   }
 
@@ -72,6 +72,6 @@ public class SkillLevelFixture {
   }
 
   public SkillLevel toModel() {
-    return SkillLevel.toDomain(id, name, status, tracks, amses, skill);
+    return SkillLevel.toDomain(id, name, status, traces, amses, skill);
   }
 }

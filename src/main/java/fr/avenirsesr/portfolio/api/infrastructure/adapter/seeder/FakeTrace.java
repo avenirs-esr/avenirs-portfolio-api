@@ -2,43 +2,43 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.api.domain.model.Track;
+import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public class FakeTrack {
+public class FakeTrace {
   private static final FakerProvider faker = new FakerProvider();
-  private final Track track;
+  private final Trace trace;
 
-  private FakeTrack(Track track) {
-    this.track = track;
+  private FakeTrace(Trace trace) {
+    this.trace = trace;
   }
 
-  public static FakeTrack of(User user) {
-    return new FakeTrack(
-        Track.create(
+  public static FakeTrace of(User user) {
+    return new FakeTrace(
+        Trace.create(
             UUID.fromString(faker.call().internet().uuid()),
             user,
             faker.call().lorem().sentence()));
   }
 
-  public FakeTrack withSkillLevel(List<SkillLevel> skillLevels) {
-    track.setSkillLevels(skillLevels);
+  public FakeTrace withSkillLevel(List<SkillLevel> skillLevels) {
+    trace.setSkillLevels(skillLevels);
     skillLevels.forEach(
         skillLevel ->
-            skillLevel.setTracks(
-                Stream.concat(skillLevel.getTracks().stream(), Stream.of(track)).toList()));
+            skillLevel.setTraces(
+                Stream.concat(skillLevel.getTraces().stream(), Stream.of(trace)).toList()));
     return this;
   }
 
-  public FakeTrack withAMS(List<AMS> amses) {
-    track.setAmses(amses);
+  public FakeTrace withAMS(List<AMS> amses) {
+    trace.setAmses(amses);
     return this;
   }
 
-  public Track toModel() {
-    return track;
+  public Trace toModel() {
+    return trace;
   }
 }

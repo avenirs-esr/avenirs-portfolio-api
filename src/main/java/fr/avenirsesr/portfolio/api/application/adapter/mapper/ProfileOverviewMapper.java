@@ -1,12 +1,12 @@
 package fr.avenirsesr.portfolio.api.application.adapter.mapper;
 
-import fr.avenirsesr.portfolio.api.application.adapter.dto.ProfileDTO;
+import fr.avenirsesr.portfolio.api.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.Teacher;
 
-public interface ProfileMapper {
-  static ProfileDTO userStudentDomainToDto(Student student) {
-    return new ProfileDTO(
+public interface ProfileOverviewMapper {
+  static ProfileOverviewDTO userStudentDomainToDto(Student student) {
+    return new ProfileOverviewDTO(
         student.getUser().getFirstName(),
         student.getUser().getLastName(),
         student.getBio(),
@@ -14,8 +14,8 @@ public interface ProfileMapper {
         student.getCoverPicture());
   }
 
-  static ProfileDTO userTeacherDomainToDto(Teacher teacher) {
-    return new ProfileDTO(
+  static ProfileOverviewDTO userTeacherDomainToDto(Teacher teacher) {
+    return new ProfileOverviewDTO(
         teacher.getUser().getFirstName(),
         teacher.getUser().getLastName(),
         teacher.getBio(),
