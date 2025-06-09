@@ -65,7 +65,7 @@ mvn spring-boot:run
 ```
 ✓ 10 users created
 ✓ 3 institutions created
-✓ 1 track created
+✓ 1 trace created
 ✓ 1 ams created
 Seeding successfully finished
 ```

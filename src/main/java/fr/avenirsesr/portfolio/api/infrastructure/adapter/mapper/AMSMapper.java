@@ -17,7 +17,7 @@ public interface AMSMapper {
                             skillLevel.getSkill(),
                             ProgramProgressMapper.fromDomain(
                                 skillLevel.getSkill().getProgramProgress())),
-                        skillLevel.getTracks().stream().map(TrackMapper::fromDomain).toList()))
+                        skillLevel.getTraces().stream().map(TraceMapper::fromDomain).toList()))
             .toList());
   }
 

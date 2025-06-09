@@ -1,16 +1,16 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper;
 
-import fr.avenirsesr.portfolio.api.domain.model.Track;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TrackEntity;
+import fr.avenirsesr.portfolio.api.domain.model.Trace;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TraceEntity;
 import java.util.List;
 
-public interface TrackMapper {
-  static TrackEntity fromDomain(Track track) {
-    return new TrackEntity(
-        track.getId(),
-        UserMapper.fromDomain(track.getUser()),
-        track.getTitle(),
-        track.getSkillLevels().stream()
+public interface TraceMapper {
+  static TraceEntity fromDomain(Trace trace) {
+    return new TraceEntity(
+        trace.getId(),
+        UserMapper.fromDomain(trace.getUser()),
+        trace.getTitle(),
+        trace.getSkillLevels().stream()
             .map(
                 skillLevel ->
                     SkillLevelMapper.fromDomain(
@@ -21,17 +21,17 @@ public interface TrackMapper {
                                 skillLevel.getSkill().getProgramProgress())),
                         List.of()))
             .toList(),
-        track.getAmses().stream().map(AMSMapper::fromDomain).toList(),
-        track.isGroup(),
-        track.getCreatedAt());
+        trace.getAmses().stream().map(AMSMapper::fromDomain).toList(),
+        trace.isGroup(),
+        trace.getCreatedAt());
   }
 
-  static Track toDomain(TrackEntity trackEntity) {
-    return Track.toDomain(
-        trackEntity.getId(),
-        UserMapper.toDomain(trackEntity.getUser()),
-        trackEntity.getTitle(),
-        trackEntity.getSkillLevels().stream()
+  static Trace toDomain(TraceEntity traceEntity) {
+    return Trace.toDomain(
+        traceEntity.getId(),
+        UserMapper.toDomain(traceEntity.getUser()),
+        traceEntity.getTitle(),
+        traceEntity.getSkillLevels().stream()
             .map(
                 skillLevelEntity ->
                     SkillLevelMapper.toDomain(
@@ -41,8 +41,8 @@ public interface TrackMapper {
                             ProgramProgressMapper.toDomain(
                                 skillLevelEntity.getSkill().getProgramProgress()))))
             .toList(),
-        trackEntity.getAmses().stream().map(AMSMapper::toDomain).toList(),
-        trackEntity.isGroup(),
-        trackEntity.getCreatedAt());
+        traceEntity.getAmses().stream().map(AMSMapper::toDomain).toList(),
+        traceEntity.isGroup(),
+        traceEntity.getCreatedAt());
   }
 }

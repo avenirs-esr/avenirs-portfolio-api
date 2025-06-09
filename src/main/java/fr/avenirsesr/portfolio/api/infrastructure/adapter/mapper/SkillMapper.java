@@ -18,7 +18,7 @@ public interface SkillMapper {
                     SkillLevelMapper.fromDomain(
                         skillLevel,
                         skillEntity,
-                        skillLevel.getTracks().stream().map(TrackMapper::fromDomain).toList()))
+                        skillLevel.getTraces().stream().map(TraceMapper::fromDomain).toList()))
             .collect(Collectors.toSet());
     skillEntity.setSkillLevels(levels);
     return skillEntity;

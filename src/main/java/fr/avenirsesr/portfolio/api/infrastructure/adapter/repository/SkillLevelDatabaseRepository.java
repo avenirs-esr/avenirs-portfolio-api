@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.api.domain.port.output.repository.SkillLevelRepos
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.SkillLevelMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.SkillMapper;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.TrackMapper;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillLevelEntity;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class SkillLevelDatabaseRepository
                 SkillMapper.fromDomain(
                     skillLevel.getSkill(),
                     ProgramProgressMapper.fromDomain(skillLevel.getSkill().getProgramProgress())),
-                skillLevel.getTracks().stream().map(TrackMapper::fromDomain).toList()),
+                skillLevel.getTraces().stream().map(TraceMapper::fromDomain).toList()),
         skillLevelEntity ->
             SkillLevelMapper.toDomain(
                 skillLevelEntity,
