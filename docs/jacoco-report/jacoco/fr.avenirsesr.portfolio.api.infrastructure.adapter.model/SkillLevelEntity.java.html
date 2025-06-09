@@ -27,10 +27,10 @@ public class SkillLevelEntity {
 
   @ManyToMany
   @JoinTable(
-      name = &quot;track_skill_levels&quot;,
-      joinColumns = @JoinColumn(name = &quot;track_id&quot;),
+      name = &quot;trace_skill_levels&quot;,
+      joinColumns = @JoinColumn(name = &quot;trace_id&quot;),
       inverseJoinColumns = @JoinColumn(name = &quot;skill_level_id&quot;))
-  private List&lt;TrackEntity&gt; tracks;
+  private List&lt;TraceEntity&gt; traces;
 
   @ManyToMany
   @JoinTable(
