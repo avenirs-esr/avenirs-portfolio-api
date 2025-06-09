@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ESecurityKeys;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.UserPayload;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,8 +23,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class HmacAuthenticationFilter extends OncePerRequestFilter {
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
-
   public HmacAuthenticationFilter() {}
 
   @Override
@@ -32,7 +31,7 @@ public class HmacAuthenticationFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     String signature = request.getHeader("X-Context-Signature");
-    String secretKey = request.getHeader("X-Context-Kid");
+    String secretKey = ESecurityKeys.getSecretByKey(request.getHeader("X-Context-Kid"));
     String payload = request.getHeader("X-Signed-Context");
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.registerModule(new JavaTimeModule());
