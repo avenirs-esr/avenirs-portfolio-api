@@ -57,7 +57,7 @@ public class HmacAuthenticationFilter extends OncePerRequestFilter {
     }
 
     if (signature != null && verifySignature(payload, signature, secretKey)) {
-      Authentication auth = new HmacAuthenticationToken(userPayload.getId());
+      Authentication auth = new HmacAuthenticationToken(userPayload.getSub());
       SecurityContextHolder.getContext().setAuthentication(auth);
 
       filterChain.doFilter(request, response);
