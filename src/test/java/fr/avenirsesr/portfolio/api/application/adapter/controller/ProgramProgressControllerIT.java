@@ -51,7 +51,7 @@ class ProgramProgressControllerIT {
   void shouldReturnSkillsOverviewForStudent() throws Exception {
     mockMvc
         .perform(
-            get("/program-progress/overview")
+            get("/me/program-progress/overview")
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -83,7 +83,7 @@ class ProgramProgressControllerIT {
   void shouldReturn404WhenUserNotFound() throws Exception {
     mockMvc
         .perform(
-            get("/program-progress/overview")
+            get("/me/program-progress/overview")
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature)
@@ -98,7 +98,7 @@ class ProgramProgressControllerIT {
   void shouldReturn403WhenUserIsNotStudent() throws Exception {
     mockMvc
         .perform(
-            get("/program-progress/overview")
+            get("/me/program-progress/overview")
                 .header("X-Signed-Context", teacherPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", teacherSignature)
