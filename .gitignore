@@ -60,4 +60,5 @@ build/
 ### VS Code ###
 .vscode/
 
+logs/
 /src/main/resources/env.properties
