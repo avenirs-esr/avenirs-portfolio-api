@@ -4,11 +4,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.SeederRunner;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -22,16 +21,24 @@ class TraceControllerIT {
 
   @Autowired private MockMvc mockMvc;
 
-  private UUID studentId;
+  @Value("${hmac.secret-key}")
+  private String secretKey;
+
+  @Value("${user.student.payload}")
+  private String studentPayload;
+
+  @Value("${user.unknown.payload}")
+  private String unknownUserPayload;
+
+  @Value("${user.student.signature}")
+  private String studentSignature;
+
+  @Value("${user.unknown.signature}")
+  private String unknownUserSignature;
 
   @BeforeAll
   static void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
-  }
-
-  @BeforeEach
-  void setUp() {
-    studentId = UUID.fromString("9fe9516a-a528-4870-8f15-89187e368610");
   }
 
   @Test
@@ -39,7 +46,9 @@ class TraceControllerIT {
     mockMvc
         .perform(
             get("/me/trace/overview")
-                .header("X-Signed-Context", studentId.toString())
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -52,7 +61,11 @@ class TraceControllerIT {
   @Test
   void shouldReturn404WhenUserNotExist() throws Exception {
     mockMvc
-        .perform(get("/me/trace/overview").header("X-Signed-Context", UUID.randomUUID().toString()))
+        .perform(
+            get("/me/trace/overview")
+                .header("X-Signed-Context", unknownUserPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", unknownUserSignature))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.message").value("User not found"))
