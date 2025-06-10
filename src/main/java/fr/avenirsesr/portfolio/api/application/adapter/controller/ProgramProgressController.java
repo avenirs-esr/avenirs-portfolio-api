@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Slf4j
 @AllArgsConstructor
-@RequestMapping("/program-progress")
+@RequestMapping("/me/program-progress")
 public class ProgramProgressController {
   private final ProgramProgressService programProgressService;
   private final UserRepository userRepository;
