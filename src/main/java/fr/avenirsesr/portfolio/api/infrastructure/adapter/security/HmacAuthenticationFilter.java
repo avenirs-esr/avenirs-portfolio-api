@@ -31,15 +31,15 @@ public class HmacAuthenticationFilter extends OncePerRequestFilter {
 
   @Value("${security.permit-all-paths}")
   private String permitAllPathsString;
-  
+
   private List<String> permitAllPathsList;
 
   public HmacAuthenticationFilter() {}
 
   @Override
   protected void doFilterInternal(
-      @NonNull HttpServletRequest request, 
-      @NonNull HttpServletResponse response, 
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
       @NonNull FilterChain filterChain)
       throws ServletException, IOException {
 
@@ -67,14 +67,16 @@ public class HmacAuthenticationFilter extends OncePerRequestFilter {
       throw exception;
     }
   }
+
   @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+  protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
     if (permitAllPathsList == null) {
-      permitAllPathsList = Arrays.stream(permitAllPathsString.split(","))
-          .map(path -> path.trim().replace("/**", ""))
-          .toList();
+      permitAllPathsList =
+          Arrays.stream(permitAllPathsString.split(","))
+              .map(path -> path.trim().replace("/**", ""))
+              .toList();
     }
-    
+
     String path = request.getRequestURI();
     return permitAllPathsList.stream().anyMatch(path::startsWith);
   }
