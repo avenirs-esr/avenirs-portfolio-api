@@ -54,6 +54,14 @@ public class HmacAuthenticationFilter extends OncePerRequestFilter {
       throw exception;
     }
   }
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    String path = request.getRequestURI();
+    return path.startsWith("/avenirs-portfolio-api/api-docs") ||
+            path.startsWith("/avenirs-portfolio-api/swagger-ui") ||
+            path.startsWith("/favicon.ico") ||
+            path.startsWith("/actuator/health");
+  }
 
   private boolean payloadIsValid(UserPayload payload) {
     return payload != null && payload.getExp().isAfter(Instant.now());
