@@ -7,13 +7,13 @@ import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,10 +26,9 @@ public class TraceController {
   private final TraceService traceService;
 
   @GetMapping("/overview")
-  public ResponseEntity<List<TraceOverviewDTO>> getTraceOverview(
-      @RequestHeader("X-Signed-Context") String userIdRaw) {
-    log.info("Received request to trace overview of user [{}]", userIdRaw);
-    UUID userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn
+  public ResponseEntity<List<TraceOverviewDTO>> getTraceOverview(Principal principal) {
+    log.info("Received request to track overview of user [{}]", principal.getName());
+    UUID userId = UUID.fromString(principal.getName());
     User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
     List<Trace> traces = traceService.lastTracesOf(user);

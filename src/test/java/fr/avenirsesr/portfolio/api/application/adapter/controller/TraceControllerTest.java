@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+import java.security.Principal;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,12 +30,14 @@ class TraceControllerTest {
   private UUID userId;
   private User user;
   private Trace trace;
+  private Principal principal;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
     user = UserFixture.create().withId(userId).toModel();
     trace = TraceFixture.create().withUser(user).toModel();
+    principal = () -> userId.toString();
   }
 
   @Test
@@ -45,8 +48,7 @@ class TraceControllerTest {
     when(traceService.programNameOfTrace(trace)).thenReturn("Program Name");
 
     // When
-    ResponseEntity<List<TraceOverviewDTO>> response =
-        controller.getTraceOverview(userId.toString());
+    ResponseEntity<List<TraceOverviewDTO>> response = controller.getTraceOverview(principal);
 
     // Then
     assertEquals(200, response.getStatusCode().value());
@@ -71,7 +73,7 @@ class TraceControllerTest {
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
     // Then
-    assertThrows(UserNotFoundException.class, () -> controller.getTraceOverview(userId.toString()));
+    assertThrows(UserNotFoundException.class, () -> controller.getTraceOverview(principal));
 
     verify(userRepository).findById(userId);
     verifyNoMoreInteractions(traceService);

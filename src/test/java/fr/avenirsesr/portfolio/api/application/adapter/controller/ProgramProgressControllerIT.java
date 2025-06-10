@@ -4,11 +4,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.SeederRunner;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -22,26 +21,40 @@ class ProgramProgressControllerIT {
 
   @Autowired private MockMvc mockMvc;
 
-  private UUID studentId;
-  private UUID teacherId;
+  @Value("${hmac.secret-key}")
+  private String secretKey;
+
+  @Value("${user.student.payload}")
+  private String studentPayload;
+
+  @Value("${user.teacher.payload}")
+  private String teacherPayload;
+
+  @Value("${user.unknown.payload}")
+  private String unknownUserPayload;
+
+  @Value("${user.student.signature}")
+  private String studentSignature;
+
+  @Value("${user.teacher.signature}")
+  private String teacherSignature;
+
+  @Value("${user.unknown.signature}")
+  private String unknownUserSignature;
 
   @BeforeAll
   static void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
   }
 
-  @BeforeEach
-  void setUp() {
-    studentId = UUID.fromString("9fe9516a-a528-4870-8f15-89187e368610");
-    teacherId = UUID.fromString("56a75a55-2f69-456d-a92d-323149a5ab7f");
-  }
-
   @Test
   void shouldReturnSkillsOverviewForStudent() throws Exception {
     mockMvc
         .perform(
-            get("/program-progress/overview")
-                .header("X-Signed-Context", studentId.toString())
+            get("/me/program-progress/overview")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -70,8 +83,10 @@ class ProgramProgressControllerIT {
   void shouldReturn404WhenUserNotFound() throws Exception {
     mockMvc
         .perform(
-            get("/program-progress/overview")
-                .header("X-Signed-Context", UUID.randomUUID().toString())
+            get("/me/program-progress/overview")
+                .header("X-Signed-Context", unknownUserPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", unknownUserSignature)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -83,8 +98,10 @@ class ProgramProgressControllerIT {
   void shouldReturn403WhenUserIsNotStudent() throws Exception {
     mockMvc
         .perform(
-            get("/program-progress/overview")
-                .header("X-Signed-Context", teacherId.toString())
+            get("/me/program-progress/overview")
+                .header("X-Signed-Context", teacherPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", teacherSignature)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
