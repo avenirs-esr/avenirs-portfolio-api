@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -16,16 +17,18 @@ public class Trace {
   private List<AMS> amses;
   private Instant createdAt;
   private boolean isGroup;
+  private ELanguage language;
 
-  private Trace(UUID id, User user, String title, Instant createdAt) {
+  private Trace(UUID id, User user, String title, Instant createdAt, ELanguage language) {
     this.id = id;
     this.user = user;
     this.title = title;
     this.createdAt = createdAt;
+    this.language = language;
   }
 
-  public static Trace create(UUID id, User user, String title) {
-    var trace = new Trace(id, user, title, Instant.now());
+  public static Trace create(UUID id, User user, String title, ELanguage language) {
+    var trace = new Trace(id, user, title, Instant.now(), language);
     trace.setSkillLevels(List.of());
     trace.setAmses(List.of());
     trace.setGroup(false);
@@ -40,8 +43,9 @@ public class Trace {
       List<SkillLevel> skillLevels,
       List<AMS> amses,
       boolean group,
-      Instant createdAt) {
-    var trace = new Trace(id, user, title, createdAt);
+      Instant createdAt,
+      ELanguage language) {
+    var trace = new Trace(id, user, title, createdAt, language);
     trace.setSkillLevels(skillLevels);
     trace.setAmses(amses);
     trace.setGroup(group);

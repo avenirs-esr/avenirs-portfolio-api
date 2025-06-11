@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeTrace;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ public class TraceFixture {
   private List<AMS> amses;
   private Instant createdAt;
   private boolean isGroup;
+  private ELanguage language = ELanguage.FRENCH;
 
   private TraceFixture() {
     var fakeUser = UserFixture.create().toModel();
@@ -89,7 +91,12 @@ public class TraceFixture {
     return traces;
   }
 
+  public TraceFixture withLanguage(ELanguage language) {
+    this.language = language;
+    return this;
+  }
+
   public Trace toModel() {
-    return Trace.toDomain(id, user, title, skillLevels, amses, isGroup, createdAt);
+    return Trace.toDomain(id, user, title, skillLevels, amses, isGroup, createdAt, language);
   }
 }

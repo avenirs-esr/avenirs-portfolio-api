@@ -22,12 +22,21 @@ public class FakeProgram {
                     faker.call().university().prefix(),
                     faker.call().university().degree(),
                     faker.call().number().numberBetween(1, 11)),
-            true));
+            true,
+            institution.getLanguage()));
   }
 
   public FakeProgram isNotAPC() {
     program.setAPC(false);
     return this;
+  }
+
+  public static String createName() {
+    return "%s %s - %s"
+        .formatted(
+            faker.call().university().prefix(),
+            faker.call().university().degree(),
+            faker.call().number().numberBetween(1, 11));
   }
 
   public Program toModel() {

@@ -1,10 +1,8 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,12 +18,22 @@ import lombok.Setter;
 public class ProgramEntity {
   @Id private UUID id;
 
-  @Column(nullable = false)
-  private String name;
-
   @Column(name = "is_apc", nullable = false)
   private boolean isAPC;
 
   @ManyToOne(optional = false)
   private InstitutionEntity institution;
+
+  @OneToMany(
+      mappedBy = "program",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private Set<ProgramTranslationEntity> translations = new HashSet<>();
+
+  public ProgramEntity(UUID id, boolean isAPC, InstitutionEntity institution) {
+    this.id = id;
+    this.institution = institution;
+    this.isAPC = isAPC;
+  }
 }

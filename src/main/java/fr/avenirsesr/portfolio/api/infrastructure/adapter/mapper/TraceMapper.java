@@ -10,6 +10,7 @@ public interface TraceMapper {
         trace.getId(),
         UserMapper.fromDomain(trace.getUser()),
         trace.getTitle(),
+        trace.getLanguage(),
         trace.getSkillLevels().stream()
             .map(
                 skillLevel ->
@@ -31,18 +32,10 @@ public interface TraceMapper {
         traceEntity.getId(),
         UserMapper.toDomain(traceEntity.getUser()),
         traceEntity.getTitle(),
-        traceEntity.getSkillLevels().stream()
-            .map(
-                skillLevelEntity ->
-                    SkillLevelMapper.toDomain(
-                        skillLevelEntity,
-                        SkillMapper.toDomain(
-                            skillLevelEntity.getSkill(),
-                            ProgramProgressMapper.toDomain(
-                                skillLevelEntity.getSkill().getProgramProgress()))))
-            .toList(),
+        List.of(),
         traceEntity.getAmses().stream().map(AMSMapper::toDomain).toList(),
         traceEntity.isGroup(),
-        traceEntity.getCreatedAt());
+        traceEntity.getCreatedAt(),
+        traceEntity.getLanguage());
   }
 }

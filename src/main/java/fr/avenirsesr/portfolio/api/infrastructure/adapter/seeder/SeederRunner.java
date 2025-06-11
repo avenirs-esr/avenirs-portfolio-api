@@ -1,14 +1,16 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.*;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.*;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.*;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.repository.*;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,29 +20,30 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class SeederRunner implements CommandLineRunner {
-  @Value("${seeder.enabled:false}")
-  private boolean seedEnabled;
 
   private final UserRepository userRepository;
   private final ExternalUserRepository externalUserRepository;
-  private final InstitutionRepository institutionRepository;
-  private final ProgramRepository programRepository;
+  private final InstitutionDatabaseRepository institutionRepository;
+  private final ProgramDatabaseRepository programRepository;
   private final ProgramProgressRepository programProgressRepository;
   private final SkillLevelRepository skillLevelRepository;
-  private final SkillRepository skillRepository;
-  private final TraceRepository traceRepository;
-  private final AMSRepository amsRepository;
+  private final SkillDatabaseRepository skillRepository;
+  private final TraceDatabaseRepository traceRepository;
+  private final AMSDatabaseRepository amsRepository;
+
+  @Value("${seeder.enabled:false}")
+  private boolean seedEnabled;
 
   public SeederRunner(
       UserRepository userRepository,
       ExternalUserRepository externalUserRepository,
-      InstitutionRepository institutionRepository,
-      ProgramRepository programRepository,
+      InstitutionDatabaseRepository institutionRepository,
+      ProgramDatabaseRepository programRepository,
       ProgramProgressRepository programProgressRepository,
       SkillLevelRepository skillLevelRepository,
-      SkillRepository skillRepository,
-      TraceRepository traceRepository,
-      AMSRepository amsRepository) {
+      SkillDatabaseRepository skillRepository,
+      TraceDatabaseRepository traceRepository,
+      AMSDatabaseRepository amsRepository) {
     this.userRepository = userRepository;
     this.externalUserRepository = externalUserRepository;
     this.institutionRepository = institutionRepository;
@@ -77,16 +80,130 @@ public class SeederRunner implements CommandLineRunner {
                           .toModel())
               .toList();
 
-      var institutions =
-          List.of(
-              FakeInstitution.create().toModel(),
-              FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel(),
-              FakeInstitution.create()
-                  .withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT))
-                  .toModel());
+      userRepository.saveAll(users);
+      log.info("✓ {} users created", users.size());
 
-      var programs =
-          institutions.stream().map(institution -> FakeProgram.of(institution).toModel()).toList();
+      var students = fakeUsers.stream().map(FakeUser::getStudent).filter(Objects::nonNull).toList();
+      userRepository.saveAllStudents(students);
+      log.info("✓ {} students synced", students.size());
+
+      var teachers = fakeUsers.stream().map(FakeUser::getTeacher).filter(Objects::nonNull).toList();
+      userRepository.saveAllTeachers(teachers);
+      log.info("✓ {} teachers synced", teachers.size());
+
+      externalUserRepository.saveAll(externalUsers);
+      log.info("✓ {} externalUsers created", externalUsers.size());
+
+      Institution institutionBase = FakeInstitution.create().toModel();
+      Institution institutionApc =
+          FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
+      Institution institutionLifeProject =
+          FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT)).toModel();
+      List<Institution> institutions =
+          List.of(
+              institutionBase,
+              FakeInstitution.create(institutionBase, ELanguage.ENGLISH).toModel(),
+              FakeInstitution.create(institutionBase, ELanguage.SPANISH).toModel(),
+              institutionApc,
+              FakeInstitution.create(institutionApc, ELanguage.ENGLISH).toModel(),
+              FakeInstitution.create(institutionApc, ELanguage.SPANISH).toModel(),
+              institutionLifeProject,
+              FakeInstitution.create(institutionLifeProject, ELanguage.ENGLISH).toModel(),
+              FakeInstitution.create(institutionLifeProject, ELanguage.SPANISH).toModel());
+
+      List<Institution> cleanedInstitutions =
+          List.of(institutionBase, institutionApc, institutionLifeProject);
+
+      List<InstitutionEntity> institutionEntities =
+          cleanedInstitutions.stream()
+              .map(
+                  entity -> {
+                    Set<InstitutionTranslationEntity> translations =
+                        institutions.stream()
+                            .filter(p -> p.getId().equals(entity.getId()))
+                            .map(InstitutionTranslationMapper::fromDomain)
+                            .collect(Collectors.toSet());
+                    InstitutionEntity institutionEntity =
+                        new InstitutionEntity(entity.getId(), entity.getEnabledFields());
+                    institutionEntity.setTranslations(translations);
+                    return institutionEntity;
+                  })
+              .toList();
+
+      List<ProgramEntity> programEntities =
+          institutionEntities.stream()
+              .map(
+                  institutionEntity -> {
+                    ProgramEntity programEntity =
+                        new ProgramEntity(UUID.randomUUID(), true, institutionEntity);
+
+                    Set<ProgramTranslationEntity> programTranslations =
+                        Set.of(
+                            new ProgramTranslationEntity(
+                                UUID.randomUUID(),
+                                ELanguage.FRENCH,
+                                FakeProgram.createName(),
+                                programEntity),
+                            new ProgramTranslationEntity(
+                                UUID.randomUUID(),
+                                ELanguage.ENGLISH,
+                                String.format(
+                                    "%s %s", FakeProgram.createName(), ELanguage.ENGLISH.getCode()),
+                                programEntity),
+                            new ProgramTranslationEntity(
+                                UUID.randomUUID(),
+                                ELanguage.SPANISH,
+                                String.format(
+                                    "%s %s", FakeProgram.createName(), ELanguage.SPANISH.getCode()),
+                                programEntity));
+
+                    programEntity.setTranslations(programTranslations);
+
+                    return programEntity;
+                  })
+              .toList();
+
+      var trace = FakeTrace.of(users.getFirst()).toModel();
+      TraceEntity traceEntity = TraceMapper.fromDomain(trace);
+      traceRepository.saveAllEntities(List.of(traceEntity));
+      traceRepository.flush();
+      log.info("✓ 1 trace created");
+      AMS fakeAms = FakeAMS.of(users.getFirst()).toModel();
+      AMSEntity ams = AMSMapper.fromDomain(fakeAms);
+      Set<AMSTranslationEntity> amsTranslations =
+          Set.of(
+              new AMSTranslationEntity(
+                  UUID.randomUUID(), ELanguage.FRENCH, fakeAms.getTitle(), ams),
+              new AMSTranslationEntity(
+                  UUID.randomUUID(), ELanguage.ENGLISH, fakeAms.getTitle(), ams),
+              new AMSTranslationEntity(
+                  UUID.randomUUID(), ELanguage.SPANISH, fakeAms.getTitle(), ams));
+
+      ams.setTranslations(amsTranslations);
+      amsRepository.saveAllEntities(List.of(ams));
+      log.info("✓ 1 ams created");
+
+      SkillLevel skillLevel1 =
+          FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+      SkillLevel skillLevel2 =
+          FakeSkillLevel.create().withStatus(ESkillLevelStatus.FAILED).toModel();
+      SkillLevel skillLevel3 =
+          FakeSkillLevel.create().withStatus(ESkillLevelStatus.UNDER_REVIEW).toModel();
+      SkillLevel skillLevel4 =
+          FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+      SkillLevel skillLevel5 =
+          FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+      SkillLevel skillLevel6 =
+          FakeSkillLevel.create().withStatus(ESkillLevelStatus.TO_BE_EVALUATED).toModel();
+      SkillLevel skillLevel7 =
+          FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+      SkillLevel skillLevel8 = FakeSkillLevel.create().toModel();
+
+      Skill skill1 = FakeSkill.of(Set.of(skillLevel1, skillLevel2, skillLevel3)).toModel();
+
+      Skill skill2 = FakeSkill.of(Set.of(skillLevel4, skillLevel5, skillLevel6)).toModel();
+
+      Skill skill3 = FakeSkill.of(Set.of(skillLevel7, skillLevel8)).toModel();
 
       var programProgresses =
           users.stream()
@@ -94,42 +211,11 @@ public class SeederRunner implements CommandLineRunner {
               .filter(Objects::nonNull)
               .map(
                   student -> {
-                    var skills =
-                        Set.of(
-                            FakeSkill.of(
-                                    Set.of(
-                                        FakeSkillLevel.create()
-                                            .withStatus(ESkillLevelStatus.VALIDATED)
-                                            .toModel(),
-                                        FakeSkillLevel.create()
-                                            .withStatus(ESkillLevelStatus.FAILED)
-                                            .toModel(),
-                                        FakeSkillLevel.create()
-                                            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
-                                            .toModel()))
-                                .toModel(),
-                            FakeSkill.of(
-                                    Set.of(
-                                        FakeSkillLevel.create()
-                                            .withStatus(ESkillLevelStatus.VALIDATED)
-                                            .toModel(),
-                                        FakeSkillLevel.create()
-                                            .withStatus(ESkillLevelStatus.VALIDATED)
-                                            .toModel(),
-                                        FakeSkillLevel.create()
-                                            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-                                            .toModel()))
-                                .toModel(),
-                            FakeSkill.of(
-                                    Set.of(
-                                        FakeSkillLevel.create()
-                                            .withStatus(ESkillLevelStatus.VALIDATED)
-                                            .toModel(),
-                                        FakeSkillLevel.create().toModel()))
-                                .toModel());
+                    var skills = Set.of(skill1, skill2, skill3);
 
+                    Program program = ProgramMapper.toDomain(programEntities.getFirst());
                     var programProgress =
-                        FakeProgramProgress.of(programs.getFirst(), student, skills).toModel();
+                        FakeProgramProgress.of(program, student, skills).toModel();
 
                     skills.forEach(
                         skill -> {
@@ -150,57 +236,101 @@ public class SeederRunner implements CommandLineRunner {
                   })
               .toList();
 
-      var trace = FakeTrace.of(users.getFirst()).toModel();
-      var ams = FakeAMS.of(users.getFirst()).toModel();
+      ProgramProgressEntity programProgressEntity =
+          ProgramProgressMapper.fromDomain(programProgresses.getFirst());
 
-      userRepository.saveAll(users);
-      log.info("✓ {} users created", users.size());
+      SkillEntity skillEntity1 =
+          skillEntitySetter(
+              skill1,
+              programProgressEntity,
+              List.of(skillLevel1, skillLevel2, skillLevel3),
+              traceEntity);
+      SkillEntity skillEntity2 =
+          skillEntitySetter(
+              skill2,
+              programProgressEntity,
+              List.of(skillLevel4, skillLevel5, skillLevel6),
+              traceEntity);
+      SkillEntity skillEntity3 =
+          skillEntitySetter(
+              skill3, programProgressEntity, List.of(skillLevel7, skillLevel8), traceEntity);
 
-      var students = fakeUsers.stream().map(FakeUser::getStudent).filter(Objects::nonNull).toList();
-      userRepository.saveAllStudents(students);
-      log.info("✓ {} students synced", students.size());
+      List<SkillEntity> skillEntities = List.of(skillEntity1, skillEntity2, skillEntity3);
 
-      var teachers = fakeUsers.stream().map(FakeUser::getTeacher).filter(Objects::nonNull).toList();
-      userRepository.saveAllTeachers(teachers);
-      log.info("✓ {} teachers synced", teachers.size());
+      institutionRepository.saveAllEntities(institutionEntities);
+      log.info("✓ {} institutions created", institutionEntities.size());
 
-      externalUserRepository.saveAll(externalUsers);
-      log.info("✓ {} externalUsers created", externalUsers.size());
-
-      institutionRepository.saveAll(institutions);
-      log.info("✓ {} institutions created", institutions.size());
-
-      programRepository.saveAll(programs);
-      log.info("✓ {} programs created", programs.size());
+      programRepository.saveAllEntities(programEntities);
+      log.info("✓ {} programs created", programEntities.size());
 
       programProgressRepository.saveAll(programProgresses);
       log.info("✓ {} programProgresses created", programProgresses.size());
 
-      var skills =
-          programProgresses.stream()
-              .flatMap(programProgress -> programProgress.getSkills().stream())
-              .toList();
-
-      skillRepository.saveAll(skills);
-      log.info("✓ {} skills created", skills.size());
-
-      var skillLevels =
-          programProgresses.stream()
-              .flatMap(programProgress -> programProgress.getSkills().stream())
-              .flatMap(getSkills -> getSkills.getSkillLevels().stream())
-              .toList();
-
-      skillLevelRepository.saveAll(skillLevels);
-      log.info("✓ {} skillLevels created", skillLevels.size());
-
-      traceRepository.save(trace);
-      log.info("✓ 1 trace created");
-
-      amsRepository.save(ams);
-      log.info("✓ 1 ams created");
+      skillRepository.saveAllEntities(skillEntities);
+      log.info("✓ {} skills created", skillEntities.size());
 
       log.info("Seeding successfully finished");
 
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
+  }
+
+  private SkillLevelEntity skillLevelTranslationSetter(
+      SkillLevel skillLevel, SkillEntity skillEntity, TraceEntity trace) {
+    SkillLevelEntity skillLevelEntity =
+        SkillLevelMapper.fromDomain(skillLevel, skillEntity, List.of(trace));
+    Set<SkillLevelTranslationEntity> skillLevelTranslationEntities1 =
+        Set.of(
+            new SkillLevelTranslationEntity(
+                UUID.randomUUID(),
+                ELanguage.FRENCH,
+                skillLevel.getName(),
+                skillLevel.getDescription(),
+                skillLevelEntity),
+            new SkillLevelTranslationEntity(
+                UUID.randomUUID(),
+                ELanguage.ENGLISH,
+                String.format("%s %s", skillLevel.getName(), ELanguage.ENGLISH.getCode()),
+                String.format("%s %s", skillLevel.getDescription(), ELanguage.ENGLISH.getCode()),
+                skillLevelEntity),
+            new SkillLevelTranslationEntity(
+                UUID.randomUUID(),
+                ELanguage.SPANISH,
+                String.format("%s %s", skillLevel.getName(), ELanguage.SPANISH.getCode()),
+                String.format("%s %s", skillLevel.getDescription(), ELanguage.SPANISH.getCode()),
+                skillLevelEntity));
+    skillLevelEntity.setTranslations(skillLevelTranslationEntities1);
+    return skillLevelEntity;
+  }
+
+  private SkillEntity skillEntitySetter(
+      Skill skill,
+      ProgramProgressEntity programProgressEntity,
+      List<SkillLevel> skillLevels,
+      TraceEntity trace) {
+    SkillEntity skillEntity = SkillMapper.fromDomain(skill, programProgressEntity);
+    skillEntity.setSkillLevels(new HashSet<>());
+    Set<SkillTranslationEntity> skillTranslationEntities1 =
+        Set.of(
+            new SkillTranslationEntity(
+                UUID.randomUUID(), ELanguage.FRENCH, skill.getName(), skillEntity),
+            new SkillTranslationEntity(
+                UUID.randomUUID(),
+                ELanguage.ENGLISH,
+                String.format("%s %s", skill.getName(), ELanguage.ENGLISH.getCode()),
+                skillEntity),
+            new SkillTranslationEntity(
+                UUID.randomUUID(),
+                ELanguage.SPANISH,
+                String.format("%s %s", skill.getName(), ELanguage.SPANISH.getCode()),
+                skillEntity));
+    skillEntity.setTranslations(skillTranslationEntities1);
+
+    skillLevels.forEach(
+        level -> {
+          SkillLevelEntity skillLevelEntity =
+              skillLevelTranslationSetter(level, skillEntity, trace);
+          skillEntity.getSkillLevels().add(skillLevelEntity);
+        });
+    return skillEntity;
   }
 }

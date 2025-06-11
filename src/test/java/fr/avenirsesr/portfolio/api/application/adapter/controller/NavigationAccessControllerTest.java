@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.api.application.adapter.dto.NavigationAccessDTO;
 import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.*;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
@@ -34,6 +35,7 @@ class NavigationAccessControllerTest {
   private UUID userId;
   private Principal principal;
   private User user;
+  private ELanguage language = ELanguage.FRENCH;
 
   @BeforeEach
   void setUp() {
@@ -46,15 +48,17 @@ class NavigationAccessControllerTest {
   void shouldReturnNavigationAccessForStudent() {
     // Given
     when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-    when(institutionService.isNavigationEnabledFor(any(Student.class), eq(EPortfolioType.APC)))
+    when(institutionService.isNavigationEnabledFor(
+            any(Student.class), eq(EPortfolioType.APC), any(ELanguage.class)))
         .thenReturn(true);
     when(institutionService.isNavigationEnabledFor(
-            any(Student.class), eq(EPortfolioType.LIFE_PROJECT)))
+            any(Student.class), eq(EPortfolioType.LIFE_PROJECT), any(ELanguage.class)))
         .thenReturn(false);
     when(programProgressService.isStudentFollowingAPCProgram(any(Student.class))).thenReturn(true);
 
     // When
-    ResponseEntity<NavigationAccessDTO> response = controller.getStudentNavigationAccess(principal);
+    ResponseEntity<NavigationAccessDTO> response =
+        controller.getStudentNavigationAccess(principal, language.getCode());
 
     // Then
     assertEquals(200, response.getStatusCode().value());
@@ -66,9 +70,11 @@ class NavigationAccessControllerTest {
     assertFalse(body.LIFE_PROJECT().enabledByInstitution());
 
     verify(userRepository).findById(userId);
-    verify(institutionService).isNavigationEnabledFor(any(Student.class), eq(EPortfolioType.APC));
     verify(institutionService)
-        .isNavigationEnabledFor(any(Student.class), eq(EPortfolioType.LIFE_PROJECT));
+        .isNavigationEnabledFor(any(Student.class), eq(EPortfolioType.APC), any(ELanguage.class));
+    verify(institutionService)
+        .isNavigationEnabledFor(
+            any(Student.class), eq(EPortfolioType.LIFE_PROJECT), any(ELanguage.class));
     verify(programProgressService).isStudentFollowingAPCProgram(any(Student.class));
   }
 
@@ -79,7 +85,8 @@ class NavigationAccessControllerTest {
 
     // Then
     assertThrows(
-        UserNotFoundException.class, () -> controller.getStudentNavigationAccess(principal));
+        UserNotFoundException.class,
+        () -> controller.getStudentNavigationAccess(principal, language.getCode()));
 
     verify(userRepository).findById(userId);
     verifyNoMoreInteractions(institutionService, programProgressService);
@@ -93,7 +100,8 @@ class NavigationAccessControllerTest {
 
     // Then
     assertThrows(
-        UserIsNotStudentException.class, () -> controller.getStudentNavigationAccess(principal));
+        UserIsNotStudentException.class,
+        () -> controller.getStudentNavigationAccess(principal, language.getCode()));
 
     verify(userRepository).findById(userId);
     verifyNoMoreInteractions(institutionService, programProgressService);

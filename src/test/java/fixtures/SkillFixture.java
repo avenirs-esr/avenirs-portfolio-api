@@ -3,6 +3,7 @@ package fixtures;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeSkill;
 import java.util.*;
 
@@ -12,6 +13,7 @@ public class SkillFixture {
   private String name;
   private Set<SkillLevel> skillLevels;
   private ProgramProgress programProgress;
+  private ELanguage language = ELanguage.FRENCH;
 
   private SkillFixture() {
     Skill base = FakeSkill.of(Set.of(SkillLevelFixture.create().toModel())).toModel();
@@ -58,8 +60,13 @@ public class SkillFixture {
     return skills;
   }
 
+  public SkillFixture withLanguage(ELanguage language) {
+    this.language = language;
+    return this;
+  }
+
   public Skill toModel() {
-    Skill skill = Skill.toDomain(id, name, skillLevels);
+    Skill skill = Skill.toDomain(id, name, skillLevels, language);
     skill.setProgramProgress(programProgress);
     return skill;
   }

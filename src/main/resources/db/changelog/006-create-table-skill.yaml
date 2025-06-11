@@ -14,14 +14,36 @@ databaseChangeLog:
                     nullable: false
 
               - column:
-                  name: name
-                  type: VARCHAR(255)
+                  name: program_progress_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: skill_translation
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: skill_id
+                  type: UUID
                   constraints:
                     nullable: false
 
               - column:
-                  name: program_progress_id
-                  type: UUID
+                  name: language
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(255)
                   constraints:
                     nullable: false
 
@@ -38,4 +60,12 @@ databaseChangeLog:
             referencedTableName: program_progress
             referencedColumnNames: id
             constraintName: fk_skill_program_progress
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: skill_translation
+            baseColumnNames: skill_id
+            referencedTableName: skill
+            referencedColumnNames: id
+            constraintName: fk_skill_translation_skill
             onDelete: CASCADE

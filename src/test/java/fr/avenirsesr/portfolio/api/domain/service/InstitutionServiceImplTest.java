@@ -7,6 +7,7 @@ import fixtures.ProgramProgressFixture;
 import fixtures.UserFixture;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.mockito.*;
 class InstitutionServiceImplTest {
   private AutoCloseable closeable;
   private Student student;
+  private ELanguage language = ELanguage.FRENCH;
 
   @Mock private ProgramProgressRepository programProgressRepository;
 
@@ -42,15 +44,16 @@ class InstitutionServiceImplTest {
     ProgramProgress progressLifeProject =
         ProgramProgressFixture.createWithoutAPC().withStudent(student).toModel();
 
-    when(programProgressRepository.findAllByStudent(student))
+    when(programProgressRepository.findAllByStudent(student, language))
         .thenReturn(List.of(progressAPC, progressLifeProject));
 
     // When
-    boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
+    boolean result =
+        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC, language);
 
     // Then
     assertTrue(result);
-    verify(programProgressRepository).findAllByStudent(student);
+    verify(programProgressRepository).findAllByStudent(student, language);
   }
 
   @Test
@@ -61,28 +64,29 @@ class InstitutionServiceImplTest {
     ProgramProgress progress2 =
         ProgramProgressFixture.createWithAPC().withStudent(student).toModel();
 
-    when(programProgressRepository.findAllByStudent(student))
+    when(programProgressRepository.findAllByStudent(student, language))
         .thenReturn(List.of(progressAPC, progress2));
 
     // When
     boolean result =
-        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);
+        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT, language);
 
     // Then
     assertFalse(result);
-    verify(programProgressRepository).findAllByStudent(student);
+    verify(programProgressRepository).findAllByStudent(student, language);
   }
 
   @Test
   void shouldReturnFalseWhenStudentHasNoProgramProgress() {
     // Given
-    when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of());
+    when(programProgressRepository.findAllByStudent(student, language)).thenReturn(List.of());
 
     // When
-    boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
+    boolean result =
+        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC, language);
 
     // Then
     assertFalse(result);
-    verify(programProgressRepository).findAllByStudent(student);
+    verify(programProgressRepository).findAllByStudent(student, language);
   }
 }

@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
@@ -67,7 +68,10 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
                                       ? Set.of(selectedSkillLevel)
                                       : Set.of();
                               return Skill.toDomain(
-                                  skill.getId(), skill.getName(), selectedSkillLevelSet);
+                                  skill.getId(),
+                                  skill.getName(),
+                                  selectedSkillLevelSet,
+                                  skill.getLanguage());
                             })
                         .collect(Collectors.toCollection(LinkedHashSet::new)),
                 (existing, replacement) -> existing,
@@ -75,8 +79,8 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   }
 
   @Override
-  public Map<ProgramProgress, Set<Skill>> getSkillsOverview(Student student) {
-    return cleanProgramProgressList(programProgressRepository.findAllByStudent(student));
+  public Map<ProgramProgress, Set<Skill>> getSkillsOverview(Student student, ELanguage language) {
+    return cleanProgramProgressList(programProgressRepository.findAllByStudent(student, language));
   }
 
   @Override

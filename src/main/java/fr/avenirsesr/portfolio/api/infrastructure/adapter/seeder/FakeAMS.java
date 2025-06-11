@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -16,7 +17,21 @@ public class FakeAMS {
   }
 
   public static FakeAMS of(User user) {
-    return new FakeAMS(AMS.create(UUID.fromString(faker.call().internet().uuid()), user));
+    return new FakeAMS(
+        AMS.create(
+            UUID.fromString(faker.call().internet().uuid()),
+            user,
+            faker.call().name().title(),
+            ELanguage.FRENCH));
+  }
+
+  public static FakeAMS of(AMS ams, ELanguage language) {
+    return new FakeAMS(
+        AMS.create(
+            ams.getId(),
+            ams.getUser(),
+            String.format("%s %s", ams.getTitle(), language.getCode()),
+            language));
   }
 
   public FakeAMS withSkillLevel(List<SkillLevel> skillLevels) {

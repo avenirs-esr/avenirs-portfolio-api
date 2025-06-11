@@ -17,12 +17,46 @@ databaseChangeLog:
                   type: UUID
                   constraints:
                     nullable: false
+
+        - createTable:
+            tableName: ams_translation
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: ams_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: language
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
         - sql:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
             sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
             stripComments: true
+
+        - addForeignKeyConstraint:
+            baseTableName: ams_translation
+            baseColumnNames: ams_id
+            referencedTableName: ams
+            referencedColumnNames: id
+            constraintName: fk_ams_translation_ams
+            onDelete: CASCADE
 
   - changeSet:
       id: 009-1

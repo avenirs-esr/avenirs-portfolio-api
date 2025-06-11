@@ -14,12 +14,6 @@ databaseChangeLog:
                     nullable: false
 
               - column:
-                  name: name
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-
-              - column:
                   name: is_apc
                   type: BOOL
                   constraints:
@@ -28,6 +22,34 @@ databaseChangeLog:
               - column:
                   name: institution_id
                   type: UUID
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: program_translation
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: program_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: language
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(255)
                   constraints:
                     nullable: false
         - sql:
@@ -43,3 +65,11 @@ databaseChangeLog:
             referencedTableName: institution
             referencedColumnNames: id
             constraintName: fk_program_institution
+
+        - addForeignKeyConstraint:
+            baseTableName: program_translation
+            baseColumnNames: program_id
+            referencedTableName: program
+            referencedColumnNames: id
+            constraintName: fk_program_translation_program
+            onDelete: CASCADE

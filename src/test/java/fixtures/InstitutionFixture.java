@@ -1,6 +1,7 @@
 package fixtures;
 
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import java.util.Set;
 import java.util.UUID;
@@ -10,6 +11,7 @@ public class InstitutionFixture {
   private UUID id;
   private String name;
   private Set<EPortfolioType> enabledFields;
+  private ELanguage language = ELanguage.FRENCH;
 
   private InstitutionFixture() {
     this.id = UUID.randomUUID();
@@ -36,7 +38,12 @@ public class InstitutionFixture {
     return this;
   }
 
+  public InstitutionFixture withLanguage(ELanguage language) {
+    this.language = language;
+    return this;
+  }
+
   public Institution toModel() {
-    return Institution.toDomain(id, name, enabledFields);
+    return Institution.toDomain(id, name, enabledFields, language);
   }
 }

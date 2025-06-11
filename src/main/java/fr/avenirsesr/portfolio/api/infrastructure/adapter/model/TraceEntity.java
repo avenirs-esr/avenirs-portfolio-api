@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -30,6 +31,9 @@ public class TraceEntity {
 
   @Column(nullable = false)
   private String title;
+
+  @Column(nullable = false)
+  private ELanguage language;
 
   @ManyToMany
   @JoinTable(

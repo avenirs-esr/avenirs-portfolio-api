@@ -14,19 +14,49 @@ databaseChangeLog:
                     nullable: false
 
               - column:
-                  name: name
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-
-              - column:
                   name: enabled_fields
                   type: TEXT
                   constraints:
                     nullable: true
+
+        - createTable:
+            tableName: institution_translation
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: institution_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: language
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
         - sql:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
             sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
             stripComments: true
+
+        - addForeignKeyConstraint:
+            baseTableName: institution_translation
+            baseColumnNames: institution_id
+            referencedTableName: institution
+            referencedColumnNames: id
+            constraintName: fk_institution_translation_institution
+            onDelete: CASCADE

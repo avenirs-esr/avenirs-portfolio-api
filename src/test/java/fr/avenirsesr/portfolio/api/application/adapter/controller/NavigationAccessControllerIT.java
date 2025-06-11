@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.api.application.adapter.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.SeederRunner;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,8 @@ class NavigationAccessControllerIT {
   @Value("${user.unknown.signature}")
   private String unknownUserSignature;
 
+  private ELanguage language = ELanguage.FRENCH;
+
   @BeforeAll
   static void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
@@ -55,6 +58,7 @@ class NavigationAccessControllerIT {
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
+                .header("Accept-Language", language.getCode())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -72,7 +76,8 @@ class NavigationAccessControllerIT {
             get("/me/navigation-access")
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", unknownUserSignature))
+                .header("X-Context-Signature", unknownUserSignature)
+                .header("Accept-Language", language.getCode()))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.message").value("User not found"))
@@ -86,7 +91,8 @@ class NavigationAccessControllerIT {
             get("/me/navigation-access")
                 .header("X-Signed-Context", teacherPayload)
                 .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", teacherSignature))
+                .header("X-Context-Signature", teacherSignature)
+                .header("Accept-Language", language.getCode()))
         .andExpect(status().isForbidden())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.message").value("User is not student"))
