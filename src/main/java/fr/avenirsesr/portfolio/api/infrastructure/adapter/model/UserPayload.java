@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class UserPayload {
-  private UUID id;
+  private UUID sub;
   private Instant iat;
   private Instant exp;
 }
