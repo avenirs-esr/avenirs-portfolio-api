@@ -30,7 +30,7 @@ public class NavigationAccessController {
   @GetMapping
   public ResponseEntity&lt;NavigationAccessDTO&gt; getStudentNavigationAccess(
       Principal principal,
-      @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr&quot;) String lang) {
+      @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
 <span class="fc" id="L34">    ELanguage language = ELanguage.fromCode(lang);</span>
 <span class="fc" id="L35">    var userId = UUID.fromString(principal.getName());</span>
 
