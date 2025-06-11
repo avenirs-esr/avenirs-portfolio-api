@@ -21,20 +21,15 @@ import org.springframework.security.core.AuthenticationException;
 @ExtendWith(MockitoExtension.class)
 class CustomAuthenticationEntryPointTest {
 
-  @InjectMocks
-  private CustomAuthenticationEntryPoint entryPoint;
+  @InjectMocks private CustomAuthenticationEntryPoint entryPoint;
 
-  @Mock
-  private HttpServletRequest request;
+  @Mock private HttpServletRequest request;
 
-  @Mock
-  private HttpServletResponse response;
+  @Mock private HttpServletResponse response;
 
-  @Mock
-  private AuthenticationException authException;
+  @Mock private AuthenticationException authException;
 
-  @Spy
-  private ObjectMapper objectMapper = new ObjectMapper();
+  @Spy private ObjectMapper objectMapper = new ObjectMapper();
 
   private StringWriter stringWriter;
   private PrintWriter printWriter;
@@ -52,16 +47,16 @@ class CustomAuthenticationEntryPointTest {
 
     verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     verify(response).setContentType("application/json");
-    
-    ErrorResponse expectedError = new ErrorResponse(
-        EErrorCode.USER_NOT_AUTHORIZED.getCode(),
-        EErrorCode.USER_NOT_AUTHORIZED.getMessage());
+
+    ErrorResponse expectedError =
+        new ErrorResponse(
+            EErrorCode.USER_NOT_AUTHORIZED.getCode(), EErrorCode.USER_NOT_AUTHORIZED.getMessage());
     String expectedJson = objectMapper.writeValueAsString(expectedError);
-    
+
     printWriter.flush();
     String actualJson = stringWriter.toString();
-    
+
     verify(response).getWriter();
-    assert(actualJson.equals(expectedJson));
+    assert (actualJson.equals(expectedJson));
   }
 }

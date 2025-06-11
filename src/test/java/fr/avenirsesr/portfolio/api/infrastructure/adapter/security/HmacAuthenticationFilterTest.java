@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -80,7 +78,8 @@ class HmacAuthenticationFilterTest {
   void shouldNotFilterPublicPath() {
     try {
       ReflectionTestUtils.setField(filter, "permitAllPathsString", "/public/path,/another/path");
-      ReflectionTestUtils.setField(filter, "permitAllPathsList", java.util.Arrays.asList("/public/path", "/another/path"));
+      ReflectionTestUtils.setField(
+          filter, "permitAllPathsList", java.util.Arrays.asList("/public/path", "/another/path"));
 
       when(request.getRequestURI()).thenReturn("/public/path/resource");
 
@@ -94,7 +93,8 @@ class HmacAuthenticationFilterTest {
   void shouldFilterNonPublicPath() {
     try {
       ReflectionTestUtils.setField(filter, "permitAllPathsString", "/public/path,/another/path");
-      ReflectionTestUtils.setField(filter, "permitAllPathsList", java.util.Arrays.asList("/public/path", "/another/path"));
+      ReflectionTestUtils.setField(
+          filter, "permitAllPathsList", java.util.Arrays.asList("/public/path", "/another/path"));
 
       when(request.getRequestURI()).thenReturn("/protected/resource");
 
@@ -217,8 +217,7 @@ class HmacAuthenticationFilterTest {
         mockedStatic.when(() -> ESecurityKeys.getSecretByKey(TEST_KEY)).thenReturn(TEST_SECRET);
 
         assertThrows(
-            Exception.class,
-            () -> filter.doFilterInternal(request, response, filterChain));
+            Exception.class, () -> filter.doFilterInternal(request, response, filterChain));
       }
     } catch (Exception e) {
       fail("Test setup failed: " + e.getMessage());
@@ -236,8 +235,7 @@ class HmacAuthenticationFilterTest {
         mockedStatic.when(() -> ESecurityKeys.getSecretByKey(TEST_KEY)).thenReturn(TEST_SECRET);
 
         assertThrows(
-            Exception.class,
-            () -> filter.doFilterInternal(request, response, filterChain));
+            Exception.class, () -> filter.doFilterInternal(request, response, filterChain));
       }
     } catch (Exception e) {
       fail("Test setup failed: " + e.getMessage());
@@ -313,8 +311,7 @@ class HmacAuthenticationFilterTest {
         mockedStatic.when(() -> ESecurityKeys.getSecretByKey(TEST_KEY)).thenReturn(TEST_SECRET);
 
         assertThrows(
-            Exception.class,
-            () -> filter.doFilterInternal(request, response, filterChain));
+            Exception.class, () -> filter.doFilterInternal(request, response, filterChain));
       }
     } catch (Exception e) {
       fail("Test setup failed: " + e.getMessage());
