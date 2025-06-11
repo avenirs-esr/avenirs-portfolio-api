@@ -16,7 +16,8 @@ public enum EErrorCode {
   SKILL_LEVEL_NOT_FOUND("SKILL_LEVEL_NOT_FOUND", "Skill level not found"),
   TRACK_NOT_FOUND("TRACK_NOT_FOUND", "Track not found"),
   AMS_NOT_FOUND("AMS_NOT_FOUND", "AMS not found"),
-  USER_IS_NOT_STUDENT_EXCEPTION("USER_IS_NOT_STUDENT_EXCEPTION", "User is not student");
+  USER_IS_NOT_STUDENT_EXCEPTION("USER_IS_NOT_STUDENT_EXCEPTION", "User is not student"),
+  LANGUAGE_NOT_SUPPORTED("LANGUAGE_NOT_SUPPORTED", "Language not supported");
 
   private final String code;
   private final String message;

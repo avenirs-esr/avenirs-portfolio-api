@@ -114,4 +114,20 @@ class ProgramProgressControllerIT {
         .andExpect(jsonPath("$.message").value("User is not student"))
         .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
   }
+
+  @Test
+  void shouldReturn400WhenLanguageNotSupported() throws Exception {
+    mockMvc
+        .perform(
+            get("/me/program-progress/overview")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .header("Accept-Language", "invalid_language_code")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("Language not supported"))
+        .andExpect(jsonPath("$.code").value("LANGUAGE_NOT_SUPPORTED"));
+  }
 }
