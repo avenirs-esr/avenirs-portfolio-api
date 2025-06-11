@@ -12,22 +12,35 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
+@Component
 public class HmacAuthenticationFilter extends OncePerRequestFilter {
+
+  @Value("${security.permit-all-paths}")
+  private String permitAllPathsString;
+
+  private List<String> permitAllPathsList;
 
   public HmacAuthenticationFilter() {}
 
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      @NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
+      @NonNull FilterChain filterChain)
       throws ServletException, IOException {
 
     String signature = request.getHeader("X-Context-Signature");
@@ -44,7 +57,7 @@ public class HmacAuthenticationFilter extends OncePerRequestFilter {
     }
 
     if (signature != null && verifySignature(payload, signature, secretKey)) {
-      Authentication auth = new HmacAuthenticationToken(userPayload.getId());
+      Authentication auth = new HmacAuthenticationToken(userPayload.getSub());
       SecurityContextHolder.getContext().setAuthentication(auth);
 
       filterChain.doFilter(request, response);
@@ -53,6 +66,19 @@ public class HmacAuthenticationFilter extends OncePerRequestFilter {
       log.error("Invalid HMAC authentication attempt.{}", String.valueOf(exception));
       throw exception;
     }
+  }
+
+  @Override
+  protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
+    if (permitAllPathsList == null) {
+      permitAllPathsList =
+          Arrays.stream(permitAllPathsString.split(","))
+              .map(path -> path.trim().replace("/**", ""))
+              .toList();
+    }
+
+    String path = request.getRequestURI();
+    return permitAllPathsList.stream().anyMatch(path::startsWith);
   }
 
   private boolean payloadIsValid(UserPayload payload) {
