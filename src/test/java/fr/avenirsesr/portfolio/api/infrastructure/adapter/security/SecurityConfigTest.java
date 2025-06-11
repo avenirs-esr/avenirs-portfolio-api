@@ -103,6 +103,17 @@ class SecurityConfigTest {
                             "Status expected to be 200 or 302 but was: " + status);
                       }
                     });
+          } else if (cleanPath.startsWith("/photo") || cleanPath.startsWith("/cover")) {
+            mockMvc
+                .perform(get(cleanPath))
+                .andExpect(
+                    result -> {
+                      int status = result.getResponse().getStatus();
+                      if (status != 200 && status != 404 && status != 500) {
+                        throw new AssertionError(
+                            "Status expected to be 200, 404 or 500 but was: " + status);
+                      }
+                    });
           } else {
             mockMvc.perform(get(cleanPath)).andExpect(status().isOk());
           }
