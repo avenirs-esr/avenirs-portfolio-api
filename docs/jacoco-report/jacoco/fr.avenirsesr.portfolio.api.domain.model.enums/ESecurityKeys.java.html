@@ -13,12 +13,12 @@
 <span class="fc" id="L13">  }</span>
 
   public static String getSecretByKey(String key) {
-<span class="pc bpc" id="L16" title="1 of 2 branches missed.">    for (ESecurityKeys securityKey : ESecurityKeys.values()) {</span>
-<span class="pc bpc" id="L17" title="1 of 2 branches missed.">      if (securityKey.key.equals(key)) {</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">    for (ESecurityKeys securityKey : ESecurityKeys.values()) {</span>
+<span class="fc bfc" id="L17" title="All 2 branches covered.">      if (securityKey.key.equals(key)) {</span>
 <span class="fc" id="L18">        return securityKey.secret;</span>
       }
     }
-<span class="nc" id="L21">    throw new IllegalArgumentException(&quot;Invalid key: &quot; + key);</span>
+<span class="fc" id="L21">    throw new IllegalArgumentException(&quot;Invalid key: &quot; + key);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
