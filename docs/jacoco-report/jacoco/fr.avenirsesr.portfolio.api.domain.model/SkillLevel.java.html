@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkillLevel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.domain.model</a> &gt; <span class="el_source">SkillLevel.java</span></div><h1>SkillLevel.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.domain.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import java.util.List;
 import java.util.UUID;
@@ -16,44 +17,53 @@ public class SkillLevel {
   @Setter(AccessLevel.NONE)
   private final String name;
 
+  @Setter(AccessLevel.NONE)
+  private final String description;
+
+  private final ELanguage language;
+
   private ESkillLevelStatus status;
   private List&lt;Trace&gt; traces;
   private List&lt;AMS&gt; amses;
   private Skill skill;
 
-<span class="fc" id="L24">  private SkillLevel(UUID id, String name) {</span>
-<span class="fc" id="L25">    this.id = id;</span>
-<span class="fc" id="L26">    this.name = name;</span>
-<span class="fc" id="L27">  }</span>
+<span class="fc" id="L30">  private SkillLevel(UUID id, String name, String description, ELanguage language) {</span>
+<span class="fc" id="L31">    this.id = id;</span>
+<span class="fc" id="L32">    this.name = name;</span>
+<span class="fc" id="L33">    this.description = description;</span>
+<span class="fc" id="L34">    this.language = language;</span>
+<span class="fc" id="L35">  }</span>
 
-  public static SkillLevel create(UUID id, String name) {
-<span class="fc" id="L30">    var skillLevel = new SkillLevel(id, name);</span>
-<span class="fc" id="L31">    skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);</span>
-<span class="fc" id="L32">    skillLevel.setAmses(List.of());</span>
-<span class="fc" id="L33">    skillLevel.setTraces(List.of());</span>
+  public static SkillLevel create(UUID id, String name, String description, ELanguage language) {
+<span class="fc" id="L38">    var skillLevel = new SkillLevel(id, name, description, language);</span>
+<span class="fc" id="L39">    skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);</span>
+<span class="fc" id="L40">    skillLevel.setAmses(List.of());</span>
+<span class="fc" id="L41">    skillLevel.setTraces(List.of());</span>
 
-<span class="fc" id="L35">    return skillLevel;</span>
+<span class="fc" id="L43">    return skillLevel;</span>
   }
 
   public static SkillLevel toDomain(
       UUID id,
       String name,
+      String description,
       ESkillLevelStatus status,
       List&lt;Trace&gt; traces,
       List&lt;AMS&gt; amses,
-      Skill skill) {
-<span class="fc" id="L45">    var skillLevel = new SkillLevel(id, name);</span>
-<span class="fc" id="L46">    skillLevel.setStatus(status);</span>
-<span class="fc" id="L47">    skillLevel.setTraces(traces);</span>
-<span class="fc" id="L48">    skillLevel.setAmses(amses);</span>
-<span class="fc" id="L49">    skillLevel.setSkill(skill);</span>
+      Skill skill,
+      ELanguage language) {
+<span class="fc" id="L55">    var skillLevel = new SkillLevel(id, name, description, language);</span>
+<span class="fc" id="L56">    skillLevel.setStatus(status);</span>
+<span class="fc" id="L57">    skillLevel.setTraces(traces);</span>
+<span class="fc" id="L58">    skillLevel.setAmses(amses);</span>
+<span class="fc" id="L59">    skillLevel.setSkill(skill);</span>
 
-<span class="fc" id="L51">    return skillLevel;</span>
+<span class="fc" id="L61">    return skillLevel;</span>
   }
 
   @Override
   public String toString() {
-<span class="nc" id="L56">    return &quot;SkillLevel[%s]&quot;.formatted(id);</span>
+<span class="nc" id="L66">    return &quot;SkillLevel[%s]&quot;.formatted(id);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -2,6 +2,7 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.UserMapper;
@@ -16,31 +17,33 @@ public class ProgramProgressDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;ProgramProgress, ProgramProgressEntity&gt;
     implements ProgramProgressRepository {
   public ProgramProgressDatabaseRepository(ProgramProgressJpaRepository jpaRepository) {
-<span class="fc" id="L19">    super(</span>
+<span class="fc" id="L20">    super(</span>
         jpaRepository,
         jpaRepository,
         ProgramProgressMapper::fromDomain,
         ProgramProgressMapper::toDomain);
-<span class="fc" id="L24">  }</span>
+<span class="fc" id="L25">  }</span>
 
   @Override
-  public List&lt;ProgramProgress&gt; findAllByStudent(Student student) {
-<span class="fc" id="L28">    return jpaSpecificationExecutor</span>
-<span class="fc" id="L29">        .findAll(ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)))</span>
-<span class="fc" id="L30">        .stream()</span>
-<span class="fc" id="L31">        .map(ProgramProgressMapper::toDomain)</span>
-<span class="fc" id="L32">        .collect(Collectors.toList());</span>
+  public List&lt;ProgramProgress&gt; findAllByStudent(Student student, ELanguage language) {
+<span class="fc" id="L29">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L30">        .findAll(ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)))</span>
+<span class="fc" id="L31">        .stream()</span>
+<span class="fc" id="L32">        .map(</span>
+            programProgressEntity -&gt;
+<span class="fc" id="L34">                ProgramProgressMapper.toDomain(programProgressEntity, language))</span>
+<span class="fc" id="L35">        .collect(Collectors.toList());</span>
   }
 
   @Override
   public List&lt;ProgramProgress&gt; findAllAPCByStudent(Student student) {
-<span class="fc" id="L37">    return jpaSpecificationExecutor</span>
-<span class="fc" id="L38">        .findAll(</span>
-<span class="fc" id="L39">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
-<span class="fc" id="L40">                .and(ProgramProgressSpecification.isAPC()))</span>
-<span class="fc" id="L41">        .stream()</span>
-<span class="fc" id="L42">        .map(ProgramProgressMapper::toDomain)</span>
-<span class="fc" id="L43">        .collect(Collectors.toList());</span>
+<span class="fc" id="L40">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L41">        .findAll(</span>
+<span class="fc" id="L42">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
+<span class="fc" id="L43">                .and(ProgramProgressSpecification.isAPC()))</span>
+<span class="fc" id="L44">        .stream()</span>
+<span class="fc" id="L45">        .map(ProgramProgressMapper::toDomain)</span>
+<span class="fc" id="L46">        .collect(Collectors.toList());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

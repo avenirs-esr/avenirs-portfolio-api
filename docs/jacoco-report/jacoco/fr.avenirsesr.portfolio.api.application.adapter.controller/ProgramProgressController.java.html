@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
 import java.security.Principal;
@@ -14,11 +15,12 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-<span class="fc" id="L21">@Slf4j</span>
+<span class="fc" id="L23">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/program-progress&quot;)
 public class ProgramProgressController {
@@ -26,23 +28,26 @@ public class ProgramProgressController {
   private final UserRepository userRepository;
 
   @GetMapping(&quot;/overview&quot;)
-  public List&lt;ProgramProgressOverviewDTO&gt; getSkillsOverview(Principal principal) {
-<span class="fc" id="L30">    User user =</span>
+  public List&lt;ProgramProgressOverviewDTO&gt; getSkillsOverview(
+      Principal principal,
+      @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
+<span class="fc" id="L34">    ELanguage language = ELanguage.fromCode(lang);</span>
+<span class="fc" id="L35">    User user =</span>
         userRepository
-<span class="fc" id="L32">            .findById(UUID.fromString(principal.getName()))</span>
-<span class="fc" id="L33">            .orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L37">            .findById(UUID.fromString(principal.getName()))</span>
+<span class="fc" id="L38">            .orElseThrow(UserNotFoundException::new);</span>
 
-<span class="fc bfc" id="L35" title="All 2 branches covered.">    if (!user.isStudent()) {</span>
-<span class="fc" id="L36">      log.error(&quot;User {} is not a student&quot;, principal.getName());</span>
-<span class="fc" id="L37">      throw new UserIsNotStudentException();</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">    if (!user.isStudent()) {</span>
+<span class="fc" id="L41">      log.error(&quot;User {} is not a student&quot;, principal.getName());</span>
+<span class="fc" id="L42">      throw new UserIsNotStudentException();</span>
     }
 
-<span class="fc" id="L40">    Student student = user.toStudent();</span>
-<span class="fc" id="L41">    return programProgressService.getSkillsOverview(student).entrySet().stream()</span>
-<span class="fc" id="L42">        .map(</span>
+<span class="fc" id="L45">    Student student = user.toStudent();</span>
+<span class="fc" id="L46">    return programProgressService.getSkillsOverview(student, language).entrySet().stream()</span>
+<span class="fc" id="L47">        .map(</span>
             entry -&gt;
-<span class="fc" id="L44">                ProgramProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
-<span class="fc" id="L45">        .toList();</span>
+<span class="fc" id="L49">                ProgramProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="fc" id="L50">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

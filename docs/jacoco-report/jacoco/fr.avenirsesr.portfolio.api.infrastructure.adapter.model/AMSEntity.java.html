@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMSEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.infrastructure.adapter.model</a> &gt; <span class="el_source">AMSEntity.java</span></div><h1>AMSEntity.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
+
+import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = &quot;ams&quot;)
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class AMSEntity {
+  @Id private UUID id;
+
+  @ManyToOne(optional = false)
+  private UserEntity user;
+
+  @ManyToMany
+  @JoinTable(
+      name = &quot;ams_skill_levels&quot;,
+      joinColumns = @JoinColumn(name = &quot;ams_id&quot;),
+      inverseJoinColumns = @JoinColumn(name = &quot;skill_level_id&quot;))
+  private List&lt;SkillLevelEntity&gt; skillLevels;
+
+<span class="fc" id="L32">  @OneToMany(</span>
+      mappedBy = &quot;ams&quot;,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private Set&lt;AMSTranslationEntity&gt; translations = new HashSet&lt;&gt;();
+
+<span class="fc" id="L39">  public AMSEntity(UUID id, UserEntity user, Set&lt;SkillLevelEntity&gt; skillLevels) {</span>
+<span class="fc" id="L40">    this.id = id;</span>
+<span class="fc" id="L41">    this.user = user;</span>
+<span class="fc" id="L42">    this.skillLevels = List.copyOf(skillLevels);</span>
+<span class="fc" id="L43">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

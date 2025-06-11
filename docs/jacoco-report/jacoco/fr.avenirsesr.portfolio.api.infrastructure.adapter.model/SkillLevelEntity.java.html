@@ -2,7 +2,9 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import jakarta.persistence.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,9 +20,6 @@ import lombok.Setter;
 public class SkillLevelEntity {
   @Id private UUID id;
 
-  @Column(nullable = false)
-  private String name;
-
   @Column
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
@@ -28,8 +27,8 @@ public class SkillLevelEntity {
   @ManyToMany
   @JoinTable(
       name = &quot;trace_skill_levels&quot;,
-      joinColumns = @JoinColumn(name = &quot;trace_id&quot;),
-      inverseJoinColumns = @JoinColumn(name = &quot;skill_level_id&quot;))
+      joinColumns = @JoinColumn(name = &quot;skill_level_id&quot;),
+      inverseJoinColumns = @JoinColumn(name = &quot;trace_id&quot;))
   private List&lt;TraceEntity&gt; traces;
 
   @ManyToMany
@@ -43,9 +42,29 @@ public class SkillLevelEntity {
   @JoinColumn(name = &quot;skill_id&quot;)
   private SkillEntity skill;
 
+<span class="fc" id="L45">  @OneToMany(</span>
+      mappedBy = &quot;skillLevel&quot;,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private Set&lt;SkillLevelTranslationEntity&gt; translations = new HashSet&lt;&gt;();
+
+  public SkillLevelEntity(
+      UUID id,
+      ESkillLevelStatus status,
+      List&lt;TraceEntity&gt; traces,
+      List&lt;AMSEntity&gt; amses,
+<span class="fc" id="L57">      SkillEntity skill) {</span>
+<span class="fc" id="L58">    this.id = id;</span>
+<span class="fc" id="L59">    this.status = status;</span>
+<span class="fc" id="L60">    this.traces = traces;</span>
+<span class="fc" id="L61">    this.amses = amses;</span>
+<span class="fc" id="L62">    this.skill = skill;</span>
+<span class="fc" id="L63">  }</span>
+
   @Override
   public String toString() {
-<span class="nc" id="L48">    return &quot;SkillLevelEntity[%s]&quot;.formatted(id);</span>
+<span class="nc" id="L67">    return &quot;SkillLevelEntity[%s]&quot;.formatted(id);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

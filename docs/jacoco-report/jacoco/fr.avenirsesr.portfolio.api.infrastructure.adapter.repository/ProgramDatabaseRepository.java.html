@@ -4,13 +4,23 @@ import fr.avenirsesr.portfolio.api.domain.model.Program;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramEntity;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProgramDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Program, ProgramEntity&gt;
     implements ProgramRepository {
+  private final ProgramJpaRepository jpaRepository;
+
   public ProgramDatabaseRepository(ProgramJpaRepository jpaRepository) {
-<span class="fc" id="L13">    super(jpaRepository, jpaRepository, ProgramMapper::fromDomain, ProgramMapper::toDomain);</span>
-<span class="fc" id="L14">  }</span>
+<span class="fc" id="L16">    super(jpaRepository, jpaRepository, ProgramMapper::fromDomain, ProgramMapper::toDomain);</span>
+<span class="fc" id="L17">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L18">  }</span>
+
+  public void saveAllEntities(List&lt;ProgramEntity&gt; entities) {
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">    if (entities != null) {</span>
+<span class="fc" id="L22">      jpaRepository.saveAll(entities);</span>
+    }
+<span class="fc" id="L24">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
