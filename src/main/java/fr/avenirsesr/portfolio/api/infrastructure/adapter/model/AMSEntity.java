@@ -7,6 +7,8 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -25,6 +27,12 @@ public class AMSEntity {
 
   @ManyToOne(optional = false)
   private UserEntity user;
+  
+  @Column(name = "start_date", nullable = false)
+  private LocalDate startDate;
+  
+  @Column(name = "end_date", nullable = false)
+  private LocalDate endDate;
 
   @ManyToMany
   @JoinTable(
