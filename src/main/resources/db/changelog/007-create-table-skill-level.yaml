@@ -61,7 +61,9 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            sql: |
+              ALTER TABLE skill_level OWNER TO ${avenirs.admin.role};
+              ALTER TABLE skill_level_translation OWNER TO ${avenirs.admin.role};
             stripComments: true
 
         - addForeignKeyConstraint:

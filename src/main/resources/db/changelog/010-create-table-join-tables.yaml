@@ -20,7 +20,7 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE trace_skill_levels OWNER TO ${avenirs.admin.role}
             stripComments: true
 
         - addForeignKeyConstraint:
@@ -60,7 +60,7 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE trace_ams OWNER TO ${avenirs.admin.role}
             stripComments: true
 
         - addForeignKeyConstraint:
@@ -100,7 +100,7 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE skill_level_ams OWNER TO ${avenirs.admin.role}
             stripComments: true
 
         - addForeignKeyConstraint:
@@ -140,7 +140,7 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE skill_skill_levels OWNER TO ${avenirs.admin.role}
             stripComments: true
 
         - addForeignKeyConstraint:
@@ -180,6 +180,13 @@ databaseChangeLog:
                   type: UUID
                   constraints:
                     nullable: false
+
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE program_progress_skills OWNER TO ${avenirs.admin.role}
+            stripComments: true
 
         - addForeignKeyConstraint:
             baseTableName: program_progress_skills
