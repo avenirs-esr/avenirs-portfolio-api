@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,12 @@ public class AMSEntity {
 
   @ManyToOne(optional = false)
   private UserEntity user;
+
+  @Column(name = "start_date", nullable = false)
+  private LocalDate startDate;
+
+  @Column(name = "end_date", nullable = false)
+  private LocalDate endDate;
 
   @ManyToMany
   @JoinTable(
