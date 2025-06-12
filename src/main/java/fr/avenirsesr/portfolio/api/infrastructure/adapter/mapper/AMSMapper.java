@@ -25,7 +25,10 @@ public interface AMSMapper {
   }
 
   static AMS toDomain(AMSEntity entity) {
-    ELanguage language = ELanguage.FRENCH;
+    return toDomain(entity, ELanguage.FRENCH);
+  }
+
+  static AMS toDomain(AMSEntity entity, ELanguage language) {
     String title =
         entity.getTranslations().stream()
             .filter(t -> t.getLanguage().equals(language))

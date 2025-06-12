@@ -33,7 +33,7 @@ public interface SkillLevelMapper {
         skillLevelTranslationEntity.getDescription(),
         skillLevelEntity.getStatus(),
         skillLevelEntity.getTraces().stream().map(TraceMapper::toDomain).toList(),
-        skillLevelEntity.getAmses().stream().map(AMSMapper::toDomain).toList(),
+        skillLevelEntity.getAmses().stream().map(ams -> AMSMapper.toDomain(ams, language)).toList(),
         skill,
         language);
   }

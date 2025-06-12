@@ -10,8 +10,11 @@ public interface InstitutionMapper {
     return new InstitutionEntity(institution.getId(), institution.getEnabledFields());
   }
 
-  static Institution toDomain(InstitutionEntity institutionEntity) {
-    ELanguage language = ELanguage.FRENCH;
+  static Institution toDomain(InstitutionEntity entity) {
+    return toDomain(entity, ELanguage.FRENCH);
+  }
+
+  static Institution toDomain(InstitutionEntity institutionEntity, ELanguage language) {
     String name =
         institutionEntity.getTranslations().stream()
             .filter(t -> t.getLanguage().equals(language))

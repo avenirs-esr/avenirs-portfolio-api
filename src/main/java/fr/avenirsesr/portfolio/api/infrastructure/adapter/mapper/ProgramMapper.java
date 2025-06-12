@@ -24,7 +24,7 @@ public interface ProgramMapper {
             .orElse(null);
     return Program.toDomain(
         programEntity.getId(),
-        InstitutionMapper.toDomain(programEntity.getInstitution()),
+        InstitutionMapper.toDomain(programEntity.getInstitution(), language),
         name,
         programEntity.isAPC(),
         language);
