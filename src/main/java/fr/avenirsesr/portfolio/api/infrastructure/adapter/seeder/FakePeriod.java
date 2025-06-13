@@ -16,8 +16,7 @@ public class FakePeriod {
 
   private static final FakerProvider faker = new FakerProvider();
 
-  @Value("${fake.academic.year:2024}")
-  private int academicYear;
+  private static final int academicYear = 2024;
 
   private Instant startDate;
   private Instant endDate;
