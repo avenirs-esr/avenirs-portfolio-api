@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSTranslationEntity;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.util.TranslationUtil;
 import java.util.stream.Collectors;
 
 public interface AMSMapper {
@@ -29,16 +30,13 @@ public interface AMSMapper {
   }
 
   static AMS toDomain(AMSEntity entity, ELanguage language) {
-    String title =
-        entity.getTranslations().stream()
-            .filter(t -> t.getLanguage().equals(language))
-            .findFirst()
-            .map(AMSTranslationEntity::getTitle)
-            .orElse(null);
+    ELanguage fallbackLanguage = ELanguage.FRENCH;
+    AMSTranslationEntity translationEntity =
+        TranslationUtil.getTranslation(entity.getTranslations(), language, fallbackLanguage);
     return AMS.toDomain(
         entity.getId(),
         UserMapper.toDomain(entity.getUser()),
-        title,
+        translationEntity.getTitle(),
         entity.getSkillLevels().stream()
             .map(
                 skillLevelEntity ->

@@ -14,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AMSTranslationEntity {
+public class AMSTranslationEntity implements Translation {
   @Id private UUID id;
 
   @Column(name = "language", nullable = false)

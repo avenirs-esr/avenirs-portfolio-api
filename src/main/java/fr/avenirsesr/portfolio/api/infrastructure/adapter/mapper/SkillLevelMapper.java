@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.*;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.util.TranslationUtil;
 import java.util.List;
 
 public interface SkillLevelMapper {
@@ -20,13 +21,10 @@ public interface SkillLevelMapper {
   }
 
   static SkillLevel toDomain(SkillLevelEntity skillLevelEntity, Skill skill, ELanguage language) {
+    ELanguage fallbackLanguage = ELanguage.FRENCH;
     SkillLevelTranslationEntity skillLevelTranslationEntity =
-        skillLevelEntity.getTranslations().stream()
-            .filter(t -> t.getLanguage().equals(language))
-            .findFirst()
-            .orElseThrow(
-                () ->
-                    new IllegalArgumentException("No translation found for language: " + language));
+        TranslationUtil.getTranslation(
+            skillLevelEntity.getTranslations(), language, fallbackLanguage);
     return SkillLevel.toDomain(
         skillLevelEntity.getId(),
         skillLevelTranslationEntity.getName(),

@@ -35,7 +35,7 @@ L’API sera accessible sur : [http://localhost:10000](http://localhost:10000)
 ## 🧪 Lancer les tests
 
 ```bash
- mvn clean compile javadoc:javadoc test jacoco:report
+ mvn clean compile javadoc:javadoc verify
 ```
 
 Les tests unitaires, d’intégration et les rapports de couverture sont générés.

@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.api.domain.model.enums;
 
-import fr.avenirsesr.portfolio.api.domain.exception.LanguageException;
-
 public enum ELanguage {
   FRENCH("fr_FR"),
   ENGLISH("en_US"),
@@ -23,6 +21,6 @@ public enum ELanguage {
         return language;
       }
     }
-    throw new LanguageException();
+    return ELanguage.FRENCH;
   }
 }

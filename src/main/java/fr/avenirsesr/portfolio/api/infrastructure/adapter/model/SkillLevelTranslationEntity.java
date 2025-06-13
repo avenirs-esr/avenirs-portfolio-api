@@ -14,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SkillLevelTranslationEntity {
+public class SkillLevelTranslationEntity implements Translation {
   @Id private UUID id;
 
   @Column(name = "language", nullable = false)

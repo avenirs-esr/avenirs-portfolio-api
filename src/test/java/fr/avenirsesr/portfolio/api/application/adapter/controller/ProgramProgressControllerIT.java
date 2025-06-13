@@ -116,7 +116,7 @@ class ProgramProgressControllerIT {
   }
 
   @Test
-  void shouldReturn400WhenLanguageNotSupported() throws Exception {
+  void shouldFallbackInDefaultLanguageWhenLanguageNotSupported() throws Exception {
     mockMvc
         .perform(
             get("/me/program-progress/overview")
@@ -125,9 +125,13 @@ class ProgramProgressControllerIT {
                 .header("X-Context-Signature", studentSignature)
                 .header("Accept-Language", "invalid_language_code")
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest())
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("Language not supported"))
-        .andExpect(jsonPath("$.code").value("LANGUAGE_NOT_SUPPORTED"));
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
+        .andExpect(jsonPath("$[0].name").value("Western Master - 8"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill amet"))
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
   }
 }

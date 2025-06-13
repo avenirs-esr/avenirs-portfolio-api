@@ -100,7 +100,7 @@ class NavigationAccessControllerIT {
   }
 
   @Test
-  void shouldReturn400WhenLanguageNotSupported() throws Exception {
+  void shouldFallbackInDefaultLanguageWhenLanguageNotSupported() throws Exception {
     mockMvc
         .perform(
             get("/me/navigation-access")
@@ -109,9 +109,12 @@ class NavigationAccessControllerIT {
                 .header("X-Context-Signature", studentSignature)
                 .header("Accept-Language", "invalid_language_code")
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isBadRequest())
+        .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("Language not supported"))
-        .andExpect(jsonPath("$.code").value("LANGUAGE_NOT_SUPPORTED"));
+        .andExpect(jsonPath("$.APC").exists())
+        .andExpect(jsonPath("$.LIFE_PROJECT").exists())
+        .andExpect(jsonPath("$.APC.enabledByInstitution").value(true))
+        .andExpect(jsonPath("$.APC.hasProgram").value(true))
+        .andExpect(jsonPath("$.LIFE_PROJECT.enabledByInstitution").value(true));
   }
 }

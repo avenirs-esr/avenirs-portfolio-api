@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.Program;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramTranslationEntity;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.util.TranslationUtil;
 
 public interface ProgramMapper {
   static ProgramEntity fromDomain(Program program) {
@@ -16,16 +17,13 @@ public interface ProgramMapper {
   }
 
   static Program toDomain(ProgramEntity programEntity, ELanguage language) {
-    String name =
-        programEntity.getTranslations().stream()
-            .filter(t -> t.getLanguage().equals(language))
-            .findFirst()
-            .map(ProgramTranslationEntity::getName)
-            .orElse(null);
+    ELanguage fallbackLanguage = ELanguage.FRENCH;
+    ProgramTranslationEntity translationEntity =
+        TranslationUtil.getTranslation(programEntity.getTranslations(), language, fallbackLanguage);
     return Program.toDomain(
         programEntity.getId(),
         InstitutionMapper.toDomain(programEntity.getInstitution(), language),
-        name,
+        translationEntity.getName(),
         programEntity.isAPC(),
         language);
   }
