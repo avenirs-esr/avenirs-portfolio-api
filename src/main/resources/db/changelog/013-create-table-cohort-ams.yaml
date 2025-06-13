@@ -4,10 +4,10 @@ databaseChangeLog:
       author: Arnaud Deman
       changes:
         - createTable:
-            tableName: group_ams
+            tableName: cohort_ams
             columns:
               - column:
-                  name: group_id
+                  name: cohort_id
                   type: UUID
                   constraints:
                     nullable: false
@@ -20,26 +20,26 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE group_ams OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE cohort_ams OWNER TO ${avenirs.admin.role}
             stripComments: true
 
         - addForeignKeyConstraint:
-            baseTableName: group_ams
-            baseColumnNames: group_id
-            referencedTableName: group
+            baseTableName: cohort_ams
+            baseColumnNames: cohort_id
+            referencedTableName: cohort
             referencedColumnNames: id
-            constraintName: fk_group_ams_group
+            constraintName: fk_cohort_ams_cohort
             onDelete: CASCADE
 
         - addForeignKeyConstraint:
-            baseTableName: group_ams
+            baseTableName: cohort_ams
             baseColumnNames: ams_id
             referencedTableName: ams
             referencedColumnNames: id
-            constraintName: fk_group_ams_ams
+            constraintName: fk_cohort_ams_ams
             onDelete: CASCADE
 
         - addPrimaryKey:
-            tableName: group_ams
-            columnNames: group_id, ams_id
-            constraintName: pk_group_ams
+            tableName: cohort_ams
+            columnNames: cohort_id, ams_id
+            constraintName: pk_cohort_ams

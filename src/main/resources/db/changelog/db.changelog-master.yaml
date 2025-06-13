@@ -22,8 +22,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/011-create-table-config.yaml
   - include:
-      file: db/changelog/012-create-table-groups.yaml
+      file: db/changelog/012-create-table-cohort.yaml
   - include:
-      file: db/changelog/013-create-table-group-ams.yaml
+      file: db/changelog/013-create-table-cohort-ams.yaml
   - include:
-      file: db/changelog/014-create-table-group-users.yaml
+      file: db/changelog/014-create-table-cohort-users.yaml

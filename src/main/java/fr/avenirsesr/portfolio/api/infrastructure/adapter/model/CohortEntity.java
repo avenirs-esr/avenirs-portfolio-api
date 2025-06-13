@@ -8,7 +8,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
+
 import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -17,35 +17,35 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "group")
+@Table(name = "cohort")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class GroupEntity {
+public class CohortEntity {
   @Id private UUID id;
 
   @Column(nullable = false)
   private String name;
-  
+
   @Column(length = 255)
   private String description;
 
   @ManyToMany
   @JoinTable(
-      name = "group_user",
-      joinColumns = @JoinColumn(name = "group_id"),
+      name = "cohort_user",
+      joinColumns = @JoinColumn(name = "cohort_id"),
       inverseJoinColumns = @JoinColumn(name = "user_id"))
   private Set<UserEntity> users;
 
   @ManyToOne(optional = false)
   @JoinColumn(name = "program_progress_id")
   private ProgramProgressEntity programProgress;
-  
+
   @ManyToMany
   @JoinTable(
-      name = "group_ams",
-      joinColumns = @JoinColumn(name = "group_id"),
+      name = "cohort_ams",
+      joinColumns = @JoinColumn(name = "cohort_id"),
       inverseJoinColumns = @JoinColumn(name = "ams_id"))
   private Set<AMSEntity> amsEntities;
 }
