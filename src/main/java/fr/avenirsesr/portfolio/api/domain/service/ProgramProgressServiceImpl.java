@@ -22,8 +22,7 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   private static final int MAX_SKILLS = 6;
   private final ProgramProgressRepository programProgressRepository;
 
-  private static SkillLevel findCurrentOrNextSkillLevel(
-      Set<SkillLevel> skillLevels, boolean onlyCurrent) {
+  private static SkillLevel findCurrentOrNextSkillLevel(Set<SkillLevel> skillLevels) {
     if (skillLevels == null || skillLevels.isEmpty()) {
       return null;
     }
@@ -35,24 +34,18 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
                     && (sl.getEndDate() == null || sl.getEndDate().isAfter(LocalDate.now())))
         .findFirst()
         .orElseGet(
-            () -> {
-              if (onlyCurrent) {
-                return null;
-              }
-              return skillLevels.stream()
-                  .filter(
-                      sl ->
-                          sl.getStatus() == ESkillLevelStatus.TO_BE_EVALUATED
-                              || sl.getStatus() == ESkillLevelStatus.NOT_STARTED)
-                  .findFirst()
-                  .orElse(null);
-            });
+            () ->
+                skillLevels.stream()
+                    .filter(
+                        sl ->
+                            sl.getStatus() == ESkillLevelStatus.TO_BE_EVALUATED
+                                || sl.getStatus() == ESkillLevelStatus.NOT_STARTED)
+                    .findFirst()
+                    .orElse(null));
   }
 
   private static Map<ProgramProgress, Set<Skill>> cleanProgramProgressList(
-      List<ProgramProgress> programProgressList,
-      boolean needToLimitSkills,
-      boolean onlyCurrentSkillLevel) {
+      List<ProgramProgress> programProgressList, boolean needToLimitSkills) {
     final int skillLimit =
         !programProgressList.isEmpty() ? MAX_SKILLS / programProgressList.size() : 0;
 
@@ -68,8 +61,7 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
                         .map(
                             skill -> {
                               SkillLevel selectedSkillLevel =
-                                  findCurrentOrNextSkillLevel(
-                                      skill.getSkillLevels(), onlyCurrentSkillLevel);
+                                  findCurrentOrNextSkillLevel(skill.getSkillLevels());
                               Set<SkillLevel> selectedSkillLevelSet =
                                   selectedSkillLevel != null
                                       ? Set.of(selectedSkillLevel)
@@ -92,7 +84,7 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   @Override
   public Map<ProgramProgress, Set<Skill>> getSkillsOverview(Student student, ELanguage language) {
     return cleanProgramProgressList(
-        programProgressRepository.findAllByStudent(student, language), true, false);
+        programProgressRepository.findAllByStudent(student, language), true);
   }
 
   @Override
@@ -104,6 +96,6 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   @Override
   public Map<ProgramProgress, Set<Skill>> getSkillsView(Student student, ELanguage language) {
     return cleanProgramProgressList(
-        programProgressRepository.findAllByStudent(student, language), false, true);
+        programProgressRepository.findAllByStudent(student, language), false);
   }
 }

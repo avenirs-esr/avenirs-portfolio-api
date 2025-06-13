@@ -407,7 +407,7 @@ public class ProgramProgressServiceImplTest {
   }
 
   @Test
-  void shouldReturnNullWhenUnderReviewSkillEndDateIsOutDatedForView() {
+  void shouldReturnNotStartedWhenUnderReviewSkillEndDateIsOutDatedForView() {
     // Given
     SkillLevel skillLevel1 =
         SkillLevelFixture.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
@@ -422,6 +422,37 @@ public class ProgramProgressServiceImplTest {
         SkillFixture.create()
             .withSkillLevels(Set.of(skillLevel1, skillLevel2, skillLevel3))
             .toModel();
+
+    ProgramProgress progress =
+        ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
+
+    when(programProgressRepository.findAllByStudent(student, language))
+        .thenReturn(List.of(progress));
+
+    // When
+    Map<ProgramProgress, Set<Skill>> result =
+        programProgressService.getSkillsView(student, language);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
+    List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
+
+    // Then
+    assertEquals(1, skills1.size());
+    assertEquals(ESkillLevelStatus.NOT_STARTED, skillLevels1.getFirst().getStatus());
+  }
+
+  @Test
+  void shouldReturnNullWhenDontHaveValidCurrentSkillsForView() {
+    // Given
+    SkillLevel skillLevel1 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+    SkillLevel skillLevel2 =
+        SkillLevelFixture.create()
+            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
+            .withEndDate(LocalDate.now().minus(Period.ofDays(1)))
+            .toModel();
+    Skill skill1 =
+        SkillFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
 
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
