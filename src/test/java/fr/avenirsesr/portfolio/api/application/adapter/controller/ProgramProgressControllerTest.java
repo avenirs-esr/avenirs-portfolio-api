@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
 import java.security.Principal;
@@ -36,6 +37,7 @@ public class ProgramProgressControllerTest {
   private UUID userId;
   private User user;
   private Principal principal;
+  private ELanguage language = ELanguage.FRENCH;
 
   @BeforeEach
   void setUp() {
@@ -52,11 +54,12 @@ public class ProgramProgressControllerTest {
     Map<ProgramProgress, Set<Skill>> serviceResponse = Map.of(programProgress, Set.of(skill));
 
     when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-    when(programProgressService.getSkillsOverview(any(Student.class))).thenReturn(serviceResponse);
+    when(programProgressService.getSkillsOverview(any(Student.class), any(ELanguage.class)))
+        .thenReturn(serviceResponse);
 
     // When
     List<ProgramProgressOverviewDTO> result =
-        programProgressController.getSkillsOverview(principal);
+        programProgressController.getSkillsOverview(principal, language.getCode());
 
     // Then
     assertEquals(1, result.size());
@@ -71,7 +74,8 @@ public class ProgramProgressControllerTest {
 
     // Then
     assertThrows(
-        UserNotFoundException.class, () -> programProgressController.getSkillsOverview(principal));
+        UserNotFoundException.class,
+        () -> programProgressController.getSkillsOverview(principal, language.getCode()));
   }
 
   @Test
@@ -83,6 +87,6 @@ public class ProgramProgressControllerTest {
     // Then
     assertThrows(
         UserIsNotStudentException.class,
-        () -> programProgressController.getSkillsOverview(principal));
+        () -> programProgressController.getSkillsOverview(principal, language.getCode()));
   }
 }

@@ -3,6 +3,7 @@ package fixtures;
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeAMS;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,13 +13,16 @@ public class AMSFixture {
 
   private UUID id;
   private User user;
+  private String title;
   private List<SkillLevel> skillLevels;
+  private ELanguage language = ELanguage.FRENCH;
 
   private AMSFixture() {
     var fakeUser = UserFixture.create().toModel();
     var base = FakeAMS.of(fakeUser).toModel();
     this.id = base.getId();
     this.user = base.getUser();
+    this.title = base.getTitle();
     this.skillLevels = base.getSkillLevels();
   }
 
@@ -54,7 +58,17 @@ public class AMSFixture {
     return amses;
   }
 
+  public AMSFixture withTitle(String title) {
+    this.title = title;
+    return this;
+  }
+
+  public AMSFixture withLanguage(ELanguage language) {
+    this.language = language;
+    return this;
+  }
+
   public AMS toModel() {
-    return AMS.toDomain(id, user, skillLevels);
+    return AMS.toDomain(id, user, title, skillLevels, language);
   }
 }

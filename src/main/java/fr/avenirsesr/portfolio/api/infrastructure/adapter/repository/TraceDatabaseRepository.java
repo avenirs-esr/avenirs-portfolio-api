@@ -34,4 +34,10 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, 
         .map(traceEntity -> TraceMapper.toDomain(traceEntity))
         .toList();
   }
+
+  public void saveAllEntities(List<TraceEntity> entities) {
+    if (entities != null && !entities.isEmpty()) {
+      jpaRepository.saveAll(entities);
+    }
+  }
 }

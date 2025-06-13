@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.UserMapper;
@@ -24,11 +25,13 @@ public class ProgramProgressDatabaseRepository
   }
 
   @Override
-  public List<ProgramProgress> findAllByStudent(Student student) {
+  public List<ProgramProgress> findAllByStudent(Student student, ELanguage language) {
     return jpaSpecificationExecutor
         .findAll(ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)))
         .stream()
-        .map(ProgramProgressMapper::toDomain)
+        .map(
+            programProgressEntity ->
+                ProgramProgressMapper.toDomain(programProgressEntity, language))
         .collect(Collectors.toList());
   }
 

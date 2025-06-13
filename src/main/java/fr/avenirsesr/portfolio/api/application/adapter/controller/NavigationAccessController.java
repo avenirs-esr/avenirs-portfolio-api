@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.api.application.adapter.controller;
 import fr.avenirsesr.portfolio.api.application.adapter.dto.NavigationAccessDTO;
 import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
@@ -13,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,7 +28,10 @@ public class NavigationAccessController {
   private final ProgramProgressService programProgressService;
 
   @GetMapping
-  public ResponseEntity<NavigationAccessDTO> getStudentNavigationAccess(Principal principal) {
+  public ResponseEntity<NavigationAccessDTO> getStudentNavigationAccess(
+      Principal principal,
+      @RequestHeader(value = "Accept-Language", defaultValue = "fr_FR") String lang) {
+    ELanguage language = ELanguage.fromCode(lang);
     var userId = UUID.fromString(principal.getName());
 
     log.info("Received request to get navigation access of student [{}]", userId);
@@ -41,9 +46,9 @@ public class NavigationAccessController {
     var student = user.toStudent();
 
     var isAPCEnabledByInstitution =
-        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
+        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC, language);
     var isLifeProjectEnabledByInstitution =
-        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);
+        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT, language);
 
     var isFollowingAPCProgram = programProgressService.isStudentFollowingAPCProgram(student);
 

@@ -2,6 +2,7 @@ package fixtures;
 
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.model.Program;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import java.util.Set;
 import java.util.UUID;
@@ -12,6 +13,7 @@ public class ProgramFixture {
   private Institution institution;
   private String name;
   private boolean isAPC;
+  private ELanguage language = ELanguage.FRENCH;
 
   private ProgramFixture() {
     this.id = UUID.randomUUID();
@@ -60,7 +62,12 @@ public class ProgramFixture {
     return this;
   }
 
+  public ProgramFixture withLanguage(ELanguage language) {
+    this.language = language;
+    return this;
+  }
+
   public Program toModel() {
-    return Program.toDomain(id, institution, name, isAPC);
+    return Program.toDomain(id, institution, name, isAPC, language);
   }
 }

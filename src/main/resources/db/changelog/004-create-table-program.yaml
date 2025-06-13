@@ -14,12 +14,6 @@ databaseChangeLog:
                     nullable: false
 
               - column:
-                  name: name
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-
-              - column:
                   name: is_apc
                   type: BOOL
                   constraints:
@@ -30,11 +24,41 @@ databaseChangeLog:
                   type: UUID
                   constraints:
                     nullable: false
+
+        - createTable:
+            tableName: program_translation
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: program_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: language
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
         - sql:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            sql: |
+              ALTER TABLE program OWNER TO ${avenirs.admin.role};
+              ALTER TABLE program_translation OWNER TO ${avenirs.admin.role};
             stripComments: true
 
         - addForeignKeyConstraint:
@@ -43,3 +67,11 @@ databaseChangeLog:
             referencedTableName: institution
             referencedColumnNames: id
             constraintName: fk_program_institution
+
+        - addForeignKeyConstraint:
+            baseTableName: program_translation
+            baseColumnNames: program_id
+            referencedTableName: program
+            referencedColumnNames: id
+            constraintName: fk_program_translation_program
+            onDelete: CASCADE

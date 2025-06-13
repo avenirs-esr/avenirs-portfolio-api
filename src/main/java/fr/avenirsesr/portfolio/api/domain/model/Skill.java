@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
@@ -13,18 +14,23 @@ public class Skill {
   private Set<SkillLevel> skillLevels;
   private ProgramProgress programProgress;
 
-  private Skill(UUID id, String name, Set<SkillLevel> skillLevels) {
+  private final ELanguage language;
+
+  private Skill(UUID id, String name, Set<SkillLevel> skillLevels, ELanguage language) {
     this.id = id;
     this.name = name;
     this.skillLevels = skillLevels;
+    this.language = language;
   }
 
-  public static Skill create(UUID id, String name, Set<SkillLevel> skillLevels) {
-    return new Skill(id, name, skillLevels);
+  public static Skill create(
+      UUID id, String name, Set<SkillLevel> skillLevels, ELanguage language) {
+    return new Skill(id, name, skillLevels, language);
   }
 
-  public static Skill toDomain(UUID id, String name, Set<SkillLevel> skillLevels) {
-    return new Skill(id, name, skillLevels);
+  public static Skill toDomain(
+      UUID id, String name, Set<SkillLevel> skillLevels, ELanguage language) {
+    return new Skill(id, name, skillLevels, language);
   }
 
   @Override

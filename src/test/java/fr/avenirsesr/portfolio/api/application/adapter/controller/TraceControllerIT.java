@@ -53,8 +53,8 @@ class TraceControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].traceId").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
-        .andExpect(jsonPath("$[0].title").value("Ut accusantium nostrum similique."))
+        .andExpect(jsonPath("$[0].traceId").value("1d7451f6-b6e6-4dbb-a834-261fd952de4a"))
+        .andExpect(jsonPath("$[0].title").value("Enim commodi et laborum sequi alias."))
         .andExpect(jsonPath("$[0].isGroup").value(false));
   }
 

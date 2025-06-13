@@ -1,11 +1,7 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,17 +22,21 @@ import lombok.Setter;
 public class InstitutionEntity {
   @Id private UUID id;
 
-  @Column(nullable = false)
-  private String name;
-
   @Column(name = "enabled_fields", nullable = false)
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
   private String enabledFieldsRaw;
 
-  public InstitutionEntity(UUID id, String name, Set<EPortfolioType> enabledFields) {
+  @OneToMany(
+      mappedBy = "institution",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private Set<InstitutionTranslationEntity> translations =
+      new HashSet<>(); // TODO: Remove this SET and get it in queries
+
+  public InstitutionEntity(UUID id, Set<EPortfolioType> enabledFields) {
     this.id = id;
-    this.name = name;
     setEnabledFields(enabledFields);
   }
 

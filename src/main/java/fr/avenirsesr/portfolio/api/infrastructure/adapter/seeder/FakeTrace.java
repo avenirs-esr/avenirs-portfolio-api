@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -21,7 +22,8 @@ public class FakeTrace {
         Trace.create(
             UUID.fromString(faker.call().internet().uuid()),
             user,
-            faker.call().lorem().sentence()));
+            faker.call().lorem().sentence(),
+            ELanguage.FRENCH));
   }
 
   public FakeTrace withSkillLevel(List<SkillLevel> skillLevels) {

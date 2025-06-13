@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Trace;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeSkillLevel;
 import java.util.ArrayList;
@@ -14,15 +15,18 @@ public class SkillLevelFixture {
 
   private UUID id;
   private String name;
+  private String description;
   private ESkillLevelStatus status;
   private List<Trace> traces;
   private List<AMS> amses;
   private Skill skill;
+  private ELanguage language = ELanguage.FRENCH;
 
   private SkillLevelFixture() {
     SkillLevel base = FakeSkillLevel.create().toModel();
     this.id = base.getId();
     this.name = base.getName();
+    this.description = base.getDescription();
     this.status = base.getStatus();
     this.traces = base.getTraces();
     this.amses = base.getAmses();
@@ -71,7 +75,17 @@ public class SkillLevelFixture {
     return skillLevels;
   }
 
+  public SkillLevelFixture withDescription(String description) {
+    this.description = description;
+    return this;
+  }
+
+  public SkillLevelFixture withLanguage(ELanguage language) {
+    this.language = language;
+    return this;
+  }
+
   public SkillLevel toModel() {
-    return SkillLevel.toDomain(id, name, status, traces, amses, skill);
+    return SkillLevel.toDomain(id, name, description, status, traces, amses, skill, language);
   }
 }

@@ -14,12 +14,6 @@ databaseChangeLog:
                     nullable: false
 
               - column:
-                  name: name
-                  type: VARCHAR(255)
-                  constraints:
-                    nullable: false
-
-              - column:
                   name: status
                   type: VARCHAR(50)
 
@@ -28,11 +22,48 @@ databaseChangeLog:
                   type: UUID
                   constraints:
                     nullable: false
+
+        - createTable:
+            tableName: skill_level_translation
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: skill_level_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: language
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: description
+                  type: TEXT
+                  constraints:
+                    nullable: true
+
         - sql:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            sql: |
+              ALTER TABLE skill_level OWNER TO ${avenirs.admin.role};
+              ALTER TABLE skill_level_translation OWNER TO ${avenirs.admin.role};
             stripComments: true
 
         - addForeignKeyConstraint:
@@ -41,4 +72,12 @@ databaseChangeLog:
             referencedTableName: skill
             referencedColumnNames: id
             constraintName: fk_skill_level_skill
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: skill_level_translation
+            baseColumnNames: skill_level_id
+            referencedTableName: skill_level
+            referencedColumnNames: id
+            constraintName: fk_skill_level_translation_skill_level
             onDelete: CASCADE
