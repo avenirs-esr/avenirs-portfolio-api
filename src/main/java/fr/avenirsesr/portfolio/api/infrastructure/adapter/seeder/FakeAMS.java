@@ -17,20 +17,26 @@ public class FakeAMS {
   }
 
   public static FakeAMS of(User user) {
+    FakePeriod period = FakePeriod.createMin24hoursPeriodInAcademicPeriod();
     return new FakeAMS(
         AMS.create(
             UUID.fromString(faker.call().internet().uuid()),
             user,
             faker.call().name().title(),
+            period.getStartDate(),
+            period.getEndDate(),
             ELanguage.FRENCH));
   }
 
   public static FakeAMS of(AMS ams, ELanguage language) {
+    FakePeriod period = FakePeriod.createMin24hoursPeriodInAcademicPeriod();
     return new FakeAMS(
         AMS.create(
             ams.getId(),
             ams.getUser(),
             String.format("%s %s", ams.getTitle(), language.getCode()),
+            period.getStartDate(),
+            period.getEndDate(),
             language));
   }
 
