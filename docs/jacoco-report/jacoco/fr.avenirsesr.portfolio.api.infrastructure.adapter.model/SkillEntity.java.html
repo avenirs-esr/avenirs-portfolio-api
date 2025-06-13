@@ -30,18 +30,19 @@ public class SkillEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set&lt;SkillTranslationEntity&gt; translations = new HashSet&lt;&gt;();
+  private Set&lt;SkillTranslationEntity&gt; translations =
+      new HashSet&lt;&gt;(); // TODO: Remove this SET and get it in queries
 
   public SkillEntity(
-<span class="fc" id="L36">      UUID id, Set&lt;SkillLevelEntity&gt; skillLevels, ProgramProgressEntity programProgress) {</span>
-<span class="fc" id="L37">    this.id = id;</span>
-<span class="fc" id="L38">    this.skillLevels = skillLevels;</span>
-<span class="fc" id="L39">    this.programProgress = programProgress;</span>
-<span class="fc" id="L40">  }</span>
+<span class="fc" id="L37">      UUID id, Set&lt;SkillLevelEntity&gt; skillLevels, ProgramProgressEntity programProgress) {</span>
+<span class="fc" id="L38">    this.id = id;</span>
+<span class="fc" id="L39">    this.skillLevels = skillLevels;</span>
+<span class="fc" id="L40">    this.programProgress = programProgress;</span>
+<span class="fc" id="L41">  }</span>
 
   @Override
   public String toString() {
-<span class="nc" id="L44">    return &quot;SkillEntity[%s]&quot;.formatted(id);</span>
+<span class="nc" id="L45">    return &quot;SkillEntity[%s]&quot;.formatted(id);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

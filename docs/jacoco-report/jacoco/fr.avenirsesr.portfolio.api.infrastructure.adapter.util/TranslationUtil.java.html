@@ -17,7 +17,8 @@ import java.util.Set;
 <span class="nc" id="L17">                translations.stream()</span>
 <span class="nc" id="L18">                    .filter(t -&gt; t.getLanguage().equals(fallback))</span>
 <span class="nc" id="L19">                    .findFirst()</span>
-<span class="nc" id="L20">                    .orElseThrow(LanguageException::new));</span>
+<span class="nc" id="L20">                    .orElseThrow(</span>
+                        LanguageException::new)); // TODO: Get fallback language from configuration
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

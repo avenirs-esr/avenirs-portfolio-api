@@ -34,12 +34,13 @@ public class AMSEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set&lt;AMSTranslationEntity&gt; translations = new HashSet&lt;&gt;();
+  private Set&lt;AMSTranslationEntity&gt; translations =
+      new HashSet&lt;&gt;(); // TODO: Remove this SET and get it in queries
 
-<span class="fc" id="L39">  public AMSEntity(UUID id, UserEntity user, Set&lt;SkillLevelEntity&gt; skillLevels) {</span>
-<span class="fc" id="L40">    this.id = id;</span>
-<span class="fc" id="L41">    this.user = user;</span>
-<span class="fc" id="L42">    this.skillLevels = List.copyOf(skillLevels);</span>
-<span class="fc" id="L43">  }</span>
+<span class="fc" id="L40">  public AMSEntity(UUID id, UserEntity user, Set&lt;SkillLevelEntity&gt; skillLevels) {</span>
+<span class="fc" id="L41">    this.id = id;</span>
+<span class="fc" id="L42">    this.user = user;</span>
+<span class="fc" id="L43">    this.skillLevels = List.copyOf(skillLevels);</span>
+<span class="fc" id="L44">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

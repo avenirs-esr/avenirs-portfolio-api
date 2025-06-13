@@ -29,12 +29,13 @@ public class ProgramEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set&lt;ProgramTranslationEntity&gt; translations = new HashSet&lt;&gt;();
+  private Set&lt;ProgramTranslationEntity&gt; translations =
+      new HashSet&lt;&gt;(); // TODO: Remove this SET and get it in queries
 
-<span class="fc" id="L34">  public ProgramEntity(UUID id, boolean isAPC, InstitutionEntity institution) {</span>
-<span class="fc" id="L35">    this.id = id;</span>
-<span class="fc" id="L36">    this.institution = institution;</span>
-<span class="fc" id="L37">    this.isAPC = isAPC;</span>
-<span class="fc" id="L38">  }</span>
+<span class="fc" id="L35">  public ProgramEntity(UUID id, boolean isAPC, InstitutionEntity institution) {</span>
+<span class="fc" id="L36">    this.id = id;</span>
+<span class="fc" id="L37">    this.institution = institution;</span>
+<span class="fc" id="L38">    this.isAPC = isAPC;</span>
+<span class="fc" id="L39">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
