@@ -32,7 +32,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.reposit
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.repository,TraceDatabaseRepository,3,44,2,2,1,13,3,4,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.repository,AMSDatabaseRepository,0,18,1,1,0,6,1,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.repository,UserDatabaseRepository,14,31,0,0,4,7,2,4,2,4
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,ProgramProgressServiceImpl,2,181,2,26,1,49,3,25,1,13
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,ProgramProgressServiceImpl,2,181,2,26,1,48,3,25,1,13
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,TraceServiceImpl,0,48,0,4,0,15,0,7,0,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,UserServiceImpl,4,123,3,11,1,37,4,10,1,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.service,InstitutionServiceImpl,0,27,0,0,0,5,0,4,0,4

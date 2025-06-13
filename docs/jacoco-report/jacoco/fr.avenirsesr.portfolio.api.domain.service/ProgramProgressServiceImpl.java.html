@@ -8,13 +8,14 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-<span class="fc" id="L17">@Slf4j</span>
+<span class="fc" id="L18">@Slf4j</span>
 @AllArgsConstructor
 @Service
 public class ProgramProgressServiceImpl implements ProgramProgressService {
@@ -23,16 +24,15 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
 
   private static SkillLevel findCurrentOrNextSkillLevel(
       Set&lt;SkillLevel&gt; skillLevels, boolean onlyCurrent) {
-<span class="pc bpc" id="L26" title="1 of 4 branches missed.">    if (skillLevels == null || skillLevels.isEmpty()) {</span>
-<span class="fc" id="L27">      return null;</span>
+<span class="pc bpc" id="L27" title="1 of 4 branches missed.">    if (skillLevels == null || skillLevels.isEmpty()) {</span>
+<span class="fc" id="L28">      return null;</span>
     }
-<span class="fc" id="L29">    return skillLevels.stream()</span>
-<span class="fc" id="L30">        .filter(</span>
+<span class="fc" id="L30">    return skillLevels.stream()</span>
+<span class="fc" id="L31">        .filter(</span>
             sl -&gt;
-<span class="fc bfc" id="L32" title="All 2 branches covered.">                (sl.getStatus() == ESkillLevelStatus.UNDER_REVIEW</span>
-<span class="fc bfc" id="L33" title="All 2 branches covered.">                        || sl.getStatus() == ESkillLevelStatus.UNDER_ACQUISITION)</span>
-<span class="pc bpc" id="L34" title="1 of 2 branches missed.">                    &amp;&amp; (sl.getEndDate() == null</span>
-<span class="fc bfc" id="L35" title="All 2 branches covered.">                        || sl.getEndDate().isAfter(java.time.Instant.now())))</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">                (sl.getStatus() == ESkillLevelStatus.UNDER_REVIEW</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">                        || sl.getStatus() == ESkillLevelStatus.UNDER_ACQUISITION)</span>
+<span class="pc bpc" id="L35" title="1 of 4 branches missed.">                    &amp;&amp; (sl.getEndDate() == null || sl.getEndDate().isAfter(LocalDate.now())))</span>
 <span class="fc" id="L36">        .findFirst()</span>
 <span class="fc" id="L37">        .orElseGet(</span>
             () -&gt; {

@@ -2,7 +2,7 @@
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
-import java.time.Instant;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,9 +11,9 @@ import lombok.Setter;
 @MappedSuperclass
 <span class="fc" id="L12">public abstract class PeriodEntity {</span>
   @Column(name = &quot;start_date&quot;, nullable = false)
-  protected Instant startDate;
+  protected LocalDate startDate;
 
   @Column(name = &quot;end_date&quot;, nullable = false)
-  protected Instant endDate;
+  protected LocalDate endDate;
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

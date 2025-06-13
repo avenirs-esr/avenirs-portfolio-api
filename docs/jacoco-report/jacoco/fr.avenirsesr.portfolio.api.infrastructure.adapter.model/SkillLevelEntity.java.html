@@ -2,7 +2,7 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import jakarta.persistence.*;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -54,8 +54,8 @@ public class SkillLevelEntity extends PeriodEntity {
       List&lt;TraceEntity&gt; traces,
       List&lt;AMSEntity&gt; amses,
       SkillEntity skill,
-      Instant startDate,
-<span class="fc" id="L58">      Instant endDate) {</span>
+      LocalDate startDate,
+<span class="fc" id="L58">      LocalDate endDate) {</span>
 <span class="fc" id="L59">    this.id = id;</span>
 <span class="fc" id="L60">    this.status = status;</span>
 <span class="fc" id="L61">    this.traces = traces;</span>
