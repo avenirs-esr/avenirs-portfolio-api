@@ -99,3 +99,21 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_ams_skill_levels_skill_level
             onDelete: CASCADE
+
+  - changeSet:
+      id: 009-2
+      author: Arnaud Deman
+      changes:
+        - addColumn:
+            tableName: ams
+            columns:
+              - column:
+                  name: start_date
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false

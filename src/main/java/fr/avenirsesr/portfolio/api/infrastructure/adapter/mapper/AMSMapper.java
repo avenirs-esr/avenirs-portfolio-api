@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public interface AMSMapper {
   static AMSEntity fromDomain(AMS ams) {
-    return new AMSEntity(
+    AMSEntity amsEntity = new AMSEntity(
         ams.getId(),
         UserMapper.fromDomain(ams.getUser()),
         ams.getSkillLevels().stream()
@@ -23,6 +23,9 @@ public interface AMSMapper {
                                 skillLevel.getSkill().getProgramProgress())),
                         skillLevel.getTraces().stream().map(TraceMapper::fromDomain).toList()))
             .collect(Collectors.toSet()));
+    amsEntity.setStartDate(ams.getStartDate());
+    amsEntity.setEndDate(ams.getEndDate());
+    return amsEntity;
   }
 
   static AMS toDomain(AMSEntity entity) {
@@ -37,6 +40,8 @@ public interface AMSMapper {
         entity.getId(),
         UserMapper.toDomain(entity.getUser()),
         translationEntity.getTitle(),
+        entity.getStartDate(),
+        entity.getEndDate(),
         entity.getSkillLevels().stream()
             .map(
                 skillLevelEntity ->
