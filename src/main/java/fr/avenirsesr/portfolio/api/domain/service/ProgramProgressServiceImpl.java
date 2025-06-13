@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -31,8 +32,7 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
             sl ->
                 (sl.getStatus() == ESkillLevelStatus.UNDER_REVIEW
                         || sl.getStatus() == ESkillLevelStatus.UNDER_ACQUISITION)
-                    && (sl.getEndDate() == null
-                        || sl.getEndDate().isAfter(java.time.Instant.now())))
+                    && (sl.getEndDate() == null || sl.getEndDate().isAfter(LocalDate.now())))
         .findFirst()
         .orElseGet(
             () -> {

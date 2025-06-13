@@ -3,8 +3,8 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
-import java.time.Duration;
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.UUID;
 
 public class FakeSkillLevel {
@@ -35,10 +35,10 @@ public class FakeSkillLevel {
   }
 
   public FakeSkillLevel withStatus(ESkillLevelStatus status) {
-    Instant pastStartDate = Instant.now().minus(Duration.ofDays(730));
-    Instant pastEndDate = Instant.now().minus(Duration.ofDays(365));
-    Instant futureStartDate = Instant.now().plus(Duration.ofDays(365));
-    Instant futureEndDate = Instant.now().plus(Duration.ofDays(730));
+    LocalDate pastStartDate = LocalDate.now().minus(Period.ofYears(2));
+    LocalDate pastEndDate = LocalDate.now().minus(Period.ofYears(1));
+    LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));
+    LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));
     skillLevel.setStatus(status);
     switch (status) {
       case VALIDATED, FAILED -> {

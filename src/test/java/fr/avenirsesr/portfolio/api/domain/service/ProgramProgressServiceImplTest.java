@@ -11,8 +11,8 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.*;
-import java.time.Duration;
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -308,7 +308,7 @@ public class ProgramProgressServiceImplTest {
     SkillLevel skillLevel2 =
         SkillLevelFixture.create()
             .withStatus(ESkillLevelStatus.UNDER_REVIEW)
-            .withEndDate(Instant.now().minus(Duration.ofDays(1)))
+            .withEndDate(LocalDate.now().minus(Period.ofDays(1)))
             .toModel();
     SkillLevel skillLevel3 =
         SkillLevelFixture.create().withStatus(ESkillLevelStatus.NOT_STARTED).toModel();
@@ -414,7 +414,7 @@ public class ProgramProgressServiceImplTest {
     SkillLevel skillLevel2 =
         SkillLevelFixture.create()
             .withStatus(ESkillLevelStatus.UNDER_REVIEW)
-            .withEndDate(Instant.now().minus(Duration.ofDays(1)))
+            .withEndDate(LocalDate.now().minus(Period.ofDays(1)))
             .toModel();
     SkillLevel skillLevel3 =
         SkillLevelFixture.create().withStatus(ESkillLevelStatus.NOT_STARTED).toModel();

@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
-import java.time.Instant;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +11,8 @@ import lombok.Setter;
 @MappedSuperclass
 public abstract class PeriodEntity {
   @Column(name = "start_date", nullable = false)
-  protected Instant startDate;
+  protected LocalDate startDate;
 
   @Column(name = "end_date", nullable = false)
-  protected Instant endDate;
+  protected LocalDate endDate;
 }
