@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011
+      author: cascade
+      changes:
+        - createTable:
+            tableName: group
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+              - column:
+                  name: program_progress_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE group OWNER TO ${avenirs.admin.role}
+            stripComments: true
+
+        - addForeignKeyConstraint:
+            baseTableName: group
+            baseColumnNames: program_progress_id
+            referencedTableName: program_progress
+            referencedColumnNames: id
+            constraintName: fk_group_program_progress
+            onDelete: CASCADE

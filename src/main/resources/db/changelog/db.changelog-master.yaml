@@ -19,3 +19,9 @@ databaseChangeLog:
       file: db/changelog/009-create-table-ams.yaml
   - include:
       file: db/changelog/010-create-table-join-tables.yaml
+  - include:
+      file: db/changelog/012-create-table-groups.yaml
+  - include:
+      file: db/changelog/014-create-table-group-users.yaml
+  - include:
+      file: db/changelog/013-create-table-group-ams.yaml

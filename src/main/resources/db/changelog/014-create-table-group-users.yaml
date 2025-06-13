@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012
+      author: cascade
+      changes:
+        - createTable:
+            tableName: group_user
+            columns:
+              - column:
+                  name: group_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE group_user OWNER TO ${avenirs.admin.role}
+            stripComments: true
+
+        - addForeignKeyConstraint:
+            baseTableName: group_user
+            baseColumnNames: group_id
+            referencedTableName: group
+            referencedColumnNames: id
+            constraintName: fk_group_user_group
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: group_user
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_group_user_user
+            onDelete: CASCADE
+
+        - addPrimaryKey:
+            tableName: group_user
+            columnNames: group_id, user_id
+            constraintName: pk_group_user
