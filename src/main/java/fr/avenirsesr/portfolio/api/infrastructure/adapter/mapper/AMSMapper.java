@@ -9,9 +9,11 @@ import java.util.stream.Collectors;
 
 public interface AMSMapper {
   static AMSEntity fromDomain(AMS ams) {
-    AMSEntity amsEntity = new AMSEntity(
+    return new AMSEntity(
         ams.getId(),
         UserMapper.fromDomain(ams.getUser()),
+        ams.getStartDate(),
+        ams.getEndDate(),
         ams.getSkillLevels().stream()
             .map(
                 skillLevel ->
@@ -22,10 +24,8 @@ public interface AMSMapper {
                             ProgramProgressMapper.fromDomain(
                                 skillLevel.getSkill().getProgramProgress())),
                         skillLevel.getTraces().stream().map(TraceMapper::fromDomain).toList()))
-            .collect(Collectors.toSet()));
-    amsEntity.setStartDate(ams.getStartDate());
-    amsEntity.setEndDate(ams.getEndDate());
-    return amsEntity;
+            .collect(Collectors.toSet()),
+        ams.getCohorts().stream().map(CohortMapper::fromDomain).collect(Collectors.toSet()));
   }
 
   static AMS toDomain(AMSEntity entity) {
@@ -54,6 +54,7 @@ public interface AMSMapper {
                             ELanguage.FRENCH),
                         ELanguage.FRENCH))
             .toList(),
+        entity.getCohorts().stream().map(CohortMapper::toDomain).collect(Collectors.toSet()),
         language);
   }
 }

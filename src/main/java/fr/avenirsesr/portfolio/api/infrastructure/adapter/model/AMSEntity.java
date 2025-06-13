@@ -53,12 +53,21 @@ public class AMSEntity {
   private Set<AMSTranslationEntity> translations =
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
-  public AMSEntity(UUID id, UserEntity user, Set<SkillLevelEntity> skillLevels) {
+  @ManyToMany(mappedBy = "amsEntities")
+  private Set<CohortEntity> cohorts;
+
+  public AMSEntity(
+      UUID id,
+      UserEntity user,
+      Instant startDate,
+      Instant endDate,
+      Set<SkillLevelEntity> skillLevels,
+      Set<CohortEntity> cohorts) {
     this.id = id;
     this.user = user;
+    this.startDate = startDate;
+    this.endDate = endDate;
     this.skillLevels = List.copyOf(skillLevels);
+    this.cohorts = Set.copyOf(cohorts == null ? Set.of() : cohorts);
   }
-
-  @ManyToMany(mappedBy = "amsEntities")
-  private Set<GroupEntity> groups;
 }
