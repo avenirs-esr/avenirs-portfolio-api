@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -49,4 +50,7 @@ public class AMSEntity {
     this.user = user;
     this.skillLevels = List.copyOf(skillLevels);
   }
+
+  @ManyToMany(mappedBy = "amsEntities")
+  private Set<GroupEntity> groups;
 }
