@@ -2,10 +2,8 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SkillLevelEntity {
+public class SkillLevelEntity extends PeriodEntity {
   @Id private UUID id;
 
   @Column
@@ -55,12 +53,16 @@ public class SkillLevelEntity {
       ESkillLevelStatus status,
       List<TraceEntity> traces,
       List<AMSEntity> amses,
-      SkillEntity skill) {
+      SkillEntity skill,
+      Instant startDate,
+      Instant endDate) {
     this.id = id;
     this.status = status;
     this.traces = traces;
     this.amses = amses;
     this.skill = skill;
+    this.startDate = startDate;
+    this.endDate = endDate;
   }
 
   @Override

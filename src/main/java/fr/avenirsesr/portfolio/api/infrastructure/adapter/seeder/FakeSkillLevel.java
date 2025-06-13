@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 
 public class FakeSkillLevel {
@@ -15,11 +17,12 @@ public class FakeSkillLevel {
 
   public static FakeSkillLevel create() {
     return new FakeSkillLevel(
-        SkillLevel.create(
-            UUID.fromString(faker.call().internet().uuid()),
-            "Niv. %s".formatted(faker.call().lorem().character()),
-            faker.call().lorem().sentence(),
-            ELanguage.FRENCH));
+            SkillLevel.create(
+                UUID.fromString(faker.call().internet().uuid()),
+                "Niv. %s".formatted(faker.call().lorem().character()),
+                faker.call().lorem().sentence(),
+                ELanguage.FRENCH))
+        .withStatus(ESkillLevelStatus.NOT_STARTED);
   }
 
   public static FakeSkillLevel of(SkillLevel skillLevel, ELanguage language) {
@@ -32,7 +35,25 @@ public class FakeSkillLevel {
   }
 
   public FakeSkillLevel withStatus(ESkillLevelStatus status) {
+    Instant pastStartDate = Instant.now().minus(Duration.ofDays(730));
+    Instant pastEndDate = Instant.now().minus(Duration.ofDays(365));
+    Instant futureStartDate = Instant.now().plus(Duration.ofDays(365));
+    Instant futureEndDate = Instant.now().plus(Duration.ofDays(730));
     skillLevel.setStatus(status);
+    switch (status) {
+      case VALIDATED, FAILED -> {
+        skillLevel.setStartDate(pastStartDate);
+        skillLevel.setEndDate(pastEndDate);
+      }
+      case UNDER_ACQUISITION, UNDER_REVIEW -> {
+        skillLevel.setStartDate(pastStartDate);
+        skillLevel.setEndDate(futureEndDate);
+      }
+      case TO_BE_EVALUATED, NOT_STARTED -> {
+        skillLevel.setStartDate(futureStartDate);
+        skillLevel.setEndDate(futureEndDate);
+      }
+    }
     return this;
   }
 

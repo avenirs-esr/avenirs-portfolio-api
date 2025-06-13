@@ -18,6 +18,18 @@ databaseChangeLog:
                   type: VARCHAR(50)
 
               - column:
+                  name: start_date
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: end_date
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+
+              - column:
                   name: skill_id
                   type: UUID
                   constraints:

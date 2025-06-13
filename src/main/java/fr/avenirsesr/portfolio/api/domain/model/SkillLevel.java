@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.api.domain.model;
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -26,6 +27,8 @@ public class SkillLevel {
   private List<Trace> traces;
   private List<AMS> amses;
   private Skill skill;
+  private Instant startDate;
+  private Instant endDate;
 
   private SkillLevel(UUID id, String name, String description, ELanguage language) {
     this.id = id;
@@ -51,12 +54,16 @@ public class SkillLevel {
       List<Trace> traces,
       List<AMS> amses,
       Skill skill,
-      ELanguage language) {
+      ELanguage language,
+      Instant startDate,
+      Instant endDate) {
     var skillLevel = new SkillLevel(id, name, description, language);
     skillLevel.setStatus(status);
     skillLevel.setTraces(traces);
     skillLevel.setAmses(amses);
     skillLevel.setSkill(skill);
+    skillLevel.setStartDate(startDate);
+    skillLevel.setEndDate(endDate);
 
     return skillLevel;
   }
