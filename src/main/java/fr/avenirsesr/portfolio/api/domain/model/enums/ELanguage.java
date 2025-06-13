@@ -21,6 +21,6 @@ public enum ELanguage {
         return language;
       }
     }
-    return ELanguage.FRENCH;
+    return ELanguage.FRENCH; // TODO: Get fallback language from configuration
   }
 }

@@ -30,7 +30,8 @@ public class SkillEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set<SkillTranslationEntity> translations = new HashSet<>();
+  private Set<SkillTranslationEntity> translations =
+      new HashSet<>(); // TODO: Remove this SET and get it in queries
 
   public SkillEntity(
       UUID id, Set<SkillLevelEntity> skillLevels, ProgramProgressEntity programProgress) {

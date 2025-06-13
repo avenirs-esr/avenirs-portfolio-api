@@ -32,7 +32,8 @@ public class InstitutionEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set<InstitutionTranslationEntity> translations = new HashSet<>();
+  private Set<InstitutionTranslationEntity> translations =
+      new HashSet<>(); // TODO: Remove this SET and get it in queries
 
   public InstitutionEntity(UUID id, Set<EPortfolioType> enabledFields) {
     this.id = id;

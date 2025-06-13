@@ -47,7 +47,8 @@ public class SkillLevelEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set<SkillLevelTranslationEntity> translations = new HashSet<>();
+  private Set<SkillLevelTranslationEntity> translations =
+      new HashSet<>(); // TODO: Remove this SET and get it in queries
 
   public SkillLevelEntity(
       UUID id,

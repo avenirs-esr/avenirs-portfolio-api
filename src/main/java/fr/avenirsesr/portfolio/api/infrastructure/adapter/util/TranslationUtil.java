@@ -17,6 +17,7 @@ public class TranslationUtil {
                 translations.stream()
                     .filter(t -> t.getLanguage().equals(fallback))
                     .findFirst()
-                    .orElseThrow(LanguageException::new));
+                    .orElseThrow(
+                        LanguageException::new)); // TODO: Get fallback language from configuration
   }
 }

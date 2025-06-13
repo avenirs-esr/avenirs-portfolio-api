@@ -34,7 +34,8 @@ public class AMSEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set<AMSTranslationEntity> translations = new HashSet<>();
+  private Set<AMSTranslationEntity> translations =
+      new HashSet<>(); // TODO: Remove this SET and get it in queries
 
   public AMSEntity(UUID id, UserEntity user, Set<SkillLevelEntity> skillLevels) {
     this.id = id;

@@ -29,7 +29,8 @@ public class ProgramEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set<ProgramTranslationEntity> translations = new HashSet<>();
+  private Set<ProgramTranslationEntity> translations =
+      new HashSet<>(); // TODO: Remove this SET and get it in queries
 
   public ProgramEntity(UUID id, boolean isAPC, InstitutionEntity institution) {
     this.id = id;
