@@ -2,12 +2,12 @@
 
 import fr.avenirsesr.portfolio.api.domain.exception.LanguageException;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.Translation;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TranslationEntity;
 import java.util.Set;
 
 <span class="nc" id="L8">public class TranslationUtil {</span>
 
-  public static &lt;T extends Translation&gt; T getTranslation(
+  public static &lt;T extends TranslationEntity&gt; T getTranslation(
       Set&lt;T&gt; translations, ELanguage language, ELanguage fallback) {
 <span class="fc" id="L12">    return translations.stream()</span>
 <span class="fc" id="L13">        .filter(t -&gt; t.getLanguage().equals(language))</span>

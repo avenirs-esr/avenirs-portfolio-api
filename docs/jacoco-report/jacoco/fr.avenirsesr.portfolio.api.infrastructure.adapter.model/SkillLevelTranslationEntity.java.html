@@ -14,12 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SkillLevelTranslationEntity implements Translation {
-  @Id private UUID id;
-
-  @Column(name = &quot;language&quot;, nullable = false)
-  private ELanguage language;
-
+public class SkillLevelTranslationEntity extends TranslationEntity {
   @Column(nullable = false)
   private String name;
 
@@ -29,9 +24,23 @@ public class SkillLevelTranslationEntity implements Translation {
   @JoinColumn(name = &quot;skill_level_id&quot;, nullable = false)
   private SkillLevelEntity skillLevel;
 
+  public SkillLevelTranslationEntity(
+      UUID uuid,
+      ELanguage eLanguage,
+      String name,
+      String description,
+      SkillLevelEntity skillLevelEntity) {
+<span class="fc" id="L33">    super();</span>
+<span class="fc" id="L34">    this.id = uuid;</span>
+<span class="fc" id="L35">    this.language = eLanguage;</span>
+<span class="fc" id="L36">    this.name = name;</span>
+<span class="fc" id="L37">    this.description = description;</span>
+<span class="fc" id="L38">    this.skillLevel = skillLevelEntity;</span>
+<span class="fc" id="L39">  }</span>
+
   @Override
   public String toString() {
-<span class="nc" id="L34">    return &quot;SkillLevelEntity[%s]&quot;.formatted(id);</span>
+<span class="nc" id="L43">    return &quot;SkillLevelEntity[%s]&quot;.formatted(id);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
