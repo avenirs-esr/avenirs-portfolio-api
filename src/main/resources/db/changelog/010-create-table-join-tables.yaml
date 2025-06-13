@@ -80,45 +80,6 @@ databaseChangeLog:
             onDelete: CASCADE
 
   - changeSet:
-      id: 010-3
-      author: bilelbanelhaq
-      changes:
-        - createTable:
-            tableName: skill_level_ams
-            columns:
-              - column:
-                  name: skill_level_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-              - column:
-                  name: ams_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-        - sql:
-            dbms: 'postgresql'
-            endDelimiter: \nGO
-            splitStatements: true
-            sql: ALTER TABLE skill_level_ams OWNER TO ${avenirs.admin.role}
-            stripComments: true
-
-        - addForeignKeyConstraint:
-            baseTableName: skill_level_ams
-            baseColumnNames: skill_level_id
-            referencedTableName: skill_level
-            referencedColumnNames: id
-            constraintName: fk_skill_level_ams_skill_level
-            onDelete: CASCADE
-
-        - addForeignKeyConstraint:
-            baseTableName: skill_level_ams
-            baseColumnNames: ams_id
-            referencedTableName: ams
-            referencedColumnNames: id
-            constraintName: fk_skill_level_ams_ams
-            onDelete: CASCADE
-  - changeSet:
       id: 010-4
       author: bilelbanelhaq
       changes:

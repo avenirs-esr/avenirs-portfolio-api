@@ -14,18 +14,22 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SkillTranslationEntity implements Translation {
-  @Id private UUID id;
-
-  @Column(name = "language", nullable = false)
-  private ELanguage language;
-
+public class SkillTranslationEntity extends TranslationEntity {
   @Column(nullable = false)
   private String name;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "skill_id", nullable = false)
   private SkillEntity skill;
+
+  public SkillTranslationEntity(
+      UUID uuid, ELanguage language, String name, SkillEntity skillEntity) {
+    super();
+    this.id = uuid;
+    this.language = language;
+    this.name = name;
+    this.skill = skillEntity;
+  }
 
   @Override
   public String toString() {

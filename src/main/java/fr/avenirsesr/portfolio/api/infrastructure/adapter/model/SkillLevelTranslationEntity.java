@@ -14,12 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SkillLevelTranslationEntity implements Translation {
-  @Id private UUID id;
-
-  @Column(name = "language", nullable = false)
-  private ELanguage language;
-
+public class SkillLevelTranslationEntity extends TranslationEntity {
   @Column(nullable = false)
   private String name;
 
@@ -28,6 +23,20 @@ public class SkillLevelTranslationEntity implements Translation {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "skill_level_id", nullable = false)
   private SkillLevelEntity skillLevel;
+
+  public SkillLevelTranslationEntity(
+      UUID uuid,
+      ELanguage eLanguage,
+      String name,
+      String description,
+      SkillLevelEntity skillLevelEntity) {
+    super();
+    this.id = uuid;
+    this.language = eLanguage;
+    this.name = name;
+    this.description = description;
+    this.skillLevel = skillLevelEntity;
+  }
 
   @Override
   public String toString() {

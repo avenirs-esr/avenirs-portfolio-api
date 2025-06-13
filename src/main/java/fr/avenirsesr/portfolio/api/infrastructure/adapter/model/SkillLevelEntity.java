@@ -33,7 +33,7 @@ public class SkillLevelEntity {
 
   @ManyToMany
   @JoinTable(
-      name = "skill_level_ams",
+      name = "ams_skill_levels",
       joinColumns = @JoinColumn(name = "skill_level_id"),
       inverseJoinColumns = @JoinColumn(name = "ams_id"))
   private List<AMSEntity> amses;

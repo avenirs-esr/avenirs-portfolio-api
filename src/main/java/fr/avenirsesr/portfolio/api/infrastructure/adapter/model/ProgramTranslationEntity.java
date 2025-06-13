@@ -14,11 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ProgramTranslationEntity implements Translation {
-  @Id private UUID id;
-
-  @Column(name = "language", nullable = false)
-  private ELanguage language;
+public class ProgramTranslationEntity extends TranslationEntity {
 
   @Column(nullable = false)
   private String name;
@@ -26,4 +22,13 @@ public class ProgramTranslationEntity implements Translation {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "program_id", nullable = false)
   private ProgramEntity program;
+
+  public ProgramTranslationEntity(
+      UUID id, ELanguage language, String name, ProgramEntity programEntity) {
+    super();
+    this.id = id;
+    this.language = language;
+    this.name = name;
+    this.program = programEntity;
+  }
 }
