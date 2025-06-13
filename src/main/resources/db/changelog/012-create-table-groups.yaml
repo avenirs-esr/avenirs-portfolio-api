@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: 011
-      author: cascade
+      author: Arnaud Deman
       changes:
         - createTable:
             tableName: group

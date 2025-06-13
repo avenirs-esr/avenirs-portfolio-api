@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -21,25 +22,33 @@ public class AMS {
 
   private final ELanguage language;
 
+  @Setter(AccessLevel.NONE)
+  private final Instant startDate;
+
+  @Setter(AccessLevel.NONE)
+  private final Instant endDate;
+
   private List<SkillLevel> skillLevels;
 
-  private AMS(UUID id, User user, String title, ELanguage language) {
+  private AMS(UUID id, User user, String title, Instant startDate, Instant endDate, ELanguage language) {
     this.id = id;
     this.user = user;
     this.title = title;
+    this.startDate = startDate;
+    this.endDate = endDate;
     this.language = language;
   }
 
-  public static AMS create(UUID id, User user, String title, ELanguage language) {
-    var ams = new AMS(id, user, title, language);
+  public static AMS create(UUID id, User user, String title, Instant startDate, Instant endDate, ELanguage language) {
+    var ams = new AMS(id, user, title, startDate, endDate, language);
     ams.setSkillLevels(List.of());
 
     return ams;
   }
 
   public static AMS toDomain(
-      UUID id, User user, String title, List<SkillLevel> skillLevels, ELanguage language) {
-    var ams = new AMS(id, user, title, language);
+      UUID id, User user, String title, Instant startDate, Instant endDate, List<SkillLevel> skillLevels, ELanguage language) {
+    var ams = new AMS(id, user, title, startDate, endDate, language);
     ams.setSkillLevels(skillLevels);
 
     return ams;
