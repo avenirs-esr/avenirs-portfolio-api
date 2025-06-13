@@ -11,4 +11,6 @@ public interface ProgramProgressService {
   boolean isStudentFollowingAPCProgram(Student student);
 
   Map<ProgramProgress, Set<Skill>> getSkillsOverview(Student student, ELanguage language);
+
+  Map<ProgramProgress, Set<Skill>> getSkillsView(Student student, ELanguage language);
 }

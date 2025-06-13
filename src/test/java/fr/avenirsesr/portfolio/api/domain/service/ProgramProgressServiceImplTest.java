@@ -11,6 +11,8 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.*;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
@@ -239,12 +241,12 @@ public class ProgramProgressServiceImplTest {
   }
 
   @Test
-  void shouldReturnOnlyToBeEvaluatedSkillLevelBySkill() {
+  void shouldReturnOnlyUnderAcquisitionSkillLevelBySkill() {
     // Given
     SkillLevel skillLevel1 =
         SkillLevelFixture.create().withStatus(ESkillLevelStatus.NOT_STARTED).toModel();
     SkillLevel skillLevel2 =
-        SkillLevelFixture.create().withStatus(ESkillLevelStatus.TO_BE_EVALUATED).toModel();
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.UNDER_ACQUISITION).toModel();
     Skill skill1 =
         SkillFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
 
@@ -263,7 +265,7 @@ public class ProgramProgressServiceImplTest {
 
     // Then
     assertEquals(1, skillLevels1.size());
-    assertEquals(ESkillLevelStatus.TO_BE_EVALUATED, skillLevels1.getFirst().getStatus());
+    assertEquals(ESkillLevelStatus.UNDER_ACQUISITION, skillLevels1.getFirst().getStatus());
   }
 
   @Test
@@ -273,6 +275,41 @@ public class ProgramProgressServiceImplTest {
         SkillLevelFixture.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
     SkillLevel skillLevel2 =
         SkillLevelFixture.create().withStatus(ESkillLevelStatus.FAILED).toModel();
+    SkillLevel skillLevel3 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.NOT_STARTED).toModel();
+    Skill skill1 =
+        SkillFixture.create()
+            .withSkillLevels(Set.of(skillLevel1, skillLevel2, skillLevel3))
+            .toModel();
+
+    ProgramProgress progress =
+        ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
+
+    when(programProgressRepository.findAllByStudent(student, language))
+        .thenReturn(List.of(progress));
+
+    // When
+    Map<ProgramProgress, Set<Skill>> result =
+        programProgressService.getSkillsOverview(student, language);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
+    List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
+
+    // Then
+    assertEquals(1, skillLevels1.size());
+    assertEquals(ESkillLevelStatus.NOT_STARTED, skillLevels1.getFirst().getStatus());
+  }
+
+  @Test
+  void shouldReturnNotStartedWhenUnderReviewSkillEndDateIsOutDatedForOverview() {
+    // Given
+    SkillLevel skillLevel1 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+    SkillLevel skillLevel2 =
+        SkillLevelFixture.create()
+            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
+            .withEndDate(LocalDate.now().minus(Period.ofDays(1)))
+            .toModel();
     SkillLevel skillLevel3 =
         SkillLevelFixture.create().withStatus(ESkillLevelStatus.NOT_STARTED).toModel();
     Skill skill1 =
@@ -314,7 +351,122 @@ public class ProgramProgressServiceImplTest {
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
 
     // Then
+    assertEquals(0, skills1.size());
+  }
+
+  @Test
+  void shouldReturnAllSkillsInAllPrograms() {
+    // Given
+    ProgramProgress programProgress1 =
+        createProgramProgress(UUID.randomUUID(), "A", List.of("b", "a", "c", "d", "e"));
+    ProgramProgress programProgress2 =
+        createProgramProgress(UUID.randomUUID(), "B", List.of("f", "g", "h"));
+    ProgramProgress programProgress3 =
+        createProgramProgress(
+            UUID.randomUUID(), "B", List.of("f", "g", "h", "i", "j", "k", "l", "m", "n"));
+
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(ELanguage.class)))
+        .thenReturn(List.of(programProgress1, programProgress2, programProgress3));
+
+    // When
+    Map<ProgramProgress, Set<Skill>> result =
+        programProgressService.getSkillsView(student, language);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+
+    // Then
+    assertEquals(3, resultPrograms.size());
+    assertEquals(5, resultPrograms.get(0).getSkills().size());
+    assertEquals(3, resultPrograms.get(1).getSkills().size());
+    assertEquals(9, resultPrograms.get(2).getSkills().size());
+  }
+
+  @Test
+  void shouldReturnOnlySkillsWithCurrentSkillLevel() {
+    // Given
+    ProgramProgress programProgress1 =
+        createProgramProgress(UUID.randomUUID(), "A", List.of("b", "a", "c", "d", "e"));
+    ProgramProgress programProgress2 =
+        createProgramProgress(UUID.randomUUID(), "B", List.of("f", "g", "h"));
+    ProgramProgress programProgress3 =
+        createProgramProgress(
+            UUID.randomUUID(), "B", List.of("f", "g", "h", "i", "j", "k", "l", "m", "n"));
+
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(ELanguage.class)))
+        .thenReturn(List.of(programProgress1, programProgress2, programProgress3));
+
+    // When
+    Map<ProgramProgress, Set<Skill>> result =
+        programProgressService.getSkillsView(student, language);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+
+    // Then
+    assertEquals(3, resultPrograms.size());
+    assertEquals(5, resultPrograms.get(0).getSkills().size());
+    assertEquals(3, resultPrograms.get(1).getSkills().size());
+    assertEquals(9, resultPrograms.get(2).getSkills().size());
+  }
+
+  @Test
+  void shouldReturnNotStartedWhenUnderReviewSkillEndDateIsOutDatedForView() {
+    // Given
+    SkillLevel skillLevel1 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+    SkillLevel skillLevel2 =
+        SkillLevelFixture.create()
+            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
+            .withEndDate(LocalDate.now().minus(Period.ofDays(1)))
+            .toModel();
+    SkillLevel skillLevel3 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.NOT_STARTED).toModel();
+    Skill skill1 =
+        SkillFixture.create()
+            .withSkillLevels(Set.of(skillLevel1, skillLevel2, skillLevel3))
+            .toModel();
+
+    ProgramProgress progress =
+        ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
+
+    when(programProgressRepository.findAllByStudent(student, language))
+        .thenReturn(List.of(progress));
+
+    // When
+    Map<ProgramProgress, Set<Skill>> result =
+        programProgressService.getSkillsView(student, language);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
+    List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
+
+    // Then
     assertEquals(1, skills1.size());
-    assertTrue(skills1.getFirst().getSkillLevels().isEmpty());
+    assertEquals(ESkillLevelStatus.NOT_STARTED, skillLevels1.getFirst().getStatus());
+  }
+
+  @Test
+  void shouldReturnNullWhenDontHaveValidCurrentSkillsForView() {
+    // Given
+    SkillLevel skillLevel1 =
+        SkillLevelFixture.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+    SkillLevel skillLevel2 =
+        SkillLevelFixture.create()
+            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
+            .withEndDate(LocalDate.now().minus(Period.ofDays(1)))
+            .toModel();
+    Skill skill1 =
+        SkillFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
+
+    ProgramProgress progress =
+        ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
+
+    when(programProgressRepository.findAllByStudent(student, language))
+        .thenReturn(List.of(progress));
+
+    // When
+    Map<ProgramProgress, Set<Skill>> result =
+        programProgressService.getSkillsView(student, language);
+    List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
+    List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
+
+    // Then
+    assertEquals(0, skills1.size());
   }
 }

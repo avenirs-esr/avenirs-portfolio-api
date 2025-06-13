@@ -16,7 +16,9 @@ public interface SkillLevelMapper {
             skillLevel.getStatus(),
             tracesEntities,
             skillLevel.getAmses().stream().map(AMSMapper::fromDomain).toList(),
-            skillEntity);
+            skillEntity,
+            skillLevel.getStartDate(),
+            skillLevel.getEndDate());
     return entity;
   }
 
@@ -33,6 +35,8 @@ public interface SkillLevelMapper {
         skillLevelEntity.getTraces().stream().map(TraceMapper::toDomain).toList(),
         skillLevelEntity.getAmses().stream().map(ams -> AMSMapper.toDomain(ams, language)).toList(),
         skill,
-        language);
+        language,
+        skillLevelEntity.getStartDate(),
+        skillLevelEntity.getEndDate());
   }
 }

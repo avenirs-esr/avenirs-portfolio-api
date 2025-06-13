@@ -51,7 +51,7 @@ class ProgramProgressControllerIT {
   }
 
   @Test
-  void shouldReturnSkillsOverviewForStudent() throws Exception {
+  void shouldReturnSkillsOverviewForStudentForOverviewEndpoint() throws Exception {
     mockMvc
         .perform(
             get("/me/program-progress/overview")
@@ -84,7 +84,7 @@ class ProgramProgressControllerIT {
   }
 
   @Test
-  void shouldReturn404WhenUserNotFound() throws Exception {
+  void shouldReturn404WhenUserNotFoundForOverviewEndpoint() throws Exception {
     mockMvc
         .perform(
             get("/me/program-progress/overview")
@@ -100,7 +100,7 @@ class ProgramProgressControllerIT {
   }
 
   @Test
-  void shouldReturn403WhenUserIsNotStudent() throws Exception {
+  void shouldReturn403WhenUserIsNotStudentForOverviewEndpoint() throws Exception {
     mockMvc
         .perform(
             get("/me/program-progress/overview")
@@ -116,7 +116,8 @@ class ProgramProgressControllerIT {
   }
 
   @Test
-  void shouldFallbackInDefaultLanguageWhenLanguageNotSupported() throws Exception {
+  void shouldFallbackInDefaultLanguageWhenLanguageNotSupportedForOverviewEndpoint()
+      throws Exception {
     mockMvc
         .perform(
             get("/me/program-progress/overview")
@@ -132,6 +133,90 @@ class ProgramProgressControllerIT {
         .andExpect(jsonPath("$[0].name").value("Western Master - 8"))
         .andExpect(jsonPath("$[0].skills[0].id").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
         .andExpect(jsonPath("$[0].skills[0].name").value("Skill amet"))
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
+  }
+
+  @Test
+  void shouldReturnSkillsOverviewForStudentForViewEndpoint() throws Exception {
+    mockMvc
+        .perform(
+            get("/me/program-progress/view")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .header("Accept-Language", language.getCode())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
+        .andExpect(jsonPath("$[0].name").value("Western Master - 8"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill amet"))
+        .andExpect(jsonPath("$[0].skills[0].traceCount").value(1))
+        .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists())
+        .andExpect(
+            jsonPath("$[0].skills[0].currentSkillLevel.id")
+                .value("802fde10-2cd0-47cb-9660-ecd1634ab506"))
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.name").value("Niv. 1"))
+        .andExpect(
+            jsonPath("$[0].skills[0].currentSkillLevel.shortDescription")
+                .value("Perspiciatis nihil quos."))
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.status").value("UNDER_REVIEW"));
+  }
+
+  @Test
+  void shouldReturn404WhenUserNotFoundForViewEndpoint() throws Exception {
+    mockMvc
+        .perform(
+            get("/me/program-progress/view")
+                .header("X-Signed-Context", unknownUserPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", unknownUserSignature)
+                .header("Accept-Language", language.getCode())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("User not found"))
+        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+  }
+
+  @Test
+  void shouldReturn403WhenUserIsNotStudentForViewEndpoint() throws Exception {
+    mockMvc
+        .perform(
+            get("/me/program-progress/view")
+                .header("X-Signed-Context", teacherPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", teacherSignature)
+                .header("Accept-Language", language.getCode())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("User is not student"))
+        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
+  }
+
+  @Test
+  void shouldFallbackInDefaultLanguageWhenLanguageNotSupportedForViewEndpoint() throws Exception {
+    mockMvc
+        .perform(
+            get("/me/program-progress/view")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .header("Accept-Language", "invalid_language_code")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
+        .andExpect(jsonPath("$[0].name").value("Western Master - 8"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill amet"))
+        .andExpect(jsonPath("$[0].skills[0].traceCount").value(1))
+        .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
   }
 }
