@@ -117,3 +117,10 @@ databaseChangeLog:
                   type: TIMESTAMP WITH TIME ZONE
                   constraints:
                     nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: |
+              ALTER TABLE ams ADD CONSTRAINT check_ams_dates CHECK (start_date < end_date);
+            stripComments: true
