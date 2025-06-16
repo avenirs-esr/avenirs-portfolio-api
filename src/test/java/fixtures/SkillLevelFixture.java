@@ -7,6 +7,8 @@ import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeSkillLevel;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +23,8 @@ public class SkillLevelFixture {
   private List<AMS> amses;
   private Skill skill;
   private ELanguage language = ELanguage.FRENCH;
+  private LocalDate startDate;
+  private LocalDate endDate;
 
   private SkillLevelFixture() {
     SkillLevel base = FakeSkillLevel.create().toModel();
@@ -31,6 +35,8 @@ public class SkillLevelFixture {
     this.traces = base.getTraces();
     this.amses = base.getAmses();
     this.skill = base.getSkill();
+    this.startDate = base.getStartDate();
+    this.endDate = base.getEndDate();
   }
 
   public static SkillLevelFixture create() {
@@ -48,7 +54,25 @@ public class SkillLevelFixture {
   }
 
   public SkillLevelFixture withStatus(ESkillLevelStatus status) {
+    LocalDate pastStartDate = LocalDate.now().minus(Period.ofYears(2));
+    LocalDate pastEndDate = LocalDate.now().minus(Period.ofYears(1));
+    LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));
+    LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));
     this.status = status;
+    switch (status) {
+      case VALIDATED, FAILED -> {
+        this.startDate = pastStartDate;
+        this.endDate = pastEndDate;
+      }
+      case UNDER_ACQUISITION, UNDER_REVIEW -> {
+        this.startDate = pastStartDate;
+        this.endDate = futureEndDate;
+      }
+      case TO_BE_EVALUATED, NOT_STARTED -> {
+        this.startDate = futureStartDate;
+        this.endDate = futureEndDate;
+      }
+    }
     return this;
   }
 
@@ -85,7 +109,18 @@ public class SkillLevelFixture {
     return this;
   }
 
+  public SkillLevelFixture withStartDate(LocalDate startDate) {
+    this.startDate = startDate;
+    return this;
+  }
+
+  public SkillLevelFixture withEndDate(LocalDate endDate) {
+    this.endDate = endDate;
+    return this;
+  }
+
   public SkillLevel toModel() {
-    return SkillLevel.toDomain(id, name, description, status, traces, amses, skill, language);
+    return SkillLevel.toDomain(
+        id, name, description, status, traces, amses, skill, language, startDate, endDate);
   }
 }
