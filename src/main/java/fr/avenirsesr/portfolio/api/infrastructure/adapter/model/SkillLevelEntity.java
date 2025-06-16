@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SkillLevelEntity extends PeriodEntity {
+public class SkillLevelEntity extends PeriodEntity<LocalDate> {
   @Id private UUID id;
 
   @Column

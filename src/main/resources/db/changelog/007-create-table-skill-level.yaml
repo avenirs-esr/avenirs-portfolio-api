@@ -76,6 +76,7 @@ databaseChangeLog:
             sql: |
               ALTER TABLE skill_level OWNER TO ${avenirs.admin.role};
               ALTER TABLE skill_level_translation OWNER TO ${avenirs.admin.role};
+              ALTER TABLE skill_level ADD CONSTRAINT chk_skill_level_dates CHECK (start_date <= end_date);
             stripComments: true
 
         - addForeignKeyConstraint:
