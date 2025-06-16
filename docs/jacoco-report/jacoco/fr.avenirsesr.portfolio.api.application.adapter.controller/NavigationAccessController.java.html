@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NavigationAccessController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.application.adapter.controller</a> &gt; <span class="el_source">NavigationAccessController.java</span></div><h1>NavigationAccessController.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.api.application.adapter.dto.NavigationAccessDTO;
-import fr.avenirsesr.portfolio.api.application.adapter.util.UserUtil;
-import fr.avenirsesr.portfolio.api.domain.model.Student;
+import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
+import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
+import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
 import java.security.Principal;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +18,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L21">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/navigation-access&quot;)
 public class NavigationAccessController {
-  private final UserUtil userUtil;
+  private final UserRepository userRepository;
   private final InstitutionService institutionService;
   private final ProgramProgressService programProgressService;
 
@@ -29,22 +31,34 @@ public class NavigationAccessController {
   public ResponseEntity&lt;NavigationAccessDTO&gt; getStudentNavigationAccess(
       Principal principal,
       @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
-<span class="fc" id="L32">    ELanguage language = ELanguage.fromCode(lang);</span>
-<span class="fc" id="L33">    Student student = userUtil.getStudent(principal);</span>
+<span class="fc" id="L34">    ELanguage language = ELanguage.fromCode(lang);</span>
+<span class="fc" id="L35">    var userId = UUID.fromString(principal.getName());</span>
 
-<span class="fc" id="L35">    var isAPCEnabledByInstitution =</span>
-<span class="fc" id="L36">        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC, language);</span>
-<span class="fc" id="L37">    var isLifeProjectEnabledByInstitution =</span>
-<span class="fc" id="L38">        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT, language);</span>
+<span class="fc" id="L37">    log.info(&quot;Received request to get navigation access of student [{}]&quot;, userId);</span>
 
-<span class="fc" id="L40">    var isFollowingAPCProgram = programProgressService.isStudentFollowingAPCProgram(student);</span>
+<span class="fc" id="L39">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
 
-<span class="fc" id="L42">    var navigationAccess =</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">    if (!user.isStudent()) {</span>
+<span class="fc" id="L42">      log.error(&quot;User {} is not a student&quot;, userId);</span>
+<span class="fc" id="L43">      throw new UserIsNotStudentException();</span>
+    }
+
+<span class="fc" id="L46">    var student = user.toStudent();</span>
+
+<span class="fc" id="L48">    var isAPCEnabledByInstitution =</span>
+<span class="fc" id="L49">        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC, language);</span>
+<span class="fc" id="L50">    var isLifeProjectEnabledByInstitution =</span>
+<span class="fc" id="L51">        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT, language);</span>
+
+<span class="fc" id="L53">    var isFollowingAPCProgram = programProgressService.isStudentFollowingAPCProgram(student);</span>
+
+<span class="fc" id="L55">    var navigationAccess =</span>
         new NavigationAccessDTO(
             new NavigationAccessDTO.AccessInfoAPC(isAPCEnabledByInstitution, isFollowingAPCProgram),
             new NavigationAccessDTO.AccessInfoLifeProject(isLifeProjectEnabledByInstitution));
 
-<span class="fc" id="L47">    return ResponseEntity.ok(navigationAccess);</span>
+<span class="fc" id="L60">    log.debug(&quot;Navigation access of student {} : {}&quot;, userId, navigationAccess);</span>
+<span class="fc" id="L61">    return ResponseEntity.ok(navigationAccess);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
