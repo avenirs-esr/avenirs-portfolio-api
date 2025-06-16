@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -17,7 +18,7 @@ public class FakeAMS {
   }
 
   public static FakeAMS of(User user) {
-    FakePeriod period = FakePeriod.createMin24hoursPeriodInAcademicPeriod();
+    FakePeriod<Instant> period = FakePeriod.createMin24hoursInstantPeriodInAcademicPeriod();
     return new FakeAMS(
         AMS.create(
             UUID.fromString(faker.call().internet().uuid()),
@@ -29,7 +30,7 @@ public class FakeAMS {
   }
 
   public static FakeAMS of(AMS ams, ELanguage language) {
-    FakePeriod period = FakePeriod.createMin24hoursPeriodInAcademicPeriod();
+    FakePeriod<Instant> period = FakePeriod.createMin24hoursInstantPeriodInAcademicPeriod();
     return new FakeAMS(
         AMS.create(
             ams.getId(),

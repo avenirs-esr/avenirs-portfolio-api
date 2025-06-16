@@ -4,24 +4,47 @@ import lombok.Getter;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import java.time.temporal.Temporal;
+import java.util.function.Function;
 
 @Getter
-@Component
-public class FakePeriod {
+public class FakePeriod<T extends Temporal> {
 
   private static final FakerProvider faker = new FakerProvider();
-
   private static final int academicYear = 2024;
+  
+  private final Function<LocalDate, T> localDateConverter;
+  private final Function<Instant, T> instantConverter;
+  
+  private T startDate;
+  private T endDate;
 
-  private Instant startDate;
-  private Instant endDate;
+  public static FakePeriod<LocalDate> createLocalDatePeriod() {
+    return new FakePeriod<>(
+        localDate -> localDate,
+        instant -> instant.atZone(ZoneId.systemDefault()).toLocalDate()
+    );
+  }
+  
+  public static FakePeriod<Instant> createInstantPeriod() {
+    return new FakePeriod<>(
+        localDate -> {
+          int hour = faker.call().number().numberBetween(8, 20);
+          int minute = faker.call().number().numberBetween(0, 60);
+          return localDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();
+        },
+        instant -> instant
+    );
+  }
 
-  private FakePeriod() {}
+  private FakePeriod(Function<LocalDate, T> localDateConverter, Function<Instant, T> instantConverter) {
+    this.localDateConverter = localDateConverter;
+    this.instantConverter = instantConverter;
+  }
 
   public void initStartDateInAcademicPeriodBeforeMay() {
     LocalDate startBoundary = LocalDate.of(academicYear, Month.SEPTEMBER, 1);
@@ -34,7 +57,8 @@ public class FakePeriod {
         startEpochDay
             + faker.call().number().numberBetween(0, (int) (endEpochDay - startEpochDay + 1));
 
-    startDate = LocalDate.ofEpochDay(randomDay).atStartOfDay(ZoneId.systemDefault()).toInstant();
+    LocalDate randomLocalDate = LocalDate.ofEpochDay(randomDay);
+    startDate = localDateConverter.apply(randomLocalDate);
   }
 
   public void initEndDateInAcademicPeriodAfterStartDate() {
@@ -42,13 +66,20 @@ public class FakePeriod {
       initStartDateInAcademicPeriodBeforeMay();
     }
 
-    Instant minimumEndDate = startDate.plus(24, ChronoUnit.HOURS);
+    Instant startInstant;
+    if (startDate instanceof LocalDate) {
+      startInstant = ((LocalDate) startDate).atStartOfDay(ZoneId.systemDefault()).toInstant();
+    } else {
+      startInstant = (Instant) startDate;
+    }
+
+    Instant minimumEndDate = startInstant.plus(24, ChronoUnit.HOURS);
 
     LocalDate julyFirstBoundary = LocalDate.of(academicYear + 1, Month.JULY, 1);
     Instant julyFirstInstant = julyFirstBoundary.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
     if (minimumEndDate.isAfter(julyFirstInstant)) {
-      endDate = julyFirstInstant.minus(1, ChronoUnit.DAYS);
+      endDate = instantConverter.apply(julyFirstInstant.minus(1, ChronoUnit.DAYS));
       return;
     }
 
@@ -59,11 +90,31 @@ public class FakePeriod {
     int additionalDays =
         faker.call().number().numberBetween(1, (int) Math.min(180, daysUntilJulyFirst));
 
-    endDate = minimumEndDate.plus(additionalDays, ChronoUnit.DAYS);
+    Instant baseEndDate = minimumEndDate.plus(additionalDays, ChronoUnit.DAYS);
+    
+    if (!(startDate instanceof LocalDate)) {
+      int hour = faker.call().number().numberBetween(8, 20);
+      int minute = faker.call().number().numberBetween(0, 60);
+      LocalDate endLocalDate = baseEndDate.atZone(ZoneId.systemDefault()).toLocalDate();
+      baseEndDate = endLocalDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();
+      
+      if (ChronoUnit.HOURS.between(startInstant, baseEndDate) < 24) {
+        baseEndDate = startInstant.plus(24, ChronoUnit.HOURS);
+      }
+    }
+    
+    endDate = instantConverter.apply(baseEndDate);
   }
 
-  static FakePeriod createMin24hoursPeriodInAcademicPeriod() {
-    FakePeriod fakePeriod = new FakePeriod();
+  public static FakePeriod<LocalDate> createMin24hoursLocalDatePeriodInAcademicPeriod() {
+    FakePeriod<LocalDate> fakePeriod = createLocalDatePeriod();
+    fakePeriod.initStartDateInAcademicPeriodBeforeMay();
+    fakePeriod.initEndDateInAcademicPeriodAfterStartDate();
+    return fakePeriod;
+  }
+  
+  public static FakePeriod<Instant> createMin24hoursInstantPeriodInAcademicPeriod() {
+    FakePeriod<Instant> fakePeriod = createInstantPeriod();
     fakePeriod.initStartDateInAcademicPeriodBeforeMay();
     fakePeriod.initEndDateInAcademicPeriodAfterStartDate();
     return fakePeriod;
