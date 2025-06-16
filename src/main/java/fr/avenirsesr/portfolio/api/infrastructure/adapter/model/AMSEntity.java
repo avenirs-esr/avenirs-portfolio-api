@@ -24,6 +24,7 @@ public class AMSEntity {
   @ManyToOne(optional = false)
   private UserEntity user;
 
+  // TODO: refactor to use the interface Period.
   @Column(name = "start_date", nullable = false)
   private Instant startDate;
 
