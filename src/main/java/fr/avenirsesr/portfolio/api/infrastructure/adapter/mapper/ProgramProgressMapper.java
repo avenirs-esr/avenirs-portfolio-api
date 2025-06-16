@@ -1,7 +1,9 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
+import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.dto.ProgramProgressSummaryDTO;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramProgressEntity;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,5 +45,14 @@ public interface ProgramProgressMapper {
             .collect(Collectors.toSet()));
 
     return programProgress;
+  }
+
+  static ProgramProgress toDomainWithoutSkills(
+      ProgramProgressSummaryDTO programProgressSummaryDTO, Student student, ELanguage language) {
+    return ProgramProgress.toDomain(
+        programProgressSummaryDTO.id(),
+        ProgramMapper.toDomain(programProgressSummaryDTO.program(), language),
+        student,
+        Set.of());
   }
 }

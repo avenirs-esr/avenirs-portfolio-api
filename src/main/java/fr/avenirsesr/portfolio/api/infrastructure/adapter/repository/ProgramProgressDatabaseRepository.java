@@ -16,12 +16,15 @@ import org.springframework.stereotype.Component;
 public class ProgramProgressDatabaseRepository
     extends GenericJpaRepositoryAdapter<ProgramProgress, ProgramProgressEntity>
     implements ProgramProgressRepository {
+  private final ProgramProgressJpaRepository jpaRepository;
+
   public ProgramProgressDatabaseRepository(ProgramProgressJpaRepository jpaRepository) {
     super(
         jpaRepository,
         jpaRepository,
         ProgramProgressMapper::fromDomain,
         ProgramProgressMapper::toDomain);
+    this.jpaRepository = jpaRepository;
   }
 
   @Override
@@ -44,5 +47,14 @@ public class ProgramProgressDatabaseRepository
         .stream()
         .map(ProgramProgressMapper::toDomain)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<ProgramProgress> findAllWithoutSkillsByStudent(Student student, ELanguage language) {
+    return jpaRepository.findAllByStudentIdAndLang(student.getId(), language).stream()
+        .map(
+            programProgressDTO ->
+                ProgramProgressMapper.toDomainWithoutSkills(programProgressDTO, student, language))
+        .toList();
   }
 }

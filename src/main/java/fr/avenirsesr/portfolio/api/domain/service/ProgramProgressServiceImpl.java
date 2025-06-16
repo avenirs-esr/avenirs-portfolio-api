@@ -88,4 +88,11 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
     var programProgress = programProgressRepository.findAllAPCByStudent(student);
     return !programProgress.isEmpty();
   }
+
+  @Override
+  public List<ProgramProgress> getAllProgramProgress(Student student, ELanguage language) {
+    return programProgressRepository.findAllWithoutSkillsByStudent(student, language).stream()
+        .sorted(Comparator.comparing(p -> p.getProgram().getName()))
+        .collect(Collectors.toList());
+  }
 }

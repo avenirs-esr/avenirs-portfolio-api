@@ -317,4 +317,25 @@ public class ProgramProgressServiceImplTest {
     assertEquals(1, skills1.size());
     assertTrue(skills1.getFirst().getSkillLevels().isEmpty());
   }
+
+  @Test
+  void shouldReturnAllProgramProgressForStudent() {
+    // Given
+    Program program1 = ProgramFixture.create().withName("Beta").toModel();
+    Program program2 = ProgramFixture.create().withName("Alpha").toModel();
+    ProgramProgress programProgress1 =
+        ProgramProgressFixture.create().withProgram(program1).toModel();
+    ProgramProgress programProgress2 =
+        ProgramProgressFixture.create().withProgram(program2).toModel();
+    when(programProgressRepository.findAllWithoutSkillsByStudent(student, language))
+        .thenReturn(List.of(programProgress1, programProgress2));
+
+    // When
+    List<ProgramProgress> result = programProgressService.getAllProgramProgress(student, language);
+
+    // Then
+    assertEquals(2, result.size());
+    assertEquals("Alpha", result.get(0).getProgram().getName());
+    assertEquals("Beta", result.get(1).getProgram().getName());
+  }
 }

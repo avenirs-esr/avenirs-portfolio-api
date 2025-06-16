@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.api.application.adapter.dto.ProgramProgressDTO;
 import fr.avenirsesr.portfolio.api.application.adapter.dto.ProgramProgressOverviewDTO;
+import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressOverviewMapper;
 import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
@@ -47,6 +49,26 @@ public class ProgramProgressController {
         .map(
             entry ->
                 ProgramProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
+        .toList();
+  }
+
+  @GetMapping()
+  public List<ProgramProgressDTO> getAllProgramProgress(
+      Principal principal,
+      @RequestHeader(value = "Accept-Language", defaultValue = "fr_FR") String lang) {
+    User user =
+        userRepository
+            .findById(UUID.fromString(principal.getName()))
+            .orElseThrow(UserNotFoundException::new);
+
+    if (!user.isStudent()) {
+      log.error("User {} is not a student", principal.getName());
+      throw new UserIsNotStudentException();
+    }
+
+    Student student = user.toStudent();
+    return programProgressService.getAllProgramProgress(student, ELanguage.fromCode(lang)).stream()
+        .map(ProgramProgressMapper::fromDomainToDto)
         .toList();
   }
 }
