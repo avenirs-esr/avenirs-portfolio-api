@@ -18,8 +18,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AMSEntity {
-  @Id private UUID id;
+public class AMSEntity extends AvenirsBaseEntity {
 
   @ManyToOne(optional = false)
   private UserEntity user;
@@ -56,7 +55,7 @@ public class AMSEntity {
       Instant endDate,
       Set<SkillLevelEntity> skillLevels,
       Set<CohortEntity> cohorts) {
-    this.id = id;
+    setId(id);
     this.user = user;
     this.startDate = startDate;
     this.endDate = endDate;

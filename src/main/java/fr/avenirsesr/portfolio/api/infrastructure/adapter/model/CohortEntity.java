@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -11,7 +10,6 @@ import jakarta.persistence.Table;
 
 import java.util.Set;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,11 +17,9 @@ import lombok.Setter;
 @Entity
 @Table(name = "cohort")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-public class CohortEntity {
-  @Id private UUID id;
+public class CohortEntity extends AvenirsBaseEntity {
 
   @Column(nullable = false)
   private String name;
@@ -48,4 +44,19 @@ public class CohortEntity {
       joinColumns = @JoinColumn(name = "cohort_id"),
       inverseJoinColumns = @JoinColumn(name = "ams_id"))
   private Set<AMSEntity> amsEntities;
+  
+  public CohortEntity(
+      UUID id,
+      String name,
+      String description,
+      Set<UserEntity> users,
+      ProgramProgressEntity programProgress,
+      Set<AMSEntity> amsEntities) {
+    this.setId(id);
+    this.name = name;
+    this.description = description;
+    this.users = users;
+    this.programProgress = programProgress;
+    this.amsEntities = amsEntities;
+  }
 }
