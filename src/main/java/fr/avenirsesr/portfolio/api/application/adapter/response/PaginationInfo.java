@@ -1,11 +1,10 @@
-package fr.avenirsesr.portfolio.api.application.adapter.dto;
+package fr.avenirsesr.portfolio.api.application.adapter.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(requiredProperties = {"size", "totalElements", "totalPages", "number"})
-public record PageDTO(
+public record PaginationInfo(
     @Schema(description = "Number of elements per page") int size,
     @Schema(description = "Total number of elements") long totalElements,
     @Schema(description = "Total number of pages") int totalPages,
-    @Schema(description = "Current page number (0-indexed)") int number) {
-}
+    @Schema(description = "Current page number (0-indexed)") int number) {}
