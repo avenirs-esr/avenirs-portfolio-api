@@ -13,14 +13,10 @@ public interface ProgramProgressJpaRepository
     extends JpaRepository<ProgramProgressEntity, UUID>,
         JpaSpecificationExecutor<ProgramProgressEntity> {
   @Query(
-"""
-   SELECT new fr.avenirsesr.portfolio.api.infrastructure.adapter.dto.ProgramProgressSummaryDTO(
-            p.id,
-            pr
-          )
-   FROM ProgramProgressEntity      p
-     JOIN p.program                pr
-   WHERE p.student.id = :studentId
-""")
+      "SELECT new fr.avenirsesr.portfolio.api.infrastructure.adapter.dto.ProgramProgressSummaryDTO("
+          + "p.id, pr) "
+          + "FROM ProgramProgressEntity p "
+          + "JOIN p.program pr "
+          + "WHERE p.student.id = :studentId")
   List<ProgramProgressSummaryDTO> findAllByStudentIdAndLang(UUID studentId, ELanguage lang);
 }
