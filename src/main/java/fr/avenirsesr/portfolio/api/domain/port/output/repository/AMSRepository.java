@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.api.domain.port.output.repository;
 
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
-import java.util.List;
+import fr.avenirsesr.portfolio.api.domain.model.PagedResult;
 import java.util.UUID;
 
 public interface AMSRepository extends GenericRepositoryPort<AMS> {
-  List<AMS> findByUserIdViaCohorts(UUID userId, int page, int size);
+  PagedResult<AMS> findByUserIdViaCohorts(UUID userId, int page, int size);
 }
