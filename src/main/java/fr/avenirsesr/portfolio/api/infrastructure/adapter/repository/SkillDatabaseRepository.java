@@ -35,6 +35,7 @@ public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter<Skill, 
     }
   }
 
+  // TODO: remove this methode, is is not use and should not return an entity.
   @Override
   public List<SkillEntity> findAll() {
     return jpaRepository.findAll();
