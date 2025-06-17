@@ -54,6 +54,7 @@ public interface AMSMapper {
                             ELanguage.FRENCH),
                         ELanguage.FRENCH))
             .toList(),
+        entity.getTraces().stream().map(TraceMapper::toDomain).toList(),
         entity.getCohorts().stream().map(CohortMapper::toDomain).collect(Collectors.toSet()),
         language);
   }

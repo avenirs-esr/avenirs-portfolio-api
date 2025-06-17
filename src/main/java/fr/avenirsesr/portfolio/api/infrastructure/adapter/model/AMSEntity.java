@@ -37,6 +37,13 @@ public class AMSEntity extends AvenirsBaseEntity {
       inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
   private List<SkillLevelEntity> skillLevels;
 
+  @ManyToMany
+  @JoinTable(
+      name = "trace_ams",
+      joinColumns = @JoinColumn(name = "ams_id"),
+      inverseJoinColumns = @JoinColumn(name = "trace_id"))
+  private List<TraceEntity> traces;
+
   @OneToMany(
       mappedBy = "ams",
       cascade = CascadeType.ALL,
@@ -61,5 +68,6 @@ public class AMSEntity extends AvenirsBaseEntity {
     this.endDate = endDate;
     this.skillLevels = List.copyOf(skillLevels);
     this.cohorts = Set.copyOf(cohorts == null ? Set.of() : cohorts);
+    this.traces = List.of();
   }
 }

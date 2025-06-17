@@ -30,6 +30,8 @@ public class AMS {
   private final Instant endDate;
 
   private List<SkillLevel> skillLevels;
+  
+  private List<Trace> traces;
 
   private Set<Cohort> cohorts;
 
@@ -47,6 +49,7 @@ public class AMS {
       UUID id, User user, String title, Instant startDate, Instant endDate, ELanguage language) {
     var ams = new AMS(id, user, title, startDate, endDate, language);
     ams.setSkillLevels(List.of());
+    ams.setTraces(List.of());
     ams.setCohorts(Set.of());
 
     return ams;
@@ -59,10 +62,12 @@ public class AMS {
       Instant startDate,
       Instant endDate,
       List<SkillLevel> skillLevels,
+      List<Trace> traces,
       Set<Cohort> cohorts,
       ELanguage language) {
     var ams = new AMS(id, user, title, startDate, endDate, language);
     ams.setSkillLevels(skillLevels);
+    ams.setTraces(traces);
     ams.setCohorts(cohorts);
     return ams;
   }
