@@ -9,4 +9,6 @@ public interface ProgramProgressRepository extends GenericRepositoryPort<Program
   List<ProgramProgress> findAllByStudent(Student student, ELanguage language);
 
   List<ProgramProgress> findAllAPCByStudent(Student student);
+
+  List<ProgramProgress> findAllWithoutSkillsByStudent(Student student, ELanguage language);
 }

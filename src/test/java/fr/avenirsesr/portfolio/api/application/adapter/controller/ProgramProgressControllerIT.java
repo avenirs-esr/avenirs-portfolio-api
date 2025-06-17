@@ -219,4 +219,71 @@ class ProgramProgressControllerIT {
         .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
   }
+
+  @Test
+  void shouldReturnAllProgramProgressForStudent() throws Exception {
+    mockMvc
+        .perform(
+            get("/me/program-progress")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .header("Accept-Language", language.getCode())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
+        .andExpect(jsonPath("$[0].name").value("Western Master - 8"));
+  }
+
+  @Test
+  void shouldReturn404WhenUserIsUnknown() throws Exception {
+    mockMvc
+        .perform(
+            get("/me/program-progress")
+                .header("X-Signed-Context", unknownUserPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", unknownUserSignature)
+                .header("Accept-Language", language.getCode())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("User not found"))
+        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+  }
+
+  @Test
+  void shouldReturn403WhenUserIsNotStudentForAllProgramProgress() throws Exception {
+    mockMvc
+        .perform(
+            get("/me/program-progress")
+                .header("X-Signed-Context", teacherPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", teacherSignature)
+                .header("Accept-Language", language.getCode())
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("User is not student"))
+        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
+  }
+
+  @Test
+  void shouldFallbackInDefaultLanguageWhenLanguageNotSupportedForAllProgramProgress()
+      throws Exception {
+    mockMvc
+        .perform(
+            get("/me/program-progress")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .header("Accept-Language", "invalid_language_code")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
+        .andExpect(jsonPath("$[0].name").value("Western Master - 8"));
+  }
 }

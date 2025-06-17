@@ -1,7 +1,9 @@
 package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.api.application.adapter.dto.ProgramProgressDTO;
 import fr.avenirsesr.portfolio.api.application.adapter.dto.ProgramProgressOverviewDTO;
 import fr.avenirsesr.portfolio.api.application.adapter.dto.ProgramProgressViewDTO;
+import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressOverviewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressViewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.util.UserUtil;
@@ -46,6 +48,16 @@ public class ProgramProgressController {
     Student student = userUtil.getStudent(principal);
     return programProgressService.getSkillsView(student, language).entrySet().stream()
         .map(entry -> ProgramProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
+        .toList();
+  }
+
+  @GetMapping()
+  public List<ProgramProgressDTO> getAllProgramProgress(
+      Principal principal,
+      @RequestHeader(value = "Accept-Language", defaultValue = "fr_FR") String lang) {
+    Student student = userUtil.getStudent(principal);
+    return programProgressService.getAllProgramProgress(student, ELanguage.fromCode(lang)).stream()
+        .map(ProgramProgressMapper::fromDomainToDto)
         .toList();
   }
 }

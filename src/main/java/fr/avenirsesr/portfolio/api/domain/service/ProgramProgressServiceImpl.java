@@ -98,4 +98,11 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
     return cleanProgramProgressList(
         programProgressRepository.findAllByStudent(student, language), false);
   }
+
+  @Override
+  public List<ProgramProgress> getAllProgramProgress(Student student, ELanguage language) {
+    return programProgressRepository.findAllWithoutSkillsByStudent(student, language).stream()
+        .sorted(Comparator.comparing(p -> p.getProgram().getName()))
+        .collect(Collectors.toList());
+  }
 }
