@@ -24,7 +24,9 @@ public interface TraceMapper {
             .toList(),
         trace.getAmses().stream().map(AMSMapper::fromDomain).toList(),
         trace.isGroup(),
-        trace.getCreatedAt());
+        trace.getCreatedAt(),
+        trace.getUpdatedAt(),
+        trace.getDeletionDate());
   }
 
   static Trace toDomain(TraceEntity traceEntity) {
@@ -36,6 +38,8 @@ public interface TraceMapper {
         traceEntity.getAmses().stream().map(AMSMapper::toDomain).toList(),
         traceEntity.isGroup(),
         traceEntity.getCreatedAt(),
+        traceEntity.getUpdatedAt(),
+        traceEntity.getDeletionDate(),
         traceEntity.getLanguage());
   }
 }

@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.specification.TraceSpecification;
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,7 @@ import org.springframework.stereotype.Component;
 public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, TraceEntity>
     implements TraceRepository {
   public TraceDatabaseRepository(TraceJpaRepository jpaRepository) {
-    super(
-        jpaRepository,
-        jpaRepository,
-        TraceMapper::fromDomain,
-        traceEntity -> TraceMapper.toDomain(traceEntity));
+    super(jpaRepository, jpaRepository, TraceMapper::fromDomain, TraceMapper::toDomain);
   }
 
   @Override
@@ -31,8 +28,36 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, 
             PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt")))
         .getContent()
         .stream()
-        .map(traceEntity -> TraceMapper.toDomain(traceEntity))
+        .map(TraceMapper::toDomain)
         .toList();
+  }
+
+  @Override
+  public List<Trace> findAllPage(User user, int page, int pageSize) {
+    return jpaSpecificationExecutor
+        .findAll(
+            TraceSpecification.ofUser(UserMapper.fromDomain(user)),
+            PageRequest.of(
+                page,
+                pageSize,
+                Sort.by(Sort.Direction.DESC, "updatedAt")
+                    .and(Sort.by(Sort.Direction.DESC, "createdAt"))))
+        .getContent()
+        .stream()
+        .map(TraceMapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public Page<TraceEntity> findAllUnassociatedPage(User user, int page, int pageSize) {
+    return jpaSpecificationExecutor.findAll(
+        TraceSpecification.ofUser(UserMapper.fromDomain(user))
+            .and(TraceSpecification.unassociated()),
+        PageRequest.of(
+            page,
+            pageSize,
+            Sort.by(Sort.Direction.DESC, "updatedAt")
+                .and(Sort.by(Sort.Direction.DESC, "createdAt"))));
   }
 
   public void saveAllEntities(List<TraceEntity> entities) {
