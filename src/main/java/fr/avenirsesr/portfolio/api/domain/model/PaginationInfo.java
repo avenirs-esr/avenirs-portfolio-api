@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.api.application.adapter.response;
+package fr.avenirsesr.portfolio.api.domain.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -7,4 +7,5 @@ public record PaginationInfo(
     @Schema(description = "Number of elements per page") int size,
     @Schema(description = "Total number of elements") long totalElements,
     @Schema(description = "Total number of pages") int totalPages,
-    @Schema(description = "Current page number (0-indexed)") int number) {}
+    @Schema(description = "Current page number (0-indexed)") int number) {
+}
