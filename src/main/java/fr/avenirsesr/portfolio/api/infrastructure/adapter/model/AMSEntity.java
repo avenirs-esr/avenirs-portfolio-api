@@ -4,6 +4,13 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 import java.util.HashSet;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -29,6 +36,10 @@ public class AMSEntity extends AvenirsBaseEntity {
 
   @Column(name = "end_date", nullable = false)
   private Instant endDate;
+
+  @Column
+  @Enumerated(EnumType.STRING)
+  private EAmsStatus status;
 
   @ManyToMany
   @JoinTable(
@@ -58,16 +69,19 @@ public class AMSEntity extends AvenirsBaseEntity {
   public AMSEntity(
       UUID id,
       UserEntity user,
+      EAmsStatus status,
       Instant startDate,
       Instant endDate,
       Set<SkillLevelEntity> skillLevels,
-      Set<CohortEntity> cohorts) {
+      Set<CohortEntity> cohorts,
+      Set<TraceEntity> traces) {
     setId(id);
     this.user = user;
     this.startDate = startDate;
     this.endDate = endDate;
     this.skillLevels = List.copyOf(skillLevels);
     this.cohorts = Set.copyOf(cohorts == null ? Set.of() : cohorts);
-    this.traces = List.of();
+    this.traces = List.copyOf(traces);
+    this.status = status;
   }
 }

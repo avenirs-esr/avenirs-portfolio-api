@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import java.time.Instant;
 import java.util.List;
@@ -29,6 +30,8 @@ public class AMS {
   @Setter(AccessLevel.NONE)
   private final Instant endDate;
 
+  private EAmsStatus status;
+
   private List<SkillLevel> skillLevels;
   
   private List<Trace> traces;
@@ -51,6 +54,7 @@ public class AMS {
     ams.setSkillLevels(List.of());
     ams.setTraces(List.of());
     ams.setCohorts(Set.of());
+    ams.setStatus(EAmsStatus.NOT_STARTED);
 
     return ams;
   }
@@ -64,11 +68,13 @@ public class AMS {
       List<SkillLevel> skillLevels,
       List<Trace> traces,
       Set<Cohort> cohorts,
-      ELanguage language) {
+      ELanguage language,
+      EAmsStatus status) {
     var ams = new AMS(id, user, title, startDate, endDate, language);
     ams.setSkillLevels(skillLevels);
     ams.setTraces(traces);
     ams.setCohorts(cohorts);
+    ams.setStatus(status);
     return ams;
   }
 }
