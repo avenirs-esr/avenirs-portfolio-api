@@ -9,23 +9,27 @@ import java.util.stream.Collectors;
 
 public interface AMSMapper {
   static AMSEntity fromDomain(AMS ams) {
-    return new AMSEntity(
-        ams.getId(),
-        UserMapper.fromDomain(ams.getUser()),
-        ams.getStartDate(),
-        ams.getEndDate(),
-        ams.getSkillLevels().stream()
-            .map(
-                skillLevel ->
-                    SkillLevelMapper.fromDomain(
-                        skillLevel,
-                        SkillMapper.fromDomain(
-                            skillLevel.getSkill(),
-                            ProgramProgressMapper.fromDomain(
-                                skillLevel.getSkill().getProgramProgress())),
-                        skillLevel.getTraces().stream().map(TraceMapper::fromDomain).toList()))
-            .collect(Collectors.toSet()),
-        ams.getCohorts().stream().map(CohortMapper::fromDomain).collect(Collectors.toSet()));
+    AMSEntity entity =
+        new AMSEntity(
+            ams.getId(),
+            UserMapper.fromDomain(ams.getUser()),
+            ams.getStatus(),
+            ams.getStartDate(),
+            ams.getEndDate(),
+            ams.getSkillLevels().stream()
+                .map(
+                    skillLevel ->
+                        SkillLevelMapper.fromDomain(
+                            skillLevel,
+                            SkillMapper.fromDomain(
+                                skillLevel.getSkill(),
+                                ProgramProgressMapper.fromDomain(
+                                    skillLevel.getSkill().getProgramProgress())),
+                            skillLevel.getTraces().stream().map(TraceMapper::fromDomain).toList()))
+                .collect(Collectors.toSet()),
+            ams.getCohorts().stream().map(CohortMapper::fromDomain).collect(Collectors.toSet()),
+            ams.getTraces().stream().map(TraceMapper::fromDomain).collect(Collectors.toSet()));
+    return entity;
   }
 
   static AMS toDomain(AMSEntity entity) {
@@ -56,6 +60,7 @@ public interface AMSMapper {
             .toList(),
         entity.getTraces().stream().map(TraceMapper::toDomain).toList(),
         entity.getCohorts().stream().map(CohortMapper::toDomain).collect(Collectors.toSet()),
-        language);
+        language,
+        entity.getStatus());
   }
 }

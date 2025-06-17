@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import jakarta.persistence.*;
 
 import java.time.Instant;
 import java.util.HashSet;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -38,6 +38,10 @@ public class AMSEntity extends AvenirsBaseEntity {
   @Column(name = "end_date", nullable = false)
   private Instant endDate;
 
+  @Column
+  @Enumerated(EnumType.STRING)
+  private EAmsStatus status;
+
   @ManyToMany
   @JoinTable(
       name = "ams_skill_levels",
@@ -66,16 +70,19 @@ public class AMSEntity extends AvenirsBaseEntity {
   public AMSEntity(
       UUID id,
       UserEntity user,
+      EAmsStatus status,
       Instant startDate,
       Instant endDate,
       Set<SkillLevelEntity> skillLevels,
-      Set<CohortEntity> cohorts) {
+      Set<CohortEntity> cohorts,
+      Set<TraceEntity> traces) {
     setId(id);
     this.user = user;
     this.startDate = startDate;
     this.endDate = endDate;
     this.skillLevels = List.copyOf(skillLevels);
     this.cohorts = Set.copyOf(cohorts == null ? Set.of() : cohorts);
-    this.traces = List.of();
+    this.traces = List.copyOf(traces);
+    this.status = status;
   }
 }
