@@ -37,6 +37,12 @@ databaseChangeLog:
                   type: TIMESTAMPTZ
                   constraints:
                     nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMPTZ
+              - column:
+                  name: deletion_date
+                  type: TIMESTAMPTZ
         - sql:
             dbms: 'postgresql'
             endDelimiter: \nGO

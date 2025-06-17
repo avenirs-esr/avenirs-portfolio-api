@@ -1,14 +1,6 @@
 package fr.avenirsesr.portfolio.api.application.adapter.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class ErrorResponse {
-
-  private String code;
-  private String message;
-}
+@Schema(requiredProperties = {"code", "message"})
+public record ErrorResponse(String code, String message) {}

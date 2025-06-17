@@ -12,6 +12,8 @@ public interface TraceOverviewMapper {
         trace.getAmses().size(),
         programName,
         trace.isGroup(),
-        trace.getCreatedAt());
+        trace.getCreatedAt(),
+        trace.getUpdatedAt(),
+        trace.getDeletionDate());
   }
 }

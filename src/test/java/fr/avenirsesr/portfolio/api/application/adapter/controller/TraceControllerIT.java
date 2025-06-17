@@ -42,10 +42,10 @@ class TraceControllerIT {
   }
 
   @Test
-  void shouldReturnTrackOverview() throws Exception {
+  void shouldReturnTraceOverview() throws Exception {
     mockMvc
         .perform(
-            get("/me/trace/overview")
+            get("/me/traces/overview")
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -62,7 +62,7 @@ class TraceControllerIT {
   void shouldReturn404WhenUserNotExist() throws Exception {
     mockMvc
         .perform(
-            get("/me/trace/overview")
+            get("/me/traces/overview")
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature))

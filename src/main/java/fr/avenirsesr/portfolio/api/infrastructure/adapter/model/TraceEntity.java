@@ -54,4 +54,8 @@ public class TraceEntity {
 
   @Column(nullable = false)
   private Instant createdAt;
+
+  @Column private Instant updatedAt;
+
+  @Column private Instant deletionDate;
 }

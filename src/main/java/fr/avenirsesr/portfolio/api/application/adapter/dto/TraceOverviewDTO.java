@@ -12,7 +12,9 @@ import java.util.UUID;
       "AMSCount",
       "programName",
       "isGroup",
-      "createdAt"
+      "createdAt",
+      "updatedAt",
+      "deletionDate"
     })
 public record TraceOverviewDTO(
     UUID traceId,
@@ -21,4 +23,6 @@ public record TraceOverviewDTO(
     Integer AMSCount,
     String programName,
     boolean isGroup,
-    Instant createdAt) {}
+    Instant createdAt,
+    Instant updatedAt,
+    Instant deletionDate) {}

@@ -28,7 +28,7 @@ public class TraceServiceImplTest {
   }
 
   @Test
-  void givenTrackWithoutSkillLevels_shouldReturnLifeProject() {
+  void givenTraceWithoutSkillLevels_shouldReturnLifeProject() {
     // Given
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
@@ -40,7 +40,7 @@ public class TraceServiceImplTest {
   }
 
   @Test
-  void givenTrackWithSkillLevelsButNoApc_shouldReturnLifeProject() {
+  void givenTraceWithSkillLevelsButNoApc_shouldReturnLifeProject() {
     // Given
     Program program = ProgramFixture.create().withAPC(false).toModel();
     ProgramProgress progress =
@@ -61,7 +61,7 @@ public class TraceServiceImplTest {
   }
 
   @Test
-  void givenTrackWithApcProgram_shouldReturnProgramName() {
+  void givenTraceWithApcProgram_shouldReturnProgramName() {
     // Given
     Program program = ProgramFixture.create().withAPC(true).toModel();
     ProgramProgress progress =
