@@ -16,46 +16,34 @@ import org.springframework.stereotype.Component;
 public class ProgramProgressDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;ProgramProgress, ProgramProgressEntity&gt;
     implements ProgramProgressRepository {
-  private final ProgramProgressJpaRepository jpaRepository;
-
   public ProgramProgressDatabaseRepository(ProgramProgressJpaRepository jpaRepository) {
-<span class="fc" id="L22">    super(</span>
+<span class="fc" id="L20">    super(</span>
         jpaRepository,
         jpaRepository,
         ProgramProgressMapper::fromDomain,
         ProgramProgressMapper::toDomain);
-<span class="fc" id="L27">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L28">  }</span>
+<span class="fc" id="L25">  }</span>
 
   @Override
   public List&lt;ProgramProgress&gt; findAllByStudent(Student student, ELanguage language) {
-<span class="fc" id="L32">    return jpaSpecificationExecutor</span>
-<span class="fc" id="L33">        .findAll(ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)))</span>
-<span class="fc" id="L34">        .stream()</span>
-<span class="fc" id="L35">        .map(</span>
+<span class="fc" id="L29">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L30">        .findAll(ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)))</span>
+<span class="fc" id="L31">        .stream()</span>
+<span class="fc" id="L32">        .map(</span>
             programProgressEntity -&gt;
-<span class="fc" id="L37">                ProgramProgressMapper.toDomain(programProgressEntity, language))</span>
-<span class="fc" id="L38">        .collect(Collectors.toList());</span>
+<span class="fc" id="L34">                ProgramProgressMapper.toDomain(programProgressEntity, language))</span>
+<span class="fc" id="L35">        .collect(Collectors.toList());</span>
   }
 
   @Override
   public List&lt;ProgramProgress&gt; findAllAPCByStudent(Student student) {
-<span class="fc" id="L43">    return jpaSpecificationExecutor</span>
-<span class="fc" id="L44">        .findAll(</span>
-<span class="fc" id="L45">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
-<span class="fc" id="L46">                .and(ProgramProgressSpecification.isAPC()))</span>
-<span class="fc" id="L47">        .stream()</span>
-<span class="fc" id="L48">        .map(ProgramProgressMapper::toDomain)</span>
-<span class="fc" id="L49">        .collect(Collectors.toList());</span>
-  }
-
-  @Override
-  public List&lt;ProgramProgress&gt; findAllWithoutSkillsByStudent(Student student, ELanguage language) {
-<span class="fc" id="L54">    return jpaRepository.findAllByStudentIdAndLang(student.getId(), language).stream()</span>
-<span class="fc" id="L55">        .map(</span>
-            programProgressDTO -&gt;
-<span class="fc" id="L57">                ProgramProgressMapper.toDomainWithoutSkills(programProgressDTO, student, language))</span>
-<span class="fc" id="L58">        .toList();</span>
+<span class="fc" id="L40">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L41">        .findAll(</span>
+<span class="fc" id="L42">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
+<span class="fc" id="L43">                .and(ProgramProgressSpecification.isAPC()))</span>
+<span class="fc" id="L44">        .stream()</span>
+<span class="fc" id="L45">        .map(ProgramProgressMapper::toDomain)</span>
+<span class="fc" id="L46">        .collect(Collectors.toList());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

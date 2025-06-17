@@ -2,11 +2,25 @@
 
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.UserEntity;
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L7">public class TraceSpecification {</span>
+<span class="nc" id="L10">public class TraceSpecification {</span>
   public static Specification&lt;TraceEntity&gt; ofUser(UserEntity user) {
-<span class="fc" id="L9">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;user&quot;), user);</span>
+<span class="fc" id="L12">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;user&quot;), user);</span>
+  }
+
+  public static Specification&lt;TraceEntity&gt; unassociated() {
+<span class="nc" id="L16">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc" id="L17">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L19">      predicates.add(criteriaBuilder.equal(root.get(&quot;trace_skill_levels&quot;), null));</span>
+<span class="nc" id="L20">      predicates.add(criteriaBuilder.equal(root.get(&quot;trace_ams&quot;), null));</span>
+
+<span class="nc" id="L22">      return criteriaBuilder.and(predicates.toArray(new Predicate[0]));</span>
+    };
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
