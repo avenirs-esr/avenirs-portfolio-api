@@ -25,10 +25,4 @@ public class AMSServiceImpl implements AMSService {
         size);
     return amsRepository.findByUserIdViaCohorts(user.getId(), page, size);
   }
-
-  @Override
-  public PaginationInfo createPaginationInfo(
-      int page, int size, long totalElements, int totalPages) {
-    return new PaginationInfo(size, totalElements, totalPages, page);
-  }
 }
