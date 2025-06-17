@@ -38,21 +38,14 @@ public class Trace {
 <span class="fc" id="L38">    this.language = language;</span>
 <span class="fc" id="L39">  }</span>
 
-  public static Trace create(UUID id, User user, String title, ELanguage language) {
-<span class="fc" id="L42">    var trace =</span>
-        new Trace(
-            id,
-            user,
-            title,
-<span class="fc" id="L47">            Instant.now(),</span>
-            null,
-            null, // TODO : Renseigner la deletionDate en fonction de la config
-            language);
-<span class="fc" id="L51">    trace.setSkillLevels(List.of());</span>
-<span class="fc" id="L52">    trace.setAmses(List.of());</span>
-<span class="fc" id="L53">    trace.setGroup(false);</span>
+  public static Trace create(
+      UUID id, User user, String title, Instant deletionDate, ELanguage language) {
+<span class="fc" id="L43">    var trace = new Trace(id, user, title, Instant.now(), null, deletionDate, language);</span>
+<span class="fc" id="L44">    trace.setSkillLevels(List.of());</span>
+<span class="fc" id="L45">    trace.setAmses(List.of());</span>
+<span class="fc" id="L46">    trace.setGroup(false);</span>
 
-<span class="fc" id="L55">    return trace;</span>
+<span class="fc" id="L48">    return trace;</span>
   }
 
   public static Trace toDomain(
@@ -66,12 +59,12 @@ public class Trace {
       Instant updatedAt,
       Instant deletionDate,
       ELanguage language) {
-<span class="fc" id="L69">    var trace = new Trace(id, user, title, createdAt, updatedAt, deletionDate, language);</span>
-<span class="fc" id="L70">    trace.setSkillLevels(skillLevels);</span>
-<span class="fc" id="L71">    trace.setAmses(amses);</span>
-<span class="fc" id="L72">    trace.setGroup(group);</span>
+<span class="fc" id="L62">    var trace = new Trace(id, user, title, createdAt, updatedAt, deletionDate, language);</span>
+<span class="fc" id="L63">    trace.setSkillLevels(skillLevels);</span>
+<span class="fc" id="L64">    trace.setAmses(amses);</span>
+<span class="fc" id="L65">    trace.setGroup(group);</span>
 
-<span class="fc" id="L74">    return trace;</span>
+<span class="fc" id="L67">    return trace;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

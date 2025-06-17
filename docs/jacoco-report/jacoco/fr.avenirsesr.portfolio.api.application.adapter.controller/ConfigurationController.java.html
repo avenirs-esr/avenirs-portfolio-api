@@ -18,7 +18,7 @@ public class ConfigurationController {
 
   @GetMapping(&quot;/traces/config&quot;)
   public ResponseEntity&lt;TraceConfigurationInfo&gt; getTraceConfigInfo() {
-<span class="nc" id="L21">    log.info(&quot;Received request to get trace config&quot;);</span>
+<span class="nc" id="L21">    log.debug(&quot;Received request to get trace config&quot;);</span>
 
 <span class="nc" id="L23">    return ResponseEntity.ok(configurationService.getTraceConfiguration());</span>
   }

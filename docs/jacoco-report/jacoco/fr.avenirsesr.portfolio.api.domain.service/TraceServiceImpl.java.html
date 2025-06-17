@@ -53,9 +53,9 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public TraceView getUnassociatedTraces(User user, int page, int pageSize) {
-<span class="nc bnc" id="L57" title="All 2 branches missed.">    page = Optional.of(page).filter(p -&gt; p &gt;= 0).orElse(DEFAULT_PAGE);</span>
-<span class="nc bnc" id="L58" title="All 2 branches missed.">    pageSize = Optional.of(pageSize).filter(p -&gt; p &gt;= 0).orElse(DEFAULT_PAGESIZE);</span>
+  public TraceView getUnassociatedTraces(User user, Integer page, Integer pageSize) {
+<span class="nc" id="L57">    page = Optional.ofNullable(page).orElse(DEFAULT_PAGE);</span>
+<span class="nc" id="L58">    pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);</span>
 
 <span class="nc" id="L60">    Page&lt;TraceEntity&gt; traceEntityPage =</span>
 <span class="nc" id="L61">        traceRepository.findAllUnassociatedPage(user, page, pageSize);</span>
@@ -67,24 +67,28 @@ public class TraceServiceImpl implements TraceService {
 <span class="nc" id="L67">    TraceConfigurationInfo traceConfigurationInfo = configurationService.getTraceConfiguration();</span>
 
 <span class="nc bnc" id="L69" title="All 2 branches missed.">    for (Trace trace : traceList) {</span>
-<span class="nc bnc" id="L70" title="All 2 branches missed.">      if (!hasEnoughDayUntilCritical(</span>
-<span class="nc" id="L71">          trace.getCreatedAt(), traceConfigurationInfo.maxDayRemainingCritical())) {</span>
-<span class="nc" id="L72">        criticalCount++;</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">      if (hasEnoughDayUntilCritical(</span>
+<span class="nc" id="L71">          trace.getCreatedAt(),</span>
+<span class="nc" id="L72">          traceConfigurationInfo.maxDayRemaining()</span>
+<span class="nc" id="L73">              - traceConfigurationInfo.maxDayRemainingCritical())) {</span>
+<span class="nc" id="L74">        criticalCount++;</span>
       }
-<span class="nc" id="L74">    }</span>
+<span class="nc" id="L76">    }</span>
 
-<span class="nc" id="L76">    return new TraceView(</span>
+<span class="nc" id="L78">    return new TraceView(</span>
         traceList,
         criticalCount,
         new PageInfo(
-<span class="nc" id="L80">            traceEntityPage.getSize(),</span>
-<span class="nc" id="L81">            (int) traceEntityPage.getTotalElements(),</span>
-<span class="nc" id="L82">            traceEntityPage.getTotalPages(),</span>
-<span class="nc" id="L83">            traceEntityPage.getNumber()));</span>
+<span class="nc" id="L82">            traceEntityPage.getSize(),</span>
+<span class="nc" id="L83">            (int) traceEntityPage.getTotalElements(),</span>
+<span class="nc" id="L84">            traceEntityPage.getTotalPages(),</span>
+<span class="nc" id="L85">            traceEntityPage.getNumber()));</span>
   }
 
-  public static boolean hasEnoughDayUntilCritical(Instant target, int maxDayRemainingCritical) {
-<span class="nc bnc" id="L87" title="All 2 branches missed.">    return Duration.between(Instant.now(), target).toDays() &gt; maxDayRemainingCritical;</span>
+  public static boolean hasEnoughDayUntilCritical(
+      Instant initialDate, int maxDaySinceCreationBeforeCritical) {
+<span class="nc bnc" id="L90" title="All 2 branches missed.">    return Duration.between(initialDate, Instant.now()).toDays()</span>
+        &lt; maxDaySinceCreationBeforeCritical;
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

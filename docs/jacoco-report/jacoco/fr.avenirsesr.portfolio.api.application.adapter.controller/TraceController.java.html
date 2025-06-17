@@ -33,7 +33,7 @@ public class TraceController {
 
   @GetMapping(&quot;/overview&quot;)
   public ResponseEntity&lt;List&lt;TraceOverviewDTO&gt;&gt; getTraceOverview(Principal principal) {
-<span class="fc" id="L36">    log.info(&quot;Received request to trace overview of user [{}]&quot;, principal.getName());</span>
+<span class="fc" id="L36">    log.debug(&quot;Received request to trace overview of user [{}]&quot;, principal.getName());</span>
 <span class="fc" id="L37">    User user = getUser(principal.getName());</span>
 
 <span class="fc" id="L39">    List&lt;Trace&gt; traces = traceService.lastTracesOf(user);</span>
@@ -50,9 +50,9 @@ public class TraceController {
   public ResponseEntity&lt;TracesViewResponse&gt; getTracesView(
       Principal principal,
       @RequestParam(required = false) ETraceStatus status,
-      @RequestParam(required = false) int page,
-      @RequestParam(required = false) int pageSize) {
-<span class="nc" id="L55">    log.info(&quot;Received request to trace view of user [{}]&quot;, principal.getName());</span>
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+<span class="nc" id="L55">    log.debug(&quot;Received request to trace view of user [{}]&quot;, principal.getName());</span>
 <span class="nc" id="L56">    User user = getUser(principal.getName());</span>
 
 <span class="nc" id="L58">    TracesViewResponse tracesViewResponse = null;</span>
