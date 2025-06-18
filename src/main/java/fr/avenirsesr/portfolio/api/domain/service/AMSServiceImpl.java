@@ -1,9 +1,6 @@
 package fr.avenirsesr.portfolio.api.domain.service;
 
-import fr.avenirsesr.portfolio.api.domain.model.AMS;
-import fr.avenirsesr.portfolio.api.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.api.domain.model.PaginationInfo;
-import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.AMSRepository;
 import lombok.AllArgsConstructor;
@@ -17,12 +14,12 @@ public class AMSServiceImpl implements AMSService {
   private final AMSRepository amsRepository;
 
   @Override
-  public PagedResult<AMS> findUserAmsWithPagination(User user, int page, int size) {
+  public PagedResult<AMS> findUserAmsWithPagination(Student student, int page, int size) {
     log.debug(
         "Finding AMS for user with id [{}] with pagination (page={}, size={})",
-        user.getId(),
+        student.getId(),
         page,
         size);
-    return amsRepository.findByUserIdViaCohorts(user.getId(), page, size);
+    return amsRepository.findByUserIdViaCohorts(student.getId(), page, size);
   }
 }

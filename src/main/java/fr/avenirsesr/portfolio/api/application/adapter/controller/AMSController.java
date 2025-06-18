@@ -3,12 +3,10 @@ package fr.avenirsesr.portfolio.api.application.adapter.controller;
 import fr.avenirsesr.portfolio.api.application.adapter.dto.AmsViewDTO;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.AmsViewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.response.AmsViewResponse;
+import fr.avenirsesr.portfolio.api.application.adapter.util.UserUtil;
 import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.api.domain.model.AMS;
-import fr.avenirsesr.portfolio.api.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.api.domain.model.PaginationInfo;
-import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
 import java.security.Principal;
@@ -31,7 +29,8 @@ public class AMSController {
   private static final String DEFAULT_PAGE = "0";
   private static final String DEFAULT_SIZE = "10";
 
-  private final UserRepository userRepository;
+  // TODO: use a service instead
+  private final UserUtil userUtil;
   private final AMSService amsService;
 
   @GetMapping("/view")
@@ -45,14 +44,9 @@ public class AMSController {
         page,
         size);
 
-    UUID userId = UUID.fromString(principal.getName());
-    User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-    if (!user.isStudent()) {
-      log.error("User {} is not a student", principal.getName());
-      throw new UserIsNotStudentException();
-    }
+    Student student = userUtil.getStudent(principal);
 
-    PagedResult<AMS> pagedResult = amsService.findUserAmsWithPagination(user, page, size);
+    PagedResult<AMS> pagedResult = amsService.findUserAmsWithPagination(student, page, size);
 
     List<AmsViewDTO> amsViewDTOs =
         pagedResult.getContent().stream().map(AmsViewMapper::toDto).collect(Collectors.toList());

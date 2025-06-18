@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import jakarta.persistence.*;
 
 import java.time.Instant;
