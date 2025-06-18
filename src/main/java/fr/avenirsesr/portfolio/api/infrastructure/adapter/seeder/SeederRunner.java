@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class SeederRunner implements CommandLineRunner {
 
+  private static final int NB_USERS = 10;
+  
   private final UserRepository userRepository;
   private final ExternalUserRepository externalUserRepository;
   private final InstitutionDatabaseRepository institutionRepository;
@@ -64,7 +66,7 @@ public class SeederRunner implements CommandLineRunner {
       fakeUsers.add(FakeUser.create().withEmail().withStudent());
       fakeUsers.add(FakeUser.create().withEmail().withTeacher());
       fakeUsers.add(FakeUser.create().withEmail().withStudent().withTeacher());
-      IntStream.range(0, 10)
+      IntStream.range(0, NB_USERS)
           .mapToObj(i -> FakeUser.create().withStudent().withStudent())
           .forEach(fakeUsers::add);
 
