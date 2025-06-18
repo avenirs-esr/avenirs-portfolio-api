@@ -17,8 +17,7 @@ public class Cohort {
 
   private String description;
 
-  @Setter(AccessLevel.NONE)
-  private final ProgramProgress programProgress;
+  private ProgramProgress programProgress;
 
   private Set<User> users;
 
