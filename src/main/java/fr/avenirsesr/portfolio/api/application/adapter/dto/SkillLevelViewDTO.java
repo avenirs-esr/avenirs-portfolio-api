@@ -6,4 +6,7 @@ import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "name", "shortDescription", "status"})
 public record SkillLevelViewDTO(
-    UUID id, String name, String shortDescription, ESkillLevelStatus status) {}
+    UUID id,
+    String name,
+    String shortDescription,
+    @Schema(ref = "#/components/schemas/SkillLevelStatus") ESkillLevelStatus status) {}
