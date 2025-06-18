@@ -9,7 +9,7 @@ import java.util.UUID;
 public record TraceViewDTO(
     UUID id,
     String title,
-    ETraceStatus status,
+    @Schema(ref = "#/components/schemas/TraceStatus") ETraceStatus status,
     Instant createdAt,
     Instant updatedAt,
     Instant deletionDate) {}
