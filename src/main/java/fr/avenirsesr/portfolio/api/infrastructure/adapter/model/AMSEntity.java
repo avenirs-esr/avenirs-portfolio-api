@@ -64,7 +64,11 @@ public class AMSEntity extends AvenirsBaseEntity {
   private Set<AMSTranslationEntity> translations =
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
-  @ManyToMany(mappedBy = "amsEntities")
+  @ManyToMany
+  @JoinTable(
+      name = "cohort_ams",
+      joinColumns = @JoinColumn(name = "ams_id"),
+      inverseJoinColumns = @JoinColumn(name = "cohort_id"))
   private Set<CohortEntity> cohorts;
 
   public AMSEntity(
