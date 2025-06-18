@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.api.domain.service;
 
-import fr.avenirsesr.portfolio.api.domain.model.*;
+import fr.avenirsesr.portfolio.api.domain.model.AMS;
+import fr.avenirsesr.portfolio.api.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.AMSRepository;
 import lombok.AllArgsConstructor;

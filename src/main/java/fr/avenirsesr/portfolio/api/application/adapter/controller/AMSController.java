@@ -31,6 +31,7 @@ public class AMSController {
 
   // TODO: use a service instead
   private final UserUtil userUtil;
+
   private final AMSService amsService;
 
   @GetMapping("/view")
