@@ -71,6 +71,16 @@ public class AMSFixture {
     return this;
   }
 
+  public AMSFixture withStartDate(Instant startDate) {
+    this.startDate = startDate;
+    return this;
+  }
+
+  public AMSFixture withEndDate(Instant endDate) {
+    this.endDate = endDate;
+    return this;
+  }
+
   public AMS toModel() {
     return AMS.toDomain(
         id,
