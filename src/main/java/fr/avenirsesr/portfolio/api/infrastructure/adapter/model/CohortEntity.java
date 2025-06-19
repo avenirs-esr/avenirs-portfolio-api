@@ -7,7 +7,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
@@ -40,7 +39,7 @@ public class CohortEntity extends AvenirsBaseEntity {
 
   @ManyToMany(mappedBy = "cohorts")
   private Set<AMSEntity> amsEntities;
-  
+
   public CohortEntity(
       UUID id,
       String name,

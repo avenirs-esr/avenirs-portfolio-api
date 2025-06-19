@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
-
 import java.util.Set;
 import java.util.UUID;
 

@@ -4,16 +4,13 @@ import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.*;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.*;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.*;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.repository.*;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;

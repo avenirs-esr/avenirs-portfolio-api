@@ -3,8 +3,6 @@ package fr.avenirsesr.portfolio.api.application.adapter.mapper;
 import fr.avenirsesr.portfolio.api.application.adapter.dto.AmsViewDTO;
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.AmsProgress;
-import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
-import java.util.List;
 
 public interface AmsViewMapper {
   static AmsViewDTO toDto(AMS ams) {

@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.api.domain.model.Cohort;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.CohortEntity;
-
 import java.util.stream.Collectors;
 
 public interface CohortMapper {

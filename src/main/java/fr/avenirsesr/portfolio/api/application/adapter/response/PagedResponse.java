@@ -6,9 +6,9 @@ import java.util.List;
 
 @Schema(requiredProperties = {"content", "page"})
 public interface PagedResponse<T> {
-    @Schema(description = "List of elements on the current page") 
-    List<T> content();
-    
-    @Schema(description = "Pagination information") 
-    PaginationInfo page();
+  @Schema(description = "List of elements on the current page")
+  List<T> content();
+
+  @Schema(description = "Pagination information")
+  PaginationInfo page();
 }

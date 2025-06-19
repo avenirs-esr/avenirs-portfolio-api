@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 
-import lombok.Getter;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
@@ -9,6 +7,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.function.Function;
+import lombok.Getter;
 
 @Getter
 public class FakePeriod<T extends Temporal> {

@@ -12,5 +12,4 @@ public record AmsViewDTO(
     int countSkills,
     int countTraces,
     EAmsStatus status,
-    AmsProgress progress) {
-}
+    AmsProgress progress) {}

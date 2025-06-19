@@ -2,16 +2,15 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import jakarta.persistence.*;
-
-import java.time.Instant;
-import java.util.HashSet;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Column;
+import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;

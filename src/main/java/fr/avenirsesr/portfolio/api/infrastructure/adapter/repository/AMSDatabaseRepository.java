@@ -25,20 +25,14 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
 
   @Override
   public PagedResult<AMS> findByUserIdViaCohorts(UUID userId, int page, int size) {
-    Page<AMSEntity> pageResult = jpaSpecificationExecutor.findAll(
-        AMSSpecification.belongsToUserViaCohorts(userId),
-        PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startDate")));
-    
-    List<AMS> content = pageResult.getContent()
-        .stream()
-        .map(AMSMapper::toDomain)
-        .toList();
-    
-    return new PagedResult<>(
-        content, 
-        pageResult.getTotalElements(), 
-        pageResult.getTotalPages()
-    );
+    Page<AMSEntity> pageResult =
+        jpaSpecificationExecutor.findAll(
+            AMSSpecification.belongsToUserViaCohorts(userId),
+            PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startDate")));
+
+    List<AMS> content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();
+
+    return new PagedResult<>(content, pageResult.getTotalElements(), pageResult.getTotalPages());
   }
 
   public void saveAllEntities(List<AMSEntity> entities) {

@@ -4,16 +4,14 @@ import fr.avenirsesr.portfolio.api.domain.model.Cohort;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.CohortRepository;
-
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakeCohort;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakerProvider;
+import java.util.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.*;
 
 @Slf4j
 @Component

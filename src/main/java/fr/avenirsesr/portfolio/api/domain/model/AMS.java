@@ -33,7 +33,7 @@ public class AMS {
   private EAmsStatus status;
 
   private List<SkillLevel> skillLevels;
-  
+
   private List<Trace> traces;
 
   private Set<Cohort> cohorts;

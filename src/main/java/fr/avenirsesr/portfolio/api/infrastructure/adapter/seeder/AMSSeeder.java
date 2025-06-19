@@ -2,20 +2,18 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
-
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSTranslationEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.repository.AMSDatabaseRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakeAMS;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakerProvider;
+import java.util.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.*;
 
 @Slf4j
 @Component

@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 import fr.avenirsesr.portfolio.api.domain.model.Cohort;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.User;
-
 import java.util.Set;
 import java.util.UUID;
 

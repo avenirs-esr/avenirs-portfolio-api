@@ -9,7 +9,6 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakeUser;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakerProvider;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

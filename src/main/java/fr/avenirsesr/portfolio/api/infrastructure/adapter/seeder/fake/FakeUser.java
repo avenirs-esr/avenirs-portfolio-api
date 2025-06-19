@@ -6,7 +6,6 @@ import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import java.time.Instant;
 import java.util.UUID;
-
 import lombok.Getter;
 
 public class FakeUser {

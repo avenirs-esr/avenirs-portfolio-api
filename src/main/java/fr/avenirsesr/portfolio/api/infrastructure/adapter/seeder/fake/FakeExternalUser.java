@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import java.util.Arrays;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
