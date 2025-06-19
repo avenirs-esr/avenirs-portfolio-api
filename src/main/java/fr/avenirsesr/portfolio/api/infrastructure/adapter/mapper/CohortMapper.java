@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.api.domain.model.Cohort;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.CohortEntity;
 import java.util.stream.Collectors;
 
@@ -17,13 +18,20 @@ public interface CohortMapper {
   }
 
   static Cohort toDomain(CohortEntity entity) {
+    return toDomain(entity, ELanguage.FRENCH);
+  }
 
+  static Cohort toDomain(CohortEntity entity, ELanguage language) {
     return Cohort.toDomain(
         entity.getId(),
         entity.getName(),
         entity.getDescription(),
-        ProgramProgressMapper.toDomain(entity.getProgramProgress()),
+        ProgramProgressMapper.toDomain(entity.getProgramProgress(), language),
         entity.getUsers().stream().map(UserMapper::toDomain).collect(Collectors.toSet()),
-        entity.getAmsEntities().stream().map(AMSMapper::toDomain).collect(Collectors.toSet()));
+        entity.getAmsEntities().isEmpty()
+            ? java.util.Collections.emptySet()
+            : entity.getAmsEntities().stream()
+                .map(amsEntity -> AMSMapper.toDomain(amsEntity, language))
+                .collect(Collectors.toSet()));
   }
 }
