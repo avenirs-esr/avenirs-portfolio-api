@@ -5,6 +5,8 @@ import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSTranslationEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.util.TranslationUtil;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface AMSMapper {
@@ -37,6 +39,24 @@ public interface AMSMapper {
   }
 
   static AMS toDomain(AMSEntity entity, ELanguage language) {
+    AMS ams = toDomainWithoutRecursion(entity, language);
+    ams.setTraces(entity.getTraces().stream().map(TraceMapper::toDomainRecursion).toList());
+    ams.setSkillLevels(
+        entity.getSkillLevels().stream()
+            .map(skillLevel -> SkillLevelMapper.toDomainWithoutRecursion(skillLevel, language))
+            .collect(Collectors.toList()));
+    ams.setCohorts(
+        entity.getCohorts().stream()
+            .map(cohort -> CohortMapper.toDomainWithoutRecursion(cohort, language))
+            .collect(Collectors.toSet()));
+    return ams;
+  }
+
+  static AMS toDomainWithoutRecursion(AMSEntity entity) {
+    return toDomainWithoutRecursion(entity, ELanguage.FRENCH);
+  }
+
+  static AMS toDomainWithoutRecursion(AMSEntity entity, ELanguage language) {
     ELanguage fallbackLanguage = ELanguage.FRENCH;
     AMSTranslationEntity translationEntity =
         TranslationUtil.getTranslation(entity.getTranslations(), language, fallbackLanguage);
@@ -46,20 +66,9 @@ public interface AMSMapper {
         translationEntity.getTitle(),
         entity.getStartDate(),
         entity.getEndDate(),
-        entity.getSkillLevels().stream()
-            .map(
-                skillLevelEntity ->
-                    SkillLevelMapper.toDomain(
-                        skillLevelEntity,
-                        SkillMapper.toDomain(
-                            skillLevelEntity.getSkill(),
-                            ProgramProgressMapper.toDomain(
-                                skillLevelEntity.getSkill().getProgramProgress(), ELanguage.FRENCH),
-                            ELanguage.FRENCH),
-                        ELanguage.FRENCH))
-            .toList(),
-        entity.getTraces().stream().map(TraceMapper::toDomain).toList(),
-        entity.getCohorts().stream().map(CohortMapper::toDomain).collect(Collectors.toSet()),
+        List.of(),
+        List.of(),
+        Set.of(),
         language,
         entity.getStatus());
   }
