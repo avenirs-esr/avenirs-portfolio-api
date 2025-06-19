@@ -66,7 +66,8 @@ class AMSControllerTest {
         .thenReturn(pagedResult);
 
     // When
-    ResponseEntity<AmsViewResponse> response = controller.getAmsView(principal, defaultPage, defaultSize);
+    ResponseEntity<AmsViewResponse> response =
+        controller.getAmsView(principal, defaultPage, defaultSize);
 
     // Then
     assertEquals(200, response.getStatusCode().value());
@@ -80,12 +81,12 @@ class AMSControllerTest {
     assertEquals(defaultSize, body.page().size());
 
     // Verify DTO conversion
-    AmsViewDTO firstDto = body.content().get(0);
-    assertEquals(amsList.get(0).getId(), firstDto.id());
-    assertEquals(amsList.get(0).getTitle(), firstDto.title());
-    assertEquals(amsList.get(0).getSkillLevels().size(), firstDto.countSkills());
-    assertEquals(amsList.get(0).getTraces().size(), firstDto.countTraces());
-    assertEquals(amsList.get(0).getStatus(), firstDto.status());
+    AmsViewDTO firstDto = body.content().getFirst();
+    assertEquals(amsList.getFirst().getId(), firstDto.id());
+    assertEquals(amsList.getFirst().getTitle(), firstDto.title());
+    assertEquals(amsList.getFirst().getSkillLevels().size(), firstDto.countSkills());
+    assertEquals(amsList.getFirst().getTraces().size(), firstDto.countTraces());
+    assertEquals(amsList.getFirst().getStatus(), firstDto.status());
 
     verify(userUtil).getStudent(principal);
     verify(amsService).findUserAmsWithPagination(student, defaultPage, defaultSize);
@@ -101,7 +102,8 @@ class AMSControllerTest {
         .thenReturn(emptyPagedResult);
 
     // When
-    ResponseEntity<AmsViewResponse> response = controller.getAmsView(principal, defaultPage, defaultSize);
+    ResponseEntity<AmsViewResponse> response =
+        controller.getAmsView(principal, defaultPage, defaultSize);
 
     // Then
     assertEquals(200, response.getStatusCode().value());
@@ -127,8 +129,7 @@ class AMSControllerTest {
     PagedResult<AMS> pagedResult = new PagedResult<>(amsList, 15, 3);
 
     when(userUtil.getStudent(principal)).thenReturn(student);
-    when(amsService.findUserAmsWithPagination(student, page, size))
-        .thenReturn(pagedResult);
+    when(amsService.findUserAmsWithPagination(student, page, size)).thenReturn(pagedResult);
 
     // When
     ResponseEntity<AmsViewResponse> response = controller.getAmsView(principal, page, size);
@@ -154,7 +155,9 @@ class AMSControllerTest {
     when(userUtil.getStudent(principal)).thenThrow(new UserNotFoundException());
 
     // Then
-    assertThrows(UserNotFoundException.class, () -> controller.getAmsView(principal, defaultPage, defaultSize));
+    assertThrows(
+        UserNotFoundException.class,
+        () -> controller.getAmsView(principal, defaultPage, defaultSize));
 
     verify(userUtil).getStudent(principal);
     verifyNoMoreInteractions(amsService);
@@ -166,7 +169,9 @@ class AMSControllerTest {
     when(userUtil.getStudent(principal)).thenThrow(new UserIsNotStudentException());
 
     // Then
-    assertThrows(UserIsNotStudentException.class, () -> controller.getAmsView(principal, defaultPage, defaultSize));
+    assertThrows(
+        UserIsNotStudentException.class,
+        () -> controller.getAmsView(principal, defaultPage, defaultSize));
 
     verify(userUtil).getStudent(principal);
     verifyNoMoreInteractions(amsService);
