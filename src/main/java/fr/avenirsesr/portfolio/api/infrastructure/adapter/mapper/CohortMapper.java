@@ -23,17 +23,17 @@ public interface CohortMapper {
 
   static Cohort toDomain(CohortEntity entity, ELanguage language) {
     Cohort cohort = toDomainWithoutRecursion(entity, language);
-    
+
     if (!entity.getAmsEntities().isEmpty()) {
       cohort.setAmsSet(
           entity.getAmsEntities().stream()
               .map(amsEntity -> AMSMapper.toDomainWithoutRecursion(amsEntity, language))
               .collect(Collectors.toSet()));
     }
-    
+
     return cohort;
   }
-  
+
   static Cohort toDomainWithoutRecursion(CohortEntity entity, ELanguage language) {
     return Cohort.toDomain(
         entity.getId(),
