@@ -1,9 +1,12 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.Cohort;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.AMS;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.CohortMapper;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.CohortEntity;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -16,55 +19,15 @@ public class FakeCohort {
     this.cohort = cohort;
   }
 
-  public static FakeCohort create() {
-    return new FakeCohort(
+  public static FakeCohort of(ProgramProgress programProgress, Set<User> users) {
+    final Cohort cohort =
         Cohort.create(
             UUID.fromString(faker.call().internet().uuid()),
             faker.call().educator().course(),
-            faker.call().lorem().sentence(3),
-            null));
-  }
-
-  public static FakeCohort of(ProgramProgress programProgress) {
-    return new FakeCohort(
-        Cohort.create(
-            UUID.fromString(faker.call().internet().uuid()),
-            faker.call().educator().course(),
-            faker.call().lorem().sentence(3),
-            programProgress));
-  }
-
-  public FakeCohort withProgramProgress(ProgramProgress programProgress) {
-    return new FakeCohort(
-        Cohort.create(
-            cohort.getId(),
-            cohort.getName(),
-            cohort.getDescription(),
-            programProgress));
-  }
-
-  public FakeCohort withUsers(Set<User> users) {
+            faker.call().lorem().sentence(),
+            programProgress);
     cohort.setUsers(users);
-    return this;
-  }
-
-  public FakeCohort withUser(User user) {
-    Set<User> users = new HashSet<>(cohort.getUsers());
-    users.add(user);
-    cohort.setUsers(users);
-    return this;
-  }
-
-  public FakeCohort withAMS(AMS ams) {
-    Set<AMS> amsSet = new HashSet<>(cohort.getAmsSet());
-    amsSet.add(ams);
-    cohort.setAmsSet(amsSet);
-    return this;
-  }
-
-  public FakeCohort withAMSSet(Set<AMS> amsSet) {
-    cohort.setAmsSet(amsSet);
-    return this;
+    return new FakeCohort(cohort);
   }
 
   public Cohort toModel() {

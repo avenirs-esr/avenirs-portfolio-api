@@ -21,8 +21,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class SeederRunner implements CommandLineRunner {
 
-  private static final int NB_USERS = 10;
-  
+  private static final int NB_USERS = 100;
+  private static final int NB_COHORTS = 50;
+  private static final int NB_AMS = 50;
+  private static final int NB_TRACES = 200;
+
   private final UserRepository userRepository;
   private final ExternalUserRepository externalUserRepository;
   private final InstitutionDatabaseRepository institutionRepository;
@@ -30,8 +33,9 @@ public class SeederRunner implements CommandLineRunner {
   private final ProgramProgressRepository programProgressRepository;
   private final SkillLevelRepository skillLevelRepository;
   private final SkillDatabaseRepository skillRepository;
-  private final TraceDatabaseRepository traceRepository;
-  private final AMSDatabaseRepository amsRepository;
+  private final CohortSeeder cohortSeeder;
+  private final AMSSeeder amsSeeder;
+  private final TraceSeeder traceSeeder;
 
   @Value("${seeder.enabled:false}")
   private boolean seedEnabled;
@@ -44,8 +48,9 @@ public class SeederRunner implements CommandLineRunner {
       ProgramProgressRepository programProgressRepository,
       SkillLevelRepository skillLevelRepository,
       SkillDatabaseRepository skillRepository,
-      TraceDatabaseRepository traceRepository,
-      AMSDatabaseRepository amsRepository) {
+      CohortSeeder cohortSeeder,
+      AMSSeeder amsSeeder,
+      TraceSeeder traceSeeder) {
     this.userRepository = userRepository;
     this.externalUserRepository = externalUserRepository;
     this.institutionRepository = institutionRepository;
@@ -53,8 +58,13 @@ public class SeederRunner implements CommandLineRunner {
     this.programProgressRepository = programProgressRepository;
     this.skillLevelRepository = skillLevelRepository;
     this.skillRepository = skillRepository;
-    this.traceRepository = traceRepository;
-    this.amsRepository = amsRepository;
+    this.cohortSeeder = cohortSeeder;
+    this.amsSeeder = amsSeeder;
+    this.traceSeeder = traceSeeder;
+
+    this.cohortSeeder.setNbCohorts(NB_COHORTS);
+    this.amsSeeder.setNbAms(NB_AMS);
+    this.traceSeeder.setNbTraces(NB_TRACES);
   }
 
   @Override
@@ -165,12 +175,11 @@ public class SeederRunner implements CommandLineRunner {
                   })
               .toList();
 
-      var trace = FakeTrace.of(users.getFirst()).toModel();
-      TraceEntity traceEntity = TraceMapper.fromDomain(trace);
-      traceRepository.saveAllEntities(List.of(traceEntity));
-      traceRepository.flush();
-      log.info("✓ 1 trace created");
-      AMS fakeAms = FakeAMS.of(users.getFirst()).toModel();
+      List<Trace> traces = traceSeeder.withUsers(users).seed();
+      // TODO: to remove when all seeders are set
+      TraceEntity traceEntity = TraceMapper.fromDomain(traces.getFirst());
+
+      /*AMS fakeAms = FakeAMS.of(users.getFirst()).toModel();
       AMSEntity ams = AMSMapper.fromDomain(fakeAms);
       Set<AMSTranslationEntity> amsTranslations =
           Set.of(
@@ -183,7 +192,7 @@ public class SeederRunner implements CommandLineRunner {
 
       ams.setTranslations(amsTranslations);
       amsRepository.saveAllEntities(List.of(ams));
-      log.info("✓ 1 ams created");
+      log.info("✓ 1 ams created");*/
 
       SkillLevel skillLevel1 =
           FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
@@ -267,6 +276,25 @@ public class SeederRunner implements CommandLineRunner {
 
       programProgressRepository.saveAll(programProgresses);
       log.info("✓ {} programProgresses created", programProgresses.size());
+
+      List<Cohort> cohorts =
+          cohortSeeder.withUsers(users).withProgramProgressSet(programProgresses).seed();
+      List<SkillLevel> skillLevels =
+          List.of(
+              skillLevel1,
+              skillLevel2,
+              skillLevel3,
+              skillLevel4,
+              skillLevel5,
+              skillLevel6,
+              skillLevel7,
+              skillLevel8);
+      amsSeeder
+          .withUsers(users)
+          .withCohorts(cohorts)
+          .withSkillLevels(skillLevels)
+          .withTraces(traces)
+          .seed();
 
       skillRepository.saveAllEntities(skillEntities);
       log.info("✓ {} skills created", skillEntities.size());
