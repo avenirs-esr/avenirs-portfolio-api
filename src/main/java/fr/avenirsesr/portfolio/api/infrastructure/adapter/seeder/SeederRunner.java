@@ -12,6 +12,8 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.repository.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;

@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 
 import java.util.Locale;
 import java.util.Random;

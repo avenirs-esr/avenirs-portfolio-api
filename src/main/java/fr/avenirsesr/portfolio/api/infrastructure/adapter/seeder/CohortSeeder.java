@@ -5,6 +5,8 @@ import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.CohortRepository;
 
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakeCohort;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakerProvider;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

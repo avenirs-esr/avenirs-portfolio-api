@@ -1,9 +1,10 @@
-package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.api.domain.model.Program;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
+
 import java.util.Set;
 import java.util.UUID;
 

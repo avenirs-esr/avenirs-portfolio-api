@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeSkillLevel;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakeSkillLevel;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;

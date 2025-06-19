@@ -1,7 +1,8 @@
-package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.model.Program;
+
 import java.util.UUID;
 
 public class FakeProgram {

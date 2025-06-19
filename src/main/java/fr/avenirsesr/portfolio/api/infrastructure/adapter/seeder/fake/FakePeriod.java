@@ -1,10 +1,9 @@
-package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 
 import lombok.Getter;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -16,20 +15,18 @@ public class FakePeriod<T extends Temporal> {
 
   private static final FakerProvider faker = new FakerProvider();
   private static final int academicYear = 2024;
-  
+
   private final Function<LocalDate, T> localDateConverter;
   private final Function<Instant, T> instantConverter;
-  
+
   private T startDate;
   private T endDate;
 
   public static FakePeriod<LocalDate> createLocalDatePeriod() {
     return new FakePeriod<>(
-        localDate -> localDate,
-        instant -> instant.atZone(ZoneId.systemDefault()).toLocalDate()
-    );
+        localDate -> localDate, instant -> instant.atZone(ZoneId.systemDefault()).toLocalDate());
   }
-  
+
   public static FakePeriod<Instant> createInstantPeriod() {
     return new FakePeriod<>(
         localDate -> {
@@ -37,11 +34,11 @@ public class FakePeriod<T extends Temporal> {
           int minute = faker.call().number().numberBetween(0, 60);
           return localDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();
         },
-        instant -> instant
-    );
+        instant -> instant);
   }
 
-  private FakePeriod(Function<LocalDate, T> localDateConverter, Function<Instant, T> instantConverter) {
+  private FakePeriod(
+      Function<LocalDate, T> localDateConverter, Function<Instant, T> instantConverter) {
     this.localDateConverter = localDateConverter;
     this.instantConverter = instantConverter;
   }
@@ -91,18 +88,18 @@ public class FakePeriod<T extends Temporal> {
         faker.call().number().numberBetween(1, (int) Math.min(180, daysUntilJulyFirst));
 
     Instant baseEndDate = minimumEndDate.plus(additionalDays, ChronoUnit.DAYS);
-    
+
     if (!(startDate instanceof LocalDate)) {
       int hour = faker.call().number().numberBetween(8, 20);
       int minute = faker.call().number().numberBetween(0, 60);
       LocalDate endLocalDate = baseEndDate.atZone(ZoneId.systemDefault()).toLocalDate();
       baseEndDate = endLocalDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();
-      
+
       if (ChronoUnit.HOURS.between(startInstant, baseEndDate) < 24) {
         baseEndDate = startInstant.plus(24, ChronoUnit.HOURS);
       }
     }
-    
+
     endDate = instantConverter.apply(baseEndDate);
   }
 
@@ -112,7 +109,7 @@ public class FakePeriod<T extends Temporal> {
     fakePeriod.initEndDateInAcademicPeriodAfterStartDate();
     return fakePeriod;
   }
-  
+
   public static FakePeriod<Instant> createMin24hoursInstantPeriodInAcademicPeriod() {
     FakePeriod<Instant> fakePeriod = createInstantPeriod();
     fakePeriod.initStartDateInAcademicPeriodBeforeMay();

@@ -1,13 +1,11 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
-import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Trace;
 
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.TraceRepository;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.TraceMapper;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakeTrace;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakerProvider;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

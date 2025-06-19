@@ -1,10 +1,11 @@
-package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.api.domain.model.AMS;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;

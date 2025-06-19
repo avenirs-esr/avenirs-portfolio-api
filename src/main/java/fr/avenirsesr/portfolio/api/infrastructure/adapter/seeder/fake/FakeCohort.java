@@ -1,13 +1,9 @@
-package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.api.domain.model.Cohort;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.User;
-import fr.avenirsesr.portfolio.api.domain.model.AMS;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.CohortMapper;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.CohortEntity;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 

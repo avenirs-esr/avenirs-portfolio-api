@@ -3,7 +3,7 @@ package fixtures;
 import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeAMS;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakeAMS;
 
 import java.time.Instant;
 import java.util.ArrayList;

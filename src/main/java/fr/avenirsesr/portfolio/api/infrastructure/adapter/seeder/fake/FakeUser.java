@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.Teacher;
@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import java.time.Instant;
 import java.util.UUID;
+
 import lombok.Getter;
 
 public class FakeUser {
