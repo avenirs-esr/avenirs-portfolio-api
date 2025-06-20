@@ -71,7 +71,8 @@ public class AMSSeeder {
   private void checkIfInitialized() throws IllegalStateException {
     if (cohorts.isEmpty() || skillLevels.isEmpty() || traces.isEmpty() || users.isEmpty()) {
       log.error(
-          "AMSSeeder is not initialized: withCohorts, withSkillLevels, withTraces and withUsers must be called before seeding");
+          "AMSSeeder is not initialized: withCohorts, withSkillLevels, withTraces and withUsers"
+              + " must be called before seeding");
       throw new IllegalStateException("AMSSeeder is not initialized");
     }
   }

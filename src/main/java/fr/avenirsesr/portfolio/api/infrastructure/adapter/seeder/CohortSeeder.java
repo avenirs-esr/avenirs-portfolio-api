@@ -50,7 +50,8 @@ public class CohortSeeder {
   private void checkIfInitialized() throws IllegalStateException {
     if (users.isEmpty() || programProgressSet.isEmpty()) {
       log.error(
-          "CohortSeeder is not initialized: withUsers and withProgramProgressSet must be called before seeding");
+          "CohortSeeder is not initialized: withUsers and withProgramProgressSet must be called"
+              + " before seeding");
       throw new IllegalStateException("CohortSeeder is not initialized");
     }
     if (users.size() < NB_USERS_MAX_PER_COHORT) {
