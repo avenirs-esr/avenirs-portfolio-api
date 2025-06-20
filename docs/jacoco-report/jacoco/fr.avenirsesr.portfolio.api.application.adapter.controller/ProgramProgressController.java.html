@@ -31,34 +31,34 @@ public class ProgramProgressController {
   public List&lt;ProgramProgressOverviewDTO&gt; getSkillsOverview(
       Principal principal,
       @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
-<span class="fc" id="L34">    ELanguage language = ELanguage.fromCode(lang);</span>
-<span class="fc" id="L35">    Student student = userUtil.getStudent(principal);</span>
-<span class="fc" id="L36">    return programProgressService.getSkillsOverview(student, language).entrySet().stream()</span>
-<span class="fc" id="L37">        .map(</span>
+<span class="nc" id="L34">    ELanguage language = ELanguage.fromCode(lang);</span>
+<span class="nc" id="L35">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L36">    return programProgressService.getSkillsOverview(student, language).entrySet().stream()</span>
+<span class="nc" id="L37">        .map(</span>
             entry -&gt;
-<span class="fc" id="L39">                ProgramProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
-<span class="fc" id="L40">        .toList();</span>
+<span class="nc" id="L39">                ProgramProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="nc" id="L40">        .toList();</span>
   }
 
   @GetMapping(&quot;/view&quot;)
   public List&lt;ProgramProgressViewDTO&gt; getSkillsView(
       Principal principal,
       @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
-<span class="fc" id="L47">    ELanguage language = ELanguage.fromCode(lang);</span>
-<span class="fc" id="L48">    Student student = userUtil.getStudent(principal);</span>
-<span class="fc" id="L49">    return programProgressService.getSkillsView(student, language).entrySet().stream()</span>
-<span class="fc" id="L50">        .map(entry -&gt; ProgramProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
-<span class="fc" id="L51">        .toList();</span>
+<span class="nc" id="L47">    ELanguage language = ELanguage.fromCode(lang);</span>
+<span class="nc" id="L48">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L49">    return programProgressService.getSkillsView(student, language).entrySet().stream()</span>
+<span class="nc" id="L50">        .map(entry -&gt; ProgramProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="nc" id="L51">        .toList();</span>
   }
 
   @GetMapping()
   public List&lt;ProgramProgressDTO&gt; getAllProgramProgress(
       Principal principal,
       @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
-<span class="fc" id="L58">    Student student = userUtil.getStudent(principal);</span>
-<span class="fc" id="L59">    return programProgressService.getAllProgramProgress(student, ELanguage.fromCode(lang)).stream()</span>
-<span class="fc" id="L60">        .map(ProgramProgressMapper::fromDomainToDto)</span>
-<span class="fc" id="L61">        .toList();</span>
+<span class="nc" id="L58">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L59">    return programProgressService.getAllProgramProgress(student, ELanguage.fromCode(lang)).stream()</span>
+<span class="nc" id="L60">        .map(ProgramProgressMapper::fromDomainToDto)</span>
+<span class="nc" id="L61">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

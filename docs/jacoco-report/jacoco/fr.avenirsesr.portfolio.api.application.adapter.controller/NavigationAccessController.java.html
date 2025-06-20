@@ -29,22 +29,22 @@ public class NavigationAccessController {
   public ResponseEntity&lt;NavigationAccessDTO&gt; getStudentNavigationAccess(
       Principal principal,
       @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
-<span class="fc" id="L32">    ELanguage language = ELanguage.fromCode(lang);</span>
-<span class="fc" id="L33">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L32">    ELanguage language = ELanguage.fromCode(lang);</span>
+<span class="nc" id="L33">    Student student = userUtil.getStudent(principal);</span>
 
-<span class="fc" id="L35">    var isAPCEnabledByInstitution =</span>
-<span class="fc" id="L36">        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC, language);</span>
-<span class="fc" id="L37">    var isLifeProjectEnabledByInstitution =</span>
-<span class="fc" id="L38">        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT, language);</span>
+<span class="nc" id="L35">    var isAPCEnabledByInstitution =</span>
+<span class="nc" id="L36">        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC, language);</span>
+<span class="nc" id="L37">    var isLifeProjectEnabledByInstitution =</span>
+<span class="nc" id="L38">        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT, language);</span>
 
-<span class="fc" id="L40">    var isFollowingAPCProgram = programProgressService.isStudentFollowingAPCProgram(student);</span>
+<span class="nc" id="L40">    var isFollowingAPCProgram = programProgressService.isStudentFollowingAPCProgram(student);</span>
 
-<span class="fc" id="L42">    var navigationAccess =</span>
+<span class="nc" id="L42">    var navigationAccess =</span>
         new NavigationAccessDTO(
             new NavigationAccessDTO.AccessInfoAPC(isAPCEnabledByInstitution, isFollowingAPCProgram),
             new NavigationAccessDTO.AccessInfoLifeProject(isLifeProjectEnabledByInstitution));
 
-<span class="fc" id="L47">    return ResponseEntity.ok(navigationAccess);</span>
+<span class="nc" id="L47">    return ResponseEntity.ok(navigationAccess);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

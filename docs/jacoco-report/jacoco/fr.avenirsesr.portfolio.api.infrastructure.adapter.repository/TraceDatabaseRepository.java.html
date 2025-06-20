@@ -22,14 +22,14 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Trac
 
   @Override
   public List&lt;Trace&gt; findLastsOf(User user, int limit) {
-<span class="fc" id="L25">    return jpaSpecificationExecutor</span>
-<span class="fc" id="L26">        .findAll(</span>
-<span class="fc" id="L27">            TraceSpecification.ofUser(UserMapper.fromDomain(user)),</span>
-<span class="fc" id="L28">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
-<span class="fc" id="L29">        .getContent()</span>
-<span class="fc" id="L30">        .stream()</span>
-<span class="fc" id="L31">        .map(TraceMapper::toDomain)</span>
-<span class="fc" id="L32">        .toList();</span>
+<span class="nc" id="L25">    return jpaSpecificationExecutor</span>
+<span class="nc" id="L26">        .findAll(</span>
+<span class="nc" id="L27">            TraceSpecification.ofUser(UserMapper.fromDomain(user)),</span>
+<span class="nc" id="L28">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
+<span class="nc" id="L29">        .getContent()</span>
+<span class="nc" id="L30">        .stream()</span>
+<span class="nc" id="L31">        .map(TraceMapper::toDomain)</span>
+<span class="nc" id="L32">        .toList();</span>
   }
 
   @Override
@@ -61,9 +61,9 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Trac
   }
 
   public void saveAllEntities(List&lt;TraceEntity&gt; entities) {
-<span class="pc bpc" id="L64" title="2 of 4 branches missed.">    if (entities != null &amp;&amp; !entities.isEmpty()) {</span>
-<span class="fc" id="L65">      jpaRepository.saveAll(entities);</span>
+<span class="nc bnc" id="L64" title="All 4 branches missed.">    if (entities != null &amp;&amp; !entities.isEmpty()) {</span>
+<span class="nc" id="L65">      jpaRepository.saveAll(entities);</span>
     }
-<span class="fc" id="L67">  }</span>
+<span class="nc" id="L67">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
