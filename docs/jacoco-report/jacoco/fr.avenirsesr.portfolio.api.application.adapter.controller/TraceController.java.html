@@ -18,12 +18,14 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-<span class="fc" id="L26">@Slf4j</span>
+<span class="fc" id="L28">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/traces&quot;)
@@ -33,17 +35,17 @@ public class TraceController {
 
   @GetMapping(&quot;/overview&quot;)
   public ResponseEntity&lt;List&lt;TraceOverviewDTO&gt;&gt; getTraceOverview(Principal principal) {
-<span class="fc" id="L36">    log.debug(&quot;Received request to trace overview of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L37">    User user = getUser(principal.getName());</span>
+<span class="fc" id="L38">    log.debug(&quot;Received request to trace overview of user [{}]&quot;, principal.getName());</span>
+<span class="fc" id="L39">    User user = getUser(principal.getName());</span>
 
-<span class="fc" id="L39">    List&lt;Trace&gt; traces = traceService.lastTracesOf(user);</span>
+<span class="fc" id="L41">    List&lt;Trace&gt; traces = traceService.lastTracesOf(user);</span>
 
-<span class="fc" id="L41">    List&lt;TraceOverviewDTO&gt; response =</span>
-<span class="fc" id="L42">        traces.stream()</span>
-<span class="fc" id="L43">            .map(trace -&gt; TraceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))</span>
-<span class="fc" id="L44">            .toList();</span>
+<span class="fc" id="L43">    List&lt;TraceOverviewDTO&gt; response =</span>
+<span class="fc" id="L44">        traces.stream()</span>
+<span class="fc" id="L45">            .map(trace -&gt; TraceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))</span>
+<span class="fc" id="L46">            .toList();</span>
 
-<span class="fc" id="L46">    return ResponseEntity.ok(response);</span>
+<span class="fc" id="L48">    return ResponseEntity.ok(response);</span>
   }
 
   @GetMapping(&quot;/view&quot;)
@@ -52,30 +54,40 @@ public class TraceController {
       @RequestParam(required = false) ETraceStatus status,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="nc" id="L55">    log.debug(&quot;Received request to trace view of user [{}]&quot;, principal.getName());</span>
-<span class="nc" id="L56">    User user = getUser(principal.getName());</span>
+<span class="nc" id="L57">    log.debug(&quot;Received request to trace view of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L58">    User user = getUser(principal.getName());</span>
 
-<span class="nc" id="L58">    TracesViewResponse tracesViewResponse = null;</span>
+<span class="nc" id="L60">    TracesViewResponse tracesViewResponse = null;</span>
 
-<span class="nc bnc" id="L60" title="All 2 branches missed.">    if (status == ETraceStatus.UNASSOCIATED) {</span>
-<span class="nc" id="L61">      TraceView tracesView = traceService.getUnassociatedTraces(user, page, pageSize);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">    if (status == ETraceStatus.UNASSOCIATED) {</span>
+<span class="nc" id="L63">      TraceView tracesView = traceService.getUnassociatedTraces(user, page, pageSize);</span>
 
-<span class="nc" id="L63">      tracesViewResponse =</span>
+<span class="nc" id="L65">      tracesViewResponse =</span>
           new TracesViewResponse(
               new TracesResponse(
-<span class="nc" id="L66">                  tracesView.traces().stream()</span>
-<span class="nc" id="L67">                      .map(trace -&gt; TraceViewMapper.toDTO(trace, ETraceStatus.UNASSOCIATED))</span>
-<span class="nc" id="L68">                      .toList(),</span>
-<span class="nc" id="L69">                  tracesView.criticalCount()),</span>
-<span class="nc" id="L70">              tracesView.page());</span>
+<span class="nc" id="L68">                  tracesView.traces().stream()</span>
+<span class="nc" id="L69">                      .map(trace -&gt; TraceViewMapper.toDTO(trace, ETraceStatus.UNASSOCIATED))</span>
+<span class="nc" id="L70">                      .toList(),</span>
+<span class="nc" id="L71">                  tracesView.criticalCount()),</span>
+<span class="nc" id="L72">              tracesView.page());</span>
     }
 
-<span class="nc" id="L73">    return ResponseEntity.ok(tracesViewResponse);</span>
+<span class="nc" id="L75">    return ResponseEntity.ok(tracesViewResponse);</span>
+  }
+
+  @DeleteMapping(&quot;/{traceId}&quot;)
+  public ResponseEntity&lt;String&gt; deleteTrace(Principal principal, @PathVariable UUID traceId) {
+<span class="nc" id="L80">    log.debug(&quot;Received request to trace overview of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L81">    User user = getUser(principal.getName());</span>
+
+<span class="nc" id="L83">    traceService.deleteById(user, traceId);</span>
+
+<span class="nc" id="L85">    return ResponseEntity.ok(&quot;Suppression effectuée.&quot;);</span>
   }
 
   private User getUser(String id) {
-<span class="fc" id="L77">    UUID userId = UUID.fromString(id);</span>
-<span class="fc" id="L78">    return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L89">    UUID userId = UUID.fromString(id);</span>
+<span class="fc" id="L90">    return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
