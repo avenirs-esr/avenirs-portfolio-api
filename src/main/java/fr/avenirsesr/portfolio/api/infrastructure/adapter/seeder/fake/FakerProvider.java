@@ -10,7 +10,7 @@ public class FakerProvider {
   private final boolean fixSeedEnabled = true;
   private static final long DEFAULT_SEED = 100000L;
   private static final Locale LOCALE = Locale.FRENCH;
-
+  private static Faker FIXED_SEED_FAKER;
   private final long seed;
 
   public FakerProvider() {
@@ -23,8 +23,10 @@ public class FakerProvider {
 
   public Faker call() {
     if (fixSeedEnabled) {
-
-      return new Faker(LOCALE, new Random(seed));
+      if (FIXED_SEED_FAKER == null) {
+        FIXED_SEED_FAKER = new Faker(LOCALE, new Random(seed));
+      }
+      return FIXED_SEED_FAKER;
     }
 
     return new Faker(LOCALE);
