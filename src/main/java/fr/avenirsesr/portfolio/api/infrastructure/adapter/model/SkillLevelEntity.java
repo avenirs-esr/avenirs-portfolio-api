@@ -22,11 +22,7 @@ public class SkillLevelEntity extends PeriodEntity<LocalDate> {
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
 
-  @ManyToMany
-  @JoinTable(
-      name = "trace_skill_levels",
-      joinColumns = @JoinColumn(name = "skill_level_id"),
-      inverseJoinColumns = @JoinColumn(name = "trace_id"))
+  @ManyToMany(mappedBy = "skillLevels")
   private List<TraceEntity> traces;
 
   @ManyToMany(mappedBy = "skillLevels")
