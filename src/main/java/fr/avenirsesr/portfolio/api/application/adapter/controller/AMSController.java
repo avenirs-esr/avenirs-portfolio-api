@@ -22,8 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/me/ams")
 public class AMSController {
-  private static final String DEFAULT_PAGE = "0";
-  private static final String DEFAULT_SIZE = "10";
+  private static final int DEFAULT_PAGE = 0;
+  private static final int DEFAULT_PAGE_SIZE = 8;
+  private static final int MAX_PAGE_SIZE = 12;
+  private static final String DEFAULT_PAGE_STR = "0";
+  private static final String DEFAULT_PAGE_SIZE_STR = "8";
 
   // TODO: use a service instead
   private final UserUtil userUtil;
@@ -33,13 +36,16 @@ public class AMSController {
   @GetMapping("/view")
   public ResponseEntity<AmsViewResponse> getAmsView(
       Principal principal,
-      @RequestParam(value = "page", defaultValue = DEFAULT_PAGE) int page,
-      @RequestParam(value = "size", defaultValue = DEFAULT_SIZE) int size) {
+      @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_STR) int page,
+      @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE_STR) int size) {
     log.debug(
         "Received request to get AMS view for user [{}] with pagination (page={}, size={})",
         principal.getName(),
         page,
         size);
+
+    page = page < 0 ? DEFAULT_PAGE : page;
+    size = (size > 0 && size <= MAX_PAGE_SIZE) ? size : DEFAULT_PAGE_SIZE;
 
     Student student = userUtil.getStudent(principal);
 
