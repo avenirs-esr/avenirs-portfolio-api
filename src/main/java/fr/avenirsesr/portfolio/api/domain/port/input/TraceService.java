@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.TraceView;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import java.util.List;
+import java.util.UUID;
 
 public interface TraceService {
   String programNameOfTrace(Trace trace);
@@ -11,4 +12,6 @@ public interface TraceService {
   List<Trace> lastTracesOf(User user);
 
   TraceView getUnassociatedTraces(User user, Integer page, Integer pageSize);
+
+  void deleteById(User user, UUID id);
 }
