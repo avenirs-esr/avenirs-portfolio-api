@@ -37,7 +37,7 @@ public class AMSController {
   public ResponseEntity<AmsViewResponse> getAmsView(
       Principal principal,
       @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_STR) int page,
-      @RequestParam(value = "size", defaultValue = DEFAULT_PAGE_SIZE_STR) int size) {
+      @RequestParam(value = "pageSize", defaultValue = DEFAULT_PAGE_SIZE_STR) int size) {
     log.debug(
         "Received request to get AMS view for user [{}] with pagination (page={}, size={})",
         principal.getName(),
