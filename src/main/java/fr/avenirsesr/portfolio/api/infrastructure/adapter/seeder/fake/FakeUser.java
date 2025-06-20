@@ -33,7 +33,7 @@ public class FakeUser {
 
   public FakeUser withStudent() {
     var student = user.toStudent();
-    student.setBio(faker.call().lorem().paragraph());
+    student.setBio(faker.call().lorem().characters(50, 255, true));
     student.setProfilePicture(
         faker.call().company().url()
             + "/"
@@ -50,7 +50,7 @@ public class FakeUser {
 
   public FakeUser withTeacher() {
     var teacher = user.toTeacher();
-    teacher.setBio(faker.call().lorem().paragraph());
+    teacher.setBio(faker.call().lorem().characters(50, 255, true));
     teacher.setProfilePicture(
         faker.call().company().url()
             + "/"
