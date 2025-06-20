@@ -6,6 +6,11 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [v1.0.2] - 2025-06-20
+
+- /me/ams/view/ end point.
+- Start of refactoring for the seeding process.
+
 ## [v1.0.1] - 2025-06-11
 
 🏁 Initial version : this marks the beginning of the changelog tracking for the project.
