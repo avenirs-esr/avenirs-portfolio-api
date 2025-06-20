@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.api.domain.model.*;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.AMSEntity;
@@ -108,11 +109,17 @@ public class AMSSeeder {
   }
 
   private User getRandomUser() {
-    int randomIndex = faker.call().number().numberBetween(0, users.size());
-    return users.get(randomIndex);
+    int userIndex = faker.call().number().numberBetween(0, users.size());
+    return users.get(userIndex);
   }
 
-  Set<AMSTranslationEntity> generateTranslations(AMS ams) {
+  private EAmsStatus getRandomStatus() {
+    EAmsStatus[] statuses = EAmsStatus.values();
+    int statusIndex = faker.call().number().numberBetween(0, statuses.length);
+    return statuses[statusIndex];
+  }
+
+  private Set<AMSTranslationEntity> generateTranslations(AMS ams) {
     AMSEntity amsEntity = AMSMapper.fromDomain(ams);
     return Set.of(
         new AMSTranslationEntity(UUID.randomUUID(), ELanguage.FRENCH, ams.getTitle(), amsEntity),
@@ -132,9 +139,11 @@ public class AMSSeeder {
       AMS ams = FakeAMS.of(getRandomUser()).toModel();
       Set<AMSTranslationEntity> amsTranslations = generateTranslations(ams);
       List<Trace> amsTraces = getRandomTraces();
+      EAmsStatus status = getRandomStatus();
       ams.setCohorts(amsCohorts);
       ams.setSkillLevels(amsSkillLevels);
       ams.setTraces(amsTraces);
+      ams.setStatus(status);
 
       AMSEntity amsEntity = AMSMapper.fromDomain(ams);
       amsEntity.setTranslations(amsTranslations);
@@ -143,6 +152,5 @@ public class AMSSeeder {
 
     amsRepository.saveAllEntities(amsList);
     log.info("✓ {} ams created", amsList.size());
-    // return amsList.stream().map(AMSMapper::toDomain).collect(Collectors.toList());
   }
 }
