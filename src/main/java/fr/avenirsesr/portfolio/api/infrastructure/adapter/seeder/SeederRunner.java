@@ -241,15 +241,17 @@ public class SeederRunner implements CommandLineRunner {
               skillLevel6,
               skillLevel7,
               skillLevel8);
+
+      skillRepository.saveAllEntities(skillEntities);
+
+      log.info("✓ {} skills created", skillEntities.size());
+
       amsSeeder
           .withUsers(users)
           .withCohorts(cohorts)
           .withSkillLevels(skillLevels)
           .withTraces(traces)
           .seed();
-
-      skillRepository.saveAllEntities(skillEntities);
-      log.info("✓ {} skills created", skillEntities.size());
 
       log.info("Seeding successfully finished");
 

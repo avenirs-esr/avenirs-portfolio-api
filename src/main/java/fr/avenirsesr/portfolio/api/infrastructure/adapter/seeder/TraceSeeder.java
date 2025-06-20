@@ -35,7 +35,7 @@ public class TraceSeeder {
   private void checkIfInitialized() throws IllegalStateException {
     if (users.isEmpty()) {
       log.error("TraceSeeder is not initialized: withUsers must be called before seeding");
-      throw new IllegalStateException("AMSSeeder is not initialized");
+      throw new IllegalStateException("TraceSeeder is not initialized");
     }
   }
 
