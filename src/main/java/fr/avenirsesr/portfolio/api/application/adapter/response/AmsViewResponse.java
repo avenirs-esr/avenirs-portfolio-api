@@ -6,5 +6,5 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 @Schema(description = "Paginated response containing AMS view information")
-public record AmsViewResponse(List<AmsViewDTO> content, PaginationInfo page)
+public record AmsViewResponse(List<AmsViewDTO> content, PaginationInfo pagination)
     implements PagedResponse<AmsViewDTO> {}

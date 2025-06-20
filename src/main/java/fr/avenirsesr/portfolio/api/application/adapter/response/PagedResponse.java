@@ -10,5 +10,5 @@ public interface PagedResponse<T> {
   List<T> content();
 
   @Schema(description = "Pagination information")
-  PaginationInfo page();
+  PaginationInfo pagination();
 }

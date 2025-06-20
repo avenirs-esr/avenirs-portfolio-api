@@ -75,10 +75,10 @@ class AMSControllerTest {
     AmsViewResponse body = response.getBody();
     assertNotNull(body);
     assertEquals(3, body.content().size());
-    assertEquals(3, body.page().totalElements());
-    assertEquals(1, body.page().totalPages());
-    assertEquals(defaultPage, body.page().number());
-    assertEquals(defaultSize, body.page().size());
+    assertEquals(3, body.pagination().totalElements());
+    assertEquals(1, body.pagination().totalPages());
+    assertEquals(defaultPage, body.pagination().number());
+    assertEquals(defaultSize, body.pagination().size());
 
     // Verify DTO conversion
     AmsViewDTO firstDto = body.content().getFirst();
@@ -111,10 +111,10 @@ class AMSControllerTest {
     AmsViewResponse body = response.getBody();
     assertNotNull(body);
     assertEquals(0, body.content().size());
-    assertEquals(0, body.page().totalElements());
-    assertEquals(0, body.page().totalPages());
-    assertEquals(defaultPage, body.page().number());
-    assertEquals(defaultSize, body.page().size());
+    assertEquals(0, body.pagination().totalElements());
+    assertEquals(0, body.pagination().totalPages());
+    assertEquals(defaultPage, body.pagination().number());
+    assertEquals(defaultSize, body.pagination().size());
 
     verify(userUtil).getStudent(principal);
     verify(amsService).findUserAmsWithPagination(student, defaultPage, defaultSize);
@@ -140,10 +140,10 @@ class AMSControllerTest {
     AmsViewResponse body = response.getBody();
     assertNotNull(body);
     assertEquals(5, body.content().size());
-    assertEquals(15, body.page().totalElements());
-    assertEquals(3, body.page().totalPages());
-    assertEquals(page, body.page().number());
-    assertEquals(size, body.page().size());
+    assertEquals(15, body.pagination().totalElements());
+    assertEquals(3, body.pagination().totalPages());
+    assertEquals(page, body.pagination().number());
+    assertEquals(size, body.pagination().size());
 
     verify(userUtil).getStudent(principal);
     verify(amsService).findUserAmsWithPagination(student, page, size);
