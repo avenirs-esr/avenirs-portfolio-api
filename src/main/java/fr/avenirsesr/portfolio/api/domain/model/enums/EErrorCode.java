@@ -17,7 +17,9 @@ public enum EErrorCode {
   TRACE_NOT_FOUND("TRACE_NOT_FOUND", "TRACE not found"),
   AMS_NOT_FOUND("AMS_NOT_FOUND", "AMS not found"),
   USER_IS_NOT_STUDENT_EXCEPTION("USER_IS_NOT_STUDENT_EXCEPTION", "User is not student"),
-  LANGUAGE_NOT_SUPPORTED("LANGUAGE_NOT_SUPPORTED", "Language not supported");
+  LANGUAGE_NOT_SUPPORTED("LANGUAGE_NOT_SUPPORTED", "Language not supported"),
+  INVALID_ARGUMENT_TYPE("INVALID_ARGUMENT_TYPE", "The type of the argument is invalid"),
+  ;
 
   private final String code;
   private final String message;
