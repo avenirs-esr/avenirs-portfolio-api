@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.api.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.api.domain.model.AmsProgress;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
@@ -12,4 +11,4 @@ public record AmsViewDTO(
     int countSkills,
     int countTraces,
     @Schema(implementation = EAmsStatus.class) EAmsStatus status,
-    AmsProgress progress) {}
+    AmsProgressDTO progress) {}
