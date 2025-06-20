@@ -7,11 +7,13 @@ import fr.avenirsesr.portfolio.api.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserCategoryNotRecognizedException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Slf4j
 @RestControllerAdvice
@@ -62,5 +64,15 @@ public class RestExceptionHandler {
   public ResponseEntity<ErrorResponse> handleUserIsNotStudent(UserIsNotStudentException ex) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN)
         .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(
+      MethodArgumentTypeMismatchException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(
+            new ErrorResponse(
+                EErrorCode.INVALID_ARGUMENT_TYPE.getCode(),
+                EErrorCode.INVALID_ARGUMENT_TYPE.getMessage()));
   }
 }

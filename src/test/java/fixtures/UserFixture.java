@@ -1,7 +1,7 @@
 package fixtures;
 
 import fr.avenirsesr.portfolio.api.domain.model.User;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeUser;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakeUser;
 import java.util.UUID;
 
 public class UserFixture {

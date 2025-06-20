@@ -10,19 +10,27 @@ import java.util.List;
 public interface SkillLevelMapper {
   static SkillLevelEntity fromDomain(
       SkillLevel skillLevel, SkillEntity skillEntity, List<TraceEntity> tracesEntities) {
-    SkillLevelEntity entity =
-        new SkillLevelEntity(
-            skillLevel.getId(),
-            skillLevel.getStatus(),
-            tracesEntities,
-            skillLevel.getAmses().stream().map(AMSMapper::fromDomain).toList(),
-            skillEntity,
-            skillLevel.getStartDate(),
-            skillLevel.getEndDate());
-    return entity;
+    return new SkillLevelEntity(
+        skillLevel.getId(),
+        skillLevel.getStatus(),
+        tracesEntities,
+        skillLevel.getAmses().stream().map(AMSMapper::fromDomain).toList(),
+        skillEntity,
+        skillLevel.getStartDate(),
+        skillLevel.getEndDate());
   }
 
   static SkillLevel toDomain(SkillLevelEntity skillLevelEntity, Skill skill, ELanguage language) {
+    SkillLevel skillLevel = toDomainWithoutRecursion(skillLevelEntity, skill, language);
+    skillLevel.setAmses(
+        skillLevelEntity.getAmses().stream()
+            .map(ams -> AMSMapper.toDomainWithoutRecursion(ams, language))
+            .toList());
+    return skillLevel;
+  }
+
+  static SkillLevel toDomainWithoutRecursion(
+      SkillLevelEntity skillLevelEntity, Skill skill, ELanguage language) {
     ELanguage fallbackLanguage = ELanguage.FRENCH;
     SkillLevelTranslationEntity skillLevelTranslationEntity =
         TranslationUtil.getTranslation(
@@ -32,11 +40,16 @@ public interface SkillLevelMapper {
         skillLevelTranslationEntity.getName(),
         skillLevelTranslationEntity.getDescription(),
         skillLevelEntity.getStatus(),
-        skillLevelEntity.getTraces().stream().map(TraceMapper::toDomain).toList(),
-        skillLevelEntity.getAmses().stream().map(ams -> AMSMapper.toDomain(ams, language)).toList(),
+        skillLevelEntity.getTraces().stream().map(TraceMapper::toDomainRecursion).toList(),
+        List.of(),
         skill,
         language,
         skillLevelEntity.getStartDate(),
         skillLevelEntity.getEndDate());
+  }
+
+  static SkillLevel toDomainWithoutRecursion(
+      SkillLevelEntity skillLevelEntity, ELanguage language) {
+    return toDomainWithoutRecursion(skillLevelEntity, null, language);
   }
 }

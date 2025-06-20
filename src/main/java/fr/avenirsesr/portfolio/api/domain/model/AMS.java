@@ -1,7 +1,10 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
+import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,27 +24,57 @@ public class AMS {
 
   private final ELanguage language;
 
+  @Setter(AccessLevel.NONE)
+  private final Instant startDate;
+
+  @Setter(AccessLevel.NONE)
+  private final Instant endDate;
+
+  private EAmsStatus status;
+
   private List<SkillLevel> skillLevels;
 
-  private AMS(UUID id, User user, String title, ELanguage language) {
+  private List<Trace> traces;
+
+  private Set<Cohort> cohorts;
+
+  private AMS(
+      UUID id, User user, String title, Instant startDate, Instant endDate, ELanguage language) {
     this.id = id;
     this.user = user;
     this.title = title;
+    this.startDate = startDate;
+    this.endDate = endDate;
     this.language = language;
   }
 
-  public static AMS create(UUID id, User user, String title, ELanguage language) {
-    var ams = new AMS(id, user, title, language);
+  public static AMS create(
+      UUID id, User user, String title, Instant startDate, Instant endDate, ELanguage language) {
+    var ams = new AMS(id, user, title, startDate, endDate, language);
     ams.setSkillLevels(List.of());
+    ams.setTraces(List.of());
+    ams.setCohorts(Set.of());
+    ams.setStatus(EAmsStatus.NOT_STARTED);
 
     return ams;
   }
 
   public static AMS toDomain(
-      UUID id, User user, String title, List<SkillLevel> skillLevels, ELanguage language) {
-    var ams = new AMS(id, user, title, language);
+      UUID id,
+      User user,
+      String title,
+      Instant startDate,
+      Instant endDate,
+      List<SkillLevel> skillLevels,
+      List<Trace> traces,
+      Set<Cohort> cohorts,
+      ELanguage language,
+      EAmsStatus status) {
+    var ams = new AMS(id, user, title, startDate, endDate, language);
     ams.setSkillLevels(skillLevels);
-
+    ams.setTraces(traces);
+    ams.setCohorts(cohorts);
+    ams.setStatus(status);
     return ams;
   }
 }

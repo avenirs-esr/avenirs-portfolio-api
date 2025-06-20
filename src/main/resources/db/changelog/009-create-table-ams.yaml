@@ -99,3 +99,45 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_ams_skill_levels_skill_level
             onDelete: CASCADE
+
+  - changeSet:
+      id: 009-2
+      author: Arnaud Deman
+      changes:
+        - addColumn:
+            tableName: ams
+            columns:
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: modified_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: end_date
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: |
+              ALTER TABLE ams ADD CONSTRAINT check_ams_dates CHECK (start_date < end_date);
+            stripComments: true
