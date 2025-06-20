@@ -37,25 +37,26 @@ public class AMSController {
   public ResponseEntity<AmsViewResponse> getAmsView(
       Principal principal,
       @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_STR) int page,
-      @RequestParam(value = "pageSize", defaultValue = DEFAULT_PAGE_SIZE_STR) int size) {
+      @RequestParam(value = "pageSize", defaultValue = DEFAULT_PAGE_SIZE_STR) int pageSize) {
     log.debug(
-        "Received request to get AMS view for user [{}] with pagination (page={}, size={})",
+        "Received request to get AMS view for user [{}] with pagination (page={}, pageSize={})",
         principal.getName(),
         page,
-        size);
+        pageSize);
 
     page = page < 0 ? DEFAULT_PAGE : page;
-    size = (size > 0 && size <= MAX_PAGE_SIZE) ? size : DEFAULT_PAGE_SIZE;
+    pageSize = (pageSize > 0 && pageSize <= MAX_PAGE_SIZE) ? pageSize : DEFAULT_PAGE_SIZE;
 
     Student student = userUtil.getStudent(principal);
 
-    PagedResult<AMS> pagedResult = amsService.findUserAmsWithPagination(student, page, size);
+    PagedResult<AMS> pagedResult = amsService.findUserAmsWithPagination(student, page, pageSize);
 
     List<AmsViewDTO> amsViewDTOs =
         pagedResult.getContent().stream().map(AmsViewMapper::toDto).collect(Collectors.toList());
 
     PaginationInfo paginationInfo =
-        new PaginationInfo(size, pagedResult.getTotalElements(), pagedResult.getTotalPages(), page);
+        new PaginationInfo(
+            pageSize, pagedResult.getTotalElements(), pagedResult.getTotalPages(), page);
 
     AmsViewResponse response = new AmsViewResponse(amsViewDTOs, paginationInfo);
 
