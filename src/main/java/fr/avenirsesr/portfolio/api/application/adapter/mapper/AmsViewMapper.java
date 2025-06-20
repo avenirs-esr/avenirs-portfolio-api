@@ -14,6 +14,6 @@ public interface AmsViewMapper {
         ams.getTraces().size(),
         ams.getStatus(),
         // TODO: calculate progress
-        new AmsProgress(0, 0, 0));
+        AmsProgress.createMock());
   }
 }
