@@ -1,6 +1,10 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.api.domain.model.*;
+import fr.avenirsesr.portfolio.api.domain.model.AMS;
+import fr.avenirsesr.portfolio.api.domain.model.Cohort;
+import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.api.domain.model.Trace;
+import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.AMSMapper;
