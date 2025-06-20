@@ -16,6 +16,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "trace")
@@ -36,6 +38,7 @@ public class TraceEntity {
   private ELanguage language;
 
   @ManyToMany
+  @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinTable(
       name = "trace_skill_levels",
       joinColumns = @JoinColumn(name = "trace_id"),
@@ -43,6 +46,7 @@ public class TraceEntity {
   private List<SkillLevelEntity> skillLevels;
 
   @ManyToMany
+  @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinTable(
       name = "trace_ams",
       joinColumns = @JoinColumn(name = "trace_id"),

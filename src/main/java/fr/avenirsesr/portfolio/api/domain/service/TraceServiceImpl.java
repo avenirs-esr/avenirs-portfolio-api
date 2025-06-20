@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.api.domain.service;
 
+import fr.avenirsesr.portfolio.api.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.api.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.api.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.TraceConfigurationInfo;
@@ -15,6 +17,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -85,9 +88,22 @@ public class TraceServiceImpl implements TraceService {
             traceEntityPage.getNumber()));
   }
 
+  @Override
+  public void deleteById(User user, UUID id) {
+    Optional<Trace> traceOptional = traceRepository.findById(id);
+
+    if (traceOptional.isEmpty()) {
+      throw new TraceNotFoundException();
+    } else if (!traceOptional.get().getUser().getId().equals(user.getId())) {
+      throw new UserNotAuthorizedException();
+    }
+
+    traceRepository.deleteById(id);
+  }
+
   public static boolean hasEnoughDayUntilCritical(
       Instant initialDate, int maxDaySinceCreationBeforeCritical) {
     return Duration.between(initialDate, Instant.now()).toDays()
-        < maxDaySinceCreationBeforeCritical;
+        <= maxDaySinceCreationBeforeCritical;
   }
 }

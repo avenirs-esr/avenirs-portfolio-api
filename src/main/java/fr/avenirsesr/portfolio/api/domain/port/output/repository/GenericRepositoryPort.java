@@ -12,4 +12,6 @@ public interface GenericRepositoryPort<D> {
   void saveAll(List<D> collection);
 
   void flush();
+
+  void deleteById(UUID id);
 }
