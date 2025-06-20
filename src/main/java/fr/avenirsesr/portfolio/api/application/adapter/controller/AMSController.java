@@ -54,11 +54,10 @@ public class AMSController {
     List<AmsViewDTO> amsViewDTOs =
         pagedResult.getContent().stream().map(AmsViewMapper::toDto).collect(Collectors.toList());
 
-    PaginationInfo paginationInfo =
-        new PaginationInfo(
-            pageSize, pagedResult.getTotalElements(), pagedResult.getTotalPages(), page);
+    PageInfo pageInfo =
+        new PageInfo(pageSize, pagedResult.getTotalElements(), pagedResult.getTotalPages(), page);
 
-    AmsViewResponse response = new AmsViewResponse(amsViewDTOs, paginationInfo);
+    AmsViewResponse response = new AmsViewResponse(amsViewDTOs, pageInfo);
 
     return ResponseEntity.ok(response);
   }
