@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.api.domain.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class AMSServiceImplTest {
@@ -41,15 +43,19 @@ class AMSServiceImplTest {
     studentId = student.getId();
     defaultPage = 0;
     defaultSize = 10;
+    
+    ReflectionTestUtils.setField(amsService, "defaultPage", 0);
+    ReflectionTestUtils.setField(amsService, "defaultPageSize", 8);
+    ReflectionTestUtils.setField(amsService, "maxPageSize", 12);
   }
 
   @Test
   void shouldReturnPagedAMSForUser() {
     // Given
     List<AMS> amsList = AMSFixture.create().withCount(3);
-    PagedResult<AMS> expectedResult = new PagedResult<>(amsList, 3, 1);
+    PagedResult<AMS> expectedResult = new PagedResult<>(amsList, 3, 1, defaultPage, defaultSize);
 
-    when(amsRepository.findByUserIdViaCohorts(eq(studentId), eq(defaultPage), eq(defaultSize)))
+    when(amsRepository.findByUserIdViaCohorts(any(UUID.class), eq(defaultPage), eq(defaultSize)))
         .thenReturn(expectedResult);
 
     // When
@@ -61,15 +67,18 @@ class AMSServiceImplTest {
     assertEquals(3, result.totalElements());
     assertEquals(1, result.totalPages());
     assertEquals(3, result.content().size());
-    verify(amsRepository).findByUserIdViaCohorts(studentId, defaultPage, defaultSize);
+    assertEquals(defaultPage, result.page());
+    assertEquals(defaultSize, result.pageSize());
+    verify(amsRepository).findByUserIdViaCohorts(any(UUID.class), eq(defaultPage), eq(defaultSize));
   }
 
   @Test
   void shouldReturnEmptyPagedResultWhenUserHasNoAMS() {
     // Given
-    PagedResult<AMS> expectedResult = new PagedResult<>(new ArrayList<>(), 0, 0);
+    PagedResult<AMS> expectedResult =
+        new PagedResult<>(new ArrayList<>(), 0, 0, defaultPage, defaultSize);
 
-    when(amsRepository.findByUserIdViaCohorts(eq(studentId), eq(defaultPage), eq(defaultSize)))
+    when(amsRepository.findByUserIdViaCohorts(any(UUID.class), eq(defaultPage), eq(defaultSize)))
         .thenReturn(expectedResult);
 
     // When
@@ -81,7 +90,9 @@ class AMSServiceImplTest {
     assertEquals(0, result.totalElements());
     assertEquals(0, result.totalPages());
     assertTrue(result.content().isEmpty());
-    verify(amsRepository).findByUserIdViaCohorts(studentId, defaultPage, defaultSize);
+    assertEquals(defaultPage, result.page());
+    assertEquals(defaultSize, result.pageSize());
+    verify(amsRepository).findByUserIdViaCohorts(any(UUID.class), eq(defaultPage), eq(defaultSize));
   }
 
   @Test
@@ -90,9 +101,9 @@ class AMSServiceImplTest {
     int page = 1;
     int size = 5;
     List<AMS> amsList = AMSFixture.create().withCount(5);
-    PagedResult<AMS> expectedResult = new PagedResult<>(amsList, 15, 3);
+    PagedResult<AMS> expectedResult = new PagedResult<>(amsList, 15, 3, page, size);
 
-    when(amsRepository.findByUserIdViaCohorts(eq(studentId), eq(page), eq(size)))
+    when(amsRepository.findByUserIdViaCohorts(any(UUID.class), eq(page), eq(size)))
         .thenReturn(expectedResult);
 
     // When
@@ -103,6 +114,8 @@ class AMSServiceImplTest {
     assertEquals(15, result.totalElements());
     assertEquals(3, result.totalPages());
     assertEquals(5, result.content().size());
-    verify(amsRepository).findByUserIdViaCohorts(studentId, page, size);
+    assertEquals(page, result.page());
+    assertEquals(size, result.pageSize());
+    verify(amsRepository).findByUserIdViaCohorts(any(UUID.class), eq(page), eq(size));
   }
 }

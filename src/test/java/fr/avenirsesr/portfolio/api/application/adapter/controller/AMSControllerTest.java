@@ -59,7 +59,7 @@ class AMSControllerTest {
   void shouldReturnAmsViewForUser() {
     // Given
     List<AMS> amsList = AMSFixture.create().withCount(3);
-    PagedResult<AMS> pagedResult = new PagedResult<>(amsList, 3, 1);
+    PagedResult<AMS> pagedResult = new PagedResult<>(amsList, 3, 1, defaultPage, defaultSize);
 
     when(userUtil.getStudent(principal)).thenReturn(student);
     when(amsService.findUserAmsWithPagination(student, defaultPage, defaultSize))
@@ -95,7 +95,7 @@ class AMSControllerTest {
   @Test
   void shouldReturnEmptyListWhenUserHasNoAMS() {
     // Given
-    PagedResult<AMS> emptyPagedResult = new PagedResult<>(new ArrayList<>(), 0, 0);
+    PagedResult<AMS> emptyPagedResult = new PagedResult<>(new ArrayList<>(), 0, 0, defaultPage, defaultSize);
 
     when(userUtil.getStudent(principal)).thenReturn(student);
     when(amsService.findUserAmsWithPagination(student, defaultPage, defaultSize))
@@ -126,7 +126,7 @@ class AMSControllerTest {
     int page = 1;
     int size = 5;
     List<AMS> amsList = AMSFixture.create().withCount(5);
-    PagedResult<AMS> pagedResult = new PagedResult<>(amsList, 15, 3);
+    PagedResult<AMS> pagedResult = new PagedResult<>(amsList, 15, 3, page, size);
 
     when(userUtil.getStudent(principal)).thenReturn(student);
     when(amsService.findUserAmsWithPagination(student, page, size)).thenReturn(pagedResult);

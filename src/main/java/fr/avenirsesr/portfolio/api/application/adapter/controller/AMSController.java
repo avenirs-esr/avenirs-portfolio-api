@@ -22,11 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/me/ams")
 public class AMSController {
-  private static final int DEFAULT_PAGE = 0;
-  private static final int DEFAULT_PAGE_SIZE = 8;
-  private static final int MAX_PAGE_SIZE = 12;
-  private static final String DEFAULT_PAGE_STR = "0";
-  private static final String DEFAULT_PAGE_SIZE_STR = "8";
 
   // TODO: use a service instead
   private final UserUtil userUtil;
@@ -36,17 +31,13 @@ public class AMSController {
   @GetMapping("/view")
   public ResponseEntity<AmsViewResponse> getAmsView(
       Principal principal,
-      @RequestParam(value = "page", defaultValue = DEFAULT_PAGE_STR) int page,
-      @RequestParam(value = "pageSize", defaultValue = DEFAULT_PAGE_SIZE_STR) int pageSize) {
+      @RequestParam(value = "page", required = false) int page,
+      @RequestParam(value = "pageSize", required = false) int pageSize) {
     log.debug(
         "Received request to get AMS view for user [{}] with pagination (page={}, pageSize={})",
         principal.getName(),
         page,
         pageSize);
-
-    page = page < 0 ? DEFAULT_PAGE : page;
-    pageSize = (pageSize > 0 && pageSize <= MAX_PAGE_SIZE) ? pageSize : DEFAULT_PAGE_SIZE;
-
     Student student = userUtil.getStudent(principal);
 
     PagedResult<AMS> pagedResult = amsService.findUserAmsWithPagination(student, page, pageSize);
@@ -55,7 +46,11 @@ public class AMSController {
         pagedResult.content().stream().map(AmsViewMapper::toDto).collect(Collectors.toList());
 
     PageInfo pageInfo =
-        new PageInfo(pageSize, pagedResult.totalElements(), pagedResult.totalPages(), page);
+        new PageInfo(
+            pagedResult.pageSize(),
+            pagedResult.totalElements(),
+            pagedResult.totalPages(),
+            pagedResult.page());
 
     AmsViewResponse response = new AmsViewResponse(amsViewDTOs, pageInfo);
 

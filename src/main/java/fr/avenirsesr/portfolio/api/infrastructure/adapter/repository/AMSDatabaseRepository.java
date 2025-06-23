@@ -32,7 +32,8 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
 
     List<AMS> content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();
 
-    return new PagedResult<>(content, pageResult.getTotalElements(), pageResult.getTotalPages());
+    return new PagedResult<>(
+        content, pageResult.getTotalElements(), pageResult.getTotalPages(), page, size);
   }
 
   public void saveAllEntities(List<AMSEntity> entities) {

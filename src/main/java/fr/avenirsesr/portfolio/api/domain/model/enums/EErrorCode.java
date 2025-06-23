@@ -8,7 +8,7 @@ public enum EErrorCode {
   USER_ALREADY_EXISTS("USER_ALREADY_EXISTS", "User already exists"),
   USER_NOT_AUTHORIZED("USER_NOT_AUTHORIZED", "User not authorized"),
   USER_CATEGORY_NOT_FOUND("USER_CATEGORY_NOT_FOUND", "User category not found"),
-  BAD_IMAGE_SIZE("BAD_IMAGE_SIZE", "Image size is not valid"),
+  BAD_IMAGE_SIZE("BAD_IMAGE_SIZE", "Image pageSize is not valid"),
   BAD_IMAGE_TYPE("BAD_IMAGE_TYPE", "Image type is not valid"),
   PROGRAM_NOT_FOUND("PROGRAM_NOT_FOUND", "Program not found"),
   PROGRAM_PROGRESS_NOT_FOUND("PROGRAM_PROGRESS_NOT_FOUND", "Program progress not found"),
