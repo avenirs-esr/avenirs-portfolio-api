@@ -25,17 +25,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AMSEntity extends AvenirsBaseEntity {
+public class AMSEntity extends PeriodEntity<Instant> {
 
   @ManyToOne(optional = false)
   private UserEntity user;
-
-  // TODO: refactor to use the interface Period.
-  @Column(name = "start_date", nullable = false)
-  private Instant startDate;
-
-  @Column(name = "end_date", nullable = false)
-  private Instant endDate;
 
   @Column
   @Enumerated(EnumType.STRING)
@@ -81,8 +74,8 @@ public class AMSEntity extends AvenirsBaseEntity {
       Set<TraceEntity> traces) {
     setId(id);
     this.user = user;
-    this.startDate = startDate;
-    this.endDate = endDate;
+    setStartDate(startDate);
+    setEndDate(endDate);
     this.skillLevels = List.copyOf(skillLevels);
     this.cohorts = Set.copyOf(cohorts == null ? Set.of() : cohorts);
     this.traces = List.copyOf(traces);
