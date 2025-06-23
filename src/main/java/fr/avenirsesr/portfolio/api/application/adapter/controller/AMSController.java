@@ -43,7 +43,7 @@ public class AMSController {
     PagedResult<AMS> pagedResult = amsService.findUserAmsWithPagination(student, page, pageSize);
 
     List<AmsViewDTO> amsViewDTOs =
-        pagedResult.content().stream().map(AmsViewMapper::toDto).collect(Collectors.toList());
+        pagedResult.content().stream().map(AmsViewMapper::toDto).toList();
 
     PageInfo pageInfo =
         new PageInfo(
