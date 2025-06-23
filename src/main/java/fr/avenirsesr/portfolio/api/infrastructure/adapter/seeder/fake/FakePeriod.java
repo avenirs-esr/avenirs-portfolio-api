@@ -21,11 +21,6 @@ public class FakePeriod<T extends Temporal> {
   private T startDate;
   private T endDate;
 
-  public static FakePeriod<LocalDate> createLocalDatePeriod() {
-    return new FakePeriod<>(
-        localDate -> localDate, instant -> instant.atZone(ZoneId.systemDefault()).toLocalDate());
-  }
-
   public static FakePeriod<Instant> createInstantPeriod() {
     return new FakePeriod<>(
         localDate -> {
@@ -62,23 +57,38 @@ public class FakePeriod<T extends Temporal> {
       initStartDateInAcademicPeriodBeforeMay();
     }
 
-    Instant startInstant;
-    if (startDate instanceof LocalDate) {
-      startInstant = ((LocalDate) startDate).atStartOfDay(ZoneId.systemDefault()).toInstant();
-    } else {
-      startInstant = (Instant) startDate;
-    }
-
+    Instant startInstant = convertStartDateToInstant();
     Instant minimumEndDate = startInstant.plus(24, ChronoUnit.HOURS);
 
+    Instant baseEndDate = calculateBaseEndDate(minimumEndDate);
+
+    if (!(startDate instanceof LocalDate)) {
+      baseEndDate = adjustTimeForInstantType(startInstant, baseEndDate);
+    }
+
+    endDate = instantConverter.apply(baseEndDate);
+  }
+
+  private Instant convertStartDateToInstant() {
+    if (startDate instanceof LocalDate) {
+      return ((LocalDate) startDate).atStartOfDay(ZoneId.systemDefault()).toInstant();
+    } else {
+      return (Instant) startDate;
+    }
+  }
+
+  private Instant calculateBaseEndDate(Instant minimumEndDate) {
     LocalDate julyFirstBoundary = LocalDate.of(academicYear + 1, Month.JULY, 1);
     Instant julyFirstInstant = julyFirstBoundary.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
     if (minimumEndDate.isAfter(julyFirstInstant)) {
-      endDate = instantConverter.apply(julyFirstInstant.minus(1, ChronoUnit.DAYS));
-      return;
+      return julyFirstInstant.minus(1, ChronoUnit.DAYS);
     }
 
+    return calculateRandomEndDate(minimumEndDate, julyFirstBoundary);
+  }
+
+  private Instant calculateRandomEndDate(Instant minimumEndDate, LocalDate julyFirstBoundary) {
     long daysUntilJulyFirst =
         ChronoUnit.DAYS.between(
             minimumEndDate.atZone(ZoneId.systemDefault()).toLocalDate(), julyFirstBoundary);
@@ -86,27 +96,21 @@ public class FakePeriod<T extends Temporal> {
     int additionalDays =
         faker.call().number().numberBetween(1, (int) Math.min(180, daysUntilJulyFirst));
 
-    Instant baseEndDate = minimumEndDate.plus(additionalDays, ChronoUnit.DAYS);
-
-    if (!(startDate instanceof LocalDate)) {
-      int hour = faker.call().number().numberBetween(8, 20);
-      int minute = faker.call().number().numberBetween(0, 60);
-      LocalDate endLocalDate = baseEndDate.atZone(ZoneId.systemDefault()).toLocalDate();
-      baseEndDate = endLocalDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();
-
-      if (ChronoUnit.HOURS.between(startInstant, baseEndDate) < 24) {
-        baseEndDate = startInstant.plus(24, ChronoUnit.HOURS);
-      }
-    }
-
-    endDate = instantConverter.apply(baseEndDate);
+    return minimumEndDate.plus(additionalDays, ChronoUnit.DAYS);
   }
 
-  public static FakePeriod<LocalDate> createMin24hoursLocalDatePeriodInAcademicPeriod() {
-    FakePeriod<LocalDate> fakePeriod = createLocalDatePeriod();
-    fakePeriod.initStartDateInAcademicPeriodBeforeMay();
-    fakePeriod.initEndDateInAcademicPeriodAfterStartDate();
-    return fakePeriod;
+  private Instant adjustTimeForInstantType(Instant startInstant, Instant baseEndDate) {
+    int hour = faker.call().number().numberBetween(8, 20);
+    int minute = faker.call().number().numberBetween(0, 60);
+    LocalDate endLocalDate = baseEndDate.atZone(ZoneId.systemDefault()).toLocalDate();
+    Instant adjustedEndDate =
+        endLocalDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();
+
+    if (ChronoUnit.HOURS.between(startInstant, adjustedEndDate) < 24) {
+      return startInstant.plus(24, ChronoUnit.HOURS);
+    }
+
+    return adjustedEndDate;
   }
 
   public static FakePeriod<Instant> createMin24hoursInstantPeriodInAcademicPeriod() {
