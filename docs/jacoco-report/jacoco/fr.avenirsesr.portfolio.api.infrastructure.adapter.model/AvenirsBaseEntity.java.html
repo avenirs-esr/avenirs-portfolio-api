@@ -25,6 +25,7 @@ import lombok.Setter;
   @Column(
       name = &quot;modified_at&quot;,
       insertable = false,
+      updatable = false,
       columnDefinition = &quot;TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP&quot;)
   private Instant modifiedAt;
 }

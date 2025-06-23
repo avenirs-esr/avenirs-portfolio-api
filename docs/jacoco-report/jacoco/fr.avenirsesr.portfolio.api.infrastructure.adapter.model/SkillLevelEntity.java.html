@@ -16,7 +16,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SkillLevelEntity extends PeriodEntity&lt;LocalDate&gt; {
-  @Id private UUID id;
 
   @Column
   @Enumerated(EnumType.STRING)
@@ -32,7 +31,7 @@ public class SkillLevelEntity extends PeriodEntity&lt;LocalDate&gt; {
   @JoinColumn(name = &quot;skill_id&quot;)
   private SkillEntity skill;
 
-<span class="fc" id="L35">  @OneToMany(</span>
+<span class="fc" id="L34">  @OneToMany(</span>
       mappedBy = &quot;skillLevel&quot;,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -47,19 +46,19 @@ public class SkillLevelEntity extends PeriodEntity&lt;LocalDate&gt; {
       List&lt;AMSEntity&gt; amses,
       SkillEntity skill,
       LocalDate startDate,
-<span class="fc" id="L50">      LocalDate endDate) {</span>
-<span class="fc" id="L51">    this.id = id;</span>
-<span class="fc" id="L52">    this.status = status;</span>
-<span class="fc" id="L53">    this.traces = traces;</span>
-<span class="fc" id="L54">    this.amses = amses;</span>
-<span class="fc" id="L55">    this.skill = skill;</span>
-<span class="fc" id="L56">    this.startDate = startDate;</span>
-<span class="fc" id="L57">    this.endDate = endDate;</span>
-<span class="fc" id="L58">  }</span>
+<span class="fc" id="L49">      LocalDate endDate) {</span>
+<span class="fc" id="L50">    setId(id);</span>
+<span class="fc" id="L51">    this.status = status;</span>
+<span class="fc" id="L52">    this.traces = traces;</span>
+<span class="fc" id="L53">    this.amses = amses;</span>
+<span class="fc" id="L54">    this.skill = skill;</span>
+<span class="fc" id="L55">    this.startDate = startDate;</span>
+<span class="fc" id="L56">    this.endDate = endDate;</span>
+<span class="fc" id="L57">  }</span>
 
   @Override
   public String toString() {
-<span class="nc" id="L62">    return &quot;SkillLevelEntity[%s]&quot;.formatted(id);</span>
+<span class="nc" id="L61">    return &quot;SkillLevelEntity[%s]&quot;.formatted(getId());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
