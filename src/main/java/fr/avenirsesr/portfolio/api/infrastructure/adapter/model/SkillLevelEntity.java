@@ -16,7 +16,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SkillLevelEntity extends PeriodEntity<LocalDate> {
-  @Id private UUID id;
 
   @Column
   @Enumerated(EnumType.STRING)
@@ -48,7 +47,7 @@ public class SkillLevelEntity extends PeriodEntity<LocalDate> {
       SkillEntity skill,
       LocalDate startDate,
       LocalDate endDate) {
-    this.id = id;
+    setId(id);
     this.status = status;
     this.traces = traces;
     this.amses = amses;
@@ -59,6 +58,6 @@ public class SkillLevelEntity extends PeriodEntity<LocalDate> {
 
   @Override
   public String toString() {
-    return "SkillLevelEntity[%s]".formatted(id);
+    return "SkillLevelEntity[%s]".formatted(getId());
   }
 }
