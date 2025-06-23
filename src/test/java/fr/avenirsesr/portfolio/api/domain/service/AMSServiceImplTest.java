@@ -58,9 +58,9 @@ class AMSServiceImplTest {
 
     // Then
     assertNotNull(result);
-    assertEquals(3, result.getTotalElements());
-    assertEquals(1, result.getTotalPages());
-    assertEquals(3, result.getContent().size());
+    assertEquals(3, result.totalElements());
+    assertEquals(1, result.totalPages());
+    assertEquals(3, result.content().size());
     verify(amsRepository).findByUserIdViaCohorts(studentId, defaultPage, defaultSize);
   }
 
@@ -78,9 +78,9 @@ class AMSServiceImplTest {
 
     // Then
     assertNotNull(result);
-    assertEquals(0, result.getTotalElements());
-    assertEquals(0, result.getTotalPages());
-    assertTrue(result.getContent().isEmpty());
+    assertEquals(0, result.totalElements());
+    assertEquals(0, result.totalPages());
+    assertTrue(result.content().isEmpty());
     verify(amsRepository).findByUserIdViaCohorts(studentId, defaultPage, defaultSize);
   }
 
@@ -100,9 +100,9 @@ class AMSServiceImplTest {
 
     // Then
     assertNotNull(result);
-    assertEquals(15, result.getTotalElements());
-    assertEquals(3, result.getTotalPages());
-    assertEquals(5, result.getContent().size());
+    assertEquals(15, result.totalElements());
+    assertEquals(3, result.totalPages());
+    assertEquals(5, result.content().size());
     verify(amsRepository).findByUserIdViaCohorts(studentId, page, size);
   }
 }

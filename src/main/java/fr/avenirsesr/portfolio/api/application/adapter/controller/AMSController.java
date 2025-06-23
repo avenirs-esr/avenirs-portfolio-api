@@ -52,10 +52,10 @@ public class AMSController {
     PagedResult<AMS> pagedResult = amsService.findUserAmsWithPagination(student, page, pageSize);
 
     List<AmsViewDTO> amsViewDTOs =
-        pagedResult.getContent().stream().map(AmsViewMapper::toDto).collect(Collectors.toList());
+        pagedResult.content().stream().map(AmsViewMapper::toDto).collect(Collectors.toList());
 
     PageInfo pageInfo =
-        new PageInfo(pageSize, pagedResult.getTotalElements(), pagedResult.getTotalPages(), page);
+        new PageInfo(pageSize, pagedResult.totalElements(), pagedResult.totalPages(), page);
 
     AmsViewResponse response = new AmsViewResponse(amsViewDTOs, pageInfo);
 
