@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 
 import java.util.Locale;
 import java.util.Random;
@@ -8,21 +8,25 @@ import net.datafaker.Faker;
 @Slf4j
 public class FakerProvider {
   private final boolean fixSeedEnabled = true;
-  private static final long SEED = 100000L;
+  private static final long DEFAULT_SEED = 100000L;
   private static final Locale LOCALE = Locale.FRENCH;
-  private static long instanceCounter = 1;
-
+  private static Faker FIXED_SEED_FAKER;
   private final long seed;
-  private long callCounter = 0;
 
   public FakerProvider() {
-    this.seed = SEED * (instanceCounter++);
+    this(DEFAULT_SEED);
+  }
+
+  public FakerProvider(long seed) {
+    this.seed = seed;
   }
 
   public Faker call() {
     if (fixSeedEnabled) {
-      this.callCounter++;
-      return new Faker(LOCALE, new Random(seed + callCounter));
+      if (FIXED_SEED_FAKER == null) {
+        FIXED_SEED_FAKER = new Faker(LOCALE, new Random(seed));
+      }
+      return FIXED_SEED_FAKER;
     }
 
     return new Faker(LOCALE);

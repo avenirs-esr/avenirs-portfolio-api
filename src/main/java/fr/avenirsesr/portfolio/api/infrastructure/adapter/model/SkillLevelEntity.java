@@ -16,24 +16,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SkillLevelEntity extends PeriodEntity<LocalDate> {
-  @Id private UUID id;
 
   @Column
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
 
-  @ManyToMany
-  @JoinTable(
-      name = "trace_skill_levels",
-      joinColumns = @JoinColumn(name = "skill_level_id"),
-      inverseJoinColumns = @JoinColumn(name = "trace_id"))
+  @ManyToMany(mappedBy = "skillLevels")
   private List<TraceEntity> traces;
 
-  @ManyToMany
-  @JoinTable(
-      name = "ams_skill_levels",
-      joinColumns = @JoinColumn(name = "skill_level_id"),
-      inverseJoinColumns = @JoinColumn(name = "ams_id"))
+  @ManyToMany(mappedBy = "skillLevels")
   private List<AMSEntity> amses;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -56,7 +47,7 @@ public class SkillLevelEntity extends PeriodEntity<LocalDate> {
       SkillEntity skill,
       LocalDate startDate,
       LocalDate endDate) {
-    this.id = id;
+    setId(id);
     this.status = status;
     this.traces = traces;
     this.amses = amses;
@@ -67,6 +58,6 @@ public class SkillLevelEntity extends PeriodEntity<LocalDate> {
 
   @Override
   public String toString() {
-    return "SkillLevelEntity[%s]".formatted(id);
+    return "SkillLevelEntity[%s]".formatted(getId());
   }
 }

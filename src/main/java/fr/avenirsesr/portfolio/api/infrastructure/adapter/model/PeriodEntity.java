@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @MappedSuperclass
-public abstract class PeriodEntity<T extends Temporal> {
+public abstract class PeriodEntity<T extends Temporal> extends AvenirsBaseEntity {
   @Column(name = "start_date", nullable = false)
   protected T startDate;
 

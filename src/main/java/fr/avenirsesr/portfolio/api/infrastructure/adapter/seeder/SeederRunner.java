@@ -4,14 +4,13 @@ import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.api.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.*;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.*;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.*;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.repository.*;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -21,15 +20,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class SeederRunner implements CommandLineRunner {
 
+  private static final int NB_USERS = 100;
+  private static final int NB_COHORTS = 50;
+  private static final int NB_AMS = 50;
+  private static final int NB_TRACES = 200;
+
   private final UserRepository userRepository;
-  private final ExternalUserRepository externalUserRepository;
   private final InstitutionDatabaseRepository institutionRepository;
   private final ProgramDatabaseRepository programRepository;
   private final ProgramProgressRepository programProgressRepository;
-  private final SkillLevelRepository skillLevelRepository;
   private final SkillDatabaseRepository skillRepository;
-  private final TraceDatabaseRepository traceRepository;
-  private final AMSDatabaseRepository amsRepository;
+  private final UserSeeder userSeeder;
+  private final CohortSeeder cohortSeeder;
+  private final AMSSeeder amsSeeder;
+  private final TraceSeeder traceSeeder;
 
   @Value("${seeder.enabled:false}")
   private boolean seedEnabled;
@@ -42,17 +46,23 @@ public class SeederRunner implements CommandLineRunner {
       ProgramProgressRepository programProgressRepository,
       SkillLevelRepository skillLevelRepository,
       SkillDatabaseRepository skillRepository,
-      TraceDatabaseRepository traceRepository,
-      AMSDatabaseRepository amsRepository) {
+      UserSeeder userSeeder,
+      CohortSeeder cohortSeeder,
+      AMSSeeder amsSeeder,
+      TraceSeeder traceSeeder) {
     this.userRepository = userRepository;
-    this.externalUserRepository = externalUserRepository;
     this.institutionRepository = institutionRepository;
     this.programRepository = programRepository;
     this.programProgressRepository = programProgressRepository;
-    this.skillLevelRepository = skillLevelRepository;
     this.skillRepository = skillRepository;
-    this.traceRepository = traceRepository;
-    this.amsRepository = amsRepository;
+    this.cohortSeeder = cohortSeeder;
+    this.amsSeeder = amsSeeder;
+    this.traceSeeder = traceSeeder;
+    this.userSeeder = userSeeder;
+    this.userSeeder.setNbUsers(NB_USERS);
+    this.cohortSeeder.setNbCohorts(NB_COHORTS);
+    this.amsSeeder.setNbAms(NB_AMS);
+    this.traceSeeder.setNbTraces(NB_TRACES);
   }
 
   @Override
@@ -60,39 +70,8 @@ public class SeederRunner implements CommandLineRunner {
     long userCont = userRepository.countAll();
 
     if (seedEnabled && userCont == 0) {
-      var fakeUsers = new ArrayList<FakeUser>();
-      fakeUsers.add(FakeUser.create().withEmail().withStudent());
-      fakeUsers.add(FakeUser.create().withEmail().withTeacher());
-      fakeUsers.add(FakeUser.create().withEmail().withStudent().withTeacher());
-      IntStream.range(0, 10)
-          .mapToObj(i -> FakeUser.create().withStudent().withStudent())
-          .forEach(fakeUsers::add);
 
-      var users = fakeUsers.stream().map(FakeUser::toModel).toList();
-
-      var externalUsers =
-          users.stream()
-              .map(
-                  user ->
-                      FakeExternalUser.of(
-                              user,
-                              user.isStudent() ? EUserCategory.STUDENT : EUserCategory.TEACHER)
-                          .toModel())
-              .toList();
-
-      userRepository.saveAll(users);
-      log.info("✓ {} users created", users.size());
-
-      var students = fakeUsers.stream().map(FakeUser::getStudent).filter(Objects::nonNull).toList();
-      userRepository.saveAllStudents(students);
-      log.info("✓ {} students synced", students.size());
-
-      var teachers = fakeUsers.stream().map(FakeUser::getTeacher).filter(Objects::nonNull).toList();
-      userRepository.saveAllTeachers(teachers);
-      log.info("✓ {} teachers synced", teachers.size());
-
-      externalUserRepository.saveAll(externalUsers);
-      log.info("✓ {} externalUsers created", externalUsers.size());
+      var users = userSeeder.seed();
 
       Institution institutionBase = FakeInstitution.create().toModel();
       Institution institutionApc =
@@ -163,25 +142,9 @@ public class SeederRunner implements CommandLineRunner {
                   })
               .toList();
 
-      var trace = FakeTrace.of(users.getFirst()).toModel();
-      TraceEntity traceEntity = TraceMapper.fromDomain(trace);
-      traceRepository.saveAllEntities(List.of(traceEntity));
-      traceRepository.flush();
-      log.info("✓ 1 trace created");
-      AMS fakeAms = FakeAMS.of(users.getFirst()).toModel();
-      AMSEntity ams = AMSMapper.fromDomain(fakeAms);
-      Set<AMSTranslationEntity> amsTranslations =
-          Set.of(
-              new AMSTranslationEntity(
-                  UUID.randomUUID(), ELanguage.FRENCH, fakeAms.getTitle(), ams),
-              new AMSTranslationEntity(
-                  UUID.randomUUID(), ELanguage.ENGLISH, fakeAms.getTitle(), ams),
-              new AMSTranslationEntity(
-                  UUID.randomUUID(), ELanguage.SPANISH, fakeAms.getTitle(), ams));
-
-      ams.setTranslations(amsTranslations);
-      amsRepository.saveAllEntities(List.of(ams));
-      log.info("✓ 1 ams created");
+      List<Trace> traces = traceSeeder.withUsers(users).seed();
+      // TODO: to remove when all seeders are set
+      TraceEntity traceEntity = TraceMapper.fromDomain(traces.getFirst());
 
       SkillLevel skillLevel1 =
           FakeSkillLevel.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
@@ -266,8 +229,29 @@ public class SeederRunner implements CommandLineRunner {
       programProgressRepository.saveAll(programProgresses);
       log.info("✓ {} programProgresses created", programProgresses.size());
 
+      List<Cohort> cohorts =
+          cohortSeeder.withUsers(users).withProgramProgressSet(programProgresses).seed();
+      List<SkillLevel> skillLevels =
+          List.of(
+              skillLevel1,
+              skillLevel2,
+              skillLevel3,
+              skillLevel4,
+              skillLevel5,
+              skillLevel6,
+              skillLevel7,
+              skillLevel8);
+
       skillRepository.saveAllEntities(skillEntities);
+
       log.info("✓ {} skills created", skillEntities.size());
+
+      amsSeeder
+          .withUsers(users)
+          .withCohorts(cohorts)
+          .withSkillLevels(skillLevels)
+          .withTraces(traces)
+          .seed();
 
       log.info("Seeding successfully finished");
 

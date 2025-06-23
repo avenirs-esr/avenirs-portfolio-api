@@ -1,6 +1,15 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,11 +25,14 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class AMSEntity {
-  @Id private UUID id;
+public class AMSEntity extends PeriodEntity<Instant> {
 
   @ManyToOne(optional = false)
   private UserEntity user;
+
+  @Column
+  @Enumerated(EnumType.STRING)
+  private EAmsStatus status;
 
   @ManyToMany
   @JoinTable(
@@ -28,6 +40,13 @@ public class AMSEntity {
       joinColumns = @JoinColumn(name = "ams_id"),
       inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
   private List<SkillLevelEntity> skillLevels;
+
+  @ManyToMany
+  @JoinTable(
+      name = "trace_ams",
+      joinColumns = @JoinColumn(name = "ams_id"),
+      inverseJoinColumns = @JoinColumn(name = "trace_id"))
+  private List<TraceEntity> traces;
 
   @OneToMany(
       mappedBy = "ams",
@@ -37,9 +56,29 @@ public class AMSEntity {
   private Set<AMSTranslationEntity> translations =
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
-  public AMSEntity(UUID id, UserEntity user, Set<SkillLevelEntity> skillLevels) {
-    this.id = id;
+  @ManyToMany
+  @JoinTable(
+      name = "cohort_ams",
+      joinColumns = @JoinColumn(name = "ams_id"),
+      inverseJoinColumns = @JoinColumn(name = "cohort_id"))
+  private Set<CohortEntity> cohorts;
+
+  public AMSEntity(
+      UUID id,
+      UserEntity user,
+      EAmsStatus status,
+      Instant startDate,
+      Instant endDate,
+      Set<SkillLevelEntity> skillLevels,
+      Set<CohortEntity> cohorts,
+      Set<TraceEntity> traces) {
+    setId(id);
     this.user = user;
+    setStartDate(startDate);
+    setEndDate(endDate);
     this.skillLevels = List.copyOf(skillLevels);
+    this.cohorts = Set.copyOf(cohorts == null ? Set.of() : cohorts);
+    this.traces = List.copyOf(traces);
+    this.status = status;
   }
 }

@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeSkill;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakeSkill;
 import java.util.*;
 
 public class SkillFixture {

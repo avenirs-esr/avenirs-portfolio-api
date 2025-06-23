@@ -7,11 +7,11 @@ databaseChangeLog:
             tableName: configuration
             columns:
               - column:
-                    name: id
-                    type: UUID
-                    constraints:
-                      primaryKey: true
-                      nullable: false
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
 
               - column:
                   name: name
@@ -21,7 +21,7 @@ databaseChangeLog:
                     nullable: false
 
               - column:
-                  name: value
+                  name: "value"
                   type: VARCHAR(255)
                   constraints:
                     nullable: false
@@ -31,49 +31,49 @@ databaseChangeLog:
             splitStatements: true
             sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
             stripComments: true
-  -  changeSet:
-       id: 011-2
-       author:  mouhameddiallo
-       changes:
-         -  insert:
-              tableName:  configuration
-              columns:
-                - column:
-                      name: id
-                      valueComputed: 'gen_random_uuid()'
-                -  column:
-                     name:  name
-                     value:  'TRACE_MAX_DAY_REMAINING_NORMAL'
-                -  column:
-                     name:  value
-                     value:  '90'
-         - insert:
-             tableName: configuration
-             columns:
-               - column:
-                   name: id
-                   valueComputed: 'gen_random_uuid()'
-               - column:
-                   name: name
-                   value: 'TRACE_MAX_DAY_REMAINING_WARNING'
-               - column:
-                   name: value
-                   value: '30'
-         - insert:
-             tableName: configuration
-             columns:
-               - column:
-                   name: id
-                   valueComputed: 'gen_random_uuid()'
-               - column:
-                   name: name
-                   value: 'TRACE_MAX_DAY_REMAINING_CRITICAL'
-               - column:
-                   name: value
-                   value: '5'
-         - sql:
-             dbms: 'postgresql'
-             endDelimiter: \nGO
-             splitStatements: true
-             sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
-             stripComments: true
+  - changeSet:
+      id: 011-2
+      author: mouhameddiallo
+      changes:
+        - insert:
+            tableName: configuration
+            columns:
+              - column:
+                  name: id
+                  valueComputed: 'gen_random_uuid()'
+              - column:
+                  name: name
+                  value: 'TRACE_MAX_DAY_REMAINING_NORMAL'
+              - column:
+                  name: "value"
+                  value: '90'
+        - insert:
+            tableName: configuration
+            columns:
+              - column:
+                  name: id
+                  valueComputed: 'gen_random_uuid()'
+              - column:
+                  name: name
+                  value: 'TRACE_MAX_DAY_REMAINING_WARNING'
+              - column:
+                  name: "value"
+                  value: '30'
+        - insert:
+            tableName: configuration
+            columns:
+              - column:
+                  name: id
+                  valueComputed: 'gen_random_uuid()'
+              - column:
+                  name: name
+                  value: 'TRACE_MAX_DAY_REMAINING_CRITICAL'
+              - column:
+                  name: "value"
+                  value: '5'
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            stripComments: true

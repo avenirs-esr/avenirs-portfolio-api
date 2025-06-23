@@ -1,11 +1,12 @@
 package fixtures;
 
-import fr.avenirsesr.portfolio.api.domain.model.AMS;
-import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.*;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.FakeAMS;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.FakeAMS;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,6 +17,8 @@ public class AMSFixture {
   private String title;
   private List<SkillLevel> skillLevels;
   private ELanguage language = ELanguage.FRENCH;
+  private Instant startDate;
+  private Instant endDate;
 
   private AMSFixture() {
     var fakeUser = UserFixture.create().toModel();
@@ -68,7 +71,27 @@ public class AMSFixture {
     return this;
   }
 
+  public AMSFixture withStartDate(Instant startDate) {
+    this.startDate = startDate;
+    return this;
+  }
+
+  public AMSFixture withEndDate(Instant endDate) {
+    this.endDate = endDate;
+    return this;
+  }
+
   public AMS toModel() {
-    return AMS.toDomain(id, user, title, skillLevels, language);
+    return AMS.toDomain(
+        id,
+        user,
+        title,
+        startDate,
+        endDate,
+        skillLevels,
+        List.of(),
+        new HashSet<Cohort>(),
+        language,
+        EAmsStatus.NOT_STARTED);
   }
 }

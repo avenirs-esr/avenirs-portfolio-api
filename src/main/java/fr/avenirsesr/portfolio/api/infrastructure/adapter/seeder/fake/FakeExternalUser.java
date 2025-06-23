@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.api.domain.model.ExternalUser;
 import fr.avenirsesr.portfolio.api.domain.model.User;
