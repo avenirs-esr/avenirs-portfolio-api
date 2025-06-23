@@ -21,99 +21,103 @@ public class FakePeriod&lt;T extends Temporal&gt; {
   private T startDate;
   private T endDate;
 
-  public static FakePeriod&lt;LocalDate&gt; createLocalDatePeriod() {
-<span class="nc" id="L25">    return new FakePeriod&lt;&gt;(</span>
-<span class="nc" id="L26">        localDate -&gt; localDate, instant -&gt; instant.atZone(ZoneId.systemDefault()).toLocalDate());</span>
-  }
-
   public static FakePeriod&lt;Instant&gt; createInstantPeriod() {
-<span class="nc" id="L30">    return new FakePeriod&lt;&gt;(</span>
+<span class="nc" id="L25">    return new FakePeriod&lt;&gt;(</span>
         localDate -&gt; {
-<span class="nc" id="L32">          int hour = faker.call().number().numberBetween(8, 20);</span>
-<span class="nc" id="L33">          int minute = faker.call().number().numberBetween(0, 60);</span>
-<span class="nc" id="L34">          return localDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();</span>
+<span class="nc" id="L27">          int hour = faker.call().number().numberBetween(8, 20);</span>
+<span class="nc" id="L28">          int minute = faker.call().number().numberBetween(0, 60);</span>
+<span class="nc" id="L29">          return localDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();</span>
         },
-<span class="nc" id="L36">        instant -&gt; instant);</span>
+<span class="nc" id="L31">        instant -&gt; instant);</span>
   }
 
   private FakePeriod(
-<span class="nc" id="L40">      Function&lt;LocalDate, T&gt; localDateConverter, Function&lt;Instant, T&gt; instantConverter) {</span>
-<span class="nc" id="L41">    this.localDateConverter = localDateConverter;</span>
-<span class="nc" id="L42">    this.instantConverter = instantConverter;</span>
-<span class="nc" id="L43">  }</span>
+<span class="nc" id="L35">      Function&lt;LocalDate, T&gt; localDateConverter, Function&lt;Instant, T&gt; instantConverter) {</span>
+<span class="nc" id="L36">    this.localDateConverter = localDateConverter;</span>
+<span class="nc" id="L37">    this.instantConverter = instantConverter;</span>
+<span class="nc" id="L38">  }</span>
 
   public void initStartDateInAcademicPeriodBeforeMay() {
-<span class="nc" id="L46">    LocalDate startBoundary = LocalDate.of(academicYear, Month.SEPTEMBER, 1);</span>
-<span class="nc" id="L47">    LocalDate endBoundary = LocalDate.of(academicYear + 1, Month.MAY, 31);</span>
+<span class="nc" id="L41">    LocalDate startBoundary = LocalDate.of(academicYear, Month.SEPTEMBER, 1);</span>
+<span class="nc" id="L42">    LocalDate endBoundary = LocalDate.of(academicYear + 1, Month.MAY, 31);</span>
 
-<span class="nc" id="L49">    long startEpochDay = startBoundary.toEpochDay();</span>
-<span class="nc" id="L50">    long endEpochDay = endBoundary.toEpochDay();</span>
+<span class="nc" id="L44">    long startEpochDay = startBoundary.toEpochDay();</span>
+<span class="nc" id="L45">    long endEpochDay = endBoundary.toEpochDay();</span>
 
-<span class="nc" id="L52">    long randomDay =</span>
+<span class="nc" id="L47">    long randomDay =</span>
         startEpochDay
-<span class="nc" id="L54">            + faker.call().number().numberBetween(0, (int) (endEpochDay - startEpochDay + 1));</span>
+<span class="nc" id="L49">            + faker.call().number().numberBetween(0, (int) (endEpochDay - startEpochDay + 1));</span>
 
-<span class="nc" id="L56">    LocalDate randomLocalDate = LocalDate.ofEpochDay(randomDay);</span>
-<span class="nc" id="L57">    startDate = localDateConverter.apply(randomLocalDate);</span>
-<span class="nc" id="L58">  }</span>
+<span class="nc" id="L51">    LocalDate randomLocalDate = LocalDate.ofEpochDay(randomDay);</span>
+<span class="nc" id="L52">    startDate = localDateConverter.apply(randomLocalDate);</span>
+<span class="nc" id="L53">  }</span>
 
   public void initEndDateInAcademicPeriodAfterStartDate() {
-<span class="nc bnc" id="L61" title="All 2 branches missed.">    if (startDate == null) {</span>
-<span class="nc" id="L62">      initStartDateInAcademicPeriodBeforeMay();</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">    if (startDate == null) {</span>
+<span class="nc" id="L57">      initStartDateInAcademicPeriodBeforeMay();</span>
     }
 
-    Instant startInstant;
-<span class="nc bnc" id="L66" title="All 2 branches missed.">    if (startDate instanceof LocalDate) {</span>
-<span class="nc" id="L67">      startInstant = ((LocalDate) startDate).atStartOfDay(ZoneId.systemDefault()).toInstant();</span>
+<span class="nc" id="L60">    Instant startInstant = convertStartDateToInstant();</span>
+<span class="nc" id="L61">    Instant minimumEndDate = startInstant.plus(24, ChronoUnit.HOURS);</span>
+
+<span class="nc" id="L63">    Instant baseEndDate = calculateBaseEndDate(minimumEndDate);</span>
+
+<span class="nc bnc" id="L65" title="All 2 branches missed.">    if (!(startDate instanceof LocalDate)) {</span>
+<span class="nc" id="L66">      baseEndDate = adjustTimeForInstantType(startInstant, baseEndDate);</span>
+    }
+
+<span class="nc" id="L69">    endDate = instantConverter.apply(baseEndDate);</span>
+<span class="nc" id="L70">  }</span>
+
+  private Instant convertStartDateToInstant() {
+<span class="nc bnc" id="L73" title="All 2 branches missed.">    if (startDate instanceof LocalDate) {</span>
+<span class="nc" id="L74">      return ((LocalDate) startDate).atStartOfDay(ZoneId.systemDefault()).toInstant();</span>
     } else {
-<span class="nc" id="L69">      startInstant = (Instant) startDate;</span>
+<span class="nc" id="L76">      return (Instant) startDate;</span>
+    }
+  }
+
+  private Instant calculateBaseEndDate(Instant minimumEndDate) {
+<span class="nc" id="L81">    LocalDate julyFirstBoundary = LocalDate.of(academicYear + 1, Month.JULY, 1);</span>
+<span class="nc" id="L82">    Instant julyFirstInstant = julyFirstBoundary.atStartOfDay(ZoneId.systemDefault()).toInstant();</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">    if (minimumEndDate.isAfter(julyFirstInstant)) {</span>
+<span class="nc" id="L85">      return julyFirstInstant.minus(1, ChronoUnit.DAYS);</span>
     }
 
-<span class="nc" id="L72">    Instant minimumEndDate = startInstant.plus(24, ChronoUnit.HOURS);</span>
+<span class="nc" id="L88">    return calculateRandomEndDate(minimumEndDate, julyFirstBoundary);</span>
+  }
 
-<span class="nc" id="L74">    LocalDate julyFirstBoundary = LocalDate.of(academicYear + 1, Month.JULY, 1);</span>
-<span class="nc" id="L75">    Instant julyFirstInstant = julyFirstBoundary.atStartOfDay(ZoneId.systemDefault()).toInstant();</span>
+  private Instant calculateRandomEndDate(Instant minimumEndDate, LocalDate julyFirstBoundary) {
+<span class="nc" id="L92">    long daysUntilJulyFirst =</span>
+<span class="nc" id="L93">        ChronoUnit.DAYS.between(</span>
+<span class="nc" id="L94">            minimumEndDate.atZone(ZoneId.systemDefault()).toLocalDate(), julyFirstBoundary);</span>
 
-<span class="nc bnc" id="L77" title="All 2 branches missed.">    if (minimumEndDate.isAfter(julyFirstInstant)) {</span>
-<span class="nc" id="L78">      endDate = instantConverter.apply(julyFirstInstant.minus(1, ChronoUnit.DAYS));</span>
-<span class="nc" id="L79">      return;</span>
+<span class="nc" id="L96">    int additionalDays =</span>
+<span class="nc" id="L97">        faker.call().number().numberBetween(1, (int) Math.min(180, daysUntilJulyFirst));</span>
+
+<span class="nc" id="L99">    return minimumEndDate.plus(additionalDays, ChronoUnit.DAYS);</span>
+  }
+
+  private Instant adjustTimeForInstantType(Instant startInstant, Instant baseEndDate) {
+<span class="nc" id="L103">    int hour = faker.call().number().numberBetween(8, 20);</span>
+<span class="nc" id="L104">    int minute = faker.call().number().numberBetween(0, 60);</span>
+<span class="nc" id="L105">    LocalDate endLocalDate = baseEndDate.atZone(ZoneId.systemDefault()).toLocalDate();</span>
+<span class="nc" id="L106">    Instant adjustedEndDate =</span>
+<span class="nc" id="L107">        endLocalDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();</span>
+
+<span class="nc bnc" id="L109" title="All 2 branches missed.">    if (ChronoUnit.HOURS.between(startInstant, adjustedEndDate) &lt; 24) {</span>
+<span class="nc" id="L110">      return startInstant.plus(24, ChronoUnit.HOURS);</span>
     }
 
-<span class="nc" id="L82">    long daysUntilJulyFirst =</span>
-<span class="nc" id="L83">        ChronoUnit.DAYS.between(</span>
-<span class="nc" id="L84">            minimumEndDate.atZone(ZoneId.systemDefault()).toLocalDate(), julyFirstBoundary);</span>
-
-<span class="nc" id="L86">    int additionalDays =</span>
-<span class="nc" id="L87">        faker.call().number().numberBetween(1, (int) Math.min(180, daysUntilJulyFirst));</span>
-
-<span class="nc" id="L89">    Instant baseEndDate = minimumEndDate.plus(additionalDays, ChronoUnit.DAYS);</span>
-
-<span class="nc bnc" id="L91" title="All 2 branches missed.">    if (!(startDate instanceof LocalDate)) {</span>
-<span class="nc" id="L92">      int hour = faker.call().number().numberBetween(8, 20);</span>
-<span class="nc" id="L93">      int minute = faker.call().number().numberBetween(0, 60);</span>
-<span class="nc" id="L94">      LocalDate endLocalDate = baseEndDate.atZone(ZoneId.systemDefault()).toLocalDate();</span>
-<span class="nc" id="L95">      baseEndDate = endLocalDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();</span>
-
-<span class="nc bnc" id="L97" title="All 2 branches missed.">      if (ChronoUnit.HOURS.between(startInstant, baseEndDate) &lt; 24) {</span>
-<span class="nc" id="L98">        baseEndDate = startInstant.plus(24, ChronoUnit.HOURS);</span>
-      }
-    }
-
-<span class="nc" id="L102">    endDate = instantConverter.apply(baseEndDate);</span>
-<span class="nc" id="L103">  }</span>
-
-  public static FakePeriod&lt;LocalDate&gt; createMin24hoursLocalDatePeriodInAcademicPeriod() {
-<span class="nc" id="L106">    FakePeriod&lt;LocalDate&gt; fakePeriod = createLocalDatePeriod();</span>
-<span class="nc" id="L107">    fakePeriod.initStartDateInAcademicPeriodBeforeMay();</span>
-<span class="nc" id="L108">    fakePeriod.initEndDateInAcademicPeriodAfterStartDate();</span>
-<span class="nc" id="L109">    return fakePeriod;</span>
+<span class="nc" id="L113">    return adjustedEndDate;</span>
   }
 
   public static FakePeriod&lt;Instant&gt; createMin24hoursInstantPeriodInAcademicPeriod() {
-<span class="nc" id="L113">    FakePeriod&lt;Instant&gt; fakePeriod = createInstantPeriod();</span>
-<span class="nc" id="L114">    fakePeriod.initStartDateInAcademicPeriodBeforeMay();</span>
-<span class="nc" id="L115">    fakePeriod.initEndDateInAcademicPeriodAfterStartDate();</span>
-<span class="nc" id="L116">    return fakePeriod;</span>
+<span class="nc" id="L117">    FakePeriod&lt;Instant&gt; fakePeriod = createInstantPeriod();</span>
+<span class="nc" id="L118">    fakePeriod.initStartDateInAcademicPeriodBeforeMay();</span>
+<span class="nc" id="L119">    fakePeriod.initEndDateInAcademicPeriodAfterStartDate();</span>
+<span class="nc" id="L120">    return fakePeriod;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
