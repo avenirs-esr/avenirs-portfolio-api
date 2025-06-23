@@ -8,7 +8,6 @@ import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.port.input.AMSService;
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

@@ -95,7 +95,8 @@ class AMSControllerTest {
   @Test
   void shouldReturnEmptyListWhenUserHasNoAMS() {
     // Given
-    PagedResult<AMS> emptyPagedResult = new PagedResult<>(new ArrayList<>(), 0, 0, defaultPage, defaultSize);
+    PagedResult<AMS> emptyPagedResult =
+        new PagedResult<>(new ArrayList<>(), 0, 0, defaultPage, defaultSize);
 
     when(userUtil.getStudent(principal)).thenReturn(student);
     when(amsService.findUserAmsWithPagination(student, defaultPage, defaultSize))

@@ -43,7 +43,7 @@ class AMSServiceImplTest {
     studentId = student.getId();
     defaultPage = 0;
     defaultSize = 10;
-    
+
     ReflectionTestUtils.setField(amsService, "defaultPage", 0);
     ReflectionTestUtils.setField(amsService, "defaultPageSize", 8);
     ReflectionTestUtils.setField(amsService, "maxPageSize", 12);
