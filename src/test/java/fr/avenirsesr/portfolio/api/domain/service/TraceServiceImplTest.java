@@ -15,16 +15,7 @@ import fixtures.TraceFixture;
 import fixtures.UserFixture;
 import fr.avenirsesr.portfolio.api.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.api.domain.model.AMS;
-import fr.avenirsesr.portfolio.api.domain.model.Program;
-import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
-import fr.avenirsesr.portfolio.api.domain.model.Skill;
-import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.Trace;
-import fr.avenirsesr.portfolio.api.domain.model.TraceConfigurationInfo;
-import fr.avenirsesr.portfolio.api.domain.model.TraceView;
-import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.api.domain.port.input.ConfigurationService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.TraceRepository;
@@ -164,7 +155,7 @@ public class TraceServiceImplTest {
     // Then
     assertEquals(traceView.traces().size(), traceEntities.size());
     assertEquals(traceView.criticalCount(), 3);
-    assertEquals(traceView.page().size(), traceEntityPage.getSize());
+    assertEquals(traceView.page().pageSize(), traceEntityPage.getSize());
     assertEquals(traceView.page().totalElements(), traceEntityPage.getTotalElements());
     assertEquals(traceView.page().totalPages(), traceEntityPage.getTotalPages());
     assertEquals(traceView.page().number(), traceEntityPage.getNumber());
@@ -240,5 +231,40 @@ public class TraceServiceImplTest {
     // Then
     assertEquals(EErrorCode.USER_NOT_AUTHORIZED, exception.getErrorCode());
     verify(traceRepository, never()).deleteById(trace.getId());
+  }
+
+  @Test
+  void givenUnassociatedTraces_shouldReturnSummary() {
+    // Given
+    TraceConfigurationInfo traceConfigurationInfo = new TraceConfigurationInfo(90, 30, 5);
+    List<Trace> unassociatedTraces =
+        List.of(
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(12, ChronoUnit.DAYS))
+                .toModel(),
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(72, ChronoUnit.DAYS))
+                .toModel(),
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
+                .toModel(),
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(85, ChronoUnit.DAYS))
+                .toModel());
+
+    // When
+    when(traceRepository.findAllUnassociated(student.getUser())).thenReturn(unassociatedTraces);
+    when(configurationService.getTraceConfiguration()).thenReturn(traceConfigurationInfo);
+    UnassociatedTracesSummary summary =
+        traceService.getUnassociatedTracesSummary(student.getUser());
+
+    // Then
+    assertEquals(4, summary.total());
+    assertEquals(3, summary.totalWarnings());
+    assertEquals(1, summary.totalCriticals());
   }
 }

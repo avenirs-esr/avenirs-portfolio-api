@@ -65,4 +65,15 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, 
       jpaRepository.saveAll(entities);
     }
   }
+
+  @Override
+  public List<Trace> findAllUnassociated(User user) {
+    return jpaSpecificationExecutor
+        .findAll(
+            TraceSpecification.ofUser(UserMapper.fromDomain(user))
+                .and(TraceSpecification.unassociated()))
+        .stream()
+        .map(TraceMapper::toDomain)
+        .toList();
+  }
 }

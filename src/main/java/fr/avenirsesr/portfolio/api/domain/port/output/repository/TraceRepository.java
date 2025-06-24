@@ -12,4 +12,6 @@ public interface TraceRepository extends GenericRepositoryPort<Trace> {
   List<Trace> findAllPage(User user, int page, int pageSize);
 
   Page<TraceEntity> findAllUnassociatedPage(User user, int page, int pageSize);
+
+  List<Trace> findAllUnassociated(User user);
 }

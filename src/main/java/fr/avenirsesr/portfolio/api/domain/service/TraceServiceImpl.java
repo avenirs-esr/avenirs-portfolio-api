@@ -2,11 +2,7 @@ package fr.avenirsesr.portfolio.api.domain.service;
 
 import fr.avenirsesr.portfolio.api.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.api.domain.model.PageInfo;
-import fr.avenirsesr.portfolio.api.domain.model.Trace;
-import fr.avenirsesr.portfolio.api.domain.model.TraceConfigurationInfo;
-import fr.avenirsesr.portfolio.api.domain.model.TraceView;
-import fr.avenirsesr.portfolio.api.domain.model.User;
+import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.ConfigurationService;
 import fr.avenirsesr.portfolio.api.domain.port.input.TraceService;
@@ -32,6 +28,10 @@ public class TraceServiceImpl implements TraceService {
   private static final int MAX_TRACES_OVERVIEW = 3;
   private final TraceRepository traceRepository;
   private final ConfigurationService configurationService;
+
+  public static boolean isBelowThresholdDate(Instant initialDate, int maxDaySinceCreation) {
+    return Duration.between(initialDate, Instant.now()).toDays() >= maxDaySinceCreation;
+  }
 
   @Override
   public String programNameOfTrace(Trace trace) {
@@ -70,7 +70,7 @@ public class TraceServiceImpl implements TraceService {
     TraceConfigurationInfo traceConfigurationInfo = configurationService.getTraceConfiguration();
 
     for (Trace trace : traceList) {
-      if (hasEnoughDayUntilCritical(
+      if (isBelowThresholdDate(
           trace.getCreatedAt(),
           traceConfigurationInfo.maxDayRemaining()
               - traceConfigurationInfo.maxDayRemainingCritical())) {
@@ -101,9 +101,28 @@ public class TraceServiceImpl implements TraceService {
     traceRepository.deleteById(id);
   }
 
-  public static boolean hasEnoughDayUntilCritical(
-      Instant initialDate, int maxDaySinceCreationBeforeCritical) {
-    return Duration.between(initialDate, Instant.now()).toDays()
-        <= maxDaySinceCreationBeforeCritical;
+  @Override
+  public UnassociatedTracesSummary getUnassociatedTracesSummary(User user) {
+    List<Trace> unassociatedTraces = traceRepository.findAllUnassociated(user);
+    TraceConfigurationInfo traceConfigurationInfo = configurationService.getTraceConfiguration();
+
+    int criticalCount = 0;
+    int warningCount = 0;
+    for (Trace trace : unassociatedTraces) {
+      if (isBelowThresholdDate(
+          trace.getCreatedAt(),
+          traceConfigurationInfo.maxDayRemaining()
+              - traceConfigurationInfo.maxDayRemainingCritical())) {
+        criticalCount++;
+      }
+      if (isBelowThresholdDate(
+          trace.getCreatedAt(),
+          traceConfigurationInfo.maxDayRemaining()
+              - traceConfigurationInfo.maxDayRemainingWarning())) {
+        warningCount++;
+      }
+    }
+
+    return new UnassociatedTracesSummary(unassociatedTraces.size(), warningCount, criticalCount);
   }
 }
