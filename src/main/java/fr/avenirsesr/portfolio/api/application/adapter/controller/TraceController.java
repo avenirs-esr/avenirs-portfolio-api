@@ -1,8 +1,10 @@
 package fr.avenirsesr.portfolio.api.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.api.application.adapter.dto.TraceOverviewDTO;
+import fr.avenirsesr.portfolio.api.application.adapter.dto.UnassociatedTracesSummaryDTO;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.TraceViewMapper;
+import fr.avenirsesr.portfolio.api.application.adapter.mapper.UnassociatedTracesSummaryMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.response.TracesResponse;
 import fr.avenirsesr.portfolio.api.application.adapter.response.TracesViewResponse;
 import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
@@ -88,5 +90,15 @@ public class TraceController {
   private User getUser(String id) {
     UUID userId = UUID.fromString(id);
     return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+  }
+
+  @GetMapping("/unassociated/summary")
+  public ResponseEntity<UnassociatedTracesSummaryDTO> getTracesUnassociatedSummary(
+      Principal principal) {
+    log.debug("Received request to trace view of user [{}]", principal.getName());
+    User user = getUser(principal.getName());
+
+    return ResponseEntity.ok(
+        UnassociatedTracesSummaryMapper.toDTO(traceService.getUnassociatedTracesSummary(user)));
   }
 }
