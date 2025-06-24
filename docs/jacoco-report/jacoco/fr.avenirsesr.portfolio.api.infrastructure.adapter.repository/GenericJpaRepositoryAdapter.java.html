@@ -37,12 +37,18 @@ public abstract class GenericJpaRepositoryAdapter&lt;D, E&gt; implements Generic
 
   @Override
   public Optional&lt;D&gt; findById(UUID id) {
-<span class="nc" id="L40">    return Optional.ofNullable(toDomain.apply(jpaRepository.findById(id).orElse(null)));</span>
+<span class="nc" id="L40">    E entity = jpaRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">    return entity == null ? Optional.empty() : Optional.of(toDomain.apply(entity));</span>
   }
 
   @Override
   public void flush() {
-<span class="nc" id="L45">    jpaRepository.flush();</span>
-<span class="nc" id="L46">  }</span>
+<span class="nc" id="L46">    jpaRepository.flush();</span>
+<span class="nc" id="L47">  }</span>
+
+  @Override
+  public void deleteById(UUID id) {
+<span class="nc" id="L51">    jpaRepository.deleteById(id);</span>
+<span class="nc" id="L52">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
