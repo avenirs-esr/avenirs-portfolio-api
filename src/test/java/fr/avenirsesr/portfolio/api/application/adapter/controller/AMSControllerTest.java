@@ -78,7 +78,7 @@ class AMSControllerTest {
     assertEquals(3, body.page().totalElements());
     assertEquals(1, body.page().totalPages());
     assertEquals(defaultPage, body.page().number());
-    assertEquals(defaultSize, body.page().size());
+    assertEquals(defaultSize, body.page().pageSize());
 
     // Verify DTO conversion
     AmsViewDTO firstDto = body.data().getFirst();
@@ -115,7 +115,7 @@ class AMSControllerTest {
     assertEquals(0, body.page().totalElements());
     assertEquals(0, body.page().totalPages());
     assertEquals(defaultPage, body.page().number());
-    assertEquals(defaultSize, body.page().size());
+    assertEquals(defaultSize, body.page().pageSize());
 
     verify(userUtil).getStudent(principal);
     verify(amsService).findUserAmsWithPagination(student, defaultPage, defaultSize);
@@ -144,7 +144,7 @@ class AMSControllerTest {
     assertEquals(15, body.page().totalElements());
     assertEquals(3, body.page().totalPages());
     assertEquals(page, body.page().number());
-    assertEquals(size, body.page().size());
+    assertEquals(size, body.page().pageSize());
 
     verify(userUtil).getStudent(principal);
     verify(amsService).findUserAmsWithPagination(student, page, size);

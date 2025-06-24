@@ -155,7 +155,7 @@ public class TraceServiceImplTest {
     // Then
     assertEquals(traceView.traces().size(), traceEntities.size());
     assertEquals(traceView.criticalCount(), 3);
-    assertEquals(traceView.page().size(), traceEntityPage.getSize());
+    assertEquals(traceView.page().pageSize(), traceEntityPage.getSize());
     assertEquals(traceView.page().totalElements(), traceEntityPage.getTotalElements());
     assertEquals(traceView.page().totalPages(), traceEntityPage.getTotalPages());
     assertEquals(traceView.page().number(), traceEntityPage.getNumber());
