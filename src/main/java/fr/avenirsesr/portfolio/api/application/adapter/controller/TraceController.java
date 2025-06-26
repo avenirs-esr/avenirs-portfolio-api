@@ -7,13 +7,12 @@ import fr.avenirsesr.portfolio.api.application.adapter.mapper.TraceViewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.UnassociatedTracesSummaryMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.response.TracesResponse;
 import fr.avenirsesr.portfolio.api.application.adapter.response.TracesViewResponse;
-import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.Trace;
 import fr.avenirsesr.portfolio.api.domain.model.TraceView;
 import fr.avenirsesr.portfolio.api.domain.model.User;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ETraceStatus;
 import fr.avenirsesr.portfolio.api.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.api.domain.port.input.UserService;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/me/traces")
 public class TraceController {
-  private final UserRepository userRepository;
+  private final UserService userService;
   private final TraceService traceService;
 
   @GetMapping("/overview")
@@ -89,7 +88,7 @@ public class TraceController {
 
   private User getUser(String id) {
     UUID userId = UUID.fromString(id);
-    return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    return userService.getProfile(userId);
   }
 
   @GetMapping("/unassociated/summary")
