@@ -41,6 +41,6 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseTableName: program_progress
             baseColumnNames: student_id
-            referencedTableName: users
+            referencedTableName: user
             referencedColumnNames: id
             constraintName: fk_program_progress_user

@@ -22,7 +22,7 @@ import lombok.Setter;
 
 @Entity
 @Table(
-    name = "external_users",
+    name = "external_user",
     uniqueConstraints = @UniqueConstraint(columnNames = {"eternal_id", "source"}))
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

@@ -4,7 +4,7 @@ databaseChangeLog:
       author: bilelbanelhaq
       changes:
         - createTable:
-            tableName: trace_skill_levels
+            tableName: trace_skill_level
             columns:
               - column:
                   name: trace_id
@@ -20,23 +20,23 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE trace_skill_levels OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE trace_skill_level OWNER TO ${avenirs.admin.role}
             stripComments: true
 
         - addForeignKeyConstraint:
-            baseTableName: trace_skill_levels
+            baseTableName: trace_skill_level
             baseColumnNames: trace_id
             referencedTableName: trace
             referencedColumnNames: id
-            constraintName: fk_trace_skill_levels_trace
+            constraintName: fk_trace_skill_level_trace
             onDelete: CASCADE
 
         - addForeignKeyConstraint:
-            baseTableName: trace_skill_levels
+            baseTableName: trace_skill_level
             baseColumnNames: skill_level_id
             referencedTableName: skill_level
             referencedColumnNames: id
-            constraintName: fk_trace_skill_levels_skill_level
+            constraintName: fk_trace_skill_level_skill_level
             onDelete: CASCADE
 
   - changeSet:
@@ -84,7 +84,7 @@ databaseChangeLog:
       author: bilelbanelhaq
       changes:
         - createTable:
-            tableName: skill_skill_levels
+            tableName: skill_skill_level
             columns:
               - column:
                   name: skill_id
@@ -101,35 +101,35 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE skill_skill_levels OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE skill_skill_level OWNER TO ${avenirs.admin.role}
             stripComments: true
 
         - addForeignKeyConstraint:
-            baseTableName: skill_skill_levels
+            baseTableName: skill_skill_level
             baseColumnNames: skill_id
             referencedTableName: skill
             referencedColumnNames: id
-            constraintName: fk_skill_skill_levels_skill
+            constraintName: fk_skill_skill_level_skill
             onDelete: CASCADE
 
         - addForeignKeyConstraint:
-            baseTableName: skill_skill_levels
+            baseTableName: skill_skill_level
             baseColumnNames: skill_level_id
             referencedTableName: skill_level
             referencedColumnNames: id
-            constraintName: fk_skill_skill_levels_skill_level
+            constraintName: fk_skill_skill_level_skill_level
             onDelete: CASCADE
 
         - addUniqueConstraint:
-            tableName: skill_skill_levels
+            tableName: skill_skill_level
             columnNames: skill_id, skill_level_id
-            constraintName: uq_skill_skill_levels
+            constraintName: uq_skill_skill_level
   - changeSet:
       id: 010-5
       author: bilelbanelhaq
       changes:
         - createTable:
-            tableName: program_progress_skills
+            tableName: program_progress_skill
             columns:
               - column:
                   name: program_progress_id
@@ -146,23 +146,23 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE program_progress_skills OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE program_progress_skill OWNER TO ${avenirs.admin.role}
             stripComments: true
 
         - addForeignKeyConstraint:
-            baseTableName: program_progress_skills
+            baseTableName: program_progress_skill
             baseColumnNames: program_progress_id
             referencedTableName: program_progress
             referencedColumnNames: id
-            constraintName: fk_program_progress_skills_program_progress
+            constraintName: fk_program_progress_skill_program_progress
             onDelete: CASCADE
 
         - addForeignKeyConstraint:
-            baseTableName: program_progress_skills
+            baseTableName: program_progress_skill
             baseColumnNames: skill_id
             referencedTableName: skill
             referencedColumnNames: id
-            constraintName: fk_program_progress_skills_skill
+            constraintName: fk_program_progress_skill_skill
             onDelete: CASCADE
 
 
