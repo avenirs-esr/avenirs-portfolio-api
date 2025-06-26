@@ -35,7 +35,8 @@ public class AMSController {
       @RequestParam(value = "page", required = false) Integer page,
       @RequestParam(value = "pageSize", required = false) Integer pageSize) {
     log.debug(
-        "Received request to get AMS view for user [{}], programProgressId [{}] with pagination (page={}, pageSize={})",
+        "Received request to get AMS view for user [{}], programProgressId [{}] with pagination"
+            + " (page={}, pageSize={})",
         principal.getName(),
         programProgressId,
         page,
