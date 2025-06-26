@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressMap
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressOverviewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressViewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.util.UserUtil;
-import fr.avenirsesr.portfolio.api.domain.model.SortParam;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
@@ -18,11 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-<span class="fc" id="L25">@Slf4j</span>
+<span class="fc" id="L23">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/program-progress&quot;)
 public class ProgramProgressController {
@@ -33,37 +31,34 @@ public class ProgramProgressController {
   public List&lt;ProgramProgressOverviewDTO&gt; getSkillsOverview(
       Principal principal,
       @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
-<span class="nc" id="L36">    ELanguage language = ELanguage.fromCode(lang);</span>
-<span class="nc" id="L37">    Student student = userUtil.getStudent(principal);</span>
-<span class="nc" id="L38">    return programProgressService.getSkillsOverview(student, language).entrySet().stream()</span>
-<span class="nc" id="L39">        .map(</span>
+<span class="nc" id="L34">    ELanguage language = ELanguage.fromCode(lang);</span>
+<span class="nc" id="L35">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L36">    return programProgressService.getSkillsOverview(student, language).entrySet().stream()</span>
+<span class="nc" id="L37">        .map(</span>
             entry -&gt;
-<span class="nc" id="L41">                ProgramProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
-<span class="nc" id="L42">        .toList();</span>
+<span class="nc" id="L39">                ProgramProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="nc" id="L40">        .toList();</span>
   }
 
   @GetMapping(&quot;/view&quot;)
   public List&lt;ProgramProgressViewDTO&gt; getSkillsView(
       Principal principal,
-      @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang,
-      @RequestParam(name = &quot;sort&quot;, required = false) String sortRaw) {
-<span class="nc" id="L50">    ELanguage language = ELanguage.fromCode(lang);</span>
-<span class="nc" id="L51">    SortParam sortParam = new SortParam(sortRaw);</span>
-<span class="nc" id="L52">    Student student = userUtil.getStudent(principal);</span>
-
-<span class="nc" id="L54">    return programProgressService.getSkillsView(student, language, sortParam).entrySet().stream()</span>
-<span class="nc" id="L55">        .map(entry -&gt; ProgramProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
-<span class="nc" id="L56">        .toList();</span>
+      @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
+<span class="nc" id="L47">    ELanguage language = ELanguage.fromCode(lang);</span>
+<span class="nc" id="L48">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L49">    return programProgressService.getSkillsView(student, language).entrySet().stream()</span>
+<span class="nc" id="L50">        .map(entry -&gt; ProgramProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="nc" id="L51">        .toList();</span>
   }
 
   @GetMapping()
   public List&lt;ProgramProgressDTO&gt; getAllProgramProgress(
       Principal principal,
       @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
-<span class="nc" id="L63">    Student student = userUtil.getStudent(principal);</span>
-<span class="nc" id="L64">    return programProgressService.getAllProgramProgress(student, ELanguage.fromCode(lang)).stream()</span>
-<span class="nc" id="L65">        .map(ProgramProgressMapper::fromDomainToDto)</span>
-<span class="nc" id="L66">        .toList();</span>
+<span class="nc" id="L58">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L59">    return programProgressService.getAllProgramProgress(student, ELanguage.fromCode(lang)).stream()</span>
+<span class="nc" id="L60">        .map(ProgramProgressMapper::fromDomainToDto)</span>
+<span class="nc" id="L61">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

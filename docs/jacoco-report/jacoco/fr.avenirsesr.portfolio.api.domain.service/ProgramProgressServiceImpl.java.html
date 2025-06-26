@@ -3,7 +3,6 @@
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.api.domain.model.SortParam;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
@@ -16,7 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L18">@Slf4j</span>
 @AllArgsConstructor
 @Service
 public class ProgramProgressServiceImpl implements ProgramProgressService {
@@ -24,33 +23,34 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   private final ProgramProgressRepository programProgressRepository;
 
   private static SkillLevel findCurrentOrNextSkillLevel(Set&lt;SkillLevel&gt; skillLevels) {
-<span class="pc bpc" id="L27" title="1 of 4 branches missed.">    if (skillLevels == null || skillLevels.isEmpty()) {</span>
-<span class="fc" id="L28">      return null;</span>
+<span class="pc bpc" id="L26" title="1 of 4 branches missed.">    if (skillLevels == null || skillLevels.isEmpty()) {</span>
+<span class="fc" id="L27">      return null;</span>
     }
-<span class="fc" id="L30">    return skillLevels.stream()</span>
-<span class="fc" id="L31">        .filter(</span>
+<span class="fc" id="L29">    return skillLevels.stream()</span>
+<span class="fc" id="L30">        .filter(</span>
             sl -&gt;
-<span class="fc bfc" id="L33" title="All 2 branches covered.">                (sl.getStatus() == ESkillLevelStatus.UNDER_REVIEW</span>
-<span class="fc bfc" id="L34" title="All 2 branches covered.">                        || sl.getStatus() == ESkillLevelStatus.UNDER_ACQUISITION)</span>
-<span class="pc bpc" id="L35" title="1 of 4 branches missed.">                    &amp;&amp; (sl.getEndDate() == null || sl.getEndDate().isAfter(LocalDate.now())))</span>
-<span class="fc" id="L36">        .findFirst()</span>
-<span class="fc" id="L37">        .orElseGet(</span>
+<span class="fc bfc" id="L32" title="All 2 branches covered.">                (sl.getStatus() == ESkillLevelStatus.UNDER_REVIEW</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">                        || sl.getStatus() == ESkillLevelStatus.UNDER_ACQUISITION)</span>
+<span class="pc bpc" id="L34" title="1 of 4 branches missed.">                    &amp;&amp; (sl.getEndDate() == null || sl.getEndDate().isAfter(LocalDate.now())))</span>
+<span class="fc" id="L35">        .findFirst()</span>
+<span class="fc" id="L36">        .orElseGet(</span>
             () -&gt;
-<span class="fc" id="L39">                skillLevels.stream()</span>
-<span class="fc" id="L40">                    .filter(</span>
+<span class="fc" id="L38">                skillLevels.stream()</span>
+<span class="fc" id="L39">                    .filter(</span>
                         sl -&gt;
-<span class="fc bfc" id="L42" title="All 2 branches covered.">                            sl.getStatus() == ESkillLevelStatus.TO_BE_EVALUATED</span>
-<span class="fc bfc" id="L43" title="All 2 branches covered.">                                || sl.getStatus() == ESkillLevelStatus.NOT_STARTED)</span>
-<span class="fc" id="L44">                    .findFirst()</span>
-<span class="fc" id="L45">                    .orElse(null));</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">                            sl.getStatus() == ESkillLevelStatus.TO_BE_EVALUATED</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">                                || sl.getStatus() == ESkillLevelStatus.NOT_STARTED)</span>
+<span class="fc" id="L43">                    .findFirst()</span>
+<span class="fc" id="L44">                    .orElse(null));</span>
   }
 
   private static Map&lt;ProgramProgress, Set&lt;Skill&gt;&gt; cleanProgramProgressList(
       List&lt;ProgramProgress&gt; programProgressList, boolean needToLimitSkills) {
     final int skillLimit =
-<span class="fc bfc" id="L51" title="All 2 branches covered.">        !programProgressList.isEmpty() ? MAX_SKILLS / programProgressList.size() : 0;</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        !programProgressList.isEmpty() ? MAX_SKILLS / programProgressList.size() : 0;</span>
 
-<span class="fc" id="L53">    return programProgressList.stream()</span>
+<span class="fc" id="L52">    return programProgressList.stream()</span>
+<span class="fc" id="L53">        .sorted(Comparator.comparing(p -&gt; p.getProgram().getName()))</span>
 <span class="fc" id="L54">        .collect(</span>
 <span class="fc" id="L55">            Collectors.toMap(</span>
 <span class="fc" id="L56">                programProgress -&gt; programProgress,</span>
@@ -83,32 +83,27 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
 
   @Override
   public Map&lt;ProgramProgress, Set&lt;Skill&gt;&gt; getSkillsOverview(Student student, ELanguage language) {
-<span class="fc" id="L86">    SortParam sortParam = new SortParam(&quot;name&quot;, &quot;ASC&quot;);</span>
-<span class="fc" id="L87">    return cleanProgramProgressList(</span>
-<span class="fc" id="L88">        programProgressRepository.findAllByStudent(student, language, sortParam), true);</span>
+<span class="fc" id="L86">    return cleanProgramProgressList(</span>
+<span class="fc" id="L87">        programProgressRepository.findAllByStudent(student, language), true);</span>
   }
 
   @Override
   public boolean isStudentFollowingAPCProgram(Student student) {
-<span class="fc" id="L93">    var programProgress = programProgressRepository.findAllAPCByStudent(student);</span>
-<span class="fc bfc" id="L94" title="All 2 branches covered.">    return !programProgress.isEmpty();</span>
+<span class="fc" id="L92">    var programProgress = programProgressRepository.findAllAPCByStudent(student);</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">    return !programProgress.isEmpty();</span>
   }
 
   @Override
-  public Map&lt;ProgramProgress, Set&lt;Skill&gt;&gt; getSkillsView(
-      Student student, ELanguage language, SortParam sortParam) {
-<span class="pc bpc" id="L100" title="2 of 4 branches missed.">    if (sortParam == null || sortParam.getField() == null) {</span>
-<span class="nc" id="L101">      sortParam = new SortParam(&quot;name&quot;, &quot;ASC&quot;);</span>
-    }
-<span class="fc" id="L103">    return cleanProgramProgressList(</span>
-<span class="fc" id="L104">        programProgressRepository.findAllByStudent(student, language, sortParam), false);</span>
+  public Map&lt;ProgramProgress, Set&lt;Skill&gt;&gt; getSkillsView(Student student, ELanguage language) {
+<span class="fc" id="L98">    return cleanProgramProgressList(</span>
+<span class="fc" id="L99">        programProgressRepository.findAllByStudent(student, language), false);</span>
   }
 
   @Override
   public List&lt;ProgramProgress&gt; getAllProgramProgress(Student student, ELanguage language) {
-<span class="fc" id="L109">    return programProgressRepository.findAllWithoutSkillsByStudent(student, language).stream()</span>
-<span class="fc" id="L110">        .sorted(Comparator.comparing(p -&gt; p.getProgram().getName()))</span>
-<span class="fc" id="L111">        .collect(Collectors.toList());</span>
+<span class="fc" id="L104">    return programProgressRepository.findAllWithoutSkillsByStudent(student, language).stream()</span>
+<span class="fc" id="L105">        .sorted(Comparator.comparing(p -&gt; p.getProgram().getName()))</span>
+<span class="fc" id="L106">        .collect(Collectors.toList());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
