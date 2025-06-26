@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import fixtures.UserFixture;
 import fr.avenirsesr.portfolio.api.domain.exception.BadImageSizeException;
 import fr.avenirsesr.portfolio.api.domain.exception.BadImageTypeException;
+import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.RessourceRepository;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
@@ -204,5 +205,16 @@ public class UserServiceImplTest {
         () -> {
           userService.updateCoverPicture(student.getId(), mockFile);
         });
+  }
+
+  @Test
+  void getProfile_shouldThrowException_whenUserNotFound() {
+    // Arrange
+    UUID userId = UUID.randomUUID();
+    when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+    // Act + Assert
+    assertThrows(UserNotFoundException.class, () -> userService.getProfile(userId));
+    verify(userRepository).findById(userId);
   }
 }

@@ -6,9 +6,9 @@ import static org.mockito.Mockito.*;
 import fixtures.TraceFixture;
 import fixtures.UserFixture;
 import fr.avenirsesr.portfolio.api.application.adapter.dto.TraceOverviewDTO;
-import fr.avenirsesr.portfolio.api.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.api.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.UserRepository;
 import java.security.Principal;
 import java.util.*;
@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 class TraceControllerTest {
 
   @Mock private UserRepository userRepository;
+  @Mock private UserService userService;
   @Mock private TraceService traceService;
 
   @InjectMocks private TraceController controller;
@@ -43,7 +44,7 @@ class TraceControllerTest {
   @Test
   void shouldReturnTRACEOverviewForUser() {
     // Given
-    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(userService.getProfile(userId)).thenReturn(user);
     when(traceService.lastTracesOf(user)).thenReturn(List.of(trace));
     when(traceService.programNameOfTrace(trace)).thenReturn("Program Name");
 
@@ -62,20 +63,8 @@ class TraceControllerTest {
     assertEquals(trace.getTitle(), dto.title());
     assertEquals("Program Name", dto.programName());
 
-    verify(userRepository).findById(userId);
+    verify(userService).getProfile(userId);
     verify(traceService).lastTracesOf(user);
     verify(traceService).programNameOfTrace(trace);
-  }
-
-  @Test
-  void shouldThrowUserNotFoundExceptionIfUserDoesNotExist() {
-    // Given
-    when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-    // Then
-    assertThrows(UserNotFoundException.class, () -> controller.getTraceOverview(principal));
-
-    verify(userRepository).findById(userId);
-    verifyNoMoreInteractions(traceService);
   }
 }
