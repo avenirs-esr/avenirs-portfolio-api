@@ -36,7 +36,7 @@ public class AMSEntity extends PeriodEntity&lt;Instant&gt; {
 
   @ManyToMany
   @JoinTable(
-      name = &quot;ams_skill_level&quot;,
+      name = &quot;ams_skill_levels&quot;,
       joinColumns = @JoinColumn(name = &quot;ams_id&quot;),
       inverseJoinColumns = @JoinColumn(name = &quot;skill_level_id&quot;))
   private List&lt;SkillLevelEntity&gt; skillLevels;
