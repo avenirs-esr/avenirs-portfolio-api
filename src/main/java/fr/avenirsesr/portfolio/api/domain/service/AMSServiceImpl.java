@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.api.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.AMSRepository;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,15 +13,16 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class AMSServiceImpl implements AMSService {
+
   private final AMSRepository amsRepository;
 
-  @Value("${pagination.default-page:0}")
+  @Value("${pagination.default-page}")
   private int defaultPage;
 
-  @Value("${pagination.default-page-pageSize:8}")
+  @Value("${pagination.default-page-size}")
   private int defaultPageSize;
 
-  @Value("${pagination.max-page-pageSize:12}")
+  @Value("${pagination.max-page-size}")
   private int maxPageSize;
 
   public AMSServiceImpl(AMSRepository amsRepository) {
@@ -28,16 +30,18 @@ public class AMSServiceImpl implements AMSService {
   }
 
   @Override
-  public PagedResult<AMS> findUserAmsWithPagination(Student student, int page, int pageSize) {
+  public PagedResult<AMS> findUserAmsByProgramProgressWithPagination(
+      Student student, UUID programProgressId, Integer page, Integer pageSize) {
     log.debug(
         "Finding AMS for user with id [{}] with pagination (page={}, pageSize={})",
         student.getId(),
         page,
         pageSize);
+    int pageValue = (page != null && page >= 0) ? page : defaultPage;
+    int pageSizeValue =
+        (pageSize != null && pageSize > 0 && pageSize <= maxPageSize) ? pageSize : defaultPageSize;
 
-    page = page < 0 ? defaultPage : page;
-    pageSize = (pageSize > 0 && pageSize <= maxPageSize) ? pageSize : defaultPageSize;
-
-    return amsRepository.findByUserIdViaCohorts(student.getId(), page, pageSize);
+    return amsRepository.findByUserIdViaCohortsAndProgramProgressId(
+        student.getId(), programProgressId, pageValue, pageSizeValue);
   }
 }

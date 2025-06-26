@@ -34,13 +34,15 @@ class AMSServiceImplTest {
 
   private Student student;
   private UUID studentId;
-  private int defaultPage;
-  private int defaultSize;
+  private UUID programProgressId;
+  private Integer defaultPage;
+  private Integer defaultSize;
 
   @BeforeEach
   void setUp() {
     student = UserFixture.createStudent().toModel().toStudent();
     studentId = student.getId();
+    programProgressId = UUID.randomUUID();
     defaultPage = 0;
     defaultSize = 10;
 
@@ -55,12 +57,14 @@ class AMSServiceImplTest {
     List<AMS> amsList = AMSFixture.create().withCount(3);
     PagedResult<AMS> expectedResult = new PagedResult<>(amsList, 3, 1, defaultPage, defaultSize);
 
-    when(amsRepository.findByUserIdViaCohorts(any(UUID.class), eq(defaultPage), eq(defaultSize)))
+    when(amsRepository.findByUserIdViaCohortsAndProgramProgressId(
+            any(UUID.class), eq(programProgressId), eq(defaultPage), eq(defaultSize)))
         .thenReturn(expectedResult);
 
     // When
     PagedResult<AMS> result =
-        amsService.findUserAmsWithPagination(student, defaultPage, defaultSize);
+        amsService.findUserAmsByProgramProgressWithPagination(
+            student, programProgressId, defaultPage, defaultSize);
 
     // Then
     assertNotNull(result);
@@ -69,7 +73,9 @@ class AMSServiceImplTest {
     assertEquals(3, result.content().size());
     assertEquals(defaultPage, result.page());
     assertEquals(defaultSize, result.pageSize());
-    verify(amsRepository).findByUserIdViaCohorts(any(UUID.class), eq(defaultPage), eq(defaultSize));
+    verify(amsRepository)
+        .findByUserIdViaCohortsAndProgramProgressId(
+            any(UUID.class), eq(programProgressId), eq(defaultPage), eq(defaultSize));
   }
 
   @Test
@@ -78,12 +84,14 @@ class AMSServiceImplTest {
     PagedResult<AMS> expectedResult =
         new PagedResult<>(new ArrayList<>(), 0, 0, defaultPage, defaultSize);
 
-    when(amsRepository.findByUserIdViaCohorts(any(UUID.class), eq(defaultPage), eq(defaultSize)))
+    when(amsRepository.findByUserIdViaCohortsAndProgramProgressId(
+            any(UUID.class), eq(programProgressId), eq(defaultPage), eq(defaultSize)))
         .thenReturn(expectedResult);
 
     // When
     PagedResult<AMS> result =
-        amsService.findUserAmsWithPagination(student, defaultPage, defaultSize);
+        amsService.findUserAmsByProgramProgressWithPagination(
+            student, programProgressId, defaultPage, defaultSize);
 
     // Then
     assertNotNull(result);
@@ -92,22 +100,27 @@ class AMSServiceImplTest {
     assertTrue(result.content().isEmpty());
     assertEquals(defaultPage, result.page());
     assertEquals(defaultSize, result.pageSize());
-    verify(amsRepository).findByUserIdViaCohorts(any(UUID.class), eq(defaultPage), eq(defaultSize));
+    verify(amsRepository)
+        .findByUserIdViaCohortsAndProgramProgressId(
+            any(UUID.class), eq(programProgressId), eq(defaultPage), eq(defaultSize));
   }
 
   @Test
   void shouldHandlePagination() {
     // Given
-    int page = 1;
-    int size = 5;
+    Integer page = 1;
+    Integer size = 5;
     List<AMS> amsList = AMSFixture.create().withCount(5);
     PagedResult<AMS> expectedResult = new PagedResult<>(amsList, 15, 3, page, size);
 
-    when(amsRepository.findByUserIdViaCohorts(any(UUID.class), eq(page), eq(size)))
+    when(amsRepository.findByUserIdViaCohortsAndProgramProgressId(
+            any(UUID.class), eq(programProgressId), eq(page), eq(size)))
         .thenReturn(expectedResult);
 
     // When
-    PagedResult<AMS> result = amsService.findUserAmsWithPagination(student, page, size);
+    PagedResult<AMS> result =
+        amsService.findUserAmsByProgramProgressWithPagination(
+            student, programProgressId, page, size);
 
     // Then
     assertNotNull(result);
@@ -116,6 +129,35 @@ class AMSServiceImplTest {
     assertEquals(5, result.content().size());
     assertEquals(page, result.page());
     assertEquals(size, result.pageSize());
-    verify(amsRepository).findByUserIdViaCohorts(any(UUID.class), eq(page), eq(size));
+    verify(amsRepository)
+        .findByUserIdViaCohortsAndProgramProgressId(
+            any(UUID.class), eq(programProgressId), eq(page), eq(size));
+  }
+
+  @Test
+  void shouldUseDefaultValuesWhenPaginationParametersAreNull() {
+    // Given
+    List<AMS> amsList = AMSFixture.create().withCount(3);
+    PagedResult<AMS> expectedResult = new PagedResult<>(amsList, 3, 1, 0, 8);
+
+    when(amsRepository.findByUserIdViaCohortsAndProgramProgressId(
+            any(UUID.class), eq(programProgressId), eq(0), eq(8)))
+        .thenReturn(expectedResult);
+
+    // When
+    PagedResult<AMS> result =
+        amsService.findUserAmsByProgramProgressWithPagination(
+            student, programProgressId, null, null);
+
+    // Then
+    assertNotNull(result);
+    assertEquals(3, result.totalElements());
+    assertEquals(1, result.totalPages());
+    assertEquals(3, result.content().size());
+    assertEquals(0, result.page());
+    assertEquals(8, result.pageSize());
+    verify(amsRepository)
+        .findByUserIdViaCohortsAndProgramProgressId(
+            any(UUID.class), eq(programProgressId), eq(0), eq(8));
   }
 }

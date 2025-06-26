@@ -40,14 +40,16 @@ class AMSControllerTest {
   @InjectMocks private AMSController controller;
 
   private UUID userId;
+  private UUID programProgressId;
   private Student student;
   private Principal principal;
-  private int defaultPage;
-  private int defaultSize;
+  private Integer defaultPage;
+  private Integer defaultSize;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
+    programProgressId = UUID.randomUUID();
     User user = UserFixture.createStudent().withId(userId).toModel();
     student = user.toStudent();
     principal = () -> userId.toString();
@@ -62,12 +64,13 @@ class AMSControllerTest {
     PagedResult<AMS> pagedResult = new PagedResult<>(amsList, 3, 1, defaultPage, defaultSize);
 
     when(userUtil.getStudent(principal)).thenReturn(student);
-    when(amsService.findUserAmsWithPagination(student, defaultPage, defaultSize))
+    when(amsService.findUserAmsByProgramProgressWithPagination(
+            student, programProgressId, defaultPage, defaultSize))
         .thenReturn(pagedResult);
 
     // When
     ResponseEntity<AmsViewResponse> response =
-        controller.getAmsView(principal, defaultPage, defaultSize);
+        controller.getAmsView(principal, programProgressId, defaultPage, defaultSize);
 
     // Then
     assertEquals(200, response.getStatusCode().value());
@@ -89,7 +92,9 @@ class AMSControllerTest {
     assertEquals(amsList.getFirst().getStatus(), firstDto.status());
 
     verify(userUtil).getStudent(principal);
-    verify(amsService).findUserAmsWithPagination(student, defaultPage, defaultSize);
+    verify(amsService)
+        .findUserAmsByProgramProgressWithPagination(
+            student, programProgressId, defaultPage, defaultSize);
   }
 
   @Test
@@ -99,12 +104,13 @@ class AMSControllerTest {
         new PagedResult<>(new ArrayList<>(), 0, 0, defaultPage, defaultSize);
 
     when(userUtil.getStudent(principal)).thenReturn(student);
-    when(amsService.findUserAmsWithPagination(student, defaultPage, defaultSize))
+    when(amsService.findUserAmsByProgramProgressWithPagination(
+            student, programProgressId, defaultPage, defaultSize))
         .thenReturn(emptyPagedResult);
 
     // When
     ResponseEntity<AmsViewResponse> response =
-        controller.getAmsView(principal, defaultPage, defaultSize);
+        controller.getAmsView(principal, programProgressId, defaultPage, defaultSize);
 
     // Then
     assertEquals(200, response.getStatusCode().value());
@@ -118,22 +124,27 @@ class AMSControllerTest {
     assertEquals(defaultSize, body.page().pageSize());
 
     verify(userUtil).getStudent(principal);
-    verify(amsService).findUserAmsWithPagination(student, defaultPage, defaultSize);
+    verify(amsService)
+        .findUserAmsByProgramProgressWithPagination(
+            student, programProgressId, defaultPage, defaultSize);
   }
 
   @Test
   void shouldHandlePagination() {
     // Given
-    int page = 1;
-    int size = 5;
+    Integer page = 1;
+    Integer size = 5;
     List<AMS> amsList = AMSFixture.create().withCount(5);
     PagedResult<AMS> pagedResult = new PagedResult<>(amsList, 15, 3, page, size);
 
     when(userUtil.getStudent(principal)).thenReturn(student);
-    when(amsService.findUserAmsWithPagination(student, page, size)).thenReturn(pagedResult);
+    when(amsService.findUserAmsByProgramProgressWithPagination(
+            student, programProgressId, page, size))
+        .thenReturn(pagedResult);
 
     // When
-    ResponseEntity<AmsViewResponse> response = controller.getAmsView(principal, page, size);
+    ResponseEntity<AmsViewResponse> response =
+        controller.getAmsView(principal, programProgressId, page, size);
 
     // Then
     assertEquals(200, response.getStatusCode().value());
@@ -147,7 +158,8 @@ class AMSControllerTest {
     assertEquals(size, body.page().pageSize());
 
     verify(userUtil).getStudent(principal);
-    verify(amsService).findUserAmsWithPagination(student, page, size);
+    verify(amsService)
+        .findUserAmsByProgramProgressWithPagination(student, programProgressId, page, size);
   }
 
   @Test
@@ -155,10 +167,10 @@ class AMSControllerTest {
     // Given
     when(userUtil.getStudent(principal)).thenThrow(new UserNotFoundException());
 
-    // Then
+    // When & Then
     assertThrows(
         UserNotFoundException.class,
-        () -> controller.getAmsView(principal, defaultPage, defaultSize));
+        () -> controller.getAmsView(principal, programProgressId, defaultPage, defaultSize));
 
     verify(userUtil).getStudent(principal);
     verifyNoMoreInteractions(amsService);
@@ -169,10 +181,10 @@ class AMSControllerTest {
     // Given
     when(userUtil.getStudent(principal)).thenThrow(new UserIsNotStudentException());
 
-    // Then
+    // When & Then
     assertThrows(
         UserIsNotStudentException.class,
-        () -> controller.getAmsView(principal, defaultPage, defaultSize));
+        () -> controller.getAmsView(principal, programProgressId, defaultPage, defaultSize));
 
     verify(userUtil).getStudent(principal);
     verifyNoMoreInteractions(amsService);
