@@ -53,7 +53,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseTableName: trace
             baseColumnNames: user_id
-            referencedTableName: users
+            referencedTableName: user
             referencedColumnNames: id
             constraintName: fk_trace_user
             onDelete: CASCADE

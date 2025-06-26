@@ -4,7 +4,7 @@ databaseChangeLog:
       author: bilelbanelhaq
       changes:
         - createTable:
-            tableName: external_users
+            tableName: external_user
             columns:
               - column:
                   name: id
@@ -58,12 +58,12 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE external_users OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE external_user OWNER TO ${avenirs.admin.role}
             stripComments: true
 
         - addForeignKeyConstraint:
-            baseTableName: external_users
+            baseTableName: external_user
             baseColumnNames: user_id
-            referencedTableName: users
+            referencedTableName: user
             referencedColumnNames: id
-            constraintName: fk_external_users_user
+            constraintName: fk_external_user_user

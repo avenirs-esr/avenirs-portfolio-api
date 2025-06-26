@@ -29,7 +29,7 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE configuration OWNER TO ${avenirs.admin.role}
             stripComments: true
   - changeSet:
       id: 011-2
@@ -75,5 +75,5 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE configuration OWNER TO ${avenirs.admin.role}
             stripComments: true

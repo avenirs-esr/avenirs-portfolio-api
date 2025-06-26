@@ -34,7 +34,7 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             baseTableName: cohort_user
             baseColumnNames: user_id
-            referencedTableName: users
+            referencedTableName: user
             referencedColumnNames: id
             constraintName: fk_cohort_user_user
             onDelete: CASCADE

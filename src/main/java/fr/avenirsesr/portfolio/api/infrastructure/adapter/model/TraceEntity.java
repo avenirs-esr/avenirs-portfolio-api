@@ -40,7 +40,7 @@ public class TraceEntity {
   @ManyToMany
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinTable(
-      name = "trace_skill_levels",
+      name = "trace_skill_level",
       joinColumns = @JoinColumn(name = "trace_id"),
       inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
   private List<SkillLevelEntity> skillLevels;

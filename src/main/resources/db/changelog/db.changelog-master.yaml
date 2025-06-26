@@ -1,6 +1,6 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/001-create-table-users.yaml
+      file: db/changelog/001-create-table-user.yaml
   - include:
       file: db/changelog/002-create-table-trace.yaml
   - include:
@@ -14,7 +14,7 @@ databaseChangeLog:
   - include:
       file: db/changelog/007-create-table-skill-level.yaml
   - include:
-      file: db/changelog/008-create-table-external-users.yaml
+      file: db/changelog/008-create-table-external-user.yaml
   - include:
       file: db/changelog/009-create-table-ams.yaml
   - include:
@@ -26,4 +26,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/013-create-table-cohort-ams.yaml
   - include:
-      file: db/changelog/014-create-table-cohort-users.yaml
+      file: db/changelog/014-create-table-cohort-user.yaml

@@ -65,7 +65,7 @@ databaseChangeLog:
       author: bilelbanelhaq
       changes:
         - createTable:
-            tableName: ams_skill_levels
+            tableName: ams_skill_level
             columns:
               - column:
                   name: ams_id
@@ -81,23 +81,23 @@ databaseChangeLog:
             dbms: 'postgresql'
             endDelimiter: \nGO
             splitStatements: true
-            sql: ALTER TABLE users OWNER TO ${avenirs.admin.role}
+            sql: ALTER TABLE ams_skill_level OWNER TO ${avenirs.admin.role}
             stripComments: true
 
         - addForeignKeyConstraint:
-            baseTableName: ams_skill_levels
+            baseTableName: ams_skill_level
             baseColumnNames: ams_id
             referencedTableName: ams
             referencedColumnNames: id
-            constraintName: fk_ams_skill_levels_ams
+            constraintName: fk_ams_skill_level_ams
             onDelete: CASCADE
 
         - addForeignKeyConstraint:
-            baseTableName: ams_skill_levels
+            baseTableName: ams_skill_level
             baseColumnNames: skill_level_id
             referencedTableName: skill_level
             referencedColumnNames: id
-            constraintName: fk_ams_skill_levels_skill_level
+            constraintName: fk_ams_skill_level_skill_level
             onDelete: CASCADE
 
   - changeSet:
