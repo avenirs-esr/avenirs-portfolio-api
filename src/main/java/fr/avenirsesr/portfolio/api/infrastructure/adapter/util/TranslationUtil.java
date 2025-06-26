@@ -6,18 +6,19 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TranslationEntit
 import java.util.Set;
 
 public class TranslationUtil {
+  // TODO: Get fallback and selected language from configuration
+  private static final ELanguage FALLBACK_LANGUAGE = ELanguage.FRENCH;
+  private static final ELanguage SELECTED_LANGUAGE = ELanguage.FRENCH;
 
-  public static <T extends TranslationEntity> T getTranslation(
-      Set<T> translations, ELanguage language, ELanguage fallback) {
+  public static <T extends TranslationEntity> T getTranslation(Set<T> translations) {
     return translations.stream()
-        .filter(t -> t.getLanguage().equals(language))
+        .filter(t -> t.getLanguage().equals(SELECTED_LANGUAGE))
         .findFirst()
         .orElseGet(
             () ->
                 translations.stream()
-                    .filter(t -> t.getLanguage().equals(fallback))
+                    .filter(t -> t.getLanguage().equals(FALLBACK_LANGUAGE))
                     .findFirst()
-                    .orElseThrow(
-                        LanguageException::new)); // TODO: Get fallback language from configuration
+                    .orElseThrow(LanguageException::new));
   }
 }

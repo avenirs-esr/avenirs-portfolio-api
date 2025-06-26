@@ -3,31 +3,37 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake;
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.translation.InstitutionTranslation;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public class FakeInstitution {
   private static final FakerProvider faker = new FakerProvider();
   private final Institution institution;
+  private final List<InstitutionTranslation> translations;
 
   private FakeInstitution(Institution institution) {
     this.institution = institution;
+    this.translations = new ArrayList<>();
   }
 
   public static FakeInstitution create() {
-    return new FakeInstitution(
-        Institution.create(
-            UUID.fromString(faker.call().internet().uuid()),
-            faker.call().university().name(),
-            ELanguage.FRENCH));
+    var fakeInstitution =
+        new FakeInstitution(
+            Institution.create(
+                UUID.fromString(faker.call().internet().uuid()), faker.call().university().name()));
+    fakeInstitution.addTranslation(ELanguage.FRENCH);
+    return fakeInstitution;
   }
 
-  public static FakeInstitution create(Institution institution, ELanguage language) {
-    return new FakeInstitution(
-        Institution.create(
-            institution.getId(),
-            String.format("%s %s", institution.getName(), language.getCode()),
-            language));
+  public FakeInstitution addTranslation(ELanguage language) {
+    translations.add(
+        new InstitutionTranslation(
+            language, String.format("%s %s", institution.getName(), language.getCode())));
+
+    return this;
   }
 
   public FakeInstitution withEnabledFiled(Set<EPortfolioType> enabledFields) {
@@ -37,5 +43,9 @@ public class FakeInstitution {
 
   public Institution toModel() {
     return institution;
+  }
+
+  public List<InstitutionTranslation> getTranslations() {
+    return translations;
   }
 }

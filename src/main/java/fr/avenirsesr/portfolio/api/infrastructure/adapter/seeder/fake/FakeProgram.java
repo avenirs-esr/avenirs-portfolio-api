@@ -22,8 +22,7 @@ public class FakeProgram {
                     faker.call().university().prefix(),
                     faker.call().university().degree(),
                     faker.call().number().numberBetween(1, 11)),
-            true,
-            institution.getLanguage()));
+            true));
   }
 
   public FakeProgram isNotAPC() {
