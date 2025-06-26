@@ -4,7 +4,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,UserController,65,0,2,0,19,0,5,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,ConfigurationController,8,4,0,0,2,1,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,ProgramProgressController,70,4,0,0,15,1,5,1,5,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,TraceController,81,47,2,0,20,11,5,4,4,4
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,TraceController,81,44,2,0,20,11,5,4,4,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,RessourceController,74,0,6,0,18,0,7,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.security,CustomAuthenticationEntryPoint,0,30,0,0,0,8,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.security,HmacAuthenticationFilter,20,166,5,15,0,42,5,12,0,7
@@ -74,7 +74,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeUser,149,0,0,0,38,0,8,0,8,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeAMS,91,0,0,0,25,0,7,0,7,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeProgram,91,0,0,0,20,0,6,0,6,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.util,UserUtil,25,4,2,0,7,1,2,1,1,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.util,UserUtil,22,4,2,0,5,1,2,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.response,TracesViewResponse,9,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.response,AmsViewResponse,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.response,TracesResponse,9,0,0,0,1,0,1,0,1,0
