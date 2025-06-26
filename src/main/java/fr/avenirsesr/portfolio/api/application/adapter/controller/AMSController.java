@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.port.input.AMSService;
 import java.security.Principal;
 import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -30,16 +31,20 @@ public class AMSController {
   @GetMapping("/view")
   public ResponseEntity<AmsViewResponse> getAmsView(
       Principal principal,
-      @RequestParam(value = "page", required = false) int page,
-      @RequestParam(value = "pageSize", required = false) int pageSize) {
+      @RequestParam(value = "programProgressId") UUID programProgressId,
+      @RequestParam(value = "page", required = false) Integer page,
+      @RequestParam(value = "pageSize", required = false) Integer pageSize) {
     log.debug(
-        "Received request to get AMS view for user [{}] with pagination (page={}, pageSize={})",
+        "Received request to get AMS view for user [{}], programProgressId [{}] with pagination (page={}, pageSize={})",
         principal.getName(),
+        programProgressId,
         page,
         pageSize);
     Student student = userUtil.getStudent(principal);
 
-    PagedResult<AMS> pagedResult = amsService.findUserAmsWithPagination(student, page, pageSize);
+    PagedResult<AMS> pagedResult =
+        amsService.findUserAmsByProgramProgressWithPagination(
+            student, programProgressId, page, pageSize);
 
     List<AmsViewDTO> amsViewDTOs =
         pagedResult.content().stream().map(AmsViewMapper::toDto).toList();

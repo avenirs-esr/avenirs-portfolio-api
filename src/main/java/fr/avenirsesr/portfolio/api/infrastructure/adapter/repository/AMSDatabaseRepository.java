@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,11 +25,17 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
   }
 
   @Override
-  public PagedResult<AMS> findByUserIdViaCohorts(UUID userId, int page, int size) {
+  public PagedResult<AMS> findByUserIdViaCohortsAndProgramProgressId(
+      UUID userId, UUID programProgressId, int page, int size) {
+    Specification<AMSEntity> spec = AMSSpecification.belongsToUserViaCohorts(userId);
+
+    if (programProgressId != null) {
+      spec = spec.and(AMSSpecification.hasProgramProgressId(programProgressId));
+    }
+
     Page<AMSEntity> pageResult =
         jpaSpecificationExecutor.findAll(
-            AMSSpecification.belongsToUserViaCohorts(userId),
-            PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startDate")));
+            spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startDate")));
 
     List<AMS> content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();
 
