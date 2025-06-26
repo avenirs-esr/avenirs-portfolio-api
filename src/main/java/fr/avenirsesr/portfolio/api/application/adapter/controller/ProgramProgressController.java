@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressMap
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressOverviewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressViewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.util.UserUtil;
+import fr.avenirsesr.portfolio.api.domain.model.SortParam;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -43,10 +45,13 @@ public class ProgramProgressController {
   @GetMapping("/view")
   public List<ProgramProgressViewDTO> getSkillsView(
       Principal principal,
-      @RequestHeader(value = "Accept-Language", defaultValue = "fr_FR") String lang) {
+      @RequestHeader(value = "Accept-Language", defaultValue = "fr_FR") String lang,
+      @RequestParam(name = "sort", required = false) String sortRaw) {
     ELanguage language = ELanguage.fromCode(lang);
+    SortParam sortParam = new SortParam(sortRaw);
     Student student = userUtil.getStudent(principal);
-    return programProgressService.getSkillsView(student, language).entrySet().stream()
+
+    return programProgressService.getSkillsView(student, language, sortParam).entrySet().stream()
         .map(entry -> ProgramProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
         .toList();
   }
