@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
-@Component
 public class HmacAuthenticationFilter extends OncePerRequestFilter {
 
   @Value("${security.permit-all-paths}")
@@ -34,7 +33,9 @@ public class HmacAuthenticationFilter extends OncePerRequestFilter {
 
   private List<String> permitAllPathsList;
 
-  public HmacAuthenticationFilter() {}
+  public HmacAuthenticationFilter(String permitAllPathsString) {
+    this.permitAllPathsString = permitAllPathsString;
+  }
 
   @Override
   protected void doFilterInternal(
