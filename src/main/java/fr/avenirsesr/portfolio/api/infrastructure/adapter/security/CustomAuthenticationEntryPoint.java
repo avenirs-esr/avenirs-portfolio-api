@@ -26,7 +26,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     ErrorResponse error =
         new ErrorResponse(
-            EErrorCode.USER_NOT_AUTHORIZED.getCode(), EErrorCode.USER_NOT_AUTHORIZED.getMessage());
+            EErrorCode.USER_NOT_AUTHORIZED.name(), EErrorCode.USER_NOT_AUTHORIZED.getMessage());
     response.getWriter().write(objectMapper.writeValueAsString(error));
   }
 }

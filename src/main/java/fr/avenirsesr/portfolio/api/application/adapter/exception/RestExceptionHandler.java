@@ -32,38 +32,38 @@ public class RestExceptionHandler {
     log.error("Erreur métier inattendue", ex);
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(BadImageTypeException.class)
   public ResponseEntity<ErrorResponse> handleUserNotFound(BadImageTypeException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(BadImageSizeException.class)
   public ResponseEntity<ErrorResponse> handleUserNotFound(BadImageSizeException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(UserCategoryNotRecognizedException.class)
   public ResponseEntity<ErrorResponse> handleUserCategoryNotRecognized(
       UserCategoryNotRecognizedException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(UserIsNotStudentException.class)
   public ResponseEntity<ErrorResponse> handleUserIsNotStudent(UserIsNotStudentException ex) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-        .body(new ErrorResponse(ex.getErrorCode().getCode(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -72,7 +72,7 @@ public class RestExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(
             new ErrorResponse(
-                EErrorCode.INVALID_ARGUMENT_TYPE.getCode(),
+                EErrorCode.INVALID_ARGUMENT_TYPE.name(),
                 EErrorCode.INVALID_ARGUMENT_TYPE.getMessage()));
   }
 }

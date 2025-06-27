@@ -50,7 +50,7 @@ class CustomAuthenticationEntryPointTest {
 
     ErrorResponse expectedError =
         new ErrorResponse(
-            EErrorCode.USER_NOT_AUTHORIZED.getCode(), EErrorCode.USER_NOT_AUTHORIZED.getMessage());
+            EErrorCode.USER_NOT_AUTHORIZED.name(), EErrorCode.USER_NOT_AUTHORIZED.getMessage());
     String expectedJson = objectMapper.writeValueAsString(expectedError);
 
     printWriter.flush();
