@@ -1,5 +1,11 @@
 package fr.avenirsesr.portfolio.api.domain.model.enums;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 public enum ELanguage {
   FRENCH("fr_FR"),
   ENGLISH("en_US"),
@@ -15,12 +21,11 @@ public enum ELanguage {
     return code;
   }
 
+  private static final Map<String, ELanguage> BY_CODE =
+      Arrays.stream(values()).collect(Collectors.toMap(ELanguage::getCode, Function.identity()));
+
   public static ELanguage fromCode(String code) {
-    for (ELanguage language : values()) {
-      if (language.getCode().equalsIgnoreCase(code)) {
-        return language;
-      }
-    }
-    return ELanguage.FRENCH; // TODO: Get fallback language from configuration
+    return Optional.ofNullable(BY_CODE.get(code))
+        .orElseThrow(() -> new IllegalArgumentException("Unknown language code: " + code));
   }
 }
