@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProgramProgressDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.api.infrastructure.adapter.repository</a> &gt; <span class="el_source">ProgramProgressDatabaseRepository.java</span></div><h1>ProgramProgressDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.api.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
+import fr.avenirsesr.portfolio.api.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.UserMapper;
@@ -10,6 +13,9 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramProgressE
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.specification.ProgramProgressSpecification;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,43 +25,82 @@ public class ProgramProgressDatabaseRepository
   private final ProgramProgressJpaRepository jpaRepository;
 
   public ProgramProgressDatabaseRepository(ProgramProgressJpaRepository jpaRepository) {
-<span class="fc" id="L22">    super(</span>
+<span class="fc" id="L28">    super(</span>
         jpaRepository,
         jpaRepository,
         ProgramProgressMapper::fromDomain,
         ProgramProgressMapper::toDomain);
-<span class="fc" id="L27">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L28">  }</span>
+<span class="fc" id="L33">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L34">  }</span>
 
   @Override
   public List&lt;ProgramProgress&gt; findAllByStudent(Student student, ELanguage language) {
-<span class="nc" id="L32">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L33">        .findAll(ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)))</span>
-<span class="nc" id="L34">        .stream()</span>
-<span class="nc" id="L35">        .map(</span>
-            programProgressEntity -&gt;
-<span class="nc" id="L37">                ProgramProgressMapper.toDomain(programProgressEntity, language))</span>
-<span class="nc" id="L38">        .collect(Collectors.toList());</span>
+<span class="nc" id="L38">    return entityListToDomainList(</span>
+<span class="nc" id="L39">        jpaSpecificationExecutor.findAll(</span>
+<span class="nc" id="L40">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))),</span>
+        language);
+  }
+
+  @Override
+  public List&lt;ProgramProgress&gt; findAllByStudent(
+      Student student, ELanguage language, SortCriteria sortCriteria) {
+<span class="nc" id="L47">    Sort sort =</span>
+<span class="nc" id="L48">        Sort.by(</span>
+<span class="nc" id="L49">            Sort.Direction.fromString(sortCriteria.getOrder().name()),</span>
+<span class="nc" id="L50">            sortFieldToExactPath(sortCriteria.getField()));</span>
+<span class="nc" id="L51">    return entityListToDomainList(</span>
+<span class="nc" id="L52">        jpaSpecificationExecutor.findAll(</span>
+<span class="nc" id="L53">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)), sort),</span>
+        language);
+  }
+
+  @Override
+  public List&lt;ProgramProgress&gt; findAllByStudent(
+      Student student, ELanguage language, PageInfo pageInfo) {
+<span class="nc" id="L60">    Pageable pageable = PageRequest.of(pageInfo.number(), pageInfo.pageSize());</span>
+<span class="nc" id="L61">    return entityListToDomainList(</span>
+        jpaSpecificationExecutor
+<span class="nc" id="L63">            .findAll(</span>
+<span class="nc" id="L64">                ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)), pageable)</span>
+<span class="nc" id="L65">            .getContent(),</span>
+        language);
   }
 
   @Override
   public List&lt;ProgramProgress&gt; findAllAPCByStudent(Student student) {
-<span class="nc" id="L43">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L44">        .findAll(</span>
-<span class="nc" id="L45">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
-<span class="nc" id="L46">                .and(ProgramProgressSpecification.isAPC()))</span>
-<span class="nc" id="L47">        .stream()</span>
-<span class="nc" id="L48">        .map(ProgramProgressMapper::toDomain)</span>
-<span class="nc" id="L49">        .collect(Collectors.toList());</span>
+<span class="nc" id="L71">    return jpaSpecificationExecutor</span>
+<span class="nc" id="L72">        .findAll(</span>
+<span class="nc" id="L73">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
+<span class="nc" id="L74">                .and(ProgramProgressSpecification.isAPC()))</span>
+<span class="nc" id="L75">        .stream()</span>
+<span class="nc" id="L76">        .map(ProgramProgressMapper::toDomain)</span>
+<span class="nc" id="L77">        .collect(Collectors.toList());</span>
   }
 
   @Override
   public List&lt;ProgramProgress&gt; findAllWithoutSkillsByStudent(Student student, ELanguage language) {
-<span class="nc" id="L54">    return jpaRepository.findAllByStudentIdAndLang(student.getId(), language).stream()</span>
-<span class="nc" id="L55">        .map(</span>
+<span class="nc" id="L82">    return jpaRepository.findAllByStudentIdAndLang(student.getId(), language).stream()</span>
+<span class="nc" id="L83">        .map(</span>
             programProgressDTO -&gt;
-<span class="nc" id="L57">                ProgramProgressMapper.toDomainWithoutSkills(programProgressDTO, student, language))</span>
-<span class="nc" id="L58">        .toList();</span>
+<span class="nc" id="L85">                ProgramProgressMapper.toDomainWithoutSkills(programProgressDTO, student, language))</span>
+<span class="nc" id="L86">        .toList();</span>
+  }
+
+  private List&lt;ProgramProgress&gt; entityListToDomainList(
+      List&lt;ProgramProgressEntity&gt; programProgressEntityList, ELanguage language) {
+<span class="nc" id="L91">    return programProgressEntityList.stream()</span>
+<span class="nc" id="L92">        .map(</span>
+            programProgressEntity -&gt;
+<span class="nc" id="L94">                ProgramProgressMapper.toDomain(programProgressEntity, language))</span>
+<span class="nc" id="L95">        .collect(Collectors.toList());</span>
+  }
+
+  private String sortFieldToExactPath(ESortField sortField) {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">    return switch (sortField) {</span>
+<span class="nc" id="L100">      case ESortField.NAME -&gt; &quot;program.translations.name&quot;;</span>
+      case ESortField.DATE -&gt;
+<span class="nc" id="L102">          &quot;createdAt&quot;; // TODO : Sera fonctionnel après ajout de createdAt sur toutes les entités</span>
+    };
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

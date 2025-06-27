@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 <span class="fc" id="L27">    ErrorResponse error =</span>
         new ErrorResponse(
-<span class="fc" id="L29">            EErrorCode.USER_NOT_AUTHORIZED.name(), EErrorCode.USER_NOT_AUTHORIZED.getMessage());</span>
+<span class="fc" id="L29">            EErrorCode.USER_NOT_AUTHORIZED.getCode(), EErrorCode.USER_NOT_AUTHORIZED.getMessage());</span>
 <span class="fc" id="L30">    response.getWriter().write(objectMapper.writeValueAsString(error));</span>
 <span class="fc" id="L31">  }</span>
 }
