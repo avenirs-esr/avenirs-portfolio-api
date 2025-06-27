@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.api.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
@@ -25,81 +24,74 @@ public class ProgramProgressDatabaseRepository
   private final ProgramProgressJpaRepository jpaRepository;
 
   public ProgramProgressDatabaseRepository(ProgramProgressJpaRepository jpaRepository) {
-<span class="fc" id="L28">    super(</span>
+<span class="fc" id="L27">    super(</span>
         jpaRepository,
         jpaRepository,
         ProgramProgressMapper::fromDomain,
         ProgramProgressMapper::toDomain);
-<span class="fc" id="L33">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L34">  }</span>
+<span class="fc" id="L32">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L33">  }</span>
 
   @Override
-  public List&lt;ProgramProgress&gt; findAllByStudent(Student student, ELanguage language) {
-<span class="nc" id="L38">    return entityListToDomainList(</span>
-<span class="nc" id="L39">        jpaSpecificationExecutor.findAll(</span>
-<span class="nc" id="L40">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))),</span>
-        language);
+  public List&lt;ProgramProgress&gt; findAllByStudent(Student student) {
+<span class="nc" id="L37">    return entityListToDomainList(</span>
+<span class="nc" id="L38">        jpaSpecificationExecutor.findAll(</span>
+<span class="nc" id="L39">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))));</span>
   }
 
   @Override
-  public List&lt;ProgramProgress&gt; findAllByStudent(
-      Student student, ELanguage language, SortCriteria sortCriteria) {
-<span class="nc" id="L47">    Sort sort =</span>
-<span class="nc" id="L48">        Sort.by(</span>
-<span class="nc" id="L49">            Sort.Direction.fromString(sortCriteria.getOrder().name()),</span>
-<span class="nc" id="L50">            sortFieldToExactPath(sortCriteria.getField()));</span>
-<span class="nc" id="L51">    return entityListToDomainList(</span>
-<span class="nc" id="L52">        jpaSpecificationExecutor.findAll(</span>
-<span class="nc" id="L53">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)), sort),</span>
-        language);
+  public List&lt;ProgramProgress&gt; findAllByStudent(Student student, SortCriteria sortCriteria) {
+<span class="nc" id="L44">    Sort sort =</span>
+<span class="nc" id="L45">        Sort.by(</span>
+<span class="nc" id="L46">            Sort.Direction.fromString(sortCriteria.getOrder().name()),</span>
+<span class="nc" id="L47">            sortFieldToExactPath(sortCriteria.getField()));</span>
+<span class="nc" id="L48">    return entityListToDomainList(</span>
+<span class="nc" id="L49">        jpaSpecificationExecutor.findAll(</span>
+<span class="nc" id="L50">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)), sort));</span>
   }
 
   @Override
-  public List&lt;ProgramProgress&gt; findAllByStudent(
-      Student student, ELanguage language, PageInfo pageInfo) {
-<span class="nc" id="L60">    Pageable pageable = PageRequest.of(pageInfo.number(), pageInfo.pageSize());</span>
-<span class="nc" id="L61">    return entityListToDomainList(</span>
+  public List&lt;ProgramProgress&gt; findAllByStudent(Student student, PageInfo pageInfo) {
+<span class="nc" id="L55">    Pageable pageable = PageRequest.of(pageInfo.number(), pageInfo.pageSize());</span>
+<span class="nc" id="L56">    return entityListToDomainList(</span>
         jpaSpecificationExecutor
-<span class="nc" id="L63">            .findAll(</span>
-<span class="nc" id="L64">                ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)), pageable)</span>
-<span class="nc" id="L65">            .getContent(),</span>
-        language);
+<span class="nc" id="L58">            .findAll(</span>
+<span class="nc" id="L59">                ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)), pageable)</span>
+<span class="nc" id="L60">            .getContent());</span>
   }
 
   @Override
   public List&lt;ProgramProgress&gt; findAllAPCByStudent(Student student) {
-<span class="nc" id="L71">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L72">        .findAll(</span>
-<span class="nc" id="L73">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
-<span class="nc" id="L74">                .and(ProgramProgressSpecification.isAPC()))</span>
-<span class="nc" id="L75">        .stream()</span>
-<span class="nc" id="L76">        .map(ProgramProgressMapper::toDomain)</span>
-<span class="nc" id="L77">        .collect(Collectors.toList());</span>
+<span class="nc" id="L65">    return jpaSpecificationExecutor</span>
+<span class="nc" id="L66">        .findAll(</span>
+<span class="nc" id="L67">            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
+<span class="nc" id="L68">                .and(ProgramProgressSpecification.isAPC()))</span>
+<span class="nc" id="L69">        .stream()</span>
+<span class="nc" id="L70">        .map(ProgramProgressMapper::toDomain)</span>
+<span class="nc" id="L71">        .collect(Collectors.toList());</span>
   }
 
   @Override
-  public List&lt;ProgramProgress&gt; findAllWithoutSkillsByStudent(Student student, ELanguage language) {
-<span class="nc" id="L82">    return jpaRepository.findAllByStudentIdAndLang(student.getId(), language).stream()</span>
-<span class="nc" id="L83">        .map(</span>
+  public List&lt;ProgramProgress&gt; findAllWithoutSkillsByStudent(Student student) {
+<span class="nc" id="L76">    return jpaRepository.findAllByStudentIdAndLang(student.getId()).stream()</span>
+<span class="nc" id="L77">        .map(</span>
             programProgressDTO -&gt;
-<span class="nc" id="L85">                ProgramProgressMapper.toDomainWithoutSkills(programProgressDTO, student, language))</span>
-<span class="nc" id="L86">        .toList();</span>
+<span class="nc" id="L79">                ProgramProgressMapper.toDomainWithoutSkills(programProgressDTO, student))</span>
+<span class="nc" id="L80">        .toList();</span>
   }
 
   private List&lt;ProgramProgress&gt; entityListToDomainList(
-      List&lt;ProgramProgressEntity&gt; programProgressEntityList, ELanguage language) {
-<span class="nc" id="L91">    return programProgressEntityList.stream()</span>
-<span class="nc" id="L92">        .map(</span>
-            programProgressEntity -&gt;
-<span class="nc" id="L94">                ProgramProgressMapper.toDomain(programProgressEntity, language))</span>
-<span class="nc" id="L95">        .collect(Collectors.toList());</span>
+      List&lt;ProgramProgressEntity&gt; programProgressEntityList) {
+<span class="nc" id="L85">    return programProgressEntityList.stream()</span>
+<span class="nc" id="L86">        .map(ProgramProgressMapper::toDomain)</span>
+<span class="nc" id="L87">        .collect(Collectors.toList());</span>
   }
 
   private String sortFieldToExactPath(ESortField sortField) {
-<span class="nc bnc" id="L99" title="All 2 branches missed.">    return switch (sortField) {</span>
-<span class="nc" id="L100">      case ESortField.NAME -&gt; &quot;program.translations.name&quot;;</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">    return switch (sortField) {</span>
+<span class="nc" id="L92">      case ESortField.NAME -&gt; &quot;program.translations.name&quot;;</span>
       case ESortField.DATE -&gt;
-<span class="nc" id="L102">          &quot;createdAt&quot;; // TODO : Sera fonctionnel après ajout de createdAt sur toutes les entités</span>
+<span class="nc" id="L94">          &quot;createdAt&quot;; // TODO : Sera fonctionnel après ajout de createdAt sur toutes les entités</span>
     };
   }
 }

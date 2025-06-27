@@ -20,45 +20,43 @@ public class FakeSkillLevel {
 <span class="nc" id="L20">            SkillLevel.create(</span>
 <span class="nc" id="L21">                UUID.fromString(faker.call().internet().uuid()),</span>
 <span class="nc" id="L22">                &quot;Niv. %s&quot;.formatted(faker.call().lorem().character()),</span>
-<span class="nc" id="L23">                faker.call().lorem().sentence(),</span>
-                ELanguage.FRENCH))
-<span class="nc" id="L25">        .withStatus(ESkillLevelStatus.NOT_STARTED);</span>
+<span class="nc" id="L23">                faker.call().lorem().sentence()))</span>
+<span class="nc" id="L24">        .withStatus(ESkillLevelStatus.NOT_STARTED);</span>
   }
 
   public static FakeSkillLevel of(SkillLevel skillLevel, ELanguage language) {
-<span class="nc" id="L29">    return new FakeSkillLevel(</span>
-<span class="nc" id="L30">        SkillLevel.create(</span>
-<span class="nc" id="L31">            skillLevel.getId(),</span>
-<span class="nc" id="L32">            String.format(&quot;%s %s&quot;, skillLevel.getName(), language.getCode()),</span>
-<span class="nc" id="L33">            String.format(&quot;%s %s&quot;, skillLevel.getDescription(), language.getCode()),</span>
-            language));
+<span class="nc" id="L28">    return new FakeSkillLevel(</span>
+<span class="nc" id="L29">        SkillLevel.create(</span>
+<span class="nc" id="L30">            skillLevel.getId(),</span>
+<span class="nc" id="L31">            String.format(&quot;%s %s&quot;, skillLevel.getName(), language.getCode()),</span>
+<span class="nc" id="L32">            String.format(&quot;%s %s&quot;, skillLevel.getDescription(), language.getCode())));</span>
   }
 
   public FakeSkillLevel withStatus(ESkillLevelStatus status) {
-<span class="nc" id="L38">    LocalDate pastStartDate = LocalDate.now().minus(Period.ofYears(2));</span>
-<span class="nc" id="L39">    LocalDate pastEndDate = LocalDate.now().minus(Period.ofYears(1));</span>
-<span class="nc" id="L40">    LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));</span>
-<span class="nc" id="L41">    LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));</span>
-<span class="nc" id="L42">    skillLevel.setStatus(status);</span>
-<span class="nc bnc" id="L43" title="All 4 branches missed.">    switch (status) {</span>
+<span class="nc" id="L36">    LocalDate pastStartDate = LocalDate.now().minus(Period.ofYears(2));</span>
+<span class="nc" id="L37">    LocalDate pastEndDate = LocalDate.now().minus(Period.ofYears(1));</span>
+<span class="nc" id="L38">    LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));</span>
+<span class="nc" id="L39">    LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));</span>
+<span class="nc" id="L40">    skillLevel.setStatus(status);</span>
+<span class="nc bnc" id="L41" title="All 4 branches missed.">    switch (status) {</span>
       case VALIDATED, FAILED -&gt; {
-<span class="nc" id="L45">        skillLevel.setStartDate(pastStartDate);</span>
-<span class="nc" id="L46">        skillLevel.setEndDate(pastEndDate);</span>
-<span class="nc" id="L47">      }</span>
+<span class="nc" id="L43">        skillLevel.setStartDate(pastStartDate);</span>
+<span class="nc" id="L44">        skillLevel.setEndDate(pastEndDate);</span>
+<span class="nc" id="L45">      }</span>
       case UNDER_ACQUISITION, UNDER_REVIEW -&gt; {
-<span class="nc" id="L49">        skillLevel.setStartDate(pastStartDate);</span>
-<span class="nc" id="L50">        skillLevel.setEndDate(futureEndDate);</span>
-<span class="nc" id="L51">      }</span>
+<span class="nc" id="L47">        skillLevel.setStartDate(pastStartDate);</span>
+<span class="nc" id="L48">        skillLevel.setEndDate(futureEndDate);</span>
+<span class="nc" id="L49">      }</span>
       case TO_BE_EVALUATED, NOT_STARTED -&gt; {
-<span class="nc" id="L53">        skillLevel.setStartDate(futureStartDate);</span>
-<span class="nc" id="L54">        skillLevel.setEndDate(futureEndDate);</span>
+<span class="nc" id="L51">        skillLevel.setStartDate(futureStartDate);</span>
+<span class="nc" id="L52">        skillLevel.setEndDate(futureEndDate);</span>
       }
     }
-<span class="nc" id="L57">    return this;</span>
+<span class="nc" id="L55">    return this;</span>
   }
 
   public SkillLevel toModel() {
-<span class="nc" id="L61">    return skillLevel;</span>
+<span class="nc" id="L59">    return skillLevel;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

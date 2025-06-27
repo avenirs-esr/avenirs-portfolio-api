@@ -3,22 +3,30 @@
 import fr.avenirsesr.portfolio.api.domain.exception.LanguageException;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.TranslationEntity;
+import fr.avenirsesr.portfolio.api.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.api.infrastructure.context.RequestData;
+import java.util.Optional;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 
-<span class="nc" id="L8">public class TranslationUtil {</span>
+<span class="fc" id="L12">@Slf4j</span>
+<span class="nc" id="L13">public class TranslationUtil {</span>
 
-  public static &lt;T extends TranslationEntity&gt; T getTranslation(
-      Set&lt;T&gt; translations, ELanguage language, ELanguage fallback) {
-<span class="fc" id="L12">    return translations.stream()</span>
-<span class="fc" id="L13">        .filter(t -&gt; t.getLanguage().equals(language))</span>
-<span class="fc" id="L14">        .findFirst()</span>
-<span class="fc" id="L15">        .orElseGet(</span>
+  public static &lt;T extends TranslationEntity&gt; T getTranslation(Set&lt;T&gt; translations) {
+    var preferredLanguage =
+<span class="fc" id="L17">        Optional.ofNullable(RequestContext.get())</span>
+<span class="fc" id="L18">            .map(RequestData::preferredLanguage)</span>
+<span class="fc" id="L19">            .orElse(ELanguage.FALLBACK);</span>
+
+<span class="fc" id="L21">    return translations.stream()</span>
+<span class="fc" id="L22">        .filter(t -&gt; t.getLanguage().equals(preferredLanguage))</span>
+<span class="fc" id="L23">        .findFirst()</span>
+<span class="fc" id="L24">        .orElseGet(</span>
             () -&gt;
-<span class="nc" id="L17">                translations.stream()</span>
-<span class="nc" id="L18">                    .filter(t -&gt; t.getLanguage().equals(fallback))</span>
-<span class="nc" id="L19">                    .findFirst()</span>
-<span class="nc" id="L20">                    .orElseThrow(</span>
-                        LanguageException::new)); // TODO: Get fallback language from configuration
+<span class="nc" id="L26">                translations.stream()</span>
+<span class="nc" id="L27">                    .filter(t -&gt; t.getLanguage().equals(ELanguage.FALLBACK))</span>
+<span class="nc" id="L28">                    .findFirst()</span>
+<span class="nc" id="L29">                    .orElseThrow(LanguageException::new));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

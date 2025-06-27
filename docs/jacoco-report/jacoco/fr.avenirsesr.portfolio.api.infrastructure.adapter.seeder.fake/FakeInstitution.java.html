@@ -3,40 +3,50 @@
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.translation.InstitutionTranslation;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public class FakeInstitution {
-<span class="nc" id="L10">  private static final FakerProvider faker = new FakerProvider();</span>
+<span class="nc" id="L13">  private static final FakerProvider faker = new FakerProvider();</span>
   private final Institution institution;
+  private final List&lt;InstitutionTranslation&gt; translations;
 
-<span class="nc" id="L13">  private FakeInstitution(Institution institution) {</span>
-<span class="nc" id="L14">    this.institution = institution;</span>
-<span class="nc" id="L15">  }</span>
+<span class="nc" id="L17">  private FakeInstitution(Institution institution) {</span>
+<span class="nc" id="L18">    this.institution = institution;</span>
+<span class="nc" id="L19">    this.translations = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L20">  }</span>
 
   public static FakeInstitution create() {
-<span class="nc" id="L18">    return new FakeInstitution(</span>
-<span class="nc" id="L19">        Institution.create(</span>
-<span class="nc" id="L20">            UUID.fromString(faker.call().internet().uuid()),</span>
-<span class="nc" id="L21">            faker.call().university().name(),</span>
-            ELanguage.FRENCH));
+<span class="nc" id="L23">    var fakeInstitution =</span>
+        new FakeInstitution(
+<span class="nc" id="L25">            Institution.create(</span>
+<span class="nc" id="L26">                UUID.fromString(faker.call().internet().uuid()), faker.call().university().name()));</span>
+<span class="nc" id="L27">    fakeInstitution.addTranslation(ELanguage.FRENCH);</span>
+<span class="nc" id="L28">    return fakeInstitution;</span>
   }
 
-  public static FakeInstitution create(Institution institution, ELanguage language) {
-<span class="nc" id="L26">    return new FakeInstitution(</span>
-<span class="nc" id="L27">        Institution.create(</span>
-<span class="nc" id="L28">            institution.getId(),</span>
-<span class="nc" id="L29">            String.format(&quot;%s %s&quot;, institution.getName(), language.getCode()),</span>
-            language));
+  public FakeInstitution addTranslation(ELanguage language) {
+<span class="nc" id="L32">    translations.add(</span>
+        new InstitutionTranslation(
+<span class="nc" id="L34">            language, String.format(&quot;%s %s&quot;, institution.getName(), language.getCode())));</span>
+
+<span class="nc" id="L36">    return this;</span>
   }
 
   public FakeInstitution withEnabledFiled(Set&lt;EPortfolioType&gt; enabledFields) {
-<span class="nc" id="L34">    institution.setEnabledFields(enabledFields);</span>
-<span class="nc" id="L35">    return this;</span>
+<span class="nc" id="L40">    institution.setEnabledFields(enabledFields);</span>
+<span class="nc" id="L41">    return this;</span>
   }
 
   public Institution toModel() {
-<span class="nc" id="L39">    return institution;</span>
+<span class="nc" id="L45">    return institution;</span>
+  }
+
+  public List&lt;InstitutionTranslation&gt; getTranslations() {
+<span class="nc" id="L49">    return translations;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

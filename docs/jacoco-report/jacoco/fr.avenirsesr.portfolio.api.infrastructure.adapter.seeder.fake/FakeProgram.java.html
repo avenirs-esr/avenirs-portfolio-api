@@ -28,26 +28,25 @@ public class FakeProgram {
 <span class="nc" id="L28">                    faker.call().university().degree(),</span>
 <span class="nc" id="L29">                    faker.call().number().numberBetween(1, 11)),</span>
             true,
-<span class="nc" id="L31">            institution.getLanguage(),</span>
-<span class="nc" id="L32">            randomDurationUnit(),</span>
-<span class="nc" id="L33">            faker.call().number().numberBetween(1, 5)));</span>
+<span class="nc" id="L31">            randomDurationUnit(),</span>
+<span class="nc" id="L32">            faker.call().number().numberBetween(1, 5)));</span>
   }
 
   public static String createName() {
-<span class="nc" id="L37">    return &quot;%s %s - %s&quot;</span>
-<span class="nc" id="L38">        .formatted(</span>
-<span class="nc" id="L39">            faker.call().university().prefix(),</span>
-<span class="nc" id="L40">            faker.call().university().degree(),</span>
-<span class="nc" id="L41">            faker.call().number().numberBetween(1, 11));</span>
+<span class="nc" id="L36">    return &quot;%s %s - %s&quot;</span>
+<span class="nc" id="L37">        .formatted(</span>
+<span class="nc" id="L38">            faker.call().university().prefix(),</span>
+<span class="nc" id="L39">            faker.call().university().degree(),</span>
+<span class="nc" id="L40">            faker.call().number().numberBetween(1, 11));</span>
   }
 
   public FakeProgram isNotAPC() {
-<span class="nc" id="L45">    program.setAPC(false);</span>
-<span class="nc" id="L46">    return this;</span>
+<span class="nc" id="L44">    program.setAPC(false);</span>
+<span class="nc" id="L45">    return this;</span>
   }
 
   public Program toModel() {
-<span class="nc" id="L50">    return program;</span>
+<span class="nc" id="L49">    return program;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

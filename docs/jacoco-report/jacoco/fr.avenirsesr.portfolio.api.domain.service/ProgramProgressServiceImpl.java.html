@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESortOrder;
@@ -18,7 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-<span class="fc" id="L21">@Slf4j</span>
+<span class="fc" id="L20">@Slf4j</span>
 @AllArgsConstructor
 @Service
 public class ProgramProgressServiceImpl implements ProgramProgressService {
@@ -26,91 +25,88 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   private final ProgramProgressRepository programProgressRepository;
 
   private static SkillLevel findCurrentOrNextSkillLevel(Set&lt;SkillLevel&gt; skillLevels) {
-<span class="pc bpc" id="L29" title="1 of 4 branches missed.">    if (skillLevels == null || skillLevels.isEmpty()) {</span>
-<span class="fc" id="L30">      return null;</span>
+<span class="pc bpc" id="L28" title="1 of 4 branches missed.">    if (skillLevels == null || skillLevels.isEmpty()) {</span>
+<span class="fc" id="L29">      return null;</span>
     }
-<span class="fc" id="L32">    return skillLevels.stream()</span>
-<span class="fc" id="L33">        .filter(</span>
+<span class="fc" id="L31">    return skillLevels.stream()</span>
+<span class="fc" id="L32">        .filter(</span>
             sl -&gt;
-<span class="fc bfc" id="L35" title="All 2 branches covered.">                (sl.getStatus() == ESkillLevelStatus.UNDER_REVIEW</span>
-<span class="fc bfc" id="L36" title="All 2 branches covered.">                        || sl.getStatus() == ESkillLevelStatus.UNDER_ACQUISITION)</span>
-<span class="pc bpc" id="L37" title="1 of 4 branches missed.">                    &amp;&amp; (sl.getEndDate() == null || sl.getEndDate().isAfter(LocalDate.now())))</span>
-<span class="fc" id="L38">        .findFirst()</span>
-<span class="fc" id="L39">        .orElseGet(</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">                (sl.getStatus() == ESkillLevelStatus.UNDER_REVIEW</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">                        || sl.getStatus() == ESkillLevelStatus.UNDER_ACQUISITION)</span>
+<span class="pc bpc" id="L36" title="1 of 4 branches missed.">                    &amp;&amp; (sl.getEndDate() == null || sl.getEndDate().isAfter(LocalDate.now())))</span>
+<span class="fc" id="L37">        .findFirst()</span>
+<span class="fc" id="L38">        .orElseGet(</span>
             () -&gt;
-<span class="fc" id="L41">                skillLevels.stream()</span>
-<span class="fc" id="L42">                    .filter(</span>
+<span class="fc" id="L40">                skillLevels.stream()</span>
+<span class="fc" id="L41">                    .filter(</span>
                         sl -&gt;
-<span class="fc bfc" id="L44" title="All 2 branches covered.">                            sl.getStatus() == ESkillLevelStatus.TO_BE_EVALUATED</span>
-<span class="fc bfc" id="L45" title="All 2 branches covered.">                                || sl.getStatus() == ESkillLevelStatus.NOT_STARTED)</span>
-<span class="fc" id="L46">                    .findFirst()</span>
-<span class="fc" id="L47">                    .orElse(null));</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">                            sl.getStatus() == ESkillLevelStatus.TO_BE_EVALUATED</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">                                || sl.getStatus() == ESkillLevelStatus.NOT_STARTED)</span>
+<span class="fc" id="L45">                    .findFirst()</span>
+<span class="fc" id="L46">                    .orElse(null));</span>
   }
 
   private static Map&lt;ProgramProgress, Set&lt;Skill&gt;&gt; cleanProgramProgressList(
       List&lt;ProgramProgress&gt; programProgressList, boolean needToLimitSkills) {
     final int skillLimit =
-<span class="fc bfc" id="L53" title="All 2 branches covered.">        !programProgressList.isEmpty() ? MAX_SKILLS / programProgressList.size() : 0;</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        !programProgressList.isEmpty() ? MAX_SKILLS / programProgressList.size() : 0;</span>
 
-<span class="fc" id="L55">    return programProgressList.stream()</span>
-<span class="fc" id="L56">        .collect(</span>
-<span class="fc" id="L57">            Collectors.toMap(</span>
-<span class="fc" id="L58">                programProgress -&gt; programProgress,</span>
+<span class="fc" id="L54">    return programProgressList.stream()</span>
+<span class="fc" id="L55">        .collect(</span>
+<span class="fc" id="L56">            Collectors.toMap(</span>
+<span class="fc" id="L57">                programProgress -&gt; programProgress,</span>
                 programProgress -&gt;
-<span class="fc" id="L60">                    programProgress.getSkills().stream()</span>
-<span class="fc" id="L61">                        .sorted(Comparator.comparing(Skill::getName))</span>
-<span class="fc bfc" id="L62" title="All 2 branches covered.">                        .limit(needToLimitSkills ? skillLimit : programProgress.getSkills().size())</span>
-<span class="fc" id="L63">                        .map(</span>
+<span class="fc" id="L59">                    programProgress.getSkills().stream()</span>
+<span class="fc" id="L60">                        .sorted(Comparator.comparing(Skill::getName))</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">                        .limit(needToLimitSkills ? skillLimit : programProgress.getSkills().size())</span>
+<span class="fc" id="L62">                        .map(</span>
                             skill -&gt; {
-<span class="fc" id="L65">                              SkillLevel selectedSkillLevel =</span>
-<span class="fc" id="L66">                                  findCurrentOrNextSkillLevel(skill.getSkillLevels());</span>
+<span class="fc" id="L64">                              SkillLevel selectedSkillLevel =</span>
+<span class="fc" id="L65">                                  findCurrentOrNextSkillLevel(skill.getSkillLevels());</span>
                               Set&lt;SkillLevel&gt; selectedSkillLevelSet =
-<span class="fc bfc" id="L68" title="All 2 branches covered.">                                  selectedSkillLevel != null</span>
-<span class="fc" id="L69">                                      ? Set.of(selectedSkillLevel)</span>
-<span class="fc" id="L70">                                      : Set.of();</span>
-<span class="fc bfc" id="L71" title="All 2 branches covered.">                              if (selectedSkillLevelSet.isEmpty()) {</span>
-<span class="fc" id="L72">                                return null;</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">                                  selectedSkillLevel != null</span>
+<span class="fc" id="L68">                                      ? Set.of(selectedSkillLevel)</span>
+<span class="fc" id="L69">                                      : Set.of();</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">                              if (selectedSkillLevelSet.isEmpty()) {</span>
+<span class="fc" id="L71">                                return null;</span>
                               }
-<span class="fc" id="L74">                              return Skill.toDomain(</span>
-<span class="fc" id="L75">                                  skill.getId(),</span>
-<span class="fc" id="L76">                                  skill.getName(),</span>
-                                  selectedSkillLevelSet,
-<span class="fc" id="L78">                                  skill.getLanguage());</span>
+<span class="fc" id="L73">                              return Skill.toDomain(</span>
+<span class="fc" id="L74">                                  skill.getId(), skill.getName(), selectedSkillLevelSet);</span>
                             })
-<span class="fc" id="L80">                        .filter(Objects::nonNull)</span>
-<span class="fc" id="L81">                        .collect(Collectors.toCollection(LinkedHashSet::new)),</span>
-<span class="nc" id="L82">                (existing, replacement) -&gt; existing,</span>
+<span class="fc" id="L76">                        .filter(Objects::nonNull)</span>
+<span class="fc" id="L77">                        .collect(Collectors.toCollection(LinkedHashSet::new)),</span>
+<span class="nc" id="L78">                (existing, replacement) -&gt; existing,</span>
                 LinkedHashMap::new));
   }
 
   @Override
-  public Map&lt;ProgramProgress, Set&lt;Skill&gt;&gt; getSkillsOverview(Student student, ELanguage language) {
-<span class="fc" id="L88">    SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);</span>
-<span class="fc" id="L89">    return cleanProgramProgressList(</span>
-<span class="fc" id="L90">        programProgressRepository.findAllByStudent(student, language, sortCriteria), true);</span>
+  public Map&lt;ProgramProgress, Set&lt;Skill&gt;&gt; getSkillsOverview(Student student) {
+<span class="fc" id="L84">    SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);</span>
+<span class="fc" id="L85">    return cleanProgramProgressList(</span>
+<span class="fc" id="L86">        programProgressRepository.findAllByStudent(student, sortCriteria), true);</span>
   }
 
   @Override
   public boolean isStudentFollowingAPCProgram(Student student) {
-<span class="fc" id="L95">    var programProgress = programProgressRepository.findAllAPCByStudent(student);</span>
-<span class="fc bfc" id="L96" title="All 2 branches covered.">    return !programProgress.isEmpty();</span>
+<span class="fc" id="L91">    var programProgress = programProgressRepository.findAllAPCByStudent(student);</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">    return !programProgress.isEmpty();</span>
   }
 
   @Override
   public Map&lt;ProgramProgress, Set&lt;Skill&gt;&gt; getSkillsView(
-      Student student, ELanguage language, SortCriteria sortCriteria) {
-<span class="pc bpc" id="L102" title="1 of 2 branches missed.">    if (sortCriteria == null) {</span>
-<span class="nc" id="L103">      sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);</span>
+      Student student, SortCriteria sortCriteria) {
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">    if (sortCriteria == null) {</span>
+<span class="nc" id="L99">      sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);</span>
     }
-<span class="fc" id="L105">    return cleanProgramProgressList(</span>
-<span class="fc" id="L106">        programProgressRepository.findAllByStudent(student, language, sortCriteria), false);</span>
+<span class="fc" id="L101">    return cleanProgramProgressList(</span>
+<span class="fc" id="L102">        programProgressRepository.findAllByStudent(student, sortCriteria), false);</span>
   }
 
   @Override
-  public List&lt;ProgramProgress&gt; getAllProgramProgress(Student student, ELanguage language) {
-<span class="fc" id="L111">    return programProgressRepository.findAllWithoutSkillsByStudent(student, language).stream()</span>
-<span class="fc" id="L112">        .sorted(Comparator.comparing(p -&gt; p.getProgram().getName()))</span>
-<span class="fc" id="L113">        .collect(Collectors.toList());</span>
+  public List&lt;ProgramProgress&gt; getAllProgramProgress(Student student) {
+<span class="fc" id="L107">    return programProgressRepository.findAllWithoutSkillsByStudent(student).stream()</span>
+<span class="fc" id="L108">        .sorted(Comparator.comparing(p -&gt; p.getProgram().getName()))</span>
+<span class="fc" id="L109">        .collect(Collectors.toList());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

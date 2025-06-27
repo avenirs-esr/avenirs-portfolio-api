@@ -81,21 +81,27 @@ public class UserServiceImpl implements UserService {
 <span class="fc" id="L81">  }</span>
 
   private User getUser(UUID id) {
-<span class="fc" id="L84">    return userRepository.findById(id).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L84">    var user = userRepository.findById(id);</span>
+
+<span class="fc bfc" id="L86" title="All 2 branches covered.">    if (user.isEmpty()) {</span>
+<span class="fc" id="L87">      log.error(&quot;User {} not found&quot;, id);</span>
+<span class="fc" id="L88">      throw new UserNotFoundException();</span>
+    }
+<span class="fc" id="L90">    return user.get();</span>
   }
 
   private void checkImageFormat(MultipartFile file) {
-<span class="fc" id="L88">    String contentType = file.getContentType();</span>
-<span class="fc" id="L89">    long contentSize = file.getSize();</span>
+<span class="fc" id="L94">    String contentType = file.getContentType();</span>
+<span class="fc" id="L95">    long contentSize = file.getSize();</span>
 
-<span class="fc bfc" id="L91" title="All 2 branches covered.">    if (!contentType.equals(MediaType.IMAGE_JPEG_VALUE)</span>
-<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        &amp;&amp; !contentType.equals(MediaType.IMAGE_PNG_VALUE)) {</span>
-<span class="fc" id="L93">      throw new BadImageTypeException();</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">    if (!contentType.equals(MediaType.IMAGE_JPEG_VALUE)</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">        &amp;&amp; !contentType.equals(MediaType.IMAGE_PNG_VALUE)) {</span>
+<span class="fc" id="L99">      throw new BadImageTypeException();</span>
     }
 
-<span class="fc bfc" id="L96" title="All 2 branches covered.">    if (contentSize &gt; MAX_SIZE) {</span>
-<span class="fc" id="L97">      throw new BadImageSizeException();</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">    if (contentSize &gt; MAX_SIZE) {</span>
+<span class="fc" id="L103">      throw new BadImageSizeException();</span>
     }
-<span class="fc" id="L99">  }</span>
+<span class="fc" id="L105">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -3,7 +3,6 @@
 import fr.avenirsesr.portfolio.api.application.adapter.dto.NavigationAccessDTO;
 import fr.avenirsesr.portfolio.api.application.adapter.util.UserUtil;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
@@ -12,11 +11,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L17">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/navigation-access&quot;)
@@ -26,25 +24,22 @@ public class NavigationAccessController {
   private final ProgramProgressService programProgressService;
 
   @GetMapping
-  public ResponseEntity&lt;NavigationAccessDTO&gt; getStudentNavigationAccess(
-      Principal principal,
-      @RequestHeader(value = &quot;Accept-Language&quot;, defaultValue = &quot;fr_FR&quot;) String lang) {
-<span class="nc" id="L32">    ELanguage language = ELanguage.fromCode(lang);</span>
-<span class="nc" id="L33">    Student student = userUtil.getStudent(principal);</span>
+  public ResponseEntity&lt;NavigationAccessDTO&gt; getStudentNavigationAccess(Principal principal) {
+<span class="nc" id="L28">    Student student = userUtil.getStudent(principal);</span>
 
-<span class="nc" id="L35">    var isAPCEnabledByInstitution =</span>
-<span class="nc" id="L36">        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC, language);</span>
-<span class="nc" id="L37">    var isLifeProjectEnabledByInstitution =</span>
-<span class="nc" id="L38">        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT, language);</span>
+<span class="nc" id="L30">    var isAPCEnabledByInstitution =</span>
+<span class="nc" id="L31">        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);</span>
+<span class="nc" id="L32">    var isLifeProjectEnabledByInstitution =</span>
+<span class="nc" id="L33">        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);</span>
 
-<span class="nc" id="L40">    var isFollowingAPCProgram = programProgressService.isStudentFollowingAPCProgram(student);</span>
+<span class="nc" id="L35">    var isFollowingAPCProgram = programProgressService.isStudentFollowingAPCProgram(student);</span>
 
-<span class="nc" id="L42">    var navigationAccess =</span>
+<span class="nc" id="L37">    var navigationAccess =</span>
         new NavigationAccessDTO(
             new NavigationAccessDTO.AccessInfoAPC(isAPCEnabledByInstitution, isFollowingAPCProgram),
             new NavigationAccessDTO.AccessInfoLifeProject(isLifeProjectEnabledByInstitution));
 
-<span class="nc" id="L47">    return ResponseEntity.ok(navigationAccess);</span>
+<span class="nc" id="L42">    return ResponseEntity.ok(navigationAccess);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -19,21 +19,19 @@ public class FakeSkill {
 <span class="nc" id="L19">        Skill.create(</span>
 <span class="nc" id="L20">            UUID.fromString(faker.call().internet().uuid()),</span>
 <span class="nc" id="L21">            &quot;Skill %s&quot;.formatted(faker.call().lorem().word()),</span>
-            skillLevels,
-            ELanguage.FRENCH));
+            skillLevels));
   }
 
   public static FakeSkill of(Skill skill, ELanguage language) {
-<span class="nc" id="L27">    return new FakeSkill(</span>
-<span class="nc" id="L28">        Skill.create(</span>
-<span class="nc" id="L29">            skill.getId(),</span>
-<span class="nc" id="L30">            String.format(&quot;%s %s&quot;, skill.getName(), language.getCode()),</span>
-<span class="nc" id="L31">            skill.getSkillLevels(),</span>
-            language));
+<span class="nc" id="L26">    return new FakeSkill(</span>
+<span class="nc" id="L27">        Skill.create(</span>
+<span class="nc" id="L28">            skill.getId(),</span>
+<span class="nc" id="L29">            String.format(&quot;%s %s&quot;, skill.getName(), language.getCode()),</span>
+<span class="nc" id="L30">            skill.getSkillLevels()));</span>
   }
 
   public Skill toModel() {
-<span class="nc" id="L36">    return skill;</span>
+<span class="nc" id="L34">    return skill;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
