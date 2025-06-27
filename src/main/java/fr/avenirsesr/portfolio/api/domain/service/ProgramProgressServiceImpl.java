@@ -3,10 +3,12 @@ package fr.avenirsesr.portfolio.api.domain.service;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.api.domain.model.SortParam;
+import fr.avenirsesr.portfolio.api.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import java.time.LocalDate;
@@ -83,9 +85,9 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
 
   @Override
   public Map<ProgramProgress, Set<Skill>> getSkillsOverview(Student student, ELanguage language) {
-    SortParam sortParam = new SortParam("name", "ASC");
+    SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
     return cleanProgramProgressList(
-        programProgressRepository.findAllByStudent(student, language, sortParam), true);
+        programProgressRepository.findAllByStudent(student, language, sortCriteria), true);
   }
 
   @Override
@@ -96,12 +98,12 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
 
   @Override
   public Map<ProgramProgress, Set<Skill>> getSkillsView(
-      Student student, ELanguage language, SortParam sortParam) {
-    if (sortParam == null || sortParam.getField() == null) {
-      sortParam = new SortParam("name", "ASC");
+      Student student, ELanguage language, SortCriteria sortCriteria) {
+    if (sortCriteria == null) {
+      sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
     }
     return cleanProgramProgressList(
-        programProgressRepository.findAllByStudent(student, language, sortParam), false);
+        programProgressRepository.findAllByStudent(student, language, sortCriteria), false);
   }
 
   @Override

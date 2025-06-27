@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressMap
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressOverviewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressViewMapper;
 import fr.avenirsesr.portfolio.api.application.adapter.util.UserUtil;
-import fr.avenirsesr.portfolio.api.domain.model.SortParam;
+import fr.avenirsesr.portfolio.api.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
@@ -48,10 +48,10 @@ public class ProgramProgressController {
       @RequestHeader(value = "Accept-Language", defaultValue = "fr_FR") String lang,
       @RequestParam(name = "sort", required = false) String sortRaw) {
     ELanguage language = ELanguage.fromCode(lang);
-    SortParam sortParam = new SortParam(sortRaw);
+    SortCriteria sortCriteria = SortCriteria.fromString(sortRaw);
     Student student = userUtil.getStudent(principal);
 
-    return programProgressService.getSkillsView(student, language, sortParam).entrySet().stream()
+    return programProgressService.getSkillsView(student, language, sortCriteria).entrySet().stream()
         .map(entry -> ProgramProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
         .toList();
   }

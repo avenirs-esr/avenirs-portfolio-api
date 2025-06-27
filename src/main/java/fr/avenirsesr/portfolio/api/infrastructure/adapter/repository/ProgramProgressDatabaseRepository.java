@@ -2,9 +2,10 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.api.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
-import fr.avenirsesr.portfolio.api.domain.model.SortParam;
+import fr.avenirsesr.portfolio.api.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.api.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.UserMapper;
@@ -42,11 +43,11 @@ public class ProgramProgressDatabaseRepository
 
   @Override
   public List<ProgramProgress> findAllByStudent(
-      Student student, ELanguage language, SortParam sortParam) {
+      Student student, ELanguage language, SortCriteria sortCriteria) {
     Sort sort =
         Sort.by(
-            Sort.Direction.fromString(sortParam.getDirection()),
-            sortFieldToExactPath(sortParam.getField()));
+            Sort.Direction.fromString(sortCriteria.getOrder().name()),
+            sortFieldToExactPath(sortCriteria.getField()));
     return entityListToDomainList(
         jpaSpecificationExecutor.findAll(
             ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)), sort),
@@ -94,12 +95,11 @@ public class ProgramProgressDatabaseRepository
         .collect(Collectors.toList());
   }
 
-  private String sortFieldToExactPath(String sortField) {
+  private String sortFieldToExactPath(ESortField sortField) {
     return switch (sortField) {
-      case "name" -> "program.translations.name";
-      case "date" ->
+      case ESortField.NAME -> "program.translations.name";
+      case ESortField.DATE ->
           "createdAt"; // TODO : Sera fonctionnel après ajout de createdAt sur toutes les entités
-      default -> "program.translations.name";
     };
   }
 }
