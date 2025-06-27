@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.SkillRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.SkillMapper;
@@ -23,9 +22,7 @@ public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter<Skill, 
                 skill, ProgramProgressMapper.fromDomain(skill.getProgramProgress())),
         skill ->
             SkillMapper.toDomain(
-                skill,
-                ProgramProgressMapper.toDomain(skill.getProgramProgress(), ELanguage.FRENCH),
-                ELanguage.FRENCH));
+                skill, ProgramProgressMapper.toDomain(skill.getProgramProgress())));
     this.jpaRepository = jpaRepository;
   }
 

@@ -19,8 +19,7 @@ public class FakeSkill {
         Skill.create(
             UUID.fromString(faker.call().internet().uuid()),
             "Skill %s".formatted(faker.call().lorem().word()),
-            skillLevels,
-            ELanguage.FRENCH));
+            skillLevels));
   }
 
   public static FakeSkill of(Skill skill, ELanguage language) {
@@ -28,8 +27,7 @@ public class FakeSkill {
         Skill.create(
             skill.getId(),
             String.format("%s %s", skill.getName(), language.getCode()),
-            skill.getSkillLevels(),
-            language));
+            skill.getSkillLevels()));
   }
 
   public Skill toModel() {

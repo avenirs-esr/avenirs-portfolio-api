@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.api.application.adapter.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.SeederRunner;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,7 @@ class TraceControllerIT {
     mockMvc
         .perform(
             get("/me/traces/overview")
+                .header("Accept-Language", ELanguage.FRENCH.getCode())
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -63,6 +65,7 @@ class TraceControllerIT {
     mockMvc
         .perform(
             get("/me/traces/overview")
+                .header("Accept-Language", ELanguage.FRENCH.getCode())
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature))

@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.api.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESortOrder;
@@ -72,10 +71,7 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
                                 return null;
                               }
                               return Skill.toDomain(
-                                  skill.getId(),
-                                  skill.getName(),
-                                  selectedSkillLevelSet,
-                                  skill.getLanguage());
+                                  skill.getId(), skill.getName(), selectedSkillLevelSet);
                             })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toCollection(LinkedHashSet::new)),
@@ -84,10 +80,10 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
   }
 
   @Override
-  public Map<ProgramProgress, Set<Skill>> getSkillsOverview(Student student, ELanguage language) {
+  public Map<ProgramProgress, Set<Skill>> getSkillsOverview(Student student) {
     SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
     return cleanProgramProgressList(
-        programProgressRepository.findAllByStudent(student, language, sortCriteria), true);
+        programProgressRepository.findAllByStudent(student, sortCriteria), true);
   }
 
   @Override
@@ -98,17 +94,17 @@ public class ProgramProgressServiceImpl implements ProgramProgressService {
 
   @Override
   public Map<ProgramProgress, Set<Skill>> getSkillsView(
-      Student student, ELanguage language, SortCriteria sortCriteria) {
+      Student student, SortCriteria sortCriteria) {
     if (sortCriteria == null) {
       sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
     }
     return cleanProgramProgressList(
-        programProgressRepository.findAllByStudent(student, language, sortCriteria), false);
+        programProgressRepository.findAllByStudent(student, sortCriteria), false);
   }
 
   @Override
-  public List<ProgramProgress> getAllProgramProgress(Student student, ELanguage language) {
-    return programProgressRepository.findAllWithoutSkillsByStudent(student, language).stream()
+  public List<ProgramProgress> getAllProgramProgress(Student student) {
+    return programProgressRepository.findAllWithoutSkillsByStudent(student).stream()
         .sorted(Comparator.comparing(p -> p.getProgram().getName()))
         .collect(Collectors.toList());
   }

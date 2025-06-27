@@ -40,12 +40,10 @@ public class ProgramProgressServiceImplTest {
 
   @Test
   void shouldReturnEmptyListWhenRepositoryReturnsEmptyList() {
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of());
 
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
 
     assertTrue(result.isEmpty());
   }
@@ -61,12 +59,10 @@ public class ProgramProgressServiceImplTest {
         createProgramProgress(programProgressId2, "Y", List.of("x", "y"));
     ProgramProgress programProgress3 = createProgramProgress(programProgressId3, "X", List.of("s"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress3, programProgress2, programProgress1));
 
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
 
     assertEquals(3, resultPrograms.size());
@@ -82,12 +78,10 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress programProgress2 =
         createProgramProgress(UUID.randomUUID(), "B", List.of("d", "e", "f", "g"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress1, programProgress2));
 
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.get(0)));
     List<Skill> skills2 = new ArrayList<>(result.get(resultPrograms.get(1)));
@@ -106,12 +100,10 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress programProgress2 =
         createProgramProgress(UUID.randomUUID(), "B", List.of("d", "e", "f", "g"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress1, programProgress2));
 
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.get(0)));
     List<Skill> skills2 = new ArrayList<>(result.get(resultPrograms.get(1)));
@@ -128,12 +120,10 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress programProgress2 =
         createProgramProgress(UUID.randomUUID(), "B", List.of("d", "e", "f", "g", "h"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress1, programProgress2));
 
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.get(0)));
     List<Skill> skills2 = new ArrayList<>(result.get(resultPrograms.get(1)));
@@ -205,13 +195,11 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
     List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
@@ -234,13 +222,11 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
     List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
@@ -263,13 +249,11 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
     List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
@@ -296,13 +280,11 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
     List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
@@ -332,13 +314,11 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
     List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
@@ -355,12 +335,10 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
     // When
-    Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsOverview(student, language);
+    Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
 
@@ -379,13 +357,12 @@ public class ProgramProgressServiceImplTest {
         createProgramProgress(
             UUID.randomUUID(), "B", List.of("f", "g", "h", "i", "j", "k", "l", "m", "n"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress1, programProgress2, programProgress3));
 
     // When
     Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsView(student, language, sortCriteria);
+        programProgressService.getSkillsView(student, sortCriteria);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
 
     // Then
@@ -406,13 +383,12 @@ public class ProgramProgressServiceImplTest {
         createProgramProgress(
             UUID.randomUUID(), "B", List.of("f", "g", "h", "i", "j", "k", "l", "m", "n"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(ELanguage.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress1, programProgress2, programProgress3));
 
     // When
     Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsView(student, language, sortCriteria);
+        programProgressService.getSkillsView(student, sortCriteria);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
 
     // Then
@@ -442,12 +418,12 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(student, language, sortCriteria))
+    when(programProgressRepository.findAllByStudent(student, sortCriteria))
         .thenReturn(List.of(progress));
 
     // When
     Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsView(student, language, sortCriteria);
+        programProgressService.getSkillsView(student, sortCriteria);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
     List<SkillLevel> skillLevels1 = new ArrayList<>(skills1.getFirst().getSkillLevels());
@@ -473,12 +449,12 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(student, language, sortCriteria))
+    when(programProgressRepository.findAllByStudent(student, sortCriteria))
         .thenReturn(List.of(progress));
 
     // When
     Map<ProgramProgress, Set<Skill>> result =
-        programProgressService.getSkillsView(student, language, sortCriteria);
+        programProgressService.getSkillsView(student, sortCriteria);
     List<ProgramProgress> resultPrograms = new ArrayList<>(result.keySet());
     List<Skill> skills1 = new ArrayList<>(result.get(resultPrograms.getFirst()));
 
@@ -495,11 +471,11 @@ public class ProgramProgressServiceImplTest {
         ProgramProgressFixture.create().withProgram(program1).toModel();
     ProgramProgress programProgress2 =
         ProgramProgressFixture.create().withProgram(program2).toModel();
-    when(programProgressRepository.findAllWithoutSkillsByStudent(student, language))
+    when(programProgressRepository.findAllWithoutSkillsByStudent(student))
         .thenReturn(List.of(programProgress1, programProgress2));
 
     // When
-    List<ProgramProgress> result = programProgressService.getAllProgramProgress(student, language);
+    List<ProgramProgress> result = programProgressService.getAllProgramProgress(student);
 
     // Then
     assertEquals(2, result.size());

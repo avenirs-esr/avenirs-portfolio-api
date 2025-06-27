@@ -81,7 +81,13 @@ public class UserServiceImpl implements UserService {
   }
 
   private User getUser(UUID id) {
-    return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+    var user = userRepository.findById(id);
+
+    if (user.isEmpty()) {
+      log.error("User {} not found", id);
+      throw new UserNotFoundException();
+    }
+    return user.get();
   }
 
   private void checkImageFormat(MultipartFile file) {

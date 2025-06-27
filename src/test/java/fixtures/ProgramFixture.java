@@ -81,6 +81,6 @@ public class ProgramFixture {
   }
 
   public Program toModel() {
-    return Program.toDomain(id, institution, name, isAPC, language, durationUnit, durationCount);
+    return Program.toDomain(id, institution, name, isAPC, durationUnit, durationCount);
   }
 }
