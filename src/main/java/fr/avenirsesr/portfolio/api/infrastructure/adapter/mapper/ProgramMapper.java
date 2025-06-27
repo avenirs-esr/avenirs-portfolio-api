@@ -21,15 +21,13 @@ public interface ProgramMapper {
   }
 
   static Program toDomain(ProgramEntity programEntity, ELanguage language) {
-    ELanguage fallbackLanguage = ELanguage.FRENCH;
     ProgramTranslationEntity translationEntity =
-        TranslationUtil.getTranslation(programEntity.getTranslations(), language, fallbackLanguage);
+        TranslationUtil.getTranslation(programEntity.getTranslations());
     return Program.toDomain(
         programEntity.getId(),
-        InstitutionMapper.toDomain(programEntity.getInstitution(), language),
+        InstitutionMapper.toDomain(programEntity.getInstitution()),
         translationEntity.getName(),
         programEntity.isAPC(),
-        language,
         programEntity.getDurationUnit(),
         programEntity.getDurationCount());
   }

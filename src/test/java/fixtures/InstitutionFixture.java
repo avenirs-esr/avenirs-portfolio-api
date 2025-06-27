@@ -44,6 +44,6 @@ public class InstitutionFixture {
   }
 
   public Institution toModel() {
-    return Institution.toDomain(id, name, enabledFields, language);
+    return Institution.toDomain(id, name, enabledFields);
   }
 }

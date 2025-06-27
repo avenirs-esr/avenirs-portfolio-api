@@ -74,37 +74,43 @@ public class SeederRunner implements CommandLineRunner {
 
       var users = userSeeder.seed();
 
-      Institution institutionBase = FakeInstitution.create().toModel();
-      Institution institutionApc =
-          FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
-      Institution institutionLifeProject =
-          FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT)).toModel();
-      List<Institution> institutions =
-          List.of(
-              institutionBase,
-              FakeInstitution.create(institutionBase, ELanguage.ENGLISH).toModel(),
-              FakeInstitution.create(institutionBase, ELanguage.SPANISH).toModel(),
-              institutionApc,
-              FakeInstitution.create(institutionApc, ELanguage.ENGLISH).toModel(),
-              FakeInstitution.create(institutionApc, ELanguage.SPANISH).toModel(),
-              institutionLifeProject,
-              FakeInstitution.create(institutionLifeProject, ELanguage.ENGLISH).toModel(),
-              FakeInstitution.create(institutionLifeProject, ELanguage.SPANISH).toModel());
+      var institutionBase =
+          FakeInstitution.create()
+              .addTranslation(ELanguage.ENGLISH)
+              .addTranslation(ELanguage.SPANISH);
+      var institutionApc =
+          FakeInstitution.create()
+              .withEnabledFiled(Set.of(EPortfolioType.APC))
+              .addTranslation(ELanguage.ENGLISH)
+              .addTranslation(ELanguage.SPANISH);
+      var institutionLifeProject =
+          FakeInstitution.create()
+              .withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT))
+              .addTranslation(ELanguage.ENGLISH)
+              .addTranslation(ELanguage.SPANISH);
 
-      List<Institution> cleanedInstitutions =
-          List.of(institutionBase, institutionApc, institutionLifeProject);
+      var fakeInstitutions = List.of(institutionBase, institutionApc, institutionLifeProject);
 
       List<InstitutionEntity> institutionEntities =
-          cleanedInstitutions.stream()
+          fakeInstitutions.stream()
               .map(
-                  entity -> {
-                    Set<InstitutionTranslationEntity> translations =
-                        institutions.stream()
-                            .filter(p -> p.getId().equals(entity.getId()))
-                            .map(InstitutionTranslationMapper::fromDomain)
-                            .collect(Collectors.toSet());
+                  fakeInstitution -> {
                     InstitutionEntity institutionEntity =
-                        new InstitutionEntity(entity.getId(), entity.getEnabledFields());
+                        new InstitutionEntity(
+                            fakeInstitution.toModel().getId(),
+                            fakeInstitution.toModel().getEnabledFields());
+
+                    var translations =
+                        fakeInstitution.getTranslations().stream()
+                            .map(
+                                t ->
+                                    new InstitutionTranslationEntity(
+                                        UUID.randomUUID(),
+                                        t.language(),
+                                        t.name(),
+                                        institutionEntity))
+                            .collect(Collectors.toSet());
+
                     institutionEntity.setTranslations(translations);
                     return institutionEntity;
                   })

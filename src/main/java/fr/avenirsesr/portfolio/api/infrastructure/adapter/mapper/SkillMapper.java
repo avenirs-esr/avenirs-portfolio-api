@@ -28,9 +28,9 @@ public interface SkillMapper {
 
   static Skill toDomain(
       SkillEntity skillEntity, ProgramProgress programProgress, ELanguage language) {
-    ELanguage fallbackLanguage = ELanguage.FRENCH;
+
     SkillTranslationEntity skillTranslationEntity =
-        TranslationUtil.getTranslation(skillEntity.getTranslations(), language, fallbackLanguage);
+        TranslationUtil.getTranslation(skillEntity.getTranslations());
     var skill =
         Skill.toDomain(skillEntity.getId(), skillTranslationEntity.getName(), Set.of(), language);
 

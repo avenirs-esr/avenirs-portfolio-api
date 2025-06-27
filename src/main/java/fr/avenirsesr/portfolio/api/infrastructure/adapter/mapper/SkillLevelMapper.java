@@ -31,10 +31,8 @@ public interface SkillLevelMapper {
 
   static SkillLevel toDomainWithoutRecursion(
       SkillLevelEntity skillLevelEntity, Skill skill, ELanguage language) {
-    ELanguage fallbackLanguage = ELanguage.FRENCH;
     SkillLevelTranslationEntity skillLevelTranslationEntity =
-        TranslationUtil.getTranslation(
-            skillLevelEntity.getTranslations(), language, fallbackLanguage);
+        TranslationUtil.getTranslation(skillLevelEntity.getTranslations());
     return SkillLevel.toDomain(
         skillLevelEntity.getId(),
         skillLevelTranslationEntity.getName(),
