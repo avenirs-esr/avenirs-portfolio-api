@@ -57,9 +57,8 @@ public interface AMSMapper {
   }
 
   static AMS toDomainWithoutRecursion(AMSEntity entity, ELanguage language) {
-    ELanguage fallbackLanguage = ELanguage.FRENCH;
     AMSTranslationEntity translationEntity =
-        TranslationUtil.getTranslation(entity.getTranslations(), language, fallbackLanguage);
+        TranslationUtil.getTranslation(entity.getTranslations());
     return AMS.toDomain(
         entity.getId(),
         UserMapper.toDomain(entity.getUser()),

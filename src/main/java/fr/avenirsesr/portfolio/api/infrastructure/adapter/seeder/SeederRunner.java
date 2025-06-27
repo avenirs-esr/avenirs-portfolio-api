@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.api.domain.model.*;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.*;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.*;
@@ -10,7 +9,6 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.*;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.repository.*;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake.*;
 import java.util.*;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -34,6 +32,7 @@ public class SeederRunner implements CommandLineRunner {
   private final CohortSeeder cohortSeeder;
   private final AMSSeeder amsSeeder;
   private final TraceSeeder traceSeeder;
+  private final InstitutionSeeder institutionSeeder;
 
   @Value("${seeder.enabled:false}")
   private boolean seedEnabled;
@@ -49,7 +48,8 @@ public class SeederRunner implements CommandLineRunner {
       UserSeeder userSeeder,
       CohortSeeder cohortSeeder,
       AMSSeeder amsSeeder,
-      TraceSeeder traceSeeder) {
+      TraceSeeder traceSeeder,
+      InstitutionSeeder institutionSeeder) {
     this.userRepository = userRepository;
     this.institutionRepository = institutionRepository;
     this.programRepository = programRepository;
@@ -59,6 +59,7 @@ public class SeederRunner implements CommandLineRunner {
     this.amsSeeder = amsSeeder;
     this.traceSeeder = traceSeeder;
     this.userSeeder = userSeeder;
+    this.institutionSeeder = institutionSeeder;
     this.userSeeder.setNbUsers(NB_USERS);
     this.cohortSeeder.setNbCohorts(NB_COHORTS);
     this.amsSeeder.setNbAms(NB_AMS);
@@ -73,42 +74,9 @@ public class SeederRunner implements CommandLineRunner {
 
       var users = userSeeder.seed();
 
-      Institution institutionBase = FakeInstitution.create().toModel();
-      Institution institutionApc =
-          FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.APC)).toModel();
-      Institution institutionLifeProject =
-          FakeInstitution.create().withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT)).toModel();
-      List<Institution> institutions =
-          List.of(
-              institutionBase,
-              FakeInstitution.create(institutionBase, ELanguage.ENGLISH).toModel(),
-              FakeInstitution.create(institutionBase, ELanguage.SPANISH).toModel(),
-              institutionApc,
-              FakeInstitution.create(institutionApc, ELanguage.ENGLISH).toModel(),
-              FakeInstitution.create(institutionApc, ELanguage.SPANISH).toModel(),
-              institutionLifeProject,
-              FakeInstitution.create(institutionLifeProject, ELanguage.ENGLISH).toModel(),
-              FakeInstitution.create(institutionLifeProject, ELanguage.SPANISH).toModel());
+      var institutionEntities = institutionSeeder.seed();
 
-      List<Institution> cleanedInstitutions =
-          List.of(institutionBase, institutionApc, institutionLifeProject);
-
-      List<InstitutionEntity> institutionEntities =
-          cleanedInstitutions.stream()
-              .map(
-                  entity -> {
-                    Set<InstitutionTranslationEntity> translations =
-                        institutions.stream()
-                            .filter(p -> p.getId().equals(entity.getId()))
-                            .map(InstitutionTranslationMapper::fromDomain)
-                            .collect(Collectors.toSet());
-                    InstitutionEntity institutionEntity =
-                        new InstitutionEntity(entity.getId(), entity.getEnabledFields());
-                    institutionEntity.setTranslations(translations);
-                    return institutionEntity;
-                  })
-              .toList();
-
+      // todo -> programSeeder
       List<ProgramEntity> programEntities =
           institutionEntities.stream()
               .map(
@@ -219,9 +187,6 @@ public class SeederRunner implements CommandLineRunner {
               skill3, programProgressEntity, List.of(skillLevel7, skillLevel8), traceEntity);
 
       List<SkillEntity> skillEntities = List.of(skillEntity1, skillEntity2, skillEntity3);
-
-      institutionRepository.saveAllEntities(institutionEntities);
-      log.info("✓ {} institutions created", institutionEntities.size());
 
       programRepository.saveAllEntities(programEntities);
       log.info("✓ {} programs created", programEntities.size());
