@@ -9,21 +9,23 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
   private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-  private final HmacAuthenticationFilter hmacAuthenticationFilter;
+
+  @Value("${security.enabled:true}")
+  private boolean securityEnabled;
 
   @Value("${security.permit-all-paths}")
   private String[] permitAllPaths;
 
   public SecurityConfig(
-      CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
-      HmacAuthenticationFilter hmacAuthenticationFilter) {
+      CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
     this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
-    this.hmacAuthenticationFilter = hmacAuthenticationFilter;
   }
 
   @Bean
@@ -32,8 +34,13 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authz -> authz.requestMatchers(permitAllPaths).permitAll().anyRequest().authenticated())
         .exceptionHandling(
-            exception -> exception.authenticationEntryPoint(customAuthenticationEntryPoint))
-        .addFilterBefore(hmacAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            exception -> exception.authenticationEntryPoint(customAuthenticationEntryPoint));
+
+    if (securityEnabled) {
+      http.addFilterBefore(new HmacAuthenticationFilter(Arrays.toString(permitAllPaths)), UsernamePasswordAuthenticationFilter.class);
+    } else {
+      http.addFilterBefore(new DevAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+    }
 
     return http.build();
   }
