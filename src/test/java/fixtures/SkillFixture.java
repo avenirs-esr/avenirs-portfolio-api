@@ -66,7 +66,7 @@ public class SkillFixture {
   }
 
   public Skill toModel() {
-    Skill skill = Skill.toDomain(id, name, skillLevels, language);
+    Skill skill = Skill.toDomain(id, name, skillLevels);
     skill.setProgramProgress(programProgress);
     return skill;
   }

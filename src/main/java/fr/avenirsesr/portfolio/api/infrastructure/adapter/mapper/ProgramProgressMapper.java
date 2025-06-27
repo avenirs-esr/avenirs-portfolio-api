@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.dto.ProgramProgressSummaryDTO;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramProgressEntity;
 import java.util.Set;
@@ -26,14 +25,10 @@ public interface ProgramProgressMapper {
   }
 
   static ProgramProgress toDomain(ProgramProgressEntity programProgressEntity) {
-    return toDomain(programProgressEntity, ELanguage.FRENCH);
-  }
-
-  static ProgramProgress toDomain(ProgramProgressEntity programProgressEntity, ELanguage language) {
     var programProgress =
         ProgramProgress.toDomain(
             programProgressEntity.getId(),
-            ProgramMapper.toDomain(programProgressEntity.getProgram(), language),
+            ProgramMapper.toDomain(programProgressEntity.getProgram()),
             StudentMapper.toDomain(
                 programProgressEntity.getStudent().getStudent(),
                 programProgressEntity.getStudent()),
@@ -41,17 +36,17 @@ public interface ProgramProgressMapper {
 
     programProgress.setSkills(
         programProgressEntity.getSkills().stream()
-            .map(skill -> SkillMapper.toDomain(skill, programProgress, language))
+            .map(skill -> SkillMapper.toDomain(skill, programProgress))
             .collect(Collectors.toSet()));
 
     return programProgress;
   }
 
   static ProgramProgress toDomainWithoutSkills(
-      ProgramProgressSummaryDTO programProgressSummaryDTO, Student student, ELanguage language) {
+      ProgramProgressSummaryDTO programProgressSummaryDTO, Student student) {
     return ProgramProgress.toDomain(
         programProgressSummaryDTO.id(),
-        ProgramMapper.toDomain(programProgressSummaryDTO.program(), language),
+        ProgramMapper.toDomain(programProgressSummaryDTO.program()),
         student,
         Set.of());
   }

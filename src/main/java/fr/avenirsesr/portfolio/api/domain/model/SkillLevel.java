@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
 import java.time.LocalDate;
 import java.util.List;
@@ -21,8 +20,6 @@ public class SkillLevel {
   @Setter(AccessLevel.NONE)
   private final String description;
 
-  private final ELanguage language;
-
   private ESkillLevelStatus status;
   private List<Trace> traces;
   private List<AMS> amses;
@@ -30,15 +27,14 @@ public class SkillLevel {
   private LocalDate startDate;
   private LocalDate endDate;
 
-  private SkillLevel(UUID id, String name, String description, ELanguage language) {
+  private SkillLevel(UUID id, String name, String description) {
     this.id = id;
     this.name = name;
     this.description = description;
-    this.language = language;
   }
 
-  public static SkillLevel create(UUID id, String name, String description, ELanguage language) {
-    var skillLevel = new SkillLevel(id, name, description, language);
+  public static SkillLevel create(UUID id, String name, String description) {
+    var skillLevel = new SkillLevel(id, name, description);
     skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);
     skillLevel.setAmses(List.of());
     skillLevel.setTraces(List.of());
@@ -54,10 +50,9 @@ public class SkillLevel {
       List<Trace> traces,
       List<AMS> amses,
       Skill skill,
-      ELanguage language,
       LocalDate startDate,
       LocalDate endDate) {
-    var skillLevel = new SkillLevel(id, name, description, language);
+    var skillLevel = new SkillLevel(id, name, description);
     skillLevel.setStatus(status);
     skillLevel.setTraces(traces);
     skillLevel.setAmses(amses);

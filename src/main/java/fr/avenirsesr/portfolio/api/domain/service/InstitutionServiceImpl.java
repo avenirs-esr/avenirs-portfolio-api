@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.api.domain.service;
 
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
@@ -16,9 +15,8 @@ public class InstitutionServiceImpl implements InstitutionService {
   private final ProgramProgressRepository programProgressRepository;
 
   @Override
-  public boolean isNavigationEnabledFor(
-      Student student, EPortfolioType navigationField, ELanguage language) {
-    var programProgresses = programProgressRepository.findAllByStudent(student, language);
+  public boolean isNavigationEnabledFor(Student student, EPortfolioType navigationField) {
+    var programProgresses = programProgressRepository.findAllByStudent(student);
 
     return programProgresses.stream()
         .map(programProgress -> programProgress.getProgram().getInstitution())

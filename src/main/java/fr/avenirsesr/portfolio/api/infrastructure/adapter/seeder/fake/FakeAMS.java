@@ -25,8 +25,7 @@ public class FakeAMS {
             user,
             faker.call().name().title(),
             period.getStartDate(),
-            period.getEndDate(),
-            ELanguage.FRENCH));
+            period.getEndDate()));
   }
 
   public static FakeAMS of(AMS ams, ELanguage language) {
@@ -37,8 +36,7 @@ public class FakeAMS {
             ams.getUser(),
             String.format("%s %s", ams.getTitle(), language.getCode()),
             period.getStartDate(),
-            period.getEndDate(),
-            language));
+            period.getEndDate()));
   }
 
   public FakeAMS withSkillLevel(List<SkillLevel> skillLevels) {

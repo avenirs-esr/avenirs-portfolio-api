@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramProgressEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.SkillTranslationEntity;
@@ -26,17 +25,15 @@ public interface SkillMapper {
     return skillEntity;
   }
 
-  static Skill toDomain(
-      SkillEntity skillEntity, ProgramProgress programProgress, ELanguage language) {
+  static Skill toDomain(SkillEntity skillEntity, ProgramProgress programProgress) {
 
     SkillTranslationEntity skillTranslationEntity =
         TranslationUtil.getTranslation(skillEntity.getTranslations());
-    var skill =
-        Skill.toDomain(skillEntity.getId(), skillTranslationEntity.getName(), Set.of(), language);
+    var skill = Skill.toDomain(skillEntity.getId(), skillTranslationEntity.getName(), Set.of());
 
     skill.setSkillLevels(
         skillEntity.getSkillLevels().stream()
-            .map(skillLevelEntity -> SkillLevelMapper.toDomain(skillLevelEntity, skill, language))
+            .map(skillLevelEntity -> SkillLevelMapper.toDomain(skillLevelEntity, skill))
             .collect(Collectors.toSet()));
 
     skill.setProgramProgress(programProgress);

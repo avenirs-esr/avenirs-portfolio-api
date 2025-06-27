@@ -5,13 +5,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public enum ELanguage {
   FRENCH("fr_FR"),
   ENGLISH("en_US"),
   SPANISH("es_ES");
 
   private final String code;
+
+  public static final ELanguage FALLBACK = FRENCH;
 
   ELanguage(String code) {
     this.code = code;
@@ -25,7 +29,12 @@ public enum ELanguage {
       Arrays.stream(values()).collect(Collectors.toMap(ELanguage::getCode, Function.identity()));
 
   public static ELanguage fromCode(String code) {
-    return Optional.ofNullable(BY_CODE.get(code))
-        .orElseThrow(() -> new IllegalArgumentException("Unknown language code: " + code));
+    var lang = Optional.ofNullable(BY_CODE.get(code));
+
+    if (lang.isEmpty()) {
+      log.error("Unknown language code: {} - using fallback language {}", code, FALLBACK);
+    }
+
+    return lang.orElse(FALLBACK);
   }
 }

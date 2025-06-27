@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.api.domain.model.Program;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramTranslationEntity;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.util.TranslationUtil;
@@ -17,10 +16,6 @@ public interface ProgramMapper {
   }
 
   static Program toDomain(ProgramEntity programEntity) {
-    return toDomain(programEntity, ELanguage.FRENCH);
-  }
-
-  static Program toDomain(ProgramEntity programEntity, ELanguage language) {
     ProgramTranslationEntity translationEntity =
         TranslationUtil.getTranslation(programEntity.getTranslations());
     return Program.toDomain(

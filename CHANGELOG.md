@@ -6,6 +6,10 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [v1.0.4] - 2025-06-30
+
+- Added language management using a RequestContext.
+
 ## [v1.0.3] - 2025-06-26
 
 - Fix missing programProgressId in /me/ams/view/ end point.

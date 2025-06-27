@@ -43,7 +43,7 @@ class NavigationAccessControllerIT {
   @Value("${user.unknown.signature}")
   private String unknownUserSignature;
 
-  private ELanguage language = ELanguage.FRENCH;
+  private final ELanguage language = ELanguage.FRENCH;
 
   @BeforeAll
   static void setup(@Autowired SeederRunner seederRunner) {

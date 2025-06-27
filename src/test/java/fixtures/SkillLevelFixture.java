@@ -121,6 +121,6 @@ public class SkillLevelFixture {
 
   public SkillLevel toModel() {
     return SkillLevel.toDomain(
-        id, name, description, status, traces, amses, skill, language, startDate, endDate);
+        id, name, description, status, traces, amses, skill, startDate, endDate);
   }
 }

@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.api.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.api.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.ProgramProgressRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
@@ -34,36 +33,31 @@ public class ProgramProgressDatabaseRepository
   }
 
   @Override
-  public List<ProgramProgress> findAllByStudent(Student student, ELanguage language) {
+  public List<ProgramProgress> findAllByStudent(Student student) {
     return entityListToDomainList(
         jpaSpecificationExecutor.findAll(
-            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))),
-        language);
+            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student))));
   }
 
   @Override
-  public List<ProgramProgress> findAllByStudent(
-      Student student, ELanguage language, SortCriteria sortCriteria) {
+  public List<ProgramProgress> findAllByStudent(Student student, SortCriteria sortCriteria) {
     Sort sort =
         Sort.by(
             Sort.Direction.fromString(sortCriteria.getOrder().name()),
             sortFieldToExactPath(sortCriteria.getField()));
     return entityListToDomainList(
         jpaSpecificationExecutor.findAll(
-            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)), sort),
-        language);
+            ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)), sort));
   }
 
   @Override
-  public List<ProgramProgress> findAllByStudent(
-      Student student, ELanguage language, PageInfo pageInfo) {
+  public List<ProgramProgress> findAllByStudent(Student student, PageInfo pageInfo) {
     Pageable pageable = PageRequest.of(pageInfo.number(), pageInfo.pageSize());
     return entityListToDomainList(
         jpaSpecificationExecutor
             .findAll(
                 ProgramProgressSpecification.hasStudent(UserMapper.fromDomain(student)), pageable)
-            .getContent(),
-        language);
+            .getContent());
   }
 
   @Override
@@ -78,20 +72,18 @@ public class ProgramProgressDatabaseRepository
   }
 
   @Override
-  public List<ProgramProgress> findAllWithoutSkillsByStudent(Student student, ELanguage language) {
-    return jpaRepository.findAllByStudentIdAndLang(student.getId(), language).stream()
+  public List<ProgramProgress> findAllWithoutSkillsByStudent(Student student) {
+    return jpaRepository.findAllByStudentIdAndLang(student.getId()).stream()
         .map(
             programProgressDTO ->
-                ProgramProgressMapper.toDomainWithoutSkills(programProgressDTO, student, language))
+                ProgramProgressMapper.toDomainWithoutSkills(programProgressDTO, student))
         .toList();
   }
 
   private List<ProgramProgress> entityListToDomainList(
-      List<ProgramProgressEntity> programProgressEntityList, ELanguage language) {
+      List<ProgramProgressEntity> programProgressEntityList) {
     return programProgressEntityList.stream()
-        .map(
-            programProgressEntity ->
-                ProgramProgressMapper.toDomain(programProgressEntity, language))
+        .map(ProgramProgressMapper::toDomain)
         .collect(Collectors.toList());
   }
 

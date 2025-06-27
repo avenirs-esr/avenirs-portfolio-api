@@ -9,14 +9,12 @@ import fr.avenirsesr.portfolio.api.application.adapter.mapper.ProgramProgressVie
 import fr.avenirsesr.portfolio.api.application.adapter.util.UserUtil;
 import fr.avenirsesr.portfolio.api.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.api.domain.model.Student;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.port.input.ProgramProgressService;
 import java.security.Principal;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,12 +28,9 @@ public class ProgramProgressController {
   private final UserUtil userUtil;
 
   @GetMapping("/overview")
-  public List<ProgramProgressOverviewDTO> getSkillsOverview(
-      Principal principal,
-      @RequestHeader(value = "Accept-Language", defaultValue = "fr_FR") String lang) {
-    ELanguage language = ELanguage.fromCode(lang);
+  public List<ProgramProgressOverviewDTO> getSkillsOverview(Principal principal) {
     Student student = userUtil.getStudent(principal);
-    return programProgressService.getSkillsOverview(student, language).entrySet().stream()
+    return programProgressService.getSkillsOverview(student).entrySet().stream()
         .map(
             entry ->
                 ProgramProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
@@ -44,24 +39,19 @@ public class ProgramProgressController {
 
   @GetMapping("/view")
   public List<ProgramProgressViewDTO> getSkillsView(
-      Principal principal,
-      @RequestHeader(value = "Accept-Language", defaultValue = "fr_FR") String lang,
-      @RequestParam(name = "sort", required = false) String sortRaw) {
-    ELanguage language = ELanguage.fromCode(lang);
+      Principal principal, @RequestParam(name = "sort", required = false) String sortRaw) {
     SortCriteria sortCriteria = SortCriteria.fromString(sortRaw);
     Student student = userUtil.getStudent(principal);
 
-    return programProgressService.getSkillsView(student, language, sortCriteria).entrySet().stream()
+    return programProgressService.getSkillsView(student, sortCriteria).entrySet().stream()
         .map(entry -> ProgramProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
         .toList();
   }
 
   @GetMapping()
-  public List<ProgramProgressDTO> getAllProgramProgress(
-      Principal principal,
-      @RequestHeader(value = "Accept-Language", defaultValue = "fr_FR") String lang) {
+  public List<ProgramProgressDTO> getAllProgramProgress(Principal principal) {
     Student student = userUtil.getStudent(principal);
-    return programProgressService.getAllProgramProgress(student, ELanguage.fromCode(lang)).stream()
+    return programProgressService.getAllProgramProgress(student).stream()
         .map(ProgramProgressMapper::fromDomainToDto)
         .toList();
   }

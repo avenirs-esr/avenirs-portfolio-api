@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.api.domain.model;
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.EAmsStatus;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
@@ -22,8 +21,6 @@ public class AMS {
   @Setter(AccessLevel.NONE)
   private final String title;
 
-  private final ELanguage language;
-
   @Setter(AccessLevel.NONE)
   private final Instant startDate;
 
@@ -38,19 +35,16 @@ public class AMS {
 
   private Set<Cohort> cohorts;
 
-  private AMS(
-      UUID id, User user, String title, Instant startDate, Instant endDate, ELanguage language) {
+  private AMS(UUID id, User user, String title, Instant startDate, Instant endDate) {
     this.id = id;
     this.user = user;
     this.title = title;
     this.startDate = startDate;
     this.endDate = endDate;
-    this.language = language;
   }
 
-  public static AMS create(
-      UUID id, User user, String title, Instant startDate, Instant endDate, ELanguage language) {
-    var ams = new AMS(id, user, title, startDate, endDate, language);
+  public static AMS create(UUID id, User user, String title, Instant startDate, Instant endDate) {
+    var ams = new AMS(id, user, title, startDate, endDate);
     ams.setSkillLevels(List.of());
     ams.setTraces(List.of());
     ams.setCohorts(Set.of());
@@ -68,9 +62,8 @@ public class AMS {
       List<SkillLevel> skillLevels,
       List<Trace> traces,
       Set<Cohort> cohorts,
-      ELanguage language,
       EAmsStatus status) {
-    var ams = new AMS(id, user, title, startDate, endDate, language);
+    var ams = new AMS(id, user, title, startDate, endDate);
     ams.setSkillLevels(skillLevels);
     ams.setTraces(traces);
     ams.setCohorts(cohorts);

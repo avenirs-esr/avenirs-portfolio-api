@@ -20,8 +20,7 @@ public class FakeSkillLevel {
             SkillLevel.create(
                 UUID.fromString(faker.call().internet().uuid()),
                 "Niv. %s".formatted(faker.call().lorem().character()),
-                faker.call().lorem().sentence(),
-                ELanguage.FRENCH))
+                faker.call().lorem().sentence()))
         .withStatus(ESkillLevelStatus.NOT_STARTED);
   }
 
@@ -30,8 +29,7 @@ public class FakeSkillLevel {
         SkillLevel.create(
             skillLevel.getId(),
             String.format("%s %s", skillLevel.getName(), language.getCode()),
-            String.format("%s %s", skillLevel.getDescription(), language.getCode()),
-            language));
+            String.format("%s %s", skillLevel.getDescription(), language.getCode())));
   }
 
   public FakeSkillLevel withStatus(ESkillLevelStatus status) {

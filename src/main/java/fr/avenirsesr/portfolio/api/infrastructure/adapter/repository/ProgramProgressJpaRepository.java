@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
 
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.dto.ProgramProgressSummaryDTO;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.ProgramProgressEntity;
 import java.util.List;
@@ -18,5 +17,5 @@ public interface ProgramProgressJpaRepository
           + "FROM ProgramProgressEntity p "
           + "JOIN p.program pr "
           + "WHERE p.student.id = :studentId")
-  List<ProgramProgressSummaryDTO> findAllByStudentIdAndLang(UUID studentId, ELanguage lang);
+  List<ProgramProgressSummaryDTO> findAllByStudentIdAndLang(UUID studentId);
 }

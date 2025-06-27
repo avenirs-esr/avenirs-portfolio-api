@@ -91,7 +91,6 @@ public class AMSFixture {
         skillLevels,
         List.of(),
         new HashSet<Cohort>(),
-        language,
         EAmsStatus.NOT_STARTED);
   }
 }
