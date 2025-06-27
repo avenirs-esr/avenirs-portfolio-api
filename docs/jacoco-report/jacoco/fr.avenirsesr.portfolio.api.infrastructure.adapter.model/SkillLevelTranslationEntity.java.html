@@ -25,13 +25,13 @@ public class SkillLevelTranslationEntity extends TranslationEntity {
   private SkillLevelEntity skillLevel;
 
   public SkillLevelTranslationEntity(
-      UUID uuid,
+      UUID id,
       ELanguage eLanguage,
       String name,
       String description,
       SkillLevelEntity skillLevelEntity) {
 <span class="fc" id="L33">    super();</span>
-<span class="fc" id="L34">    this.id = uuid;</span>
+<span class="fc" id="L34">    this.setId(id);</span>
 <span class="fc" id="L35">    this.language = eLanguage;</span>
 <span class="fc" id="L36">    this.name = name;</span>
 <span class="fc" id="L37">    this.description = description;</span>
@@ -40,7 +40,7 @@ public class SkillLevelTranslationEntity extends TranslationEntity {
 
   @Override
   public String toString() {
-<span class="nc" id="L43">    return &quot;SkillLevelEntity[%s]&quot;.formatted(id);</span>
+<span class="nc" id="L43">    return &quot;SkillLevelEntity[%s]&quot;.formatted(this.getId());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

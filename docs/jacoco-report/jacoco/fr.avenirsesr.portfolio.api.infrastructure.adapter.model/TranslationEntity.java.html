@@ -2,18 +2,14 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import jakarta.persistence.Column;
-import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @MappedSuperclass
-<span class="fc" id="L14">public abstract class TranslationEntity {</span>
-  @Id protected UUID id;
-
+<span class="fc" id="L12">public abstract class TranslationEntity extends AvenirsBaseEntity {</span>
   @Column(name = &quot;language&quot;, nullable = false)
   protected ELanguage language;
 }

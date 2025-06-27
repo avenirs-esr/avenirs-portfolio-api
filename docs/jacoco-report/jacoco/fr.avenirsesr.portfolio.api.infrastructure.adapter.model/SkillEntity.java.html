@@ -15,9 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SkillEntity {
-  @Id private UUID id;
-
+public class SkillEntity extends AvenirsBaseEntity {
   @OneToMany(mappedBy = &quot;skill&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
   private Set&lt;SkillLevelEntity&gt; skillLevels;
 
@@ -25,7 +23,7 @@ public class SkillEntity {
   @JoinColumn(name = &quot;program_progress_id&quot;)
   private ProgramProgressEntity programProgress;
 
-<span class="fc" id="L28">  @OneToMany(</span>
+<span class="fc" id="L26">  @OneToMany(</span>
       mappedBy = &quot;skill&quot;,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -34,15 +32,15 @@ public class SkillEntity {
       new HashSet&lt;&gt;(); // TODO: Remove this SET and get it in queries
 
   public SkillEntity(
-<span class="fc" id="L37">      UUID id, Set&lt;SkillLevelEntity&gt; skillLevels, ProgramProgressEntity programProgress) {</span>
-<span class="fc" id="L38">    this.id = id;</span>
-<span class="fc" id="L39">    this.skillLevels = skillLevels;</span>
-<span class="fc" id="L40">    this.programProgress = programProgress;</span>
-<span class="fc" id="L41">  }</span>
+<span class="fc" id="L35">      UUID id, Set&lt;SkillLevelEntity&gt; skillLevels, ProgramProgressEntity programProgress) {</span>
+<span class="fc" id="L36">    this.setId(id);</span>
+<span class="fc" id="L37">    this.skillLevels = skillLevels;</span>
+<span class="fc" id="L38">    this.programProgress = programProgress;</span>
+<span class="fc" id="L39">  }</span>
 
   @Override
   public String toString() {
-<span class="nc" id="L45">    return &quot;SkillEntity[%s]&quot;.formatted(id);</span>
+<span class="nc" id="L43">    return &quot;SkillEntity[%s]&quot;.formatted(this.getId());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
