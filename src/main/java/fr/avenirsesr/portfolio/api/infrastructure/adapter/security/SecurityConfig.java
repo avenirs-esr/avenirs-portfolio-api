@@ -24,6 +24,15 @@ public class SecurityConfig {
   @Value("${security.permit-all-paths}")
   private String[] permitAllPaths;
 
+  @Value("${cors.allowed-origins}")
+  private String allowedOrigins;
+
+  @Value("${cors.allowed-methods}")
+  private String[] allowedMethods;
+  
+  @Value("${cors.allowed-headers}")
+  private String[] allowedHeaders;
+
   public SecurityConfig(
       CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
       HmacAuthenticationFilter hmacAuthenticationFilter) {
@@ -47,10 +56,9 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
-    configuration.setAllowedMethods(
-        Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+    configuration.setAllowedOrigins(Collections.singletonList(allowedOrigins));
+    configuration.setAllowedMethods(Arrays.asList(allowedMethods));
+    configuration.setAllowedHeaders(Arrays.asList(allowedHeaders));
     configuration.setAllowCredentials(true);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
