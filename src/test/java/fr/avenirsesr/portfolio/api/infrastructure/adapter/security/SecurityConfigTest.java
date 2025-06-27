@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -77,6 +78,7 @@ class SecurityConfigTest {
         () ->
             mockMvc.perform(
                 get("/api/some-protected-endpoint")
+                    .header("Accept-Language", ELanguage.FRENCH.getCode())
                     .header("X-Context-Kid", "TEST_KEY")
                     .header("X-Context-Signature", "test-signature")
                     .header(

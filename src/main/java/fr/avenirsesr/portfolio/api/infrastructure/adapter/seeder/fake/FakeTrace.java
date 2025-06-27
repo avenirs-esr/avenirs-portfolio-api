@@ -26,7 +26,7 @@ public class FakeTrace {
             user,
             faker.call().lorem().sentence(),
             Instant.now().plus(90, ChronoUnit.DAYS),
-            ELanguage.FRENCH));
+            ELanguage.FALLBACK));
   }
 
   public FakeTrace withSkillLevel(List<SkillLevel> skillLevels) {

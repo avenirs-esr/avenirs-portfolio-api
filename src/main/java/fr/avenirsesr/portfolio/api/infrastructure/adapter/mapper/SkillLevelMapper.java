@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.api.domain.model.Skill;
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.model.*;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.util.TranslationUtil;
 import java.util.List;
@@ -20,17 +19,14 @@ public interface SkillLevelMapper {
         skillLevel.getEndDate());
   }
 
-  static SkillLevel toDomain(SkillLevelEntity skillLevelEntity, Skill skill, ELanguage language) {
-    SkillLevel skillLevel = toDomainWithoutRecursion(skillLevelEntity, skill, language);
+  static SkillLevel toDomain(SkillLevelEntity skillLevelEntity, Skill skill) {
+    SkillLevel skillLevel = toDomainWithoutRecursion(skillLevelEntity, skill);
     skillLevel.setAmses(
-        skillLevelEntity.getAmses().stream()
-            .map(ams -> AMSMapper.toDomainWithoutRecursion(ams, language))
-            .toList());
+        skillLevelEntity.getAmses().stream().map(AMSMapper::toDomainWithoutRecursion).toList());
     return skillLevel;
   }
 
-  static SkillLevel toDomainWithoutRecursion(
-      SkillLevelEntity skillLevelEntity, Skill skill, ELanguage language) {
+  static SkillLevel toDomainWithoutRecursion(SkillLevelEntity skillLevelEntity, Skill skill) {
     SkillLevelTranslationEntity skillLevelTranslationEntity =
         TranslationUtil.getTranslation(skillLevelEntity.getTranslations());
     return SkillLevel.toDomain(
@@ -41,13 +37,11 @@ public interface SkillLevelMapper {
         skillLevelEntity.getTraces().stream().map(TraceMapper::toDomainRecursion).toList(),
         List.of(),
         skill,
-        language,
         skillLevelEntity.getStartDate(),
         skillLevelEntity.getEndDate());
   }
 
-  static SkillLevel toDomainWithoutRecursion(
-      SkillLevelEntity skillLevelEntity, ELanguage language) {
-    return toDomainWithoutRecursion(skillLevelEntity, null, language);
+  static SkillLevel toDomainWithoutRecursion(SkillLevelEntity skillLevelEntity) {
+    return toDomainWithoutRecursion(skillLevelEntity, null);
   }
 }

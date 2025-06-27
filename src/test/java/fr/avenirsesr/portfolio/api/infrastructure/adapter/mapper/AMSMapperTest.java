@@ -129,14 +129,13 @@ class AMSMapperTest {
     translations.add(translationEntity);
     entity.setTranslations(translations);
 
-    AMS mappedAms = AMSMapper.toDomain(entity, language);
+    AMS mappedAms = AMSMapper.toDomain(entity);
 
     assertNotNull(mappedAms);
     assertEquals(id, mappedAms.getId());
     assertEquals(user.getId(), mappedAms.getUser().getId());
     assertEquals(title, mappedAms.getTitle());
     assertEquals(status, mappedAms.getStatus());
-    assertEquals(language, mappedAms.getLanguage());
   }
 
   @Test
@@ -165,7 +164,7 @@ class AMSMapperTest {
     translations.add(translationEntity);
     entity.setTranslations(translations);
 
-    AMS mappedAms = AMSMapper.toDomain(entity, language);
+    AMS mappedAms = AMSMapper.toDomain(entity);
 
     assertNotNull(mappedAms);
     assertTrue(mappedAms.getSkillLevels() != null && mappedAms.getSkillLevels().isEmpty());

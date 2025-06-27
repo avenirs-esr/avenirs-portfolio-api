@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,19 +20,18 @@ public class RequestContextFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     try {
-      if (request.getHeader("Accept-Language") == null) {
-        throw new IOException("Accept-Language header not present");
+      var languageCode = Optional.ofNullable(request.getHeader("Accept-Language"));
+      if (languageCode.isEmpty()) {
+        log.error("Accept-Language header not present, using fallback language {}", ELanguage.FALLBACK);
+        languageCode = Optional.of(ELanguage.FALLBACK.getCode());
       }
-      ELanguage preferredLanguage = ELanguage.fromCode(request.getHeader("Accept-Language"));
+      ELanguage preferredLanguage = ELanguage.fromCode(languageCode.get());
 
       RequestContext.set(new RequestData(preferredLanguage));
 
-      log.info("RequestContextFilter set : {}", RequestContext.get());
       filterChain.doFilter(request, response);
-
     } finally {
       RequestContext.clear();
-      log.info("RequestContextFilter cleared");
     }
   }
 }

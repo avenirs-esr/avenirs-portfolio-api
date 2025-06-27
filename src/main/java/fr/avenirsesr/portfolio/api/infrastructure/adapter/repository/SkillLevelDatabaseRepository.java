@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.api.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.port.output.repository.SkillLevelRepository;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.ProgramProgressMapper;
 import fr.avenirsesr.portfolio.api.infrastructure.adapter.mapper.SkillLevelMapper;
@@ -31,8 +30,6 @@ public class SkillLevelDatabaseRepository
                 SkillMapper.toDomain(
                     skillLevelEntity.getSkill(),
                     ProgramProgressMapper.toDomain(
-                        skillLevelEntity.getSkill().getProgramProgress(), ELanguage.FRENCH),
-                    ELanguage.FRENCH),
-                ELanguage.FRENCH));
+                        skillLevelEntity.getSkill().getProgramProgress()))));
   }
 }

@@ -44,16 +44,15 @@ class InstitutionServiceImplTest {
     ProgramProgress progressLifeProject =
         ProgramProgressFixture.createWithoutAPC().withStudent(student).toModel();
 
-    when(programProgressRepository.findAllByStudent(student, language))
+    when(programProgressRepository.findAllByStudent(student))
         .thenReturn(List.of(progressAPC, progressLifeProject));
 
     // When
-    boolean result =
-        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC, language);
+    boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
 
     // Then
     assertTrue(result);
-    verify(programProgressRepository).findAllByStudent(student, language);
+    verify(programProgressRepository).findAllByStudent(student);
   }
 
   @Test
@@ -64,29 +63,28 @@ class InstitutionServiceImplTest {
     ProgramProgress progress2 =
         ProgramProgressFixture.createWithAPC().withStudent(student).toModel();
 
-    when(programProgressRepository.findAllByStudent(student, language))
+    when(programProgressRepository.findAllByStudent(student))
         .thenReturn(List.of(progressAPC, progress2));
 
     // When
     boolean result =
-        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT, language);
+        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);
 
     // Then
     assertFalse(result);
-    verify(programProgressRepository).findAllByStudent(student, language);
+    verify(programProgressRepository).findAllByStudent(student);
   }
 
   @Test
   void shouldReturnFalseWhenStudentHasNoProgramProgress() {
     // Given
-    when(programProgressRepository.findAllByStudent(student, language)).thenReturn(List.of());
+    when(programProgressRepository.findAllByStudent(student)).thenReturn(List.of());
 
     // When
-    boolean result =
-        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC, language);
+    boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
 
     // Then
     assertFalse(result);
-    verify(programProgressRepository).findAllByStudent(student, language);
+    verify(programProgressRepository).findAllByStudent(student);
   }
 }
