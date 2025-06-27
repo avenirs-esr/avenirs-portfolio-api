@@ -13,9 +13,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,7 +25,6 @@ import lombok.Setter;
     name = "external_user",
     uniqueConstraints = @UniqueConstraint(columnNames = {"eternal_id", "source"}))
 @NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
 public class ExternalUserEntity {
@@ -57,6 +56,21 @@ public class ExternalUserEntity {
 
   @Column(nullable = false)
   private String lastName;
+
+  @Column(
+      name = "created_at",
+      nullable = false,
+      insertable = false,
+      updatable = false,
+      columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
+  private Instant createdAt;
+
+  @Column(
+      name = "updated_at",
+      nullable = false,
+      insertable = false,
+      columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
+  private Instant updatedAt;
 
   public ExternalUserEntity(
       String externalId,

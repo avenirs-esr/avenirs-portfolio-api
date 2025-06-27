@@ -14,6 +14,6 @@ public interface TraceOverviewMapper {
         trace.isGroup(),
         trace.getCreatedAt(),
         trace.getUpdatedAt(),
-        trace.getDeletionDate());
+        trace.getDeletedAt());
   }
 }

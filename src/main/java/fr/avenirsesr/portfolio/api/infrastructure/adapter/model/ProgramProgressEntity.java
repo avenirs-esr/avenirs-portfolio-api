@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -19,9 +18,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ProgramProgressEntity {
-  @Id private UUID id;
-
+public class ProgramProgressEntity extends AvenirsBaseEntity {
   @ManyToOne(optional = false)
   private ProgramEntity program;
 
@@ -30,4 +27,12 @@ public class ProgramProgressEntity {
 
   @OneToMany(mappedBy = "programProgress", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<SkillEntity> skills;
+
+  public ProgramProgressEntity(
+      UUID id, ProgramEntity program, UserEntity student, Set<SkillEntity> skills) {
+    this.setId(id);
+    this.program = program;
+    this.student = student;
+    this.skills = skills;
+  }
 }

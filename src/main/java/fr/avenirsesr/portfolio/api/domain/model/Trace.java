@@ -17,7 +17,7 @@ public class Trace {
   private List<AMS> amses;
   private Instant createdAt;
   private Instant updatedAt;
-  private Instant deletionDate;
+  private Instant deletedAt;
   private boolean isGroup;
   private ELanguage language;
 
@@ -27,20 +27,20 @@ public class Trace {
       String title,
       Instant createdAt,
       Instant updatedAt,
-      Instant deletionDate,
+      Instant deletedAt,
       ELanguage language) {
     this.id = id;
     this.user = user;
     this.title = title;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-    this.deletionDate = deletionDate;
+    this.deletedAt = deletedAt;
     this.language = language;
   }
 
   public static Trace create(
-      UUID id, User user, String title, Instant deletionDate, ELanguage language) {
-    var trace = new Trace(id, user, title, Instant.now(), null, deletionDate, language);
+      UUID id, User user, String title, Instant deletedAt, ELanguage language) {
+    var trace = new Trace(id, user, title, Instant.now(), null, deletedAt, language);
     trace.setSkillLevels(List.of());
     trace.setAmses(List.of());
     trace.setGroup(false);
@@ -57,9 +57,9 @@ public class Trace {
       boolean group,
       Instant createdAt,
       Instant updatedAt,
-      Instant deletionDate,
+      Instant deletedAt,
       ELanguage language) {
-    var trace = new Trace(id, user, title, createdAt, updatedAt, deletionDate, language);
+    var trace = new Trace(id, user, title, createdAt, updatedAt, deletedAt, language);
     trace.setSkillLevels(skillLevels);
     trace.setAmses(amses);
     trace.setGroup(group);

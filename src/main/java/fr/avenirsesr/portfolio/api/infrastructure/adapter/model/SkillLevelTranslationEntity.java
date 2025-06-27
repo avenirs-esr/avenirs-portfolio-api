@@ -25,13 +25,13 @@ public class SkillLevelTranslationEntity extends TranslationEntity {
   private SkillLevelEntity skillLevel;
 
   public SkillLevelTranslationEntity(
-      UUID uuid,
+      UUID id,
       ELanguage eLanguage,
       String name,
       String description,
       SkillLevelEntity skillLevelEntity) {
     super();
-    this.id = uuid;
+    this.setId(id);
     this.language = eLanguage;
     this.name = name;
     this.description = description;
@@ -40,6 +40,6 @@ public class SkillLevelTranslationEntity extends TranslationEntity {
 
   @Override
   public String toString() {
-    return "SkillLevelEntity[%s]".formatted(id);
+    return "SkillLevelEntity[%s]".formatted(this.getId());
   }
 }

@@ -19,9 +19,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class InstitutionEntity {
-  @Id private UUID id;
-
+public class InstitutionEntity extends AvenirsBaseEntity {
   @Column(name = "enabled_fields", nullable = false)
   @Getter(AccessLevel.NONE)
   @Setter(AccessLevel.NONE)
@@ -36,7 +34,7 @@ public class InstitutionEntity {
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
   public InstitutionEntity(UUID id, Set<EPortfolioType> enabledFields) {
-    this.id = id;
+    this.setId(id);
     setEnabledFields(enabledFields);
   }
 

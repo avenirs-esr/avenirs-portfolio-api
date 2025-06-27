@@ -23,9 +23,8 @@ public abstract class AvenirsBaseEntity {
   private Instant createdAt;
 
   @Column(
-      name = "modified_at",
+      name = "updated_at",
       insertable = false,
-      updatable = false,
       columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
-  private Instant modifiedAt;
+  private Instant updatedAt;
 }

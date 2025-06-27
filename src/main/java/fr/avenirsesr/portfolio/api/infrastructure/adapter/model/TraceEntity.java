@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -25,9 +24,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor
 @Getter
 @Setter
-public class TraceEntity {
-  @Id private UUID id;
-
+public class TraceEntity extends AvenirsBaseEntity {
   @ManyToOne(optional = false)
   private UserEntity user;
 
@@ -56,10 +53,28 @@ public class TraceEntity {
   @Column(nullable = false)
   private boolean isGroup;
 
-  @Column(nullable = false)
-  private Instant createdAt;
+  @Column private Instant deletedAt;
 
-  @Column private Instant updatedAt;
-
-  @Column private Instant deletionDate;
+  public TraceEntity(
+      UUID id,
+      UserEntity user,
+      String title,
+      ELanguage language,
+      List<SkillLevelEntity> skillLevels,
+      List<AMSEntity> amses,
+      boolean isGroup,
+      Instant createdAt,
+      Instant updatedAt,
+      Instant deletedAt) {
+    this.setId(id);
+    this.user = user;
+    this.title = title;
+    this.language = language;
+    this.skillLevels = skillLevels;
+    this.amses = amses;
+    this.isGroup = isGroup;
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
+    this.setDeletedAt(deletedAt);
+  }
 }
