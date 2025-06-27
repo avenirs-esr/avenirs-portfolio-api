@@ -41,7 +41,7 @@ databaseChangeLog:
 
               - column:
                   name: duration_unit
-                  type: VARCHAR(9)
+                  type: VARCHAR(12)
                   constraints:
                     nullable: true
 
