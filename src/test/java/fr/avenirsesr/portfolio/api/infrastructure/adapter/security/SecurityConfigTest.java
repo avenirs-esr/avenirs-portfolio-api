@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class SecurityConfigTest {
 
   @Value("${security.permit-all-paths}")
-  private String permitAllPathsString;
+  private static String permitAllPathsString;
 
   @TestConfiguration
   static class TestSecurityConfig {
@@ -38,7 +38,7 @@ class SecurityConfigTest {
     @Bean
     @Primary
     public HmacAuthenticationFilter testHmacFilter() throws ServletException, IOException {
-      HmacAuthenticationFilter mockFilter = spy(new HmacAuthenticationFilter());
+      HmacAuthenticationFilter mockFilter = spy(new HmacAuthenticationFilter(permitAllPathsString));
 
       doAnswer(
               (Answer<Void>)
