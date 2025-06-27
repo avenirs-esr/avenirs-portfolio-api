@@ -23,9 +23,10 @@ import lombok.Setter;
   private Instant createdAt;
 
   @Column(
-      name = &quot;updated_at&quot;,
+      name = &quot;modified_at&quot;,
       insertable = false,
+      updatable = false,
       columnDefinition = &quot;TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP&quot;)
-  private Instant updatedAt;
+  private Instant modifiedAt;
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

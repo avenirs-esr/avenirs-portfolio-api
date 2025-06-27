@@ -24,9 +24,9 @@ public class InstitutionTranslationEntity extends TranslationEntity {
   private InstitutionEntity institution;
 
   public InstitutionTranslationEntity(
-      UUID id, ELanguage language, String name, InstitutionEntity institutionEntity) {
+      UUID uuid, ELanguage language, String name, InstitutionEntity institutionEntity) {
 <span class="fc" id="L28">    super();</span>
-<span class="fc" id="L29">    this.setId(id);</span>
+<span class="fc" id="L29">    this.id = uuid;</span>
 <span class="fc" id="L30">    this.language = language;</span>
 <span class="fc" id="L31">    this.name = name;</span>
 <span class="fc" id="L32">    this.institution = institutionEntity;</span>

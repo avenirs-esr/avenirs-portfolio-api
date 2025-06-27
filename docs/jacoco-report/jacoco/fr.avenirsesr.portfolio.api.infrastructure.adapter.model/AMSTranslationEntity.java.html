@@ -23,9 +23,9 @@ public class AMSTranslationEntity extends TranslationEntity {
   @JoinColumn(name = &quot;ams_id&quot;, nullable = false)
   private AMSEntity ams;
 
-  public AMSTranslationEntity(UUID id, ELanguage language, String title, AMSEntity ams) {
+  public AMSTranslationEntity(UUID uuid, ELanguage language, String title, AMSEntity ams) {
 <span class="fc" id="L27">    super();</span>
-<span class="fc" id="L28">    this.setId(id);</span>
+<span class="fc" id="L28">    this.id = uuid;</span>
 <span class="fc" id="L29">    this.language = language;</span>
 <span class="fc" id="L30">    this.title = title;</span>
 <span class="fc" id="L31">    this.ams = ams;</span>
