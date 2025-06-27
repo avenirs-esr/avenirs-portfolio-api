@@ -26,7 +26,7 @@ public interface TraceMapper {
         trace.isGroup(),
         trace.getCreatedAt(),
         trace.getUpdatedAt(),
-        trace.getDeletionDate());
+        trace.getDeletedAt());
   }
 
   static Trace toDomain(TraceEntity traceEntity) {
@@ -46,7 +46,7 @@ public interface TraceMapper {
         traceEntity.isGroup(),
         traceEntity.getCreatedAt(),
         traceEntity.getUpdatedAt(),
-        traceEntity.getDeletionDate(),
+        traceEntity.getDeletedAt(),
         traceEntity.getLanguage());
   }
 }

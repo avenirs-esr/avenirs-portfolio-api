@@ -15,9 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SkillEntity {
-  @Id private UUID id;
-
+public class SkillEntity extends AvenirsBaseEntity {
   @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<SkillLevelEntity> skillLevels;
 
@@ -35,13 +33,13 @@ public class SkillEntity {
 
   public SkillEntity(
       UUID id, Set<SkillLevelEntity> skillLevels, ProgramProgressEntity programProgress) {
-    this.id = id;
+    this.setId(id);
     this.skillLevels = skillLevels;
     this.programProgress = programProgress;
   }
 
   @Override
   public String toString() {
-    return "SkillEntity[%s]".formatted(id);
+    return "SkillEntity[%s]".formatted(this.getId());
   }
 }

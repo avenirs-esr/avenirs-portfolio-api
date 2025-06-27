@@ -15,9 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ProgramEntity {
-  @Id private UUID id;
-
+public class ProgramEntity extends AvenirsBaseEntity {
   @Column(name = "is_apc", nullable = false)
   private boolean isAPC;
 
@@ -33,7 +31,7 @@ public class ProgramEntity {
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
   public ProgramEntity(UUID id, boolean isAPC, InstitutionEntity institution) {
-    this.id = id;
+    this.setId(id);
     this.institution = institution;
     this.isAPC = isAPC;
   }

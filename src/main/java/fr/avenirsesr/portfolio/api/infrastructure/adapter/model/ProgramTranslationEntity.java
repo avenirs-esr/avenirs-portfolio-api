@@ -26,7 +26,7 @@ public class ProgramTranslationEntity extends TranslationEntity {
   public ProgramTranslationEntity(
       UUID id, ELanguage language, String name, ProgramEntity programEntity) {
     super();
-    this.id = id;
+    this.setId(id);
     this.language = language;
     this.name = name;
     this.program = programEntity;

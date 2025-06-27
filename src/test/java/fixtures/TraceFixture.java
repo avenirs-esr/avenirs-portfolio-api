@@ -20,7 +20,7 @@ public class TraceFixture {
   private List<AMS> amses;
   private Instant createdAt;
   private Instant updatedAt;
-  private Instant deletionDate;
+  private Instant deletedAt;
   private boolean isGroup;
   private ELanguage language = ELanguage.FRENCH;
 
@@ -34,7 +34,7 @@ public class TraceFixture {
     this.amses = base.getAmses();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
-    this.deletionDate = base.getDeletionDate();
+    this.deletedAt = base.getDeletedAt();
     this.isGroup = base.isGroup();
   }
 
@@ -87,8 +87,8 @@ public class TraceFixture {
     return this;
   }
 
-  public TraceFixture withDeletionDate(Instant deletionDate) {
-    this.deletionDate = deletionDate;
+  public TraceFixture withDeletedAt(Instant deletedAt) {
+    this.deletedAt = deletedAt;
     return this;
   }
 
@@ -112,6 +112,6 @@ public class TraceFixture {
 
   public Trace toModel() {
     return Trace.toDomain(
-        id, user, title, skillLevels, amses, isGroup, createdAt, updatedAt, deletionDate, language);
+        id, user, title, skillLevels, amses, isGroup, createdAt, updatedAt, deletedAt, language);
   }
 }

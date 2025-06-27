@@ -43,6 +43,20 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
         - sql:
             dbms: 'postgresql'
             endDelimiter: \nGO
@@ -119,7 +133,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: modified_at
+                  name: updated_at
                   type: TIMESTAMP WITH TIME ZONE
                   defaultValueComputed: CURRENT_TIMESTAMP
                   constraints:

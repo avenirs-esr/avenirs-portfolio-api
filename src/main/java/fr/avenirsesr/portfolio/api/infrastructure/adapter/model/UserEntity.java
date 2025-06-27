@@ -5,7 +5,6 @@ import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import java.util.UUID;
@@ -20,9 +19,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserEntity {
-  @Id private UUID id;
-
+public class UserEntity extends AvenirsBaseEntity {
   @Column(nullable = false)
   private String firstName;
 
@@ -48,4 +45,19 @@ public class UserEntity {
     @AttributeOverride(name = "coverPicture", column = @Column(name = "teacher_cover_picture"))
   })
   private TeacherEntity teacher;
+
+  public UserEntity(
+      UUID id,
+      String firstName,
+      String lastName,
+      String email,
+      StudentEntity student,
+      TeacherEntity teacher) {
+    this.setId(id);
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+    this.student = student;
+    this.teacher = teacher;
+  }
 }

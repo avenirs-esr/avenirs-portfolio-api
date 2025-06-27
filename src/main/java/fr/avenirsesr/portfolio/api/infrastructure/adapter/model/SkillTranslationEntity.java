@@ -22,10 +22,9 @@ public class SkillTranslationEntity extends TranslationEntity {
   @JoinColumn(name = "skill_id", nullable = false)
   private SkillEntity skill;
 
-  public SkillTranslationEntity(
-      UUID uuid, ELanguage language, String name, SkillEntity skillEntity) {
+  public SkillTranslationEntity(UUID id, ELanguage language, String name, SkillEntity skillEntity) {
     super();
-    this.id = uuid;
+    this.setId(id);
     this.language = language;
     this.name = name;
     this.skill = skillEntity;
@@ -33,6 +32,6 @@ public class SkillTranslationEntity extends TranslationEntity {
 
   @Override
   public String toString() {
-    return "SkillEntity[%s]".formatted(id);
+    return "SkillEntity[%s]".formatted(this.getId());
   }
 }
