@@ -28,10 +28,10 @@ public class SecurityConfig {
   private String allowedOrigins;
 
   @Value("${cors.allowed-methods}")
-  private String[] allowedMethods;
+  private String allowedMethodsString;
 
   @Value("${cors.allowed-headers}")
-  private String[] allowedHeaders;
+  private String allowedHeadersString;
 
   public SecurityConfig(
       CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
@@ -57,8 +57,8 @@ public class SecurityConfig {
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(Collections.singletonList(allowedOrigins));
-    configuration.setAllowedMethods(Arrays.asList(allowedMethods));
-    configuration.setAllowedHeaders(Arrays.asList(allowedHeaders));
+    configuration.setAllowedMethods(Arrays.asList(allowedMethodsString.split(",")));
+    configuration.setAllowedHeaders(Arrays.asList(allowedHeadersString.split(",")));
     configuration.setAllowCredentials(true);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);

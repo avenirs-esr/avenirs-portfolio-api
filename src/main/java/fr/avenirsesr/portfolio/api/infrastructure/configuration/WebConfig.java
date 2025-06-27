@@ -14,10 +14,10 @@ public class WebConfig {
   private String allowedOrigins;
 
   @Value("${cors.allowed-methods}")
-  private String[] allowedMethods;
+  private String allowedMethodsString;
 
   @Value("${cors.allowed-headers}")
-  private String[] allowedHeaders;
+  private String allowedHeadersString;
 
   @Bean
   public CorsFilter corsFilter() {
@@ -27,12 +27,12 @@ public class WebConfig {
     config.setAllowCredentials(true);
     config.addAllowedOrigin(allowedOrigins);
 
-    for (String header : allowedHeaders) {
-      config.addAllowedHeader(header);
+    for (String header : allowedHeadersString.split(",")) {
+      config.addAllowedHeader(header.trim());
     }
 
-    for (String method : allowedMethods) {
-      config.addAllowedMethod(method);
+    for (String method : allowedMethodsString.split(",")) {
+      config.addAllowedMethod(method.trim());
     }
 
     source.registerCorsConfiguration("/**", config);
