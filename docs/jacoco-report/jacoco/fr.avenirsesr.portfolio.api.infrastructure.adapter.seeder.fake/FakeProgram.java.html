@@ -2,45 +2,52 @@
 
 import fr.avenirsesr.portfolio.api.domain.model.Institution;
 import fr.avenirsesr.portfolio.api.domain.model.Program;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EDurationUnit;
 import java.util.UUID;
 
 public class FakeProgram {
-<span class="nc" id="L8">  private static final FakerProvider faker = new FakerProvider();</span>
+<span class="nc" id="L9">  private static final FakerProvider faker = new FakerProvider();</span>
   private final Program program;
 
-<span class="nc" id="L11">  private FakeProgram(Program program) {</span>
-<span class="nc" id="L12">    this.program = program;</span>
-<span class="nc" id="L13">  }</span>
+<span class="nc" id="L12">  private FakeProgram(Program program) {</span>
+<span class="nc" id="L13">    this.program = program;</span>
+<span class="nc" id="L14">  }</span>
 
-  public static FakeProgram of(Institution institution) {
-<span class="nc" id="L16">    return new FakeProgram(</span>
-<span class="nc" id="L17">        Program.create(</span>
-<span class="nc" id="L18">            UUID.fromString(faker.call().internet().uuid()),</span>
-            institution,
-            &quot;%s %s - %s&quot;
-<span class="nc" id="L21">                .formatted(</span>
-<span class="nc" id="L22">                    faker.call().university().prefix(),</span>
-<span class="nc" id="L23">                    faker.call().university().degree(),</span>
-<span class="nc" id="L24">                    faker.call().number().numberBetween(1, 11)),</span>
-            true,
-<span class="nc" id="L26">            institution.getLanguage()));</span>
+  private static EDurationUnit randomDurationUnit() {
+<span class="nc" id="L17">    return faker.call().options().option(EDurationUnit.values());</span>
   }
 
-  public FakeProgram isNotAPC() {
-<span class="nc" id="L30">    program.setAPC(false);</span>
-<span class="nc" id="L31">    return this;</span>
+  public static FakeProgram of(Institution institution) {
+<span class="nc" id="L21">    return new FakeProgram(</span>
+<span class="nc" id="L22">        Program.create(</span>
+<span class="nc" id="L23">            UUID.fromString(faker.call().internet().uuid()),</span>
+            institution,
+            &quot;%s %s - %s&quot;
+<span class="nc" id="L26">                .formatted(</span>
+<span class="nc" id="L27">                    faker.call().university().prefix(),</span>
+<span class="nc" id="L28">                    faker.call().university().degree(),</span>
+<span class="nc" id="L29">                    faker.call().number().numberBetween(1, 11)),</span>
+            true,
+<span class="nc" id="L31">            institution.getLanguage(),</span>
+<span class="nc" id="L32">            randomDurationUnit(),</span>
+<span class="nc" id="L33">            faker.call().number().numberBetween(1, 5)));</span>
   }
 
   public static String createName() {
-<span class="nc" id="L35">    return &quot;%s %s - %s&quot;</span>
-<span class="nc" id="L36">        .formatted(</span>
-<span class="nc" id="L37">            faker.call().university().prefix(),</span>
-<span class="nc" id="L38">            faker.call().university().degree(),</span>
-<span class="nc" id="L39">            faker.call().number().numberBetween(1, 11));</span>
+<span class="nc" id="L37">    return &quot;%s %s - %s&quot;</span>
+<span class="nc" id="L38">        .formatted(</span>
+<span class="nc" id="L39">            faker.call().university().prefix(),</span>
+<span class="nc" id="L40">            faker.call().university().degree(),</span>
+<span class="nc" id="L41">            faker.call().number().numberBetween(1, 11));</span>
+  }
+
+  public FakeProgram isNotAPC() {
+<span class="nc" id="L45">    program.setAPC(false);</span>
+<span class="nc" id="L46">    return this;</span>
   }
 
   public Program toModel() {
-<span class="nc" id="L43">    return program;</span>
+<span class="nc" id="L50">    return program;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

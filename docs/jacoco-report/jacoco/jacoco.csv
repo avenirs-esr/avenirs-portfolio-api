@@ -16,7 +16,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,E
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,AMSTranslationEntity,0,15,0,0,0,6,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,SkillEntity,10,17,0,0,1,6,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,AvenirsBaseEntity,0,3,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,ProgramEntity,0,17,0,0,0,6,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,ProgramEntity,0,23,0,0,0,8,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,InstitutionEntity,0,49,1,3,0,13,1,4,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,SkillTranslationEntity,10,15,0,0,1,6,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,InstitutionTranslationEntity,0,15,0,0,0,6,0,1,0,1
@@ -62,6 +62,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EPortfolioT
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EUserCategory,28,25,4,0,5,6,4,2,2,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EDeletionUrgency,21,0,0,0,4,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EConfiguration,21,0,0,0,4,0,1,0,1,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model.enums,EDurationUnit,0,33,0,0,0,6,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeTrace,61,0,0,0,17,0,7,0,7,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeSkillLevel,136,0,4,0,31,0,9,0,6,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeSkill,61,0,0,0,14,0,5,0,5,0
@@ -73,7 +74,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeCohort,38,0,0,0,12,0,4,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeUser,149,0,0,0,38,0,8,0,8,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeAMS,91,0,0,0,25,0,7,0,7,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeProgram,91,0,0,0,20,0,6,0,6,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.fake,FakeProgram,105,0,0,0,23,0,7,0,7,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.util,UserUtil,22,4,2,0,5,1,2,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.response,TracesViewResponse,9,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.response,AmsViewResponse,0,9,0,0,0,1,0,1,0,1
@@ -86,7 +87,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,PageInfo,0,15,0,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,ProgramProgress,0,31,0,0,0,8,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,User,0,83,0,0,0,24,0,5,0,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Teacher,15,22,0,0,3,8,3,2,3,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Program,9,27,0,0,1,8,1,2,1,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Program,11,35,0,0,1,10,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Student,5,32,0,0,1,10,1,4,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,UnassociatedTracesSummary,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.domain.model,Configuration,26,0,0,0,7,0,3,0,3,0
