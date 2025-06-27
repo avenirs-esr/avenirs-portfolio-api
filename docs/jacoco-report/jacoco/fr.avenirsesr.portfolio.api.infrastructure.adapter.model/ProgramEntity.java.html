@@ -15,16 +15,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ProgramEntity {
-  @Id private UUID id;
-
+public class ProgramEntity extends AvenirsBaseEntity {
   @Column(name = &quot;is_apc&quot;, nullable = false)
   private boolean isAPC;
 
   @ManyToOne(optional = false)
   private InstitutionEntity institution;
 
-<span class="fc" id="L27">  @OneToMany(</span>
+<span class="fc" id="L25">  @OneToMany(</span>
       mappedBy = &quot;program&quot;,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -32,10 +30,10 @@ public class ProgramEntity {
   private Set&lt;ProgramTranslationEntity&gt; translations =
       new HashSet&lt;&gt;(); // TODO: Remove this SET and get it in queries
 
-<span class="fc" id="L35">  public ProgramEntity(UUID id, boolean isAPC, InstitutionEntity institution) {</span>
-<span class="fc" id="L36">    this.id = id;</span>
-<span class="fc" id="L37">    this.institution = institution;</span>
-<span class="fc" id="L38">    this.isAPC = isAPC;</span>
-<span class="fc" id="L39">  }</span>
+<span class="fc" id="L33">  public ProgramEntity(UUID id, boolean isAPC, InstitutionEntity institution) {</span>
+<span class="fc" id="L34">    this.setId(id);</span>
+<span class="fc" id="L35">    this.institution = institution;</span>
+<span class="fc" id="L36">    this.isAPC = isAPC;</span>
+<span class="fc" id="L37">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
