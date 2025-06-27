@@ -13,8 +13,7 @@ public interface ProgramProgressService {
 
   Map<ProgramProgress, Set<Skill>> getSkillsOverview(Student student);
 
-  Map<ProgramProgress, Set<Skill>> getSkillsView(
-      Student student, SortCriteria sortCriteria);
+  Map<ProgramProgress, Set<Skill>> getSkillsView(Student student, SortCriteria sortCriteria);
 
   List<ProgramProgress> getAllProgramProgress(Student student);
 }

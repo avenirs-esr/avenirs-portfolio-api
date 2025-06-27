@@ -39,8 +39,7 @@ public class ProgramProgressController {
 
   @GetMapping("/view")
   public List<ProgramProgressViewDTO> getSkillsView(
-      Principal principal,
-      @RequestParam(name = "sort", required = false) String sortRaw) {
+      Principal principal, @RequestParam(name = "sort", required = false) String sortRaw) {
     SortCriteria sortCriteria = SortCriteria.fromString(sortRaw);
     Student student = userUtil.getStudent(principal);
 

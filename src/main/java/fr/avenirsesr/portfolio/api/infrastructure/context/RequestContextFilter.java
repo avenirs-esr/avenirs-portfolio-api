@@ -22,7 +22,8 @@ public class RequestContextFilter extends OncePerRequestFilter {
     try {
       var languageCode = Optional.ofNullable(request.getHeader("Accept-Language"));
       if (languageCode.isEmpty()) {
-        log.error("Accept-Language header not present, using fallback language {}", ELanguage.FALLBACK);
+        log.error(
+            "Accept-Language header not present, using fallback language {}", ELanguage.FALLBACK);
         languageCode = Optional.of(ELanguage.FALLBACK.getCode());
       }
       ELanguage preferredLanguage = ELanguage.fromCode(languageCode.get());

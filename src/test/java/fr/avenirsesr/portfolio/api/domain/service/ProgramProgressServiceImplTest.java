@@ -59,8 +59,7 @@ public class ProgramProgressServiceImplTest {
         createProgramProgress(programProgressId2, "Y", List.of("x", "y"));
     ProgramProgress programProgress3 = createProgramProgress(programProgressId3, "X", List.of("s"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress3, programProgress2, programProgress1));
 
     Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
@@ -79,8 +78,7 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress programProgress2 =
         createProgramProgress(UUID.randomUUID(), "B", List.of("d", "e", "f", "g"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress1, programProgress2));
 
     Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
@@ -102,8 +100,7 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress programProgress2 =
         createProgramProgress(UUID.randomUUID(), "B", List.of("d", "e", "f", "g"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress1, programProgress2));
 
     Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
@@ -123,8 +120,7 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress programProgress2 =
         createProgramProgress(UUID.randomUUID(), "B", List.of("d", "e", "f", "g", "h"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress1, programProgress2));
 
     Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
@@ -199,8 +195,7 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
@@ -227,8 +222,7 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
@@ -255,8 +249,7 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
@@ -287,8 +280,7 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
@@ -322,8 +314,7 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill1)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
@@ -344,8 +335,7 @@ public class ProgramProgressServiceImplTest {
     ProgramProgress progress =
         ProgramProgressFixture.create().withStudent(student).withSkills(Set.of(skill)).toModel();
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
     // When
     Map<ProgramProgress, Set<Skill>> result = programProgressService.getSkillsOverview(student);
@@ -367,8 +357,7 @@ public class ProgramProgressServiceImplTest {
         createProgramProgress(
             UUID.randomUUID(), "B", List.of("f", "g", "h", "i", "j", "k", "l", "m", "n"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress1, programProgress2, programProgress3));
 
     // When
@@ -394,8 +383,7 @@ public class ProgramProgressServiceImplTest {
         createProgramProgress(
             UUID.randomUUID(), "B", List.of("f", "g", "h", "i", "j", "k", "l", "m", "n"));
 
-    when(programProgressRepository.findAllByStudent(
-            any(Student.class), any(SortCriteria.class)))
+    when(programProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(programProgress1, programProgress2, programProgress3));
 
     // When
