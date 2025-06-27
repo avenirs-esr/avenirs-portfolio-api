@@ -39,6 +39,18 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+              - column:
+                  name: duration_unit
+                  type: VARCHAR(9)
+                  constraints:
+                    nullable: true
+
+              - column:
+                  name: duration_count
+                  type: int
+                  constraints:
+                    nullable: true
+
         - createTable:
             tableName: program_translation
             columns:
