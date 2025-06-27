@@ -5,6 +5,10 @@ import fr.avenirsesr.portfolio.api.domain.model.ProgramProgress;
 
 public interface ProgramProgressMapper {
   static ProgramProgressDTO fromDomainToDto(ProgramProgress programProgress) {
-    return new ProgramProgressDTO(programProgress.getId(), programProgress.getProgram().getName());
+    return new ProgramProgressDTO(
+        programProgress.getId(),
+        programProgress.getProgram().getName(),
+        programProgress.getProgram().getDurationUnit(),
+        programProgress.getProgram().getDurationCount());
   }
 }

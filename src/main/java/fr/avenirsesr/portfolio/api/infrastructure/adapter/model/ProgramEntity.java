@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.api.domain.model.enums.EDurationUnit;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +20,12 @@ public class ProgramEntity extends AvenirsBaseEntity {
   @Column(name = "is_apc", nullable = false)
   private boolean isAPC;
 
+  @Column(name = "duration_unit", nullable = true)
+  private EDurationUnit durationUnit;
+
+  @Column(name = "duration_count", nullable = true)
+  private int durationCount;
+
   @ManyToOne(optional = false)
   private InstitutionEntity institution;
 
@@ -30,9 +37,16 @@ public class ProgramEntity extends AvenirsBaseEntity {
   private Set<ProgramTranslationEntity> translations =
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
-  public ProgramEntity(UUID id, boolean isAPC, InstitutionEntity institution) {
+  public ProgramEntity(
+      UUID id,
+      boolean isAPC,
+      InstitutionEntity institution,
+      EDurationUnit durationUnit,
+      int durationCount) {
     this.setId(id);
     this.institution = institution;
     this.isAPC = isAPC;
+    this.durationUnit = durationUnit;
+    this.durationCount = durationCount;
   }
 }

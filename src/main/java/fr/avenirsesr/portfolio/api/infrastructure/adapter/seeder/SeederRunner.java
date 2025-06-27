@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.api.domain.model.*;
+import fr.avenirsesr.portfolio.api.domain.model.enums.EDurationUnit;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.api.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.api.domain.model.enums.ESkillLevelStatus;
@@ -114,7 +115,8 @@ public class SeederRunner implements CommandLineRunner {
               .map(
                   institutionEntity -> {
                     ProgramEntity programEntity =
-                        new ProgramEntity(UUID.randomUUID(), true, institutionEntity);
+                        new ProgramEntity(
+                            UUID.randomUUID(), true, institutionEntity, EDurationUnit.YEAR, 2);
 
                     Set<ProgramTranslationEntity> programTranslations =
                         Set.of(

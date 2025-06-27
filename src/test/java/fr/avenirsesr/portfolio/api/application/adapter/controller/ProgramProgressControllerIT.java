@@ -233,7 +233,9 @@ class ProgramProgressControllerIT {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value("3d12e4ad-df72-4313-9768-ec4091201362"))
-        .andExpect(jsonPath("$[0].name").value("Eastern Bachelor - 9"));
+        .andExpect(jsonPath("$[0].name").value("Eastern Bachelor - 9"))
+        .andExpect(jsonPath("$[0].name").value("YEAR"))
+        .andExpect(jsonPath("$[0].name").value(2));
   }
 
   @Test
@@ -283,6 +285,8 @@ class ProgramProgressControllerIT {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value("3d12e4ad-df72-4313-9768-ec4091201362"))
-        .andExpect(jsonPath("$[0].name").value("Eastern Bachelor - 9"));
+        .andExpect(jsonPath("$[0].name").value("Eastern Bachelor - 9"))
+        .andExpect(jsonPath("$[0].name").value("YEAR"))
+        .andExpect(jsonPath("$[0].name").value(2));
   }
 }

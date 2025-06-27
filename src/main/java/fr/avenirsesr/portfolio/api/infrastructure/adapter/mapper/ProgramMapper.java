@@ -9,7 +9,11 @@ import fr.avenirsesr.portfolio.api.infrastructure.adapter.util.TranslationUtil;
 public interface ProgramMapper {
   static ProgramEntity fromDomain(Program program) {
     return new ProgramEntity(
-        program.getId(), program.isAPC(), InstitutionMapper.fromDomain(program.getInstitution()));
+        program.getId(),
+        program.isAPC(),
+        InstitutionMapper.fromDomain(program.getInstitution()),
+        program.getDurationUnit(),
+        program.getDurationCount());
   }
 
   static Program toDomain(ProgramEntity programEntity) {
@@ -25,6 +29,8 @@ public interface ProgramMapper {
         InstitutionMapper.toDomain(programEntity.getInstitution(), language),
         translationEntity.getName(),
         programEntity.isAPC(),
-        language);
+        language,
+        programEntity.getDurationUnit(),
+        programEntity.getDurationCount());
   }
 }
