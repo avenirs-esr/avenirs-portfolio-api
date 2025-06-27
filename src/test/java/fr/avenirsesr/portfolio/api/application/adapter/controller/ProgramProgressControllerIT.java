@@ -63,23 +63,23 @@ class ProgramProgressControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
-        .andExpect(jsonPath("$[0].name").value("Western Master - 8"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Skill amet"))
+        .andExpect(jsonPath("$[0].id").value("3d12e4ad-df72-4313-9768-ec4091201362"))
+        .andExpect(jsonPath("$[0].name").value("Eastern Bachelor - 9"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("4b8549bd-a667-42b6-a47f-e8d7342edbce"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill adipisci"))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists())
         .andExpect(
             jsonPath("$[0].skills[0].currentSkillLevel.id")
-                .value("802fde10-2cd0-47cb-9660-ecd1634ab506"))
-        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.name").value("Niv. 1"))
+                .value("ea004c96-5ce4-4a46-bef4-b3c2615d70fe"))
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.name").value("Niv. 5"))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.status").value("UNDER_REVIEW"))
-        .andExpect(jsonPath("$[0].skills[1].id").value("7a9be554-3616-44f5-a49a-07ed4755bc0a"))
-        .andExpect(jsonPath("$[0].skills[1].name").value("Skill distinctio"))
+        .andExpect(jsonPath("$[0].skills[1].id").value("c67268ad-704f-4a2f-8a7e-dce3650fa980"))
+        .andExpect(jsonPath("$[0].skills[1].name").value("Skill dolorum"))
         .andExpect(jsonPath("$[0].skills[1].currentSkillLevel").exists())
         .andExpect(
             jsonPath("$[0].skills[1].currentSkillLevel.id")
-                .value("0395bac3-9cd5-4df2-ae24-6b053b09bad2"))
-        .andExpect(jsonPath("$[0].skills[1].currentSkillLevel.name").value("Niv. 2"))
+                .value("b51e91be-c43b-46df-8c6b-159f27878d3c"))
+        .andExpect(jsonPath("$[0].skills[1].currentSkillLevel.name").value("Niv. 0"))
         .andExpect(jsonPath("$[0].skills[1].currentSkillLevel.status").value("TO_BE_EVALUATED"));
   }
 
@@ -129,10 +129,10 @@ class ProgramProgressControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
-        .andExpect(jsonPath("$[0].name").value("Western Master - 8"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Skill amet"))
+        .andExpect(jsonPath("$[0].id").value("3d12e4ad-df72-4313-9768-ec4091201362"))
+        .andExpect(jsonPath("$[0].name").value("Eastern Bachelor - 9"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("4b8549bd-a667-42b6-a47f-e8d7342edbce"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill adipisci"))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
   }
 
@@ -149,20 +149,19 @@ class ProgramProgressControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
-        .andExpect(jsonPath("$[0].name").value("Western Master - 8"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Skill amet"))
-        .andExpect(jsonPath("$[0].skills[0].traceCount").value(1))
+        .andExpect(jsonPath("$[0].id").value("3d12e4ad-df72-4313-9768-ec4091201362"))
+        .andExpect(jsonPath("$[0].name").value("Eastern Bachelor - 9"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("4b8549bd-a667-42b6-a47f-e8d7342edbce"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill adipisci"))
+        .andExpect(jsonPath("$[0].skills[0].traceCount").value(0))
         .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists())
         .andExpect(
             jsonPath("$[0].skills[0].currentSkillLevel.id")
-                .value("802fde10-2cd0-47cb-9660-ecd1634ab506"))
-        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.name").value("Niv. 1"))
+                .value("ea004c96-5ce4-4a46-bef4-b3c2615d70fe"))
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.name").value("Niv. 5"))
         .andExpect(
-            jsonPath("$[0].skills[0].currentSkillLevel.shortDescription")
-                .value("Perspiciatis nihil quos."))
+            jsonPath("$[0].skills[0].currentSkillLevel.shortDescription").value("Nostrum ut modi."))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.status").value("UNDER_REVIEW"));
   }
 
@@ -211,11 +210,11 @@ class ProgramProgressControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
-        .andExpect(jsonPath("$[0].name").value("Western Master - 8"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("18516fa2-79cf-43e9-8ccb-3be357a5882e"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Skill amet"))
-        .andExpect(jsonPath("$[0].skills[0].traceCount").value(1))
+        .andExpect(jsonPath("$[0].id").value("3d12e4ad-df72-4313-9768-ec4091201362"))
+        .andExpect(jsonPath("$[0].name").value("Eastern Bachelor - 9"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("4b8549bd-a667-42b6-a47f-e8d7342edbce"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill adipisci"))
+        .andExpect(jsonPath("$[0].skills[0].traceCount").value(0))
         .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
   }
@@ -233,8 +232,8 @@ class ProgramProgressControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
-        .andExpect(jsonPath("$[0].name").value("Western Master - 8"));
+        .andExpect(jsonPath("$[0].id").value("3d12e4ad-df72-4313-9768-ec4091201362"))
+        .andExpect(jsonPath("$[0].name").value("Eastern Bachelor - 9"));
   }
 
   @Test
@@ -283,7 +282,7 @@ class ProgramProgressControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("f01fe339-f9d4-4fbc-9fac-4a4b73a84702"))
-        .andExpect(jsonPath("$[0].name").value("Western Master - 8"));
+        .andExpect(jsonPath("$[0].id").value("3d12e4ad-df72-4313-9768-ec4091201362"))
+        .andExpect(jsonPath("$[0].name").value("Eastern Bachelor - 9"));
   }
 }
