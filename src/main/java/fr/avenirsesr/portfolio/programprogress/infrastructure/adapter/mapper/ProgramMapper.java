@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUt
 
 public interface ProgramMapper {
   static ProgramEntity fromDomain(Program program) {
-    return new ProgramEntity(
+    return ProgramEntity.of(
         program.getId(),
         program.isAPC(),
         InstitutionMapper.fromDomain(program.getInstitution()),

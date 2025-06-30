@@ -6,14 +6,12 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "program")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -38,7 +36,7 @@ public class ProgramEntity extends AvenirsBaseEntity {
   private Set<ProgramTranslationEntity> translations =
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
-  public ProgramEntity(
+  private ProgramEntity(
       UUID id,
       boolean isAPC,
       InstitutionEntity institution,
@@ -49,5 +47,14 @@ public class ProgramEntity extends AvenirsBaseEntity {
     this.isAPC = isAPC;
     this.durationUnit = durationUnit;
     this.durationCount = durationCount;
+  }
+
+  public static ProgramEntity of(
+      UUID id,
+      boolean isAPC,
+      InstitutionEntity institution,
+      EDurationUnit durationUnit,
+      int durationCount) {
+    return new ProgramEntity(id, isAPC, institution, durationUnit, durationCount);
   }
 }

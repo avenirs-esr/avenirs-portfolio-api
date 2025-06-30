@@ -1,36 +1,40 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.programprogress.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
+import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 public class FakeTrace {
   private static final FakerProvider faker = new FakerProvider();
-  private final Trace trace;
+  private final TraceEntity trace;
 
-  private FakeTrace(Trace trace) {
+  private FakeTrace(TraceEntity trace) {
     this.trace = trace;
   }
 
-  public static FakeTrace of(User user) {
+  public static FakeTrace of(UserEntity user) {
     return new FakeTrace(
-        Trace.create(
+        TraceEntity.of(
             UUID.fromString(faker.call().internet().uuid()),
             user,
             faker.call().lorem().sentence(),
-            Instant.now().plus(90, ChronoUnit.DAYS),
-            ELanguage.FALLBACK));
+            ELanguage.FALLBACK,
+            List.of(),
+            List.of(),
+            false,
+            Instant.now(),
+            Instant.now(),
+            null));
   }
 
-  public FakeTrace withSkillLevel(List<SkillLevel> skillLevels) {
+  public FakeTrace withSkillLevel(List<SkillLevelEntity> skillLevels) {
     trace.setSkillLevels(skillLevels);
     skillLevels.forEach(
         skillLevel ->
@@ -39,12 +43,27 @@ public class FakeTrace {
     return this;
   }
 
-  public FakeTrace withAMS(List<AMS> amses) {
+  public FakeTrace withAMS(List<AMSEntity> amses) {
     trace.setAmses(amses);
     return this;
   }
 
-  public Trace toModel() {
+  public FakeTrace withELanguage(ELanguage language) {
+    trace.setLanguage(language);
+    return this;
+  }
+
+  public FakeTrace withDeletedAt(Instant deletedAt) {
+    trace.setDeletedAt(deletedAt);
+    return this;
+  }
+
+  public FakeTrace isGroup() {
+    trace.setGroup(true);
+    return this;
+  }
+
+  public TraceEntity toEntity() {
     return trace;
   }
 }

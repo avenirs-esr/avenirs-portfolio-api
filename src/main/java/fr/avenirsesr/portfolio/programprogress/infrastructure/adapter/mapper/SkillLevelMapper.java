@@ -14,7 +14,7 @@ import java.util.List;
 public interface SkillLevelMapper {
   static SkillLevelEntity fromDomain(
       SkillLevel skillLevel, SkillEntity skillEntity, List<TraceEntity> tracesEntities) {
-    return new SkillLevelEntity(
+    return SkillLevelEntity.of(
         skillLevel.getId(),
         skillLevel.getStatus(),
         tracesEntities,

@@ -3,12 +3,14 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.Teacher;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 
 public interface UserMapper {
   static UserEntity fromDomain(User user) {
     return user != null
-        ? new UserEntity(
+        ? UserEntity.of(
             user.getId(),
             user.getFirstName(),
             user.getLastName(),
@@ -20,7 +22,7 @@ public interface UserMapper {
 
   static UserEntity fromDomain(Student student) {
     return student != null
-        ? new UserEntity(
+        ? UserEntity.of(
             student.getUser().getId(),
             student.getUser().getFirstName(),
             student.getUser().getLastName(),
@@ -32,7 +34,7 @@ public interface UserMapper {
 
   static UserEntity fromDomain(Teacher teacher) {
     return teacher != null
-        ? new UserEntity(
+        ? UserEntity.of(
             teacher.getUser().getId(),
             teacher.getUser().getFirstName(),
             teacher.getUser().getLastName(),
@@ -49,14 +51,14 @@ public interface UserMapper {
             userEntity.getFirstName(),
             userEntity.getLastName(),
             userEntity.getEmail(),
-            userEntity.getStudent().isActive(),
-            userEntity.getStudent().getBio(),
-            userEntity.getStudent().getProfilePicture(),
-            userEntity.getStudent().getCoverPicture(),
-            userEntity.getTeacher().isActive(),
-            userEntity.getTeacher().getBio(),
-            userEntity.getTeacher().getProfilePicture(),
-            userEntity.getTeacher().getCoverPicture())
+            userEntity.getStudent().map(StudentEntity::isActive).orElse(false),
+            userEntity.getStudent().map(StudentEntity::getBio).orElse(null),
+            userEntity.getStudent().map(StudentEntity::getProfilePicture).orElse(null),
+            userEntity.getStudent().map(StudentEntity::getCoverPicture).orElse(null),
+            userEntity.getTeacher().map(TeacherEntity::isActive).orElse(false),
+            userEntity.getTeacher().map(TeacherEntity::getBio).orElse(null),
+            userEntity.getTeacher().map(TeacherEntity::getProfilePicture).orElse(null),
+            userEntity.getTeacher().map(TeacherEntity::getCoverPicture).orElse(null))
         : null;
   }
 }

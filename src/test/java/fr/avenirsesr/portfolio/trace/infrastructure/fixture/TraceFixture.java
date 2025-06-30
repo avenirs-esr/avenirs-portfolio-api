@@ -1,13 +1,16 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.porgramprogress.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.programprogress.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.mapper.SkillLevelMapper;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake.FakeTrace;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -29,12 +32,13 @@ public class TraceFixture {
 
   private TraceFixture() {
     var fakeUser = UserFixture.create().toModel();
-    var base = FakeTrace.of(fakeUser).toModel();
+    var base = FakeTrace.of(UserMapper.fromDomain(fakeUser)).toEntity();
     this.id = base.getId();
-    this.user = base.getUser();
+    this.user = fakeUser;
     this.title = base.getTitle();
-    this.skillLevels = base.getSkillLevels();
-    this.amses = base.getAmses();
+    this.skillLevels =
+        base.getSkillLevels().stream().map(SkillLevelMapper::toDomainWithoutRecursion).toList();
+    this.amses = base.getAmses().stream().map(AMSMapper::toDomainWithoutRecursion).toList();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
     this.deletedAt = base.getDeletedAt();

@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface TraceMapper {
   static TraceEntity fromDomain(Trace trace) {
-    return new TraceEntity(
+    return TraceEntity.of(
         trace.getId(),
         UserMapper.fromDomain(trace.getUser()),
         trace.getTitle(),

@@ -72,7 +72,7 @@ public class ExternalUserEntity {
       columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
   private Instant updatedAt;
 
-  public ExternalUserEntity(
+  private ExternalUserEntity(
       String externalId,
       EExternalSource source,
       UserEntity user,
@@ -87,5 +87,16 @@ public class ExternalUserEntity {
     this.email = email;
     this.firstName = firstName;
     this.lastName = lastName;
+  }
+
+  public static ExternalUserEntity of(
+      String externalId,
+      EExternalSource source,
+      UserEntity user,
+      EUserCategory category,
+      String email,
+      String firstName,
+      String lastName) {
+    return new ExternalUserEntity(externalId, source, user, category, email, firstName, lastName);
   }
 }

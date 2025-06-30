@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.ams.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeCohort;
 import fr.avenirsesr.portfolio.porgramprogress.infrastructure.fixture.ProgramProgressFixture;
 import fr.avenirsesr.portfolio.programprogress.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
@@ -93,9 +92,5 @@ public class CohortFixture {
 
   public Cohort toModel() {
     return Cohort.toDomain(id, name, description, programProgress, users, amsSet);
-  }
-
-  public static Cohort createFromFake(ProgramProgress programProgress, Set<User> users) {
-    return FakeCohort.of(programProgress, users).toModel();
   }
 }

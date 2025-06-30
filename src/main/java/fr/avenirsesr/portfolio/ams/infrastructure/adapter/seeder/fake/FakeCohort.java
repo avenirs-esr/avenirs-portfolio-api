@@ -1,32 +1,33 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
-import fr.avenirsesr.portfolio.programprogress.domain.model.ProgramProgress;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
+import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramProgressEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.Set;
 import java.util.UUID;
 
 public class FakeCohort {
   private static final FakerProvider faker = new FakerProvider();
-  private final Cohort cohort;
+  private final CohortEntity cohort;
 
-  private FakeCohort(Cohort cohort) {
+  private FakeCohort(CohortEntity cohort) {
     this.cohort = cohort;
   }
 
-  public static FakeCohort of(ProgramProgress programProgress, Set<User> users) {
-    final Cohort cohort =
-        Cohort.create(
+  public static FakeCohort of(ProgramProgressEntity programProgress, Set<UserEntity> users) {
+    final CohortEntity cohort =
+        CohortEntity.of(
             UUID.fromString(faker.call().internet().uuid()),
             faker.call().educator().course(),
             faker.call().lorem().sentence(),
-            programProgress);
-    cohort.setUsers(users);
+            users,
+            programProgress,
+            Set.of());
     return new FakeCohort(cohort);
   }
 
-  public Cohort toModel() {
+  public CohortEntity toEntity() {
     return cohort;
   }
 }

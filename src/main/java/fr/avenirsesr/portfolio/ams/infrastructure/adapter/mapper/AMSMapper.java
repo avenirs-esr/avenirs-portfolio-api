@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public interface AMSMapper {
   static AMSEntity fromDomain(AMS ams) {
-    return new AMSEntity(
+    return AMSEntity.of(
         ams.getId(),
         UserMapper.fromDomain(ams.getUser()),
         ams.getStatus(),

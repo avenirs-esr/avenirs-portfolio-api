@@ -1,47 +1,68 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.programprogress.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEntity;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
+import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakePeriod;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 public class FakeAMS {
   private static final FakerProvider faker = new FakerProvider();
-  private final AMS ams;
+  private final AMSEntity ams;
 
-  private FakeAMS(AMS ams) {
+  private FakeAMS(AMSEntity ams) {
     this.ams = ams;
   }
 
-  public static FakeAMS of(User user) {
+  public static FakeAMS of(UserEntity user) {
     FakePeriod<Instant> period = FakePeriod.createMin24hoursInstantPeriodInAcademicPeriod();
-    return new FakeAMS(
-        AMS.create(
+    var entity =
+        AMSEntity.of(
             UUID.fromString(faker.call().internet().uuid()),
             user,
-            faker.call().name().title(),
+            EAmsStatus.NOT_STARTED,
             period.getStartDate(),
-            period.getEndDate()));
+            period.getEndDate(),
+            Set.of(),
+            Set.of(),
+            Set.of());
+
+    entity.setTranslations(
+        Set.of(
+            AMSTranslationEntity.of(
+                UUID.fromString(faker.call().internet().uuid()),
+                ELanguage.FRENCH,
+                faker.call().name().title(),
+                entity)));
+
+    return new FakeAMS(entity);
   }
 
-  public static FakeAMS of(AMS ams, ELanguage language) {
-    FakePeriod<Instant> period = FakePeriod.createMin24hoursInstantPeriodInAcademicPeriod();
-    return new FakeAMS(
-        AMS.create(
-            ams.getId(),
-            ams.getUser(),
-            String.format("%s %s", ams.getTitle(), language.getCode()),
-            period.getStartDate(),
-            period.getEndDate()));
+  public FakeAMS addTranslation(ELanguage language) {
+    var translations = new java.util.HashSet<>(Set.copyOf(ams.getTranslations()));
+    translations.add(
+        AMSTranslationEntity.of(
+            UUID.fromString(faker.call().internet().uuid()),
+            language,
+            "%s - [%s]".formatted(faker.call().name().title(), language.getCode()),
+            ams));
+
+    ams.setTranslations(translations);
+
+    return this;
   }
 
-  public FakeAMS withSkillLevel(List<SkillLevel> skillLevels) {
+  public FakeAMS withSkillLevel(List<SkillLevelEntity> skillLevels) {
     ams.setSkillLevels(skillLevels);
     skillLevels.forEach(
         skillLevel ->
@@ -50,7 +71,22 @@ public class FakeAMS {
     return this;
   }
 
-  public AMS toModel() {
+  public FakeAMS withCohorts(Set<CohortEntity> cohorts) {
+    ams.setCohorts(cohorts);
+    return this;
+  }
+
+  public FakeAMS withTraces(List<TraceEntity> traces) {
+    ams.setTraces(traces);
+    return this;
+  }
+
+  public FakeAMS withStatus(EAmsStatus status) {
+    ams.setStatus(status);
+    return this;
+  }
+
+  public AMSEntity toEntity() {
     return ams;
   }
 }

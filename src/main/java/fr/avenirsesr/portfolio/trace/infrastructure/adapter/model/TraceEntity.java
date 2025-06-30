@@ -15,7 +15,6 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,7 +23,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "trace")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -59,7 +57,7 @@ public class TraceEntity extends AvenirsBaseEntity {
 
   @Column private Instant deletedAt;
 
-  public TraceEntity(
+  private TraceEntity(
       UUID id,
       UserEntity user,
       String title,
@@ -80,5 +78,20 @@ public class TraceEntity extends AvenirsBaseEntity {
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
     this.setDeletedAt(deletedAt);
+  }
+
+  public static TraceEntity of(
+      UUID id,
+      UserEntity user,
+      String title,
+      ELanguage language,
+      List<SkillLevelEntity> skillLevels,
+      List<AMSEntity> amses,
+      boolean isGroup,
+      Instant createdAt,
+      Instant updatedAt,
+      Instant deletedAt) {
+    return new TraceEntity(
+        id, user, title, language, skillLevels, amses, isGroup, createdAt, updatedAt, deletedAt);
   }
 }

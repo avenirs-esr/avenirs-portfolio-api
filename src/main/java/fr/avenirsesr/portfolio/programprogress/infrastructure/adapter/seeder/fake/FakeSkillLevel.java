@@ -1,36 +1,62 @@
 package fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.programprogress.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.programprogress.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.SkillLevelEntity;
+import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.SkillLevelTranslationEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class FakeSkillLevel {
   private static final FakerProvider faker = new FakerProvider();
-  private final SkillLevel skillLevel;
+  private final SkillLevelEntity skillLevel;
 
-  private FakeSkillLevel(SkillLevel skillLevel) {
+  private FakeSkillLevel(SkillLevelEntity skillLevel) {
     this.skillLevel = skillLevel;
   }
 
   public static FakeSkillLevel create() {
-    return new FakeSkillLevel(
-            SkillLevel.create(
+    SkillLevelEntity entity =
+        SkillLevelEntity.of(
+            UUID.fromString(faker.call().internet().uuid()),
+            null,
+            List.of(),
+            List.of(),
+            null,
+            null,
+            null);
+
+    entity.setTranslations(
+        Set.of(
+            SkillLevelTranslationEntity.of(
                 UUID.fromString(faker.call().internet().uuid()),
-                "Niv. %s".formatted(faker.call().lorem().character()),
-                faker.call().lorem().sentence()))
-        .withStatus(ESkillLevelStatus.NOT_STARTED);
+                ELanguage.FALLBACK,
+                "Niv. %s - [%s]"
+                    .formatted(faker.call().lorem().character(), ELanguage.FALLBACK.getCode()),
+                "%s - [%s]"
+                    .formatted(faker.call().lorem().sentence(), ELanguage.FALLBACK.getCode()),
+                entity)));
+
+    return new FakeSkillLevel(entity).withStatus(ESkillLevelStatus.NOT_STARTED);
   }
 
-  public static FakeSkillLevel of(SkillLevel skillLevel, ELanguage language) {
-    return new FakeSkillLevel(
-        SkillLevel.create(
-            skillLevel.getId(),
-            String.format("%s %s", skillLevel.getName(), language.getCode()),
-            String.format("%s %s", skillLevel.getDescription(), language.getCode())));
+  public FakeSkillLevel addTranslation(ELanguage language) {
+    var translations = new java.util.HashSet<>(Set.copyOf(skillLevel.getTranslations()));
+    translations.add(
+        SkillLevelTranslationEntity.of(
+            UUID.fromString(faker.call().internet().uuid()),
+            language,
+            "Niv. %s - [%s]".formatted(faker.call().lorem().character(), language.getCode()),
+            "%s - [%s]".formatted(faker.call().lorem().sentence(), language.getCode()),
+            skillLevel));
+
+    skillLevel.setTranslations(translations);
+
+    return this;
   }
 
   public FakeSkillLevel withStatus(ESkillLevelStatus status) {
@@ -56,7 +82,7 @@ public class FakeSkillLevel {
     return this;
   }
 
-  public SkillLevel toModel() {
+  public SkillLevelEntity toEntity() {
     return skillLevel;
   }
 }

@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.ExternalUserEnt
 
 public interface ExternalUserMapper {
   static ExternalUserEntity fromDomain(ExternalUser externalUser) {
-    return new ExternalUserEntity(
+    return ExternalUserEntity.of(
         externalUser.getExternalId(),
         externalUser.getSource(),
         UserMapper.fromDomain(externalUser.getUser()),

@@ -9,14 +9,12 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "program_progress")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -30,11 +28,16 @@ public class ProgramProgressEntity extends AvenirsBaseEntity {
   @OneToMany(mappedBy = "programProgress", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<SkillEntity> skills;
 
-  public ProgramProgressEntity(
+  private ProgramProgressEntity(
       UUID id, ProgramEntity program, UserEntity student, Set<SkillEntity> skills) {
     this.setId(id);
     this.program = program;
     this.student = student;
     this.skills = skills;
+  }
+
+  public static ProgramProgressEntity of(
+      UUID id, ProgramEntity program, UserEntity student, Set<SkillEntity> skills) {
+    return new ProgramProgressEntity(id, program, student, skills);
   }
 }

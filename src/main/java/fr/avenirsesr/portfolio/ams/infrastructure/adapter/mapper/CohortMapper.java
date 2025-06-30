@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public interface CohortMapper {
   static CohortEntity fromDomain(Cohort cohort) {
 
-    return new CohortEntity(
+    return CohortEntity.of(
         cohort.getId(),
         cohort.getName(),
         cohort.getDescription(),

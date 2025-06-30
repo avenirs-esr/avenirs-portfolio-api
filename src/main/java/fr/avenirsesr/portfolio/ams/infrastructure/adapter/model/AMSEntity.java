@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +25,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "ams")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class AMSEntity extends PeriodEntity<Instant> {
@@ -67,7 +65,7 @@ public class AMSEntity extends PeriodEntity<Instant> {
       inverseJoinColumns = @JoinColumn(name = "cohort_id"))
   private Set<CohortEntity> cohorts;
 
-  public AMSEntity(
+  private AMSEntity(
       UUID id,
       UserEntity user,
       EAmsStatus status,
@@ -84,5 +82,17 @@ public class AMSEntity extends PeriodEntity<Instant> {
     this.cohorts = Set.copyOf(cohorts == null ? Set.of() : cohorts);
     this.traces = List.copyOf(traces);
     this.status = status;
+  }
+
+  public static AMSEntity of(
+      UUID id,
+      UserEntity user,
+      EAmsStatus status,
+      Instant startDate,
+      Instant endDate,
+      Set<SkillLevelEntity> skillLevels,
+      Set<CohortEntity> cohorts,
+      Set<TraceEntity> traces) {
+    return new AMSEntity(id, user, status, startDate, endDate, skillLevels, cohorts, traces);
   }
 }

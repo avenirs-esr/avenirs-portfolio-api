@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public interface SkillMapper {
   static SkillEntity fromDomain(Skill skill, ProgramProgressEntity programProgressEntity) {
-    var skillEntity = new SkillEntity(skill.getId(), Set.of(), programProgressEntity);
+    var skillEntity = SkillEntity.of(skill.getId(), Set.of(), programProgressEntity);
     var levels =
         skill.getSkillLevels().stream()
             .map(

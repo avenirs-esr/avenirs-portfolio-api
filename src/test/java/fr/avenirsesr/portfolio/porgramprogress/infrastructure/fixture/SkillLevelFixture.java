@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.programprogress.domain.model.Skill;
 import fr.avenirsesr.portfolio.programprogress.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.programprogress.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.mapper.SkillLevelMapper;
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake.FakeSkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -27,7 +28,7 @@ public class SkillLevelFixture {
   private LocalDate endDate;
 
   private SkillLevelFixture() {
-    SkillLevel base = FakeSkillLevel.create().toModel();
+    SkillLevel base = SkillLevelMapper.toDomain(FakeSkillLevel.create().toEntity(), null);
     this.id = base.getId();
     this.name = base.getName();
     this.description = base.getDescription();

@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.TranslationEntity;
 import jakarta.persistence.*;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +11,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "ams_translation")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class AMSTranslationEntity extends TranslationEntity {
@@ -24,11 +22,15 @@ public class AMSTranslationEntity extends TranslationEntity {
   @JoinColumn(name = "ams_id", nullable = false)
   private AMSEntity ams;
 
-  public AMSTranslationEntity(UUID id, ELanguage language, String title, AMSEntity ams) {
+  private AMSTranslationEntity(UUID id, ELanguage language, String title, AMSEntity ams) {
     super();
     this.setId(id);
     this.language = language;
     this.title = title;
     this.ams = ams;
+  }
+
+  public static AMSTranslationEntity of(UUID id, ELanguage language, String title, AMSEntity ams) {
+    return new AMSTranslationEntity(id, language, title, ams);
   }
 }

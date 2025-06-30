@@ -5,14 +5,12 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "skill")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -32,11 +30,16 @@ public class SkillEntity extends AvenirsBaseEntity {
   private Set<SkillTranslationEntity> translations =
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
-  public SkillEntity(
+  private SkillEntity(
       UUID id, Set<SkillLevelEntity> skillLevels, ProgramProgressEntity programProgress) {
     this.setId(id);
     this.skillLevels = skillLevels;
     this.programProgress = programProgress;
+  }
+
+  public static SkillEntity of(
+      UUID id, Set<SkillLevelEntity> skillLevels, ProgramProgressEntity programProgress) {
+    return new SkillEntity(id, skillLevels, programProgress);
   }
 
   @Override

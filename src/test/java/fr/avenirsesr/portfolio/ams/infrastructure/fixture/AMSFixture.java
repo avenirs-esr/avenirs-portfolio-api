@@ -6,8 +6,10 @@ import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeAMS;
 import fr.avenirsesr.portfolio.porgramprogress.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.programprogress.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.mapper.SkillLevelMapper;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -27,11 +29,12 @@ public class AMSFixture {
 
   private AMSFixture() {
     var fakeUser = UserFixture.create().toModel();
-    var base = FakeAMS.of(fakeUser).toModel();
+    var base = FakeAMS.of(UserMapper.fromDomain(fakeUser)).toEntity();
     this.id = base.getId();
-    this.user = base.getUser();
-    this.title = base.getTitle();
-    this.skillLevels = base.getSkillLevels();
+    this.user = fakeUser;
+    this.title = "fake ams title";
+    this.skillLevels =
+        base.getSkillLevels().stream().map(SkillLevelMapper::toDomainWithoutRecursion).toList();
   }
 
   public static AMSFixture create() {

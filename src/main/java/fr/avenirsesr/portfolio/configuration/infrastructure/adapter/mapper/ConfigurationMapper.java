@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.configuration.infrastructure.adapter.model.Config
 
 public interface ConfigurationMapper {
   static ConfigurationEntity fromDomain(Configuration configuration) {
-    return new ConfigurationEntity(
+    return ConfigurationEntity.of(
         configuration.getId(), configuration.getName(), configuration.getValue());
   }
 

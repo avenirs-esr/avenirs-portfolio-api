@@ -4,14 +4,12 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.TranslationEntity;
 import jakarta.persistence.*;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "skill_level_translation")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -25,7 +23,7 @@ public class SkillLevelTranslationEntity extends TranslationEntity {
   @JoinColumn(name = "skill_level_id", nullable = false)
   private SkillLevelEntity skillLevel;
 
-  public SkillLevelTranslationEntity(
+  private SkillLevelTranslationEntity(
       UUID id,
       ELanguage eLanguage,
       String name,
@@ -37,6 +35,15 @@ public class SkillLevelTranslationEntity extends TranslationEntity {
     this.name = name;
     this.description = description;
     this.skillLevel = skillLevelEntity;
+  }
+
+  public static SkillLevelTranslationEntity of(
+      UUID id,
+      ELanguage eLanguage,
+      String name,
+      String description,
+      SkillLevelEntity skillLevelEntity) {
+    return new SkillLevelTranslationEntity(id, eLanguage, name, description, skillLevelEntity);
   }
 
   @Override

@@ -20,7 +20,7 @@ public class UserFixture {
   private String teacherCoverPicture;
 
   private UserFixture() {
-    var base = FakeUser.create().toModel();
+    var base = FakeUser.create().toEntity();
     this.id = base.getId();
     this.firstName = base.getFirstName();
     this.lastName = base.getLastName();

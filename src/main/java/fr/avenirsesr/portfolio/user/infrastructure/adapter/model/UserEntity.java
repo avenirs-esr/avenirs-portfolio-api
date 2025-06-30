@@ -8,15 +8,15 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import java.util.Optional;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "\"user\"")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -29,6 +29,7 @@ public class UserEntity extends AvenirsBaseEntity {
 
   @Email @Column private String email;
 
+  @Getter(AccessLevel.NONE)
   @Embedded
   @AttributeOverrides({
     @AttributeOverride(name = "bio", column = @Column(name = "student_bio")),
@@ -38,6 +39,7 @@ public class UserEntity extends AvenirsBaseEntity {
   })
   private StudentEntity student;
 
+  @Getter(AccessLevel.NONE)
   @Embedded
   @AttributeOverrides({
     @AttributeOverride(name = "bio", column = @Column(name = "teacher_bio")),
@@ -47,7 +49,7 @@ public class UserEntity extends AvenirsBaseEntity {
   })
   private TeacherEntity teacher;
 
-  public UserEntity(
+  private UserEntity(
       UUID id,
       String firstName,
       String lastName,
@@ -60,5 +62,23 @@ public class UserEntity extends AvenirsBaseEntity {
     this.email = email;
     this.student = student;
     this.teacher = teacher;
+  }
+
+  public static UserEntity of(
+      UUID id,
+      String firstName,
+      String lastName,
+      String email,
+      StudentEntity student,
+      TeacherEntity teacher) {
+    return new UserEntity(id, firstName, lastName, email, student, teacher);
+  }
+
+  public Optional<StudentEntity> getStudent() {
+    return Optional.ofNullable(student);
+  }
+
+  public Optional<TeacherEntity> getTeacher() {
+    return Optional.ofNullable(teacher);
   }
 }

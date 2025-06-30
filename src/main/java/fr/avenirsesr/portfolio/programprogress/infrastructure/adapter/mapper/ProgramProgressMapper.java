@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public interface ProgramProgressMapper {
   static ProgramProgressEntity fromDomain(ProgramProgress programProgress) {
     var entity =
-        new ProgramProgressEntity(
+        ProgramProgressEntity.of(
             programProgress.getId(),
             ProgramMapper.fromDomain(programProgress.getProgram()),
             UserMapper.fromDomain(programProgress.getStudent().getUser()),
@@ -32,7 +32,7 @@ public interface ProgramProgressMapper {
             programProgressEntity.getId(),
             ProgramMapper.toDomain(programProgressEntity.getProgram()),
             StudentMapper.toDomain(
-                programProgressEntity.getStudent().getStudent(),
+                programProgressEntity.getStudent().getStudent().get(),
                 programProgressEntity.getStudent()),
             Set.of());
 

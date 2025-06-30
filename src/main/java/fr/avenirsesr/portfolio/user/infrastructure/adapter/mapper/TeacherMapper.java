@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 
 public interface TeacherMapper {
   static TeacherEntity fromDomain(Teacher teacher) {
-    return new TeacherEntity(
+    return TeacherEntity.of(
         teacher.getBio(),
         teacher.getUser().isTeacher(),
         teacher.getProfilePicture(),

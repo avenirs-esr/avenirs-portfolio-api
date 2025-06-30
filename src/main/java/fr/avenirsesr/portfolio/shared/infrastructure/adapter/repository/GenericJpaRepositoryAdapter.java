@@ -35,6 +35,12 @@ public abstract class GenericJpaRepositoryAdapter<D, E> implements GenericReposi
     jpaRepository.saveAll(domains.stream().map(fromDomain).toList());
   }
 
+  public void saveAllEntities(List<E> entities) {
+    if (entities != null && !entities.isEmpty()) {
+      jpaRepository.saveAll(entities);
+    }
+  }
+
   @Override
   public Optional<D> findById(UUID id) {
     E entity = jpaRepository.findById(id).orElse(null);

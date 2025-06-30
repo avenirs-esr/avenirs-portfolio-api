@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.TranslationEntity;
 import jakarta.persistence.*;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +11,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "institution_translation")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class InstitutionTranslationEntity extends TranslationEntity {
@@ -24,12 +22,17 @@ public class InstitutionTranslationEntity extends TranslationEntity {
   @JoinColumn(name = "institution_id", nullable = false)
   private InstitutionEntity institution;
 
-  public InstitutionTranslationEntity(
+  private InstitutionTranslationEntity(
       UUID id, ELanguage language, String name, InstitutionEntity institutionEntity) {
     super();
     this.setId(id);
     this.language = language;
     this.name = name;
     this.institution = institutionEntity;
+  }
+
+  public static InstitutionTranslationEntity of(
+      UUID id, ELanguage language, String name, InstitutionEntity institutionEntity) {
+    return new InstitutionTranslationEntity(id, language, name, institutionEntity);
   }
 }

@@ -1,10 +1,11 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake.FakeTrace;
-import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -21,43 +22,32 @@ import org.springframework.stereotype.Component;
 public class TraceSeeder {
 
   private static final FakerProvider faker = new FakerProvider();
-  private static final int DEF_NB_TRACES = 20;
+  private static final int NB_TRACES = 20;
 
   private final TraceRepository traceRepository;
-  private List<User> users = List.of();
-  private int nbTraces = DEF_NB_TRACES;
 
-  public TraceSeeder withUsers(List<User> users) {
-    this.users = users;
-    return this;
-  }
-
-  private void checkIfInitialized() throws IllegalStateException {
-    if (users.isEmpty()) {
-      log.error("TraceSeeder is not initialized: withUsers must be called before seeding");
-      throw new IllegalStateException("TraceSeeder is not initialized");
-    }
-  }
-
-  private User getRandomUser() {
+  private UserEntity getRandomUserOf(List<UserEntity> users) {
     int randomIndex = faker.call().number().numberBetween(0, users.size());
     return users.get(randomIndex);
   }
 
-  public List<Trace> seed() {
-    log.info("Seeding Traces...");
-
-    checkIfInitialized();
-
-    List<Trace> traceList = new ArrayList<>();
-
-    for (int i = 0; i < nbTraces; i++) {
-      traceList.add(FakeTrace.of(getRandomUser()).toModel());
+  public List<TraceEntity> seed(List<UserEntity> users) {
+    if (users == null || users.isEmpty()) {
+      throw new IllegalArgumentException("The list of users is empty");
     }
 
-    traceRepository.saveAll(traceList);
+    log.info("Seeding Traces...");
+
+    List<TraceEntity> traceList = new ArrayList<>();
+
+    for (int i = 0; i < NB_TRACES; i++) {
+      traceList.add(FakeTrace.of(getRandomUserOf(users)).toEntity());
+    }
+
+    traceRepository.saveAll(traceList.stream().map(TraceMapper::toDomain).toList());
 
     log.info("✓ {} traces created", traceList.size());
+
     return traceList;
   }
 }

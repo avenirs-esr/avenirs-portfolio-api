@@ -7,14 +7,12 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "skill_level")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -42,7 +40,7 @@ public class SkillLevelEntity extends PeriodEntity<LocalDate> {
   private Set<SkillLevelTranslationEntity> translations =
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
-  public SkillLevelEntity(
+  private SkillLevelEntity(
       UUID id,
       ESkillLevelStatus status,
       List<TraceEntity> traces,
@@ -57,6 +55,17 @@ public class SkillLevelEntity extends PeriodEntity<LocalDate> {
     this.skill = skill;
     this.startDate = startDate;
     this.endDate = endDate;
+  }
+
+  public static SkillLevelEntity of(
+      UUID id,
+      ESkillLevelStatus status,
+      List<TraceEntity> traces,
+      List<AMSEntity> amses,
+      SkillEntity skillEntity,
+      LocalDate startDate,
+      LocalDate endDate) {
+    return new SkillLevelEntity(id, status, traces, amses, skillEntity, startDate, endDate);
   }
 
   @Override

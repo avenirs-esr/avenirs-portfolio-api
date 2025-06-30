@@ -1,10 +1,12 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.ExternalUserRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.ExternalUserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeExternalUser;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeUser;
 import java.util.*;
@@ -24,19 +26,18 @@ import org.springframework.stereotype.Component;
 public class UserSeeder {
 
   private static final Faker faker = new FakerProvider().call();
-  private static final int DEF_NB_USERS = 20;
+  private static final int DEF_NB_USERS = 100;
   private static final double PROBABILITY_OF_STUDENT = 0.8;
   private static final double PROBABILITY_OF_BOTH = 0.08;
 
-  private int nbUsers = DEF_NB_USERS;
   private final UserRepository userRepository;
   private final ExternalUserRepository externalUserRepository;
+
   private int nbStudents = 0;
   private int nbTeachers = 0;
   private int nbBoth = 0;
 
   private FakeUser createFakeUser() {
-
     if (faker.random().nextDouble() < PROBABILITY_OF_STUDENT) {
       nbStudents++;
       if (faker.random().nextDouble() < PROBABILITY_OF_BOTH) {
@@ -49,27 +50,32 @@ public class UserSeeder {
     return FakeUser.create().withEmail().withTeacher();
   }
 
-  public List<User> seed() {
+  public List<UserEntity> seed() {
     log.info("Seeding Users...");
 
     List<FakeUser> fakeUsers = new ArrayList<>();
-    for (int i = 0; i < nbUsers; i++) {
+    for (int i = 0; i < DEF_NB_USERS; i++) {
       fakeUsers.add(createFakeUser());
     }
 
-    List<User> users = fakeUsers.stream().map(FakeUser::toModel).collect(Collectors.toList());
-    userRepository.saveAll(users);
+    List<UserEntity> users =
+        fakeUsers.stream().map(FakeUser::toEntity).collect(Collectors.toList());
+    userRepository.saveAll(users.stream().map(UserMapper::toDomain).toList());
 
     var externalUsers =
         users.stream()
             .map(
                 user ->
                     FakeExternalUser.of(
-                            user, user.isStudent() ? EUserCategory.STUDENT : EUserCategory.TEACHER)
-                        .toModel())
+                            user,
+                            user.getStudent().isPresent() && user.getStudent().get().isActive()
+                                ? EUserCategory.STUDENT
+                                : EUserCategory.TEACHER)
+                        .toEntity())
             .toList();
 
-    externalUserRepository.saveAll(externalUsers);
+    externalUserRepository.saveAll(
+        externalUsers.stream().map(ExternalUserMapper::toDomain).toList());
 
     var students = fakeUsers.stream().map(FakeUser::getStudent).filter(Objects::nonNull).toList();
     userRepository.saveAllStudents(students);
@@ -81,6 +87,7 @@ public class UserSeeder {
     log.info("✓ {} teachers synced", nbTeachers);
     log.info("✓ {} students and teachers synced", nbBoth);
     log.info("✓ {} users created", users.size());
+
     return users;
   }
 }

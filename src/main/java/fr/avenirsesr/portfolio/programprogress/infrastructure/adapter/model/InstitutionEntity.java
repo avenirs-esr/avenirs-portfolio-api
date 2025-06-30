@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,7 +16,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "institution")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class InstitutionEntity extends AvenirsBaseEntity {
@@ -34,9 +32,13 @@ public class InstitutionEntity extends AvenirsBaseEntity {
   private Set<InstitutionTranslationEntity> translations =
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
-  public InstitutionEntity(UUID id, Set<EPortfolioType> enabledFields) {
+  private InstitutionEntity(UUID id, Set<EPortfolioType> enabledFields) {
     this.setId(id);
     setEnabledFields(enabledFields);
+  }
+
+  public static InstitutionEntity of(UUID id, Set<EPortfolioType> enabledFields) {
+    return new InstitutionEntity(id, enabledFields);
   }
 
   @Transient

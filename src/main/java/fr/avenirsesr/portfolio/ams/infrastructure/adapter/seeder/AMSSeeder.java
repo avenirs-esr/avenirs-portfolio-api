@@ -1,19 +1,20 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEntity;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.AMSDatabaseRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeAMS;
-import fr.avenirsesr.portfolio.programprogress.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.user.domain.model.User;
-import java.util.*;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Component;
 public class AMSSeeder {
 
   private static final FakerProvider faker = new FakerProvider();
-  private static final int DEF_NB_AMS = 20;
+  private static final int NB_AMS = 20;
   private static final int NB_COHORTS_MIN_PER_AMS = 0;
   private static final int NB_COHORTS_MAX_PER_AMS = 8;
 
@@ -38,84 +39,47 @@ public class AMSSeeder {
   private static final int NB_TRACES_MIN_PER_AMS = 0;
   private static final int NB_TRACES_MAX_PER_AMS = 8;
 
-  private int nbAms = DEF_NB_AMS;
-  private List<Cohort> cohorts = List.of();
-  private List<SkillLevel> skillLevels = List.of();
-  private List<Trace> traces = List.of();
-  // TODO: to remove when model is updated.
-  private List<User> users = List.of();
-
-  // TODO: abstraction when translations are fixed.
   private final AMSDatabaseRepository amsRepository;
 
-  public AMSSeeder withCohorts(List<Cohort> cohorts) {
-    this.cohorts = cohorts;
-    return this;
-  }
-
-  public AMSSeeder withSkillLevels(List<SkillLevel> skillLevels) {
-    this.skillLevels = skillLevels;
-    return this;
-  }
-
-  public AMSSeeder withTraces(List<Trace> traces) {
-    this.traces = traces;
-    return this;
-  }
-
-  public AMSSeeder withUsers(List<User> users) {
-    this.users = users;
-    return this;
-  }
-
-  private void checkIfInitialized() throws IllegalStateException {
-    if (cohorts.isEmpty() || skillLevels.isEmpty() || traces.isEmpty() || users.isEmpty()) {
-      log.error(
-          "AMSSeeder is not initialized: withCohorts, withSkillLevels, withTraces and withUsers"
-              + " must be called before seeding");
-      throw new IllegalStateException("AMSSeeder is not initialized");
-    }
-  }
-
-  private Set<Cohort> getRandomCohorts() {
+  private Set<CohortEntity> getRandomCohorts(List<CohortEntity> savedCohorts) {
     int cohortCount =
         faker.call().number().numberBetween(NB_COHORTS_MIN_PER_AMS, NB_COHORTS_MAX_PER_AMS + 1);
 
-    List<Cohort> cohortList = new ArrayList<>(cohorts);
+    List<CohortEntity> cohorts = new ArrayList<>(savedCohorts);
 
-    Collections.shuffle(cohortList);
+    Collections.shuffle(cohorts);
 
-    return new HashSet<>(cohortList.subList(0, cohortCount));
+    return new HashSet<>(cohorts.subList(0, cohortCount));
   }
 
-  private List<Trace> getRandomTraces() {
+  private List<TraceEntity> getRandomTraces(List<TraceEntity> savedTraces) {
     int tracesCount =
         faker.call().number().numberBetween(NB_TRACES_MIN_PER_AMS, NB_TRACES_MAX_PER_AMS + 1);
 
-    List<Trace> traceList = new ArrayList<>(traces);
+    List<TraceEntity> traceList = new ArrayList<>(savedTraces);
 
     Collections.shuffle(traceList);
 
     return new ArrayList<>(traceList.subList(0, tracesCount));
   }
 
-  private List<SkillLevel> getRandomSkillLevels() {
+  private List<SkillLevelEntity> getRandomSkillLevels(List<SkillLevelEntity> savedSkillLevels) {
     int skillLevelCount =
         faker
             .call()
             .number()
             .numberBetween(NB_SKILL_LEVEL_MIN_PER_AMS, NB_SKILL_LEVEL_MAX_PER_AMS + 1);
 
-    List<SkillLevel> skillLevelList = new ArrayList<>(skillLevels);
+    List<SkillLevelEntity> skillLevelList = new ArrayList<>(savedSkillLevels);
 
     Collections.shuffle(skillLevelList);
 
     return new ArrayList<>(skillLevelList.subList(0, skillLevelCount));
   }
 
-  private User getRandomUser() {
-    int userIndex = faker.call().number().numberBetween(0, users.size());
-    return users.get(userIndex);
+  private UserEntity getRandomUser(List<UserEntity> savedUsers) {
+    int userIndex = faker.call().number().numberBetween(0, savedUsers.size());
+    return savedUsers.get(userIndex);
   }
 
   private EAmsStatus getRandomStatus() {
@@ -124,38 +88,32 @@ public class AMSSeeder {
     return statuses[statusIndex];
   }
 
-  private Set<AMSTranslationEntity> generateTranslations(AMS ams) {
-    AMSEntity amsEntity = AMSMapper.fromDomain(ams);
-    return Set.of(
-        new AMSTranslationEntity(UUID.randomUUID(), ELanguage.FRENCH, ams.getTitle(), amsEntity),
-        new AMSTranslationEntity(UUID.randomUUID(), ELanguage.ENGLISH, ams.getTitle(), amsEntity),
-        new AMSTranslationEntity(UUID.randomUUID(), ELanguage.SPANISH, ams.getTitle(), amsEntity));
-  }
-
-  public void seed() {
+  public List<AMSEntity> seed(
+      List<UserEntity> savedUsers,
+      List<SkillLevelEntity> savedSkillLevels,
+      List<TraceEntity> savedTraces,
+      List<CohortEntity> savedCohorts) {
     log.info("Seeding AMS...");
-    checkIfInitialized();
 
     List<AMSEntity> amsList = new ArrayList<>();
 
-    for (int i = 0; i < nbAms; i++) {
-      Set<Cohort> amsCohorts = getRandomCohorts();
-      List<SkillLevel> amsSkillLevels = getRandomSkillLevels();
-      AMS ams = FakeAMS.of(getRandomUser()).toModel();
-      Set<AMSTranslationEntity> amsTranslations = generateTranslations(ams);
-      List<Trace> amsTraces = getRandomTraces();
-      EAmsStatus status = getRandomStatus();
-      ams.setCohorts(amsCohorts);
-      ams.setSkillLevels(amsSkillLevels);
-      ams.setTraces(amsTraces);
-      ams.setStatus(status);
+    for (int i = 0; i < NB_AMS; i++) {
+      AMSEntity ams =
+          FakeAMS.of(getRandomUser(savedUsers))
+              .withCohorts(getRandomCohorts(savedCohorts))
+              .withSkillLevel(getRandomSkillLevels(savedSkillLevels))
+              .withTraces(getRandomTraces(savedTraces))
+              .withStatus(getRandomStatus())
+              .addTranslation(ELanguage.ENGLISH)
+              .addTranslation(ELanguage.SPANISH)
+              .toEntity();
 
-      AMSEntity amsEntity = AMSMapper.fromDomain(ams);
-      amsEntity.setTranslations(amsTranslations);
-      amsList.add(amsEntity);
+      amsList.add(ams);
     }
 
     amsRepository.saveAllEntities(amsList);
     log.info("✓ {} ams created", amsList.size());
+
+    return amsList;
   }
 }

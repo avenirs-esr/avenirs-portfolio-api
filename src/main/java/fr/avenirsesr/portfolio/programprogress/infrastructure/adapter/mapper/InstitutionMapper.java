@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUt
 
 public interface InstitutionMapper {
   static InstitutionEntity fromDomain(Institution institution) {
-    return new InstitutionEntity(institution.getId(), institution.getEnabledFields());
+    return InstitutionEntity.of(institution.getId(), institution.getEnabledFields());
   }
 
   static Institution toDomain(InstitutionEntity entity) {
