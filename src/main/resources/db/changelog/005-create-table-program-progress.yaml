@@ -58,3 +58,15 @@ databaseChangeLog:
             referencedTableName: user
             referencedColumnNames: id
             constraintName: fk_program_progress_user
+
+  - changeSet:
+      id: create-updated-at-trigger-program_progress
+      author: bilelbanelhaq
+      changes:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trigger_set_updated_at_program_progress ON "program_progress";
+              CREATE TRIGGER trigger_set_updated_at_program_progress
+              BEFORE UPDATE ON "program_progress"
+              FOR EACH ROW
+              EXECUTE FUNCTION set_updated_at();

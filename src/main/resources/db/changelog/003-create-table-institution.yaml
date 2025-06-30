@@ -90,3 +90,14 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_institution_translation_institution
             onDelete: CASCADE
+  - changeSet:
+      id: create-updated-at-trigger-institution
+      author: bilelbanelhaq
+      changes:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trigger_set_updated_at_institution ON "institution";
+              CREATE TRIGGER trigger_set_updated_at_institution
+              BEFORE UPDATE ON "institution"
+              FOR EACH ROW
+              EXECUTE FUNCTION set_updated_at();

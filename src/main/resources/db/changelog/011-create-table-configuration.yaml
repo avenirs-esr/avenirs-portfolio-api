@@ -91,3 +91,15 @@ databaseChangeLog:
             splitStatements: true
             sql: ALTER TABLE configuration OWNER TO ${avenirs.admin.role}
             stripComments: true
+
+  - changeSet:
+      id: create-updated-at-trigger-configuration
+      author: bilelbanelhaq
+      changes:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trigger_set_updated_at_configuration ON "configuration";
+              CREATE TRIGGER trigger_set_updated_at_configuration
+              BEFORE UPDATE ON "configuration"
+              FOR EACH ROW
+              EXECUTE FUNCTION set_updated_at();

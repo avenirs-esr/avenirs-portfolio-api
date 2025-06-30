@@ -61,3 +61,14 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_trace_user
             onDelete: CASCADE
+  - changeSet:
+      id: create-updated-at-trigger-trace
+      author: bilelbanelhaq
+      changes:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trigger_set_updated_at_trace ON "trace";
+              CREATE TRIGGER trigger_set_updated_at_trace
+              BEFORE UPDATE ON "trace"
+              FOR EACH ROW
+              EXECUTE FUNCTION set_updated_at();
