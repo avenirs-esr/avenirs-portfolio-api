@@ -26,6 +26,10 @@ public class TranslationUtil {
                 translations.stream()
                     .filter(t -> t.getLanguage().equals(ELanguage.FALLBACK))
                     .findFirst()
-                    .orElseThrow(LanguageException::new));
+                    .orElseThrow(
+                        () ->
+                            new LanguageException(
+                                String.format(
+                                    "Fallback language [%s] not setup", ELanguage.FALLBACK))));
   }
 }
