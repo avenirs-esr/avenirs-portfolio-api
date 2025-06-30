@@ -3,8 +3,6 @@
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
@@ -13,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @MappedSuperclass
-<span class="fc" id="L16">public abstract class AvenirsBaseEntity {</span>
+<span class="fc" id="L14">public abstract class AvenirsBaseEntity {</span>
 
   @Id private UUID id;
 
@@ -29,11 +27,5 @@ import lombok.Setter;
       insertable = false,
       columnDefinition = &quot;TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP&quot;)
   private Instant updatedAt;
-
-  @PrePersist
-  @PreUpdate
-  public void updateTimestamps() {
-<span class="fc" id="L36">    this.updatedAt = Instant.now();</span>
-<span class="fc" id="L37">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

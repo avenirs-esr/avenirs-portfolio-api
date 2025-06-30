@@ -19,7 +19,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,A
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,ExternalUserEntity,0,24,0,0,0,9,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,AMSTranslationEntity,0,15,0,0,0,6,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,SkillEntity,10,17,0,0,1,6,1,1,1,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,AvenirsBaseEntity,0,7,0,0,0,3,0,2,0,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,AvenirsBaseEntity,0,3,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,ProgramEntity,0,23,0,0,0,8,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,ProgramProgressEntity,0,15,0,0,0,6,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.model,InstitutionEntity,0,49,1,3,0,13,1,4,0,3
