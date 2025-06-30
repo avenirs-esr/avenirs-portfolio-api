@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import fr.avenirsesr.portfolio.api.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.api.domain.exception.UserNotAuthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -29,41 +28,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class SecurityConfigTest {
 
-  @Value("${security.permit-all-paths}")
-  private static String permitAllPathsString;
-
-  @TestConfiguration
-  static class TestSecurityConfig {
-
-    @Bean
-    @Primary
-    public HmacAuthenticationFilter testHmacFilter() throws ServletException, IOException {
-      HmacAuthenticationFilter mockFilter = spy(new HmacAuthenticationFilter(permitAllPathsString));
-
-      doAnswer(
-              (Answer<Void>)
-                  invocation -> {
-                    HttpServletRequest request = invocation.getArgument(0);
-                    HttpServletResponse response = invocation.getArgument(1);
-                    FilterChain chain = invocation.getArgument(2);
-
-                    if (mockFilter.shouldNotFilter(request)) {
-                      chain.doFilter(request, response);
-                    } else {
-                      throw new BadCredentialsException("Authentication required");
-                    }
-                    return null;
-                  })
-          .when(mockFilter)
-          .doFilterInternal(
-              any(HttpServletRequest.class),
-              any(HttpServletResponse.class),
-              any(FilterChain.class));
-
-      return mockFilter;
-    }
-  }
-
+  private static final String permitAllPathsString =
+      "/avenirs-portfolio-api/api-docs/**,/avenirs-portfolio-api/swagger-ui/**,/favicon.ico,/actuator/health,/photo/**,/cover/**";
   @Autowired private MockMvc mockMvc;
 
   @BeforeEach
@@ -74,16 +40,15 @@ class SecurityConfigTest {
   @Test
   void shouldRequireAuthenticationForProtectedEndpoints() {
     org.junit.jupiter.api.Assertions.assertThrows(
-        org.springframework.security.authentication.BadCredentialsException.class,
+        UserNotAuthorizedException.class,
         () ->
             mockMvc.perform(
                 get("/api/some-protected-endpoint")
-                    .header("Accept-Language", ELanguage.FRENCH.getCode())
-                    .header("X-Context-Kid", "TEST_KEY")
+                    .header("X-Context-Kid", "v1")
                     .header("X-Context-Signature", "test-signature")
                     .header(
                         "X-Signed-Context",
-                        "{\"sub\":\"test-user\",\"exp\":\"2099-01-01T00:00:00Z\"}")));
+                        "{\"sub\":\"85139402-8a4a-4e7b-806e-9d7d5a7252cd\",\"exp\":\"2099-01-01T00:00:00Z\"}")));
   }
 
   @Test
@@ -123,6 +88,38 @@ class SecurityConfigTest {
               "Test failed for path: " + cleanPath + " - " + e.getMessage(), e);
         }
       }
+    }
+  }
+
+  @TestConfiguration
+  static class TestSecurityConfig {
+
+    @Bean
+    @Primary
+    public HmacAuthenticationFilter testHmacFilter() throws ServletException, IOException {
+      HmacAuthenticationFilter mockFilter = spy(new HmacAuthenticationFilter(permitAllPathsString));
+
+      doAnswer(
+              (Answer<Void>)
+                  invocation -> {
+                    HttpServletRequest request = invocation.getArgument(0);
+                    HttpServletResponse response = invocation.getArgument(1);
+                    FilterChain chain = invocation.getArgument(2);
+
+                    if (mockFilter.shouldNotFilter(request)) {
+                      chain.doFilter(request, response);
+                    } else {
+                      throw new BadCredentialsException("Authentication required");
+                    }
+                    return null;
+                  })
+          .when(mockFilter)
+          .doFilterInternal(
+              any(HttpServletRequest.class),
+              any(HttpServletResponse.class),
+              any(FilterChain.class));
+
+      return mockFilter;
     }
   }
 }

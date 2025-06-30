@@ -14,8 +14,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -52,9 +50,12 @@ public class SecurityConfig {
             exception -> exception.authenticationEntryPoint(customAuthenticationEntryPoint));
 
     if (securityEnabled) {
-      http.addFilterBefore(new HmacAuthenticationFilter(Arrays.toString(permitAllPaths)), UsernamePasswordAuthenticationFilter.class);
+      http.addFilterBefore(
+          new HmacAuthenticationFilter(String.join(",", permitAllPaths)),
+          UsernamePasswordAuthenticationFilter.class);
     } else {
-      http.addFilterBefore(new DevAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+      http.addFilterBefore(
+          new DevAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     return http.build();
