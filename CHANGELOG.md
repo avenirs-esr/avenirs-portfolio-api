@@ -6,9 +6,9 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
-## [v1.0.4] - 2025-06-30
+## [v1.1.0] - 2025-06-30
 
-- Added language management using a RequestContext.
+- Add CORS configuration.
 
 ## [v1.0.3] - 2025-06-26
 
