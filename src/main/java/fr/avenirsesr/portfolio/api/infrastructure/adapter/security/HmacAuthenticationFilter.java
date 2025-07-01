@@ -19,7 +19,6 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -27,8 +26,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 public class HmacAuthenticationFilter extends OncePerRequestFilter {
 
-  @Value("${security.permit-all-paths}")
-  private String permitAllPathsString;
+  private final String permitAllPathsString;
 
   private List<String> permitAllPathsList;
 
