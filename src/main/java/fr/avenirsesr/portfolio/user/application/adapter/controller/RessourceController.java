@@ -5,6 +5,10 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.input.RessourceService;
 import fr.avenirsesr.portfolio.user.domain.utils.UserUtils;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import java.io.IOException;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -63,5 +67,16 @@ public class RessourceController {
     }
 
     return MediaType.IMAGE_JPEG;
+  }
+
+  @GetMapping("/user-categories")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Liste des catégories d'utilisateur",
+      content =
+          @Content(
+              array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/UserCategory"))))
+  public List<EUserCategory> getUserCategories() {
+    return List.of(EUserCategory.values());
   }
 }
