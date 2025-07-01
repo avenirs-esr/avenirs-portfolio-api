@@ -76,7 +76,7 @@ public class ProgramProgressDatabaseRepository
 <span class="nc" id="L76">    return jpaRepository.findAllByStudentIdAndLang(student.getId()).stream()</span>
 <span class="nc" id="L77">        .map(</span>
             programProgressDTO -&gt;
-<span class="nc" id="L79">                ProgramProgressMapper.toDomainWithoutSkills(programProgressDTO, student))</span>
+<span class="nc" id="L79">                ProgramProgressMapper.toDomainWithoutRecursion(programProgressDTO, student))</span>
 <span class="nc" id="L80">        .toList();</span>
   }
 

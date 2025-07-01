@@ -2,7 +2,6 @@
 
 import java.util.Arrays;
 import java.util.Collections;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,15 +14,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-<span class="fc" id="L18">@Slf4j</span>
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
   private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
-  @Value(&quot;${security.disabled:false}&quot;)
-  private boolean securityDisabled;
+  private final HmacAuthenticationFilter hmacAuthenticationFilter;
 
   @Value(&quot;${security.permit-all-paths}&quot;)
   private String[] permitAllPaths;
@@ -37,42 +33,36 @@ public class SecurityConfig {
   @Value(&quot;${cors.allowed-headers}&quot;)
   private String allowedHeadersString;
 
-<span class="fc" id="L40">  public SecurityConfig(CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {</span>
-<span class="fc" id="L41">    this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;</span>
-<span class="fc" id="L42">  }</span>
+  public SecurityConfig(
+      CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
+<span class="fc" id="L38">      HmacAuthenticationFilter hmacAuthenticationFilter) {</span>
+<span class="fc" id="L39">    this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;</span>
+<span class="fc" id="L40">    this.hmacAuthenticationFilter = hmacAuthenticationFilter;</span>
+<span class="fc" id="L41">  }</span>
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-<span class="fc" id="L46">    http.csrf(AbstractHttpConfigurer::disable)</span>
-<span class="fc" id="L47">        .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
-<span class="fc" id="L48">        .authorizeHttpRequests(</span>
-<span class="fc" id="L49">            authz -&gt; authz.requestMatchers(permitAllPaths).permitAll().anyRequest().authenticated())</span>
-<span class="fc" id="L50">        .exceptionHandling(</span>
-<span class="fc" id="L51">            exception -&gt; exception.authenticationEntryPoint(customAuthenticationEntryPoint));</span>
+<span class="fc" id="L45">    http.csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L46">        .cors(cors -&gt; cors.configurationSource(corsConfigurationSource()))</span>
+<span class="fc" id="L47">        .authorizeHttpRequests(</span>
+<span class="fc" id="L48">            authz -&gt; authz.requestMatchers(permitAllPaths).permitAll().anyRequest().authenticated())</span>
+<span class="fc" id="L49">        .exceptionHandling(</span>
+<span class="fc" id="L50">            exception -&gt; exception.authenticationEntryPoint(customAuthenticationEntryPoint))</span>
+<span class="fc" id="L51">        .addFilterBefore(hmacAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);</span>
 
-<span class="pc bpc" id="L53" title="1 of 2 branches missed.">    if (securityDisabled) {</span>
-<span class="nc" id="L54">      log.warn(&quot;Security is disabled&quot;);</span>
-<span class="nc" id="L55">      http.addFilterBefore(</span>
-          new DevAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-    } else {
-<span class="fc" id="L58">      http.addFilterBefore(</span>
-<span class="fc" id="L59">          new HmacAuthenticationFilter(String.join(&quot;,&quot;, permitAllPaths)),</span>
-          UsernamePasswordAuthenticationFilter.class);
-    }
-
-<span class="fc" id="L63">    return http.build();</span>
+<span class="fc" id="L53">    return http.build();</span>
   }
 
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
-<span class="fc" id="L68">    CorsConfiguration configuration = new CorsConfiguration();</span>
-<span class="fc" id="L69">    configuration.setAllowedOrigins(Collections.singletonList(allowedOrigins));</span>
-<span class="fc" id="L70">    configuration.setAllowedMethods(Arrays.asList(allowedMethodsString.split(&quot;,&quot;)));</span>
-<span class="fc" id="L71">    configuration.setAllowedHeaders(Arrays.asList(allowedHeadersString.split(&quot;,&quot;)));</span>
-<span class="fc" id="L72">    configuration.setAllowCredentials(true);</span>
-<span class="fc" id="L73">    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
-<span class="fc" id="L74">    source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
-<span class="fc" id="L75">    return source;</span>
+<span class="fc" id="L58">    CorsConfiguration configuration = new CorsConfiguration();</span>
+<span class="fc" id="L59">    configuration.setAllowedOrigins(Collections.singletonList(allowedOrigins));</span>
+<span class="fc" id="L60">    configuration.setAllowedMethods(Arrays.asList(allowedMethodsString.split(&quot;,&quot;)));</span>
+<span class="fc" id="L61">    configuration.setAllowedHeaders(Arrays.asList(allowedHeadersString.split(&quot;,&quot;)));</span>
+<span class="fc" id="L62">    configuration.setAllowCredentials(true);</span>
+<span class="fc" id="L63">    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="fc" id="L64">    source.registerCorsConfiguration(&quot;/**&quot;, configuration);</span>
+<span class="fc" id="L65">    return source;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
