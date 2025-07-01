@@ -33,7 +33,7 @@ public interface AMSMapper {
 
   static AMS toDomain(AMSEntity entity) {
     AMS ams = toDomainWithoutRecursion(entity);
-    ams.setTraces(entity.getTraces().stream().map(TraceMapper::toDomainRecursion).toList());
+    ams.setTraces(entity.getTraces().stream().map(TraceMapper::toDomainWithoutRecursion).toList());
     ams.setSkillLevels(
         entity.getSkillLevels().stream()
             .map(SkillLevelMapper::toDomainWithoutRecursion)

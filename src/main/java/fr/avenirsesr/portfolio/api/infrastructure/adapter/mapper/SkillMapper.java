@@ -40,4 +40,16 @@ public interface SkillMapper {
 
     return skill;
   }
+
+  static Skill toDomainWithoutRecursion(SkillEntity skillEntity, ProgramProgress programProgress) {
+    SkillTranslationEntity skillTranslationEntity =
+        TranslationUtil.getTranslation(skillEntity.getTranslations());
+    var skill = Skill.toDomain(skillEntity.getId(), skillTranslationEntity.getName(), Set.of());
+    skill.setProgramProgress(programProgress);
+    return skill;
+  }
+
+  static Skill toDomainWithoutRecursion(SkillEntity skillEntity) {
+    return toDomainWithoutRecursion(skillEntity, null);
+  }
 }

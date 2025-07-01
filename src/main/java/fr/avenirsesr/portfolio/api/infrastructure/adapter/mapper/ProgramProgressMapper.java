@@ -42,7 +42,7 @@ public interface ProgramProgressMapper {
     return programProgress;
   }
 
-  static ProgramProgress toDomainWithoutSkills(
+  static ProgramProgress toDomainWithoutRecursion(
       ProgramProgressSummaryDTO programProgressSummaryDTO, Student student) {
     return ProgramProgress.toDomain(
         programProgressSummaryDTO.id(),

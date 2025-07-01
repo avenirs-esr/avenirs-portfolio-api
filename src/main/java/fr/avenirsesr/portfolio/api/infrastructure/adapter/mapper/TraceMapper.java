@@ -30,13 +30,13 @@ public interface TraceMapper {
   }
 
   static Trace toDomain(TraceEntity traceEntity) {
-    Trace trace = toDomainRecursion(traceEntity);
+    Trace trace = toDomainWithoutRecursion(traceEntity);
     trace.setAmses(
         traceEntity.getAmses().stream().map(AMSMapper::toDomainWithoutRecursion).toList());
     return trace;
   }
 
-  static Trace toDomainRecursion(TraceEntity traceEntity) {
+  static Trace toDomainWithoutRecursion(TraceEntity traceEntity) {
     return Trace.toDomain(
         traceEntity.getId(),
         UserMapper.toDomain(traceEntity.getUser()),
