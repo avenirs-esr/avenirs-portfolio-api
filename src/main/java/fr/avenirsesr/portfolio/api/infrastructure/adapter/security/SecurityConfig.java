@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.api.infrastructure.adapter.security;
 
 import java.util.Arrays;
 import java.util.Collections;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,14 +15,15 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
   private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-  @Value("${security.enabled:true}")
-  private boolean securityEnabled;
+  @Value("${security.disabled:false}")
+  private boolean securityDisabled;
 
   @Value("${security.permit-all-paths}")
   private String[] permitAllPaths;
@@ -35,8 +37,7 @@ public class SecurityConfig {
   @Value("${cors.allowed-headers}")
   private String allowedHeadersString;
 
-  public SecurityConfig(
-      CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
+  public SecurityConfig(CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
     this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
   }
 
@@ -49,13 +50,14 @@ public class SecurityConfig {
         .exceptionHandling(
             exception -> exception.authenticationEntryPoint(customAuthenticationEntryPoint));
 
-    if (securityEnabled) {
+    if (securityDisabled) {
+      log.warn("Security is disabled");
+      http.addFilterBefore(
+          new DevAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+    } else {
       http.addFilterBefore(
           new HmacAuthenticationFilter(String.join(",", permitAllPaths)),
           UsernamePasswordAuthenticationFilter.class);
-    } else {
-      http.addFilterBefore(
-          new DevAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     return http.build();
