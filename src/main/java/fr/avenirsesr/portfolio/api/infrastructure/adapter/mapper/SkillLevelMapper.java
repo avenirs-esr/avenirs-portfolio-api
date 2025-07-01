@@ -34,7 +34,7 @@ public interface SkillLevelMapper {
         skillLevelTranslationEntity.getName(),
         skillLevelTranslationEntity.getDescription(),
         skillLevelEntity.getStatus(),
-        skillLevelEntity.getTraces().stream().map(TraceMapper::toDomainRecursion).toList(),
+        skillLevelEntity.getTraces().stream().map(TraceMapper::toDomainWithoutRecursion).toList(),
         List.of(),
         skill,
         skillLevelEntity.getStartDate(),
