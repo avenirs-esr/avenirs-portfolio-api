@@ -8,10 +8,9 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.application.adapter.controller,RessourceController,74,0,6,0,18,0,7,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.seeder.translation,InstitutionTranslation,9,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.security,CustomAuthenticationEntryPoint,0,30,0,0,0,8,0,2,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.security,HmacAuthenticationFilter,20,169,5,15,0,44,5,12,0,7
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.security,DevAuthenticationFilter,64,0,12,0,14,0,10,0,4,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.security,HmacAuthenticationFilter,20,166,5,15,0,42,5,12,0,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.security,HmacAuthenticationToken,0,15,0,0,0,6,0,3,0,3
-avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.security,SecurityConfig,7,52,1,1,1,12,1,4,0,4
+avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.adapter.security,SecurityConfig,0,90,0,0,0,20,0,6,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.context,RequestContextFilter,0,39,0,2,0,11,0,4,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.context,RequestContext,3,16,0,0,1,6,1,4,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.api.infrastructure.context,RequestData,0,6,0,0,0,1,0,1,0,1

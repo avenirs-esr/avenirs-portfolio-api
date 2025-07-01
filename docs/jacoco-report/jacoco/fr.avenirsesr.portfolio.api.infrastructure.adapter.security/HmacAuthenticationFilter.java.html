@@ -22,9 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-<span class="fc" id="L27">@Slf4j</span>
+<span class="fc" id="L28">@Slf4j</span>
+@Component
 public class HmacAuthenticationFilter extends OncePerRequestFilter {
 
   @Value(&quot;${security.permit-all-paths}&quot;)
@@ -32,9 +34,7 @@ public class HmacAuthenticationFilter extends OncePerRequestFilter {
 
   private List&lt;String&gt; permitAllPathsList;
 
-<span class="fc" id="L35">  public HmacAuthenticationFilter(String permitAllPathsString) {</span>
-<span class="fc" id="L36">    this.permitAllPathsString = permitAllPathsString;</span>
-<span class="fc" id="L37">  }</span>
+<span class="fc" id="L37">  public HmacAuthenticationFilter() {}</span>
 
   @Override
   protected void doFilterInternal(
