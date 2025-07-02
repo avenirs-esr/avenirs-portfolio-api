@@ -15,7 +15,6 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,7 +23,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = &quot;trace&quot;)
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -59,7 +57,7 @@ public class TraceEntity extends AvenirsBaseEntity {
 
   @Column private Instant deletedAt;
 
-  public TraceEntity(
+  private TraceEntity(
       UUID id,
       UserEntity user,
       String title,
@@ -69,17 +67,32 @@ public class TraceEntity extends AvenirsBaseEntity {
       boolean isGroup,
       Instant createdAt,
       Instant updatedAt,
-<span class="fc" id="L72">      Instant deletedAt) {</span>
-<span class="fc" id="L73">    this.setId(id);</span>
-<span class="fc" id="L74">    this.user = user;</span>
-<span class="fc" id="L75">    this.title = title;</span>
-<span class="fc" id="L76">    this.language = language;</span>
-<span class="fc" id="L77">    this.skillLevels = skillLevels;</span>
-<span class="fc" id="L78">    this.amses = amses;</span>
-<span class="fc" id="L79">    this.isGroup = isGroup;</span>
-<span class="fc" id="L80">    this.setCreatedAt(createdAt);</span>
-<span class="fc" id="L81">    this.setUpdatedAt(updatedAt);</span>
-<span class="fc" id="L82">    this.setDeletedAt(deletedAt);</span>
-<span class="fc" id="L83">  }</span>
+<span class="fc" id="L70">      Instant deletedAt) {</span>
+<span class="fc" id="L71">    this.setId(id);</span>
+<span class="fc" id="L72">    this.user = user;</span>
+<span class="fc" id="L73">    this.title = title;</span>
+<span class="fc" id="L74">    this.language = language;</span>
+<span class="fc" id="L75">    this.skillLevels = skillLevels;</span>
+<span class="fc" id="L76">    this.amses = amses;</span>
+<span class="fc" id="L77">    this.isGroup = isGroup;</span>
+<span class="fc" id="L78">    this.setCreatedAt(createdAt);</span>
+<span class="fc" id="L79">    this.setUpdatedAt(updatedAt);</span>
+<span class="fc" id="L80">    this.setDeletedAt(deletedAt);</span>
+<span class="fc" id="L81">  }</span>
+
+  public static TraceEntity of(
+      UUID id,
+      UserEntity user,
+      String title,
+      ELanguage language,
+      List&lt;SkillLevelEntity&gt; skillLevels,
+      List&lt;AMSEntity&gt; amses,
+      boolean isGroup,
+      Instant createdAt,
+      Instant updatedAt,
+      Instant deletedAt) {
+<span class="fc" id="L94">    return new TraceEntity(</span>
+        id, user, title, language, skillLevels, amses, isGroup, createdAt, updatedAt, deletedAt);
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

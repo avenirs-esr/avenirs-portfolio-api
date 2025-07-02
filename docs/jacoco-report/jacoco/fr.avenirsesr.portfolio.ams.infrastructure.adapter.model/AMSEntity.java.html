@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +25,6 @@ import lombok.Setter;
 @Entity
 @Table(name = &quot;ams&quot;)
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 public class AMSEntity extends PeriodEntity&lt;Instant&gt; {
@@ -52,7 +50,7 @@ public class AMSEntity extends PeriodEntity&lt;Instant&gt; {
       inverseJoinColumns = @JoinColumn(name = &quot;trace_id&quot;))
   private List&lt;TraceEntity&gt; traces;
 
-<span class="fc" id="L55">  @OneToMany(</span>
+<span class="fc" id="L53">  @OneToMany(</span>
       mappedBy = &quot;ams&quot;,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -67,7 +65,7 @@ public class AMSEntity extends PeriodEntity&lt;Instant&gt; {
       inverseJoinColumns = @JoinColumn(name = &quot;cohort_id&quot;))
   private Set&lt;CohortEntity&gt; cohorts;
 
-  public AMSEntity(
+  private AMSEntity(
       UUID id,
       UserEntity user,
       EAmsStatus status,
@@ -75,15 +73,27 @@ public class AMSEntity extends PeriodEntity&lt;Instant&gt; {
       Instant endDate,
       Set&lt;SkillLevelEntity&gt; skillLevels,
       Set&lt;CohortEntity&gt; cohorts,
-<span class="fc" id="L78">      Set&lt;TraceEntity&gt; traces) {</span>
-<span class="fc" id="L79">    setId(id);</span>
-<span class="fc" id="L80">    this.user = user;</span>
-<span class="fc" id="L81">    setStartDate(startDate);</span>
-<span class="fc" id="L82">    setEndDate(endDate);</span>
-<span class="fc" id="L83">    this.skillLevels = List.copyOf(skillLevels);</span>
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">    this.cohorts = Set.copyOf(cohorts == null ? Set.of() : cohorts);</span>
-<span class="fc" id="L85">    this.traces = List.copyOf(traces);</span>
-<span class="fc" id="L86">    this.status = status;</span>
-<span class="fc" id="L87">  }</span>
+<span class="fc" id="L76">      Set&lt;TraceEntity&gt; traces) {</span>
+<span class="fc" id="L77">    setId(id);</span>
+<span class="fc" id="L78">    this.user = user;</span>
+<span class="fc" id="L79">    setStartDate(startDate);</span>
+<span class="fc" id="L80">    setEndDate(endDate);</span>
+<span class="fc" id="L81">    this.skillLevels = List.copyOf(skillLevels);</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">    this.cohorts = Set.copyOf(cohorts == null ? Set.of() : cohorts);</span>
+<span class="fc" id="L83">    this.traces = List.copyOf(traces);</span>
+<span class="fc" id="L84">    this.status = status;</span>
+<span class="fc" id="L85">  }</span>
+
+  public static AMSEntity of(
+      UUID id,
+      UserEntity user,
+      EAmsStatus status,
+      Instant startDate,
+      Instant endDate,
+      Set&lt;SkillLevelEntity&gt; skillLevels,
+      Set&lt;CohortEntity&gt; cohorts,
+      Set&lt;TraceEntity&gt; traces) {
+<span class="fc" id="L96">    return new AMSEntity(id, user, status, startDate, endDate, skillLevels, cohorts, traces);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -43,7 +43,7 @@ public class CohortEntity extends AvenirsBaseEntity {
   @ManyToMany(mappedBy = &quot;cohorts&quot;)
   private Set&lt;AMSEntity&gt; amsEntities;
 
-  public CohortEntity(
+  private CohortEntity(
       UUID id,
       String name,
       String description,
@@ -57,5 +57,15 @@ public class CohortEntity extends AvenirsBaseEntity {
 <span class="fc" id="L57">    this.programProgress = programProgress;</span>
 <span class="fc" id="L58">    this.amsEntities = amsEntities;</span>
 <span class="fc" id="L59">  }</span>
+
+  public static CohortEntity of(
+      UUID id,
+      String name,
+      String description,
+      Set&lt;UserEntity&gt; users,
+      ProgramProgressEntity programProgress,
+      Set&lt;AMSEntity&gt; amsEntities) {
+<span class="fc" id="L68">    return new CohortEntity(id, name, description, users, programProgress, amsEntities);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

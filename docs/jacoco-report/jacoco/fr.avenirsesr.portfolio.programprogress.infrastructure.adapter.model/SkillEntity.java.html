@@ -5,14 +5,12 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = &quot;skill&quot;)
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -24,7 +22,7 @@ public class SkillEntity extends AvenirsBaseEntity {
   @JoinColumn(name = &quot;program_progress_id&quot;)
   private ProgramProgressEntity programProgress;
 
-<span class="fc" id="L27">  @OneToMany(</span>
+<span class="fc" id="L25">  @OneToMany(</span>
       mappedBy = &quot;skill&quot;,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -32,16 +30,21 @@ public class SkillEntity extends AvenirsBaseEntity {
   private Set&lt;SkillTranslationEntity&gt; translations =
       new HashSet&lt;&gt;(); // TODO: Remove this SET and get it in queries
 
-  public SkillEntity(
-<span class="fc" id="L36">      UUID id, Set&lt;SkillLevelEntity&gt; skillLevels, ProgramProgressEntity programProgress) {</span>
-<span class="fc" id="L37">    this.setId(id);</span>
-<span class="fc" id="L38">    this.skillLevels = skillLevels;</span>
-<span class="fc" id="L39">    this.programProgress = programProgress;</span>
-<span class="fc" id="L40">  }</span>
+  private SkillEntity(
+<span class="fc" id="L34">      UUID id, Set&lt;SkillLevelEntity&gt; skillLevels, ProgramProgressEntity programProgress) {</span>
+<span class="fc" id="L35">    this.setId(id);</span>
+<span class="fc" id="L36">    this.skillLevels = skillLevels;</span>
+<span class="fc" id="L37">    this.programProgress = programProgress;</span>
+<span class="fc" id="L38">  }</span>
+
+  public static SkillEntity of(
+      UUID id, Set&lt;SkillLevelEntity&gt; skillLevels, ProgramProgressEntity programProgress) {
+<span class="fc" id="L42">    return new SkillEntity(id, skillLevels, programProgress);</span>
+  }
 
   @Override
   public String toString() {
-<span class="nc" id="L44">    return &quot;SkillEntity[%s]&quot;.formatted(this.getId());</span>
+<span class="nc" id="L47">    return &quot;SkillEntity[%s]&quot;.formatted(this.getId());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
