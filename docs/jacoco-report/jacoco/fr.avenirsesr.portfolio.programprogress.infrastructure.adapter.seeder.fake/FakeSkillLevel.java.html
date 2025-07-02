@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FakeSkillLevel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake</a> &gt; <span class="el_source">FakeSkillLevel.java</span></div><h1>FakeSkillLevel.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake;
+
+import fr.avenirsesr.portfolio.programprogress.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.programprogress.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.UUID;
+
+public class FakeSkillLevel {
+<span class="nc" id="L12">  private static final FakerProvider faker = new FakerProvider();</span>
+  private final SkillLevel skillLevel;
+
+<span class="nc" id="L15">  private FakeSkillLevel(SkillLevel skillLevel) {</span>
+<span class="nc" id="L16">    this.skillLevel = skillLevel;</span>
+<span class="nc" id="L17">  }</span>
+
+  public static FakeSkillLevel create() {
+<span class="nc" id="L20">    return new FakeSkillLevel(</span>
+<span class="nc" id="L21">            SkillLevel.create(</span>
+<span class="nc" id="L22">                UUID.fromString(faker.call().internet().uuid()),</span>
+<span class="nc" id="L23">                &quot;Niv. %s&quot;.formatted(faker.call().lorem().character()),</span>
+<span class="nc" id="L24">                faker.call().lorem().sentence()))</span>
+<span class="nc" id="L25">        .withStatus(ESkillLevelStatus.NOT_STARTED);</span>
+  }
+
+  public static FakeSkillLevel of(SkillLevel skillLevel, ELanguage language) {
+<span class="nc" id="L29">    return new FakeSkillLevel(</span>
+<span class="nc" id="L30">        SkillLevel.create(</span>
+<span class="nc" id="L31">            skillLevel.getId(),</span>
+<span class="nc" id="L32">            String.format(&quot;%s %s&quot;, skillLevel.getName(), language.getCode()),</span>
+<span class="nc" id="L33">            String.format(&quot;%s %s&quot;, skillLevel.getDescription(), language.getCode())));</span>
+  }
+
+  public FakeSkillLevel withStatus(ESkillLevelStatus status) {
+<span class="nc" id="L37">    LocalDate pastStartDate = LocalDate.now().minus(Period.ofYears(2));</span>
+<span class="nc" id="L38">    LocalDate pastEndDate = LocalDate.now().minus(Period.ofYears(1));</span>
+<span class="nc" id="L39">    LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));</span>
+<span class="nc" id="L40">    LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));</span>
+<span class="nc" id="L41">    skillLevel.setStatus(status);</span>
+<span class="nc bnc" id="L42" title="All 4 branches missed.">    switch (status) {</span>
+      case VALIDATED, FAILED -&gt; {
+<span class="nc" id="L44">        skillLevel.setStartDate(pastStartDate);</span>
+<span class="nc" id="L45">        skillLevel.setEndDate(pastEndDate);</span>
+<span class="nc" id="L46">      }</span>
+      case UNDER_ACQUISITION, UNDER_REVIEW -&gt; {
+<span class="nc" id="L48">        skillLevel.setStartDate(pastStartDate);</span>
+<span class="nc" id="L49">        skillLevel.setEndDate(futureEndDate);</span>
+<span class="nc" id="L50">      }</span>
+      case TO_BE_EVALUATED, NOT_STARTED -&gt; {
+<span class="nc" id="L52">        skillLevel.setStartDate(futureStartDate);</span>
+<span class="nc" id="L53">        skillLevel.setEndDate(futureEndDate);</span>
+      }
+    }
+<span class="nc" id="L56">    return this;</span>
+  }
+
+  public SkillLevel toModel() {
+<span class="nc" id="L60">    return skillLevel;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

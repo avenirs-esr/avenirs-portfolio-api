@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.trace.application.adapter.controller</a> &gt; <span class="el_source">TraceController.java</span></div><h1>TraceController.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.trace.application.adapter.controller;
+
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.UnassociatedTracesSummaryDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
+import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceViewMapper;
+import fr.avenirsesr.portfolio.trace.application.adapter.mapper.UnassociatedTracesSummaryMapper;
+import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesResponse;
+import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesViewResponse;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
+import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceStatus;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import java.security.Principal;
+import java.util.List;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+<span class="fc" id="L29">@Slf4j</span>
+@AllArgsConstructor
+@RestController
+@RequestMapping(&quot;/me/traces&quot;)
+public class TraceController {
+  private final UserService userService;
+  private final TraceService traceService;
+
+  @GetMapping(&quot;/overview&quot;)
+  public ResponseEntity&lt;List&lt;TraceOverviewDTO&gt;&gt; getTraceOverview(Principal principal) {
+<span class="fc" id="L39">    log.debug(&quot;Received request to trace overview of user [{}]&quot;, principal.getName());</span>
+<span class="fc" id="L40">    User user = getUser(principal.getName());</span>
+
+<span class="fc" id="L42">    List&lt;Trace&gt; traces = traceService.lastTracesOf(user);</span>
+
+<span class="fc" id="L44">    List&lt;TraceOverviewDTO&gt; response =</span>
+<span class="fc" id="L45">        traces.stream()</span>
+<span class="fc" id="L46">            .map(trace -&gt; TraceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))</span>
+<span class="fc" id="L47">            .toList();</span>
+
+<span class="fc" id="L49">    return ResponseEntity.ok(response);</span>
+  }
+
+  @GetMapping(&quot;/view&quot;)
+  public ResponseEntity&lt;TracesViewResponse&gt; getTracesView(
+      Principal principal,
+      @RequestParam(required = false) ETraceStatus status,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+<span class="nc" id="L58">    log.debug(&quot;Received request to trace view of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L59">    User user = getUser(principal.getName());</span>
+
+<span class="nc" id="L61">    TracesViewResponse tracesViewResponse = null;</span>
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">    if (status == ETraceStatus.UNASSOCIATED) {</span>
+<span class="nc" id="L64">      TraceView tracesView = traceService.getUnassociatedTraces(user, page, pageSize);</span>
+
+<span class="nc" id="L66">      tracesViewResponse =</span>
+          new TracesViewResponse(
+              new TracesResponse(
+<span class="nc" id="L69">                  tracesView.traces().stream()</span>
+<span class="nc" id="L70">                      .map(trace -&gt; TraceViewMapper.toDTO(trace, ETraceStatus.UNASSOCIATED))</span>
+<span class="nc" id="L71">                      .toList(),</span>
+<span class="nc" id="L72">                  tracesView.criticalCount()),</span>
+<span class="nc" id="L73">              tracesView.page());</span>
+    }
+
+<span class="nc" id="L76">    return ResponseEntity.ok(tracesViewResponse);</span>
+  }
+
+  @DeleteMapping(&quot;/{traceId}&quot;)
+  public ResponseEntity&lt;String&gt; deleteTrace(Principal principal, @PathVariable UUID traceId) {
+<span class="nc" id="L81">    log.debug(&quot;Received request to trace overview of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L82">    User user = getUser(principal.getName());</span>
+
+<span class="nc" id="L84">    traceService.deleteById(user, traceId);</span>
+
+<span class="nc" id="L86">    return ResponseEntity.ok(&quot;Resource successfully deleted.&quot;);</span>
+  }
+
+  private User getUser(String id) {
+<span class="fc" id="L90">    UUID userId = UUID.fromString(id);</span>
+<span class="fc" id="L91">    return userService.getProfile(userId);</span>
+  }
+
+  @GetMapping(&quot;/unassociated/summary&quot;)
+  public ResponseEntity&lt;UnassociatedTracesSummaryDTO&gt; getTracesUnassociatedSummary(
+      Principal principal) {
+<span class="nc" id="L97">    log.debug(&quot;Received request to trace view of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L98">    User user = getUser(principal.getName());</span>
+
+<span class="nc" id="L100">    return ResponseEntity.ok(</span>
+<span class="nc" id="L101">        UnassociatedTracesSummaryMapper.toDTO(traceService.getUnassociatedTracesSummary(user)));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

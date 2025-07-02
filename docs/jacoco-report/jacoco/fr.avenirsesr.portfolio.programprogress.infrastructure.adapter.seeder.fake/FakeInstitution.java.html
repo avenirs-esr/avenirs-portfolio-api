@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FakeInstitution.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake</a> &gt; <span class="el_source">FakeInstitution.java</span></div><h1>FakeInstitution.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake;
+
+import fr.avenirsesr.portfolio.programprogress.domain.model.Institution;
+import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake.translation.InstitutionTranslation;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+public class FakeInstitution {
+<span class="nc" id="L14">  private static final FakerProvider faker = new FakerProvider();</span>
+  private final Institution institution;
+  private final List&lt;InstitutionTranslation&gt; translations;
+
+<span class="nc" id="L18">  private FakeInstitution(Institution institution) {</span>
+<span class="nc" id="L19">    this.institution = institution;</span>
+<span class="nc" id="L20">    this.translations = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L21">  }</span>
+
+  public static FakeInstitution create() {
+<span class="nc" id="L24">    var fakeInstitution =</span>
+        new FakeInstitution(
+<span class="nc" id="L26">            Institution.create(</span>
+<span class="nc" id="L27">                UUID.fromString(faker.call().internet().uuid()), faker.call().university().name()));</span>
+<span class="nc" id="L28">    fakeInstitution.addTranslation(ELanguage.FRENCH);</span>
+<span class="nc" id="L29">    return fakeInstitution;</span>
+  }
+
+  public FakeInstitution addTranslation(ELanguage language) {
+<span class="nc" id="L33">    translations.add(</span>
+        new InstitutionTranslation(
+<span class="nc" id="L35">            language, String.format(&quot;%s %s&quot;, institution.getName(), language.getCode())));</span>
+
+<span class="nc" id="L37">    return this;</span>
+  }
+
+  public FakeInstitution withEnabledFiled(Set&lt;EPortfolioType&gt; enabledFields) {
+<span class="nc" id="L41">    institution.setEnabledFields(enabledFields);</span>
+<span class="nc" id="L42">    return this;</span>
+  }
+
+  public Institution toModel() {
+<span class="nc" id="L46">    return institution;</span>
+  }
+
+  public List&lt;InstitutionTranslation&gt; getTranslations() {
+<span class="nc" id="L50">    return translations;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

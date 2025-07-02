@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FakeProgram.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake</a> &gt; <span class="el_source">FakeProgram.java</span></div><h1>FakeProgram.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake;
+
+import fr.avenirsesr.portfolio.programprogress.domain.model.Institution;
+import fr.avenirsesr.portfolio.programprogress.domain.model.Program;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.EDurationUnit;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import java.util.UUID;
+
+public class FakeProgram {
+<span class="nc" id="L10">  private static final FakerProvider faker = new FakerProvider();</span>
+  private final Program program;
+
+<span class="nc" id="L13">  private FakeProgram(Program program) {</span>
+<span class="nc" id="L14">    this.program = program;</span>
+<span class="nc" id="L15">  }</span>
+
+  private static EDurationUnit randomDurationUnit() {
+<span class="nc" id="L18">    return faker.call().options().option(EDurationUnit.values());</span>
+  }
+
+  public static FakeProgram of(Institution institution) {
+<span class="nc" id="L22">    return new FakeProgram(</span>
+<span class="nc" id="L23">        Program.create(</span>
+<span class="nc" id="L24">            UUID.fromString(faker.call().internet().uuid()),</span>
+            institution,
+            &quot;%s %s - %s&quot;
+<span class="nc" id="L27">                .formatted(</span>
+<span class="nc" id="L28">                    faker.call().university().prefix(),</span>
+<span class="nc" id="L29">                    faker.call().university().degree(),</span>
+<span class="nc" id="L30">                    faker.call().number().numberBetween(1, 11)),</span>
+            true,
+<span class="nc" id="L32">            randomDurationUnit(),</span>
+<span class="nc" id="L33">            faker.call().number().numberBetween(1, 5)));</span>
+  }
+
+  public static String createName() {
+<span class="nc" id="L37">    return &quot;%s %s - %s&quot;</span>
+<span class="nc" id="L38">        .formatted(</span>
+<span class="nc" id="L39">            faker.call().university().prefix(),</span>
+<span class="nc" id="L40">            faker.call().university().degree(),</span>
+<span class="nc" id="L41">            faker.call().number().numberBetween(1, 11));</span>
+  }
+
+  public FakeProgram isNotAPC() {
+<span class="nc" id="L45">    program.setAPC(false);</span>
+<span class="nc" id="L46">    return this;</span>
+  }
+
+  public Program toModel() {
+<span class="nc" id="L50">    return program;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
