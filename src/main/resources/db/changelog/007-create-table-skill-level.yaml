@@ -134,3 +134,15 @@ databaseChangeLog:
               BEFORE UPDATE ON "skill_level"
               FOR EACH ROW
               EXECUTE FUNCTION set_updated_at();
+
+  - changeSet:
+      id: create-updated-at-trigger-skill_level_translation
+      author: bilelbanelhaq
+      changes:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trigger_set_updated_at_skill_level_translation ON "skill_level_translation";
+              CREATE TRIGGER trigger_set_updated_at_skill_level_translation
+              BEFORE UPDATE ON "skill_level_translation"
+              FOR EACH ROW
+              EXECUTE FUNCTION set_updated_at();

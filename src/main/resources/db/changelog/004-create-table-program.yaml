@@ -126,3 +126,16 @@ databaseChangeLog:
               BEFORE UPDATE ON "program"
               FOR EACH ROW
               EXECUTE FUNCTION set_updated_at();
+
+  - changeSet:
+      id: create-updated-at-trigger-program_translation
+      author: bilelbanelhaq
+      changes:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trigger_set_updated_at_program_translation ON "program_translation";
+              CREATE TRIGGER trigger_set_updated_at_program_translation
+              BEFORE UPDATE ON "program_translation"
+              FOR EACH ROW
+              EXECUTE FUNCTION set_updated_at();
+

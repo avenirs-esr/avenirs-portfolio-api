@@ -108,3 +108,15 @@ databaseChangeLog:
               BEFORE UPDATE ON "skill"
               FOR EACH ROW
               EXECUTE FUNCTION set_updated_at();
+
+  - changeSet:
+      id: create-updated-at-trigger-skill_translation
+      author: bilelbanelhaq
+      changes:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trigger_set_updated_at_skill_translation ON "skill_translation";
+              CREATE TRIGGER trigger_set_updated_at_skill_translation
+              BEFORE UPDATE ON "skill_translation"
+              FOR EACH ROW
+              EXECUTE FUNCTION set_updated_at();

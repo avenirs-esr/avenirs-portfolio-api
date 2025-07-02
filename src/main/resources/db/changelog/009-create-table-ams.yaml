@@ -167,3 +167,16 @@ databaseChangeLog:
               BEFORE UPDATE ON "ams"
               FOR EACH ROW
               EXECUTE FUNCTION set_updated_at();
+
+  - changeSet:
+      id: create-updated-at-trigger-ams_translation
+      author: bilelbanelhaq
+      changes:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trigger_set_updated_at_ams_translation ON "ams_translation";
+              CREATE TRIGGER trigger_set_updated_at_ams_translation
+              BEFORE UPDATE ON "ams_translation"
+              FOR EACH ROW
+              EXECUTE FUNCTION set_updated_at();
+

@@ -101,3 +101,16 @@ databaseChangeLog:
               BEFORE UPDATE ON "institution"
               FOR EACH ROW
               EXECUTE FUNCTION set_updated_at();
+
+  - changeSet:
+      id: create-updated-at-trigger-institution_translation
+      author: bilelbanelhaq
+      changes:
+        - sql:
+            sql: |
+              DROP TRIGGER IF EXISTS trigger_set_updated_at_institution_translation ON "institution_translation";
+              CREATE TRIGGER trigger_set_updated_at_institution_translation
+              BEFORE UPDATE ON "institution_translation"
+              FOR EACH ROW
+              EXECUTE FUNCTION set_updated_at();
+
