@@ -9,12 +9,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Set;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = &quot;program_progress&quot;)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -28,17 +30,12 @@ public class ProgramProgressEntity extends AvenirsBaseEntity {
   @OneToMany(mappedBy = &quot;programProgress&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
   private Set&lt;SkillEntity&gt; skills;
 
-  private ProgramProgressEntity(
-<span class="fc" id="L32">      UUID id, ProgramEntity program, UserEntity student, Set&lt;SkillEntity&gt; skills) {</span>
-<span class="fc" id="L33">    this.setId(id);</span>
-<span class="fc" id="L34">    this.program = program;</span>
-<span class="fc" id="L35">    this.student = student;</span>
-<span class="fc" id="L36">    this.skills = skills;</span>
-<span class="fc" id="L37">  }</span>
-
-  public static ProgramProgressEntity of(
-      UUID id, ProgramEntity program, UserEntity student, Set&lt;SkillEntity&gt; skills) {
-<span class="fc" id="L41">    return new ProgramProgressEntity(id, program, student, skills);</span>
-  }
+  public ProgramProgressEntity(
+<span class="fc" id="L34">      UUID id, ProgramEntity program, UserEntity student, Set&lt;SkillEntity&gt; skills) {</span>
+<span class="fc" id="L35">    this.setId(id);</span>
+<span class="fc" id="L36">    this.program = program;</span>
+<span class="fc" id="L37">    this.student = student;</span>
+<span class="fc" id="L38">    this.skills = skills;</span>
+<span class="fc" id="L39">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

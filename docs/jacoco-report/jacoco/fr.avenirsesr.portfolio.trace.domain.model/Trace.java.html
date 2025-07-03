@@ -43,12 +43,12 @@ public class Trace {
 
   public static Trace create(
       UUID id, User user, String title, Instant deletedAt, ELanguage language) {
-<span class="nc" id="L46">    var trace = new Trace(id, user, title, Instant.now(), null, deletedAt, language);</span>
-<span class="nc" id="L47">    trace.setSkillLevels(List.of());</span>
-<span class="nc" id="L48">    trace.setAmses(List.of());</span>
-<span class="nc" id="L49">    trace.setGroup(false);</span>
+<span class="fc" id="L46">    var trace = new Trace(id, user, title, Instant.now(), null, deletedAt, language);</span>
+<span class="fc" id="L47">    trace.setSkillLevels(List.of());</span>
+<span class="fc" id="L48">    trace.setAmses(List.of());</span>
+<span class="fc" id="L49">    trace.setGroup(false);</span>
 
-<span class="nc" id="L51">    return trace;</span>
+<span class="fc" id="L51">    return trace;</span>
   }
 
   public static Trace toDomain(

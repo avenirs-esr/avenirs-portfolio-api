@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.TranslationEntity;
 import jakarta.persistence.*;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 @Entity
 @Table(name = &quot;ams_translation&quot;)
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class AMSTranslationEntity extends TranslationEntity {
@@ -22,16 +24,12 @@ public class AMSTranslationEntity extends TranslationEntity {
   @JoinColumn(name = &quot;ams_id&quot;, nullable = false)
   private AMSEntity ams;
 
-  private AMSTranslationEntity(UUID id, ELanguage language, String title, AMSEntity ams) {
-<span class="fc" id="L26">    super();</span>
-<span class="fc" id="L27">    this.setId(id);</span>
-<span class="fc" id="L28">    this.language = language;</span>
-<span class="fc" id="L29">    this.title = title;</span>
-<span class="fc" id="L30">    this.ams = ams;</span>
-<span class="fc" id="L31">  }</span>
-
-  public static AMSTranslationEntity of(UUID id, ELanguage language, String title, AMSEntity ams) {
-<span class="fc" id="L34">    return new AMSTranslationEntity(id, language, title, ams);</span>
-  }
+  public AMSTranslationEntity(UUID id, ELanguage language, String title, AMSEntity ams) {
+<span class="fc" id="L28">    super();</span>
+<span class="fc" id="L29">    this.setId(id);</span>
+<span class="fc" id="L30">    this.language = language;</span>
+<span class="fc" id="L31">    this.title = title;</span>
+<span class="fc" id="L32">    this.ams = ams;</span>
+<span class="fc" id="L33">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

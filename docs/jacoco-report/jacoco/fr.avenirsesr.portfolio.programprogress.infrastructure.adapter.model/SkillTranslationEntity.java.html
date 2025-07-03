@@ -4,12 +4,14 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.TranslationEntity;
 import jakarta.persistence.*;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = &quot;skill_translation&quot;)
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -21,23 +23,17 @@ public class SkillTranslationEntity extends TranslationEntity {
   @JoinColumn(name = &quot;skill_id&quot;, nullable = false)
   private SkillEntity skill;
 
-  private SkillTranslationEntity(
-      UUID id, ELanguage language, String name, SkillEntity skillEntity) {
-<span class="fc" id="L26">    super();</span>
-<span class="fc" id="L27">    this.setId(id);</span>
-<span class="fc" id="L28">    this.language = language;</span>
-<span class="fc" id="L29">    this.name = name;</span>
-<span class="fc" id="L30">    this.skill = skillEntity;</span>
-<span class="fc" id="L31">  }</span>
-
-  public static SkillTranslationEntity of(
-      UUID id, ELanguage language, String name, SkillEntity skillEntity) {
-<span class="fc" id="L35">    return new SkillTranslationEntity(id, language, name, skillEntity);</span>
-  }
+  public SkillTranslationEntity(UUID id, ELanguage language, String name, SkillEntity skillEntity) {
+<span class="fc" id="L27">    super();</span>
+<span class="fc" id="L28">    this.setId(id);</span>
+<span class="fc" id="L29">    this.language = language;</span>
+<span class="fc" id="L30">    this.name = name;</span>
+<span class="fc" id="L31">    this.skill = skillEntity;</span>
+<span class="fc" id="L32">  }</span>
 
   @Override
   public String toString() {
-<span class="nc" id="L40">    return &quot;SkillEntity[%s]&quot;.formatted(this.getId());</span>
+<span class="nc" id="L36">    return &quot;SkillEntity[%s]&quot;.formatted(this.getId());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

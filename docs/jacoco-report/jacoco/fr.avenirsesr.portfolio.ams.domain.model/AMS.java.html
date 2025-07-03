@@ -47,13 +47,13 @@ public class AMS {
 <span class="fc" id="L47">  }</span>
 
   public static AMS create(UUID id, User user, String title, Instant startDate, Instant endDate) {
-<span class="nc" id="L50">    var ams = new AMS(id, user, title, startDate, endDate);</span>
-<span class="nc" id="L51">    ams.setSkillLevels(List.of());</span>
-<span class="nc" id="L52">    ams.setTraces(List.of());</span>
-<span class="nc" id="L53">    ams.setCohorts(Set.of());</span>
-<span class="nc" id="L54">    ams.setStatus(EAmsStatus.NOT_STARTED);</span>
+<span class="fc" id="L50">    var ams = new AMS(id, user, title, startDate, endDate);</span>
+<span class="fc" id="L51">    ams.setSkillLevels(List.of());</span>
+<span class="fc" id="L52">    ams.setTraces(List.of());</span>
+<span class="fc" id="L53">    ams.setCohorts(Set.of());</span>
+<span class="fc" id="L54">    ams.setStatus(EAmsStatus.NOT_STARTED);</span>
 
-<span class="nc" id="L56">    return ams;</span>
+<span class="fc" id="L56">    return ams;</span>
   }
 
   public static AMS toDomain(

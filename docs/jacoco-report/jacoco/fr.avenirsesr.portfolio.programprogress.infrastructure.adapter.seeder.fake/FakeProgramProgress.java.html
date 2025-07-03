@@ -1,31 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FakeProgramProgress.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake</a> &gt; <span class="el_source">FakeProgramProgress.java</span></div><h1>FakeProgramProgress.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramProgressEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.SkillEntity;
+import fr.avenirsesr.portfolio.programprogress.domain.model.Program;
+import fr.avenirsesr.portfolio.programprogress.domain.model.ProgramProgress;
+import fr.avenirsesr.portfolio.programprogress.domain.model.Skill;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.Set;
 import java.util.UUID;
 
 public class FakeProgramProgress {
 <span class="nc" id="L12">  private static final FakerProvider faker = new FakerProvider();</span>
-  private final ProgramProgressEntity programProgress;
+  private final ProgramProgress programProgress;
 
-<span class="nc" id="L15">  private FakeProgramProgress(ProgramProgressEntity programProgress) {</span>
+<span class="nc" id="L15">  private FakeProgramProgress(ProgramProgress programProgress) {</span>
 <span class="nc" id="L16">    this.programProgress = programProgress;</span>
 <span class="nc" id="L17">  }</span>
 
-  public static FakeProgramProgress of(
-      ProgramEntity program, UserEntity student, Set&lt;SkillEntity&gt; skills) {
-
-<span class="nc" id="L22">    return new FakeProgramProgress(</span>
-<span class="nc" id="L23">        ProgramProgressEntity.of(</span>
-<span class="nc" id="L24">            UUID.fromString(faker.call().internet().uuid()), program, student, skills));</span>
+  public static FakeProgramProgress of(Program program, Student student, Set&lt;Skill&gt; skills) {
+<span class="nc" id="L20">    return new FakeProgramProgress(</span>
+<span class="nc" id="L21">        ProgramProgress.create(</span>
+<span class="nc" id="L22">            UUID.fromString(faker.call().internet().uuid()), program, student, skills));</span>
   }
 
-  public ProgramProgressEntity toEntity() {
-<span class="nc" id="L28">    return programProgress;</span>
+  public ProgramProgress toModel() {
+<span class="nc" id="L26">    return programProgress;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
