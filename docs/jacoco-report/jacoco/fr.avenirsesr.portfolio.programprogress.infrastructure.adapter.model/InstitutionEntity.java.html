@@ -43,13 +43,13 @@ public class InstitutionEntity extends AvenirsBaseEntity {
 
   @Transient
   public Set&lt;EPortfolioType&gt; getEnabledFields() {
-<span class="pc bpc" id="L46" title="2 of 4 branches missed.">    if (enabledFieldsRaw == null || enabledFieldsRaw.isBlank()) {</span>
+<span class="pc bpc" id="L46" title="1 of 4 branches missed.">    if (enabledFieldsRaw == null || enabledFieldsRaw.isBlank()) {</span>
 <span class="fc" id="L47">      return new HashSet&lt;&gt;();</span>
     }
-<span class="nc" id="L49">    return Arrays.stream(enabledFieldsRaw.split(&quot;,&quot;))</span>
-<span class="nc" id="L50">        .map(String::trim)</span>
-<span class="nc" id="L51">        .map(EPortfolioType::valueOf)</span>
-<span class="nc" id="L52">        .collect(Collectors.toSet());</span>
+<span class="fc" id="L49">    return Arrays.stream(enabledFieldsRaw.split(&quot;,&quot;))</span>
+<span class="fc" id="L50">        .map(String::trim)</span>
+<span class="fc" id="L51">        .map(EPortfolioType::valueOf)</span>
+<span class="fc" id="L52">        .collect(Collectors.toSet());</span>
   }
 
   public void setEnabledFields(Set&lt;EPortfolioType&gt; enabledFields) {
