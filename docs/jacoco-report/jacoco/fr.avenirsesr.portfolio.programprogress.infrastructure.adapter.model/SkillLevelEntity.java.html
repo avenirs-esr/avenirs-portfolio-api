@@ -7,14 +7,12 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = &quot;skill_level&quot;)
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -34,7 +32,7 @@ public class SkillLevelEntity extends PeriodEntity&lt;LocalDate&gt; {
   @JoinColumn(name = &quot;skill_id&quot;)
   private SkillEntity skill;
 
-<span class="fc" id="L37">  @OneToMany(</span>
+<span class="fc" id="L35">  @OneToMany(</span>
       mappedBy = &quot;skillLevel&quot;,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -42,26 +40,37 @@ public class SkillLevelEntity extends PeriodEntity&lt;LocalDate&gt; {
   private Set&lt;SkillLevelTranslationEntity&gt; translations =
       new HashSet&lt;&gt;(); // TODO: Remove this SET and get it in queries
 
-  public SkillLevelEntity(
+  private SkillLevelEntity(
       UUID id,
       ESkillLevelStatus status,
       List&lt;TraceEntity&gt; traces,
       List&lt;AMSEntity&gt; amses,
       SkillEntity skill,
       LocalDate startDate,
-<span class="fc" id="L52">      LocalDate endDate) {</span>
-<span class="fc" id="L53">    setId(id);</span>
-<span class="fc" id="L54">    this.status = status;</span>
-<span class="fc" id="L55">    this.traces = traces;</span>
-<span class="fc" id="L56">    this.amses = amses;</span>
-<span class="fc" id="L57">    this.skill = skill;</span>
-<span class="fc" id="L58">    this.startDate = startDate;</span>
-<span class="fc" id="L59">    this.endDate = endDate;</span>
-<span class="fc" id="L60">  }</span>
+<span class="fc" id="L50">      LocalDate endDate) {</span>
+<span class="fc" id="L51">    setId(id);</span>
+<span class="fc" id="L52">    this.status = status;</span>
+<span class="fc" id="L53">    this.traces = traces;</span>
+<span class="fc" id="L54">    this.amses = amses;</span>
+<span class="fc" id="L55">    this.skill = skill;</span>
+<span class="fc" id="L56">    this.startDate = startDate;</span>
+<span class="fc" id="L57">    this.endDate = endDate;</span>
+<span class="fc" id="L58">  }</span>
+
+  public static SkillLevelEntity of(
+      UUID id,
+      ESkillLevelStatus status,
+      List&lt;TraceEntity&gt; traces,
+      List&lt;AMSEntity&gt; amses,
+      SkillEntity skillEntity,
+      LocalDate startDate,
+      LocalDate endDate) {
+<span class="fc" id="L68">    return new SkillLevelEntity(id, status, traces, amses, skillEntity, startDate, endDate);</span>
+  }
 
   @Override
   public String toString() {
-<span class="nc" id="L64">    return &quot;SkillLevelEntity[%s]&quot;.formatted(getId());</span>
+<span class="nc" id="L73">    return &quot;SkillLevelEntity[%s]&quot;.formatted(getId());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

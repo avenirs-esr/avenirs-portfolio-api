@@ -72,7 +72,7 @@ public class ExternalUserEntity {
       columnDefinition = &quot;TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP&quot;)
   private Instant updatedAt;
 
-  public ExternalUserEntity(
+  private ExternalUserEntity(
       String externalId,
       EExternalSource source,
       UserEntity user,
@@ -88,5 +88,16 @@ public class ExternalUserEntity {
 <span class="fc" id="L88">    this.firstName = firstName;</span>
 <span class="fc" id="L89">    this.lastName = lastName;</span>
 <span class="fc" id="L90">  }</span>
+
+  public static ExternalUserEntity of(
+      String externalId,
+      EExternalSource source,
+      UserEntity user,
+      EUserCategory category,
+      String email,
+      String firstName,
+      String lastName) {
+<span class="fc" id="L100">    return new ExternalUserEntity(externalId, source, user, category, email, firstName, lastName);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -34,10 +34,10 @@ public class Cohort {
 
   public static Cohort create(
       UUID id, String name, String description, ProgramProgress programProgress) {
-<span class="fc" id="L37">    Cohort cohort = new Cohort(id, name, description, programProgress);</span>
-<span class="fc" id="L38">    cohort.setUsers(new HashSet&lt;&gt;());</span>
-<span class="fc" id="L39">    cohort.setAmsSet(new HashSet&lt;&gt;());</span>
-<span class="fc" id="L40">    return cohort;</span>
+<span class="nc" id="L37">    Cohort cohort = new Cohort(id, name, description, programProgress);</span>
+<span class="nc" id="L38">    cohort.setUsers(new HashSet&lt;&gt;());</span>
+<span class="nc" id="L39">    cohort.setAmsSet(new HashSet&lt;&gt;());</span>
+<span class="nc" id="L40">    return cohort;</span>
   }
 
   public static Cohort toDomain(

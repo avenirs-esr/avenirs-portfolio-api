@@ -6,14 +6,12 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = &quot;program&quot;)
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -31,7 +29,7 @@ public class ProgramEntity extends AvenirsBaseEntity {
   @ManyToOne(optional = false)
   private InstitutionEntity institution;
 
-<span class="fc" id="L34">  @OneToMany(</span>
+<span class="fc" id="L32">  @OneToMany(</span>
       mappedBy = &quot;program&quot;,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -39,17 +37,26 @@ public class ProgramEntity extends AvenirsBaseEntity {
   private Set&lt;ProgramTranslationEntity&gt; translations =
       new HashSet&lt;&gt;(); // TODO: Remove this SET and get it in queries
 
-  public ProgramEntity(
+  private ProgramEntity(
       UUID id,
       boolean isAPC,
       InstitutionEntity institution,
       EDurationUnit durationUnit,
-<span class="fc" id="L47">      int durationCount) {</span>
-<span class="fc" id="L48">    this.setId(id);</span>
-<span class="fc" id="L49">    this.institution = institution;</span>
-<span class="fc" id="L50">    this.isAPC = isAPC;</span>
-<span class="fc" id="L51">    this.durationUnit = durationUnit;</span>
-<span class="fc" id="L52">    this.durationCount = durationCount;</span>
-<span class="fc" id="L53">  }</span>
+<span class="fc" id="L45">      int durationCount) {</span>
+<span class="fc" id="L46">    this.setId(id);</span>
+<span class="fc" id="L47">    this.institution = institution;</span>
+<span class="fc" id="L48">    this.isAPC = isAPC;</span>
+<span class="fc" id="L49">    this.durationUnit = durationUnit;</span>
+<span class="fc" id="L50">    this.durationCount = durationCount;</span>
+<span class="fc" id="L51">  }</span>
+
+  public static ProgramEntity of(
+      UUID id,
+      boolean isAPC,
+      InstitutionEntity institution,
+      EDurationUnit durationUnit,
+      int durationCount) {
+<span class="fc" id="L59">    return new ProgramEntity(id, isAPC, institution, durationUnit, durationCount);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -46,12 +46,12 @@ public class User {
 <span class="fc" id="L46">  }</span>
 
   public static User create(UUID id, String firstName, String lastName) {
-<span class="fc" id="L49">    var user = new User(id);</span>
-<span class="fc" id="L50">    user.setFirstName(firstName);</span>
-<span class="fc" id="L51">    user.setLastName(lastName);</span>
-<span class="fc" id="L52">    user.setStudent(false);</span>
-<span class="fc" id="L53">    user.setTeacher(false);</span>
-<span class="fc" id="L54">    return user;</span>
+<span class="nc" id="L49">    var user = new User(id);</span>
+<span class="nc" id="L50">    user.setFirstName(firstName);</span>
+<span class="nc" id="L51">    user.setLastName(lastName);</span>
+<span class="nc" id="L52">    user.setStudent(false);</span>
+<span class="nc" id="L53">    user.setTeacher(false);</span>
+<span class="nc" id="L54">    return user;</span>
   }
 
   public static User toDomain(

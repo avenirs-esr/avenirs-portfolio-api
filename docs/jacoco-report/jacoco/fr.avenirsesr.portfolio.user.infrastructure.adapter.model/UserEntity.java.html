@@ -8,15 +8,15 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import java.util.Optional;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = &quot;\&quot;user\&quot;&quot;)
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -29,6 +29,7 @@ public class UserEntity extends AvenirsBaseEntity {
 
   @Email @Column private String email;
 
+  @Getter(AccessLevel.NONE)
   @Embedded
   @AttributeOverrides({
     @AttributeOverride(name = &quot;bio&quot;, column = @Column(name = &quot;student_bio&quot;)),
@@ -38,6 +39,7 @@ public class UserEntity extends AvenirsBaseEntity {
   })
   private StudentEntity student;
 
+  @Getter(AccessLevel.NONE)
   @Embedded
   @AttributeOverrides({
     @AttributeOverride(name = &quot;bio&quot;, column = @Column(name = &quot;teacher_bio&quot;)),
@@ -47,19 +49,37 @@ public class UserEntity extends AvenirsBaseEntity {
   })
   private TeacherEntity teacher;
 
-  public UserEntity(
+  private UserEntity(
       UUID id,
       String firstName,
       String lastName,
       String email,
       StudentEntity student,
-<span class="fc" id="L56">      TeacherEntity teacher) {</span>
-<span class="fc" id="L57">    this.setId(id);</span>
-<span class="fc" id="L58">    this.firstName = firstName;</span>
-<span class="fc" id="L59">    this.lastName = lastName;</span>
-<span class="fc" id="L60">    this.email = email;</span>
-<span class="fc" id="L61">    this.student = student;</span>
-<span class="fc" id="L62">    this.teacher = teacher;</span>
-<span class="fc" id="L63">  }</span>
+<span class="fc" id="L58">      TeacherEntity teacher) {</span>
+<span class="fc" id="L59">    this.setId(id);</span>
+<span class="fc" id="L60">    this.firstName = firstName;</span>
+<span class="fc" id="L61">    this.lastName = lastName;</span>
+<span class="fc" id="L62">    this.email = email;</span>
+<span class="fc" id="L63">    this.student = student;</span>
+<span class="fc" id="L64">    this.teacher = teacher;</span>
+<span class="fc" id="L65">  }</span>
+
+  public static UserEntity of(
+      UUID id,
+      String firstName,
+      String lastName,
+      String email,
+      StudentEntity student,
+      TeacherEntity teacher) {
+<span class="fc" id="L74">    return new UserEntity(id, firstName, lastName, email, student, teacher);</span>
+  }
+
+  public Optional&lt;StudentEntity&gt; getStudent() {
+<span class="fc" id="L78">    return Optional.ofNullable(student);</span>
+  }
+
+  public Optional&lt;TeacherEntity&gt; getTeacher() {
+<span class="fc" id="L82">    return Optional.ofNullable(teacher);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
