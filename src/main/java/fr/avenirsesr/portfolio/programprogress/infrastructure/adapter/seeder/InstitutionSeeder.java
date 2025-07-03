@@ -5,44 +5,23 @@ import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.repository
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake.FakeInstitution;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class InstitutionSeeder {
-  private static final Faker faker = new FakerProvider().call();
-  private static final int NB_INSTITUTIONS = 5;
-  private static final double PROBABILITY_OF_APC = 0.1;
-  private static final double PROBABILITY_OF_LIFE_PROJECT = 0.1;
-  private static final double PROBABILITY_OF_BOTH_TYPE = 0.8;
-
-  private int nbApc = 0;
-  private int nbLifeProject = 0;
-  private int nbBothType = 0;
-
   private final InstitutionDatabaseRepository institutionRepository;
 
-  private FakeInstitution createFakeInstitution() {
-    FakeInstitution fakeInstitution = FakeInstitution.create();
-
-    int typeRandom = faker.random().nextInt(1, 10);
-
-    if (typeRandom == PROBABILITY_OF_APC * 10) {
-      fakeInstitution.withEnabledFiled(Set.of(EPortfolioType.APC));
-      nbApc++;
-    } else if (typeRandom == (PROBABILITY_OF_APC + PROBABILITY_OF_LIFE_PROJECT) * 10) {
-      fakeInstitution.withEnabledFiled(Set.of(EPortfolioType.LIFE_PROJECT));
-      nbLifeProject++;
-    } else nbBothType++;
+  private FakeInstitution createFakeInstitution(Set<EPortfolioType> types) {
+    FakeInstitution fakeInstitution = FakeInstitution.create().withEnabledFiled(types);
 
     Arrays.stream(ELanguage.values())
         .filter(language -> language != ELanguage.FRENCH)
@@ -55,8 +34,15 @@ public class InstitutionSeeder {
     log.info("Seeding institutions...");
 
     List<FakeInstitution> fakeInstitutions = new ArrayList<>();
-    for (int i = 0; i < NB_INSTITUTIONS; i++) {
-      fakeInstitutions.add(createFakeInstitution());
+    for (int i = 0; i < SeederConfig.INSTITUTIONS_NB_OF_APC; i++) {
+      fakeInstitutions.add(createFakeInstitution(Set.of(EPortfolioType.APC)));
+    }
+    for (int i = 0; i < SeederConfig.INSTITUTIONS_NB_OF_LIFE_PROJECT; i++) {
+      fakeInstitutions.add(createFakeInstitution(Set.of(EPortfolioType.LIFE_PROJECT)));
+    }
+    for (int i = 0; i < SeederConfig.INSTITUTIONS_NB_OF_BOTH; i++) {
+      fakeInstitutions.add(
+          createFakeInstitution(Set.of(EPortfolioType.APC, EPortfolioType.LIFE_PROJECT)));
     }
 
     var institutionEntities = fakeInstitutions.stream().map(FakeInstitution::toEntity).toList();
@@ -64,11 +50,11 @@ public class InstitutionSeeder {
     institutionRepository.saveAllEntities(institutionEntities);
 
     log.info(
-        "✓ {} institutions created : {} APC - {} Life Project - {} Both",
+        "✔ {} institutions created : {} APC - {} Life Project - {} Both",
         institutionEntities.size(),
-        nbApc,
-        nbLifeProject,
-        nbBothType);
+        SeederConfig.INSTITUTIONS_NB_OF_APC,
+        SeederConfig.INSTITUTIONS_NB_OF_LIFE_PROJECT,
+        SeederConfig.INSTITUTIONS_NB_OF_BOTH);
 
     return institutionEntities;
   }

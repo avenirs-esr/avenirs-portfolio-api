@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.AMSDatabase
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeAMS;
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
@@ -28,23 +29,17 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class AMSSeeder {
-
   private static final FakerProvider faker = new FakerProvider();
-  private static final int NB_AMS = 20;
-  private static final int NB_COHORTS_MIN_PER_AMS = 0;
-  private static final int NB_COHORTS_MAX_PER_AMS = 8;
-
-  private static final int NB_SKILL_LEVEL_MIN_PER_AMS = 1;
-  private static final int NB_SKILL_LEVEL_MAX_PER_AMS = 4;
-
-  private static final int NB_TRACES_MIN_PER_AMS = 0;
-  private static final int NB_TRACES_MAX_PER_AMS = 8;
 
   private final AMSDatabaseRepository amsRepository;
 
   private Set<CohortEntity> getRandomCohorts(List<CohortEntity> savedCohorts) {
     int cohortCount =
-        faker.call().number().numberBetween(NB_COHORTS_MIN_PER_AMS, NB_COHORTS_MAX_PER_AMS + 1);
+        faker
+            .call()
+            .number()
+            .numberBetween(
+                SeederConfig.NB_COHORTS_MIN_PER_AMS, SeederConfig.NB_COHORTS_MAX_PER_AMS + 1);
 
     List<CohortEntity> cohorts = new ArrayList<>(savedCohorts);
 
@@ -55,7 +50,11 @@ public class AMSSeeder {
 
   private List<TraceEntity> getRandomTraces(List<TraceEntity> savedTraces) {
     int tracesCount =
-        faker.call().number().numberBetween(NB_TRACES_MIN_PER_AMS, NB_TRACES_MAX_PER_AMS + 1);
+        faker
+            .call()
+            .number()
+            .numberBetween(
+                SeederConfig.NB_TRACES_MIN_PER_AMS, SeederConfig.NB_TRACES_MAX_PER_AMS + 1);
 
     List<TraceEntity> traceList = new ArrayList<>(savedTraces);
 
@@ -69,7 +68,9 @@ public class AMSSeeder {
         faker
             .call()
             .number()
-            .numberBetween(NB_SKILL_LEVEL_MIN_PER_AMS, NB_SKILL_LEVEL_MAX_PER_AMS + 1);
+            .numberBetween(
+                SeederConfig.NB_SKILL_LEVEL_MIN_PER_AMS,
+                SeederConfig.NB_SKILL_LEVEL_MAX_PER_AMS + 1);
 
     List<SkillLevelEntity> skillLevelList = new ArrayList<>(savedSkillLevels);
 
@@ -103,7 +104,7 @@ public class AMSSeeder {
 
     List<AMSEntity> amsList = new ArrayList<>();
 
-    for (int i = 0; i < NB_AMS; i++) {
+    for (int i = 0; i < SeederConfig.AMS_NB; i++) {
       AMSEntity ams =
           FakeAMS.of(getRandomUser(savedUsers))
               .withCohorts(getRandomCohorts(savedCohorts))
@@ -118,7 +119,7 @@ public class AMSSeeder {
     }
 
     amsRepository.saveAllEntities(amsList);
-    log.info("✓ {} ams created", amsList.size());
+    log.info("✔ {} ams created", amsList.size());
 
     return amsList;
   }

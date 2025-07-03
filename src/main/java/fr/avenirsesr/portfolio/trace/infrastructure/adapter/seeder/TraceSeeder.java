@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -21,9 +22,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class TraceSeeder {
-
   private static final FakerProvider faker = new FakerProvider();
-  private static final int NB_TRACES = 20;
 
   private final TraceRepository traceRepository;
 
@@ -39,13 +38,13 @@ public class TraceSeeder {
 
     List<TraceEntity> traceList = new ArrayList<>();
 
-    for (int i = 0; i < NB_TRACES; i++) {
+    for (int i = 0; i < SeederConfig.TRACES_NB; i++) {
       traceList.add(FakeTrace.of(getRandomUserOf(users)).toEntity());
     }
 
     traceRepository.saveAll(traceList.stream().map(TraceMapper::toDomain).toList());
 
-    log.info("✓ {} traces created", traceList.size());
+    log.info("✔ {} traces created", traceList.size());
 
     return traceList;
   }

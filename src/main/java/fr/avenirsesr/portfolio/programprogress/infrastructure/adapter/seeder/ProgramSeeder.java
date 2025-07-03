@@ -5,12 +5,11 @@ import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.Prog
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.repository.ProgramDatabaseRepository;
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake.FakeProgram;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,8 +18,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ProgramSeeder {
-  private static final int NB_PROGRAM_BY_INSTITUTION = 3;
-  private static final int NB_OF_APC = 2;
 
   private final ProgramDatabaseRepository programRepository;
 
@@ -46,8 +43,9 @@ public class ProgramSeeder {
 
     institutionEntities.forEach(
         institution -> {
-          for (int i = 0; i < NB_PROGRAM_BY_INSTITUTION; i++) {
-            fakePrograms.add(createFakeProgram(institutionEntities.get(i), i < NB_OF_APC));
+          for (int i = 0; i < SeederConfig.PROGRAM_BY_INSTITUTION; i++) {
+            fakePrograms.add(
+                createFakeProgram(institutionEntities.get(i), i < SeederConfig.PROGRAM_NB_APC));
           }
         });
 
@@ -56,8 +54,8 @@ public class ProgramSeeder {
     programRepository.saveAllEntities(programEntities);
 
     log.info(
-        "✓ {} program created by institution -> Total {} Programs created",
-        NB_PROGRAM_BY_INSTITUTION,
+        "✔ {} program created by institution -> Total {} Programs created",
+        SeederConfig.PROGRAM_BY_INSTITUTION,
         programEntities.size());
 
     return programEntities;

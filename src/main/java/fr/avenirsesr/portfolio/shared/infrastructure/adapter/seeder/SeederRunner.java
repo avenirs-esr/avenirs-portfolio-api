@@ -70,7 +70,7 @@ public class SeederRunner implements CommandLineRunner {
           savedSkills.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
       var savedAmses = amsSeeder.seed(savedUsers, savedSkillLevels, savedTraces, savedCohorts);
 
-      log.info("Seeding successfully finished");
+      log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
   }
 }

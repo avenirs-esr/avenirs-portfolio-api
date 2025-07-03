@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.CohortMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeCohort;
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramProgressEntity;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -28,15 +29,14 @@ public class CohortSeeder {
 
   private static final FakerProvider faker = new FakerProvider();
 
-  private static final int NB_COHORTS = 50;
-  private static final int NB_USERS_MIN_PER_COHORT = 1;
-  private static final int NB_USERS_MAX_PER_COHORT = 50;
-
   private final CohortRepository cohortRepository;
 
   private Set<UserEntity> getRandomUsers(List<UserEntity> savedUsers) {
     int userCount =
-        faker.call().number().numberBetween(NB_USERS_MIN_PER_COHORT, NB_USERS_MAX_PER_COHORT + 1);
+        faker
+            .call()
+            .number()
+            .numberBetween(SeederConfig.COHORT_NB_USERS_MIN, SeederConfig.COHORT_NB_USERS_MAX + 1);
 
     List<UserEntity> userList = new ArrayList<>(savedUsers);
 
@@ -60,14 +60,14 @@ public class CohortSeeder {
 
     List<CohortEntity> cohorts = new ArrayList<>();
 
-    for (int i = 0; i < NB_COHORTS; i++) {
+    for (int i = 0; i < SeederConfig.COHORTS_NB; i++) {
       cohorts.add(
           FakeCohort.of(getRandomProgramProgress(savedProgramProgress), getRandomUsers(savedUsers))
               .toEntity());
     }
 
     cohortRepository.saveAll(cohorts.stream().map(CohortMapper::toDomain).toList());
-    log.info("✓ {} cohorts created", cohorts.size());
+    log.info("✔ {} cohorts created", cohorts.size());
 
     return cohorts;
   }

@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.Skil
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.repository.ProgramProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.repository.SkillDatabaseRepository;
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake.FakeProgramProgress;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -24,9 +25,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProgramProgressSeeder {
   private static final Faker faker = new FakerProvider().call();
-  private static final int NB_SKILL_BY_PROGRAM = 6;
-  private static final int NB_PROGRAM_PROGRESS_BY_PROGRAM = 3;
-  private static final int NB_STUDENT_MAX_BY_PROGRAM_PROGRESS = 5;
 
   private final ProgramProgressDatabaseRepository programProgressRepository;
   private final SkillDatabaseRepository skillDatabaseRepository;
@@ -40,22 +38,14 @@ public class ProgramProgressSeeder {
     List<SkillEntity> skills = new ArrayList<>(savedSkills);
     Collections.shuffle(skills);
 
-    return new HashSet<>(skills.subList(0, NB_SKILL_BY_PROGRAM));
+    return new HashSet<>(skills.subList(0, SeederConfig.SKILL_BY_PROGRAM));
   }
 
-  public List<ProgramProgressEntity> seed(
+  private List<ProgramProgressEntity> generateFakeProgramProgressEntities(
       List<ProgramEntity> savedPrograms,
       List<UserEntity> savedUsers,
       List<SkillEntity> savedSkills) {
-
-    ValidationUtils.requireNonEmpty(savedPrograms, "programs cannot be empty");
-    ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");
-    ValidationUtils.requireNonEmpty(savedSkills, "skills cannot be empty");
-
-    log.info("Seeding program progress...");
-
-    List<FakeProgramProgress> fakeProgramProgresses = new ArrayList<>();
-
+    List<ProgramProgressEntity> programProgressEntities = new ArrayList<>();
     var students =
         savedUsers.stream()
             .filter(
@@ -64,22 +54,36 @@ public class ProgramProgressSeeder {
             .toList();
 
     for (ProgramEntity programEntity : savedPrograms) {
-      for (int i = 0; i < NB_PROGRAM_PROGRESS_BY_PROGRAM; i++) {
-        int nbOfStudentsByProgram = faker.random().nextInt(NB_STUDENT_MAX_BY_PROGRAM_PROGRESS);
-        for (int j = 0; j < nbOfStudentsByProgram; j++) {
-          int studentIdx = faker.random().nextInt(students.size());
-          fakeProgramProgresses.add(
+      for (int i = 0; i < SeederConfig.PROGRAM_PROGRESS_BY_PROGRAM; i++) {
+        for (int j = 0;
+            j < faker.random().nextInt(SeederConfig.PROGRAM_PROGRESS_NB_STUDENT_MAX);
+            j++) {
+          programProgressEntities.add(
               createFakeProgramProgress(
-                  programEntity, students.get(studentIdx), getRandomSkills(savedSkills)));
+                      programEntity,
+                      students.get(faker.random().nextInt(students.size())),
+                      getRandomSkills(savedSkills))
+                  .toEntity());
         }
       }
     }
 
-    var programProgressEntities =
-        fakeProgramProgresses.stream().map(FakeProgramProgress::toEntity).toList();
+    return programProgressEntities;
+  }
+
+  public List<ProgramProgressEntity> seed(
+      List<ProgramEntity> savedPrograms,
+      List<UserEntity> savedUsers,
+      List<SkillEntity> savedSkills) {
+    ValidationUtils.requireNonEmpty(savedPrograms, "programs cannot be empty");
+    ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");
+    ValidationUtils.requireNonEmpty(savedSkills, "skills cannot be empty");
+    log.info("Seeding program progress...");
+
+    List<ProgramProgressEntity> programProgressEntities =
+        generateFakeProgramProgressEntities(savedPrograms, savedUsers, savedSkills);
 
     programProgressRepository.saveAllEntities(programProgressEntities);
-
     programProgressEntities.forEach(
         programProgress -> {
           programProgress
@@ -93,7 +97,6 @@ public class ProgramProgressSeeder {
         programProgressEntities.stream().flatMap(p -> p.getSkills().stream()).toList());
 
     log.info("✔ {} programProgresses created", programProgressEntities.size());
-
     return programProgressEntities;
   }
 }
