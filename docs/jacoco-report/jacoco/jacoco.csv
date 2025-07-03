@@ -74,7 +74,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.seed
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.model,Cohort,20,31,0,0,4,10,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.model,AMS,23,41,0,0,6,13,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.model,AmsProgress,9,0,0,0,1,0,1,0,1,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,RessourceController,74,0,6,0,18,0,7,0,4,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,RessourceController,77,0,6,0,19,0,8,0,5,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,65,0,2,0,19,0,5,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter.utils,UserUtil,22,4,2,0,5,1,2,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter.utils,RessourceUtils,44,0,10,0,13,0,8,0,3,0
