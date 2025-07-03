@@ -7,6 +7,8 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEn
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -34,6 +36,7 @@ public class TraceEntity extends AvenirsBaseEntity {
   private String title;
 
   @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
   private ELanguage language;
 
   @ManyToMany

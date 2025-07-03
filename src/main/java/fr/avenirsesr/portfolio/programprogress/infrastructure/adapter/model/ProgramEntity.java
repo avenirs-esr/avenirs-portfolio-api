@@ -20,6 +20,7 @@ public class ProgramEntity extends AvenirsBaseEntity {
   private boolean isAPC;
 
   @Column(name = "duration_unit", nullable = true)
+  @Enumerated(EnumType.STRING)
   private EDurationUnit durationUnit;
 
   @Column(name = "duration_count", nullable = true)
