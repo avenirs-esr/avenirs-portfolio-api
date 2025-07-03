@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.programprogress.domain.model.enums.ESkillLevelSta
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public class SkillLevel {
   private final String name;
 
   @Setter(AccessLevel.NONE)
+  @Getter(AccessLevel.NONE)
   private final String description;
 
   private ESkillLevelStatus status;
@@ -63,6 +65,10 @@ public class SkillLevel {
     skillLevel.setEndDate(endDate);
 
     return skillLevel;
+  }
+
+  public Optional<String> getDescription() {
+    return Optional.ofNullable(description);
   }
 
   @Override

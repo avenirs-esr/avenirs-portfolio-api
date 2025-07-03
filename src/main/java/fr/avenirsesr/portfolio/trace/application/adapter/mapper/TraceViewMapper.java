@@ -12,6 +12,6 @@ public interface TraceViewMapper {
         traceStatus,
         trace.getCreatedAt(),
         trace.getUpdatedAt(),
-        trace.getDeletedAt());
+        trace.getDeletedAt().orElse(null));
   }
 }

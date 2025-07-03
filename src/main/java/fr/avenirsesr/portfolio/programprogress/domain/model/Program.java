@@ -1,7 +1,9 @@
 package fr.avenirsesr.portfolio.programprogress.domain.model;
 
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EDurationUnit;
+import java.util.Optional;
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +13,13 @@ public class Program {
   private final UUID id;
   private final Institution institution;
   private final String name;
+
+  @Getter(AccessLevel.NONE)
   private final EDurationUnit durationUnit;
-  private final int durationCount;
+
+  @Getter(AccessLevel.NONE)
+  private final Integer durationCount;
+
   private boolean isAPC;
 
   private Program(
@@ -21,7 +28,7 @@ public class Program {
       String name,
       boolean isAPC,
       EDurationUnit durationUnit,
-      int durationCount) {
+      Integer durationCount) {
     this.id = id;
     this.institution = institution;
     this.name = name;
@@ -36,7 +43,7 @@ public class Program {
       String name,
       boolean isAPC,
       EDurationUnit durationUnit,
-      int durationCount) {
+      Integer durationCount) {
     return new Program(id, institution, name, isAPC, durationUnit, durationCount);
   }
 
@@ -46,7 +53,15 @@ public class Program {
       String name,
       boolean isAPC,
       EDurationUnit durationUnit,
-      int durationCount) {
+      Integer durationCount) {
     return new Program(id, institution, name, isAPC, durationUnit, durationCount);
+  }
+
+  public Optional<EDurationUnit> getDurationUnit() {
+    return Optional.ofNullable(durationUnit);
+  }
+
+  public Optional<Integer> getDurationCount() {
+    return Optional.ofNullable(durationCount);
   }
 }

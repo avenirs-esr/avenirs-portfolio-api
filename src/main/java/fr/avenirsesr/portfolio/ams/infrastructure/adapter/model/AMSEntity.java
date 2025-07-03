@@ -32,7 +32,7 @@ public class AMSEntity extends PeriodEntity<Instant> {
   @ManyToOne(optional = false)
   private UserEntity user;
 
-  @Column
+  @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private EAmsStatus status;
 

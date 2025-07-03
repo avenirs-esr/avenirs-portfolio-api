@@ -8,7 +8,7 @@ public interface ProgramProgressMapper {
     return new ProgramProgressDTO(
         programProgress.getId(),
         programProgress.getProgram().getName(),
-        programProgress.getProgram().getDurationUnit(),
-        programProgress.getProgram().getDurationCount());
+        programProgress.getProgram().getDurationUnit().orElse(null),
+        programProgress.getProgram().getDurationCount().orElse(null));
   }
 }

@@ -6,7 +6,9 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +22,10 @@ public class Trace {
   private List<AMS> amses;
   private Instant createdAt;
   private Instant updatedAt;
+
+  @Getter(AccessLevel.NONE)
   private Instant deletedAt;
+
   private boolean isGroup;
   private ELanguage language;
 
@@ -68,5 +73,9 @@ public class Trace {
     trace.setGroup(group);
 
     return trace;
+  }
+
+  public Optional<Instant> getDeletedAt() {
+    return Optional.ofNullable(deletedAt);
   }
 }

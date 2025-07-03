@@ -11,8 +11,8 @@ public interface ProgramMapper {
         program.getId(),
         program.isAPC(),
         InstitutionMapper.fromDomain(program.getInstitution()),
-        program.getDurationUnit(),
-        program.getDurationCount());
+        program.getDurationUnit().orElse(null),
+        program.getDurationCount().orElse(null));
   }
 
   static Program toDomain(ProgramEntity programEntity) {

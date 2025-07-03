@@ -8,7 +8,7 @@ public interface SkillLevelViewMapper {
     return new SkillLevelViewDTO(
         skillLevel.getId(),
         skillLevel.getName(),
-        skillLevel.getDescription(),
+        skillLevel.getDescription().orElse(null),
         skillLevel.getStatus());
   }
 }

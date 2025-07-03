@@ -31,7 +31,7 @@ public class SkillLevelFixture {
     SkillLevel base = SkillLevelMapper.toDomain(FakeSkillLevel.create().toEntity(), null);
     this.id = base.getId();
     this.name = base.getName();
-    this.description = base.getDescription();
+    this.description = base.getDescription().orElse(null);
     this.status = base.getStatus();
     this.traces = base.getTraces();
     this.amses = base.getAmses();

@@ -24,7 +24,7 @@ public class ProgramEntity extends AvenirsBaseEntity {
   private EDurationUnit durationUnit;
 
   @Column(name = "duration_count", nullable = true)
-  private int durationCount;
+  private Integer durationCount;
 
   @ManyToOne(optional = false)
   private InstitutionEntity institution;
@@ -55,7 +55,7 @@ public class ProgramEntity extends AvenirsBaseEntity {
       boolean isAPC,
       InstitutionEntity institution,
       EDurationUnit durationUnit,
-      int durationCount) {
+      Integer durationCount) {
     return new ProgramEntity(id, isAPC, institution, durationUnit, durationCount);
   }
 }
