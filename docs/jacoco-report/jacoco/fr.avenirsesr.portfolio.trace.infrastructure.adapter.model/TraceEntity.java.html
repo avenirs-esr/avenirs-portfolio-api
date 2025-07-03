@@ -7,6 +7,8 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEn
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -34,6 +36,7 @@ public class TraceEntity extends AvenirsBaseEntity {
   private String title;
 
   @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
   private ELanguage language;
 
   @ManyToMany
@@ -67,18 +70,18 @@ public class TraceEntity extends AvenirsBaseEntity {
       boolean isGroup,
       Instant createdAt,
       Instant updatedAt,
-<span class="fc" id="L70">      Instant deletedAt) {</span>
-<span class="fc" id="L71">    this.setId(id);</span>
-<span class="fc" id="L72">    this.user = user;</span>
-<span class="fc" id="L73">    this.title = title;</span>
-<span class="fc" id="L74">    this.language = language;</span>
-<span class="fc" id="L75">    this.skillLevels = skillLevels;</span>
-<span class="fc" id="L76">    this.amses = amses;</span>
-<span class="fc" id="L77">    this.isGroup = isGroup;</span>
-<span class="fc" id="L78">    this.setCreatedAt(createdAt);</span>
-<span class="fc" id="L79">    this.setUpdatedAt(updatedAt);</span>
-<span class="fc" id="L80">    this.setDeletedAt(deletedAt);</span>
-<span class="fc" id="L81">  }</span>
+<span class="fc" id="L73">      Instant deletedAt) {</span>
+<span class="fc" id="L74">    this.setId(id);</span>
+<span class="fc" id="L75">    this.user = user;</span>
+<span class="fc" id="L76">    this.title = title;</span>
+<span class="fc" id="L77">    this.language = language;</span>
+<span class="fc" id="L78">    this.skillLevels = skillLevels;</span>
+<span class="fc" id="L79">    this.amses = amses;</span>
+<span class="fc" id="L80">    this.isGroup = isGroup;</span>
+<span class="fc" id="L81">    this.setCreatedAt(createdAt);</span>
+<span class="fc" id="L82">    this.setUpdatedAt(updatedAt);</span>
+<span class="fc" id="L83">    this.setDeletedAt(deletedAt);</span>
+<span class="fc" id="L84">  }</span>
 
   public static TraceEntity of(
       UUID id,
@@ -91,7 +94,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
-<span class="fc" id="L94">    return new TraceEntity(</span>
+<span class="fc" id="L97">    return new TraceEntity(</span>
         id, user, title, language, skillLevels, amses, isGroup, createdAt, updatedAt, deletedAt);
   }
 }

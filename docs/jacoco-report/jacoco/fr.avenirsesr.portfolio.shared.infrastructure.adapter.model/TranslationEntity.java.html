@@ -2,6 +2,8 @@
 
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,8 +11,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @MappedSuperclass
-<span class="fc" id="L12">public abstract class TranslationEntity extends AvenirsBaseEntity {</span>
+<span class="fc" id="L14">public abstract class TranslationEntity extends AvenirsBaseEntity {</span>
   @Column(name = &quot;language&quot;, nullable = false)
+  @Enumerated(EnumType.STRING)
   protected ELanguage language;
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
