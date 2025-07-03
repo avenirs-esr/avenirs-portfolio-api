@@ -6,6 +6,14 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [v1.1.1] - 2025-03-07
+
+- ✨ Refactor Seeder System
+- 🛠️ Introduced `SeederConfig` to centralize and group all seeding constants
+- 📦 Split seeders: one seeder per entity
+- 🔄 Fake entities now depend solely on persistence (JPA) entities instead of domain classes
+
+
 ## [v1.1.0] - 2025-06-30
 
 - Add CORS configuration.
