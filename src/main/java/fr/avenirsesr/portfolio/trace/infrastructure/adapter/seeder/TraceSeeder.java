@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
@@ -32,9 +33,7 @@ public class TraceSeeder {
   }
 
   public List<TraceEntity> seed(List<UserEntity> users) {
-    if (users == null || users.isEmpty()) {
-      throw new IllegalArgumentException("The list of users is empty");
-    }
+    ValidationUtils.requireNonEmpty(users, "users cannot be empty");
 
     log.info("Seeding Traces...");
 

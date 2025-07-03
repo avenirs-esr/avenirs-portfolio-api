@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +38,7 @@ public class ProgramSeeder {
   }
 
   public List<ProgramEntity> seed(List<InstitutionEntity> institutionEntities) {
-    if (institutionEntities == null || institutionEntities.isEmpty()) {
-      throw new IllegalArgumentException("The list of institutions is empty");
-    }
+    ValidationUtils.requireNonEmpty(institutionEntities, "institutions cannot be empty");
 
     log.info("Seeding programs...");
 

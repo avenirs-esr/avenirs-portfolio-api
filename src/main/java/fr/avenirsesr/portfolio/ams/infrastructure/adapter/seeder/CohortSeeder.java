@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeCohort;
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramProgressEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,6 +53,9 @@ public class CohortSeeder {
 
   public List<CohortEntity> seed(
       List<UserEntity> savedUsers, List<ProgramProgressEntity> savedProgramProgress) {
+    ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");
+    ValidationUtils.requireNonEmpty(savedProgramProgress, "program progress cannot be empty");
+
     log.info("Seeding cohorts...");
 
     List<CohortEntity> cohorts = new ArrayList<>();

@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeAMS;
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
@@ -93,6 +94,11 @@ public class AMSSeeder {
       List<SkillLevelEntity> savedSkillLevels,
       List<TraceEntity> savedTraces,
       List<CohortEntity> savedCohorts) {
+    ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");
+    ValidationUtils.requireNonEmpty(savedSkillLevels, "skillLevels cannot be empty");
+    ValidationUtils.requireNonEmpty(savedTraces, "traces cannot be empty");
+    ValidationUtils.requireNonEmpty(savedCohorts, "cohorts cannot be empty");
+
     log.info("Seeding AMS...");
 
     List<AMSEntity> amsList = new ArrayList<>();

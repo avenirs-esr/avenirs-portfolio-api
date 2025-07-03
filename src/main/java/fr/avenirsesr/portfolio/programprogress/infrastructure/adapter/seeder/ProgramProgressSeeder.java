@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.repository
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.repository.SkillDatabaseRepository;
 import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake.FakeProgramProgress;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,6 +48,9 @@ public class ProgramProgressSeeder {
       List<UserEntity> savedUsers,
       List<SkillEntity> savedSkills) {
 
+    ValidationUtils.requireNonEmpty(savedPrograms, "programs cannot be empty");
+    ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");
+    ValidationUtils.requireNonEmpty(savedSkills, "skills cannot be empty");
 
     log.info("Seeding program progress...");
 

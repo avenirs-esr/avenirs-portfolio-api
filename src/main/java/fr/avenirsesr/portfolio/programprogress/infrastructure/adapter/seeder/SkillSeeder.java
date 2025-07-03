@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
@@ -48,6 +49,8 @@ public class SkillSeeder {
   }
 
   public List<SkillEntity> seed(List<ProgramEntity> programEntities) {
+    ValidationUtils.requireNonEmpty(programEntities, "programs cannot be empty");
+
     log.info("Seeding skills...");
 
     List<FakeSkill> fakeSkills = new ArrayList<>();
