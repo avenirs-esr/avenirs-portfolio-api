@@ -6,7 +6,9 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +22,10 @@ public class Trace {
   private List&lt;AMS&gt; amses;
   private Instant createdAt;
   private Instant updatedAt;
+
+  @Getter(AccessLevel.NONE)
   private Instant deletedAt;
+
   private boolean isGroup;
   private ELanguage language;
 
@@ -31,24 +36,24 @@ public class Trace {
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt,
-<span class="fc" id="L34">      ELanguage language) {</span>
-<span class="fc" id="L35">    this.id = id;</span>
-<span class="fc" id="L36">    this.user = user;</span>
-<span class="fc" id="L37">    this.title = title;</span>
-<span class="fc" id="L38">    this.createdAt = createdAt;</span>
-<span class="fc" id="L39">    this.updatedAt = updatedAt;</span>
-<span class="fc" id="L40">    this.deletedAt = deletedAt;</span>
-<span class="fc" id="L41">    this.language = language;</span>
-<span class="fc" id="L42">  }</span>
+<span class="fc" id="L39">      ELanguage language) {</span>
+<span class="fc" id="L40">    this.id = id;</span>
+<span class="fc" id="L41">    this.user = user;</span>
+<span class="fc" id="L42">    this.title = title;</span>
+<span class="fc" id="L43">    this.createdAt = createdAt;</span>
+<span class="fc" id="L44">    this.updatedAt = updatedAt;</span>
+<span class="fc" id="L45">    this.deletedAt = deletedAt;</span>
+<span class="fc" id="L46">    this.language = language;</span>
+<span class="fc" id="L47">  }</span>
 
   public static Trace create(
       UUID id, User user, String title, Instant deletedAt, ELanguage language) {
-<span class="nc" id="L46">    var trace = new Trace(id, user, title, Instant.now(), null, deletedAt, language);</span>
-<span class="nc" id="L47">    trace.setSkillLevels(List.of());</span>
-<span class="nc" id="L48">    trace.setAmses(List.of());</span>
-<span class="nc" id="L49">    trace.setGroup(false);</span>
+<span class="nc" id="L51">    var trace = new Trace(id, user, title, Instant.now(), null, deletedAt, language);</span>
+<span class="nc" id="L52">    trace.setSkillLevels(List.of());</span>
+<span class="nc" id="L53">    trace.setAmses(List.of());</span>
+<span class="nc" id="L54">    trace.setGroup(false);</span>
 
-<span class="nc" id="L51">    return trace;</span>
+<span class="nc" id="L56">    return trace;</span>
   }
 
   public static Trace toDomain(
@@ -62,12 +67,16 @@ public class Trace {
       Instant updatedAt,
       Instant deletedAt,
       ELanguage language) {
-<span class="fc" id="L65">    var trace = new Trace(id, user, title, createdAt, updatedAt, deletedAt, language);</span>
-<span class="fc" id="L66">    trace.setSkillLevels(skillLevels);</span>
-<span class="fc" id="L67">    trace.setAmses(amses);</span>
-<span class="fc" id="L68">    trace.setGroup(group);</span>
+<span class="fc" id="L70">    var trace = new Trace(id, user, title, createdAt, updatedAt, deletedAt, language);</span>
+<span class="fc" id="L71">    trace.setSkillLevels(skillLevels);</span>
+<span class="fc" id="L72">    trace.setAmses(amses);</span>
+<span class="fc" id="L73">    trace.setGroup(group);</span>
 
-<span class="fc" id="L70">    return trace;</span>
+<span class="fc" id="L75">    return trace;</span>
+  }
+
+  public Optional&lt;Instant&gt; getDeletedAt() {
+<span class="fc" id="L79">    return Optional.ofNullable(deletedAt);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

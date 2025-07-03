@@ -20,16 +20,15 @@ public class ProgramEntity extends AvenirsBaseEntity {
   private boolean isAPC;
 
   @Column(name = &quot;duration_unit&quot;, nullable = true)
-  @Enumerated(EnumType.STRING)
   private EDurationUnit durationUnit;
 
   @Column(name = &quot;duration_count&quot;, nullable = true)
-  private int durationCount;
+  private Integer durationCount;
 
   @ManyToOne(optional = false)
   private InstitutionEntity institution;
 
-<span class="fc" id="L32">  @OneToMany(</span>
+<span class="fc" id="L31">  @OneToMany(</span>
       mappedBy = &quot;program&quot;,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -42,21 +41,21 @@ public class ProgramEntity extends AvenirsBaseEntity {
       boolean isAPC,
       InstitutionEntity institution,
       EDurationUnit durationUnit,
-<span class="fc" id="L45">      int durationCount) {</span>
-<span class="fc" id="L46">    this.setId(id);</span>
-<span class="fc" id="L47">    this.institution = institution;</span>
-<span class="fc" id="L48">    this.isAPC = isAPC;</span>
-<span class="fc" id="L49">    this.durationUnit = durationUnit;</span>
-<span class="fc" id="L50">    this.durationCount = durationCount;</span>
-<span class="fc" id="L51">  }</span>
+<span class="fc" id="L44">      int durationCount) {</span>
+<span class="fc" id="L45">    this.setId(id);</span>
+<span class="fc" id="L46">    this.institution = institution;</span>
+<span class="fc" id="L47">    this.isAPC = isAPC;</span>
+<span class="fc" id="L48">    this.durationUnit = durationUnit;</span>
+<span class="fc" id="L49">    this.durationCount = durationCount;</span>
+<span class="fc" id="L50">  }</span>
 
   public static ProgramEntity of(
       UUID id,
       boolean isAPC,
       InstitutionEntity institution,
       EDurationUnit durationUnit,
-      int durationCount) {
-<span class="fc" id="L59">    return new ProgramEntity(id, isAPC, institution, durationUnit, durationCount);</span>
+      Integer durationCount) {
+<span class="fc" id="L58">    return new ProgramEntity(id, isAPC, institution, durationUnit, durationCount);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
