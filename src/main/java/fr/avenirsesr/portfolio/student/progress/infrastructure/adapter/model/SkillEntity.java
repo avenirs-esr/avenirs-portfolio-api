@@ -18,10 +18,6 @@ public class SkillEntity extends AvenirsBaseEntity {
   @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<SkillLevelEntity> skillLevels;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "program_progress_id")
-  private TrainingPathEntity programProgress;
-
   @OneToMany(
       mappedBy = "skill",
       cascade = CascadeType.ALL,
@@ -30,16 +26,13 @@ public class SkillEntity extends AvenirsBaseEntity {
   private Set<SkillTranslationEntity> translations =
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
-  public SkillEntity(
-      UUID id, Set<SkillLevelEntity> skillLevels, TrainingPathEntity programProgress) {
+  public SkillEntity(UUID id, Set<SkillLevelEntity> skillLevels) {
     this.setId(id);
     this.skillLevels = skillLevels;
-    this.programProgress = programProgress;
   }
 
-  public static SkillEntity of(
-      UUID id, Set<SkillLevelEntity> skillLevels, ProgramProgressEntity programProgress) {
-    return new SkillEntity(id, skillLevels, programProgress);
+  public static SkillEntity of(UUID id, Set<SkillLevelEntity> skillLevels) {
+    return new SkillEntity(id, skillLevels);
   }
 
   @Override

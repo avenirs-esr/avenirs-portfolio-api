@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEn
 import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,5 +28,4 @@ public class StudentProgressEntity extends AvenirsBaseEntity {
   @Column
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
-
 }

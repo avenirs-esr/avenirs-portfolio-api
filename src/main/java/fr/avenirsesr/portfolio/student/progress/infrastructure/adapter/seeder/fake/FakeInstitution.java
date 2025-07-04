@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.InstitutionEntity;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.InstitutionTranslationEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.InstitutionEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.InstitutionTranslationEntity;
 import java.util.Set;
 import java.util.UUID;
 

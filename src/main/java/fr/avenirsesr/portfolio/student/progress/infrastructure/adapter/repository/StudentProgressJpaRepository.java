@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.reposito
 
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.dto.StudentTrainingPathSummaryDTO;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
-
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +13,7 @@ public interface StudentProgressJpaRepository
         JpaSpecificationExecutor<StudentProgressEntity> {
   @Query(
       "SELECT new"
-          + " fr.avenirsesr.portfolio.trainingpath.infrastructure.adapter.dto.StudentTrainingPathSummaryDTO(p.id,"
+          + " fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.dto.StudentTrainingPathSummaryDTO(p.id,"
           + " pr) FROM StudentProgressEntity s JOIN s.trainingPath p JOIN p.program pr WHERE s.student.id = :studentId")
   List<StudentTrainingPathSummaryDTO> findAllByStudentIdAndLang(UUID studentId);
 }

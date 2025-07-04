@@ -3,9 +3,9 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.InstitutionSeeder;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.ProgramProgressSeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.ProgramSeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.SkillSeeder;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
@@ -24,7 +24,7 @@ public class SeederRunner implements CommandLineRunner {
   private final TraceSeeder traceSeeder;
   private final InstitutionSeeder institutionSeeder;
   private final ProgramSeeder programSeeder;
-  private final ProgramProgressSeeder programProgressSeeder;
+  private final TrainingPathSeeder trainingPathSeeder;
   private final SkillSeeder skillSeeder;
 
   @Value("${seeder.enabled:false}")
@@ -38,7 +38,7 @@ public class SeederRunner implements CommandLineRunner {
       TraceSeeder traceSeeder,
       InstitutionSeeder institutionSeeder,
       ProgramSeeder programSeeder,
-      ProgramProgressSeeder programProgressSeeder,
+      TrainingPathSeeder trainingPathSeeder,
       SkillSeeder skillSeeder) {
     this.userRepository = userRepository;
     this.cohortSeeder = cohortSeeder;
@@ -47,7 +47,7 @@ public class SeederRunner implements CommandLineRunner {
     this.userSeeder = userSeeder;
     this.institutionSeeder = institutionSeeder;
     this.programSeeder = programSeeder;
-    this.programProgressSeeder = programProgressSeeder;
+    this.trainingPathSeeder = trainingPathSeeder;
     this.skillSeeder = skillSeeder;
   }
 
@@ -63,11 +63,10 @@ public class SeederRunner implements CommandLineRunner {
       var savedPrograms = programSeeder.seed(savedInstitutions);
       var savedTraces = traceSeeder.seed(savedUsers);
       var savedSkills = skillSeeder.seed(savedPrograms);
-      var savedProgramProgresses =
-          programProgressSeeder.seed(savedPrograms, savedUsers, savedSkills);
-      var savedCohorts = cohortSeeder.seed(savedUsers, savedProgramProgresses);
       var savedSkillLevels =
           savedSkills.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
+      var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedUsers, savedSkillLevels);
+      var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
       var savedAmses = amsSeeder.seed(savedUsers, savedSkillLevels, savedTraces, savedCohorts);
 
       log.info("✔ Seeding successfully finished");

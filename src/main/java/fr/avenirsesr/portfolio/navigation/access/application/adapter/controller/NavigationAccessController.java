@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.navigation.access.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.navigation.access.application.adapter.dto.NavigationAccessDTO;
-import fr.avenirsesr.portfolio.student.progress.domain.port.input.InstitutionService;
-import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.student.progress.domain.port.input.InstitutionService;
+import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.security.Principal;
 import lombok.AllArgsConstructor;

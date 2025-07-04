@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,8 +37,8 @@ public class CohortEntity extends AvenirsBaseEntity {
   private Set<UserEntity> users;
 
   @ManyToOne(optional = false)
-  @JoinColumn(name = "program_progress_id")
-  private TrainingPathEntity programProgress;
+  @JoinColumn(name = "training_path_id")
+  private TrainingPathEntity trainingPath;
 
   @ManyToMany(mappedBy = "cohorts")
   private Set<AMSEntity> amsEntities;
@@ -48,13 +48,13 @@ public class CohortEntity extends AvenirsBaseEntity {
       String name,
       String description,
       Set<UserEntity> users,
-      TrainingPathEntity programProgress,
+      TrainingPathEntity trainingPath,
       Set<AMSEntity> amsEntities) {
     this.setId(id);
     this.name = name;
     this.description = description;
     this.users = users;
-    this.programProgress = programProgress;
+    this.trainingPath = trainingPath;
     this.amsEntities = amsEntities;
   }
 
@@ -63,8 +63,8 @@ public class CohortEntity extends AvenirsBaseEntity {
       String name,
       String description,
       Set<UserEntity> users,
-      ProgramProgressEntity programProgress,
+      TrainingPathEntity trainingPathEntity,
       Set<AMSEntity> amsEntities) {
-    return new CohortEntity(id, name, description, users, programProgress, amsEntities);
+    return new CohortEntity(id, name, description, users, trainingPathEntity, amsEntities);
   }
 }

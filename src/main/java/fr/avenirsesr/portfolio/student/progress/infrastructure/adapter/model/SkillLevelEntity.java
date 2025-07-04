@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
-import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.PeriodEntity;
+import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -31,6 +31,10 @@ public class SkillLevelEntity extends PeriodEntity<LocalDate> {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "skill_id")
   private SkillEntity skill;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "training_path_id")
+  private TrainingPathEntity trainingPath;
 
   @OneToMany(
       mappedBy = "skillLevel",

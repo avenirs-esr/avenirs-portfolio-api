@@ -1,11 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.student.progress.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillRepository;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.TrainingPathMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -15,15 +14,7 @@ public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter<Skill, 
   private final SkillJpaRepository jpaRepository;
 
   public SkillDatabaseRepository(SkillJpaRepository jpaRepository) {
-    super(
-        jpaRepository,
-        jpaRepository,
-        skill ->
-            SkillMapper.fromDomain(
-                skill, TrainingPathMapper.fromDomain(skill.getTrainingPath())),
-        skill ->
-            SkillMapper.toDomain(
-                skill, TrainingPathMapper.toDomain(skill.getProgramProgress())));
+    super(jpaRepository, jpaRepository, SkillMapper::fromDomain, SkillMapper::toDomain);
     this.jpaRepository = jpaRepository;
   }
 

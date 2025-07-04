@@ -1,12 +1,12 @@
-package fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.InstitutionEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.repository.ProgramDatabaseRepository;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake.FakeProgram;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.InstitutionEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.ProgramEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.ProgramDatabaseRepository;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake.FakeProgram;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

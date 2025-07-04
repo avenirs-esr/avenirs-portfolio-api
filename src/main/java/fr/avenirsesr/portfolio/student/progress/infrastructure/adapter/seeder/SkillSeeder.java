@@ -1,16 +1,16 @@
-package fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.programprogress.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.SkillEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.SkillLevelEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.repository.SkillDatabaseRepository;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake.FakeSkill;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake.FakeSkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
+import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.ProgramEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.SkillDatabaseRepository;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake.FakeSkill;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake.FakeSkillLevel;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

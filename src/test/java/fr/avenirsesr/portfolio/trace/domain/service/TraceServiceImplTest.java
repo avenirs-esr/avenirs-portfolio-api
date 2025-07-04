@@ -10,15 +10,9 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.configuration.domain.model.TraceConfigurationInfo;
 import fr.avenirsesr.portfolio.configuration.domain.port.input.ConfigurationService;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.ProgramFixture;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.ProgramProgressFixture;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.SkillFixture;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.SkillLevelFixture;
-import fr.avenirsesr.portfolio.student.progress.domain.model.Program;
-import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.student.progress.domain.model.Skill;
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
+import fr.avenirsesr.portfolio.student.progress.domain.model.*;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
@@ -76,11 +70,17 @@ public class TraceServiceImplTest {
   @Test
   void givenTraceWithSkillLevelsButNoApc_shouldReturnLifeProject() {
     // Given
+    // TODO: Refactor this method when skill levels are refactored
     Program program = ProgramFixture.create().withAPC(false).toModel();
-    TrainingPath progress =
-        ProgramProgressFixture.create().withProgram(program).withStudent(student).toModel();
-    Skill skill = SkillFixture.create().withSkillLevels(1).withProgramProgress(progress).toModel();
+    TrainingPath progress = TrainingPathFixture.create().withProgram(program).toModel();
+    Skill skill = SkillFixture.create().withSkillLevels(1).toModel();
     SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
+    StudentProgress studentProgress =
+        StudentProgressFixture.create()
+            .withTrainingPath(progress)
+            .withSkillLevel(skillLevel)
+            .withUser(student.getUser())
+            .toModel();
     Trace trace =
         TraceFixture.create()
             .withUser(student.getUser())
@@ -97,11 +97,17 @@ public class TraceServiceImplTest {
   @Test
   void givenTraceWithApcProgram_shouldReturnProgramName() {
     // Given
+    // TODO: Refactor this method when skill levels are refactored
     Program program = ProgramFixture.create().withAPC(true).toModel();
-    TrainingPath progress =
-        ProgramProgressFixture.create().withProgram(program).withStudent(student).toModel();
-    Skill skill = SkillFixture.create().withSkillLevels(1).withProgramProgress(progress).toModel();
+    TrainingPath progress = TrainingPathFixture.create().withProgram(program).toModel();
+    Skill skill = SkillFixture.create().withSkillLevels(1).toModel();
     SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
+    StudentProgress studentProgress =
+        StudentProgressFixture.create()
+            .withTrainingPath(progress)
+            .withSkillLevel(skillLevel)
+            .withUser(student.getUser())
+            .toModel();
     Trace trace =
         TraceFixture.create()
             .withUser(student.getUser())

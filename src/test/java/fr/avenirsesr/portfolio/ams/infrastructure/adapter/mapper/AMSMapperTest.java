@@ -12,14 +12,14 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEn
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.CohortFixture;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.ProgramProgressFixture;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.SkillFixture;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.SkillLevelFixture;
-import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelEntity;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.SkillFixture;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.SkillLevelFixture;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
@@ -55,10 +55,12 @@ class AMSMapperTest {
   @BeforeEach
   void setUp() {
     user = UserFixture.create().toModel();
-    TrainingPath trainingPath = ProgramProgressFixture.create().toModel();
+    TrainingPath trainingPath = TrainingPathFixture.create().toModel();
     skillLevels = new ArrayList<>();
     for (int i = 0; i < 2; i++) {
-      Skill skill = SkillFixture.create().withProgramProgress(trainingPath).toModel();
+      // TODO: Refactor this method when skill levels are refactored
+      // Skill skill = SkillFixture.create().withProgramProgress(trainingPath).toModel();
+      Skill skill = SkillFixture.create().toModel();
       SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
       skillLevels.add(skillLevel);
     }

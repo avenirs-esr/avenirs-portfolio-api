@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.student.progress.domain.model.Institution;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.InstitutionRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.InstitutionMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.InstitutionEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
