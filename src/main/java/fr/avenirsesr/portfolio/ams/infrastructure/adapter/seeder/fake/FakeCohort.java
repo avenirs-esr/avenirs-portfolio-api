@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.Set;
@@ -15,14 +15,14 @@ public class FakeCohort {
     this.cohort = cohort;
   }
 
-  public static FakeCohort of(ProgramProgressEntity programProgress, Set<UserEntity> users) {
+  public static FakeCohort of(TrainingPathEntity trainingPath, Set<UserEntity> users) {
     final CohortEntity cohort =
         CohortEntity.of(
             UUID.fromString(faker.call().internet().uuid()),
             faker.call().educator().course(),
             faker.call().lorem().sentence(),
             users,
-            programProgress,
+            trainingPath,
             Set.of());
     return new FakeCohort(cohort);
   }

@@ -43,14 +43,14 @@ public class TraceServiceImpl implements TraceService {
     return trace.getSkillLevels().isEmpty()
             || trace.getSkillLevels().stream()
                 .noneMatch(
-                    skillLevel -> skillLevel.getSkill().getProgramProgress().getProgram().isAPC())
+                    skillLevel -> skillLevel.getSkill().getTrainingPath().getProgram().isAPC())
         ? EPortfolioType.LIFE_PROJECT.name()
         : trace.getSkillLevels().stream()
-            .filter(skillLevel -> skillLevel.getSkill().getProgramProgress().getProgram().isAPC())
+            .filter(skillLevel -> skillLevel.getSkill().getTrainingPath().getProgram().isAPC())
             .findAny()
             .orElseThrow()
             .getSkill()
-            .getProgramProgress()
+            .getTrainingPath()
             .getProgram()
             .getName();
   }

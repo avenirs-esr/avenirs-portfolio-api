@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.navigation.access.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.navigation.access.application.adapter.dto.NavigationAccessDTO;
-import fr.avenirsesr.portfolio.programprogress.domain.port.input.InstitutionService;
-import fr.avenirsesr.portfolio.programprogress.domain.port.input.ProgramProgressService;
+import fr.avenirsesr.portfolio.student.progress.domain.port.input.InstitutionService;
+import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NavigationAccessController {
   private final UserUtil userUtil;
   private final InstitutionService institutionService;
-  private final ProgramProgressService programProgressService;
+  private final StudentProgressService programProgressService;
 
   @GetMapping
   public ResponseEntity<NavigationAccessDTO> getStudentNavigationAccess(Principal principal) {

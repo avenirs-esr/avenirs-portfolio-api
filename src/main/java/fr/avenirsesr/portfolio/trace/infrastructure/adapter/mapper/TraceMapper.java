@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.mapper.ProgramProgressMapper;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.mapper.SkillLevelMapper;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.mapper.SkillMapper;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.TrainingPathMapper;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelMapper;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -23,8 +23,8 @@ public interface TraceMapper {
                         skillLevel,
                         SkillMapper.fromDomain(
                             skillLevel.getSkill(),
-                            ProgramProgressMapper.fromDomain(
-                                skillLevel.getSkill().getProgramProgress())),
+                            TrainingPathMapper.fromDomain(
+                                skillLevel.getSkill().getTrainingPath())),
                         List.of()))
             .toList(),
         trace.getAmses().stream().map(AMSMapper::fromDomain).toList(),

@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.ams.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
-import fr.avenirsesr.portfolio.porgramprogress.infrastructure.fixture.ProgramProgressFixture;
-import fr.avenirsesr.portfolio.programprogress.domain.model.ProgramProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.ProgramProgressFixture;
+import fr.avenirsesr.portfolio.student.progress.domain.model.ProgramProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class CohortFixture {
   private UUID id;
   private String name;
   private String description;
-  private ProgramProgress programProgress;
+  private TrainingPath trainingPath;
   private Set<User> users;
   private Set<AMS> amsSet;
 
@@ -25,7 +25,7 @@ public class CohortFixture {
     this.id = UUID.randomUUID();
     this.name = "Test Cohort";
     this.description = "Test Cohort Description";
-    this.programProgress = ProgramProgressFixture.create().toModel();
+    this.trainingPath = ProgramProgressFixture.create().toModel();
     this.users = new HashSet<>();
     this.amsSet = new HashSet<>();
   }
@@ -49,8 +49,8 @@ public class CohortFixture {
     return this;
   }
 
-  public CohortFixture withProgramProgress(ProgramProgress programProgress) {
-    this.programProgress = programProgress;
+  public CohortFixture withProgramProgress(TrainingPath trainingPath) {
+    this.trainingPath = trainingPath;
     return this;
   }
 
@@ -91,6 +91,6 @@ public class CohortFixture {
   }
 
   public Cohort toModel() {
-    return Cohort.toDomain(id, name, description, programProgress, users, amsSet);
+    return Cohort.toDomain(id, name, description, trainingPath, users, amsSet);
   }
 }
