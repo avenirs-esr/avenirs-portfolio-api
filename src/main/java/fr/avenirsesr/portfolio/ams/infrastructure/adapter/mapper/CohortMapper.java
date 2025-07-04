@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.mapper.ProgramProgressMapper;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.TrainingPathMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.stream.Collectors;
 
@@ -14,7 +14,7 @@ public interface CohortMapper {
         cohort.getName(),
         cohort.getDescription(),
         cohort.getUsers().stream().map(UserMapper::fromDomain).collect(Collectors.toSet()),
-        ProgramProgressMapper.fromDomain(cohort.getProgramProgress()),
+        TrainingPathMapper.fromDomain(cohort.getTrainingPath()),
         cohort.getAmsSet().stream().map(AMSMapper::fromDomain).collect(Collectors.toSet()));
   }
 
@@ -36,7 +36,7 @@ public interface CohortMapper {
         entity.getId(),
         entity.getName(),
         entity.getDescription(),
-        ProgramProgressMapper.toDomain(entity.getProgramProgress()),
+        TrainingPathMapper.toDomain(entity.getProgramProgress()),
         entity.getUsers().stream().map(UserMapper::toDomain).collect(Collectors.toSet()),
         java.util.Collections.emptySet());
   }

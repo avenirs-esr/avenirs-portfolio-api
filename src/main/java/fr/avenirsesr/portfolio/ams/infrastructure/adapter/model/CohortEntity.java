@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.Column;
@@ -38,7 +38,7 @@ public class CohortEntity extends AvenirsBaseEntity {
 
   @ManyToOne(optional = false)
   @JoinColumn(name = "program_progress_id")
-  private ProgramProgressEntity programProgress;
+  private TrainingPathEntity programProgress;
 
   @ManyToMany(mappedBy = "cohorts")
   private Set<AMSEntity> amsEntities;
@@ -48,7 +48,7 @@ public class CohortEntity extends AvenirsBaseEntity {
       String name,
       String description,
       Set<UserEntity> users,
-      ProgramProgressEntity programProgress,
+      TrainingPathEntity programProgress,
       Set<AMSEntity> amsEntities) {
     this.setId(id);
     this.name = name;
