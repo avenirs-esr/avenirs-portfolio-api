@@ -7,13 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.CohortFixture;
-import fr.avenirsesr.portfolio.porgramprogress.infrastructure.fixture.ProgramProgressFixture;
-import fr.avenirsesr.portfolio.programprogress.domain.model.ProgramProgress;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.InstitutionEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.InstitutionTranslationEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramProgressEntity;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.model.ProgramTranslationEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.ProgramProgressFixture;
+import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.InstitutionEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.InstitutionTranslationEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.ProgramEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.ProgramTranslationEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
@@ -38,7 +38,7 @@ class CohortMapperTest {
   @Test
   void shouldMapFromDomainToEntity() {
     // Given
-    ProgramProgress programProgress = ProgramProgressFixture.create().toModel();
+    TrainingPath trainingPath = ProgramProgressFixture.create().toModel();
     User user = UserFixture.createStudent().toModel();
     Set<User> users = new HashSet<>();
     users.add(user);
@@ -48,7 +48,7 @@ class CohortMapperTest {
             .withId(id)
             .withName(name)
             .withDescription(description)
-            .withProgramProgress(programProgress)
+            .withProgramProgress(trainingPath)
             .withUsers(users)
             .withAmsSet(new HashSet<>())
             .toModel();
@@ -62,7 +62,7 @@ class CohortMapperTest {
     assertEquals(name, entity.getName());
     assertEquals(description, entity.getDescription());
     assertNotNull(entity.getProgramProgress());
-    assertEquals(programProgress.getId(), entity.getProgramProgress().getId());
+    assertEquals(trainingPath.getId(), entity.getProgramProgress().getId());
 
     assertEquals(users.size(), entity.getUsers().size());
     for (UserEntity userEntity : entity.getUsers()) {
@@ -119,11 +119,11 @@ class CohortMapperTest {
     translations.add(translationEntity);
     programEntity.setTranslations(translations);
 
-    ProgramProgressEntity programProgressEntity = new ProgramProgressEntity();
-    programProgressEntity.setId(UUID.randomUUID());
-    programProgressEntity.setProgram(programEntity);
-    programProgressEntity.setStudent(studentEntity);
-    programProgressEntity.setSkills(new HashSet<>());
+    TrainingPathEntity trainingPathEntity = new TrainingPathEntity();
+    trainingPathEntity.setId(UUID.randomUUID());
+    trainingPathEntity.setProgram(programEntity);
+    trainingPathEntity.setStudent(studentEntity);
+    trainingPathEntity.setSkills(new HashSet<>());
 
     UserEntity userEntity = new UserEntity();
     userEntity.setId(UUID.randomUUID());
@@ -150,7 +150,7 @@ class CohortMapperTest {
     entity.setId(id);
     entity.setName(name);
     entity.setDescription(description);
-    entity.setProgramProgress(programProgressEntity);
+    entity.setProgramProgress(trainingPathEntity);
     entity.setUsers(userEntities);
     entity.setAmsEntities(new HashSet<>());
 
@@ -162,8 +162,8 @@ class CohortMapperTest {
     assertEquals(id, mappedCohort.getId());
     assertEquals(name, mappedCohort.getName());
     assertEquals(description, mappedCohort.getDescription());
-    assertNotNull(mappedCohort.getProgramProgress());
-    assertEquals(programProgressEntity.getId(), mappedCohort.getProgramProgress().getId());
+    assertNotNull(mappedCohort.getTrainingPath());
+    assertEquals(trainingPathEntity.getId(), mappedCohort.getTrainingPath().getId());
     assertEquals(userEntities.size(), mappedCohort.getUsers().size());
     assertTrue(mappedCohort.getAmsSet().isEmpty());
   }
@@ -215,17 +215,17 @@ class CohortMapperTest {
     translations.add(translationEntity);
     programEntity.setTranslations(translations);
 
-    ProgramProgressEntity programProgressEntity = new ProgramProgressEntity();
-    programProgressEntity.setId(UUID.randomUUID());
-    programProgressEntity.setProgram(programEntity);
-    programProgressEntity.setStudent(studentEntity);
-    programProgressEntity.setSkills(new HashSet<>());
+    TrainingPathEntity trainingPathEntity = new TrainingPathEntity();
+    trainingPathEntity.setId(UUID.randomUUID());
+    trainingPathEntity.setProgram(programEntity);
+    trainingPathEntity.setStudent(studentEntity);
+    trainingPathEntity.setSkills(new HashSet<>());
 
     CohortEntity entity = new CohortEntity();
     entity.setId(id);
     entity.setName(name);
     entity.setDescription(description);
-    entity.setProgramProgress(programProgressEntity);
+    entity.setProgramProgress(trainingPathEntity);
     entity.setUsers(new HashSet<>());
     entity.setAmsEntities(new HashSet<>());
 

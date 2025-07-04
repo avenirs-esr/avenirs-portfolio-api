@@ -8,7 +8,7 @@ databaseChangeLog:
   - include:
       file: db/changelog/004-create-table-program.yaml
   - include:
-      file: db/changelog/005-create-table-program-progress.yaml
+      file: db/changelog/005-create-table-training-path.yaml
   - include:
       file: db/changelog/006-create-table-skill.yaml
   - include:
