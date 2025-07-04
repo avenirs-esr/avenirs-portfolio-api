@@ -32,8 +32,7 @@ public class Cohort {
     this.trainingPath = trainingPath;
   }
 
-  public static Cohort create(
-      UUID id, String name, String description, TrainingPath trainingPath) {
+  public static Cohort create(UUID id, String name, String description, TrainingPath trainingPath) {
     Cohort cohort = new Cohort(id, name, description, trainingPath);
     cohort.setUsers(new HashSet<>());
     cohort.setAmsSet(new HashSet<>());

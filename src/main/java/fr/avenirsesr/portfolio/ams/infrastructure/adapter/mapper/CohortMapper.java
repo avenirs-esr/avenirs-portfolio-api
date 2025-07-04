@@ -36,7 +36,7 @@ public interface CohortMapper {
         entity.getId(),
         entity.getName(),
         entity.getDescription(),
-        TrainingPathMapper.toDomain(entity.getProgramProgress()),
+        TrainingPathMapper.toDomain(entity.getTrainingPath()),
         entity.getUsers().stream().map(UserMapper::toDomain).collect(Collectors.toSet()),
         java.util.Collections.emptySet());
   }

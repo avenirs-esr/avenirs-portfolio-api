@@ -3,12 +3,11 @@ package fr.avenirsesr.portfolio.student.progress.application.adapter.mapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.StudentProgressViewDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
-
 import java.util.Set;
 
 public interface StudentProgressViewMapper {
   static StudentProgressViewDTO fromDomainToDto(
-          TrainingPath trainingPath, Set<StudentProgress> studentProgresses) {
+      TrainingPath trainingPath, Set<StudentProgress> studentProgresses) {
     return new StudentProgressViewDTO(
         trainingPath.getId(),
         trainingPath.getProgram().getName(),

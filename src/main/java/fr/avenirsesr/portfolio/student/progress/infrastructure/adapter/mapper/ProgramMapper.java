@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.model.Program;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.ProgramEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.ProgramTranslationEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 
 public interface ProgramMapper {
   static ProgramEntity fromDomain(Program program) {

@@ -8,6 +8,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Set;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,17 +24,16 @@ public class TrainingPathEntity extends AvenirsBaseEntity {
   private ProgramEntity program;
 
   @OneToMany(mappedBy = "trainingPath", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Set<SkillLevelEntity> skillsLevels;
+  private Set<SkillLevelEntity> skillLevels;
 
-  public TrainingPathEntity(
-      UUID id, ProgramEntity program, Set<SkillLevelEntity> skillsLevels) {
+  public TrainingPathEntity(UUID id, ProgramEntity program, Set<SkillLevelEntity> skillLevels) {
     this.setId(id);
     this.program = program;
-    this.skillsLevels = skillsLevels;
+    this.skillLevels = skillLevels;
   }
 
-  public static ProgramProgressEntity of(
-      UUID id, ProgramEntity program, UserEntity student, Set<SkillEntity> skills) {
-    return new ProgramProgressEntity(id, program, student, skills);
+  public static TrainingPathEntity of(
+      UUID id, ProgramEntity program, Set<SkillLevelEntity> skillLevels) {
+    return new TrainingPathEntity(id, program, skillLevels);
   }
 }

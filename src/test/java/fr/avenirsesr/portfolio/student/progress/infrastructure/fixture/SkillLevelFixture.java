@@ -1,12 +1,12 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.programprogress.domain.model.Skill;
-import fr.avenirsesr.portfolio.programprogress.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.programprogress.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.mapper.SkillLevelMapper;
-import fr.avenirsesr.portfolio.programprogress.infrastructure.adapter.seeder.fake.FakeSkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.student.progress.domain.model.Skill;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelMapper;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake.FakeSkillLevel;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.time.LocalDate;
 import java.time.Period;
