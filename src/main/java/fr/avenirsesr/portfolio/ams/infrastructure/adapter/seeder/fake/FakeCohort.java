@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.Set;
 import java.util.UUID;

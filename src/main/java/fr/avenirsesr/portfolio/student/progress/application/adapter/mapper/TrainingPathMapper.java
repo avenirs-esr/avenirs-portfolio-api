@@ -8,7 +8,7 @@ public interface TrainingPathMapper {
     return new TrainingPathDTO(
         trainingPath.getId(),
         trainingPath.getProgram().getName(),
-        trainingPath.getProgram().getDurationUnit(),
-        trainingPath.getProgram().getDurationCount());
+        trainingPath.getProgram().getDurationUnit().orElse(null),
+        trainingPath.getProgram().getDurationCount().orElse(null));
   }
 }

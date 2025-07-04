@@ -1,26 +1,24 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelTranslationEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.util.List;
 
 public interface SkillLevelMapper {
-  static SkillLevelEntity fromDomain(
-          SkillLevel skillLevel, TrainingPath trainingPath) {
-    return new SkillLevelEntity(
+  static SkillLevelEntity fromDomain(SkillLevel skillLevel) {
+    return SkillLevelEntity.of(
         skillLevel.getId(),
         skillLevel.getStatus(),
         null,
         skillLevel.getAmses().stream().map(AMSMapper::fromDomain).toList(),
-        SkillMapper.fromDomain(skillLevel.getSkill(), trainingPath),
+        SkillMapper.fromDomain(skillLevel.getSkill()),
         skillLevel.getStartDate(),
         skillLevel.getEndDate());
   }

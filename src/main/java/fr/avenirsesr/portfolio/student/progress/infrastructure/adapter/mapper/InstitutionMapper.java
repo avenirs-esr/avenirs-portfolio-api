@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.model.Institution;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.InstitutionEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.InstitutionTranslationEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 
 public interface InstitutionMapper {
   static InstitutionEntity fromDomain(Institution institution) {

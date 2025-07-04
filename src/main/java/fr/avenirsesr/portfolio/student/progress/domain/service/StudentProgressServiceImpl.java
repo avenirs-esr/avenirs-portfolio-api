@@ -1,15 +1,14 @@
 package fr.avenirsesr.portfolio.student.progress.domain.service;
 
+import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
-import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -23,7 +22,8 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   private static final int MAX_SKILLS = 6;
   private final StudentProgressRepository studentProgressRepository;
 
-  private static List<StudentProgress> filterOneSkillLevelPerSkill(List<StudentProgress> studentProgresses) {
+  private static List<StudentProgress> filterOneSkillLevelPerSkill(
+      List<StudentProgress> studentProgresses) {
     Map<String, StudentProgress> chosenByUserPathSkill = new HashMap<>();
 
     for (StudentProgress sp : studentProgresses) {
@@ -47,51 +47,54 @@ public class StudentProgressServiceImpl implements StudentProgressService {
     }
 
     return chosenByUserPathSkill.values().stream()
-            .filter(sp -> isValidStatus(sp.getSkillLevel().getStatus()))
-            .toList();
+        .filter(sp -> isValidStatus(sp.getSkillLevel().getStatus()))
+        .toList();
   }
 
   private static boolean isValidStatus(ESkillLevelStatus status) {
     return status == ESkillLevelStatus.UNDER_REVIEW
-            || status == ESkillLevelStatus.UNDER_ACQUISITION
-            || status == ESkillLevelStatus.TO_BE_EVALUATED
-            || status == ESkillLevelStatus.NOT_STARTED;
+        || status == ESkillLevelStatus.UNDER_ACQUISITION
+        || status == ESkillLevelStatus.TO_BE_EVALUATED
+        || status == ESkillLevelStatus.NOT_STARTED;
   }
 
   private static int getStatusPriority(ESkillLevelStatus status) {
     return switch (status) {
       case UNDER_REVIEW, UNDER_ACQUISITION -> 1;
-      case TO_BE_EVALUATED, NOT_STARTED     -> 2;
-      default                               -> 3;
+      case TO_BE_EVALUATED, NOT_STARTED -> 2;
+      default -> 3;
     };
   }
 
-  private static boolean isStatusHigherPriority(ESkillLevelStatus newStatus, ESkillLevelStatus currentStatus) {
+  private static boolean isStatusHigherPriority(
+      ESkillLevelStatus newStatus, ESkillLevelStatus currentStatus) {
     return getStatusPriority(newStatus) < getStatusPriority(currentStatus);
   }
 
-
   private static Map<TrainingPath, Set<StudentProgress>> cleanStudentProgressList(
-          List<StudentProgress> studentProgresses, boolean needToLimitSkills) {
+      List<StudentProgress> studentProgresses, boolean needToLimitSkills) {
     if (studentProgresses.isEmpty()) {
       return Collections.emptyMap();
     }
     List<StudentProgress> filtered = filterOneSkillLevelPerSkill(studentProgresses);
 
-    Map<TrainingPath, Set<StudentProgress>> groupedByTrainingPath = filtered.stream()
-            .collect(Collectors.groupingBy(
+    Map<TrainingPath, Set<StudentProgress>> groupedByTrainingPath =
+        filtered.stream()
+            .collect(
+                Collectors.groupingBy(
                     StudentProgress::getTrainingPath,
                     LinkedHashMap::new,
-                    Collectors.toCollection(LinkedHashSet::new)
-            ));
+                    Collectors.toCollection(LinkedHashSet::new)));
 
     if (needToLimitSkills) {
       int trainingPathCount = groupedByTrainingPath.size();
       int skillLimitPerPath = trainingPathCount > 0 ? MAX_SKILLS / trainingPathCount : 0;
 
-      groupedByTrainingPath.replaceAll((tp, progresses) -> progresses.stream()
-              .limit(skillLimitPerPath)
-              .collect(Collectors.toCollection(LinkedHashSet::new)));
+      groupedByTrainingPath.replaceAll(
+          (tp, progresses) ->
+              progresses.stream()
+                  .limit(skillLimitPerPath)
+                  .collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     return groupedByTrainingPath;

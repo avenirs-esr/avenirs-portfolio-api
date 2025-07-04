@@ -6,6 +6,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface TrainingPathJpaRepository
-    extends JpaRepository<TrainingPathEntity, UUID>,
-        JpaSpecificationExecutor<TrainingPathEntity> {
-}
+    extends JpaRepository<TrainingPathEntity, UUID>, JpaSpecificationExecutor<TrainingPathEntity> {}

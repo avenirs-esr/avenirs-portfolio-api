@@ -1,10 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.domain.model;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +16,12 @@ public class StudentProgress {
   private final SkillLevel skillLevel;
   private ESkillLevelStatus status;
 
-  private StudentProgress(UUID id, User user, TrainingPath trainingPath, SkillLevel skillLevel, Optional<ESkillLevelStatus> status) {
+  private StudentProgress(
+      UUID id,
+      User user,
+      TrainingPath trainingPath,
+      SkillLevel skillLevel,
+      Optional<ESkillLevelStatus> status) {
     this.id = id;
     this.user = user;
     this.trainingPath = trainingPath;
@@ -26,12 +30,20 @@ public class StudentProgress {
   }
 
   public static StudentProgress create(
-      UUID id, User user, TrainingPath trainingPath, SkillLevel skillLevel, Optional<ESkillLevelStatus> status) {
+      UUID id,
+      User user,
+      TrainingPath trainingPath,
+      SkillLevel skillLevel,
+      Optional<ESkillLevelStatus> status) {
     return new StudentProgress(id, user, trainingPath, skillLevel, status);
   }
 
   public static StudentProgress toDomain(
-      UUID id, User user, TrainingPath trainingPath, SkillLevel skillLevel, Optional<ESkillLevelStatus> status) {
+      UUID id,
+      User user,
+      TrainingPath trainingPath,
+      SkillLevel skillLevel,
+      Optional<ESkillLevelStatus> status) {
     return new StudentProgress(id, user, trainingPath, skillLevel, status);
   }
 }

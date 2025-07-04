@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper;
 import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.dto.StudentTrainingPathSummaryDTO;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,14 +13,12 @@ public interface TrainingPathMapper {
         new TrainingPathEntity(
             trainingPath.getId(), ProgramMapper.fromDomain(trainingPath.getProgram()), Set.of());
 
-    entity.setSkillsLevels(
+    entity.setSkillLevels(
         trainingPath.getSkillLevels().stream()
             .map(
                 skillLevel ->
                     SkillLevelMapper.fromDomain(
-                        skillLevel,
-                        SkillMapper.fromDomain(skillLevel.getSkill(), trainingPath),
-                        List.of()))
+                        skillLevel, SkillMapper.fromDomain(skillLevel.getSkill()), List.of()))
             .collect(Collectors.toSet()));
 
     return entity;
@@ -35,7 +32,7 @@ public interface TrainingPathMapper {
             Set.of());
 
     trainingPath.setSkillLevels(
-        trainingPathEntity.getSkillsLevels().stream()
+        trainingPathEntity.getSkillLevels().stream()
             .map(
                 skillLevel ->
                     SkillLevelMapper.toDomain(

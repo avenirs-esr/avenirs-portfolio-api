@@ -1,17 +1,16 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper;
 
-import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillTranslationEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface SkillMapper {
-  static SkillEntity fromDomain(Skill skill, TrainingPathEntity trainingPathEntity) {
-    var skillEntity = SkillEntity.of(skill.getId(), Set.of(), trainingPathEntity);
+  static SkillEntity fromDomain(Skill skill) {
+    var skillEntity = SkillEntity.of(skill.getId(), Set.of());
     var levels =
         skill.getSkillLevels().stream()
             .map(
@@ -25,7 +24,7 @@ public interface SkillMapper {
     return skillEntity;
   }
 
-  static Skill toDomain(SkillEntity skillEntity, TrainingPath trainingPath) {
+  static Skill toDomain(SkillEntity skillEntity) {
 
     SkillTranslationEntity skillTranslationEntity =
         TranslationUtil.getTranslation(skillEntity.getTranslations());
@@ -36,20 +35,12 @@ public interface SkillMapper {
             .map(skillLevelEntity -> SkillLevelMapper.toDomain(skillLevelEntity, skill))
             .collect(Collectors.toSet()));
 
-    skill.setTrainingPath(trainingPath);
-
-    return skill;
-  }
-
-  static Skill toDomainWithoutRecursion(SkillEntity skillEntity, TrainingPath trainingPath) {
-    SkillTranslationEntity skillTranslationEntity =
-        TranslationUtil.getTranslation(skillEntity.getTranslations());
-    var skill = Skill.toDomain(skillEntity.getId(), skillTranslationEntity.getName(), Set.of());
-    skill.setTrainingPath(trainingPath);
     return skill;
   }
 
   static Skill toDomainWithoutRecursion(SkillEntity skillEntity) {
-    return toDomainWithoutRecursion(skillEntity, null);
+    SkillTranslationEntity skillTranslationEntity =
+        TranslationUtil.getTranslation(skillEntity.getTranslations());
+    return Skill.toDomain(skillEntity.getId(), skillTranslationEntity.getName(), Set.of());
   }
 }

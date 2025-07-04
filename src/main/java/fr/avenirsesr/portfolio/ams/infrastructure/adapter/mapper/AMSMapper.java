@@ -3,10 +3,9 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEntity;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.TrainingPathMapper;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillMapper;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
@@ -26,10 +25,7 @@ public interface AMSMapper {
                 skillLevel ->
                     SkillLevelMapper.fromDomain(
                         skillLevel,
-                        SkillMapper.fromDomain(
-                            skillLevel.getSkill(),
-                            TrainingPathMapper.fromDomain(
-                                skillLevel.getSkill().getTrainingPath())),
+                        SkillMapper.fromDomain(skillLevel.getSkill()),
                         skillLevel.getTraces().stream().map(TraceMapper::fromDomain).toList()))
             .collect(Collectors.toSet()),
         ams.getCohorts().stream().map(CohortMapper::fromDomain).collect(Collectors.toSet()),

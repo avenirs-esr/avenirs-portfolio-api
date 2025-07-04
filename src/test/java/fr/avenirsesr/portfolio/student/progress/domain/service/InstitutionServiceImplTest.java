@@ -3,11 +3,13 @@ package fr.avenirsesr.portfolio.student.progress.domain.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.ProgramProgressFixture;
-import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
+import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.List;
@@ -39,13 +41,21 @@ class InstitutionServiceImplTest {
   @Test
   void shouldReturnTrueWhenInstitutionHasEnabledNavigationField() {
     // Given
-    TrainingPath progressAPC =
-        ProgramProgressFixture.createWithAPC().withStudent(student).toModel();
-    TrainingPath progressLifeProject =
-        ProgramProgressFixture.createWithoutAPC().withStudent(student).toModel();
+    TrainingPath apcTrainingPath = TrainingPathFixture.createWithAPC().toModel();
+    TrainingPath lifeProjectTrainingPath = TrainingPathFixture.createWithoutAPC().toModel();
+    StudentProgress studentProgressAPC =
+        StudentProgressFixture.create()
+            .withTrainingPath(apcTrainingPath)
+            .withUser(student.getUser())
+            .toModel();
+    StudentProgress studentProgressLifeProject =
+        StudentProgressFixture.create()
+            .withTrainingPath(lifeProjectTrainingPath)
+            .withUser(student.getUser())
+            .toModel();
 
     when(studentProgressRepository.findAllByStudent(student))
-        .thenReturn(List.of(progressAPC, progressLifeProject));
+        .thenReturn(List.of(studentProgressAPC, studentProgressLifeProject));
 
     // When
     boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
@@ -58,13 +68,21 @@ class InstitutionServiceImplTest {
   @Test
   void shouldReturnFalseWhenNoInstitutionHasEnabledNavigationField() {
     // Given
-    TrainingPath progressAPC =
-        ProgramProgressFixture.createWithAPC().withStudent(student).toModel();
-    TrainingPath progress2 =
-        ProgramProgressFixture.createWithAPC().withStudent(student).toModel();
+    TrainingPath apcTrainingPath = TrainingPathFixture.createWithAPC().toModel();
+    TrainingPath apcTrainingPath2 = TrainingPathFixture.createWithAPC().toModel();
+    StudentProgress studentProgressAPC =
+        StudentProgressFixture.create()
+            .withTrainingPath(apcTrainingPath)
+            .withUser(student.getUser())
+            .toModel();
+    StudentProgress studentProgress2 =
+        StudentProgressFixture.create()
+            .withTrainingPath(apcTrainingPath2)
+            .withUser(student.getUser())
+            .toModel();
 
     when(studentProgressRepository.findAllByStudent(student))
-        .thenReturn(List.of(progressAPC, progress2));
+        .thenReturn(List.of(studentProgressAPC, studentProgress2));
 
     // When
     boolean result =

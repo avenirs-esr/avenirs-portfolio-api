@@ -18,13 +18,11 @@ public class TrainingPath {
     this.skillLevels = skillLevels;
   }
 
-  public static TrainingPath create(
-      UUID id, Program program, Set<SkillLevel> skills) {
+  public static TrainingPath create(UUID id, Program program, Set<SkillLevel> skills) {
     return new TrainingPath(id, program, skills);
   }
 
-  public static TrainingPath toDomain(
-      UUID id, Program program, Set<SkillLevel> skills) {
+  public static TrainingPath toDomain(UUID id, Program program, Set<SkillLevel> skills) {
     return new TrainingPath(id, program, skills);
   }
 }

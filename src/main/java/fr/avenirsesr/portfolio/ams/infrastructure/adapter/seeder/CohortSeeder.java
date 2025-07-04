@@ -4,10 +4,10 @@ import fr.avenirsesr.portfolio.ams.domain.port.output.repository.CohortRepositor
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.CohortMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeCohort;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,16 +45,15 @@ public class CohortSeeder {
     return new HashSet<>(userList.subList(0, userCount));
   }
 
-  private TrainingPathEntity getRandomProgramProgress(
-      List<TrainingPathEntity> savedTrainingPath) {
-    int randomIndex = faker.call().number().numberBetween(0, savedProgramProgress.size());
+  private TrainingPathEntity getRandomProgramProgress(List<TrainingPathEntity> savedTrainingPath) {
+    int randomIndex = faker.call().number().numberBetween(0, savedTrainingPath.size());
     return savedTrainingPath.get(randomIndex);
   }
 
   public List<CohortEntity> seed(
-      List<UserEntity> savedUsers, List<ProgramProgressEntity> savedProgramProgress) {
+      List<UserEntity> savedUsers, List<TrainingPathEntity> savedTrainingPath) {
     ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");
-    ValidationUtils.requireNonEmpty(savedProgramProgress, "program progress cannot be empty");
+    ValidationUtils.requireNonEmpty(savedTrainingPath, "training path cannot be empty");
 
     log.info("Seeding cohorts...");
 
@@ -62,7 +61,7 @@ public class CohortSeeder {
 
     for (int i = 0; i < SeederConfig.COHORTS_NB; i++) {
       cohorts.add(
-          FakeCohort.of(getRandomProgramProgress(savedProgramProgress), getRandomUsers(savedUsers))
+          FakeCohort.of(getRandomProgramProgress(savedTrainingPath), getRandomUsers(savedUsers))
               .toEntity());
     }
 

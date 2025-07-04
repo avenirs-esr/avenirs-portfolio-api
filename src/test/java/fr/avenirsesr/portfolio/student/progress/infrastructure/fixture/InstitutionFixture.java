@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.student.progress.domain.model.Institution;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.student.progress.domain.model.Institution;
 import java.util.Set;
 import java.util.UUID;
 

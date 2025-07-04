@@ -124,46 +124,6 @@ databaseChangeLog:
             tableName: skill_skill_level
             columnNames: skill_id, skill_level_id
             constraintName: uq_skill_skill_level
-  - changeSet:
-      id: 010-5
-      author: bilelbanelhaq
-      changes:
-        - createTable:
-            tableName: program_progress_skill
-            columns:
-              - column:
-                  name: program_progress_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-              - column:
-                  name: skill_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-
-        - sql:
-            dbms: 'postgresql'
-            endDelimiter: \nGO
-            splitStatements: true
-            sql: ALTER TABLE program_progress_skill OWNER TO ${avenirs.admin.role}
-            stripComments: true
-
-        - addForeignKeyConstraint:
-            baseTableName: program_progress_skill
-            baseColumnNames: program_progress_id
-            referencedTableName: program_progress
-            referencedColumnNames: id
-            constraintName: fk_program_progress_skill_program_progress
-            onDelete: CASCADE
-
-        - addForeignKeyConstraint:
-            baseTableName: program_progress_skill
-            baseColumnNames: skill_id
-            referencedTableName: skill
-            referencedColumnNames: id
-            constraintName: fk_program_progress_skill_skill
-            onDelete: CASCADE
 
 
 

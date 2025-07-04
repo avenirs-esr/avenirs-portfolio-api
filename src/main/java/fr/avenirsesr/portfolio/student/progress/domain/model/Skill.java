@@ -11,7 +11,6 @@ public class Skill {
   private final UUID id;
   private final String name;
   private Set<SkillLevel> skillLevels;
-  private TrainingPath trainingPath;
 
   private Skill(UUID id, String name, Set<SkillLevel> skillLevels) {
     this.id = id;

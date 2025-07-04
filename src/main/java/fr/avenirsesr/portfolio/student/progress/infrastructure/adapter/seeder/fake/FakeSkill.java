@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake;
 
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillTranslationEntity;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ public class FakeSkill {
   }
 
   public static FakeSkill of(Set<SkillLevelEntity> skillLevels) {
-    var entity = SkillEntity.of(UUID.fromString(faker.call().internet().uuid()), skillLevels, null);
+    var entity = SkillEntity.of(UUID.fromString(faker.call().internet().uuid()), skillLevels);
 
     entity.getSkillLevels().forEach(skillLevel -> skillLevel.setSkill(entity));
 
