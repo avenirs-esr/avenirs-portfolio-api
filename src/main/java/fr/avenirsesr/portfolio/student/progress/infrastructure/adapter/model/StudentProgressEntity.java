@@ -4,6 +4,8 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEn
 import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,4 +30,33 @@ public class StudentProgressEntity extends AvenirsBaseEntity {
   @Column
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
+
+  private StudentProgressEntity(
+      UUID id,
+      UserEntity student,
+      TrainingPathEntity trainingPath,
+      SkillLevelEntity skillLevel,
+      ESkillLevelStatus status,
+      Instant createdAt,
+      Instant updatedAt) {
+    this.setId(id);
+    this.student = student;
+    this.trainingPath = trainingPath;
+    this.skillLevel = skillLevel;
+    this.status = status;
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
+  }
+
+  public static StudentProgressEntity of(
+      UUID id,
+      UserEntity student,
+      TrainingPathEntity trainingPath,
+      SkillLevelEntity skillLevel,
+      ESkillLevelStatus status,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new StudentProgressEntity(
+        id, student, trainingPath, skillLevel, status, createdAt, updatedAt);
+  }
 }

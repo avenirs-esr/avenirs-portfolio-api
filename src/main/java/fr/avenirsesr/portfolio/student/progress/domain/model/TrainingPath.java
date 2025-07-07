@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.domain.model;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
@@ -24,5 +25,17 @@ public class TrainingPath {
 
   public static TrainingPath toDomain(UUID id, Program program, Set<SkillLevel> skills) {
     return new TrainingPath(id, program, skills);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof TrainingPath that)) return false;
+    return Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
   }
 }

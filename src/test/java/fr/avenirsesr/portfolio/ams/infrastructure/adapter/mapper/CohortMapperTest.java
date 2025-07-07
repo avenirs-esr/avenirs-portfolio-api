@@ -118,6 +118,7 @@ class CohortMapperTest {
     TrainingPathEntity trainingPathEntity = new TrainingPathEntity();
     trainingPathEntity.setId(UUID.randomUUID());
     trainingPathEntity.setProgram(programEntity);
+    trainingPathEntity.setSkillLevels(new HashSet<>());
 
     StudentProgressEntity studentProgressEntity = new StudentProgressEntity();
     studentProgressEntity.setId(UUID.randomUUID());
@@ -218,6 +219,7 @@ class CohortMapperTest {
     TrainingPathEntity trainingPathEntity = new TrainingPathEntity();
     trainingPathEntity.setId(UUID.randomUUID());
     trainingPathEntity.setProgram(programEntity);
+    trainingPathEntity.setSkillLevels(new HashSet<>());
 
     StudentProgressEntity studentProgressEntity = new StudentProgressEntity();
     studentProgressEntity.setId(UUID.randomUUID());

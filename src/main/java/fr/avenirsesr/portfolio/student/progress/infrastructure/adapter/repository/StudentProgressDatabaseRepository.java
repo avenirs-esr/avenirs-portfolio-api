@@ -71,26 +71,32 @@ public class StudentProgressDatabaseRepository
                 .and(StudentProgressSpecification.isAPC()))
         .stream()
         .map(StudentProgressMapper::toDomain)
-        .collect(Collectors.toList());
+        .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))
+        .values()
+        .stream()
+        .map(List::getFirst)
+        .toList();
   }
 
   @Override
   public List<TrainingPath> findAllWithoutSkillsByStudent(Student student) {
     return jpaRepository.findAllByStudentIdAndLang(student.getId()).stream()
         .map(TrainingPathMapper::toDomainWithoutRecursion)
+        .collect(Collectors.groupingBy(TrainingPath::getId))
+        .values()
+        .stream()
+        .map(List::getFirst)
         .toList();
   }
 
   private List<StudentProgress> entityListToDomainList(
       List<StudentProgressEntity> trainingPathEntityList) {
-    return trainingPathEntityList.stream()
-        .map(StudentProgressMapper::toDomain)
-        .collect(Collectors.toList());
+    return trainingPathEntityList.stream().map(StudentProgressMapper::toDomain).toList();
   }
 
   private String sortFieldToExactPath(ESortField sortField) {
     return switch (sortField) {
-      case ESortField.NAME -> "program.translations.name";
+      case ESortField.NAME -> "trainingPath.program.translations.name";
       case ESortField.DATE -> "createdAt";
     };
   }

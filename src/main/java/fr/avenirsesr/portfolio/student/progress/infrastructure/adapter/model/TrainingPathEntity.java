@@ -1,11 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;

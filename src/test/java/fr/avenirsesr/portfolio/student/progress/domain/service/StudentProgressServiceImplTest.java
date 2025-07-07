@@ -167,6 +167,7 @@ public class StudentProgressServiceImplTest {
           StudentProgressFixture.create()
               .withTrainingPath(trainingPath)
               .withSkillLevel(SkillLevelFixture.create().withSkill(skill).toModel())
+              .withStatus(ESkillLevelStatus.NOT_STARTED)
               .withUser(student.getUser())
               .toModel();
       studentProgressList.add(studentProgress);
@@ -218,22 +219,35 @@ public class StudentProgressServiceImplTest {
   @Test
   void shouldReturnOnlyCurrentSkillLevelBySkill() {
     // Given
+    Skill skill1 = SkillFixture.create().toModel();
     SkillLevel skillLevel1 =
-        SkillLevelFixture.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+        SkillLevelFixture.create()
+            .withSkill(skill1)
+            .withStatus(ESkillLevelStatus.VALIDATED)
+            .toModel();
     SkillLevel skillLevel2 =
-        SkillLevelFixture.create().withStatus(ESkillLevelStatus.TO_BE_EVALUATED).toModel();
-    Skill skill1 =
-        SkillFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
+        SkillLevelFixture.create()
+            .withSkill(skill1)
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .toModel();
     TrainingPath trainingPath = TrainingPathFixture.create().toModel();
-    StudentProgress progress =
+    StudentProgress progress1 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
-            .withSkillLevel(SkillLevelFixture.create().withSkill(skill1).toModel())
+            .withSkillLevel(skillLevel1)
+            .withStatus(skillLevel1.getStatus())
+            .withUser(student.getUser())
+            .toModel();
+    StudentProgress progress2 =
+        StudentProgressFixture.create()
+            .withTrainingPath(trainingPath)
+            .withSkillLevel(skillLevel2)
+            .withStatus(skillLevel2.getStatus())
             .withUser(student.getUser())
             .toModel();
 
     when(studentProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
-        .thenReturn(List.of(progress));
+        .thenReturn(List.of(progress1, progress2));
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
@@ -250,22 +264,36 @@ public class StudentProgressServiceImplTest {
   @Test
   void shouldReturnOnlyUnderReviewSkillLevelBySkill() {
     // Given
+    Skill skill1 = SkillFixture.create().toModel();
     SkillLevel skillLevel1 =
-        SkillLevelFixture.create().withStatus(ESkillLevelStatus.UNDER_REVIEW).toModel();
+        SkillLevelFixture.create()
+            .withSkill(skill1)
+            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
+            .toModel();
     SkillLevel skillLevel2 =
-        SkillLevelFixture.create().withStatus(ESkillLevelStatus.TO_BE_EVALUATED).toModel();
-    Skill skill1 =
-        SkillFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
-    TrainingPath trainingPath = TrainingPathFixture.create().toModel();
-    StudentProgress progress =
+        SkillLevelFixture.create()
+            .withSkill(skill1)
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .toModel();
+    TrainingPath trainingPath =
+        TrainingPathFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
+    StudentProgress progress1 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
-            .withSkillLevel(SkillLevelFixture.create().withSkill(skill1).toModel())
+            .withSkillLevel(skillLevel1)
+            .withStatus(skillLevel1.getStatus())
+            .withUser(student.getUser())
+            .toModel();
+    StudentProgress progress2 =
+        StudentProgressFixture.create()
+            .withTrainingPath(trainingPath)
+            .withSkillLevel(skillLevel2)
+            .withStatus(skillLevel2.getStatus())
             .withUser(student.getUser())
             .toModel();
 
     when(studentProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
-        .thenReturn(List.of(progress));
+        .thenReturn(List.of(progress1, progress2));
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
@@ -282,22 +310,35 @@ public class StudentProgressServiceImplTest {
   @Test
   void shouldReturnOnlyUnderAcquisitionSkillLevelBySkill() {
     // Given
+    Skill skill1 = SkillFixture.create().toModel();
     SkillLevel skillLevel1 =
-        SkillLevelFixture.create().withStatus(ESkillLevelStatus.NOT_STARTED).toModel();
+        SkillLevelFixture.create()
+            .withSkill(skill1)
+            .withStatus(ESkillLevelStatus.NOT_STARTED)
+            .toModel();
     SkillLevel skillLevel2 =
-        SkillLevelFixture.create().withStatus(ESkillLevelStatus.UNDER_ACQUISITION).toModel();
-    Skill skill1 =
-        SkillFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
+        SkillLevelFixture.create()
+            .withSkill(skill1)
+            .withStatus(ESkillLevelStatus.UNDER_ACQUISITION)
+            .toModel();
     TrainingPath trainingPath = TrainingPathFixture.create().toModel();
-    StudentProgress progress =
+    StudentProgress progress1 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
-            .withSkillLevel(SkillLevelFixture.create().withSkill(skill1).toModel())
+            .withSkillLevel(skillLevel1)
+            .withStatus(skillLevel1.getStatus())
+            .withUser(student.getUser())
+            .toModel();
+    StudentProgress progress2 =
+        StudentProgressFixture.create()
+            .withTrainingPath(trainingPath)
+            .withSkillLevel(skillLevel2)
+            .withStatus(skillLevel2.getStatus())
             .withUser(student.getUser())
             .toModel();
 
     when(studentProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
-        .thenReturn(List.of(progress));
+        .thenReturn(List.of(progress1, progress2));
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
@@ -386,31 +427,6 @@ public class StudentProgressServiceImplTest {
   }
 
   @Test
-  void shouldReturnNullWhenSkillLevelsIsEmpty() {
-    // Given
-    Skill skill = SkillFixture.create().withSkillLevels(Set.of()).toModel();
-    TrainingPath trainingPath = TrainingPathFixture.create().toModel();
-    StudentProgress progress =
-        StudentProgressFixture.create()
-            .withTrainingPath(trainingPath)
-            .withSkillLevel(SkillLevelFixture.create().withSkill(skill).toModel())
-            .withUser(student.getUser())
-            .toModel();
-
-    when(studentProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
-        .thenReturn(List.of(progress));
-    // When
-    Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
-    List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
-    List<StudentProgress> studentProgresses1 =
-        new ArrayList<>(result.get(resultPrograms.getFirst()));
-
-    // Then
-    assertEquals(0, studentProgresses1.size());
-  }
-
-  @Test
   void shouldReturnAllSkillsInAllPrograms() {
     // Given
     List<StudentProgress> studentProgress1 =
@@ -419,7 +435,7 @@ public class StudentProgressServiceImplTest {
         createStudentProgress(UUID.randomUUID(), "B", List.of("f", "g", "h"));
     List<StudentProgress> studentProgress3 =
         createStudentProgress(
-            UUID.randomUUID(), "B", List.of("f", "g", "h", "i", "j", "k", "l", "m", "n"));
+            UUID.randomUUID(), "C", List.of("f", "g", "h", "i", "j", "k", "l", "m", "n"));
     List<StudentProgress> allProgress = new ArrayList<>();
     allProgress.addAll(studentProgress1);
     allProgress.addAll(studentProgress2);
@@ -432,12 +448,15 @@ public class StudentProgressServiceImplTest {
     Map<TrainingPath, Set<StudentProgress>> result =
         programProgressService.getSkillsView(student, sortCriteria);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
+    Set<StudentProgress> progressesForTrainingPath0 = result.get(resultPrograms.get(0));
+    Set<StudentProgress> progressesForTrainingPath1 = result.get(resultPrograms.get(1));
+    Set<StudentProgress> progressesForTrainingPath2 = result.get(resultPrograms.get(2));
 
     // Then
     assertEquals(3, resultPrograms.size());
-    assertEquals(5, resultPrograms.get(0).getSkillLevels().size());
-    assertEquals(3, resultPrograms.get(1).getSkillLevels().size());
-    assertEquals(9, resultPrograms.get(2).getSkillLevels().size());
+    assertEquals(5, progressesForTrainingPath0.size());
+    assertEquals(3, progressesForTrainingPath1.size());
+    assertEquals(9, progressesForTrainingPath2.size());
   }
 
   @Test
@@ -449,7 +468,7 @@ public class StudentProgressServiceImplTest {
         createStudentProgress(UUID.randomUUID(), "B", List.of("f", "g", "h"));
     List<StudentProgress> studentProgress3 =
         createStudentProgress(
-            UUID.randomUUID(), "B", List.of("f", "g", "h", "i", "j", "k", "l", "m", "n"));
+            UUID.randomUUID(), "C", List.of("f", "g", "h", "i", "j", "k", "l", "m", "n"));
     List<StudentProgress> allProgress = new ArrayList<>();
     allProgress.addAll(studentProgress1);
     allProgress.addAll(studentProgress2);
@@ -462,12 +481,15 @@ public class StudentProgressServiceImplTest {
     Map<TrainingPath, Set<StudentProgress>> result =
         programProgressService.getSkillsView(student, sortCriteria);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
+    Set<StudentProgress> progressesForTrainingPath0 = result.get(resultPrograms.get(0));
+    Set<StudentProgress> progressesForTrainingPath1 = result.get(resultPrograms.get(1));
+    Set<StudentProgress> progressesForTrainingPath2 = result.get(resultPrograms.get(2));
 
     // Then
     assertEquals(3, resultPrograms.size());
-    assertEquals(5, resultPrograms.get(0).getSkillLevels().size());
-    assertEquals(3, resultPrograms.get(1).getSkillLevels().size());
-    assertEquals(9, resultPrograms.get(2).getSkillLevels().size());
+    assertEquals(5, progressesForTrainingPath0.size());
+    assertEquals(3, progressesForTrainingPath1.size());
+    assertEquals(9, progressesForTrainingPath2.size());
   }
 
   @Test
@@ -512,35 +534,44 @@ public class StudentProgressServiceImplTest {
   @Test
   void shouldReturnNullWhenDontHaveValidCurrentSkillsForView() {
     // Given
+    Skill skill1 = SkillFixture.create().toModel();
     SkillLevel skillLevel1 =
-        SkillLevelFixture.create().withStatus(ESkillLevelStatus.VALIDATED).toModel();
+        SkillLevelFixture.create()
+            .withSkill(skill1)
+            .withStatus(ESkillLevelStatus.VALIDATED)
+            .toModel();
     SkillLevel skillLevel2 =
         SkillLevelFixture.create()
+            .withSkill(skill1)
             .withStatus(ESkillLevelStatus.UNDER_REVIEW)
             .withEndDate(LocalDate.now().minus(Period.ofDays(1)))
             .toModel();
-    Skill skill1 =
-        SkillFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
     TrainingPath trainingPath = TrainingPathFixture.create().toModel();
-    StudentProgress progress =
+    StudentProgress progress1 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
-            .withSkillLevel(SkillLevelFixture.create().withSkill(skill1).toModel())
+            .withSkillLevel(skillLevel1)
+            .withStatus(skillLevel1.getStatus())
+            .withUser(student.getUser())
+            .toModel();
+    StudentProgress progress2 =
+        StudentProgressFixture.create()
+            .withTrainingPath(trainingPath)
+            .withSkillLevel(skillLevel2)
+            .withStatus(skillLevel2.getStatus())
             .withUser(student.getUser())
             .toModel();
 
     when(studentProgressRepository.findAllByStudent(student, sortCriteria))
-        .thenReturn(List.of(progress));
+        .thenReturn(List.of(progress1, progress2));
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
         programProgressService.getSkillsView(student, sortCriteria);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
-    List<StudentProgress> studentProgresses1 =
-        new ArrayList<>(result.get(resultPrograms.getFirst()));
 
     // Then
-    assertEquals(0, studentProgresses1.size());
+    assertEquals(0, resultPrograms.size());
   }
 
   @Test
