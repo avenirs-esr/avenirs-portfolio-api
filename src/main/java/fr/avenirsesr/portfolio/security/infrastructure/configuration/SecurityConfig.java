@@ -2,8 +2,6 @@ package fr.avenirsesr.portfolio.security.infrastructure.configuration;
 
 import fr.avenirsesr.portfolio.security.infrastructure.filter.DevAuthenticationFilter;
 import fr.avenirsesr.portfolio.security.infrastructure.filter.HmacAuthenticationFilter;
-import java.util.Arrays;
-import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -31,13 +29,16 @@ public class SecurityConfig {
   private String[] permitAllPaths;
 
   @Value("${cors.allowed-origins}")
-  private String allowedOrigins;
+  private String allowedOriginsString;
 
   @Value("${cors.allowed-methods}")
   private String allowedMethodsString;
 
   @Value("${cors.allowed-headers}")
   private String allowedHeadersString;
+
+  @Value("${cors.allow-credentials}")
+  private boolean allowCredentials;
 
   public SecurityConfig(CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
     this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
@@ -68,10 +69,20 @@ public class SecurityConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(Collections.singletonList(allowedOrigins));
-    configuration.setAllowedMethods(Arrays.asList(allowedMethodsString.split(",")));
-    configuration.setAllowedHeaders(Arrays.asList(allowedHeadersString.split(",")));
-    configuration.setAllowCredentials(true);
+
+    for (String origin : allowedOriginsString.split(",")) {
+      configuration.addAllowedOrigin(origin.trim());
+    }
+
+    for (String method : allowedMethodsString.split(",")) {
+      configuration.addAllowedMethod(method.trim());
+    }
+
+    for (String header : allowedHeadersString.split(",")) {
+      configuration.addAllowedHeader(header.trim());
+    }
+
+    configuration.setAllowCredentials(allowCredentials);
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;

@@ -11,7 +11,7 @@ import org.springframework.web.filter.CorsFilter;
 public class WebConfig {
 
   @Value("${cors.allowed-origins}")
-  private String allowedOrigins;
+  private String allowedOriginsString;
 
   @Value("${cors.allowed-methods}")
   private String allowedMethodsString;
@@ -19,13 +19,19 @@ public class WebConfig {
   @Value("${cors.allowed-headers}")
   private String allowedHeadersString;
 
+  @Value("${cors.allow-credentials}")
+  private boolean allowCredentials;
+
   @Bean
   public CorsFilter corsFilter() {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     CorsConfiguration config = new CorsConfiguration();
 
-    config.setAllowCredentials(true);
-    config.addAllowedOrigin(allowedOrigins);
+    config.setAllowCredentials(allowCredentials);
+
+    for (String origin : allowedOriginsString.split(",")) {
+      config.addAllowedOrigin(origin.trim());
+    }
 
     for (String header : allowedHeadersString.split(",")) {
       config.addAllowedHeader(header.trim());
