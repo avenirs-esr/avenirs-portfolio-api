@@ -19,7 +19,9 @@ public interface StudentProgressMapper {
         studentProgressEntity.getId(),
         UserMapper.toDomain(studentProgressEntity.getStudent()),
         TrainingPathMapper.toDomain(studentProgressEntity.getTrainingPath()),
-        SkillLevelMapper.toDomainWithoutRecursion(studentProgressEntity.getSkillLevel()),
+        SkillLevelMapper.toDomain(
+            studentProgressEntity.getSkillLevel(),
+            SkillMapper.toDomainWithoutRecursion(studentProgressEntity.getSkillLevel().getSkill())),
         Optional.ofNullable(studentProgressEntity.getStatus()));
   }
 }

@@ -3,12 +3,14 @@ package fr.avenirsesr.portfolio.student.progress.domain.service;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortOrder;
+import fr.avenirsesr.portfolio.student.progress.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -28,21 +30,24 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
     for (StudentProgress sp : studentProgresses) {
       UUID trainingPathId = sp.getTrainingPath().getId();
-      UUID skillId = sp.getSkillLevel().getSkill().getId();
+      Skill skill = sp.getSkillLevel().getSkill();
+      UUID skillId = Objects.isNull(skill) ? null : skill.getId();
 
-      String key = trainingPathId + "-" + skillId;
+      if (!Objects.isNull(skillId) && sp.getSkillLevel().getEndDate().isAfter(LocalDate.now())) {
+        String key = trainingPathId + "-" + skillId;
 
-      if (!chosenByUserPathSkill.containsKey(key)) {
-        chosenByUserPathSkill.put(key, sp);
-        continue;
-      }
+        if (!chosenByUserPathSkill.containsKey(key)) {
+          chosenByUserPathSkill.put(key, sp);
+          continue;
+        }
 
-      StudentProgress current = chosenByUserPathSkill.get(key);
-      ESkillLevelStatus currentStatus = current.getSkillLevel().getStatus();
-      ESkillLevelStatus newStatus = sp.getSkillLevel().getStatus();
+        StudentProgress current = chosenByUserPathSkill.get(key);
+        ESkillLevelStatus currentStatus = current.getSkillLevel().getStatus();
+        ESkillLevelStatus newStatus = sp.getSkillLevel().getStatus();
 
-      if (isStatusHigherPriority(newStatus, currentStatus)) {
-        chosenByUserPathSkill.put(key, sp);
+        if (isStatusHigherPriority(newStatus, currentStatus)) {
+          chosenByUserPathSkill.put(key, sp);
+        }
       }
     }
 
@@ -86,18 +91,25 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                     LinkedHashMap::new,
                     Collectors.toCollection(LinkedHashSet::new)));
 
+    Map<TrainingPath, Set<StudentProgress>> sorted = new LinkedHashMap<>();
+
+    groupedByTrainingPath.entrySet().stream()
+        .sorted(Comparator.comparing(e -> e.getKey().getProgram().getName()))
+        .forEachOrdered(e -> sorted.put(e.getKey(), e.getValue()));
+
     if (needToLimitSkills) {
-      int trainingPathCount = groupedByTrainingPath.size();
+      int trainingPathCount = sorted.size();
       int skillLimitPerPath = trainingPathCount > 0 ? MAX_SKILLS / trainingPathCount : 0;
 
-      groupedByTrainingPath.replaceAll(
+      sorted.replaceAll(
           (tp, progresses) ->
               progresses.stream()
+                  .sorted(Comparator.comparing(sp -> sp.getSkillLevel().getSkill().getName()))
                   .limit(skillLimitPerPath)
                   .collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
-    return groupedByTrainingPath;
+    return sorted;
   }
 
   @Override

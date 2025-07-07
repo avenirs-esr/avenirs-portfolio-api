@@ -27,3 +27,5 @@ databaseChangeLog:
       file: db/changelog/013-create-table-cohort-ams.yaml
   - include:
       file: db/changelog/014-create-table-cohort-user.yaml
+  - include:
+      file: db/changelog/015-create-table-student-progress.yaml

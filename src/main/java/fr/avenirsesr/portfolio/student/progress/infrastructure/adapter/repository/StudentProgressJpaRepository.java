@@ -14,6 +14,7 @@ public interface StudentProgressJpaRepository
   @Query(
       "SELECT new"
           + " fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.dto.StudentTrainingPathSummaryDTO(p.id,"
-          + " pr) FROM StudentProgressEntity s JOIN s.trainingPath p JOIN p.program pr WHERE s.student.id = :studentId")
+          + " pr) FROM StudentProgressEntity s JOIN s.trainingPath p JOIN p.program pr WHERE"
+          + " s.student.id = :studentId")
   List<StudentTrainingPathSummaryDTO> findAllByStudentIdAndLang(UUID studentId);
 }
