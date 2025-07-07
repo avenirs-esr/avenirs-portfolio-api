@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FakeSkillLevel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake</a> &gt; <span class="el_source">FakeSkillLevel.java</span></div><h1>FakeSkillLevel.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake;
+
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelTranslationEntity;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+public class FakeSkillLevel {
+<span class="nc" id="L15">  private static final FakerProvider faker = new FakerProvider();</span>
+  private final SkillLevelEntity skillLevel;
+
+<span class="nc" id="L18">  private FakeSkillLevel(SkillLevelEntity skillLevel) {</span>
+<span class="nc" id="L19">    this.skillLevel = skillLevel;</span>
+<span class="nc" id="L20">  }</span>
+
+  public static FakeSkillLevel create() {
+<span class="nc" id="L23">    SkillLevelEntity entity =</span>
+<span class="nc" id="L24">        SkillLevelEntity.of(</span>
+<span class="nc" id="L25">            UUID.fromString(faker.call().internet().uuid()),</span>
+            null,
+<span class="nc" id="L27">            List.of(),</span>
+<span class="nc" id="L28">            List.of(),</span>
+            null,
+            null,
+            null);
+
+<span class="nc" id="L33">    entity.setTranslations(</span>
+<span class="nc" id="L34">        Set.of(</span>
+<span class="nc" id="L35">            SkillLevelTranslationEntity.of(</span>
+<span class="nc" id="L36">                UUID.fromString(faker.call().internet().uuid()),</span>
+                ELanguage.FALLBACK,
+                &quot;Niv. %s - [%s]&quot;
+<span class="nc" id="L39">                    .formatted(faker.call().lorem().character(), ELanguage.FALLBACK.getCode()),</span>
+                &quot;%s - [%s]&quot;
+<span class="nc" id="L41">                    .formatted(faker.call().lorem().sentence(), ELanguage.FALLBACK.getCode()),</span>
+                entity)));
+
+<span class="nc" id="L44">    return new FakeSkillLevel(entity).withStatus(ESkillLevelStatus.NOT_STARTED);</span>
+  }
+
+  public FakeSkillLevel addTranslation(ELanguage language) {
+<span class="nc" id="L48">    var translations = new java.util.HashSet&lt;&gt;(Set.copyOf(skillLevel.getTranslations()));</span>
+<span class="nc" id="L49">    translations.add(</span>
+<span class="nc" id="L50">        SkillLevelTranslationEntity.of(</span>
+<span class="nc" id="L51">            UUID.fromString(faker.call().internet().uuid()),</span>
+            language,
+<span class="nc" id="L53">            &quot;Niv. %s - [%s]&quot;.formatted(faker.call().lorem().character(), language.getCode()),</span>
+<span class="nc" id="L54">            &quot;%s - [%s]&quot;.formatted(faker.call().lorem().sentence(), language.getCode()),</span>
+            skillLevel));
+
+<span class="nc" id="L57">    skillLevel.setTranslations(translations);</span>
+
+<span class="nc" id="L59">    return this;</span>
+  }
+
+  public FakeSkillLevel withStatus(ESkillLevelStatus status) {
+<span class="nc" id="L63">    LocalDate pastStartDate = LocalDate.now().minus(Period.ofYears(2));</span>
+<span class="nc" id="L64">    LocalDate pastEndDate = LocalDate.now().minus(Period.ofYears(1));</span>
+<span class="nc" id="L65">    LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));</span>
+<span class="nc" id="L66">    LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));</span>
+<span class="nc" id="L67">    skillLevel.setStatus(status);</span>
+<span class="nc bnc" id="L68" title="All 4 branches missed.">    switch (status) {</span>
+      case VALIDATED, FAILED -&gt; {
+<span class="nc" id="L70">        skillLevel.setStartDate(pastStartDate);</span>
+<span class="nc" id="L71">        skillLevel.setEndDate(pastEndDate);</span>
+<span class="nc" id="L72">      }</span>
+      case UNDER_ACQUISITION, UNDER_REVIEW -&gt; {
+<span class="nc" id="L74">        skillLevel.setStartDate(pastStartDate);</span>
+<span class="nc" id="L75">        skillLevel.setEndDate(futureEndDate);</span>
+<span class="nc" id="L76">      }</span>
+      case TO_BE_EVALUATED, NOT_STARTED -&gt; {
+<span class="nc" id="L78">        skillLevel.setStartDate(futureStartDate);</span>
+<span class="nc" id="L79">        skillLevel.setEndDate(futureEndDate);</span>
+      }
+    }
+<span class="nc" id="L82">    return this;</span>
+  }
+
+  public SkillLevelEntity toEntity() {
+<span class="nc" id="L86">    return skillLevel;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
