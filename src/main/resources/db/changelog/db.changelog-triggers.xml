@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Create the function to set updated_at -->
+    <changeSet id="create-set-updated-at-function" author="bilelbanelhaq">
+        <sql splitStatements="false" stripComments="true">
+            CREATE OR REPLACE FUNCTION set_updated_at()
+            RETURNS TRIGGER AS $BODY$
+        BEGIN
+              NEW.updated_at = now();
+        RETURN NEW;
+        END;
+        $BODY$ LANGUAGE plpgsql;
+        </sql>
+    </changeSet>
+
+    <!-- Add triggers for each table -->
+    <changeSet id="create-updated-at-trigger-ams" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_ams ON ams;
+            CREATE TRIGGER trigger_set_updated_at_ams
+                BEFORE UPDATE
+                ON ams
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-ams_translation" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_ams_translation ON ams_translation;
+            CREATE TRIGGER trigger_set_updated_at_ams_translation
+                BEFORE UPDATE
+                ON ams_translation
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-configuration" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_configuration ON configuration;
+            CREATE TRIGGER trigger_set_updated_at_configuration
+                BEFORE UPDATE
+                ON configuration
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-external_user" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_external_user ON external_user;
+            CREATE TRIGGER trigger_set_updated_at_external_user
+                BEFORE UPDATE
+                ON external_user
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-institution" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_institution ON institution;
+            CREATE TRIGGER trigger_set_updated_at_institution
+                BEFORE UPDATE
+                ON institution
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-institution_translation" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_institution_translation ON institution_translation;
+            CREATE TRIGGER trigger_set_updated_at_institution_translation
+                BEFORE UPDATE
+                ON institution_translation
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-program" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_program ON program;
+            CREATE TRIGGER trigger_set_updated_at_program
+                BEFORE UPDATE
+                ON program
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-program_progress" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_program_progress ON program_progress;
+            CREATE TRIGGER trigger_set_updated_at_program_progress
+                BEFORE UPDATE
+                ON program_progress
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-program_translation" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_program_translation ON program_translation;
+            CREATE TRIGGER trigger_set_updated_at_program_translation
+                BEFORE UPDATE
+                ON program_translation
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-skill" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_skill ON skill;
+            CREATE TRIGGER trigger_set_updated_at_skill
+                BEFORE UPDATE
+                ON skill
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-skill_level" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_skill_level ON skill_level;
+            CREATE TRIGGER trigger_set_updated_at_skill_level
+                BEFORE UPDATE
+                ON skill_level
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-skill_level_translation" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_skill_level_translation ON skill_level_translation;
+            CREATE TRIGGER trigger_set_updated_at_skill_level_translation
+                BEFORE UPDATE
+                ON skill_level_translation
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-skill_translation" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_skill_translation ON skill_translation;
+            CREATE TRIGGER trigger_set_updated_at_skill_translation
+                BEFORE UPDATE
+                ON skill_translation
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-trace" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_trace ON trace;
+            CREATE TRIGGER trigger_set_updated_at_trace
+                BEFORE UPDATE
+                ON trace
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-user" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_user ON "user";
+            CREATE TRIGGER trigger_set_updated_at_user
+                BEFORE UPDATE
+                ON "user"
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-cohort" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_cohort ON "cohort";
+            CREATE TRIGGER trigger_set_updated_at_cohort
+                BEFORE UPDATE
+                ON "cohort"
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
