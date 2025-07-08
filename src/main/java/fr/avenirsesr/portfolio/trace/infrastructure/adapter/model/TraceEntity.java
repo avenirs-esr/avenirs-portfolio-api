@@ -55,10 +55,11 @@ public class TraceEntity extends AvenirsBaseEntity {
       inverseJoinColumns = @JoinColumn(name = "ams_id"))
   private List<AMSEntity> amses;
 
-  @Column(nullable = false)
+  @Column(nullable = false, name = "is_group")
   private boolean isGroup;
 
-  @Column private Instant deletedAt;
+  @Column(name = "deleted_at")
+  private Instant deletedAt;
 
   private TraceEntity(
       UUID id,
