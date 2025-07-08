@@ -32,6 +32,55 @@ L’API sera accessible sur : [http://localhost:10000](http://localhost:10000)
 
 ---
 
+## 📦 Génération et application des changelogs Liquibase
+
+Pour initialiser la base de données avec tous les changelogs à jour, utilise la commande suivante **à partir du
+dossier `srv-dev`** :
+
+**Commande :**
+
+```bash
+npm run api:reset-db
+```
+
+Cette commande :
+
+- Supprime la base de données existante
+- Recrée la base, les rôles et les schémas
+- Applique **tous les changelogs Liquibase** pour créer les tables
+
+---
+
+### 🛠️ Générer un nouveau changelog
+
+Toujours depuis `srv-dev`, exécute :
+
+```bash
+npm run api:generate-changelog
+```
+
+Un fichier sera généré dans :  
+`src/main/resources/db/changelog/generated/`
+
+**⚠️ Attention** :
+
+- Même si aucun changement n’est détecté, **un fichier vide est quand même généré** → pense à le **supprimer
+  manuellement**
+- Liquibase ne détecte **pas tous les changements** (nullable, renommages, contraintes, etc.)  
+  → Toujours **relire le changelog généré** et corriger manuellement si besoin.
+
+---
+
+### ✅ Appliquer les nouveaux changelogs
+
+Deux options s’offrent à toi :
+
+- **Réinitialiser complètement** la base : `npm run api:reset-db`
+
+- **Appliquer les différences** sans supprimer les données : `mvn liquibase:update` _(à lancer depuis l’API)_
+
+---
+
 ## 🧪 Lancer les tests
 
 ```bash
@@ -74,7 +123,8 @@ Seeding successfully finished
 
 ## 🧹 Code Formatting – Google Java Format (via Spotless)
 
-This project enforces code formatting using [google-java-format](https://github.com/google/google-java-format) via the [Spotless Maven plugin](https://github.com/diffplug/spotless).
+This project enforces code formatting using [google-java-format](https://github.com/google/google-java-format) via
+the [Spotless Maven plugin](https://github.com/diffplug/spotless).
 
 ---
 
@@ -85,7 +135,9 @@ Before committing or pushing code, you can verify that your Java files follow th
 ```bash
 mvn spotless:check
 ```
+
 ### ✨ Format code
+
 If you find any files that are not formatted correctly, you can automatically format them using:
 
 ```bash
@@ -98,7 +150,8 @@ mvn spotless:apply
 
 L’API est documentée via **Swagger** :
 
-👉 [http://localhost:10000/avenirs-portfolio-api/swagger-ui](http://localhost:10000/avenirs-portfolio-api/swagger-ui) (en local)
+👉 [http://localhost:10000/avenirs-portfolio-api/swagger-ui](http://localhost:10000/avenirs-portfolio-api/swagger-ui) (en
+local)
 
 ---
 
