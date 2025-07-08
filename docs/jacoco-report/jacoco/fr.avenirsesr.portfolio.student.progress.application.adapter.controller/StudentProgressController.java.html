@@ -4,10 +4,8 @@ import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.StudentProgressOverviewDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.StudentProgressViewDTO;
-import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.TrainingPathDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.StudentProgressOverviewMapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.StudentProgressViewMapper;
-import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.TrainingPathMapper;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.security.Principal;
@@ -20,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-<span class="fc" id="L23">@Slf4j</span>
+<span class="fc" id="L21">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/student-progress&quot;)
 public class StudentProgressController {
@@ -29,31 +27,23 @@ public class StudentProgressController {
 
   @GetMapping(&quot;/overview&quot;)
   public List&lt;StudentProgressOverviewDTO&gt; getSkillsOverview(Principal principal) {
-<span class="nc" id="L32">    Student student = userUtil.getStudent(principal);</span>
-<span class="nc" id="L33">    return studentProgressService.getSkillsOverview(student).entrySet().stream()</span>
-<span class="nc" id="L34">        .map(</span>
+<span class="nc" id="L30">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L31">    return studentProgressService.getSkillsOverview(student).entrySet().stream()</span>
+<span class="nc" id="L32">        .map(</span>
             entry -&gt;
-<span class="nc" id="L36">                StudentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
-<span class="nc" id="L37">        .toList();</span>
+<span class="nc" id="L34">                StudentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="nc" id="L35">        .toList();</span>
   }
 
   @GetMapping(&quot;/view&quot;)
   public List&lt;StudentProgressViewDTO&gt; getSkillsView(
       Principal principal, @RequestParam(name = &quot;sort&quot;, required = false) String sortRaw) {
-<span class="nc" id="L43">    SortCriteria sortCriteria = SortCriteria.fromString(sortRaw);</span>
-<span class="nc" id="L44">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L41">    SortCriteria sortCriteria = SortCriteria.fromString(sortRaw);</span>
+<span class="nc" id="L42">    Student student = userUtil.getStudent(principal);</span>
 
-<span class="nc" id="L46">    return studentProgressService.getSkillsView(student, sortCriteria).entrySet().stream()</span>
-<span class="nc" id="L47">        .map(entry -&gt; StudentProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
-<span class="nc" id="L48">        .toList();</span>
-  }
-
-  @GetMapping()
-  public List&lt;TrainingPathDTO&gt; getAllProgramProgress(Principal principal) {
-<span class="nc" id="L53">    Student student = userUtil.getStudent(principal);</span>
-<span class="nc" id="L54">    return studentProgressService.getAllStudentProgress(student).stream()</span>
-<span class="nc" id="L55">        .map(TrainingPathMapper::fromDomainToDto)</span>
-<span class="nc" id="L56">        .toList();</span>
+<span class="nc" id="L44">    return studentProgressService.getSkillsView(student, sortCriteria).entrySet().stream()</span>
+<span class="nc" id="L45">        .map(entry -&gt; StudentProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="nc" id="L46">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

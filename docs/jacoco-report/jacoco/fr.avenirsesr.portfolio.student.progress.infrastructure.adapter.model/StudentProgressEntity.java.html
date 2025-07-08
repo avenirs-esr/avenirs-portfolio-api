@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudentProgressEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model</a> &gt; <span class="el_source">StudentProgressEntity.java</span></div><h1>StudentProgressEntity.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
-import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
@@ -38,15 +40,15 @@ public class StudentProgressEntity extends AvenirsBaseEntity {
       SkillLevelEntity skillLevel,
       ESkillLevelStatus status,
       Instant createdAt,
-<span class="fc" id="L41">      Instant updatedAt) {</span>
-<span class="fc" id="L42">    this.setId(id);</span>
-<span class="fc" id="L43">    this.student = student;</span>
-<span class="fc" id="L44">    this.trainingPath = trainingPath;</span>
-<span class="fc" id="L45">    this.skillLevel = skillLevel;</span>
-<span class="fc" id="L46">    this.status = status;</span>
-<span class="fc" id="L47">    this.setCreatedAt(createdAt);</span>
-<span class="fc" id="L48">    this.setUpdatedAt(updatedAt);</span>
-<span class="fc" id="L49">  }</span>
+<span class="fc" id="L43">      Instant updatedAt) {</span>
+<span class="fc" id="L44">    this.setId(id);</span>
+<span class="fc" id="L45">    this.student = student;</span>
+<span class="fc" id="L46">    this.trainingPath = trainingPath;</span>
+<span class="fc" id="L47">    this.skillLevel = skillLevel;</span>
+<span class="fc" id="L48">    this.status = status;</span>
+<span class="fc" id="L49">    this.setCreatedAt(createdAt);</span>
+<span class="fc" id="L50">    this.setUpdatedAt(updatedAt);</span>
+<span class="fc" id="L51">  }</span>
 
   public static StudentProgressEntity of(
       UUID id,
@@ -56,7 +58,7 @@ public class StudentProgressEntity extends AvenirsBaseEntity {
       ESkillLevelStatus status,
       Instant createdAt,
       Instant updatedAt) {
-<span class="fc" id="L59">    return new StudentProgressEntity(</span>
+<span class="fc" id="L61">    return new StudentProgressEntity(</span>
         id, student, trainingPath, skillLevel, status, createdAt, updatedAt);
   }
 }
