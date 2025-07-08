@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.ams.domain.model;
 
-import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.util.HashSet;
 import java.util.Set;

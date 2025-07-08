@@ -11,6 +11,6 @@ public interface SkillViewMapper {
         studentProgress.getSkillLevel().getTraces().size(),
         studentProgress.getSkillLevel().getAmses().size(),
         levelCount,
-        SkillLevelViewMapper.fromDomainToDto(studentProgress.getSkillLevel()));
+        SkillLevelViewMapper.fromDomainToDto(studentProgress));
   }
 }

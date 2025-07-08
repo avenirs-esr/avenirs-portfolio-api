@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 

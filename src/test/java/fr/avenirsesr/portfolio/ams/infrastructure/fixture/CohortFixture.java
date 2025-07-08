@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.ams.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
-import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.TrainingPathFixture;
+import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.ArrayList;

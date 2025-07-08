@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.TrainingPathMapper;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.TrainingPathMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.stream.Collectors;
 

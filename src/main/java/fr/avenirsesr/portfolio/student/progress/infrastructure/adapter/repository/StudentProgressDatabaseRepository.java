@@ -5,10 +5,8 @@ import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.StudentProgressMapper;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.TrainingPathMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.StudentProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -72,17 +70,6 @@ public class StudentProgressDatabaseRepository
         .stream()
         .map(StudentProgressMapper::toDomain)
         .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))
-        .values()
-        .stream()
-        .map(List::getFirst)
-        .toList();
-  }
-
-  @Override
-  public List<TrainingPath> findAllWithoutSkillsByStudent(Student student) {
-    return jpaRepository.findAllByStudentIdAndLang(student.getId()).stream()
-        .map(TrainingPathMapper::toDomainWithoutRecursion)
-        .collect(Collectors.groupingBy(TrainingPath::getId))
         .values()
         .stream()
         .map(List::getFirst)

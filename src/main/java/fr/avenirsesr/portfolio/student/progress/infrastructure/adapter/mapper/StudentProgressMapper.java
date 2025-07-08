@@ -1,9 +1,11 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillMapper;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.TrainingPathMapper;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
-import java.util.Optional;
 
 public interface StudentProgressMapper {
   static StudentProgressEntity fromDomain(StudentProgress studentProgress) {
@@ -22,6 +24,6 @@ public interface StudentProgressMapper {
         SkillLevelMapper.toDomain(
             studentProgressEntity.getSkillLevel(),
             SkillMapper.toDomainWithoutRecursion(studentProgressEntity.getSkillLevel().getSkill())),
-        Optional.ofNullable(studentProgressEntity.getStatus()));
+        studentProgressEntity.getStatus());
   }
 }

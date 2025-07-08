@@ -1,12 +1,13 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
-import java.util.Optional;
 import java.util.UUID;
 
 public class StudentProgressFixture {
@@ -54,7 +55,6 @@ public class StudentProgressFixture {
   }
 
   public StudentProgress toModel() {
-    return StudentProgress.toDomain(
-        id, user, trainingPath, skillLevel, Optional.ofNullable(status));
+    return StudentProgress.toDomain(id, user, trainingPath, skillLevel, status);
   }
 }
