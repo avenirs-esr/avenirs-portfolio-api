@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.configuration;
 
-import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceStatus;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import io.swagger.v3.oas.models.Components;

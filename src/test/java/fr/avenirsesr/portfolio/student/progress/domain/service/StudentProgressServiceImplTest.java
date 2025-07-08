@@ -5,12 +5,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.program.domain.model.Program;
+import fr.avenirsesr.portfolio.program.domain.model.Skill;
+import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.ProgramFixture;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.student.progress.domain.model.*;
-import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -28,10 +36,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class StudentProgressServiceImplTest {
-  private final ELanguage language = ELanguage.FRENCH;
+  private final ELanguage language = ELanguage.FALLBACK;
   private final SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
   @Mock private StudentProgressRepository studentProgressRepository;
-  @InjectMocks private StudentProgressServiceImpl programProgressService;
+  @InjectMocks private StudentProgressServiceImpl studentProgressService;
   private Student student;
 
   @BeforeEach
@@ -45,7 +53,7 @@ public class StudentProgressServiceImplTest {
         .thenReturn(List.of());
 
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
+        studentProgressService.getSkillsOverview(student);
 
     assertTrue(result.isEmpty());
   }
@@ -70,7 +78,7 @@ public class StudentProgressServiceImplTest {
         .thenReturn(allProgress);
 
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
+        studentProgressService.getSkillsOverview(student);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
 
     assertEquals(3, resultPrograms.size());
@@ -93,7 +101,7 @@ public class StudentProgressServiceImplTest {
         .thenReturn(allProgress);
 
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
+        studentProgressService.getSkillsOverview(student);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     List<StudentProgress> studentProgresses1 = new ArrayList<>(result.get(resultPrograms.get(0)));
     List<StudentProgress> studentProgresses2 = new ArrayList<>(result.get(resultPrograms.get(1)));
@@ -119,7 +127,7 @@ public class StudentProgressServiceImplTest {
         .thenReturn(allProgress);
 
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
+        studentProgressService.getSkillsOverview(student);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     List<StudentProgress> studentProgresses1 = new ArrayList<>(result.get(resultPrograms.get(0)));
     List<StudentProgress> studentProgresses2 = new ArrayList<>(result.get(resultPrograms.get(1)));
@@ -144,7 +152,7 @@ public class StudentProgressServiceImplTest {
         .thenReturn(allProgress);
 
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
+        studentProgressService.getSkillsOverview(student);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     List<StudentProgress> studentProgresses1 = new ArrayList<>(result.get(resultPrograms.get(0)));
     List<StudentProgress> studentProgresses2 = new ArrayList<>(result.get(resultPrograms.get(1)));
@@ -196,7 +204,7 @@ public class StudentProgressServiceImplTest {
         .thenReturn(List.of(progressAPCModel));
 
     // When
-    boolean result = programProgressService.isStudentFollowingAPCProgram(student);
+    boolean result = studentProgressService.isStudentFollowingAPCProgram(student);
 
     // Then
     assertTrue(result);
@@ -209,7 +217,7 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllAPCByStudent(student)).thenReturn(List.of());
 
     // When
-    boolean result = programProgressService.isStudentFollowingAPCProgram(student);
+    boolean result = studentProgressService.isStudentFollowingAPCProgram(student);
 
     // Then
     assertFalse(result);
@@ -251,7 +259,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
+        studentProgressService.getSkillsOverview(student);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     List<StudentProgress> studentProgresses1 =
         new ArrayList<>(result.get(resultPrograms.getFirst()));
@@ -297,7 +305,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
+        studentProgressService.getSkillsOverview(student);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     List<StudentProgress> studentProgresses1 =
         new ArrayList<>(result.get(resultPrograms.getFirst()));
@@ -342,7 +350,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
+        studentProgressService.getSkillsOverview(student);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     List<StudentProgress> studentProgresses1 =
         new ArrayList<>(result.get(resultPrograms.getFirst()));
@@ -378,7 +386,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
+        studentProgressService.getSkillsOverview(student);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     List<StudentProgress> studentProgresses1 =
         new ArrayList<>(result.get(resultPrograms.getFirst()));
@@ -416,7 +424,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsOverview(student);
+        studentProgressService.getSkillsOverview(student);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     List<StudentProgress> studentProgresses1 =
         new ArrayList<>(result.get(resultPrograms.getFirst()));
@@ -446,7 +454,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsView(student, sortCriteria);
+        studentProgressService.getSkillsView(student, sortCriteria);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     Set<StudentProgress> progressesForTrainingPath0 = result.get(resultPrograms.get(0));
     Set<StudentProgress> progressesForTrainingPath1 = result.get(resultPrograms.get(1));
@@ -479,7 +487,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsView(student, sortCriteria);
+        studentProgressService.getSkillsView(student, sortCriteria);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     Set<StudentProgress> progressesForTrainingPath0 = result.get(resultPrograms.get(0));
     Set<StudentProgress> progressesForTrainingPath1 = result.get(resultPrograms.get(1));
@@ -516,12 +524,12 @@ public class StudentProgressServiceImplTest {
             .withUser(student.getUser())
             .toModel();
 
-    when(studentProgressRepository.findAllByStudent(student, sortCriteria))
+    when(studentProgressRepository.findAllByStudent(any(Student.class), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsView(student, sortCriteria);
+        studentProgressService.getSkillsView(student, sortCriteria);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
     List<StudentProgress> studentProgresses1 =
         new ArrayList<>(result.get(resultPrograms.getFirst()));
@@ -567,33 +575,10 @@ public class StudentProgressServiceImplTest {
 
     // When
     Map<TrainingPath, Set<StudentProgress>> result =
-        programProgressService.getSkillsView(student, sortCriteria);
+        studentProgressService.getSkillsView(student, sortCriteria);
     List<TrainingPath> resultPrograms = new ArrayList<>(result.keySet());
 
     // Then
     assertEquals(0, resultPrograms.size());
-  }
-
-  @Test
-  void shouldReturnAllProgramProgressForStudent() {
-    // Given
-    Program program1 = ProgramFixture.create().withName("Beta").toModel();
-    Program program2 = ProgramFixture.create().withName("Alpha").toModel();
-    TrainingPath trainingPath1 = TrainingPathFixture.create().withProgram(program1).toModel();
-    TrainingPath trainingPath2 = TrainingPathFixture.create().withProgram(program2).toModel();
-    List<TrainingPath> allTrainingPaths = new ArrayList<>();
-    allTrainingPaths.add(trainingPath1);
-    allTrainingPaths.add(trainingPath2);
-
-    when(studentProgressRepository.findAllWithoutSkillsByStudent(student))
-        .thenReturn(allTrainingPaths);
-
-    // When
-    List<TrainingPath> result = programProgressService.getAllStudentProgress(student);
-
-    // Then
-    assertEquals(2, result.size());
-    assertEquals("Alpha", result.get(0).getProgram().getName());
-    assertEquals("Beta", result.get(1).getProgram().getName());
   }
 }

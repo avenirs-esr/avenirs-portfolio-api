@@ -2,6 +2,10 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.*;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
@@ -65,9 +69,10 @@ public class SeederRunner implements CommandLineRunner {
       var savedSkills = skillSeeder.seed(savedPrograms);
       var savedSkillLevels =
           savedSkills.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
-      var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedUsers, savedSkillLevels);
+      var savedStudents = savedUsers.stream().filter(u -> u.getStudent().isPresent()).toList();
+      var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
       var savedStudentProgresses =
-          studentProgressSeeder.seed(savedTrainingPaths, savedUsers, savedSkillLevels);
+          studentProgressSeeder.seed(savedTrainingPaths, savedStudents, savedSkillLevels);
       var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
       var savedAmses = amsSeeder.seed(savedUsers, savedSkillLevels, savedTraces, savedCohorts);
 

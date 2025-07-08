@@ -24,9 +24,8 @@ public class SeederConfig {
   public static final int SKILL_BY_PROGRAM = 6;
   public static final int SKILL_LEVEL_BY_SKILL = 3;
 
-  // Program progress
-  public static final int PROGRAM_PROGRESS_BY_PROGRAM = 3;
-  public static final int PROGRAM_PROGRESS_NB_STUDENT_MAX = 5;
+  // Training paths
+  public static final int TRAINING_PATH_BY_PROGRAM = 3;
 
   // Cohorts
   public static final int COHORTS_NB = 500;

@@ -1,12 +1,11 @@
 package fr.avenirsesr.portfolio.student.progress.domain.service;
 
+import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortOrder;
-import fr.avenirsesr.portfolio.student.progress.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.student.progress.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -30,10 +29,9 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
     for (StudentProgress sp : studentProgresses) {
       UUID trainingPathId = sp.getTrainingPath().getId();
-      Skill skill = sp.getSkillLevel().getSkill();
-      UUID skillId = Objects.isNull(skill) ? null : skill.getId();
+      UUID skillId = sp.getSkillLevel().getSkill().getId();
 
-      if (!Objects.isNull(skillId) && sp.getSkillLevel().getEndDate().isAfter(LocalDate.now())) {
+      if (sp.getSkillLevel().getEndDate().isAfter(LocalDate.now())) {
         String key = trainingPathId + "-" + skillId;
 
         if (!chosenByUserPathSkill.containsKey(key)) {
@@ -42,8 +40,8 @@ public class StudentProgressServiceImpl implements StudentProgressService {
         }
 
         StudentProgress current = chosenByUserPathSkill.get(key);
-        ESkillLevelStatus currentStatus = current.getSkillLevel().getStatus();
-        ESkillLevelStatus newStatus = sp.getSkillLevel().getStatus();
+        ESkillLevelStatus currentStatus = current.getStatus();
+        ESkillLevelStatus newStatus = sp.getStatus();
 
         if (isStatusHigherPriority(newStatus, currentStatus)) {
           chosenByUserPathSkill.put(key, sp);
@@ -52,22 +50,22 @@ public class StudentProgressServiceImpl implements StudentProgressService {
     }
 
     return chosenByUserPathSkill.values().stream()
-        .filter(sp -> isValidStatus(sp.getSkillLevel().getStatus()))
+        .filter(sp -> statusIsValid(sp.getStatus()))
         .toList();
   }
 
-  private static boolean isValidStatus(ESkillLevelStatus status) {
-    return status == ESkillLevelStatus.UNDER_REVIEW
-        || status == ESkillLevelStatus.UNDER_ACQUISITION
-        || status == ESkillLevelStatus.TO_BE_EVALUATED
-        || status == ESkillLevelStatus.NOT_STARTED;
+  private static boolean statusIsValid(ESkillLevelStatus status) {
+    return switch (status) {
+      case UNDER_REVIEW, UNDER_ACQUISITION, TO_BE_EVALUATED, NOT_STARTED -> true;
+      case FAILED, VALIDATED -> false;
+    };
   }
 
   private static int getStatusPriority(ESkillLevelStatus status) {
     return switch (status) {
       case UNDER_REVIEW, UNDER_ACQUISITION -> 1;
       case TO_BE_EVALUATED, NOT_STARTED -> 2;
-      default -> 3;
+      case VALIDATED, FAILED -> 3;
     };
   }
 
@@ -133,12 +131,5 @@ public class StudentProgressServiceImpl implements StudentProgressService {
     }
     return cleanStudentProgressList(
         studentProgressRepository.findAllByStudent(student, sortCriteria), false);
-  }
-
-  @Override
-  public List<TrainingPath> getAllStudentProgress(Student student) {
-    return studentProgressRepository.findAllWithoutSkillsByStudent(student).stream()
-        .sorted(Comparator.comparing(p -> p.getProgram().getName()))
-        .collect(Collectors.toList());
   }
 }

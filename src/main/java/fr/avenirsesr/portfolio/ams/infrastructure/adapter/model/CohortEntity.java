@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
