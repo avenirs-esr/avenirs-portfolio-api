@@ -6,7 +6,16 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
-## [v1.1.1] - 2025-03-07
+## [v1.2.0] - 2025-07-08
+
+- 🛠️ **Added Liquibase Changelog Generation Feature**
+    - Introduced the capability to generate and apply Liquibase changelog files.
+    - Use `npm run api:reset-db` to initialize the database with all changelogs applied.
+    - Generate new changelog files with `npm run api:generate-changelog`.
+    - Apply new changelogs either by resetting the database or updating it with `mvn liquibase:update`.
+    - **Note:** Always review generated changelog files for accuracy and completeness.
+
+## [v1.1.1] - 2025-07-03
 
 - ✨ Refactor Seeder System
 - 🛠️ Introduced `SeederConfig` to centralize and group all seeding constants
