@@ -23,7 +23,7 @@ import lombok.Setter;
 @Entity
 @Table(
     name = "external_user",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"eternal_id", "source"}))
+    uniqueConstraints = @UniqueConstraint(columnNames = {"external_id", "source"}))
 @NoArgsConstructor
 @Getter
 @Setter
@@ -33,7 +33,7 @@ public class ExternalUserEntity {
   @Setter(AccessLevel.NONE)
   private UUID id;
 
-  @Column(nullable = false)
+  @Column(nullable = false, name = "external_id")
   private String externalId;
 
   @Column(nullable = false)
