@@ -21,10 +21,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserEntity extends AvenirsBaseEntity {
-  @Column(nullable = false)
+  @Column(nullable = false, name = &quot;first_name&quot;)
   private String firstName;
 
-  @Column(nullable = false)
+  @Column(nullable = false, name = &quot;last_name&quot;)
   private String lastName;
 
   @Email @Column private String email;
