@@ -24,12 +24,14 @@ public class StudentProgressEntity extends AvenirsBaseEntity {
   private UserEntity student;
 
   @ManyToOne(optional = false)
+  @JoinColumn(name = "training_path_id")
   private TrainingPathEntity trainingPath;
 
   @ManyToOne(optional = false)
+  @JoinColumn(name = "skill_level_id")
   private SkillLevelEntity skillLevel;
 
-  @Column
+  @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
 

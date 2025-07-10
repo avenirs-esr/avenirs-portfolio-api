@@ -1,29 +1,27 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-1">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-1">
         <createTable tableName="ams">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="amsPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="end_date" type="TIMESTAMP(6) WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
             <column name="start_date" type="TIMESTAMP(6) WITHOUT TIME ZONE">
                 <constraints nullable="false"/>
             </column>
-            <column name="status" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="user_id" type="UUID">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-2">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-2">
         <createTable tableName="ams_skill_level">
             <column name="ams_id" type="UUID">
                 <constraints nullable="false"/>
@@ -33,17 +31,13 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-3">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-3">
         <createTable tableName="ams_translation">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="ams_translationPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="language" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -55,27 +49,23 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-4">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-4">
         <createTable tableName="cohort">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="cohortPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="description" type="VARCHAR(255)"/>
             <column name="name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="program_progress_id" type="UUID">
+            <column name="training_path_id" type="UUID">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-5">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-5">
         <createTable tableName="cohort_ams">
             <column name="ams_id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="cohort_amsPK"/>
@@ -85,7 +75,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-6">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-6">
         <createTable tableName="cohort_user">
             <column name="cohort_id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="cohort_userPK"/>
@@ -95,17 +85,13 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-7">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-7">
         <createTable tableName="configuration">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="configurationPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -114,7 +100,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-8">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-8">
         <createTable tableName="external_user">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="external_userPK"/>
@@ -148,33 +134,25 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-9">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-9">
         <createTable tableName="institution">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="institutionPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="enabled_fields" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-10">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-10">
         <createTable tableName="institution_translation">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="institution_translationPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="language" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -186,17 +164,13 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-11">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-11">
         <createTable tableName="program">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="programPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="duration_count" type="INTEGER"/>
             <column name="duration_unit" type="VARCHAR(255)"/>
             <column name="is_apc" type="BOOLEAN">
@@ -207,36 +181,13 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-12">
-        <createTable tableName="program_progress">
-            <column name="id" type="UUID">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="program_progressPK"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="program_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="student_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-13">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-12">
         <createTable tableName="program_translation">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="program_translationPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="language" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -248,31 +199,22 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-14">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-13">
         <createTable tableName="skill">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="skillPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column name="program_progress_id" type="UUID"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-15">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-14">
         <createTable tableName="skill_level">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="skill_levelPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="end_date" type="date">
                 <constraints nullable="false"/>
             </column>
@@ -281,19 +223,16 @@
             </column>
             <column name="status" type="VARCHAR(255)"/>
             <column name="skill_id" type="UUID"/>
+            <column name="training_path_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-16">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-15">
         <createTable tableName="skill_level_translation">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="skill_level_translationPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="language" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -306,17 +245,13 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-17">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-16">
         <createTable tableName="skill_translation">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="skill_translationPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="language" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -328,17 +263,34 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-18">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-17">
+        <createTable tableName="student_progress">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="student_progressPK"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_level_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="student_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="training_path_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-18">
         <createTable tableName="trace">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="tracePK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="deleted_at" type="TIMESTAMP(6) WITHOUT TIME ZONE"/>
             <column name="is_group" type="BOOLEAN">
                 <constraints nullable="false"/>
@@ -354,7 +306,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-19">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-19">
         <createTable tableName="trace_ams">
             <column name="trace_id" type="UUID">
                 <constraints nullable="false"/>
@@ -364,7 +316,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-20">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-20">
         <createTable tableName="trace_skill_level">
             <column name="trace_id" type="UUID">
                 <constraints nullable="false"/>
@@ -374,17 +326,25 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-21">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-21">
+        <createTable tableName="training_path">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="training_pathPK"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="program_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-22">
         <createTable tableName="user">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="userPK"/>
             </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
-                <constraints nullable="false"/>
-            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column name="email" type="VARCHAR(255)"/>
             <column name="first_name" type="VARCHAR(255)">
                 <constraints nullable="false"/>
@@ -402,79 +362,85 @@
             <column name="teacher_profile_picture" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-22">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-23">
         <addUniqueConstraint columnNames="external_id, source" constraintName="UKiqmhgee6pmpujonjcuwcrxjy6" tableName="external_user"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-23">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-24">
+        <addForeignKeyConstraint baseColumnNames="skill_level_id" baseTableName="student_progress" constraintName="FK1i1xekhboumqi51wi3crsnusp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="skill_level" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-25">
         <addForeignKeyConstraint baseColumnNames="trace_id" baseTableName="trace_ams" constraintName="FK20bh0fn3idgah6j6njqbyyubp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="trace" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-24">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-26">
         <addForeignKeyConstraint baseColumnNames="skill_id" baseTableName="skill_translation" constraintName="FK487nr9gqeb3reepdasuccwetv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="skill" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-25">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-27">
         <addForeignKeyConstraint baseColumnNames="cohort_id" baseTableName="cohort_ams" constraintName="FK4lmrm16tqgdeg2tdewrve3wvf" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="cohort" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-26">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-28">
         <addForeignKeyConstraint baseColumnNames="ams_id" baseTableName="ams_skill_level" constraintName="FK5lhlnjp6lhsfemd96jhn3veh2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ams" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-27">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-29">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="student_progress" constraintName="FK739vikxivy83rik5edf4se7kn" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-30">
         <addForeignKeyConstraint baseColumnNames="program_id" baseTableName="program_translation" constraintName="FK7c2whuc7h5wqfnqorwx18hqn2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="program" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-28">
-        <addForeignKeyConstraint baseColumnNames="program_progress_id" baseTableName="cohort" constraintName="FK7n3qu4xuy5ivikppokvrcyvuy" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="program_progress" validate="true"/>
-    </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-29">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-31">
         <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="institution_translation" constraintName="FK886t77iwh1kd2u7kg6qj05qb6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="institution" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-30">
-        <addForeignKeyConstraint baseColumnNames="program_progress_id" baseTableName="skill" constraintName="FK91ecloe2hf8tgqhd4e722dgul" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="program_progress" validate="true"/>
-    </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-31">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-32">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="ams" constraintName="FK9byulnw3u0cog0fpjfa4bpfoy" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-32">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-33">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="external_user" constraintName="FKal8pfemrd8yc55d3gt7phxx7i" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-33">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-34">
         <addForeignKeyConstraint baseColumnNames="skill_level_id" baseTableName="ams_skill_level" constraintName="FKbwrj6yv0ysw3yn6laeb5xxibl" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="skill_level" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-34">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-35">
         <addForeignKeyConstraint baseColumnNames="ams_id" baseTableName="trace_ams" constraintName="FKcckyv1xsxa76diihyxlf75ftd" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ams" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-35">
-        <addForeignKeyConstraint baseColumnNames="program_id" baseTableName="program_progress" constraintName="FKcutx7muev5chy6w5uneghmbyr" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="program" validate="true"/>
-    </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-36">
-        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="program_progress" constraintName="FKcvppodp9l0b9eqj3f0s6a8gdj" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
-    </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-37">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-36">
         <addForeignKeyConstraint baseColumnNames="ams_id" baseTableName="cohort_ams" constraintName="FKdn2yha86h6sbigxsawao9tlj2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ams" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-38">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-37">
+        <addForeignKeyConstraint baseColumnNames="training_path_id" baseTableName="student_progress" constraintName="FKf00dj5ykgbp98o1hbers080ng" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="training_path" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-38">
         <addForeignKeyConstraint baseColumnNames="institution_id" baseTableName="program" constraintName="FKfr6h2e2bsg8m0csg2ncuidaxu" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="institution" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-39">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-39">
         <addForeignKeyConstraint baseColumnNames="trace_id" baseTableName="trace_skill_level" constraintName="FKfwyc1kmx10t33udpk5mqrohf5" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="trace" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-40">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-40">
         <addForeignKeyConstraint baseColumnNames="ams_id" baseTableName="ams_translation" constraintName="FKhekvktxhoydhs3g9l4b0nbapm" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ams" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-41">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-41">
         <addForeignKeyConstraint baseColumnNames="skill_level_id" baseTableName="trace_skill_level" constraintName="FKikbvl7fenoiam164lrqu5bikg" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="skill_level" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-42">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-42">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="trace" constraintName="FKjiaa32cs961r7ly0idfap9soi" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-43">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-43">
         <addForeignKeyConstraint baseColumnNames="skill_id" baseTableName="skill_level" constraintName="FKk8yy30pvpxxp3etl7olmfesh6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="skill" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-44">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-44">
+        <addForeignKeyConstraint baseColumnNames="training_path_id" baseTableName="cohort" constraintName="FKlp91aolb8ygsy0e4x0tynusw3" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="training_path" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-45">
         <addForeignKeyConstraint baseColumnNames="skill_level_id" baseTableName="skill_level_translation" constraintName="FKly0dy24x3guv0oe3ral98bl7a" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="skill_level" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-45">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-46">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="cohort_user" constraintName="FKm64avyh89aq7de9e0vgpilbl7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1751978967111-46">
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-47">
         <addForeignKeyConstraint baseColumnNames="cohort_id" baseTableName="cohort_user" constraintName="FKqylk3iib8lfpkff27kvnjrtwm" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="cohort" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-48">
+        <addForeignKeyConstraint baseColumnNames="training_path_id" baseTableName="skill_level" constraintName="FKtnmlenq49a032lwndrt8cjlja" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="training_path" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752141564027-49">
+        <addForeignKeyConstraint baseColumnNames="program_id" baseTableName="training_path" constraintName="FKvino95hm6kcqvaaqjueb9obe" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="program" validate="true"/>
     </changeSet>
 </databaseChangeLog>

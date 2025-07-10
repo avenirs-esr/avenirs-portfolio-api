@@ -96,12 +96,23 @@
         </sql>
     </changeSet>
 
-    <changeSet id="create-updated-at-trigger-program_progress" author="bilelbanelhaq">
+    <changeSet id="create-updated-at-trigger-student_progress" author="bilelbanelhaq">
         <sql>
-            DROP TRIGGER IF EXISTS trigger_set_updated_at_program_progress ON program_progress;
-            CREATE TRIGGER trigger_set_updated_at_program_progress
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_student_progress ON student_progress;
+            CREATE TRIGGER trigger_set_updated_at_student_progress
                 BEFORE UPDATE
-                ON program_progress
+                ON student_progress
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-updated-at-trigger-training_path" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_training_path ON training_path;
+            CREATE TRIGGER trigger_set_updated_at_training_path
+                BEFORE UPDATE
+                ON training_path
                 FOR EACH ROW
                 EXECUTE FUNCTION set_updated_at();
         </sql>
