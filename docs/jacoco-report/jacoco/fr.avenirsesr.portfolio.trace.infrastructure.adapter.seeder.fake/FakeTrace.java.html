@@ -29,42 +29,48 @@ public class FakeTrace {
 <span class="nc" id="L29">            List.of(),</span>
 <span class="nc" id="L30">            List.of(),</span>
             false,
-<span class="nc" id="L32">            Instant.now(),</span>
+            null,
 <span class="nc" id="L33">            Instant.now(),</span>
+<span class="nc" id="L34">            Instant.now(),</span>
             null));
   }
 
   public FakeTrace withSkillLevel(List&lt;SkillLevelEntity&gt; skillLevels) {
-<span class="nc" id="L38">    trace.setSkillLevels(skillLevels);</span>
-<span class="nc" id="L39">    skillLevels.forEach(</span>
+<span class="nc" id="L39">    trace.setSkillLevels(skillLevels);</span>
+<span class="nc" id="L40">    skillLevels.forEach(</span>
         skillLevel -&gt;
-<span class="nc" id="L41">            skillLevel.setTraces(</span>
-<span class="nc" id="L42">                Stream.concat(skillLevel.getTraces().stream(), Stream.of(trace)).toList()));</span>
-<span class="nc" id="L43">    return this;</span>
+<span class="nc" id="L42">            skillLevel.setTraces(</span>
+<span class="nc" id="L43">                Stream.concat(skillLevel.getTraces().stream(), Stream.of(trace)).toList()));</span>
+<span class="nc" id="L44">    return this;</span>
   }
 
   public FakeTrace withAMS(List&lt;AMSEntity&gt; amses) {
-<span class="nc" id="L47">    trace.setAmses(amses);</span>
-<span class="nc" id="L48">    return this;</span>
+<span class="nc" id="L48">    trace.setAmses(amses);</span>
+<span class="nc" id="L49">    return this;</span>
   }
 
   public FakeTrace withELanguage(ELanguage language) {
-<span class="nc" id="L52">    trace.setLanguage(language);</span>
-<span class="nc" id="L53">    return this;</span>
+<span class="nc" id="L53">    trace.setLanguage(language);</span>
+<span class="nc" id="L54">    return this;</span>
   }
 
   public FakeTrace withDeletedAt(Instant deletedAt) {
-<span class="nc" id="L57">    trace.setDeletedAt(deletedAt);</span>
-<span class="nc" id="L58">    return this;</span>
+<span class="nc" id="L58">    trace.setDeletedAt(deletedAt);</span>
+<span class="nc" id="L59">    return this;</span>
   }
 
   public FakeTrace isGroup() {
-<span class="nc" id="L62">    trace.setGroup(true);</span>
-<span class="nc" id="L63">    return this;</span>
+<span class="nc" id="L63">    trace.setGroup(true);</span>
+<span class="nc" id="L64">    return this;</span>
+  }
+
+  public FakeTrace withAiUseJustification(String justification) {
+<span class="nc" id="L68">    trace.setAiUseJustification(justification);</span>
+<span class="nc" id="L69">    return this;</span>
   }
 
   public TraceEntity toEntity() {
-<span class="nc" id="L67">    return trace;</span>
+<span class="nc" id="L73">    return trace;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
