@@ -24,7 +24,7 @@ public class TrainingPathDatabaseRepository
 
   @Override
   public List&lt;TrainingPath&gt; findAllTrainingPathsByStudents(Student student) {
-<span class="nc" id="L27">    return jpaRepository.findAllByStudentIdAndLang(student.getId()).stream()</span>
+<span class="nc" id="L27">    return jpaRepository.findAllByStudentId(student.getId()).stream()</span>
 <span class="nc" id="L28">        .map(TrainingPathMapper::toDomainWithoutRecursion)</span>
 <span class="nc" id="L29">        .collect(Collectors.groupingBy(TrainingPath::getId))</span>
 <span class="nc" id="L30">        .values()</span>
