@@ -31,6 +31,9 @@ public class Trace {
   @Getter(AccessLevel.NONE)
   private String aiUseJustification;
 
+  @Getter(AccessLevel.NONE)
+  private String personalNote;
+
   private Trace(
       UUID id,
       User user,
@@ -42,7 +45,8 @@ public class Trace {
       List<SkillLevel> skillLevels,
       List<AMS> amses,
       boolean isGroup,
-      String aiUseJustification) {
+      String aiUseJustification,
+      String personalNote) {
     this.id = id;
     this.user = user;
     this.title = title;
@@ -54,6 +58,7 @@ public class Trace {
     this.amses = amses;
     this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
+    this.personalNote = personalNote;
   }
 
   public static Trace create(
@@ -70,6 +75,7 @@ public class Trace {
         List.of(),
         List.of(),
         false,
+        null,
         null);
   }
 
@@ -81,6 +87,7 @@ public class Trace {
       List<AMS> amses,
       boolean group,
       String aiUseJustification,
+      String personalNote,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt,
@@ -96,7 +103,8 @@ public class Trace {
         skillLevels,
         amses,
         group,
-        aiUseJustification);
+        aiUseJustification,
+        personalNote);
   }
 
   public Optional<Instant> getDeletedAt() {
@@ -105,5 +113,9 @@ public class Trace {
 
   public Optional<String> getAiUseJustification() {
     return Optional.ofNullable(aiUseJustification);
+  }
+
+  public Optional<String> getPersonalNote() {
+    return Optional.ofNullable(personalNote);
   }
 }

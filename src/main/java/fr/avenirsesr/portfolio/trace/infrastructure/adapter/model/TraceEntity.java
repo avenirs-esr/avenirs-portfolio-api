@@ -66,6 +66,10 @@ public class TraceEntity extends AvenirsBaseEntity {
   @Column(name = "ai_use_justification")
   private String aiUseJustification;
 
+  @Size(max = 200, message = "personal note can not exceed 200 characters")
+  @Column(name = "personal_note")
+  private String personalNote;
+
   private TraceEntity(
       UUID id,
       UserEntity user,
@@ -75,6 +79,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       List<AMSEntity> amses,
       boolean isGroup,
       String aiUseJustification,
+      String personalNote,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
@@ -86,6 +91,7 @@ public class TraceEntity extends AvenirsBaseEntity {
     this.amses = amses;
     this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
+    this.personalNote = personalNote;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
     this.setDeletedAt(deletedAt);
@@ -100,6 +106,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       List<AMSEntity> amses,
       boolean isGroup,
       String aiUseJustification,
+      String personalNote,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
@@ -112,6 +119,7 @@ public class TraceEntity extends AvenirsBaseEntity {
         amses,
         isGroup,
         aiUseJustification,
+        personalNote,
         createdAt,
         updatedAt,
         deletedAt);

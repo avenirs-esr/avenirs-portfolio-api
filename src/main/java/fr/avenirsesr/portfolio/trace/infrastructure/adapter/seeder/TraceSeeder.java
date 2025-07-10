@@ -42,15 +42,10 @@ public class TraceSeeder {
     for (int i = 0; i < SeederConfig.TRACES_NB; i++) {
       var fakeTrace = FakeTrace.of(getRandomUserOf(users));
 
-      if (faker.random().nextBoolean()) {
-        fakeTrace =
-            fakeTrace.withAiUseJustification(
-                "I used AI because : %s".formatted(faker.lorem().sentence(5)));
-      }
+      if (faker.random().nextBoolean()) fakeTrace = fakeTrace.withAiUseJustification();
+      if (faker.random().nextBoolean()) fakeTrace = fakeTrace.withPersonalNote();
+      if (faker.random().nextBoolean()) fakeTrace = fakeTrace.isGroup();
 
-      if (faker.random().nextBoolean()) {
-        fakeTrace = fakeTrace.isGroup();
-      }
       traceList.add(fakeTrace.toEntity());
     }
 

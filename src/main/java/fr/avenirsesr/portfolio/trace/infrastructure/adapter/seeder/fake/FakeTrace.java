@@ -10,9 +10,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+import net.datafaker.Faker;
 
 public class FakeTrace {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final Faker faker = new FakerProvider().call();
   private final TraceEntity trace;
 
   private FakeTrace(TraceEntity trace) {
@@ -22,13 +23,14 @@ public class FakeTrace {
   public static FakeTrace of(UserEntity user) {
     return new FakeTrace(
         TraceEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
+            UUID.fromString(faker.internet().uuid()),
             user,
-            faker.call().lorem().sentence(),
+            faker.lorem().sentence(),
             ELanguage.FALLBACK,
             List.of(),
             List.of(),
             false,
+            null,
             null,
             Instant.now(),
             Instant.now(),
@@ -64,8 +66,13 @@ public class FakeTrace {
     return this;
   }
 
-  public FakeTrace withAiUseJustification(String justification) {
-    trace.setAiUseJustification(justification);
+  public FakeTrace withAiUseJustification() {
+    trace.setAiUseJustification("I used AI because : %s".formatted(faker.lorem().sentence(5)));
+    return this;
+  }
+
+  public FakeTrace withPersonalNote() {
+    trace.setPersonalNote("My notes : %s".formatted(faker.lorem().sentence(5)));
     return this;
   }
 
