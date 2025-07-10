@@ -29,6 +29,7 @@ public class FakeTrace {
             List.of(),
             List.of(),
             false,
+            null,
             Instant.now(),
             Instant.now(),
             null));
@@ -60,6 +61,11 @@ public class FakeTrace {
 
   public FakeTrace isGroup() {
     trace.setGroup(true);
+    return this;
+  }
+
+  public FakeTrace withAiUseJustification(String justification) {
+    trace.setAiUseJustification(justification);
     return this;
   }
 

@@ -28,6 +28,7 @@ public class TraceFixture {
   private Instant updatedAt;
   private Instant deletedAt;
   private boolean isGroup;
+  private String aiUseJustification;
   private ELanguage language = ELanguage.FRENCH;
 
   private TraceFixture() {
@@ -104,6 +105,11 @@ public class TraceFixture {
     return this;
   }
 
+  public TraceFixture withAiUseJustification(String aiUseJustification) {
+    this.aiUseJustification = aiUseJustification;
+    return this;
+  }
+
   public List<Trace> withCount(int count) {
     List<Trace> traces = new ArrayList<>();
     for (int i = 0; i < count; i++) {
@@ -119,6 +125,16 @@ public class TraceFixture {
 
   public Trace toModel() {
     return Trace.toDomain(
-        id, user, title, skillLevels, amses, isGroup, createdAt, updatedAt, deletedAt, language);
+        id,
+        user,
+        title,
+        skillLevels,
+        amses,
+        isGroup,
+        aiUseJustification,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        language);
   }
 }

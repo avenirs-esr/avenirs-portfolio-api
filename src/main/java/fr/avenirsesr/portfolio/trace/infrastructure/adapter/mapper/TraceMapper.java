@@ -23,6 +23,7 @@ public interface TraceMapper {
             .toList(),
         trace.getAmses().stream().map(AMSMapper::fromDomain).toList(),
         trace.isGroup(),
+        trace.getAiUseJustification().orElse(null),
         trace.getCreatedAt(),
         trace.getUpdatedAt(),
         trace.getDeletedAt().orElse(null));
@@ -43,6 +44,7 @@ public interface TraceMapper {
         List.of(),
         List.of(),
         traceEntity.isGroup(),
+        traceEntity.getAiUseJustification(),
         traceEntity.getCreatedAt(),
         traceEntity.getUpdatedAt(),
         traceEntity.getDeletedAt(),

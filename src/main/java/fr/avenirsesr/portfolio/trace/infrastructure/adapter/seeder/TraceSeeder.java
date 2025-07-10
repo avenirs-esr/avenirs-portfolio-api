@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -22,12 +23,12 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class TraceSeeder {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final Faker faker = new FakerProvider().call();
 
   private final TraceRepository traceRepository;
 
   private UserEntity getRandomUserOf(List<UserEntity> users) {
-    int randomIndex = faker.call().number().numberBetween(0, users.size());
+    int randomIndex = faker.number().numberBetween(0, users.size());
     return users.get(randomIndex);
   }
 
@@ -39,7 +40,18 @@ public class TraceSeeder {
     List<TraceEntity> traceList = new ArrayList<>();
 
     for (int i = 0; i < SeederConfig.TRACES_NB; i++) {
-      traceList.add(FakeTrace.of(getRandomUserOf(users)).toEntity());
+      var fakeTrace = FakeTrace.of(getRandomUserOf(users));
+
+      if (faker.random().nextBoolean()) {
+        fakeTrace =
+            fakeTrace.withAiUseJustification(
+                "I used AI because : %s".formatted(faker.lorem().sentence(5)));
+      }
+
+      if (faker.random().nextBoolean()) {
+        fakeTrace = fakeTrace.isGroup();
+      }
+      traceList.add(fakeTrace.toEntity());
     }
 
     traceRepository.saveAll(traceList.stream().map(TraceMapper::toDomain).toList());

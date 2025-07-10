@@ -14,6 +14,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -61,6 +62,10 @@ public class TraceEntity extends AvenirsBaseEntity {
   @Column(name = "deleted_at")
   private Instant deletedAt;
 
+  @Size(max = 200, message = "ai use justification can not exceed 200 characters")
+  @Column(name = "ai_use_justification")
+  private String aiUseJustification;
+
   private TraceEntity(
       UUID id,
       UserEntity user,
@@ -69,6 +74,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       List<SkillLevelEntity> skillLevels,
       List<AMSEntity> amses,
       boolean isGroup,
+      String aiUseJustification,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
@@ -79,6 +85,7 @@ public class TraceEntity extends AvenirsBaseEntity {
     this.skillLevels = skillLevels;
     this.amses = amses;
     this.isGroup = isGroup;
+    this.aiUseJustification = aiUseJustification;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
     this.setDeletedAt(deletedAt);
@@ -92,10 +99,21 @@ public class TraceEntity extends AvenirsBaseEntity {
       List<SkillLevelEntity> skillLevels,
       List<AMSEntity> amses,
       boolean isGroup,
+      String aiUseJustification,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
     return new TraceEntity(
-        id, user, title, language, skillLevels, amses, isGroup, createdAt, updatedAt, deletedAt);
+        id,
+        user,
+        title,
+        language,
+        skillLevels,
+        amses,
+        isGroup,
+        aiUseJustification,
+        createdAt,
+        updatedAt,
+        deletedAt);
   }
 }

@@ -22,12 +22,14 @@ public class Trace {
   private List<AMS> amses;
   private Instant createdAt;
   private Instant updatedAt;
+  private boolean isGroup;
+  private ELanguage language;
 
   @Getter(AccessLevel.NONE)
   private Instant deletedAt;
 
-  private boolean isGroup;
-  private ELanguage language;
+  @Getter(AccessLevel.NONE)
+  private String aiUseJustification;
 
   private Trace(
       UUID id,
@@ -36,7 +38,11 @@ public class Trace {
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt,
-      ELanguage language) {
+      ELanguage language,
+      List<SkillLevel> skillLevels,
+      List<AMS> amses,
+      boolean isGroup,
+      String aiUseJustification) {
     this.id = id;
     this.user = user;
     this.title = title;
@@ -44,16 +50,27 @@ public class Trace {
     this.updatedAt = updatedAt;
     this.deletedAt = deletedAt;
     this.language = language;
+    this.skillLevels = skillLevels;
+    this.amses = amses;
+    this.isGroup = isGroup;
+    this.aiUseJustification = aiUseJustification;
   }
 
   public static Trace create(
       UUID id, User user, String title, Instant deletedAt, ELanguage language) {
-    var trace = new Trace(id, user, title, Instant.now(), null, deletedAt, language);
-    trace.setSkillLevels(List.of());
-    trace.setAmses(List.of());
-    trace.setGroup(false);
 
-    return trace;
+    return new Trace(
+        id,
+        user,
+        title,
+        Instant.now(),
+        null,
+        deletedAt,
+        language,
+        List.of(),
+        List.of(),
+        false,
+        null);
   }
 
   public static Trace toDomain(
@@ -63,19 +80,30 @@ public class Trace {
       List<SkillLevel> skillLevels,
       List<AMS> amses,
       boolean group,
+      String aiUseJustification,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt,
       ELanguage language) {
-    var trace = new Trace(id, user, title, createdAt, updatedAt, deletedAt, language);
-    trace.setSkillLevels(skillLevels);
-    trace.setAmses(amses);
-    trace.setGroup(group);
-
-    return trace;
+    return new Trace(
+        id,
+        user,
+        title,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        language,
+        skillLevels,
+        amses,
+        group,
+        aiUseJustification);
   }
 
   public Optional<Instant> getDeletedAt() {
     return Optional.ofNullable(deletedAt);
+  }
+
+  public Optional<String> getAiUseJustification() {
+    return Optional.ofNullable(aiUseJustification);
   }
 }
