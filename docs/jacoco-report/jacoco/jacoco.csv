@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.model,TraceEntity,0,51,0,0,0,14,0,2,0,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.model,TraceEntity,0,55,0,0,0,15,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake,FakeStudentProgress,48,0,0,0,14,0,4,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,6,177,0,16,1,47,1,14,1,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.response,TracesResponse,9,0,0,0,1,0,1,0,1,0
@@ -31,14 +31,14 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.infrastructure.adapter.reposit
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository,CohortDatabaseRepository,8,10,2,0,3,3,2,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,4,135,3,13,1,41,4,11,1,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,RessourceServiceImpl,0,26,0,4,0,6,0,4,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake,FakeTrace,88,0,0,0,28,0,11,0,11,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake,FakeTrace,114,0,0,0,30,0,12,0,12,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.model.enums,ETraceStatus,0,15,0,0,0,3,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.service,AMSServiceImpl,0,64,3,7,0,10,3,5,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification,StudentProgressSpecification,27,0,0,0,5,0,5,0,5,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.utils,UserUtils,14,0,2,0,5,0,3,0,2,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter.response,ErrorResponse,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.application.adapter.response,AmsViewResponse,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.model,Trace,15,59,0,0,4,16,1,4,1,4
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.model,Trace,16,67,0,0,4,18,1,5,1,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.model,TraceView,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.model,UnassociatedTracesSummary,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake,FakeSkill,105,0,0,0,20,0,6,0,6,0
