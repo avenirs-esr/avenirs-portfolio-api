@@ -8,6 +8,8 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixtur
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+
+import java.util.List;
 import java.util.UUID;
 
 public class StudentProgressFixture {
@@ -21,7 +23,7 @@ public class StudentProgressFixture {
     this.id = UUID.randomUUID();
     this.user = UserFixture.create().toModel();
     this.trainingPath = TrainingPathFixture.create().toModel();
-    this.skillLevel = SkillLevelFixture.create().toModel();
+    this.skillLevel = SkillLevelFixture.create().withTrainingPaths(List.of(trainingPath)).toModel();
     this.status = ESkillLevelStatus.NOT_STARTED;
   }
 

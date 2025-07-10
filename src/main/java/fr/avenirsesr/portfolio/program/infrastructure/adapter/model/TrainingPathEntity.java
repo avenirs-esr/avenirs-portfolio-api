@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,11 @@ public class TrainingPathEntity extends AvenirsBaseEntity {
   @ManyToOne(optional = false)
   private ProgramEntity program;
 
-  @OneToMany(mappedBy = "trainingPath", cascade = CascadeType.ALL, orphanRemoval = true)
+  @ManyToMany
+  @JoinTable(
+      name = "training_path_skill_level",
+      joinColumns = @JoinColumn(name = "training_path_id"),
+      inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
   private Set<SkillLevelEntity> skillLevels;
 
   public TrainingPathEntity(UUID id, ProgramEntity program, Set<SkillLevelEntity> skillLevels) {
@@ -31,5 +36,14 @@ public class TrainingPathEntity extends AvenirsBaseEntity {
   public static TrainingPathEntity of(
       UUID id, ProgramEntity program, Set<SkillLevelEntity> skillLevels) {
     return new TrainingPathEntity(id, program, skillLevels);
+  }
+
+  public void addSkillLevel(SkillLevelEntity skillLevel) {
+    this.skillLevels.add(skillLevel);
+    if (skillLevel.getTrainingPaths() == null) {
+      skillLevel.setTrainingPaths(new HashSet<>());
+    }
+
+    skillLevel.getTrainingPaths().add(this);
   }
 }

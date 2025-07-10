@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,13 +39,8 @@ public class TraceEntity extends AvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private ELanguage language;
 
-  @ManyToMany
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinTable(
-      name = "trace_skill_level",
-      joinColumns = @JoinColumn(name = "trace_id"),
-      inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
-  private List<SkillLevelEntity> skillLevels;
+  @ManyToOne(optional = true)
+  private StudentProgressEntity studentProgress;
 
   @ManyToMany
   @OnDelete(action = OnDeleteAction.CASCADE)
@@ -65,7 +60,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      List<SkillLevelEntity> skillLevels,
+      StudentProgressEntity studentProgress,
       List<AMSEntity> amses,
       boolean isGroup,
       Instant createdAt,
@@ -75,7 +70,7 @@ public class TraceEntity extends AvenirsBaseEntity {
     this.user = user;
     this.title = title;
     this.language = language;
-    this.skillLevels = skillLevels;
+    this.studentProgress = studentProgress;
     this.amses = amses;
     this.isGroup = isGroup;
     this.setCreatedAt(createdAt);
@@ -88,13 +83,22 @@ public class TraceEntity extends AvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      List<SkillLevelEntity> skillLevels,
+      StudentProgressEntity studentProgress,
       List<AMSEntity> amses,
       boolean isGroup,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
     return new TraceEntity(
-        id, user, title, language, skillLevels, amses, isGroup, createdAt, updatedAt, deletedAt);
+        id,
+        user,
+        title,
+        language,
+        studentProgress,
+        amses,
+        isGroup,
+        createdAt,
+        updatedAt,
+        deletedAt);
   }
 }

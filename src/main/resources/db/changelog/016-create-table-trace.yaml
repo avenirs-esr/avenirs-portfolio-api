@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 002
+      id: 016
       author: bilelbanelhaq
       changes:
         - createTable:
@@ -33,6 +33,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: student_progress_id
+                  type: UUID
+                  constraints:
+                    nullable: true
+              - column:
                   name: created_at
                   type: TIMESTAMP WITH TIME ZONE
                   defaultValueComputed: CURRENT_TIMESTAMP
@@ -60,6 +65,14 @@ databaseChangeLog:
             referencedTableName: user
             referencedColumnNames: id
             constraintName: fk_trace_user
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: trace
+            baseColumnNames: student_progress_id
+            referencedTableName: student_progress
+            referencedColumnNames: id
+            constraintName: fk_trace_student_progress
             onDelete: CASCADE
   - changeSet:
       id: create-updated-at-trigger-trace

@@ -2,8 +2,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/001-create-table-user.yaml
   - include:
-      file: db/changelog/002-create-table-trace.yaml
-  - include:
       file: db/changelog/003-create-table-institution.yaml
   - include:
       file: db/changelog/004-create-table-program.yaml
@@ -18,8 +16,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/009-create-table-ams.yaml
   - include:
-      file: db/changelog/010-create-table-join-tables.yaml
-  - include:
       file: db/changelog/011-create-table-configuration.yaml
   - include:
       file: db/changelog/012-create-table-cohort.yaml
@@ -29,3 +25,7 @@ databaseChangeLog:
       file: db/changelog/014-create-table-cohort-user.yaml
   - include:
       file: db/changelog/015-create-table-student-progress.yaml
+  - include:
+      file: db/changelog/016-create-table-trace.yaml
+  - include:
+      file: db/changelog/017-create-table-join-tables.yaml

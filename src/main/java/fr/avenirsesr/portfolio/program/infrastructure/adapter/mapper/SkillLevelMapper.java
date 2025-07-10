@@ -6,19 +6,25 @@ import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelTranslationEntity;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public interface SkillLevelMapper {
   static SkillLevelEntity fromDomain(SkillLevel skillLevel) {
     return SkillLevelEntity.of(
         skillLevel.getId(),
-        skillLevel.getStatus(),
         null,
         skillLevel.getAmses().stream().map(AMSMapper::fromDomain).toList(),
         SkillMapper.fromDomain(skillLevel.getSkill()),
+        new HashSet<>(
+            skillLevel.getTrainingPaths().stream().map(TrainingPathMapper::fromDomain).toList()),
         skillLevel.getStartDate(),
         skillLevel.getEndDate());
   }
@@ -27,10 +33,11 @@ public interface SkillLevelMapper {
       SkillLevel skillLevel, SkillEntity skillEntity, List<TraceEntity> tracesEntities) {
     return SkillLevelEntity.of(
         skillLevel.getId(),
-        skillLevel.getStatus(),
         tracesEntities,
         skillLevel.getAmses().stream().map(AMSMapper::fromDomain).toList(),
         skillEntity,
+        new HashSet<>(
+            skillLevel.getTrainingPaths().stream().map(TrainingPathMapper::fromDomain).toList()),
         skillLevel.getStartDate(),
         skillLevel.getEndDate());
   }
@@ -49,10 +56,12 @@ public interface SkillLevelMapper {
         skillLevelEntity.getId(),
         skillLevelTranslationEntity.getName(),
         skillLevelTranslationEntity.getDescription(),
-        skillLevelEntity.getStatus(),
         skillLevelEntity.getTraces().stream().map(TraceMapper::toDomainWithoutRecursion).toList(),
         List.of(),
         skill,
+        skillLevelEntity.getTrainingPaths().stream()
+            .map(TrainingPathMapper::toDomainWithoutRecursion)
+            .toList(),
         skillLevelEntity.getStartDate(),
         skillLevelEntity.getEndDate());
   }

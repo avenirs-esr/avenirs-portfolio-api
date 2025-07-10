@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.program.domain.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.time.LocalDate;
 import java.util.List;
@@ -24,12 +23,12 @@ public class SkillLevel {
   @Getter(AccessLevel.NONE)
   private final String description;
 
-  private ESkillLevelStatus status;
   private List<Trace> traces;
   private List<AMS> amses;
   private Skill skill;
   private LocalDate startDate;
   private LocalDate endDate;
+  private List<TrainingPath> trainingPaths;
 
   private SkillLevel(UUID id, String name, String description) {
     this.id = id;
@@ -39,7 +38,6 @@ public class SkillLevel {
 
   public static SkillLevel create(UUID id, String name, String description) {
     var skillLevel = new SkillLevel(id, name, description);
-    skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED);
     skillLevel.setAmses(List.of());
     skillLevel.setTraces(List.of());
 
@@ -50,19 +48,19 @@ public class SkillLevel {
       UUID id,
       String name,
       String description,
-      ESkillLevelStatus status,
       List<Trace> traces,
       List<AMS> amses,
       Skill skill,
+      List<TrainingPath> trainingPaths,
       LocalDate startDate,
       LocalDate endDate) {
     var skillLevel = new SkillLevel(id, name, description);
-    skillLevel.setStatus(status);
     skillLevel.setTraces(traces);
     skillLevel.setAmses(amses);
     skillLevel.setSkill(skill);
     skillLevel.setStartDate(startDate);
     skillLevel.setEndDate(endDate);
+    skillLevel.setTrainingPaths(trainingPaths);
 
     return skillLevel;
   }

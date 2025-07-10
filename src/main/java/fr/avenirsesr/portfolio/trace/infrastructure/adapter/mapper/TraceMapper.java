@@ -1,8 +1,7 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillMapper;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.StudentProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -15,12 +14,7 @@ public interface TraceMapper {
         UserMapper.fromDomain(trace.getUser()),
         trace.getTitle(),
         trace.getLanguage(),
-        trace.getSkillLevels().stream()
-            .map(
-                skillLevel ->
-                    SkillLevelMapper.fromDomain(
-                        skillLevel, SkillMapper.fromDomain(skillLevel.getSkill()), List.of()))
-            .toList(),
+        StudentProgressMapper.fromDomain(trace.getStudentProgress()),
         trace.getAmses().stream().map(AMSMapper::fromDomain).toList(),
         trace.isGroup(),
         trace.getCreatedAt(),
@@ -32,6 +26,7 @@ public interface TraceMapper {
     Trace trace = toDomainWithoutRecursion(traceEntity);
     trace.setAmses(
         traceEntity.getAmses().stream().map(AMSMapper::toDomainWithoutRecursion).toList());
+    trace.setStudentProgress(StudentProgressMapper.toDomain(traceEntity.getStudentProgress()));
     return trace;
   }
 
@@ -40,7 +35,7 @@ public interface TraceMapper {
         traceEntity.getId(),
         UserMapper.toDomain(traceEntity.getUser()),
         traceEntity.getTitle(),
-        List.of(),
+        null,
         List.of(),
         traceEntity.isGroup(),
         traceEntity.getCreatedAt(),

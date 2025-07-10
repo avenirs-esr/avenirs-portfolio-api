@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake;
 
+import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelTranslationEntity;
@@ -23,9 +24,9 @@ public class FakeSkillLevel {
     SkillLevelEntity entity =
         SkillLevelEntity.of(
             UUID.fromString(faker.call().internet().uuid()),
+            List.of(),
+            List.of(),
             null,
-            List.of(),
-            List.of(),
             null,
             null,
             null);
@@ -64,7 +65,6 @@ public class FakeSkillLevel {
     LocalDate pastEndDate = LocalDate.now().minus(Period.ofYears(1));
     LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));
     LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));
-    skillLevel.setStatus(status);
     switch (status) {
       case VALIDATED, FAILED -> {
         skillLevel.setStartDate(pastStartDate);

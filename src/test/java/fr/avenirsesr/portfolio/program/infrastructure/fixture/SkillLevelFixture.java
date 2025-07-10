@@ -3,8 +3,10 @@ package fr.avenirsesr.portfolio.program.infrastructure.fixture;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeSkill;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeSkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -19,9 +21,9 @@ public class SkillLevelFixture {
   private UUID id;
   private String name;
   private String description;
-  private ESkillLevelStatus status;
   private List<Trace> traces;
   private List<AMS> amses;
+  private List<TrainingPath> trainingPaths;
   private Skill skill;
   private ELanguage language = ELanguage.FRENCH;
   private LocalDate startDate;
@@ -32,10 +34,10 @@ public class SkillLevelFixture {
     this.id = base.getId();
     this.name = base.getName();
     this.description = base.getDescription().orElse(null);
-    this.status = base.getStatus();
     this.traces = base.getTraces();
     this.amses = base.getAmses();
     this.skill = base.getSkill();
+    this.trainingPaths = base.getTrainingPaths();
     this.startDate = base.getStartDate();
     this.endDate = base.getEndDate();
   }
@@ -59,7 +61,6 @@ public class SkillLevelFixture {
     LocalDate pastEndDate = LocalDate.now().minus(Period.ofYears(1));
     LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));
     LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));
-    this.status = status;
     switch (status) {
       case VALIDATED, FAILED -> {
         this.startDate = pastStartDate;
@@ -120,8 +121,13 @@ public class SkillLevelFixture {
     return this;
   }
 
+  public SkillLevelFixture withTrainingPaths(List<TrainingPath> trainingPaths) {
+    this.trainingPaths = trainingPaths;
+    return this;
+  }
+
   public SkillLevel toModel() {
     return SkillLevel.toDomain(
-        id, name, description, status, traces, amses, skill, startDate, endDate);
+        id, name, description, traces, amses, skill, trainingPaths, startDate, endDate);
   }
 }

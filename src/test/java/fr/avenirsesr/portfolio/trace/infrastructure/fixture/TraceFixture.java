@@ -3,10 +3,10 @@ package fr.avenirsesr.portfolio.trace.infrastructure.fixture;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
-import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.StudentProgressMapper;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake.FakeTrace;
 import fr.avenirsesr.portfolio.user.domain.model.User;
@@ -22,7 +22,7 @@ public class TraceFixture {
   private UUID id;
   private User user;
   private String title;
-  private List<SkillLevel> skillLevels;
+  private StudentProgress studentProgress;
   private List<AMS> amses;
   private Instant createdAt;
   private Instant updatedAt;
@@ -36,8 +36,7 @@ public class TraceFixture {
     this.id = base.getId();
     this.user = fakeUser;
     this.title = base.getTitle();
-    this.skillLevels =
-        base.getSkillLevels().stream().map(SkillLevelMapper::toDomainWithoutRecursion).toList();
+    this.studentProgress = StudentProgressFixture.create().toModel();
     this.amses = base.getAmses().stream().map(AMSMapper::toDomainWithoutRecursion).toList();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
@@ -64,13 +63,8 @@ public class TraceFixture {
     return this;
   }
 
-  public TraceFixture withSkillLevels(List<SkillLevel> skillLevels) {
-    this.skillLevels = skillLevels;
-    return this;
-  }
-
-  public TraceFixture withSkillLevels(int count) {
-    this.skillLevels = SkillLevelFixture.create().withCount(count);
+  public TraceFixture withStudentProgress(StudentProgress studentProgress) {
+    this.studentProgress = studentProgress;
     return this;
   }
 
@@ -119,6 +113,15 @@ public class TraceFixture {
 
   public Trace toModel() {
     return Trace.toDomain(
-        id, user, title, skillLevels, amses, isGroup, createdAt, updatedAt, deletedAt, language);
+        id,
+        user,
+        title,
+        studentProgress,
+        amses,
+        isGroup,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        language);
   }
 }

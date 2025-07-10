@@ -15,6 +15,8 @@ import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
+import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
@@ -186,10 +188,15 @@ public class TraceServiceImplTest {
     AMS ams = AMSFixture.create().toModel();
     Skill skill = SkillFixture.create().withSkillLevels(1).toModel();
     SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
+    StudentProgress studentProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevel(skillLevel)
+            .toModel();
     Trace trace =
         TraceFixture.create()
             .withUser(student.getUser())
-            .withSkillLevels(List.of(skillLevel))
+            .withStudentProgress(studentProgress)
             .withAmses(List.of(ams))
             .toModel();
 
@@ -207,10 +214,15 @@ public class TraceServiceImplTest {
     AMS ams = AMSFixture.create().toModel();
     Skill skill = SkillFixture.create().withSkillLevels(1).toModel();
     SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
+    StudentProgress studentProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevel(skillLevel)
+            .toModel();
     Trace trace =
         TraceFixture.create()
             .withUser(student.getUser())
-            .withSkillLevels(List.of(skillLevel))
+            .withStudentProgress(studentProgress)
             .withAmses(List.of(ams))
             .toModel();
 
@@ -233,10 +245,15 @@ public class TraceServiceImplTest {
     AMS ams = AMSFixture.create().toModel();
     Skill skill = SkillFixture.create().withSkillLevels(1).toModel();
     SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
+    StudentProgress studentProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevel(skillLevel)
+            .toModel();
     Trace trace =
         TraceFixture.create()
             .withUser(student.getUser())
-            .withSkillLevels(List.of(skillLevel))
+            .withStudentProgress(studentProgress)
             .withAmses(List.of(ams))
             .toModel();
 

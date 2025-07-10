@@ -4,46 +4,6 @@ databaseChangeLog:
       author: bilelbanelhaq
       changes:
         - createTable:
-            tableName: trace_skill_level
-            columns:
-              - column:
-                  name: trace_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-              - column:
-                  name: skill_level_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-        - sql:
-            dbms: 'postgresql'
-            endDelimiter: \nGO
-            splitStatements: true
-            sql: ALTER TABLE trace_skill_level OWNER TO ${avenirs.admin.role}
-            stripComments: true
-
-        - addForeignKeyConstraint:
-            baseTableName: trace_skill_level
-            baseColumnNames: trace_id
-            referencedTableName: trace
-            referencedColumnNames: id
-            constraintName: fk_trace_skill_level_trace
-            onDelete: CASCADE
-
-        - addForeignKeyConstraint:
-            baseTableName: trace_skill_level
-            baseColumnNames: skill_level_id
-            referencedTableName: skill_level
-            referencedColumnNames: id
-            constraintName: fk_trace_skill_level_skill_level
-            onDelete: CASCADE
-
-  - changeSet:
-      id: 010-2
-      author: bilelbanelhaq
-      changes:
-        - createTable:
             tableName: trace_ams
             columns:
               - column:
@@ -80,7 +40,7 @@ databaseChangeLog:
             onDelete: CASCADE
 
   - changeSet:
-      id: 010-4
+      id: 010-2
       author: bilelbanelhaq
       changes:
         - createTable:
@@ -125,5 +85,43 @@ databaseChangeLog:
             columnNames: skill_id, skill_level_id
             constraintName: uq_skill_skill_level
 
+  - changeSet:
+      id: 010-3
+      author: Nathan PIGNON
+      changes:
+        - createTable:
+            tableName: training_path_skill_level
+            columns:
+              - column:
+                  name: training_path_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: skill_level_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - sql:
+            dbms: 'postgresql'
+            endDelimiter: \nGO
+            splitStatements: true
+            sql: ALTER TABLE training_path_skill_level OWNER TO ${avenirs.admin.role}
+            stripComments: true
 
+        - addForeignKeyConstraint:
+            baseTableName: training_path_skill_level
+            baseColumnNames: training_path_id
+            referencedTableName: training_path
+            referencedColumnNames: id
+            constraintName: fk_training_path_skill_level_training_path
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: training_path_skill_level
+            baseColumnNames: skill_level_id
+            referencedTableName: skill_level
+            referencedColumnNames: id
+            constraintName: fk_training_path_skill_level_skill_level
+            onDelete: CASCADE
 

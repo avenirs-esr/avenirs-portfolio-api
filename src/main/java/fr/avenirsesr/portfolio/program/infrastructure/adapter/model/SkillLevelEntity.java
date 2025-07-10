@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
-import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import jakarta.persistence.*;
@@ -18,23 +17,18 @@ import lombok.Setter;
 @Setter
 public class SkillLevelEntity extends PeriodEntity<LocalDate> {
 
-  @Column
-  @Enumerated(EnumType.STRING)
-  private ESkillLevelStatus status;
-
   @ManyToMany(mappedBy = "skillLevels")
   private List<TraceEntity> traces;
 
   @ManyToMany(mappedBy = "skillLevels")
   private List<AMSEntity> amses;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name = "skill_id")
   private SkillEntity skill;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "training_path_id")
-  private TrainingPathEntity trainingPath;
+  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+  private Set<TrainingPathEntity> trainingPaths;
 
   @OneToMany(
       mappedBy = "skillLevel",
@@ -46,30 +40,30 @@ public class SkillLevelEntity extends PeriodEntity<LocalDate> {
 
   private SkillLevelEntity(
       UUID id,
-      ESkillLevelStatus status,
       List<TraceEntity> traces,
       List<AMSEntity> amses,
       SkillEntity skill,
+      Set<TrainingPathEntity> trainingPaths,
       LocalDate startDate,
       LocalDate endDate) {
     setId(id);
-    this.status = status;
     this.traces = traces;
     this.amses = amses;
     this.skill = skill;
+    this.trainingPaths = trainingPaths;
     this.startDate = startDate;
     this.endDate = endDate;
   }
 
   public static SkillLevelEntity of(
       UUID id,
-      ESkillLevelStatus status,
       List<TraceEntity> traces,
       List<AMSEntity> amses,
       SkillEntity skillEntity,
+      Set<TrainingPathEntity> trainingPaths,
       LocalDate startDate,
       LocalDate endDate) {
-    return new SkillLevelEntity(id, status, traces, amses, skillEntity, startDate, endDate);
+    return new SkillLevelEntity(id, traces, amses, skillEntity, trainingPaths, startDate, endDate);
   }
 
   @Override

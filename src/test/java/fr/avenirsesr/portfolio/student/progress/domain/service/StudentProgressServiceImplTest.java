@@ -228,29 +228,21 @@ public class StudentProgressServiceImplTest {
   void shouldReturnOnlyCurrentSkillLevelBySkill() {
     // Given
     Skill skill1 = SkillFixture.create().toModel();
-    SkillLevel skillLevel1 =
-        SkillLevelFixture.create()
-            .withSkill(skill1)
-            .withStatus(ESkillLevelStatus.VALIDATED)
-            .toModel();
-    SkillLevel skillLevel2 =
-        SkillLevelFixture.create()
-            .withSkill(skill1)
-            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-            .toModel();
+    SkillLevel skillLevel1 = SkillLevelFixture.create().withSkill(skill1).toModel();
+    SkillLevel skillLevel2 = SkillLevelFixture.create().withSkill(skill1).toModel();
     TrainingPath trainingPath = TrainingPathFixture.create().toModel();
     StudentProgress progress1 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
             .withSkillLevel(skillLevel1)
-            .withStatus(skillLevel1.getStatus())
+            .withStatus(ESkillLevelStatus.VALIDATED)
             .withUser(student.getUser())
             .toModel();
     StudentProgress progress2 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
             .withSkillLevel(skillLevel2)
-            .withStatus(skillLevel2.getStatus())
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
             .withUser(student.getUser())
             .toModel();
 
@@ -273,30 +265,22 @@ public class StudentProgressServiceImplTest {
   void shouldReturnOnlyUnderReviewSkillLevelBySkill() {
     // Given
     Skill skill1 = SkillFixture.create().toModel();
-    SkillLevel skillLevel1 =
-        SkillLevelFixture.create()
-            .withSkill(skill1)
-            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
-            .toModel();
-    SkillLevel skillLevel2 =
-        SkillLevelFixture.create()
-            .withSkill(skill1)
-            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-            .toModel();
+    SkillLevel skillLevel1 = SkillLevelFixture.create().withSkill(skill1).toModel();
+    SkillLevel skillLevel2 = SkillLevelFixture.create().withSkill(skill1).toModel();
     TrainingPath trainingPath =
         TrainingPathFixture.create().withSkillLevels(Set.of(skillLevel1, skillLevel2)).toModel();
     StudentProgress progress1 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
             .withSkillLevel(skillLevel1)
-            .withStatus(skillLevel1.getStatus())
+            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
             .withUser(student.getUser())
             .toModel();
     StudentProgress progress2 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
             .withSkillLevel(skillLevel2)
-            .withStatus(skillLevel2.getStatus())
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
             .withUser(student.getUser())
             .toModel();
 
@@ -319,29 +303,21 @@ public class StudentProgressServiceImplTest {
   void shouldReturnOnlyUnderAcquisitionSkillLevelBySkill() {
     // Given
     Skill skill1 = SkillFixture.create().toModel();
-    SkillLevel skillLevel1 =
-        SkillLevelFixture.create()
-            .withSkill(skill1)
-            .withStatus(ESkillLevelStatus.NOT_STARTED)
-            .toModel();
-    SkillLevel skillLevel2 =
-        SkillLevelFixture.create()
-            .withSkill(skill1)
-            .withStatus(ESkillLevelStatus.UNDER_ACQUISITION)
-            .toModel();
+    SkillLevel skillLevel1 = SkillLevelFixture.create().withSkill(skill1).toModel();
+    SkillLevel skillLevel2 = SkillLevelFixture.create().withSkill(skill1).toModel();
     TrainingPath trainingPath = TrainingPathFixture.create().toModel();
     StudentProgress progress1 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
             .withSkillLevel(skillLevel1)
-            .withStatus(skillLevel1.getStatus())
+            .withStatus(ESkillLevelStatus.NOT_STARTED)
             .withUser(student.getUser())
             .toModel();
     StudentProgress progress2 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
             .withSkillLevel(skillLevel2)
-            .withStatus(skillLevel2.getStatus())
+            .withStatus(ESkillLevelStatus.UNDER_ACQUISITION)
             .withUser(student.getUser())
             .toModel();
 
@@ -543,15 +519,10 @@ public class StudentProgressServiceImplTest {
   void shouldReturnNullWhenDontHaveValidCurrentSkillsForView() {
     // Given
     Skill skill1 = SkillFixture.create().toModel();
-    SkillLevel skillLevel1 =
-        SkillLevelFixture.create()
-            .withSkill(skill1)
-            .withStatus(ESkillLevelStatus.VALIDATED)
-            .toModel();
+    SkillLevel skillLevel1 = SkillLevelFixture.create().withSkill(skill1).toModel();
     SkillLevel skillLevel2 =
         SkillLevelFixture.create()
             .withSkill(skill1)
-            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
             .withEndDate(LocalDate.now().minus(Period.ofDays(1)))
             .toModel();
     TrainingPath trainingPath = TrainingPathFixture.create().toModel();
@@ -559,14 +530,14 @@ public class StudentProgressServiceImplTest {
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
             .withSkillLevel(skillLevel1)
-            .withStatus(skillLevel1.getStatus())
+            .withStatus(ESkillLevelStatus.VALIDATED)
             .withUser(student.getUser())
             .toModel();
     StudentProgress progress2 =
         StudentProgressFixture.create()
             .withTrainingPath(trainingPath)
             .withSkillLevel(skillLevel2)
-            .withStatus(skillLevel2.getStatus())
+            .withStatus(ESkillLevelStatus.UNDER_REVIEW)
             .withUser(student.getUser())
             .toModel();
 

@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.trace.domain.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
 import java.util.List;
@@ -18,7 +18,7 @@ public class Trace {
   private final UUID id;
   private final User user;
   private String title;
-  private List<SkillLevel> skillLevels;
+  private StudentProgress studentProgress;
   private List<AMS> amses;
   private Instant createdAt;
   private Instant updatedAt;
@@ -47,9 +47,14 @@ public class Trace {
   }
 
   public static Trace create(
-      UUID id, User user, String title, Instant deletedAt, ELanguage language) {
+      UUID id,
+      User user,
+      String title,
+      Instant deletedAt,
+      ELanguage language,
+      StudentProgress studentProgress) {
     var trace = new Trace(id, user, title, Instant.now(), null, deletedAt, language);
-    trace.setSkillLevels(List.of());
+    trace.setStudentProgress(studentProgress);
     trace.setAmses(List.of());
     trace.setGroup(false);
 
@@ -60,7 +65,7 @@ public class Trace {
       UUID id,
       User user,
       String title,
-      List<SkillLevel> skillLevels,
+      StudentProgress studentProgress,
       List<AMS> amses,
       boolean group,
       Instant createdAt,
@@ -68,7 +73,7 @@ public class Trace {
       Instant deletedAt,
       ELanguage language) {
     var trace = new Trace(id, user, title, createdAt, updatedAt, deletedAt, language);
-    trace.setSkillLevels(skillLevels);
+    trace.setStudentProgress(studentProgress);
     trace.setAmses(amses);
     trace.setGroup(group);
 

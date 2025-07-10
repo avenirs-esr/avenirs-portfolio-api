@@ -36,6 +36,11 @@ public class FakeStudentProgress {
             Instant.now()));
   }
 
+  public FakeStudentProgress withStatus(ESkillLevelStatus status) {
+    studentProgress.setStatus(status);
+    return this;
+  }
+
   public StudentProgressEntity toEntity() {
     return studentProgress;
   }

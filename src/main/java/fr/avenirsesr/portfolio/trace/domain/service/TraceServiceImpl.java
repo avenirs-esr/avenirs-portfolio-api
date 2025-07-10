@@ -40,23 +40,10 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public String programNameOfTrace(Trace trace) {
-    // TODO: Refactor this method when skill levels are refactored
-    return EPortfolioType.LIFE_PROJECT.name();
-    //    return trace.getSkillLevels().isEmpty()
-    //            || trace.getSkillLevels().stream()
-    //                .noneMatch(
-    //                    skillLevel ->
-    // skillLevel.getSkill().getTrainingPath().getProgram().isAPC())
-    //        ? EPortfolioType.LIFE_PROJECT.name()
-    //        : trace.getSkillLevels().stream()
-    //            .filter(skillLevel ->
-    // skillLevel.getSkill().getTrainingPath().getProgram().isAPC())
-    //            .findAny()
-    //            .orElseThrow()
-    //            .getSkill()
-    //            .getTrainingPath()
-    //            .getProgram()
-    //            .getName();
+    return trace.getStudentProgress() != null
+            && !trace.getStudentProgress().getTrainingPath().getProgram().isAPC()
+        ? EPortfolioType.LIFE_PROJECT.name()
+        : trace.getStudentProgress().getTrainingPath().getProgram().getName();
   }
 
   @Override

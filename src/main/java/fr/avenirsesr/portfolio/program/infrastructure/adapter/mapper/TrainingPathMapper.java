@@ -42,6 +42,13 @@ public interface TrainingPathMapper {
     return trainingPath;
   }
 
+  static TrainingPath toDomainWithoutRecursion(TrainingPathEntity trainingPathEntity) {
+    return TrainingPath.toDomain(
+        trainingPathEntity.getId(),
+        ProgramMapper.toDomain(trainingPathEntity.getProgram()),
+        Set.of());
+  }
+
   static TrainingPath toDomainWithoutRecursion(
       StudentTrainingPathSummaryDTO studentTrainingPathSummaryDTO) {
     return TrainingPath.toDomain(
