@@ -24,12 +24,14 @@ public class StudentProgressEntity extends AvenirsBaseEntity {
   private UserEntity student;
 
   @ManyToOne(optional = false)
+  @JoinColumn(name = &quot;training_path_id&quot;)
   private TrainingPathEntity trainingPath;
 
   @ManyToOne(optional = false)
+  @JoinColumn(name = &quot;skill_level_id&quot;)
   private SkillLevelEntity skillLevel;
 
-  @Column
+  @Column(nullable = false)
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
 
@@ -40,15 +42,15 @@ public class StudentProgressEntity extends AvenirsBaseEntity {
       SkillLevelEntity skillLevel,
       ESkillLevelStatus status,
       Instant createdAt,
-<span class="fc" id="L43">      Instant updatedAt) {</span>
-<span class="fc" id="L44">    this.setId(id);</span>
-<span class="fc" id="L45">    this.student = student;</span>
-<span class="fc" id="L46">    this.trainingPath = trainingPath;</span>
-<span class="fc" id="L47">    this.skillLevel = skillLevel;</span>
-<span class="fc" id="L48">    this.status = status;</span>
-<span class="fc" id="L49">    this.setCreatedAt(createdAt);</span>
-<span class="fc" id="L50">    this.setUpdatedAt(updatedAt);</span>
-<span class="fc" id="L51">  }</span>
+<span class="fc" id="L45">      Instant updatedAt) {</span>
+<span class="fc" id="L46">    this.setId(id);</span>
+<span class="fc" id="L47">    this.student = student;</span>
+<span class="fc" id="L48">    this.trainingPath = trainingPath;</span>
+<span class="fc" id="L49">    this.skillLevel = skillLevel;</span>
+<span class="fc" id="L50">    this.status = status;</span>
+<span class="fc" id="L51">    this.setCreatedAt(createdAt);</span>
+<span class="fc" id="L52">    this.setUpdatedAt(updatedAt);</span>
+<span class="fc" id="L53">  }</span>
 
   public static StudentProgressEntity of(
       UUID id,
@@ -58,7 +60,7 @@ public class StudentProgressEntity extends AvenirsBaseEntity {
       ESkillLevelStatus status,
       Instant createdAt,
       Instant updatedAt) {
-<span class="fc" id="L61">    return new StudentProgressEntity(</span>
+<span class="fc" id="L63">    return new StudentProgressEntity(</span>
         id, student, trainingPath, skillLevel, status, createdAt, updatedAt);
   }
 }
