@@ -38,15 +38,15 @@ public class Trace {
       UUID id,
       User user,
       String title,
-      Instant createdAt,
-      Instant updatedAt,
-      Instant deletedAt,
       ELanguage language,
-      List&lt;SkillLevel&gt; skillLevels,
-      List&lt;AMS&gt; amses,
       boolean isGroup,
       String aiUseJustification,
-<span class="fc" id="L49">      String personalNote) {</span>
+      String personalNote,
+      List&lt;SkillLevel&gt; skillLevels,
+      List&lt;AMS&gt; amses,
+      Instant createdAt,
+      Instant updatedAt,
+<span class="fc" id="L49">      Instant deletedAt) {</span>
 <span class="fc" id="L50">    this.id = id;</span>
 <span class="fc" id="L51">    this.user = user;</span>
 <span class="fc" id="L52">    this.title = title;</span>
@@ -62,20 +62,26 @@ public class Trace {
 <span class="fc" id="L62">  }</span>
 
   public static Trace create(
-      UUID id, User user, String title, Instant deletedAt, ELanguage language) {
+      UUID id,
+      User user,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String aiUseJustification,
+      String personalNote) {
 
-<span class="nc" id="L67">    return new Trace(</span>
+<span class="fc" id="L73">    return new Trace(</span>
         id,
         user,
         title,
-<span class="nc" id="L71">        Instant.now(),</span>
-        null,
-        deletedAt,
         language,
-<span class="nc" id="L75">        List.of(),</span>
-<span class="nc" id="L76">        List.of(),</span>
-        false,
-        null,
+        isGroup,
+        aiUseJustification,
+        personalNote,
+<span class="fc" id="L81">        List.of(),</span>
+<span class="fc" id="L82">        List.of(),</span>
+<span class="fc" id="L83">        Instant.now(),</span>
+<span class="fc" id="L84">        Instant.now(),</span>
         null);
   }
 
@@ -92,31 +98,31 @@ public class Trace {
       Instant updatedAt,
       Instant deletedAt,
       ELanguage language) {
-<span class="fc" id="L95">    return new Trace(</span>
+<span class="fc" id="L101">    return new Trace(</span>
         id,
         user,
         title,
-        createdAt,
-        updatedAt,
-        deletedAt,
         language,
-        skillLevels,
-        amses,
         group,
         aiUseJustification,
-        personalNote);
+        personalNote,
+        skillLevels,
+        amses,
+        createdAt,
+        updatedAt,
+        deletedAt);
   }
 
   public Optional&lt;Instant&gt; getDeletedAt() {
-<span class="fc" id="L111">    return Optional.ofNullable(deletedAt);</span>
+<span class="fc" id="L117">    return Optional.ofNullable(deletedAt);</span>
   }
 
   public Optional&lt;String&gt; getAiUseJustification() {
-<span class="fc" id="L115">    return Optional.ofNullable(aiUseJustification);</span>
+<span class="fc" id="L121">    return Optional.ofNullable(aiUseJustification);</span>
   }
 
   public Optional&lt;String&gt; getPersonalNote() {
-<span class="fc" id="L119">    return Optional.ofNullable(personalNote);</span>
+<span class="fc" id="L125">    return Optional.ofNullable(personalNote);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

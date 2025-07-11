@@ -1,7 +1,7 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.model,TraceEntity,0,55,0,0,0,15,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake,FakeStudentProgress,48,0,0,0,14,0,4,0,4,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,6,177,0,16,1,47,1,14,1,6
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,6,191,0,16,1,51,1,15,1,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.response,TracesResponse,9,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.response,TracesViewResponse,9,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.model,Student,11,26,0,0,2,9,2,3,2,3
@@ -18,7 +18,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake,FakeExternalUser,112,0,16,0,25,0,13,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.infrastructure.adapter.specification,AMSSpecification,74,0,4,0,19,0,7,0,5,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.application.adapter.controller,AMSController,0,67,0,0,0,15,0,2,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,82,44,2,0,21,11,5,4,4,4
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,82,72,2,0,21,20,5,5,4,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.navigation.access.application.adapter.controller,NavigationAccessController,38,4,0,0,8,1,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.repository,TrainingPathDatabaseRepository,18,10,0,0,7,3,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.repository,InstitutionDatabaseRepository,0,21,2,2,0,6,2,2,0,2
@@ -38,7 +38,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.ad
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.utils,UserUtils,14,0,2,0,5,0,3,0,2,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter.response,ErrorResponse,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.application.adapter.response,AmsViewResponse,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.model,Trace,16,67,0,0,4,18,1,5,1,5
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.model,Trace,0,83,0,0,0,23,0,6,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.model,TraceView,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.model,UnassociatedTracesSummary,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake,FakeSkill,105,0,0,0,20,0,6,0,6,0
