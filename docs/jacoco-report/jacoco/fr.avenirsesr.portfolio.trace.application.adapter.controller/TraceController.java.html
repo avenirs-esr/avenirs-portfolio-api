@@ -78,7 +78,7 @@ public class TraceController {
 
   @DeleteMapping(&quot;/{traceId}&quot;)
   public ResponseEntity&lt;String&gt; deleteTrace(Principal principal, @PathVariable UUID traceId) {
-<span class="nc" id="L81">    log.debug(&quot;Received request to trace overview of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L81">    log.debug(&quot;Received request to delete trace [{}] of user [{}]&quot;, traceId, principal.getName());</span>
 <span class="nc" id="L82">    User user = getUser(principal.getName());</span>
 
 <span class="nc" id="L84">    traceService.deleteById(user, traceId);</span>
@@ -94,11 +94,12 @@ public class TraceController {
   @GetMapping(&quot;/unassociated/summary&quot;)
   public ResponseEntity&lt;UnassociatedTracesSummaryDTO&gt; getTracesUnassociatedSummary(
       Principal principal) {
-<span class="nc" id="L97">    log.debug(&quot;Received request to trace view of user [{}]&quot;, principal.getName());</span>
-<span class="nc" id="L98">    User user = getUser(principal.getName());</span>
+<span class="nc" id="L97">    log.debug(</span>
+<span class="nc" id="L98">        &quot;Received request to get unassociated trace summary of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L99">    User user = getUser(principal.getName());</span>
 
-<span class="nc" id="L100">    return ResponseEntity.ok(</span>
-<span class="nc" id="L101">        UnassociatedTracesSummaryMapper.toDTO(traceService.getUnassociatedTracesSummary(user)));</span>
+<span class="nc" id="L101">    return ResponseEntity.ok(</span>
+<span class="nc" id="L102">        UnassociatedTracesSummaryMapper.toDTO(traceService.getUnassociatedTracesSummary(user)));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

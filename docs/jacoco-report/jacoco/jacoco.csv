@@ -18,7 +18,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake,FakeExternalUser,112,0,16,0,25,0,13,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.infrastructure.adapter.specification,AMSSpecification,74,0,4,0,19,0,7,0,5,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.application.adapter.controller,AMSController,0,67,0,0,0,15,0,2,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,81,44,2,0,20,11,5,4,4,4
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,82,44,2,0,21,11,5,4,4,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.navigation.access.application.adapter.controller,NavigationAccessController,38,4,0,0,8,1,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.repository,TrainingPathDatabaseRepository,18,10,0,0,7,3,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.repository,InstitutionDatabaseRepository,0,21,2,2,0,6,2,2,0,2
