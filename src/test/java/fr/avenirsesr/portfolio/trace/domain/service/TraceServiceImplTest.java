@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.trace.domain.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +14,7 @@ import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
@@ -34,6 +34,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -285,5 +286,59 @@ public class TraceServiceImplTest {
     assertEquals(4, summary.total());
     assertEquals(3, summary.totalWarnings());
     assertEquals(1, summary.totalCriticals());
+  }
+
+  @Test
+  void shouldCreateAndSaveNewTrace() {
+    // Given
+    User user = student.getUser();
+    String title = "Test Title";
+    ELanguage language = ELanguage.FRENCH;
+    boolean isGroup = true;
+    String personalNote = "Some personal note";
+    String iaJustification = "Justified by AI";
+
+    // When
+    traceService.createTrace(user, title, language, isGroup, personalNote, iaJustification);
+
+    // Then
+    ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+    verify(traceRepository).save(captor.capture());
+
+    Trace trace = captor.getValue();
+
+    assertEquals(user, trace.getUser());
+
+    assertNotNull(trace.getId());
+    assertEquals(title, trace.getTitle());
+    assertEquals(language, trace.getLanguage());
+    assertEquals(isGroup, trace.isGroup());
+
+    assertTrue(trace.getPersonalNote().isPresent());
+    assertEquals(personalNote, trace.getPersonalNote().get());
+
+    assertTrue(trace.getAiUseJustification().isPresent());
+    assertEquals(iaJustification, trace.getAiUseJustification().get());
+  }
+
+  @Test
+  void shouldCreateTraceWithNullFields() {
+    // Given
+    User user = student.getUser();
+    String title = "Trace with null fields";
+
+    // When
+    traceService.createTrace(user, title, ELanguage.FRENCH, false, null, null);
+
+    // Then
+    ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+    verify(traceRepository).save(captor.capture());
+
+    Trace trace = captor.getValue();
+
+    assertEquals(title, trace.getTitle());
+    assertEquals(ELanguage.FRENCH, trace.getLanguage());
+    assertTrue(trace.getPersonalNote().isEmpty());
+    assertTrue(trace.getAiUseJustification().isEmpty());
   }
 }

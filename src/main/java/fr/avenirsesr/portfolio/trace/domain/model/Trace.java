@@ -38,15 +38,15 @@ public class Trace {
       UUID id,
       User user,
       String title,
-      Instant createdAt,
-      Instant updatedAt,
-      Instant deletedAt,
       ELanguage language,
-      List<SkillLevel> skillLevels,
-      List<AMS> amses,
       boolean isGroup,
       String aiUseJustification,
-      String personalNote) {
+      String personalNote,
+      List<SkillLevel> skillLevels,
+      List<AMS> amses,
+      Instant createdAt,
+      Instant updatedAt,
+      Instant deletedAt) {
     this.id = id;
     this.user = user;
     this.title = title;
@@ -62,20 +62,26 @@ public class Trace {
   }
 
   public static Trace create(
-      UUID id, User user, String title, Instant deletedAt, ELanguage language) {
+      UUID id,
+      User user,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String aiUseJustification,
+      String personalNote) {
 
     return new Trace(
         id,
         user,
         title,
-        Instant.now(),
-        null,
-        deletedAt,
         language,
+        isGroup,
+        aiUseJustification,
+        personalNote,
         List.of(),
         List.of(),
-        false,
-        null,
+        Instant.now(),
+        Instant.now(),
         null);
   }
 
@@ -96,15 +102,15 @@ public class Trace {
         id,
         user,
         title,
-        createdAt,
-        updatedAt,
-        deletedAt,
         language,
-        skillLevels,
-        amses,
         group,
         aiUseJustification,
-        personalNote);
+        personalNote,
+        skillLevels,
+        amses,
+        createdAt,
+        updatedAt,
+        deletedAt);
   }
 
   public Optional<Instant> getDeletedAt() {

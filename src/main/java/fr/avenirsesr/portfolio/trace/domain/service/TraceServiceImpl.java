@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.trace.domain.service;
 import fr.avenirsesr.portfolio.configuration.domain.model.TraceConfigurationInfo;
 import fr.avenirsesr.portfolio.configuration.domain.port.input.ConfigurationService;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -47,7 +48,7 @@ public class TraceServiceImpl implements TraceService {
     //                .noneMatch(
     //                    skillLevel ->
     // skillLevel.getSkill().getTrainingPath().getProgram().isAPC())
-    //        ? EPortfolioType.LIFE_PROJECT.name()
+    //        ? EPortfolioType.LIFE_PROJECT.title()
     //        : trace.getSkillLevels().stream()
     //            .filter(skillLevel ->
     // skillLevel.getSkill().getTrainingPath().getProgram().isAPC())
@@ -133,5 +134,20 @@ public class TraceServiceImpl implements TraceService {
     }
 
     return new UnassociatedTracesSummary(unassociatedTraces.size(), warningCount, criticalCount);
+  }
+
+  @Override
+  public void createTrace(
+      User user,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String personalNote,
+      String aiJustification) {
+    var trace =
+        Trace.create(
+            UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);
+
+    traceRepository.save(trace);
   }
 }
