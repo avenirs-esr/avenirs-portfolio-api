@@ -78,7 +78,7 @@ public class TraceController {
 
   @DeleteMapping("/{traceId}")
   public ResponseEntity<String> deleteTrace(Principal principal, @PathVariable UUID traceId) {
-    log.debug("Received request to trace overview of user [{}]", principal.getName());
+    log.debug("Received request to delete trace [{}] of user [{}]", traceId, principal.getName());
     User user = getUser(principal.getName());
 
     traceService.deleteById(user, traceId);
@@ -94,7 +94,8 @@ public class TraceController {
   @GetMapping("/unassociated/summary")
   public ResponseEntity<UnassociatedTracesSummaryDTO> getTracesUnassociatedSummary(
       Principal principal) {
-    log.debug("Received request to trace view of user [{}]", principal.getName());
+    log.debug(
+        "Received request to get unassociated trace summary of user [{}]", principal.getName());
     User user = getUser(principal.getName());
 
     return ResponseEntity.ok(
