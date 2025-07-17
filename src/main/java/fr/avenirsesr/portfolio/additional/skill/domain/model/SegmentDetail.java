@@ -1,0 +1,20 @@
+package fr.avenirsesr.portfolio.additional.skill.domain.model;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class SegmentDetail {
+  private String code;
+  private String libelle;
+
+  private SegmentDetail(String code, String libelle) {
+    this.code = code;
+    this.libelle = libelle;
+  }
+
+  public static SegmentDetail create(String code, String libelle) {
+    return new SegmentDetail(code, libelle);
+  }
+}

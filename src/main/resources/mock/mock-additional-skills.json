@@ -1,0 +1,116 @@
+[
+  {
+    "type": "ROME4.0",
+    "obsolete": false,
+    "code": "104174",
+    "libelle": "Accueillir, orienter et renseigner un client",
+    "codeOgr": "104174",
+    "transitionNumerique": false,
+    "competenceEsco": {
+      "uri": "http://data.europa.eu/esco/skill/add193d6-b7bf-40ab-98ff-4a4c6c807387",
+      "libelle": "enregistrer des clients à leur arrivée"
+    },
+    "riasecMajeur": "S",
+    "macroCompetence": {
+      "type": "MACRO-SAVOIR-FAIRE",
+      "code": "300361",
+      "libelle": "Accueillir, orienter, renseigner un public",
+      "codeOgr": "300361",
+      "riasecMajeur": "S",
+      "codeArborescence": "5A101",
+      "sousCategorie": "TECHNIQUE",
+      "maturite": "HOMOGENE",
+      "objectif": {
+        "code": "68",
+        "libelle": "Accueillir, renseigner",
+        "codeArborescence": "5A1",
+        "enjeu": {
+          "code": "29",
+          "libelle": "Relation client",
+          "codeArborescence": "5A",
+          "domaineCompetence": {
+            "code": "5",
+            "libelle": "Développement économique",
+            "codeArborescence": "5"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "ROME4.0",
+    "obsolete": false,
+    "code": "104175",
+    "libelle": "Assurer un accueil téléphonique",
+    "codeOgr": "104175",
+    "transitionNumerique": true,
+    "competenceEsco": {
+      "uri": "http://data.europa.eu/esco/skill/fake1",
+      "libelle": "répondre aux appels téléphoniques"
+    },
+    "riasecMajeur": "C",
+    "macroCompetence": {
+      "type": "MACRO-SAVOIR-FAIRE",
+      "code": "300362",
+      "libelle": "Communiquer efficacement à l'accueil",
+      "codeOgr": "300362",
+      "riasecMajeur": "C",
+      "codeArborescence": "5A102",
+      "sousCategorie": "COMMUNICATION",
+      "maturite": "EMERGENTE",
+      "objectif": {
+        "code": "69",
+        "libelle": "Assurer un accueil de qualité",
+        "codeArborescence": "5A2",
+        "enjeu": {
+          "code": "30",
+          "libelle": "Relation usager",
+          "codeArborescence": "5B",
+          "domaineCompetence": {
+            "code": "6",
+            "libelle": "Services aux personnes",
+            "codeArborescence": "6"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "ROME4.0",
+    "obsolete": true,
+    "code": "104176",
+    "libelle": "Gérer les conflits avec les clients",
+    "codeOgr": "104176",
+    "transitionNumerique": false,
+    "competenceEsco": {
+      "uri": "http://data.europa.eu/esco/skill/fake2",
+      "libelle": "traiter les réclamations"
+    },
+    "riasecMajeur": "E",
+    "macroCompetence": {
+      "type": "MACRO-SAVOIR-FAIRE",
+      "code": "300363",
+      "libelle": "Gérer des situations complexes à l'accueil",
+      "codeOgr": "300363",
+      "riasecMajeur": "E",
+      "codeArborescence": "5A103",
+      "sousCategorie": "GESTION",
+      "maturite": "AVANCEE",
+      "objectif": {
+        "code": "70",
+        "libelle": "Gérer les situations conflictuelles",
+        "codeArborescence": "5A3",
+        "enjeu": {
+          "code": "31",
+          "libelle": "Satisfaction client",
+          "codeArborescence": "5C",
+          "domaineCompetence": {
+            "code": "7",
+            "libelle": "Qualité de service",
+            "codeArborescence": "7"
+          }
+        }
+      }
+    }
+  }
+]
