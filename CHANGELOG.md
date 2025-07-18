@@ -5,6 +5,19 @@ the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
 and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
+## [v1.3.0] - 2025-07-18
+
+- 🔄 **Refactored ProgramProgress / SkillLevel**
+  - Introduced `StudentProgress` as the main entity representing a student’s progress within a `TrainingPath`.
+  - Introduced `SkillLevelProgress` to track a student’s progress on a specific `SkillLevel`.
+  - Redesigned the relationships between `ProgramProgress`, `StudentProgress`, and `SkillLevelProgress` for improved data consistency and clarity.
+
+- ⚠️ **Breaking Change**
+  - This version requires a **full database reset**.
+  - Run the following command from `srv-dev`:
+    ```bash
+    npm run api:reset-db
+    ```
 
 ## [v1.2.0] - 2025-07-08
 
