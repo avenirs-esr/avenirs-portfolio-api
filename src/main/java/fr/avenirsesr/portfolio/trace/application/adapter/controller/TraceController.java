@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.UnassociatedTracesSummaryDTO;
@@ -13,7 +14,6 @@ import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
 import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.User;
-import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
@@ -36,13 +36,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/me/traces")
 public class TraceController {
-  private final UserService userService;
   private final TraceService traceService;
+  private final UserUtil userUtil;
 
   @GetMapping("/overview")
   public ResponseEntity<List<TraceOverviewDTO>> getTraceOverview(Principal principal) {
     log.debug("Received request to trace overview of user [{}]", principal.getName());
-    User user = getUser(principal.getName());
+    User user = userUtil.getUser(principal);
 
     List<Trace> traces = traceService.lastTracesOf(user);
 
@@ -61,7 +61,7 @@ public class TraceController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     log.debug("Received request to trace view of user [{}]", principal.getName());
-    User user = getUser(principal.getName());
+    User user = userUtil.getUser(principal);
 
     TracesViewResponse tracesViewResponse = null;
 
@@ -84,16 +84,11 @@ public class TraceController {
   @DeleteMapping("/{traceId}")
   public ResponseEntity<String> deleteTrace(Principal principal, @PathVariable UUID traceId) {
     log.debug("Received request to delete trace [{}] of user [{}]", traceId, principal.getName());
-    User user = getUser(principal.getName());
+    User user = userUtil.getUser(principal);
 
     traceService.deleteById(user, traceId);
 
     return ResponseEntity.ok("Resource successfully deleted.");
-  }
-
-  private User getUser(String id) {
-    UUID userId = UUID.fromString(id);
-    return userService.getProfile(userId);
   }
 
   @GetMapping("/unassociated/summary")
@@ -101,7 +96,7 @@ public class TraceController {
       Principal principal) {
     log.debug(
         "Received request to get unassociated trace summary of user [{}]", principal.getName());
-    User user = getUser(principal.getName());
+    User user = userUtil.getUser(principal);
 
     return ResponseEntity.ok(
         UnassociatedTracesSummaryMapper.toDTO(traceService.getUnassociatedTracesSummary(user)));
@@ -111,7 +106,7 @@ public class TraceController {
   public ResponseEntity<Void> createTrace(
       Principal principal, @Valid @RequestPart("trace") CreateTraceDTO createTraceDTO) {
     log.debug("Received request to create new trace for user [{}]", principal.getName());
-    User user = getUser(principal.getName());
+    User user = userUtil.getUser(principal);
 
     traceService.createTrace(
         user,

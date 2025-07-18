@@ -112,5 +112,195 @@
         }
       }
     }
+  },
+  {
+    "type": "ROME4.0",
+    "obsolete": false,
+    "code": "104177",
+    "libelle": "Traiter les demandes de renseignement",
+    "codeOgr": "104177",
+    "transitionNumerique": true,
+    "competenceEsco": {
+      "uri": "http://data.europa.eu/esco/skill/fake3",
+      "libelle": "informer sur les services"
+    },
+    "riasecMajeur": "I",
+    "macroCompetence": {
+      "type": "MACRO-SAVOIR-FAIRE",
+      "code": "300364",
+      "libelle": "Informer un public",
+      "codeOgr": "300364",
+      "riasecMajeur": "I",
+      "codeArborescence": "5A104",
+      "sousCategorie": "INFORMATION",
+      "maturite": "EXPERIMENTE",
+      "objectif": {
+        "code": "71",
+        "libelle": "Traiter des demandes",
+        "codeArborescence": "5A4",
+        "enjeu": {
+          "code": "32",
+          "libelle": "Transmission d'information",
+          "codeArborescence": "5D",
+          "domaineCompetence": {
+            "code": "8",
+            "libelle": "Communication publique",
+            "codeArborescence": "8"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "ROME4.0",
+    "obsolete": false,
+    "code": "104178",
+    "libelle": "Organiser un espace d’accueil",
+    "codeOgr": "104178",
+    "transitionNumerique": false,
+    "competenceEsco": {
+      "uri": "http://data.europa.eu/esco/skill/fake4",
+      "libelle": "aménager un lieu"
+    },
+    "riasecMajeur": "R",
+    "macroCompetence": {
+      "type": "MACRO-SAVOIR-FAIRE",
+      "code": "300365",
+      "libelle": "Organiser l'espace d'accueil",
+      "codeOgr": "300365",
+      "riasecMajeur": "R",
+      "codeArborescence": "5A105",
+      "sousCategorie": "LOGISTIQUE",
+      "maturite": "HOMOGENE",
+      "objectif": {
+        "code": "72",
+        "libelle": "Créer un espace fonctionnel",
+        "codeArborescence": "5A5",
+        "enjeu": {
+          "code": "33",
+          "libelle": "Confort utilisateur",
+          "codeArborescence": "5E",
+          "domaineCompetence": {
+            "code": "9",
+            "libelle": "Ergonomie",
+            "codeArborescence": "9"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "ROME4.0",
+    "obsolete": false,
+    "code": "104179",
+    "libelle": "Assurer la confidentialité des données clients",
+    "codeOgr": "104179",
+    "transitionNumerique": true,
+    "competenceEsco": {
+      "uri": "http://data.europa.eu/esco/skill/fake5",
+      "libelle": "protéger les données personnelles"
+    },
+    "riasecMajeur": "C",
+    "macroCompetence": {
+      "type": "MACRO-SAVOIR-FAIRE",
+      "code": "300366",
+      "libelle": "Gérer les données confidentielles",
+      "codeOgr": "300366",
+      "riasecMajeur": "C",
+      "codeArborescence": "5A106",
+      "sousCategorie": "SECURITE",
+      "maturite": "EXPERIMENTE",
+      "objectif": {
+        "code": "73",
+        "libelle": "Sécuriser les informations",
+        "codeArborescence": "5A6",
+        "enjeu": {
+          "code": "34",
+          "libelle": "Protection des données",
+          "codeArborescence": "5F",
+          "domaineCompetence": {
+            "code": "10",
+            "libelle": "Informatique",
+            "codeArborescence": "10"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "ROME4.0",
+    "obsolete": false,
+    "code": "104180",
+    "libelle": "Utiliser un logiciel de réservation",
+    "codeOgr": "104180",
+    "transitionNumerique": true,
+    "competenceEsco": {
+      "uri": "http://data.europa.eu/esco/skill/fake6",
+      "libelle": "gérer un planning"
+    },
+    "riasecMajeur": "C",
+    "macroCompetence": {
+      "type": "MACRO-SAVOIR-FAIRE",
+      "code": "300367",
+      "libelle": "Planifier des rendez-vous",
+      "codeOgr": "300367",
+      "riasecMajeur": "C",
+      "codeArborescence": "5A107",
+      "sousCategorie": "ORGANISATION",
+      "maturite": "AVANCEE",
+      "objectif": {
+        "code": "74",
+        "libelle": "Optimiser la planification",
+        "codeArborescence": "5A7",
+        "enjeu": {
+          "code": "35",
+          "libelle": "Gestion du temps",
+          "codeArborescence": "5G",
+          "domaineCompetence": {
+            "code": "11",
+            "libelle": "Productivité",
+            "codeArborescence": "11"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "ROME4.0",
+    "obsolete": false,
+    "code": "104181",
+    "libelle": "Accueillir un public en situation de handicap",
+    "codeOgr": "104181",
+    "transitionNumerique": false,
+    "competenceEsco": {
+      "uri": "http://data.europa.eu/esco/skill/fake7",
+      "libelle": "adapter son comportement"
+    },
+    "riasecMajeur": "S",
+    "macroCompetence": {
+      "type": "MACRO-SAVOIR-FAIRE",
+      "code": "300368",
+      "libelle": "Adapter son accueil aux besoins spécifiques",
+      "codeOgr": "300368",
+      "riasecMajeur": "S",
+      "codeArborescence": "5A108",
+      "sousCategorie": "INCLUSION",
+      "maturite": "HOMOGENE",
+      "objectif": {
+        "code": "75",
+        "libelle": "Favoriser l'accessibilité",
+        "codeArborescence": "5A8",
+        "enjeu": {
+          "code": "36",
+          "libelle": "Accessibilité",
+          "codeArborescence": "5H",
+          "domaineCompetence": {
+            "code": "12",
+            "libelle": "Handicap",
+            "codeArborescence": "12"
+          }
+        }
+      }
+    }
   }
 ]

@@ -27,4 +27,8 @@ public class UserUtil {
 
     return user.toStudent();
   }
+
+  public User getUser(Principal principal) {
+    return userService.getProfile(UUID.fromString(principal.getName()));
+  }
 }

@@ -1,20 +1,12 @@
 package fr.avenirsesr.portfolio.additional.skill.infrastructure.adapter.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@NoArgsConstructor
-@Getter
-@Setter
-public class MacroCompetence {
-  private String type;
-  private String code;
-  private String libelle;
-  private String codeOgr;
-  private String riasecMajeur;
-  private String codeArborescence;
-  private String sousCategorie;
-  private String maturite;
-  private Objectif objectif;
-}
+public record MacroCompetence(
+    String type,
+    String code,
+    String libelle,
+    String codeOgr,
+    String riasecMajeur,
+    String codeArborescence,
+    String sousCategorie,
+    String maturite,
+    Objectif objectif) {}

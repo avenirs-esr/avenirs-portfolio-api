@@ -8,20 +8,20 @@ public interface PathSegmentsMapper {
   static PathSegments toDomain(CompetenceComplementaireDetaillee entity) {
     SegmentDetail issue =
         SegmentDetailMapper.toDomain(
-            entity.getMacroCompetence().getObjectif().getEnjeu().getCode(),
-            entity.getMacroCompetence().getObjectif().getEnjeu().getLibelle());
+            entity.macroCompetence().objectif().enjeu().code(),
+            entity.macroCompetence().objectif().enjeu().libelle());
 
     SegmentDetail target =
         SegmentDetailMapper.toDomain(
-            entity.getMacroCompetence().getObjectif().getCode(),
-            entity.getMacroCompetence().getObjectif().getLibelle());
+            entity.macroCompetence().objectif().code(),
+            entity.macroCompetence().objectif().libelle());
 
     SegmentDetail macroSkill =
         SegmentDetailMapper.toDomain(
-            entity.getMacroCompetence().getCode(), entity.getMacroCompetence().getLibelle());
+            entity.macroCompetence().code(), entity.macroCompetence().libelle());
 
-    SegmentDetail skill = SegmentDetailMapper.toDomain(entity.getCode(), entity.getLibelle());
+    SegmentDetail skill = SegmentDetailMapper.toDomain(entity.code(), entity.libelle());
 
-    return PathSegments.create(issue, target, macroSkill, skill);
+    return PathSegments.toDomain(issue, target, macroSkill, skill);
   }
 }
