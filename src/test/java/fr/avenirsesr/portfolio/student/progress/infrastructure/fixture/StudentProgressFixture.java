@@ -1,32 +1,48 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class StudentProgressFixture {
   private UUID id;
-  private User user;
+  private Student student;
   private TrainingPath trainingPath;
-  private SkillLevel skillLevel;
-  private ESkillLevelStatus status;
+  private List<SkillLevelProgress> skillLevels;
 
-  private StudentProgressFixture() {
-    this.id = UUID.randomUUID();
-    this.user = UserFixture.create().toModel();
-    this.trainingPath = TrainingPathFixture.create().toModel();
-    this.skillLevel = SkillLevelFixture.create().toModel();
-    this.status = ESkillLevelStatus.NOT_STARTED;
+  private StudentProgressFixture(
+      UUID id, Student student, TrainingPath trainingPath, List<SkillLevelProgress> skillLevels) {
+    this.id = id;
+    this.student = student;
+    this.trainingPath = trainingPath;
+    this.skillLevels = skillLevels;
   }
 
   public static StudentProgressFixture create() {
-    return new StudentProgressFixture();
+    var trainingPathSkillLevels =
+        Set.of(
+            SkillLevelFixture.create().toModel(),
+            SkillLevelFixture.create().toModel(),
+            SkillLevelFixture.create().toModel(),
+            SkillLevelFixture.create().toModel());
+    var trainingPath =
+        TrainingPathFixture.create().withSkillLevels(trainingPathSkillLevels).toModel();
+    var student = UserFixture.createStudent().toModel().toStudent();
+    var skillLevelsProgress =
+        trainingPathSkillLevels.stream()
+            .map(skillLevel -> SkillLevelProgressFixture.create(student, skillLevel).toModel())
+            .toList();
+    return new StudentProgressFixture(
+        UUID.randomUUID(), student, trainingPath, skillLevelsProgress);
   }
 
   public StudentProgressFixture withId(UUID id) {
@@ -35,7 +51,7 @@ public class StudentProgressFixture {
   }
 
   public StudentProgressFixture withUser(User user) {
-    this.user = user;
+    this.student = user.toStudent();
     return this;
   }
 
@@ -44,17 +60,12 @@ public class StudentProgressFixture {
     return this;
   }
 
-  public StudentProgressFixture withSkillLevel(SkillLevel skillLevel) {
-    this.skillLevel = skillLevel;
-    return this;
-  }
-
-  public StudentProgressFixture withStatus(ESkillLevelStatus status) {
-    this.status = status;
+  public StudentProgressFixture withSkillLevels(List<SkillLevelProgress> skillLevels) {
+    this.skillLevels = skillLevels;
     return this;
   }
 
   public StudentProgress toModel() {
-    return StudentProgress.toDomain(id, user, trainingPath, skillLevel, status);
+    return StudentProgress.toDomain(id, student, trainingPath, skillLevels);
   }
 }

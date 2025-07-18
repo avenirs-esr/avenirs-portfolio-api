@@ -4,10 +4,8 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeAMS;
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
-import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
@@ -22,7 +20,7 @@ public class AMSFixture {
   private UUID id;
   private User user;
   private String title;
-  private List<SkillLevel> skillLevels;
+  private List<SkillLevelProgress> skillLevels;
   private ELanguage language = ELanguage.FRENCH;
   private Instant startDate;
   private Instant endDate;
@@ -33,8 +31,7 @@ public class AMSFixture {
     this.id = base.getId();
     this.user = fakeUser;
     this.title = "fake ams title";
-    this.skillLevels =
-        base.getSkillLevels().stream().map(SkillLevelMapper::toDomainWithoutRecursion).toList();
+    this.skillLevels = List.of();
   }
 
   public static AMSFixture create() {
@@ -51,13 +48,8 @@ public class AMSFixture {
     return this;
   }
 
-  public AMSFixture withSkillLevels(List<SkillLevel> skillLevels) {
+  public AMSFixture withSkillLevels(List<SkillLevelProgress> skillLevels) {
     this.skillLevels = skillLevels;
-    return this;
-  }
-
-  public AMSFixture withSkillLevels(int count) {
-    this.skillLevels = SkillLevelFixture.create().withCount(count);
     return this;
   }
 

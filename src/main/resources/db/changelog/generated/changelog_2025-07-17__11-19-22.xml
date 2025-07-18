@@ -1,0 +1,99 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-11">
+        <dropForeignKeyConstraint baseTableName="student_progress" constraintName="FK1i1xekhboumqi51wi3crsnusp"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-12">
+        <dropForeignKeyConstraint baseTableName="ams_skill_level" constraintName="FK5lhlnjp6lhsfemd96jhn3veh2"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-13">
+        <dropForeignKeyConstraint baseTableName="ams_skill_level" constraintName="FKbwrj6yv0ysw3yn6laeb5xxibl"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-14">
+        <dropForeignKeyConstraint baseTableName="trace_skill_level" constraintName="FKfwyc1kmx10t33udpk5mqrohf5"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-15">
+        <dropForeignKeyConstraint baseTableName="trace_skill_level" constraintName="FKikbvl7fenoiam164lrqu5bikg"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-1">
+        <createTable tableName="ams_skill_level_progress">
+            <column name="ams_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_level_progress_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-2">
+        <createTable tableName="skill_level_progress">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="skill_level_progressPK"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="end_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="skill_level_id" type="UUID"/>
+            <column name="student_id" type="UUID"/>
+            <column name="student_progress_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-3">
+        <createTable tableName="trace_skill_level_progress">
+            <column name="trace_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="skill_level_progress_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-4">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="skill_level_progress" constraintName="FK6dx8chcqb8go06e4l5lpf7jwi" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-5">
+        <addForeignKeyConstraint baseColumnNames="trace_id" baseTableName="trace_skill_level_progress" constraintName="FK9sdlato41t1ox3e37vylau5v6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="trace" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-6">
+        <addForeignKeyConstraint baseColumnNames="skill_level_progress_id" baseTableName="trace_skill_level_progress" constraintName="FKaofs6849fsapqssvj77amy3ps" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="skill_level_progress" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-7">
+        <addForeignKeyConstraint baseColumnNames="ams_id" baseTableName="ams_skill_level_progress" constraintName="FKdw170ywd7eil97l7xr9aetsmm" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ams" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-8">
+        <addForeignKeyConstraint baseColumnNames="skill_level_progress_id" baseTableName="ams_skill_level_progress" constraintName="FKhw2oxcx030v3pt9lh6pnw0s3o" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="skill_level_progress" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-9">
+        <addForeignKeyConstraint baseColumnNames="skill_level_id" baseTableName="skill_level_progress" constraintName="FKpuxo8yqtpxf4xnlov8pjekrhb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="skill_level" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-10">
+        <addForeignKeyConstraint baseColumnNames="student_progress_id" baseTableName="skill_level_progress" constraintName="FKtp2mnaou0le35lk8u5bl00jlo" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="student_progress" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-16">
+        <dropTable tableName="ams_skill_level"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-17">
+        <dropTable tableName="trace_skill_level"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-18">
+        <dropColumn columnName="end_date" tableName="skill_level"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-19">
+        <dropColumn columnName="skill_level_id" tableName="student_progress"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-20">
+        <dropColumn columnName="start_date" tableName="skill_level"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-21">
+        <dropColumn columnName="status" tableName="skill_level"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1752751166168-22">
+        <dropColumn columnName="status" tableName="student_progress"/>
+    </changeSet>
+</databaseChangeLog>
