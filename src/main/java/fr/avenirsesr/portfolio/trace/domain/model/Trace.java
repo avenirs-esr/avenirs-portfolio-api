@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.trace.domain.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
 import java.util.List;
@@ -18,7 +18,7 @@ public class Trace {
   private final UUID id;
   private final User user;
   private String title;
-  private List<SkillLevel> skillLevels;
+  private List<SkillLevelProgress> skillLevels;
   private List<AMS> amses;
   private Instant createdAt;
   private Instant updatedAt;
@@ -42,7 +42,7 @@ public class Trace {
       boolean isGroup,
       String aiUseJustification,
       String personalNote,
-      List<SkillLevel> skillLevels,
+      List<SkillLevelProgress> skillLevels,
       List<AMS> amses,
       Instant createdAt,
       Instant updatedAt,
@@ -89,7 +89,7 @@ public class Trace {
       UUID id,
       User user,
       String title,
-      List<SkillLevel> skillLevels,
+      List<SkillLevelProgress> skillLevels,
       List<AMS> amses,
       boolean group,
       String aiUseJustification,

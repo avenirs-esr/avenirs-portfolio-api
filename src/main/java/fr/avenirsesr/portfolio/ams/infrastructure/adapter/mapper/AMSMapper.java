@@ -3,9 +3,8 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEntity;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
@@ -21,12 +20,7 @@ public interface AMSMapper {
         ams.getStartDate(),
         ams.getEndDate(),
         ams.getSkillLevels().stream()
-            .map(
-                skillLevel ->
-                    SkillLevelMapper.fromDomain(
-                        skillLevel,
-                        SkillMapper.fromDomain(skillLevel.getSkill()),
-                        skillLevel.getTraces().stream().map(TraceMapper::fromDomain).toList()))
+            .map(SkillLevelProgressMapper::fromDomain)
             .collect(Collectors.toSet()),
         ams.getCohorts().stream().map(CohortMapper::fromDomain).collect(Collectors.toSet()),
         ams.getTraces().stream().map(TraceMapper::fromDomain).collect(Collectors.toSet()));
@@ -35,10 +29,6 @@ public interface AMSMapper {
   static AMS toDomain(AMSEntity entity) {
     AMS ams = toDomainWithoutRecursion(entity);
     ams.setTraces(entity.getTraces().stream().map(TraceMapper::toDomainWithoutRecursion).toList());
-    ams.setSkillLevels(
-        entity.getSkillLevels().stream()
-            .map(SkillLevelMapper::toDomainWithoutRecursion)
-            .collect(Collectors.toList()));
     ams.setCohorts(
         entity.getCohorts().stream()
             .map(CohortMapper::toDomainWithoutRecursion)

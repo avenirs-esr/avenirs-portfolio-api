@@ -1,11 +1,7 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
-import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.PeriodEntity;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.util.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,18 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SkillLevelEntity extends PeriodEntity<LocalDate> {
-
-  @Column
-  @Enumerated(EnumType.STRING)
-  private ESkillLevelStatus status;
-
-  @ManyToMany(mappedBy = "skillLevels")
-  private List<TraceEntity> traces;
-
-  @ManyToMany(mappedBy = "skillLevels")
-  private List<AMSEntity> amses;
-
+public class SkillLevelEntity extends AvenirsBaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "skill_id")
   private SkillEntity skill;
@@ -41,35 +26,15 @@ public class SkillLevelEntity extends PeriodEntity<LocalDate> {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set<SkillLevelTranslationEntity> translations =
-      new HashSet<>(); // TODO: Remove this SET and get it in queries
+  private Set<SkillLevelTranslationEntity> translations = new HashSet<>();
 
-  private SkillLevelEntity(
-      UUID id,
-      ESkillLevelStatus status,
-      List<TraceEntity> traces,
-      List<AMSEntity> amses,
-      SkillEntity skill,
-      LocalDate startDate,
-      LocalDate endDate) {
+  private SkillLevelEntity(UUID id, SkillEntity skill) {
     setId(id);
-    this.status = status;
-    this.traces = traces;
-    this.amses = amses;
     this.skill = skill;
-    this.startDate = startDate;
-    this.endDate = endDate;
   }
 
-  public static SkillLevelEntity of(
-      UUID id,
-      ESkillLevelStatus status,
-      List<TraceEntity> traces,
-      List<AMSEntity> amses,
-      SkillEntity skillEntity,
-      LocalDate startDate,
-      LocalDate endDate) {
-    return new SkillLevelEntity(id, status, traces, amses, skillEntity, startDate, endDate);
+  public static SkillLevelEntity of(UUID id, SkillEntity skillEntity) {
+    return new SkillLevelEntity(id, skillEntity);
   }
 
   @Override

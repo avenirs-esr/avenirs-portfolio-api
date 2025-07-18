@@ -12,14 +12,10 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEn
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.CohortFixture;
-import fr.avenirsesr.portfolio.program.domain.model.Skill;
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
-import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
-import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
-import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
@@ -42,7 +38,7 @@ class AMSMapperTest {
 
   private AMS ams;
   private User user;
-  private List<SkillLevel> skillLevels;
+  private List<SkillLevelProgress> skillLevelProgresses;
   private List<Trace> traces;
   private Set<Cohort> cohorts;
   private final String title = "Test AMS Title";
@@ -55,17 +51,12 @@ class AMSMapperTest {
   @BeforeEach
   void setUp() {
     user = UserFixture.create().toModel();
-    TrainingPath trainingPath = TrainingPathFixture.create().toModel();
-    skillLevels = new ArrayList<>();
-    for (int i = 0; i < 2; i++) {
-      // TODO: Refactor this method when skill levels are refactored
-      // Skill skill = SkillFixture.create().withProgramProgress(trainingPath).toModel();
-      Skill skill = SkillFixture.create().toModel();
-      SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
-      skillLevels.add(skillLevel);
-    }
     traces = TraceFixture.create().withCount(3);
     cohorts = new HashSet<>(CohortFixture.create().withCount(2));
+    skillLevelProgresses =
+        SkillLevelProgressFixture.createMany(user.toStudent(), 3).stream()
+            .map(SkillLevelProgressFixture::toModel)
+            .toList();
 
     ams =
         AMSFixture.create()
@@ -77,7 +68,7 @@ class AMSMapperTest {
             .withEndDate(endDate)
             .toModel();
 
-    ams.setSkillLevels(skillLevels);
+    ams.setSkillLevels(skillLevelProgresses);
     ams.setTraces(traces);
     ams.setCohorts(cohorts);
     ams.setStatus(status);
@@ -94,12 +85,14 @@ class AMSMapperTest {
     assertEquals(startDate, entity.getStartDate());
     assertEquals(endDate, entity.getEndDate());
 
-    assertEquals(skillLevels.size(), entity.getSkillLevels().size());
+    assertEquals(skillLevelProgresses.size(), entity.getSkillLevels().size());
     assertEquals(traces.size(), entity.getTraces().size());
     assertEquals(cohorts.size(), entity.getCohorts().size());
 
-    for (SkillLevelEntity skillLevelEntity : entity.getSkillLevels()) {
-      assertTrue(skillLevels.stream().anyMatch(sl -> sl.getId().equals(skillLevelEntity.getId())));
+    for (SkillLevelProgressEntity skillLevelEntity : entity.getSkillLevels()) {
+      assertTrue(
+          skillLevelProgresses.stream()
+              .anyMatch(sl -> sl.getId().equals(skillLevelEntity.getId())));
     }
 
     for (TraceEntity traceEntity : entity.getTraces()) {

@@ -1,14 +1,14 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.UUID;
 
 public class FakeStudentProgress {
@@ -20,15 +20,16 @@ public class FakeStudentProgress {
   }
 
   public static FakeStudentProgress of(
-      UserEntity student, TrainingPathEntity trainingPath, SkillLevelEntity skillLevel) {
+      UserEntity student,
+      TrainingPathEntity trainingPath,
+      List<SkillLevelProgressEntity> skillLevels) {
     LocalDate today = LocalDate.now();
     return new FakeStudentProgress(
         StudentProgressEntity.of(
             UUID.fromString(faker.call().internet().uuid()),
             student,
             trainingPath,
-            skillLevel,
-            faker.call().options().option(ESkillLevelStatus.class),
+            skillLevels,
             today
                 .minusDays(faker.call().number().numberBetween(5, 365))
                 .atStartOfDay(ZoneId.systemDefault())

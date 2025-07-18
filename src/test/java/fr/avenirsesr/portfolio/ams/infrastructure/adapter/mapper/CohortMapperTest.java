@@ -18,6 +18,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -125,7 +126,7 @@ class CohortMapperTest {
     studentProgressEntity.setId(UUID.randomUUID());
     studentProgressEntity.setStudent(studentEntity);
     studentProgressEntity.setTrainingPath(trainingPathEntity);
-    studentProgressEntity.setSkillLevel(new SkillLevelEntity());
+    studentProgressEntity.setSkillLevels(List.of(new SkillLevelProgressEntity()));
 
     UserEntity userEntity = new UserEntity();
     userEntity.setId(UUID.randomUUID());
@@ -226,7 +227,7 @@ class CohortMapperTest {
     studentProgressEntity.setId(UUID.randomUUID());
     studentProgressEntity.setStudent(studentEntity);
     studentProgressEntity.setTrainingPath(trainingPathEntity);
-    studentProgressEntity.setSkillLevel(new SkillLevelEntity());
+    studentProgressEntity.setSkillLevels(List.of(new SkillLevelProgressEntity()));
 
     CohortEntity entity = new CohortEntity();
     entity.setId(id);

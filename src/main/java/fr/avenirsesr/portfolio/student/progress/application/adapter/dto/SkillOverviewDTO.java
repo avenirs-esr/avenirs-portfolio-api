@@ -9,4 +9,4 @@ public record SkillOverviewDTO(
     String name,
     int traceCount,
     int activityCount,
-    SkillLevelOverviewDTO currentSkillLevel) {}
+    SkillLevelProgressOverviewDTO currentSkillLevel) {}

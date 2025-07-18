@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.ams.domain.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
@@ -32,7 +32,7 @@ public class AMS {
 
   private EAmsStatus status;
 
-  private List<SkillLevel> skillLevels;
+  private List<SkillLevelProgress> skillLevels;
 
   private List<Trace> traces;
 
@@ -62,7 +62,7 @@ public class AMS {
       String title,
       Instant startDate,
       Instant endDate,
-      List<SkillLevel> skillLevels,
+      List<SkillLevelProgress> skillLevels,
       List<Trace> traces,
       Set<Cohort> cohorts,
       EAmsStatus status) {

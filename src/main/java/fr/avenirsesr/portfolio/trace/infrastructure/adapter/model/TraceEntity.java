@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,12 +41,11 @@ public class TraceEntity extends AvenirsBaseEntity {
   private ELanguage language;
 
   @ManyToMany
-  @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinTable(
-      name = "trace_skill_level",
+      name = "trace_skill_level_progress",
       joinColumns = @JoinColumn(name = "trace_id"),
-      inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
-  private List<SkillLevelEntity> skillLevels;
+      inverseJoinColumns = @JoinColumn(name = "skill_level_progress_id"))
+  private List<SkillLevelProgressEntity> skillLevels;
 
   @ManyToMany
   @OnDelete(action = OnDeleteAction.CASCADE)
@@ -75,7 +74,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      List<SkillLevelEntity> skillLevels,
+      List<SkillLevelProgressEntity> skillLevels,
       List<AMSEntity> amses,
       boolean isGroup,
       String aiUseJustification,
@@ -102,7 +101,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      List<SkillLevelEntity> skillLevels,
+      List<SkillLevelProgressEntity> skillLevels,
       List<AMSEntity> amses,
       boolean isGroup,
       String aiUseJustification,
