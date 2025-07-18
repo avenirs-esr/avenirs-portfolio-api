@@ -5,11 +5,11 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.AMSDatabaseRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeAMS;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
@@ -63,7 +63,8 @@ public class AMSSeeder {
     return new ArrayList<>(traceList.subList(0, tracesCount));
   }
 
-  private List<SkillLevelEntity> getRandomSkillLevels(List<SkillLevelEntity> savedSkillLevels) {
+  private List<SkillLevelProgressEntity> getRandomSkillLevels(
+      List<SkillLevelProgressEntity> savedSkillLevels) {
     int skillLevelCount =
         faker
             .call()
@@ -72,7 +73,7 @@ public class AMSSeeder {
                 SeederConfig.NB_SKILL_LEVEL_MIN_PER_AMS,
                 SeederConfig.NB_SKILL_LEVEL_MAX_PER_AMS + 1);
 
-    List<SkillLevelEntity> skillLevelList = new ArrayList<>(savedSkillLevels);
+    List<SkillLevelProgressEntity> skillLevelList = new ArrayList<>(savedSkillLevels);
 
     Collections.shuffle(skillLevelList);
 
@@ -92,7 +93,7 @@ public class AMSSeeder {
 
   public List<AMSEntity> seed(
       List<UserEntity> savedUsers,
-      List<SkillLevelEntity> savedSkillLevels,
+      List<SkillLevelProgressEntity> savedSkillLevels,
       List<TraceEntity> savedTraces,
       List<CohortEntity> savedCohorts) {
     ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");

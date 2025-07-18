@@ -9,10 +9,6 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.configuration.domain.model.TraceConfigurationInfo;
 import fr.avenirsesr.portfolio.configuration.domain.port.input.ConfigurationService;
-import fr.avenirsesr.portfolio.program.domain.model.Skill;
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
-import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
@@ -185,14 +181,8 @@ public class TraceServiceImplTest {
   void givenTraceWithAmsAndSkillLevels_shouldDeleteTraceAndLinksToAmsAndSkillLevels() {
     // Given
     AMS ams = AMSFixture.create().toModel();
-    Skill skill = SkillFixture.create().withSkillLevels(1).toModel();
-    SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
     Trace trace =
-        TraceFixture.create()
-            .withUser(student.getUser())
-            .withSkillLevels(List.of(skillLevel))
-            .withAmses(List.of(ams))
-            .toModel();
+        TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
 
     // When
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
@@ -206,14 +196,8 @@ public class TraceServiceImplTest {
   void givenTraceWithAmsAndSkillLevels_shouldThrowTraceNotFoundException() {
     // Given
     AMS ams = AMSFixture.create().toModel();
-    Skill skill = SkillFixture.create().withSkillLevels(1).toModel();
-    SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
     Trace trace =
-        TraceFixture.create()
-            .withUser(student.getUser())
-            .withSkillLevels(List.of(skillLevel))
-            .withAmses(List.of(ams))
-            .toModel();
+        TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
 
     // When
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.empty());
@@ -232,14 +216,8 @@ public class TraceServiceImplTest {
     // Given
     User otherUser = UserFixture.createStudent().toModel();
     AMS ams = AMSFixture.create().toModel();
-    Skill skill = SkillFixture.create().withSkillLevels(1).toModel();
-    SkillLevel skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
     Trace trace =
-        TraceFixture.create()
-            .withUser(student.getUser())
-            .withSkillLevels(List.of(skillLevel))
-            .withAmses(List.of(ams))
-            .toModel();
+        TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
 
     // When
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));

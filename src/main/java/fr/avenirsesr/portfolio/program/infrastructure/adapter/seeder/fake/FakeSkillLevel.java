@@ -1,13 +1,9 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelTranslationEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,14 +17,7 @@ public class FakeSkillLevel {
 
   public static FakeSkillLevel create() {
     SkillLevelEntity entity =
-        SkillLevelEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
-            null,
-            List.of(),
-            List.of(),
-            null,
-            null,
-            null);
+        SkillLevelEntity.of(UUID.fromString(faker.call().internet().uuid()), null);
 
     entity.setTranslations(
         Set.of(
@@ -41,7 +30,7 @@ public class FakeSkillLevel {
                     .formatted(faker.call().lorem().sentence(), ELanguage.FALLBACK.getCode()),
                 entity)));
 
-    return new FakeSkillLevel(entity).withStatus(ESkillLevelStatus.NOT_STARTED);
+    return new FakeSkillLevel(entity);
   }
 
   public FakeSkillLevel addTranslation(ELanguage language) {
@@ -56,29 +45,6 @@ public class FakeSkillLevel {
 
     skillLevel.setTranslations(translations);
 
-    return this;
-  }
-
-  public FakeSkillLevel withStatus(ESkillLevelStatus status) {
-    LocalDate pastStartDate = LocalDate.now().minus(Period.ofYears(2));
-    LocalDate pastEndDate = LocalDate.now().minus(Period.ofYears(1));
-    LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));
-    LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));
-    skillLevel.setStatus(status);
-    switch (status) {
-      case VALIDATED, FAILED -> {
-        skillLevel.setStartDate(pastStartDate);
-        skillLevel.setEndDate(pastEndDate);
-      }
-      case UNDER_ACQUISITION, UNDER_REVIEW -> {
-        skillLevel.setStartDate(pastStartDate);
-        skillLevel.setEndDate(futureEndDate);
-      }
-      case TO_BE_EVALUATED, NOT_STARTED -> {
-        skillLevel.setStartDate(futureStartDate);
-        skillLevel.setEndDate(futureEndDate);
-      }
-    }
     return this;
   }
 

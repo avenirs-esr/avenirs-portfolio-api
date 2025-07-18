@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
@@ -66,15 +67,18 @@ public class SeederRunner implements CommandLineRunner {
       var savedInstitutions = institutionSeeder.seed();
       var savedPrograms = programSeeder.seed(savedInstitutions);
       var savedTraces = traceSeeder.seed(savedUsers);
-      var savedSkills = skillSeeder.seed(savedPrograms);
-      var savedSkillLevels =
-          savedSkills.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
+      var savedSkillLevels = skillSeeder.seed(savedPrograms);
+      var savedSkills =
+          savedSkillLevels.stream().map(SkillLevelEntity::getSkill).distinct().toList();
       var savedStudents = savedUsers.stream().filter(u -> u.getStudent().isPresent()).toList();
       var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
       var savedStudentProgresses =
           studentProgressSeeder.seed(savedTrainingPaths, savedStudents, savedSkillLevels);
+      var savedSkillLevelProgresses =
+          savedStudentProgresses.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
       var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
-      var savedAmses = amsSeeder.seed(savedUsers, savedSkillLevels, savedTraces, savedCohorts);
+      var savedAmses =
+          amsSeeder.seed(savedUsers, savedSkillLevelProgresses, savedTraces, savedCohorts);
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);

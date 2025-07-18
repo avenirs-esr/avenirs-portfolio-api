@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.PeriodEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
@@ -38,10 +38,10 @@ public class AMSEntity extends PeriodEntity<Instant> {
 
   @ManyToMany
   @JoinTable(
-      name = "ams_skill_level",
+      name = "ams_skill_level_progress",
       joinColumns = @JoinColumn(name = "ams_id"),
-      inverseJoinColumns = @JoinColumn(name = "skill_level_id"))
-  private List<SkillLevelEntity> skillLevels;
+      inverseJoinColumns = @JoinColumn(name = "skill_level_progress_id"))
+  private List<SkillLevelProgressEntity> skillLevels;
 
   @ManyToMany
   @JoinTable(
@@ -71,7 +71,7 @@ public class AMSEntity extends PeriodEntity<Instant> {
       EAmsStatus status,
       Instant startDate,
       Instant endDate,
-      Set<SkillLevelEntity> skillLevels,
+      Set<SkillLevelProgressEntity> skillLevels,
       Set<CohortEntity> cohorts,
       Set<TraceEntity> traces) {
     setId(id);
@@ -90,7 +90,7 @@ public class AMSEntity extends PeriodEntity<Instant> {
       EAmsStatus status,
       Instant startDate,
       Instant endDate,
-      Set<SkillLevelEntity> skillLevels,
+      Set<SkillLevelProgressEntity> skillLevels,
       Set<CohortEntity> cohorts,
       Set<TraceEntity> traces) {
     return new AMSEntity(id, user, status, startDate, endDate, skillLevels, cohorts, traces);

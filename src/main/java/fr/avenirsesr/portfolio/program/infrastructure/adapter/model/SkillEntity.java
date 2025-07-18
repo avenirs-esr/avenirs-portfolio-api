@@ -15,9 +15,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SkillEntity extends AvenirsBaseEntity {
-  @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Set<SkillLevelEntity> skillLevels;
-
   @OneToMany(
       mappedBy = "skill",
       cascade = CascadeType.ALL,
@@ -26,13 +23,12 @@ public class SkillEntity extends AvenirsBaseEntity {
   private Set<SkillTranslationEntity> translations =
       new HashSet<>(); // TODO: Remove this SET and get it in queries
 
-  public SkillEntity(UUID id, Set<SkillLevelEntity> skillLevels) {
+  public SkillEntity(UUID id) {
     this.setId(id);
-    this.skillLevels = skillLevels;
   }
 
-  public static SkillEntity of(UUID id, Set<SkillLevelEntity> skillLevels) {
-    return new SkillEntity(id, skillLevels);
+  public static SkillEntity of(UUID id) {
+    return new SkillEntity(id);
   }
 
   @Override
