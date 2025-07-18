@@ -16,9 +16,13 @@ public class FakeTrainingPath {
   }
 
   public static FakeTrainingPath of(ProgramEntity program, Set<SkillLevelEntity> skillLevels) {
-    return new FakeTrainingPath(
+    var entity =
         TrainingPathEntity.of(
-            UUID.fromString(faker.call().internet().uuid()), program, skillLevels));
+            UUID.fromString(faker.call().internet().uuid()), program, skillLevels);
+
+    entity.getSkillLevels().forEach(skillLevel -> skillLevel.setTrainingPath(entity));
+
+    return new FakeTrainingPath(entity);
   }
 
   public TrainingPathEntity toEntity() {
