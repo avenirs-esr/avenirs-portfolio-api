@@ -4,6 +4,6 @@ import fr.avenirsesr.portfolio.additional.skill.domain.model.SegmentDetail;
 
 public interface SegmentDetailMapper {
   static SegmentDetail toDomain(String code, String libelle) {
-    return SegmentDetail.create(code, libelle);
+    return SegmentDetail.toDomain(code, libelle);
   }
 }

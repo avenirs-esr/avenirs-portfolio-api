@@ -23,4 +23,9 @@ public class PathSegments {
       SegmentDetail issue, SegmentDetail target, SegmentDetail macroSkill, SegmentDetail skill) {
     return new PathSegments(issue, target, macroSkill, skill);
   }
+
+  public static PathSegments toDomain(
+      SegmentDetail issue, SegmentDetail target, SegmentDetail macroSkill, SegmentDetail skill) {
+    return create(issue, target, macroSkill, skill);
+  }
 }

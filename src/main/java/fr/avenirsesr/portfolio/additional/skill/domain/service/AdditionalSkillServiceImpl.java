@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.additional.skill.domain.service;
 
-import fr.avenirsesr.portfolio.additional.skill.domain.model.AdditionalSkill;
+import fr.avenirsesr.portfolio.additional.skill.domain.model.AdditionalSkillsPaginated;
 import fr.avenirsesr.portfolio.additional.skill.domain.port.input.AdditionalSkillService;
-import fr.avenirsesr.portfolio.additional.skill.domain.port.output.AdditionalSkillRepository;
-import java.util.List;
+import fr.avenirsesr.portfolio.additional.skill.domain.port.output.AdditionalSkillCache;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,11 +12,15 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Service
 public class AdditionalSkillServiceImpl implements AdditionalSkillService {
+  private static final int DEFAULT_PAGE = 0;
+  private static final int DEFAULT_PAGESIZE = 8;
 
-  private final AdditionalSkillRepository additionalSkillRepository;
+  private final AdditionalSkillCache additionalSkillCache;
 
   @Override
-  public List<AdditionalSkill> getAdditionalSkills() {
-    return additionalSkillRepository.findAll();
+  public AdditionalSkillsPaginated getAdditionalSkills(Integer page, Integer pageSize) {
+    page = Optional.ofNullable(page).orElse(DEFAULT_PAGE);
+    pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);
+    return additionalSkillCache.findAll(page, pageSize);
   }
 }
