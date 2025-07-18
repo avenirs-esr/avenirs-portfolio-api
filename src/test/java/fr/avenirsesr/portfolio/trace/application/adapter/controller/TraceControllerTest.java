@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
@@ -10,7 +11,6 @@ import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.User;
-import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.security.Principal;
 import java.util.*;
@@ -24,8 +24,8 @@ import org.springframework.http.ResponseEntity;
 @ExtendWith(MockitoExtension.class)
 class TraceControllerTest {
 
-  @Mock private UserService userService;
   @Mock private TraceService traceService;
+  @Mock private UserUtil userUtil;
 
   @InjectMocks private TraceController controller;
 
@@ -45,9 +45,9 @@ class TraceControllerTest {
   @Test
   void shouldReturnTRACEOverviewForUser() {
     // Given
-    when(userService.getProfile(userId)).thenReturn(user);
     when(traceService.lastTracesOf(user)).thenReturn(List.of(trace));
     when(traceService.programNameOfTrace(trace)).thenReturn("Program Name");
+    when(userUtil.getUser(any())).thenReturn(user);
 
     // When
     ResponseEntity<List<TraceOverviewDTO>> response = controller.getTraceOverview(principal);
@@ -64,7 +64,7 @@ class TraceControllerTest {
     assertEquals(trace.getTitle(), dto.title());
     assertEquals("Program Name", dto.programName());
 
-    verify(userService).getProfile(userId);
+    verify(userUtil).getUser(principal);
     verify(traceService).lastTracesOf(user);
     verify(traceService).programNameOfTrace(trace);
   }
@@ -72,7 +72,7 @@ class TraceControllerTest {
   @Test
   void shouldCreateTraceSuccessfully() {
     // Given
-    when(userService.getProfile(userId)).thenReturn(user);
+    when(userUtil.getUser(any())).thenReturn(user);
 
     CreateTraceDTO dto =
         new CreateTraceDTO("My Trace", ELanguage.FRENCH, true, "Personal note", "Justification IA");
@@ -83,7 +83,7 @@ class TraceControllerTest {
     // Then
     assertEquals(201, response.getStatusCode().value());
 
-    verify(userService).getProfile(userId);
+    verify(userUtil).getUser(principal);
     verify(traceService)
         .createTrace(
             eq(user),
@@ -96,7 +96,7 @@ class TraceControllerTest {
 
   @Test
   void shouldCreateTraceWithNullFields() {
-    when(userService.getProfile(userId)).thenReturn(user);
+    when(userUtil.getUser(any())).thenReturn(user);
 
     CreateTraceDTO dto = new CreateTraceDTO("Trace sans IA", ELanguage.FRENCH, false, null, null);
 
