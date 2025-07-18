@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.trace.infrastructure.adapter.model</a> &gt; <span class="el_source">TraceEntity.java</span></div><h1>TraceEntity.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.trace.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,12 +41,11 @@ public class TraceEntity extends AvenirsBaseEntity {
   private ELanguage language;
 
   @ManyToMany
-  @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinTable(
-      name = &quot;trace_skill_level&quot;,
+      name = &quot;trace_skill_level_progress&quot;,
       joinColumns = @JoinColumn(name = &quot;trace_id&quot;),
-      inverseJoinColumns = @JoinColumn(name = &quot;skill_level_id&quot;))
-  private List&lt;SkillLevelEntity&gt; skillLevels;
+      inverseJoinColumns = @JoinColumn(name = &quot;skill_level_progress_id&quot;))
+  private List&lt;SkillLevelProgressEntity&gt; skillLevels;
 
   @ManyToMany
   @OnDelete(action = OnDeleteAction.CASCADE)
@@ -75,34 +74,34 @@ public class TraceEntity extends AvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      List&lt;SkillLevelEntity&gt; skillLevels,
+      List&lt;SkillLevelProgressEntity&gt; skillLevels,
       List&lt;AMSEntity&gt; amses,
       boolean isGroup,
       String aiUseJustification,
       String personalNote,
       Instant createdAt,
       Instant updatedAt,
-<span class="fc" id="L85">      Instant deletedAt) {</span>
-<span class="fc" id="L86">    this.setId(id);</span>
-<span class="fc" id="L87">    this.user = user;</span>
-<span class="fc" id="L88">    this.title = title;</span>
-<span class="fc" id="L89">    this.language = language;</span>
-<span class="fc" id="L90">    this.skillLevels = skillLevels;</span>
-<span class="fc" id="L91">    this.amses = amses;</span>
-<span class="fc" id="L92">    this.isGroup = isGroup;</span>
-<span class="fc" id="L93">    this.aiUseJustification = aiUseJustification;</span>
-<span class="fc" id="L94">    this.personalNote = personalNote;</span>
-<span class="fc" id="L95">    this.setCreatedAt(createdAt);</span>
-<span class="fc" id="L96">    this.setUpdatedAt(updatedAt);</span>
-<span class="fc" id="L97">    this.setDeletedAt(deletedAt);</span>
-<span class="fc" id="L98">  }</span>
+<span class="fc" id="L84">      Instant deletedAt) {</span>
+<span class="fc" id="L85">    this.setId(id);</span>
+<span class="fc" id="L86">    this.user = user;</span>
+<span class="fc" id="L87">    this.title = title;</span>
+<span class="fc" id="L88">    this.language = language;</span>
+<span class="fc" id="L89">    this.skillLevels = skillLevels;</span>
+<span class="fc" id="L90">    this.amses = amses;</span>
+<span class="fc" id="L91">    this.isGroup = isGroup;</span>
+<span class="fc" id="L92">    this.aiUseJustification = aiUseJustification;</span>
+<span class="fc" id="L93">    this.personalNote = personalNote;</span>
+<span class="fc" id="L94">    this.setCreatedAt(createdAt);</span>
+<span class="fc" id="L95">    this.setUpdatedAt(updatedAt);</span>
+<span class="fc" id="L96">    this.setDeletedAt(deletedAt);</span>
+<span class="fc" id="L97">  }</span>
 
   public static TraceEntity of(
       UUID id,
       UserEntity user,
       String title,
       ELanguage language,
-      List&lt;SkillLevelEntity&gt; skillLevels,
+      List&lt;SkillLevelProgressEntity&gt; skillLevels,
       List&lt;AMSEntity&gt; amses,
       boolean isGroup,
       String aiUseJustification,
@@ -110,7 +109,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
-<span class="fc" id="L113">    return new TraceEntity(</span>
+<span class="fc" id="L112">    return new TraceEntity(</span>
         id,
         user,
         title,

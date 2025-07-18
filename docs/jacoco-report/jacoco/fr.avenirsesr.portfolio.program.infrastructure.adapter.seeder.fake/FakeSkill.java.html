@@ -5,49 +5,50 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEn
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillTranslationEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public class FakeSkill {
-<span class="nc" id="L12">  private static final FakerProvider faker = new FakerProvider();</span>
+<span class="nc" id="L13">  private static final FakerProvider faker = new FakerProvider();</span>
   private final SkillEntity skill;
 
-<span class="nc" id="L15">  private FakeSkill(SkillEntity skill) {</span>
-<span class="nc" id="L16">    this.skill = skill;</span>
-<span class="nc" id="L17">  }</span>
+<span class="nc" id="L16">  private FakeSkill(SkillEntity skill) {</span>
+<span class="nc" id="L17">    this.skill = skill;</span>
+<span class="nc" id="L18">  }</span>
 
-  public static FakeSkill of(Set&lt;SkillLevelEntity&gt; skillLevels) {
-<span class="nc" id="L20">    var entity = SkillEntity.of(UUID.fromString(faker.call().internet().uuid()), skillLevels);</span>
+  public static FakeSkill of(List&lt;SkillLevelEntity&gt; skillLevels) {
+<span class="nc" id="L21">    var entity = SkillEntity.of(UUID.fromString(faker.call().internet().uuid()));</span>
 
-<span class="nc" id="L22">    entity.getSkillLevels().forEach(skillLevel -&gt; skillLevel.setSkill(entity));</span>
+<span class="nc" id="L23">    skillLevels.forEach(skillLevel -&gt; skillLevel.setSkill(entity));</span>
 
-<span class="nc" id="L24">    entity.setTranslations(</span>
-<span class="nc" id="L25">        Set.of(</span>
-<span class="nc" id="L26">            SkillTranslationEntity.of(</span>
-<span class="nc" id="L27">                UUID.fromString(faker.call().internet().uuid()),</span>
+<span class="nc" id="L25">    entity.setTranslations(</span>
+<span class="nc" id="L26">        Set.of(</span>
+<span class="nc" id="L27">            SkillTranslationEntity.of(</span>
+<span class="nc" id="L28">                UUID.fromString(faker.call().internet().uuid()),</span>
                 ELanguage.FALLBACK,
                 &quot;Skill %s - [%s]&quot;
-<span class="nc" id="L30">                    .formatted(faker.call().lorem().word(), ELanguage.FALLBACK.getCode()),</span>
+<span class="nc" id="L31">                    .formatted(faker.call().lorem().word(), ELanguage.FALLBACK.getCode()),</span>
                 entity)));
-<span class="nc" id="L32">    return new FakeSkill(entity);</span>
+<span class="nc" id="L33">    return new FakeSkill(entity);</span>
   }
 
   public FakeSkill addTranslation(ELanguage language) {
-<span class="nc" id="L36">    var translations = new java.util.HashSet&lt;&gt;(Set.copyOf(skill.getTranslations()));</span>
-<span class="nc" id="L37">    translations.add(</span>
-<span class="nc" id="L38">        SkillTranslationEntity.of(</span>
-<span class="nc" id="L39">            UUID.fromString(faker.call().internet().uuid()),</span>
+<span class="nc" id="L37">    var translations = new java.util.HashSet&lt;&gt;(Set.copyOf(skill.getTranslations()));</span>
+<span class="nc" id="L38">    translations.add(</span>
+<span class="nc" id="L39">        SkillTranslationEntity.of(</span>
+<span class="nc" id="L40">            UUID.fromString(faker.call().internet().uuid()),</span>
             language,
-<span class="nc" id="L41">            &quot;Skill %s - [%s]&quot;.formatted(faker.call().lorem().word(), language.getCode()),</span>
+<span class="nc" id="L42">            &quot;Skill %s - [%s]&quot;.formatted(faker.call().lorem().word(), language.getCode()),</span>
             skill));
 
-<span class="nc" id="L44">    skill.setTranslations(translations);</span>
+<span class="nc" id="L45">    skill.setTranslations(translations);</span>
 
-<span class="nc" id="L46">    return this;</span>
+<span class="nc" id="L47">    return this;</span>
   }
 
   public SkillEntity toEntity() {
-<span class="nc" id="L50">    return skill;</span>
+<span class="nc" id="L51">    return skill;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

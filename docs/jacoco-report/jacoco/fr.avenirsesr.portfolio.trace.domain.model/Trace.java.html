@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Trace.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.trace.domain.model</a> &gt; <span class="el_source">Trace.java</span></div><h1>Trace.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.trace.domain.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
 import java.util.List;
@@ -18,7 +18,7 @@ public class Trace {
   private final UUID id;
   private final User user;
   private String title;
-  private List&lt;SkillLevel&gt; skillLevels;
+  private List&lt;SkillLevelProgress&gt; skillLevels;
   private List&lt;AMS&gt; amses;
   private Instant createdAt;
   private Instant updatedAt;
@@ -42,7 +42,7 @@ public class Trace {
       boolean isGroup,
       String aiUseJustification,
       String personalNote,
-      List&lt;SkillLevel&gt; skillLevels,
+      List&lt;SkillLevelProgress&gt; skillLevels,
       List&lt;AMS&gt; amses,
       Instant createdAt,
       Instant updatedAt,
@@ -89,7 +89,7 @@ public class Trace {
       UUID id,
       User user,
       String title,
-      List&lt;SkillLevel&gt; skillLevels,
+      List&lt;SkillLevelProgress&gt; skillLevels,
       List&lt;AMS&gt; amses,
       boolean group,
       String aiUseJustification,

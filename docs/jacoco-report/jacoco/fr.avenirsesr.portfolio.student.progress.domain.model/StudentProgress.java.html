@@ -1,51 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudentProgress.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.domain.model</a> &gt; <span class="el_source">StudentProgress.java</span></div><h1>StudentProgress.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.domain.model;
 
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.user.domain.model.User;
-import java.util.UUID;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+<span class="fc" id="L15">@Slf4j</span>
 @Getter
 @Setter
 public class StudentProgress {
   private final UUID id;
-  private final User user;
+  private final Student student;
   private final TrainingPath trainingPath;
-  private final SkillLevel skillLevel;
-  private ESkillLevelStatus status;
+
+  @Getter(AccessLevel.NONE)
+  private final List&lt;SkillLevelProgress&gt; skillLevels;
 
   private StudentProgress(
-      UUID id,
-      User user,
-      TrainingPath trainingPath,
-      SkillLevel skillLevel,
-<span class="fc" id="L25">      ESkillLevelStatus status) {</span>
-<span class="fc" id="L26">    this.id = id;</span>
-<span class="fc" id="L27">    this.user = user;</span>
-<span class="fc" id="L28">    this.trainingPath = trainingPath;</span>
-<span class="fc" id="L29">    this.skillLevel = skillLevel;</span>
-<span class="fc" id="L30">    this.status = status;</span>
-<span class="fc" id="L31">  }</span>
+<span class="fc" id="L27">      UUID id, Student student, TrainingPath trainingPath, List&lt;SkillLevelProgress&gt; skillLevels) {</span>
+<span class="fc" id="L28">    this.id = id;</span>
+<span class="fc" id="L29">    this.student = student;</span>
+<span class="fc" id="L30">    this.trainingPath = trainingPath;</span>
+<span class="fc" id="L31">    this.skillLevels = skillLevels;</span>
+<span class="fc" id="L32">  }</span>
 
   public static StudentProgress create(
-      UUID id,
-      User user,
-      TrainingPath trainingPath,
-      SkillLevel skillLevel,
-      ESkillLevelStatus status) {
-<span class="nc" id="L39">    return new StudentProgress(id, user, trainingPath, skillLevel, status);</span>
+      Student student, TrainingPath trainingPath, List&lt;SkillLevelProgress&gt; skillLevels) {
+<span class="nc" id="L36">    return new StudentProgress(UUID.randomUUID(), student, trainingPath, skillLevels);</span>
   }
 
   public static StudentProgress toDomain(
-      UUID id,
-      User user,
-      TrainingPath trainingPath,
-      SkillLevel skillLevel,
-      ESkillLevelStatus status) {
-<span class="fc" id="L48">    return new StudentProgress(id, user, trainingPath, skillLevel, status);</span>
+      UUID id, Student student, TrainingPath trainingPath, List&lt;SkillLevelProgress&gt; skillLevels) {
+<span class="fc" id="L41">    return new StudentProgress(id, student, trainingPath, skillLevels);</span>
+  }
+
+  public List&lt;SkillLevelProgress&gt; getAllSkillLevels() {
+<span class="fc" id="L45">    return skillLevels;</span>
+  }
+
+  public List&lt;SkillLevelProgress&gt; getCurrentSkillLevels() {
+<span class="fc" id="L49">    Map&lt;Skill, List&lt;SkillLevelProgress&gt;&gt; startedSkillLevelsBySkill =</span>
+<span class="fc" id="L50">        skillLevels.stream()</span>
+<span class="fc" id="L51">            .collect(</span>
+<span class="fc" id="L52">                Collectors.groupingBy(</span>
+<span class="fc" id="L53">                    skillLevelProgress -&gt; skillLevelProgress.getSkillLevel().getSkill(),</span>
+<span class="fc" id="L54">                    Collectors.collectingAndThen(</span>
+<span class="fc" id="L55">                        Collectors.filtering(</span>
+                            skillLevelProgress -&gt;
+<span class="fc bfc" id="L57" title="All 2 branches covered.">                                skillLevelProgress.getStatus() != ESkillLevelStatus.NOT_STARTED,</span>
+<span class="fc" id="L58">                            Collectors.toCollection(ArrayList::new)),</span>
+<span class="fc" id="L59">                        Function.identity())));</span>
+
+<span class="fc" id="L61">    startedSkillLevelsBySkill.forEach(</span>
+        (skill, levelProgress) -&gt; {
+<span class="fc" id="L63">          levelProgress.sort(Comparator.comparing(SkillLevelProgress::getStartDate).reversed());</span>
+<span class="fc" id="L64">        });</span>
+
+<span class="fc" id="L66">    return startedSkillLevelsBySkill.values().stream()</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        .filter(skillLevelProgresses -&gt; !skillLevelProgresses.isEmpty())</span>
+<span class="fc" id="L68">        .map(List::getFirst)</span>
+<span class="fc" id="L69">        .toList();</span>
+  }
+
+  @Override
+  public String toString() {
+<span class="nc" id="L74">    return &quot;StudentProgress[%s]&quot;.formatted(id);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
