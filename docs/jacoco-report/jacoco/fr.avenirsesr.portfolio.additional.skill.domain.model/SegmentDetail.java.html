@@ -17,5 +17,9 @@ public class SegmentDetail {
   public static SegmentDetail create(String code, String libelle) {
 <span class="nc" id="L18">    return new SegmentDetail(code, libelle);</span>
   }
+
+  public static SegmentDetail toDomain(String code, String libelle) {
+<span class="nc" id="L22">    return create(code, libelle);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
