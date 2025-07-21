@@ -5,6 +5,16 @@ the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
 and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
+## [v1.3.1] - 2025-07-21
+
+- 🛠️ **Introduction of `AvenirsBaseModel`**
+  - Added a new abstract class `AvenirsBaseModel` to centralize common behavior across domain objects.
+  - Provides a shared implementation of:
+    - `id` property management.
+    - `equals` and `hashCode` methods based on `id`.
+    - A consistent `toString` format for all domain models.
+  - This change improves code consistency and reduces duplication across the domain layer.
+
 ## [v1.3.0] - 2025-07-18
 
 - 🔄 **Refactored ProgramProgress / SkillLevel**
