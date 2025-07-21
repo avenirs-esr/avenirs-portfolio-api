@@ -2,7 +2,9 @@
 
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillDTO;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
-<span class="nc" id="L7">public record AdditionalSkillResponse(List&lt;AdditionalSkillDTO&gt; data, PageInfo page) {}</span>
+@Schema(requiredProperties = {&quot;data&quot;, &quot;page&quot;})
+<span class="nc" id="L9">public record AdditionalSkillResponse(List&lt;AdditionalSkillDTO&gt; data, PageInfo page) {}</span>
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
