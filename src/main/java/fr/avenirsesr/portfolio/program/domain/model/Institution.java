@@ -10,9 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Institution extends AvenirsBaseModel {
-  @Setter(AccessLevel.NONE)
   private final String name;
-
   private Set<EPortfolioType> enabledFields;
 
   private Institution(UUID id, String name) {

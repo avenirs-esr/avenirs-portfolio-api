@@ -15,24 +15,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AMS extends AvenirsBaseModel {
-  @Setter(AccessLevel.NONE)
   private final User user;
-
-  @Setter(AccessLevel.NONE)
   private final String title;
-
-  @Setter(AccessLevel.NONE)
   private final Instant startDate;
-
-  @Setter(AccessLevel.NONE)
   private final Instant endDate;
 
   private EAmsStatus status;
-
   private List<SkillLevelProgress> skillLevels;
-
   private List<Trace> traces;
-
   private Set<Cohort> cohorts;
 
   private AMS(UUID id, User user, String title, Instant startDate, Instant endDate) {

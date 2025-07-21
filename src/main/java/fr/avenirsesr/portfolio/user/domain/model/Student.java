@@ -7,8 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Student {
-
-  @Setter(AccessLevel.NONE)
   private final User user;
 
   private String bio;

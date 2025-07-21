@@ -5,7 +5,6 @@ import java.util.UUID;
 import lombok.Getter;
 
 @Getter
-@Setter
 public class Configuration extends AvenirsBaseModel {
   private final String name;
   private final String value;

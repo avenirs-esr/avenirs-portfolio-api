@@ -13,13 +13,9 @@ import lombok.Setter;
 @Setter
 public class Cohort extends AvenirsBaseModel {
   private String name;
-
   private String description;
-
   private TrainingPath trainingPath;
-
   private Set<User> users;
-
   private Set<AMS> amsSet;
 
   private Cohort(UUID id, String name, String description, TrainingPath trainingPath) {
