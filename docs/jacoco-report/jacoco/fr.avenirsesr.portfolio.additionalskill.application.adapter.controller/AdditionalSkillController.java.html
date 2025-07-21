@@ -38,20 +38,14 @@ public class AdditionalSkillController {
 
   @GetMapping(params = &quot;keyword&quot;)
   public ResponseEntity&lt;AdditionalSkillResponse&gt; searchAdditionalSkills(
-      Principal principal,
       @RequestParam String keyword,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="nc" id="L45">    User user = userUtil.getUser(principal);</span>
-<span class="nc" id="L46">    log.debug(</span>
-        &quot;Received request to search additional skills for user [{}] with keyword [{}]&quot;,
-        user,
-        keyword);
-<span class="nc" id="L50">    var result = additionalSkillService.searchAdditionalSkills(keyword, page, pageSize);</span>
-<span class="nc" id="L51">    return ResponseEntity.ok(</span>
+<span class="nc" id="L44">    var result = additionalSkillService.searchAdditionalSkills(keyword, page, pageSize);</span>
+<span class="nc" id="L45">    return ResponseEntity.ok(</span>
         new AdditionalSkillResponse(
-<span class="nc" id="L53">            result.data().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),</span>
-<span class="nc" id="L54">            result.page()));</span>
+<span class="nc" id="L47">            result.data().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),</span>
+<span class="nc" id="L48">            result.page()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

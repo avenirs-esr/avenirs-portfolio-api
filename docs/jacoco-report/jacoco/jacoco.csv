@@ -83,7 +83,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.repo
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,UserDatabaseRepository,14,31,0,0,4,7,2,4,2,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,ExternalUserDatabaseRepository,0,7,0,0,0,2,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,RessourceFileSystemRepository,44,69,0,0,8,14,4,6,4,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.application.adapter.controller,AdditionalSkillController,58,4,0,0,12,1,2,1,2,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.application.adapter.controller,AdditionalSkillController,48,4,0,0,10,1,2,1,2,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.model,UserEntity,0,39,0,0,0,11,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.model,StudentEntity,0,23,0,0,0,7,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.model,TeacherEntity,0,23,0,0,0,7,0,2,0,2
