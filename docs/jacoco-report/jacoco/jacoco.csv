@@ -1,6 +1,6 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.domain.model,PathSegments,6,23,0,0,1,7,1,2,1,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.domain.model,AdditionalSkill,0,24,0,0,0,8,0,3,0,3
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.domain.model,AdditionalSkill,0,22,0,0,0,7,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.domain.model,AdditionalSkillsPaginated,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.domain.model,SegmentDetail,0,19,0,0,0,6,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.model,TraceEntity,0,55,0,0,0,15,0,2,0,2
