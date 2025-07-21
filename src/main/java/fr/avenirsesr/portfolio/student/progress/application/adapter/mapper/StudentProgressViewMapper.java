@@ -10,17 +10,16 @@ public interface StudentProgressViewMapper {
         studentProgress.getTrainingPath().getProgram().getName(),
         studentProgress.getCurrentSkillLevels().stream()
             .map(
-                skillLevelProgress ->
-                    SkillViewMapper.fromDomainToDto(
-                        skillLevelProgress,
-                        studentProgress.getAllSkillLevels().stream()
-                            .filter(
-                                s ->
-                                    s.getSkillLevel()
-                                        .getSkill()
-                                        .equals(skillLevelProgress.getSkillLevel().getSkill()))
-                            .toList()
-                            .size()))
+                skillLevelProgress -> {
+                  var skill = skillLevelProgress.getSkillLevel().getSkill();
+                  return SkillViewMapper.fromDomainToDto(
+                      skillLevelProgress,
+                      studentProgress.getAllSkillLevels().stream()
+                          .filter(s -> s.getSkillLevel().getSkill().equals(skill))
+                          .toList()
+                          .size(),
+                      studentProgress.getLastAchievedSkillLevelBySkill().get(skill).orElse(null));
+                })
             .toList());
   }
 }
