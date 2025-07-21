@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 public class StudentProgress extends AvenirsBaseModel {
   private final Student student;
   private final TrainingPath trainingPath;
+  private LocalDate startDate;
+  private LocalDate endDate;
 
   @Getter(AccessLevel.NONE)
   private final List<SkillLevelProgress> skillLevelProgresses;
@@ -28,21 +30,35 @@ public class StudentProgress extends AvenirsBaseModel {
       UUID id,
       Student student,
       TrainingPath trainingPath,
+      LocalDate startDate,
+      LocalDate endDate,
       List<SkillLevelProgress> skillLevelProgresses) {
     super(id);
     this.student = student;
     this.trainingPath = trainingPath;
+    this.startDate = startDate;
+    this.endDate = endDate;
     this.skillLevelProgresses = skillLevelProgresses;
   }
 
   public static StudentProgress create(
-      Student student, TrainingPath trainingPath, List<SkillLevelProgress> skillLevels) {
-    return new StudentProgress(UUID.randomUUID(), student, trainingPath, skillLevels);
+      Student student,
+      TrainingPath trainingPath,
+      LocalDate startDate,
+      LocalDate endDate,
+      List<SkillLevelProgress> skillLevels) {
+    return new StudentProgress(
+        UUID.randomUUID(), student, trainingPath, startDate, endDate, skillLevels);
   }
 
   public static StudentProgress toDomain(
-      UUID id, Student student, TrainingPath trainingPath, List<SkillLevelProgress> skillLevels) {
-    return new StudentProgress(id, student, trainingPath, skillLevels);
+      UUID id,
+      Student student,
+      TrainingPath trainingPath,
+      LocalDate startDate,
+      LocalDate endDate,
+      List<SkillLevelProgress> skillLevels) {
+    return new StudentProgress(id, student, trainingPath, startDate, endDate, skillLevels);
   }
 
   public List<SkillLevelProgress> getAllSkillLevels() {

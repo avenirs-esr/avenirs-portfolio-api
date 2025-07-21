@@ -10,8 +10,9 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repositor
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake.FakeSkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake.FakeStudentProgress;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
@@ -25,6 +26,24 @@ public class StudentProgressSeeder {
 
   private final StudentProgressDatabaseRepository studentProgressRepository;
 
+  private static StudentProgressEntity buildStudentProgressEntity(
+      UserEntity student, LocalDate startDate, List<TrainingPathEntity> savedTrainingPaths) {
+    TrainingPathEntity selectedTrainingPath = faker.options().nextElement(savedTrainingPaths);
+
+    var skillLevelProgressEntities =
+        selectedTrainingPath.getSkillLevels().stream()
+            .map(
+                level ->
+                    FakeSkillLevelProgress.create(student, level)
+                        .withStatus(faker.options().option(ESkillLevelStatus.class))
+                        .toEntity())
+            .toList();
+
+    return FakeStudentProgress.of(student, selectedTrainingPath, skillLevelProgressEntities)
+        .withStartDate(startDate)
+        .toEntity();
+  }
+
   public List<StudentProgressEntity> seed(
       List<TrainingPathEntity> savedTrainingPaths,
       List<UserEntity> savedStudents,
@@ -34,30 +53,18 @@ public class StudentProgressSeeder {
     ValidationUtils.requireNonEmpty(savedSkillLevels, "skill levels cannot be empty");
     log.info("Seeding student progress...");
 
-    AtomicInteger index = new AtomicInteger(0);
+    List<StudentProgressEntity> studentProgressEntities = new ArrayList<>();
 
-    List<StudentProgressEntity> studentProgressEntities =
-        savedStudents.stream()
-            .map(
-                student -> {
-                  TrainingPathEntity selectedTrainingPath =
-                      savedTrainingPaths.get(
-                          index.getAndUpdate(i -> i < savedTrainingPaths.size() - 1 ? i + 1 : 0));
-
-                  var skillLevelProgressEntities =
-                      selectedTrainingPath.getSkillLevels().stream()
-                          .map(
-                              level ->
-                                  FakeSkillLevelProgress.create(student, level)
-                                      .withStatus(faker.options().option(ESkillLevelStatus.class))
-                                      .toEntity())
-                          .toList();
-
-                  return FakeStudentProgress.of(
-                          student, selectedTrainingPath, skillLevelProgressEntities)
-                      .toEntity();
-                })
-            .toList();
+    var yesterday = LocalDate.now().minusDays(1);
+    savedStudents.forEach(
+        student -> {
+          studentProgressEntities.add(
+              buildStudentProgressEntity(student, yesterday, savedTrainingPaths));
+          studentProgressEntities.add(
+              buildStudentProgressEntity(student, yesterday.minusYears(1), savedTrainingPaths));
+          studentProgressEntities.add(
+              buildStudentProgressEntity(student, yesterday.plusYears(1), savedTrainingPaths));
+        });
 
     studentProgressRepository.saveAllEntities(studentProgressEntities);
     log.info("✔ {} studentProgresses created", studentProgressEntities.size());

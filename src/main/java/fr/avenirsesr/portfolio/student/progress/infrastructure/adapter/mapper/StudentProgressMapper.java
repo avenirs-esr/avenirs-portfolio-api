@@ -20,6 +20,8 @@ public interface StudentProgressMapper {
         studentProgressEntity.getId(),
         UserMapper.toDomain(studentProgressEntity.getStudent()).toStudent(),
         TrainingPathMapper.toDomain(studentProgressEntity.getTrainingPath()),
+        studentProgressEntity.getStartDate(),
+        studentProgressEntity.getEndDate(),
         studentProgressEntity.getSkillLevels().stream()
             .map(SkillLevelProgressMapper::toDomain)
             .toList());
