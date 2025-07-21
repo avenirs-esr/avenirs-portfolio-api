@@ -21,6 +21,7 @@ public class SkillLevelProgressFixture {
   private LocalDate endDate;
   private List<Trace> traces;
   private List<AMS> amses;
+  private static final Period DEFAULT_SKILL_LEVEL_PERIOD = Period.ofMonths(3);
 
   private SkillLevelProgressFixture(Student student, SkillLevel skillLevel) {
     this.id = UUID.randomUUID();
@@ -28,7 +29,7 @@ public class SkillLevelProgressFixture {
     this.skillLevel = skillLevel;
     this.status = ESkillLevelStatus.NOT_STARTED;
     this.startDate = LocalDate.now().minusMonths(2);
-    this.endDate = LocalDate.now().plusMonths(2);
+    this.endDate = startDate.plus(DEFAULT_SKILL_LEVEL_PERIOD);
     this.traces = List.of();
     this.amses = List.of();
   }
@@ -51,10 +52,24 @@ public class SkillLevelProgressFixture {
 
   public SkillLevelProgressFixture withStartDate(LocalDate startDate) {
     this.startDate = startDate;
+    this.endDate = startDate.plus(DEFAULT_SKILL_LEVEL_PERIOD);
+    return this;
+  }
+
+  public SkillLevelProgressFixture withStartDate(LocalDate startDate, Period skillLevelPeriod) {
+    this.startDate = startDate;
+    this.endDate = startDate.plus(skillLevelPeriod);
     return this;
   }
 
   public SkillLevelProgressFixture withEndDate(LocalDate endDate) {
+    this.startDate = endDate.minus(DEFAULT_SKILL_LEVEL_PERIOD);
+    this.endDate = endDate;
+    return this;
+  }
+
+  public SkillLevelProgressFixture withEndDate(LocalDate endDate, Period skillLevelPeriod) {
+    this.startDate = endDate.minus(skillLevelPeriod);
     this.endDate = endDate;
     return this;
   }
