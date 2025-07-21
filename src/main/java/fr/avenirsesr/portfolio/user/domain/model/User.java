@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.user.domain.model;
 
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -7,8 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class User {
-  private final UUID id;
+public class User extends AvenirsBaseModel {
   private String firstName;
   private String lastName;
   private String email;
@@ -42,7 +42,7 @@ public class User {
   private String teacherCoverPicture;
 
   private User(UUID id) {
-    this.id = id;
+    super(id);
   }
 
   public static User create(UUID id, String firstName, String lastName) {

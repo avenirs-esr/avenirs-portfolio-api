@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.trace.domain.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
@@ -14,8 +15,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Trace {
-  private final UUID id;
+public class Trace extends AvenirsBaseModel {
   private final User user;
   private String title;
   private List<SkillLevelProgress> skillLevels;
@@ -47,7 +47,7 @@ public class Trace {
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
-    this.id = id;
+    super(id);
     this.user = user;
     this.title = title;
     this.createdAt = createdAt;

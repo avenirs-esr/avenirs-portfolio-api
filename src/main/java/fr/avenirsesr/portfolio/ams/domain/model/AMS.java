@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.ams.domain.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.User;
@@ -8,16 +9,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class AMS {
-  @Setter(AccessLevel.NONE)
-  private final UUID id;
-
+public class AMS extends AvenirsBaseModel {
   @Setter(AccessLevel.NONE)
   private final User user;
 
@@ -39,7 +36,7 @@ public class AMS {
   private Set<Cohort> cohorts;
 
   private AMS(UUID id, User user, String title, Instant startDate, Instant endDate) {
-    this.id = id;
+    super(id);
     this.user = user;
     this.title = title;
     this.startDate = startDate;

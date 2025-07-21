@@ -1,17 +1,17 @@
 package fr.avenirsesr.portfolio.program.domain.model;
 
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class Skill {
-  private final UUID id;
+public class Skill extends AvenirsBaseModel {
   private final String name;
 
   private Skill(UUID id, String name) {
-    this.id = id;
+    super(id);
     this.name = name;
   }
 
@@ -21,10 +21,5 @@ public class Skill {
 
   public static Skill toDomain(UUID id, String name) {
     return new Skill(id, name);
-  }
-
-  @Override
-  public String toString() {
-    return "Skill[%s]".formatted(id);
   }
 }

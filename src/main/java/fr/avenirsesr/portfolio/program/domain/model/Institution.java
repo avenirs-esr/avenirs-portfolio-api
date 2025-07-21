@@ -1,25 +1,22 @@
 package fr.avenirsesr.portfolio.program.domain.model;
 
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class Institution {
-  @Setter(AccessLevel.NONE)
-  private final UUID id;
-
+public class Institution extends AvenirsBaseModel {
   @Setter(AccessLevel.NONE)
   private final String name;
 
   private Set<EPortfolioType> enabledFields;
 
   private Institution(UUID id, String name) {
-    this.id = id;
+    super(id);
     this.name = name;
   }
 

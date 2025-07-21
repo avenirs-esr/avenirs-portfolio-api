@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.program.domain.model;
 
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -8,8 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SkillLevel {
-  private final UUID id;
+public class SkillLevel extends AvenirsBaseModel {
   private final String name;
   private final Skill skill;
 
@@ -17,7 +17,7 @@ public class SkillLevel {
   private final String description;
 
   private SkillLevel(UUID id, Skill skill, String name, String description) {
-    this.id = id;
+    super(id);
     this.name = name;
     this.description = description;
     this.skill = skill;
@@ -33,10 +33,5 @@ public class SkillLevel {
 
   public Optional<String> getDescription() {
     return Optional.ofNullable(description);
-  }
-
-  @Override
-  public String toString() {
-    return "SkillLevel[%s]".formatted(id);
   }
 }

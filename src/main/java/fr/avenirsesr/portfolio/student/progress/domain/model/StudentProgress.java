@@ -3,7 +3,9 @@ package fr.avenirsesr.portfolio.student.progress.domain.model;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -15,8 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 @Setter
-public class StudentProgress {
-  private final UUID id;
+public class StudentProgress extends AvenirsBaseModel {
   private final Student student;
   private final TrainingPath trainingPath;
 
@@ -28,7 +29,7 @@ public class StudentProgress {
       Student student,
       TrainingPath trainingPath,
       List<SkillLevelProgress> skillLevelProgresses) {
-    this.id = id;
+    super(id);
     this.student = student;
     this.trainingPath = trainingPath;
     this.skillLevelProgresses = skillLevelProgresses;
@@ -72,8 +73,18 @@ public class StudentProgress {
         .toList();
   }
 
-  @Override
-  public String toString() {
-    return "StudentProgress[%s]".formatted(id);
+  public Map<Skill, Optional<SkillLevelProgress>> getLastAchievedSkillLevelBySkill() {
+    return skillLevelProgresses.stream()
+        .collect(
+            Collectors.groupingBy(
+                skillLevelProgress -> skillLevelProgress.getSkillLevel().getSkill(),
+                Collectors.collectingAndThen(
+                    Collectors.toList(),
+                    list ->
+                        list.stream()
+                            .filter(s -> s.getStatus() != ESkillLevelStatus.NOT_STARTED)
+                            .filter(s -> s.getEndDate().isBefore(LocalDate.now()))
+                            .filter(s -> !getCurrentSkillLevels().contains(s))
+                            .max(Comparator.comparing(SkillLevelProgress::getEndDate)))));
   }
 }

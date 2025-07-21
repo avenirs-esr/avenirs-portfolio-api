@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.program.domain.model;
 
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EDurationUnit;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,8 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Program {
-  private final UUID id;
+public class Program extends AvenirsBaseModel {
   private final Institution institution;
   private final String name;
 
@@ -29,7 +29,7 @@ public class Program {
       boolean isAPC,
       EDurationUnit durationUnit,
       Integer durationCount) {
-    this.id = id;
+    super(id);
     this.institution = institution;
     this.name = name;
     this.isAPC = isAPC;

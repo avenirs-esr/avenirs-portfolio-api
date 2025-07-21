@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.domain.model;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
@@ -13,8 +14,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SkillLevelProgress {
-  private final UUID id;
+public class SkillLevelProgress extends AvenirsBaseModel {
   private final Student student;
   private final SkillLevel skillLevel;
   private ESkillLevelStatus status;
@@ -32,7 +32,7 @@ public class SkillLevelProgress {
       LocalDate endDate,
       List<Trace> traces,
       List<AMS> amses) {
-    this.id = id;
+    super(id);
     this.student = student;
     this.skillLevel = skillLevel;
     this.status = status;
@@ -66,10 +66,5 @@ public class SkillLevelProgress {
       List<AMS> amses) {
     return new SkillLevelProgress(
         id, student, skillLevel, status, startDate, endDate, traces, amses);
-  }
-
-  @Override
-  public String toString() {
-    return "SkillLevelProgress[%s]".formatted(id);
   }
 }

@@ -1,20 +1,17 @@
 package fr.avenirsesr.portfolio.ams.domain.model;
 
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class Cohort {
-  @Setter(AccessLevel.NONE)
-  private final UUID id;
-
+public class Cohort extends AvenirsBaseModel {
   private String name;
 
   private String description;
@@ -26,7 +23,7 @@ public class Cohort {
   private Set<AMS> amsSet;
 
   private Cohort(UUID id, String name, String description, TrainingPath trainingPath) {
-    this.id = id;
+    super(id);
     this.name = name;
     this.description = description;
     this.trainingPath = trainingPath;

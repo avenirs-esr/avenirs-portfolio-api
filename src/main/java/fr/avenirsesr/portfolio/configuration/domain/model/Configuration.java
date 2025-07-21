@@ -1,18 +1,17 @@
 package fr.avenirsesr.portfolio.configuration.domain.model;
 
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import java.util.UUID;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Setter
-public class Configuration {
-  private final UUID id;
+public class Configuration extends AvenirsBaseModel {
   private final String name;
   private final String value;
 
   private Configuration(UUID id, String name, String value) {
-    this.id = id;
+    super(id);
     this.name = name;
     this.value = value;
   }
