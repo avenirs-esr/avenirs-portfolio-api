@@ -7,7 +7,8 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.model
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake,FakeSkillLevelProgress,110,0,4,0,31,0,10,0,7,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake,FakeStudentProgress,42,0,0,0,13,0,4,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,6,191,0,16,1,51,1,15,1,7
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl,84,8,0,0,15,2,3,1,3,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl,144,8,2,0,27,2,7,1,6,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl.new TypeReference() {...},3,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl.new TypeReference() {...},3,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.response,TracesResponse,9,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.response,TracesViewResponse,9,0,0,0,1,0,1,0,1,0
@@ -46,7 +47,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.infrastructure.adapter.reposit
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository,CohortDatabaseRepository,8,10,2,0,3,3,2,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,4,135,3,13,1,41,4,11,1,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,RessourceServiceImpl,0,26,0,4,0,6,0,4,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.domain.service,AdditionalSkillServiceImpl,0,24,0,0,0,4,0,2,0,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.domain.service,AdditionalSkillServiceImpl,0,45,0,0,0,7,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake,FakeTrace,114,0,0,0,30,0,12,0,12,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.model.enums,ETraceStatus,0,15,0,0,0,3,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.service,AMSServiceImpl,0,64,3,7,0,10,3,5,0,3
@@ -82,7 +83,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.repo
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,UserDatabaseRepository,14,31,0,0,4,7,2,4,2,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,ExternalUserDatabaseRepository,0,7,0,0,0,2,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,RessourceFileSystemRepository,44,69,0,0,8,14,4,6,4,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.application.adapter.controller,AdditionalSkillController,28,4,0,0,6,1,1,1,1,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.application.adapter.controller,AdditionalSkillController,58,4,0,0,12,1,2,1,2,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.model,UserEntity,0,39,0,0,0,11,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.model,StudentEntity,0,23,0,0,0,7,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.model,TeacherEntity,0,23,0,0,0,7,0,2,0,2

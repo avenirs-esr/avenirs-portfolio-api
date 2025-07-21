@@ -23,24 +23,45 @@ import org.springframework.stereotype.Component;
 <span class="nc" id="L23">    return paginate(additionalSkills, page, pageSize);</span>
   }
 
+  @Override
+  public AdditionalSkillsPaginated findBySkillTitle(
+      String keyword, Integer page, Integer pageSize) {
+<span class="nc bnc" id="L29" title="All 2 branches missed.">    String normalizedKeyword = keyword == null ? &quot;&quot; : keyword.trim().toLowerCase();</span>
+<span class="nc" id="L30">    List&lt;AdditionalSkill&gt; filteredSkills = loadAdditionalSkillsByLibelle(normalizedKeyword);</span>
+<span class="nc" id="L31">    return paginate(filteredSkills, page, pageSize);</span>
+  }
+
   private List&lt;AdditionalSkill&gt; loadAdditionalSkills() {
-<span class="nc" id="L27">    try (InputStream is = getClass().getResourceAsStream(JSON_PATH)) {</span>
-<span class="nc" id="L28">      List&lt;CompetenceComplementaireDetaillee&gt; entities =</span>
-<span class="nc" id="L29">          objectMapper.readValue(is, new TypeReference&lt;&gt;() {});</span>
-<span class="nc" id="L30">      return entities.stream().map(AdditionalSkillMapper::toDomain).toList();</span>
-<span class="nc" id="L31">    } catch (Exception e) {</span>
-<span class="nc" id="L32">      throw new RuntimeException(&quot;Unable to load mock additional skills&quot;, e);</span>
+<span class="nc" id="L35">    try (InputStream is = getClass().getResourceAsStream(JSON_PATH)) {</span>
+<span class="nc" id="L36">      List&lt;CompetenceComplementaireDetaillee&gt; entities =</span>
+<span class="nc" id="L37">          objectMapper.readValue(is, new TypeReference&lt;&gt;() {});</span>
+<span class="nc" id="L38">      return entities.stream().map(AdditionalSkillMapper::toDomain).toList();</span>
+<span class="nc" id="L39">    } catch (Exception e) {</span>
+<span class="nc" id="L40">      throw new RuntimeException(&quot;Unable to load mock additional skills&quot;, e);</span>
+    }
+  }
+
+  private List&lt;AdditionalSkill&gt; loadAdditionalSkillsByLibelle(String keyword) {
+<span class="nc" id="L45">    try (InputStream is = getClass().getResourceAsStream(JSON_PATH)) {</span>
+<span class="nc" id="L46">      List&lt;CompetenceComplementaireDetaillee&gt; entities =</span>
+<span class="nc" id="L47">          objectMapper.readValue(is, new TypeReference&lt;&gt;() {});</span>
+<span class="nc" id="L48">      return entities.stream()</span>
+<span class="nc" id="L49">          .filter(skill -&gt; skill.libelle().toLowerCase().contains(keyword.toLowerCase()))</span>
+<span class="nc" id="L50">          .map(AdditionalSkillMapper::toDomain)</span>
+<span class="nc" id="L51">          .toList();</span>
+<span class="nc" id="L52">    } catch (Exception e) {</span>
+<span class="nc" id="L53">      throw new RuntimeException(&quot;Unable to load mock additional skills&quot;, e);</span>
     }
   }
 
   private AdditionalSkillsPaginated paginate(List&lt;AdditionalSkill&gt; skills, int page, int pageSize) {
-<span class="nc" id="L37">    int totalElements = skills.size();</span>
-<span class="nc" id="L38">    int totalPages = (int) Math.ceil((double) totalElements / pageSize);</span>
-<span class="nc" id="L39">    int start = Math.min(page * pageSize, totalElements);</span>
-<span class="nc" id="L40">    int end = Math.min(start + pageSize, totalElements);</span>
-<span class="nc" id="L41">    List&lt;AdditionalSkill&gt; paginatedSkills = skills.subList(start, end);</span>
-<span class="nc" id="L42">    PageInfo pageInfo = new PageInfo(pageSize, totalElements, totalPages, page);</span>
-<span class="nc" id="L43">    return new AdditionalSkillsPaginated(paginatedSkills, pageInfo);</span>
+<span class="nc" id="L58">    int totalElements = skills.size();</span>
+<span class="nc" id="L59">    int totalPages = (int) Math.ceil((double) totalElements / pageSize);</span>
+<span class="nc" id="L60">    int start = Math.min(page * pageSize, totalElements);</span>
+<span class="nc" id="L61">    int end = Math.min(start + pageSize, totalElements);</span>
+<span class="nc" id="L62">    List&lt;AdditionalSkill&gt; paginatedSkills = skills.subList(start, end);</span>
+<span class="nc" id="L63">    PageInfo pageInfo = new PageInfo(pageSize, totalElements, totalPages, page);</span>
+<span class="nc" id="L64">    return new AdditionalSkillsPaginated(paginatedSkills, pageInfo);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

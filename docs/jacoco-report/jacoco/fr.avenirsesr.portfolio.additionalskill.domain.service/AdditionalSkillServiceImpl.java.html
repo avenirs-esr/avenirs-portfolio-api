@@ -23,5 +23,13 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
 <span class="fc" id="L23">    pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);</span>
 <span class="fc" id="L24">    return additionalSkillCache.findAll(page, pageSize);</span>
   }
+
+  @Override
+  public AdditionalSkillsPaginated searchAdditionalSkills(
+      String keyword, Integer page, Integer pageSize) {
+<span class="fc" id="L30">    page = Optional.ofNullable(page).orElse(DEFAULT_PAGE);</span>
+<span class="fc" id="L31">    pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);</span>
+<span class="fc" id="L32">    return additionalSkillCache.findBySkillTitle(keyword, page, pageSize);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
