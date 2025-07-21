@@ -18,4 +18,5 @@ public record SkillViewDTO(
     int traceCount,
     int activityCount,
     int levelCount,
-    SkillLevelViewDTO currentSkillLevel) {}
+    SkillLevelViewDTO currentSkillLevel,
+    SkillLevelViewDTO achievedSkillLevels) {}
