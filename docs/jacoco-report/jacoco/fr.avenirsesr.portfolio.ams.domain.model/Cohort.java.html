@@ -1,42 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Cohort.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.ams.domain.model</a> &gt; <span class="el_source">Cohort.java</span></div><h1>Cohort.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.ams.domain.model;
 
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class Cohort {
-  @Setter(AccessLevel.NONE)
-  private final UUID id;
-
+public class Cohort extends AvenirsBaseModel {
   private String name;
-
   private String description;
-
   private TrainingPath trainingPath;
-
   private Set&lt;User&gt; users;
-
   private Set&lt;AMS&gt; amsSet;
 
-<span class="fc" id="L28">  private Cohort(UUID id, String name, String description, TrainingPath trainingPath) {</span>
-<span class="fc" id="L29">    this.id = id;</span>
-<span class="fc" id="L30">    this.name = name;</span>
-<span class="fc" id="L31">    this.description = description;</span>
-<span class="fc" id="L32">    this.trainingPath = trainingPath;</span>
-<span class="fc" id="L33">  }</span>
+  private Cohort(UUID id, String name, String description, TrainingPath trainingPath) {
+<span class="fc" id="L22">    super(id);</span>
+<span class="fc" id="L23">    this.name = name;</span>
+<span class="fc" id="L24">    this.description = description;</span>
+<span class="fc" id="L25">    this.trainingPath = trainingPath;</span>
+<span class="fc" id="L26">  }</span>
 
   public static Cohort create(UUID id, String name, String description, TrainingPath trainingPath) {
-<span class="nc" id="L36">    Cohort cohort = new Cohort(id, name, description, trainingPath);</span>
-<span class="nc" id="L37">    cohort.setUsers(new HashSet&lt;&gt;());</span>
-<span class="nc" id="L38">    cohort.setAmsSet(new HashSet&lt;&gt;());</span>
-<span class="nc" id="L39">    return cohort;</span>
+<span class="nc" id="L29">    Cohort cohort = new Cohort(id, name, description, trainingPath);</span>
+<span class="nc" id="L30">    cohort.setUsers(new HashSet&lt;&gt;());</span>
+<span class="nc" id="L31">    cohort.setAmsSet(new HashSet&lt;&gt;());</span>
+<span class="nc" id="L32">    return cohort;</span>
   }
 
   public static Cohort toDomain(
@@ -46,10 +39,10 @@ public class Cohort {
       TrainingPath trainingPath,
       Set&lt;User&gt; users,
       Set&lt;AMS&gt; amsSet) {
-<span class="fc" id="L49">    Cohort group = new Cohort(id, name, description, trainingPath);</span>
-<span class="fc" id="L50">    group.setUsers(users);</span>
-<span class="fc" id="L51">    group.setAmsSet(amsSet);</span>
-<span class="fc" id="L52">    return group;</span>
+<span class="fc" id="L42">    Cohort group = new Cohort(id, name, description, trainingPath);</span>
+<span class="fc" id="L43">    group.setUsers(users);</span>
+<span class="fc" id="L44">    group.setAmsSet(amsSet);</span>
+<span class="fc" id="L45">    return group;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

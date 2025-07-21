@@ -2,6 +2,7 @@
 
 import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import java.util.Objects;
 import lombok.Getter;
 
 @Getter
@@ -21,15 +22,15 @@ public class ExternalUser {
       EUserCategory category,
       String email,
       String firstName,
-<span class="fc" id="L24">      String lastName) {</span>
-<span class="fc" id="L25">    this.user = user;</span>
-<span class="fc" id="L26">    this.externalId = externalId;</span>
-<span class="fc" id="L27">    this.source = source;</span>
-<span class="fc" id="L28">    this.category = category;</span>
-<span class="fc" id="L29">    this.email = email;</span>
-<span class="fc" id="L30">    this.firstName = firstName;</span>
-<span class="fc" id="L31">    this.lastName = lastName;</span>
-<span class="fc" id="L32">  }</span>
+<span class="fc" id="L25">      String lastName) {</span>
+<span class="fc" id="L26">    this.user = user;</span>
+<span class="fc" id="L27">    this.externalId = externalId;</span>
+<span class="fc" id="L28">    this.source = source;</span>
+<span class="fc" id="L29">    this.category = category;</span>
+<span class="fc" id="L30">    this.email = email;</span>
+<span class="fc" id="L31">    this.firstName = firstName;</span>
+<span class="fc" id="L32">    this.lastName = lastName;</span>
+<span class="fc" id="L33">  }</span>
 
   public static ExternalUser create(
       User user,
@@ -39,7 +40,25 @@ public class ExternalUser {
       String email,
       String firstName,
       String lastName) {
-<span class="fc" id="L42">    return new ExternalUser(user, externalId, source, category, email, firstName, lastName);</span>
+<span class="fc" id="L43">    return new ExternalUser(user, externalId, source, category, email, firstName, lastName);</span>
+  }
+
+  @Override
+  public boolean equals(Object o) {
+<span class="nc bnc" id="L48" title="All 2 branches missed.">    if (this == o) return true;</span>
+<span class="nc bnc" id="L49" title="All 4 branches missed.">    if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="nc" id="L50">    ExternalUser that = (ExternalUser) o;</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">    return Objects.equals(externalId, that.externalId) &amp;&amp; Objects.equals(source, that.source);</span>
+  }
+
+  @Override
+  public int hashCode() {
+<span class="nc" id="L56">    return Objects.hash(externalId, source);</span>
+  }
+
+  @Override
+  public String toString() {
+<span class="nc" id="L61">    return &quot;ExternalUser[User - &quot; + user.getId() + ']';</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
