@@ -35,4 +35,16 @@ public class AdditionalSkillController {
             result.data().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),
             result.page()));
   }
+
+  @GetMapping(params = "keyword")
+  public ResponseEntity<AdditionalSkillResponse> searchAdditionalSkills(
+      @RequestParam String keyword,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+    var result = additionalSkillService.searchAdditionalSkills(keyword, page, pageSize);
+    return ResponseEntity.ok(
+        new AdditionalSkillResponse(
+            result.data().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),
+            result.page()));
+  }
 }
