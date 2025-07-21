@@ -41,8 +41,8 @@ public class StudentProgressController {
 <span class="nc" id="L41">    SortCriteria sortCriteria = SortCriteria.fromString(sortRaw);</span>
 <span class="nc" id="L42">    Student student = userUtil.getStudent(principal);</span>
 
-<span class="nc" id="L44">    return studentProgressService.getSkillsView(student, sortCriteria).stream()</span>
-<span class="nc" id="L45">        .map(StudentProgressViewMapper::fromDomainToDto)</span>
+<span class="nc" id="L44">    return studentProgressService.getSkillsView(student, sortCriteria).entrySet().stream()</span>
+<span class="nc" id="L45">        .map(entry -&gt; StudentProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
 <span class="nc" id="L46">        .toList();</span>
   }
 }

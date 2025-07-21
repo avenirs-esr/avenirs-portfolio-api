@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelM
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,12 +14,17 @@ public class SkillLevelDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;SkillLevel, SkillLevelEntity&gt;
     implements SkillLevelRepository {
   public SkillLevelDatabaseRepository(SkillLevelJpaRepository jpaRepository) {
-<span class="fc" id="L16">    super(</span>
+<span class="fc" id="L17">    super(</span>
         jpaRepository,
         jpaRepository,
         skillLevel -&gt;
-<span class="nc" id="L20">            SkillLevelMapper.fromDomain(skillLevel, SkillMapper.fromDomain(skillLevel.getSkill())),</span>
-        SkillLevelMapper::toDomain);
-<span class="fc" id="L22">  }</span>
+<span class="nc" id="L21">            SkillLevelMapper.fromDomain(</span>
+                skillLevel,
+<span class="nc" id="L23">                SkillMapper.fromDomain(skillLevel.getSkill()),</span>
+<span class="nc" id="L24">                skillLevel.getTraces().stream().map(TraceMapper::fromDomain).toList()),</span>
+        skillLevelEntity -&gt;
+<span class="nc" id="L26">            SkillLevelMapper.toDomain(</span>
+<span class="nc" id="L27">                skillLevelEntity, SkillMapper.toDomain(skillLevelEntity.getSkill())));</span>
+<span class="fc" id="L28">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

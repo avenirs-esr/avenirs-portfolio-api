@@ -4,10 +4,10 @@ import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakePeriod;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
@@ -62,7 +62,7 @@ public class FakeAMS {
 <span class="nc" id="L62">    return this;</span>
   }
 
-  public FakeAMS withSkillLevel(List&lt;SkillLevelProgressEntity&gt; skillLevels) {
+  public FakeAMS withSkillLevel(List&lt;SkillLevelEntity&gt; skillLevels) {
 <span class="nc" id="L66">    ams.setSkillLevels(skillLevels);</span>
 <span class="nc" id="L67">    skillLevels.forEach(</span>
         skillLevel -&gt;
