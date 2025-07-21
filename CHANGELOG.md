@@ -5,6 +5,13 @@ the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
 and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
+## [v1.3.2] - 2025-07-21
+
+- ✨ **Enhancement of `SkillView` Payload**
+  - Added a new optional field `lastAchievedSkillLevel` to the `SkillView` payload.
+  - This field represents the **last skill level completed by the student**.
+  - The field may be `null` if no skill level has been completed yet.
+  
 ## [v1.3.1] - 2025-07-21
 
 - 🛠️ **Introduction of `AvenirsBaseModel`**
