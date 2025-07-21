@@ -19,9 +19,6 @@ public class FakeTrainingPath {
     var entity =
         TrainingPathEntity.of(
             UUID.fromString(faker.call().internet().uuid()), program, skillLevels);
-
-    entity.getSkillLevels().forEach(skillLevel -> skillLevel.setTrainingPath(entity));
-
     return new FakeTrainingPath(entity);
   }
 
