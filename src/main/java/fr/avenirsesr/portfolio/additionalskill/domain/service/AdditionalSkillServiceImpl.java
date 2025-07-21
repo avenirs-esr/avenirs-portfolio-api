@@ -23,4 +23,12 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
     pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);
     return additionalSkillCache.findAll(page, pageSize);
   }
+
+  @Override
+  public AdditionalSkillsPaginated searchAdditionalSkills(
+      String keyword, Integer page, Integer pageSize) {
+    page = Optional.ofNullable(page).orElse(DEFAULT_PAGE);
+    pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);
+    return additionalSkillCache.findBySkillTitle(keyword, page, pageSize);
+  }
 }

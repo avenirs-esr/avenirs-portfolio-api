@@ -96,4 +96,48 @@ class AdditionalSkillServiceImplTest {
     assertThat(result).isEqualTo(expected);
     verify(additionalSkillCache).findAll(3, 15);
   }
+
+  @Test
+  void shouldSearchWithDefaultPageAndSizeWhenBothAreNull() {
+    AdditionalSkillsPaginated expected = createFakePaginatedResult(0, 8);
+    when(additionalSkillCache.findBySkillTitle("java", 0, 8)).thenReturn(expected);
+
+    AdditionalSkillsPaginated result = service.searchAdditionalSkills("java", null, null);
+
+    assertThat(result).isEqualTo(expected);
+    verify(additionalSkillCache).findBySkillTitle("java", 0, 8);
+  }
+
+  @Test
+  void shouldSearchWithDefaultPageWhenPageIsNull() {
+    AdditionalSkillsPaginated expected = createFakePaginatedResult(0, 20);
+    when(additionalSkillCache.findBySkillTitle("java", 0, 20)).thenReturn(expected);
+
+    AdditionalSkillsPaginated result = service.searchAdditionalSkills("java", null, 20);
+
+    assertThat(result).isEqualTo(expected);
+    verify(additionalSkillCache).findBySkillTitle("java", 0, 20);
+  }
+
+  @Test
+  void shouldSearchWithDefaultPageSizeWhenPageSizeIsNull() {
+    AdditionalSkillsPaginated expected = createFakePaginatedResult(2, 8);
+    when(additionalSkillCache.findBySkillTitle("java", 2, 8)).thenReturn(expected);
+
+    AdditionalSkillsPaginated result = service.searchAdditionalSkills("java", 2, null);
+
+    assertThat(result).isEqualTo(expected);
+    verify(additionalSkillCache).findBySkillTitle("java", 2, 8);
+  }
+
+  @Test
+  void shouldSearchWithProvidedPageAndSize() {
+    AdditionalSkillsPaginated expected = createFakePaginatedResult(3, 15);
+    when(additionalSkillCache.findBySkillTitle("java", 3, 15)).thenReturn(expected);
+
+    AdditionalSkillsPaginated result = service.searchAdditionalSkills("java", 3, 15);
+
+    assertThat(result).isEqualTo(expected);
+    verify(additionalSkillCache).findBySkillTitle("java", 3, 15);
+  }
 }

@@ -23,11 +23,32 @@ public class AdditionalSkillCacheImpl implements AdditionalSkillCache {
     return paginate(additionalSkills, page, pageSize);
   }
 
+  @Override
+  public AdditionalSkillsPaginated findBySkillTitle(
+      String keyword, Integer page, Integer pageSize) {
+    String normalizedKeyword = keyword == null ? "" : keyword.trim().toLowerCase();
+    List<AdditionalSkill> filteredSkills = loadAdditionalSkillsByLibelle(normalizedKeyword);
+    return paginate(filteredSkills, page, pageSize);
+  }
+
   private List<AdditionalSkill> loadAdditionalSkills() {
     try (InputStream is = getClass().getResourceAsStream(JSON_PATH)) {
       List<CompetenceComplementaireDetaillee> entities =
           objectMapper.readValue(is, new TypeReference<>() {});
       return entities.stream().map(AdditionalSkillMapper::toDomain).toList();
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to load mock additional skills", e);
+    }
+  }
+
+  private List<AdditionalSkill> loadAdditionalSkillsByLibelle(String keyword) {
+    try (InputStream is = getClass().getResourceAsStream(JSON_PATH)) {
+      List<CompetenceComplementaireDetaillee> entities =
+          objectMapper.readValue(is, new TypeReference<>() {});
+      return entities.stream()
+          .filter(skill -> skill.libelle().toLowerCase().contains(keyword.toLowerCase()))
+          .map(AdditionalSkillMapper::toDomain)
+          .toList();
     } catch (Exception e) {
       throw new RuntimeException("Unable to load mock additional skills", e);
     }

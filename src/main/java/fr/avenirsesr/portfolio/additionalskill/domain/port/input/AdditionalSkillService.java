@@ -4,4 +4,6 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillsPagi
 
 public interface AdditionalSkillService {
   AdditionalSkillsPaginated getAdditionalSkills(Integer page, Integer pageSize);
+
+  AdditionalSkillsPaginated searchAdditionalSkills(String keyword, Integer page, Integer pageSize);
 }
