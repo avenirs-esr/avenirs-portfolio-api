@@ -15,10 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SkillEntity extends AvenirsBaseEntity {
-  @OneToMany(mappedBy = &quot;skill&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
-  private Set&lt;SkillLevelEntity&gt; skillLevels;
-
-<span class="fc" id="L21">  @OneToMany(</span>
+<span class="fc" id="L18">  @OneToMany(</span>
       mappedBy = &quot;skill&quot;,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
@@ -26,18 +23,17 @@ public class SkillEntity extends AvenirsBaseEntity {
   private Set&lt;SkillTranslationEntity&gt; translations =
       new HashSet&lt;&gt;(); // TODO: Remove this SET and get it in queries
 
-<span class="fc" id="L29">  public SkillEntity(UUID id, Set&lt;SkillLevelEntity&gt; skillLevels) {</span>
-<span class="fc" id="L30">    this.setId(id);</span>
-<span class="fc" id="L31">    this.skillLevels = skillLevels;</span>
-<span class="fc" id="L32">  }</span>
+<span class="fc" id="L26">  public SkillEntity(UUID id) {</span>
+<span class="fc" id="L27">    this.setId(id);</span>
+<span class="fc" id="L28">  }</span>
 
-  public static SkillEntity of(UUID id, Set&lt;SkillLevelEntity&gt; skillLevels) {
-<span class="fc" id="L35">    return new SkillEntity(id, skillLevels);</span>
+  public static SkillEntity of(UUID id) {
+<span class="fc" id="L31">    return new SkillEntity(id);</span>
   }
 
   @Override
   public String toString() {
-<span class="nc" id="L40">    return &quot;SkillEntity[%s]&quot;.formatted(this.getId());</span>
+<span class="nc" id="L36">    return &quot;SkillEntity[%s]&quot;.formatted(this.getId());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

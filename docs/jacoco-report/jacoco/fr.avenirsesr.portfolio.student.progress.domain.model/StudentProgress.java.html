@@ -1,51 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudentProgress.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.domain.model</a> &gt; <span class="el_source">StudentProgress.java</span></div><h1>StudentProgress.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.domain.model;
 
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.user.domain.model.User;
-import java.util.UUID;
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+<span class="fc" id="L17">@Slf4j</span>
 @Getter
 @Setter
-public class StudentProgress {
-  private final UUID id;
-  private final User user;
+public class StudentProgress extends AvenirsBaseModel {
+  private final Student student;
   private final TrainingPath trainingPath;
-  private final SkillLevel skillLevel;
-  private ESkillLevelStatus status;
+
+  @Getter(AccessLevel.NONE)
+  private final List&lt;SkillLevelProgress&gt; skillLevelProgresses;
 
   private StudentProgress(
       UUID id,
-      User user,
+      Student student,
       TrainingPath trainingPath,
-      SkillLevel skillLevel,
-<span class="fc" id="L25">      ESkillLevelStatus status) {</span>
-<span class="fc" id="L26">    this.id = id;</span>
-<span class="fc" id="L27">    this.user = user;</span>
-<span class="fc" id="L28">    this.trainingPath = trainingPath;</span>
-<span class="fc" id="L29">    this.skillLevel = skillLevel;</span>
-<span class="fc" id="L30">    this.status = status;</span>
-<span class="fc" id="L31">  }</span>
+      List&lt;SkillLevelProgress&gt; skillLevelProgresses) {
+<span class="fc" id="L32">    super(id);</span>
+<span class="fc" id="L33">    this.student = student;</span>
+<span class="fc" id="L34">    this.trainingPath = trainingPath;</span>
+<span class="fc" id="L35">    this.skillLevelProgresses = skillLevelProgresses;</span>
+<span class="fc" id="L36">  }</span>
 
   public static StudentProgress create(
-      UUID id,
-      User user,
-      TrainingPath trainingPath,
-      SkillLevel skillLevel,
-      ESkillLevelStatus status) {
-<span class="nc" id="L39">    return new StudentProgress(id, user, trainingPath, skillLevel, status);</span>
+      Student student, TrainingPath trainingPath, List&lt;SkillLevelProgress&gt; skillLevels) {
+<span class="nc" id="L40">    return new StudentProgress(UUID.randomUUID(), student, trainingPath, skillLevels);</span>
   }
 
   public static StudentProgress toDomain(
-      UUID id,
-      User user,
-      TrainingPath trainingPath,
-      SkillLevel skillLevel,
-      ESkillLevelStatus status) {
-<span class="fc" id="L48">    return new StudentProgress(id, user, trainingPath, skillLevel, status);</span>
+      UUID id, Student student, TrainingPath trainingPath, List&lt;SkillLevelProgress&gt; skillLevels) {
+<span class="fc" id="L45">    return new StudentProgress(id, student, trainingPath, skillLevels);</span>
+  }
+
+  public List&lt;SkillLevelProgress&gt; getAllSkillLevels() {
+<span class="fc" id="L49">    return skillLevelProgresses;</span>
+  }
+
+  public List&lt;SkillLevelProgress&gt; getCurrentSkillLevels() {
+<span class="fc" id="L53">    Map&lt;Skill, List&lt;SkillLevelProgress&gt;&gt; startedSkillLevelsBySkill =</span>
+<span class="fc" id="L54">        skillLevelProgresses.stream()</span>
+<span class="fc" id="L55">            .collect(</span>
+<span class="fc" id="L56">                Collectors.groupingBy(</span>
+<span class="fc" id="L57">                    skillLevelProgress -&gt; skillLevelProgress.getSkillLevel().getSkill(),</span>
+<span class="fc" id="L58">                    Collectors.collectingAndThen(</span>
+<span class="fc" id="L59">                        Collectors.filtering(</span>
+                            skillLevelProgress -&gt;
+<span class="fc bfc" id="L61" title="All 2 branches covered.">                                skillLevelProgress.getStatus() != ESkillLevelStatus.NOT_STARTED,</span>
+<span class="fc" id="L62">                            Collectors.toCollection(ArrayList::new)),</span>
+<span class="fc" id="L63">                        Function.identity())));</span>
+
+<span class="fc" id="L65">    startedSkillLevelsBySkill.forEach(</span>
+        (skill, levelProgress) -&gt; {
+<span class="fc" id="L67">          levelProgress.sort(Comparator.comparing(SkillLevelProgress::getStartDate).reversed());</span>
+<span class="fc" id="L68">        });</span>
+
+<span class="fc" id="L70">    return startedSkillLevelsBySkill.values().stream()</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        .filter(skillLevelProgresses -&gt; !skillLevelProgresses.isEmpty())</span>
+<span class="fc" id="L72">        .map(List::getFirst)</span>
+<span class="fc" id="L73">        .toList();</span>
+  }
+
+  public Map&lt;Skill, Optional&lt;SkillLevelProgress&gt;&gt; getLastAchievedSkillLevelBySkill() {
+<span class="fc" id="L77">    return skillLevelProgresses.stream()</span>
+<span class="fc" id="L78">        .collect(</span>
+<span class="fc" id="L79">            Collectors.groupingBy(</span>
+<span class="fc" id="L80">                skillLevelProgress -&gt; skillLevelProgress.getSkillLevel().getSkill(),</span>
+<span class="fc" id="L81">                Collectors.collectingAndThen(</span>
+<span class="fc" id="L82">                    Collectors.toList(),</span>
+                    list -&gt;
+<span class="fc" id="L84">                        list.stream()</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">                            .filter(s -&gt; s.getStatus() != ESkillLevelStatus.NOT_STARTED)</span>
+<span class="fc" id="L86">                            .filter(s -&gt; s.getEndDate().isBefore(LocalDate.now()))</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">                            .filter(s -&gt; !getCurrentSkillLevels().contains(s))</span>
+<span class="fc" id="L88">                            .max(Comparator.comparing(SkillLevelProgress::getEndDate)))));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -16,13 +16,14 @@ public class FakeTrainingPath {
 <span class="nc" id="L16">  }</span>
 
   public static FakeTrainingPath of(ProgramEntity program, Set&lt;SkillLevelEntity&gt; skillLevels) {
-<span class="nc" id="L19">    return new FakeTrainingPath(</span>
+<span class="nc" id="L19">    var entity =</span>
 <span class="nc" id="L20">        TrainingPathEntity.of(</span>
-<span class="nc" id="L21">            UUID.fromString(faker.call().internet().uuid()), program, skillLevels));</span>
+<span class="nc" id="L21">            UUID.fromString(faker.call().internet().uuid()), program, skillLevels);</span>
+<span class="nc" id="L22">    return new FakeTrainingPath(entity);</span>
   }
 
   public TrainingPathEntity toEntity() {
-<span class="nc" id="L25">    return trainingPath;</span>
+<span class="nc" id="L26">    return trainingPath;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

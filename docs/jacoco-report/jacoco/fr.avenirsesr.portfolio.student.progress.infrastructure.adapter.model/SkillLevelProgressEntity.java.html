@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkillLevelProgressEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model</a> &gt; <span class="el_source">SkillLevelProgressEntity.java</span></div><h1>SkillLevelProgressEntity.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model;
+
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
+import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.PeriodEntity;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = &quot;skill_level_progress&quot;)
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public class SkillLevelProgressEntity extends PeriodEntity&lt;LocalDate&gt; {
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = &quot;student_id&quot;)
+  private UserEntity student;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = &quot;skill_level_id&quot;)
+  private SkillLevelEntity skillLevel;
+
+  @Column
+  @Enumerated(EnumType.STRING)
+  private ESkillLevelStatus status;
+
+  @ManyToMany(mappedBy = &quot;skillLevels&quot;)
+  private List&lt;TraceEntity&gt; traces;
+
+  @ManyToMany(mappedBy = &quot;skillLevels&quot;)
+  private List&lt;AMSEntity&gt; amses;
+
+  private SkillLevelProgressEntity(
+      UUID id,
+      UserEntity student,
+      SkillLevelEntity skillLevelEntity,
+      ESkillLevelStatus status,
+      LocalDate startDate,
+      LocalDate endDate,
+      List&lt;TraceEntity&gt; traces,
+<span class="fc" id="L59">      List&lt;AMSEntity&gt; amses) {</span>
+<span class="fc" id="L60">    setId(id);</span>
+<span class="fc" id="L61">    this.student = student;</span>
+<span class="fc" id="L62">    this.skillLevel = skillLevelEntity;</span>
+<span class="fc" id="L63">    this.status = status;</span>
+<span class="fc" id="L64">    this.traces = traces;</span>
+<span class="fc" id="L65">    this.amses = amses;</span>
+<span class="fc" id="L66">    this.startDate = startDate;</span>
+<span class="fc" id="L67">    this.endDate = endDate;</span>
+<span class="fc" id="L68">  }</span>
+
+  public static SkillLevelProgressEntity of(
+      UUID id,
+      UserEntity student,
+      SkillLevelEntity skillLevelEntity,
+      ESkillLevelStatus status,
+      LocalDate startDate,
+      LocalDate endDate,
+      List&lt;TraceEntity&gt; traces,
+      List&lt;AMSEntity&gt; amses) {
+<span class="fc" id="L79">    return new SkillLevelProgressEntity(</span>
+        id, student, skillLevelEntity, status, startDate, endDate, traces, amses);
+  }
+
+  @Override
+  public String toString() {
+<span class="nc" id="L85">    return &quot;SkillLevelProgressEntity[%s]&quot;.formatted(getId());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

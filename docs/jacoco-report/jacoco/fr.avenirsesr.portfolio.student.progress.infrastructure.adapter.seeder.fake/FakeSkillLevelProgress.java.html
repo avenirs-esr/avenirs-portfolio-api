@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FakeSkillLevelProgress.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake</a> &gt; <span class="el_source">FakeSkillLevelProgress.java</span></div><h1>FakeSkillLevelProgress.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake;
+
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
+import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+import java.util.UUID;
+import net.datafaker.Faker;
+
+public class FakeSkillLevelProgress {
+<span class="nc" id="L17">  private static final Faker faker = new FakerProvider().call();</span>
+  private final SkillLevelProgressEntity skillLevelProgress;
+
+<span class="nc" id="L20">  private FakeSkillLevelProgress(SkillLevelProgressEntity skillLevelProgress) {</span>
+<span class="nc" id="L21">    this.skillLevelProgress = skillLevelProgress;</span>
+<span class="nc" id="L22">  }</span>
+
+  public static FakeSkillLevelProgress create(UserEntity student, SkillLevelEntity skillLevel) {
+<span class="nc" id="L25">    LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));</span>
+<span class="nc" id="L26">    LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));</span>
+<span class="nc" id="L27">    return new FakeSkillLevelProgress(</span>
+<span class="nc" id="L28">        SkillLevelProgressEntity.of(</span>
+<span class="nc" id="L29">            UUID.fromString(faker.internet().uuid()),</span>
+            student,
+            skillLevel,
+            ESkillLevelStatus.NOT_STARTED,
+            futureStartDate,
+            futureEndDate,
+<span class="nc" id="L35">            List.of(),</span>
+<span class="nc" id="L36">            List.of()));</span>
+  }
+
+  public FakeSkillLevelProgress withStatus(ESkillLevelStatus status) {
+<span class="nc" id="L40">    LocalDate pastStartDate = LocalDate.now().minus(Period.ofYears(2));</span>
+<span class="nc" id="L41">    LocalDate pastEndDate = LocalDate.now().minus(Period.ofYears(1));</span>
+<span class="nc" id="L42">    LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));</span>
+<span class="nc" id="L43">    LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));</span>
+<span class="nc" id="L44">    skillLevelProgress.setStatus(status);</span>
+<span class="nc bnc" id="L45" title="All 4 branches missed.">    switch (status) {</span>
+      case VALIDATED, FAILED -&gt; {
+<span class="nc" id="L47">        skillLevelProgress.setStartDate(pastStartDate);</span>
+<span class="nc" id="L48">        skillLevelProgress.setEndDate(pastEndDate);</span>
+<span class="nc" id="L49">      }</span>
+      case UNDER_ACQUISITION, UNDER_REVIEW -&gt; {
+<span class="nc" id="L51">        skillLevelProgress.setStartDate(pastStartDate);</span>
+<span class="nc" id="L52">        skillLevelProgress.setEndDate(futureEndDate);</span>
+<span class="nc" id="L53">      }</span>
+      case TO_BE_EVALUATED, NOT_STARTED -&gt; {
+<span class="nc" id="L55">        skillLevelProgress.setStartDate(futureStartDate);</span>
+<span class="nc" id="L56">        skillLevelProgress.setEndDate(futureEndDate);</span>
+      }
+    }
+<span class="nc" id="L59">    return this;</span>
+  }
+
+  public FakeSkillLevelProgress withTraces(List&lt;TraceEntity&gt; traces) {
+<span class="nc" id="L63">    this.skillLevelProgress.setTraces(traces);</span>
+<span class="nc" id="L64">    return this;</span>
+  }
+
+  public FakeSkillLevelProgress withAmses(List&lt;AMSEntity&gt; amses) {
+<span class="nc" id="L68">    this.skillLevelProgress.setAmses(amses);</span>
+<span class="nc" id="L69">    return this;</span>
+  }
+
+  public SkillLevelProgressEntity toEntity() {
+<span class="nc" id="L73">    return skillLevelProgress;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
