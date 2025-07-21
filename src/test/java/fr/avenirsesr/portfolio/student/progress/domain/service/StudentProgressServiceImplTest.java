@@ -16,6 +16,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.St
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.time.LocalDate;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -136,6 +137,62 @@ public class StudentProgressServiceImplTest {
   }
 
   @Test
+  void shouldReturnOnlyCurrentStudentProgressOnOverview() {
+    var skillLevelsProgress = new ArrayList<SkillLevelProgress>();
+    for (int i = 0; i < 6; i++) {
+      skillLevelsProgress.add(
+          SkillLevelProgressFixture.create(student)
+              .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+              .toModel());
+    }
+
+    LocalDate now = LocalDate.now();
+
+    // Progress "current" : now between startDate and endDate
+    StudentProgress currentProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevels(List.of(skillLevelsProgress.get(0), skillLevelsProgress.get(1)))
+            .withStartDate(now.minusDays(5))
+            .toModel();
+
+    // Progress "past" : endDate before now
+    StudentProgress pastProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevels(List.of(skillLevelsProgress.get(2), skillLevelsProgress.get(3)))
+            .withStartDate(now.minusYears(10))
+            .toModel();
+
+    // Progress "future" : startDate after now
+    StudentProgress futureProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevels(List.of(skillLevelsProgress.get(4), skillLevelsProgress.get(5)))
+            .withStartDate(now.plusYears(1))
+            .toModel();
+
+    // Mock repository to return all progress
+    when(studentProgressRepository.findAllByStudent(eq(student), any(SortCriteria.class)))
+        .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
+
+    // WHEN
+    Map<StudentProgress, List<SkillLevelProgress>> result =
+        studentProgressService.getSkillsOverview(student);
+
+    // THEN
+    assertEquals(1, result.size(), "Only current progress should be returned");
+    assertTrue(result.containsKey(currentProgress), "Current progress should be present");
+    assertFalse(result.containsKey(pastProgress), "Past progress should be filtered out");
+    assertFalse(result.containsKey(futureProgress), "Future progress should be filtered out");
+
+    int maxPerProgress = 3;
+    assertTrue(result.get(currentProgress).size() <= maxPerProgress);
+
+    verify(studentProgressRepository).findAllByStudent(eq(student), any(SortCriteria.class));
+  }
+
+  @Test
   void shouldReturnSkillsViewWithCustomSortCriteria() {
     // Given
     SortCriteria customSort = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
@@ -152,6 +209,58 @@ public class StudentProgressServiceImplTest {
     assertEquals(1, result.size());
     assertEquals(progress, result.getFirst());
     verify(studentProgressRepository).findAllByStudent(student, customSort);
+  }
+
+  @Test
+  void shouldReturnOnlyCurrentStudentProgressOnView() {
+    var skillLevelsProgress = new ArrayList<SkillLevelProgress>();
+    for (int i = 0; i < 6; i++) {
+      skillLevelsProgress.add(
+          SkillLevelProgressFixture.create(student)
+              .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+              .toModel());
+    }
+
+    LocalDate now = LocalDate.now();
+
+    // Progress "current" : now between startDate and endDate
+    StudentProgress currentProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevels(List.of(skillLevelsProgress.get(0), skillLevelsProgress.get(1)))
+            .withStartDate(now.minusDays(5))
+            .toModel();
+
+    // Progress "past" : endDate before now
+    StudentProgress pastProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevels(List.of(skillLevelsProgress.get(2), skillLevelsProgress.get(3)))
+            .withStartDate(now.minusYears(10))
+            .toModel();
+
+    // Progress "future" : startDate after now
+    StudentProgress futureProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevels(List.of(skillLevelsProgress.get(4), skillLevelsProgress.get(5)))
+            .withStartDate(now.plusYears(1))
+            .toModel();
+
+    // Mock repository to return all progress
+    when(studentProgressRepository.findAllByStudent(eq(student), any(SortCriteria.class)))
+        .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
+
+    // WHEN
+    List<StudentProgress> result = studentProgressService.getSkillsView(student, null);
+
+    // THEN
+    assertEquals(1, result.size(), "Only current progress should be returned");
+    assertTrue(result.contains(currentProgress), "Current progress should be present");
+    assertFalse(result.contains(pastProgress), "Past progress should be filtered out");
+    assertFalse(result.contains(futureProgress), "Future progress should be filtered out");
+
+    verify(studentProgressRepository).findAllByStudent(eq(student), any(SortCriteria.class));
   }
 
   @Test

@@ -31,7 +31,10 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   @Override
   public Map<StudentProgress, List<SkillLevelProgress>> getSkillsOverview(Student student) {
     SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
-    var studentProgresses = studentProgressRepository.findAllByStudent(student, sortCriteria);
+    var studentProgresses =
+        studentProgressRepository.findAllByStudent(student, sortCriteria).stream()
+            .filter(StudentProgress::isCurrent)
+            .toList();
 
     return studentProgresses.stream()
         .collect(
@@ -45,6 +48,10 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public List<StudentProgress> getSkillsView(Student student, SortCriteria sortCriteria) {
-    return studentProgressRepository.findAllByStudent(student, sortCriteria);
+    return studentProgressRepository
+        .findAllByStudent(student, sortCriteria)
+        .stream()
+        .filter(StudentProgress::isCurrent)
+        .toList();
   }
 }

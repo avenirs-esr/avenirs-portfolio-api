@@ -61,6 +61,11 @@ public class StudentProgress extends AvenirsBaseModel {
     return new StudentProgress(id, student, trainingPath, startDate, endDate, skillLevels);
   }
 
+  public boolean isCurrent() {
+    LocalDate now = LocalDate.now();
+    return !now.isBefore(startDate) && !now.isAfter(endDate);
+  }
+
   public List<SkillLevelProgress> getAllSkillLevels() {
     return skillLevelProgresses;
   }
