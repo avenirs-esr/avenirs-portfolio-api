@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudentAdditionalSkillDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository</a> &gt; <span class="el_source">StudentAdditionalSkillDatabaseRepository.java</span></div><h1>StudentAdditionalSkillDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository;
+
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.StudentAdditionalSkillConflictException;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.StudentAdditionalSkillRepository;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.StudentAdditionalSkillEntity;
+import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import java.util.List;
+import org.springframework.stereotype.Component;
+
+@Component
+public class StudentAdditionalSkillDatabaseRepository implements StudentAdditionalSkillRepository {
+  private final StudentAdditionalSkillJpaRepository jpaRepository;
+
+  public StudentAdditionalSkillDatabaseRepository(
+<span class="fc" id="L18">      StudentAdditionalSkillJpaRepository jpaRepository) {</span>
+<span class="fc" id="L19">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L20">  }</span>
+
+  public void saveAllEntities(List&lt;StudentAdditionalSkillEntity&gt; entities) {
+<span class="pc bpc" id="L23" title="2 of 4 branches missed.">    if (entities != null &amp;&amp; !entities.isEmpty()) {</span>
+<span class="fc" id="L24">      jpaRepository.saveAll(entities);</span>
+    }
+<span class="fc" id="L26">  }</span>
+
+  @Override
+  public void saveAdditionalSkill(
+      Student student,
+      String additionalSkillId,
+      EAdditionalSkillType type,
+      ESkillLevelStatus level) {
+<span class="nc" id="L34">    StudentAdditionalSkillEntity entity =</span>
+<span class="nc" id="L35">        StudentAdditionalSkillEntity.create(</span>
+<span class="nc" id="L36">            UserMapper.fromDomain(student), additionalSkillId, type, level);</span>
+    try {
+<span class="nc" id="L38">      jpaRepository.save(entity);</span>
+<span class="nc" id="L39">    } catch (Exception e) {</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">      if (isUniqueConstraintViolation(e)) {</span>
+<span class="nc" id="L41">        throw new StudentAdditionalSkillConflictException();</span>
+      }
+<span class="nc" id="L43">      throw e;</span>
+<span class="nc" id="L44">    }</span>
+<span class="nc" id="L45">  }</span>
+
+  private boolean isUniqueConstraintViolation(Exception e) {
+<span class="nc" id="L48">    Throwable cause = e;</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">    while (cause != null) {</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">      if (cause.getMessage().contains(&quot;duplicate key&quot;)) {</span>
+<span class="nc" id="L51">        return true;</span>
+      }
+<span class="nc" id="L53">      cause = cause.getCause();</span>
+    }
+<span class="nc" id="L55">    return false;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

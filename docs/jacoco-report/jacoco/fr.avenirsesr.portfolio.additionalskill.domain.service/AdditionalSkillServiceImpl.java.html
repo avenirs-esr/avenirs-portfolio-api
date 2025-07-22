@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdditionalSkillServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.additionalskill.domain.service</a> &gt; <span class="el_source">AdditionalSkillServiceImpl.java</span></div><h1>AdditionalSkillServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.additionalskill.domain.service;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotAvailableException;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillsPaginated;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.StudentAdditionalSkillRepository;
+import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-<span class="fc" id="L11">@Slf4j</span>
+<span class="fc" id="L16">@Slf4j</span>
 @AllArgsConstructor
 @Service
 public class AdditionalSkillServiceImpl implements AdditionalSkillService {
@@ -16,20 +21,35 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
   private static final int DEFAULT_PAGESIZE = 8;
 
   private final AdditionalSkillCache additionalSkillCache;
+  private final StudentAdditionalSkillRepository studentAdditionalSkillRepository;
 
   @Override
   public AdditionalSkillsPaginated getAdditionalSkills(Integer page, Integer pageSize) {
-<span class="fc" id="L22">    page = Optional.ofNullable(page).orElse(DEFAULT_PAGE);</span>
-<span class="fc" id="L23">    pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);</span>
-<span class="fc" id="L24">    return additionalSkillCache.findAll(page, pageSize);</span>
+<span class="fc" id="L28">    page = Optional.ofNullable(page).orElse(DEFAULT_PAGE);</span>
+<span class="fc" id="L29">    pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);</span>
+<span class="fc" id="L30">    return additionalSkillCache.findAll(page, pageSize);</span>
   }
 
   @Override
   public AdditionalSkillsPaginated searchAdditionalSkills(
       String keyword, Integer page, Integer pageSize) {
-<span class="fc" id="L30">    page = Optional.ofNullable(page).orElse(DEFAULT_PAGE);</span>
-<span class="fc" id="L31">    pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);</span>
-<span class="fc" id="L32">    return additionalSkillCache.findBySkillTitle(keyword, page, pageSize);</span>
+<span class="fc" id="L36">    page = Optional.ofNullable(page).orElse(DEFAULT_PAGE);</span>
+<span class="fc" id="L37">    pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);</span>
+<span class="fc" id="L38">    return additionalSkillCache.findBySkillTitle(keyword, page, pageSize);</span>
   }
+
+  @Override
+  public void saveAdditionalSkills(
+      Student student,
+      String additionalSkillId,
+      EAdditionalSkillType type,
+      ESkillLevelStatus level) {
+<span class="fc bfc" id="L47" title="All 2 branches covered.">    if (additionalSkillCache.additionalSkillIsAvailable(additionalSkillId)) {</span>
+<span class="fc" id="L48">      studentAdditionalSkillRepository.saveAdditionalSkill(student, additionalSkillId, type, level);</span>
+    } else {
+<span class="fc" id="L50">      log.warn(&quot;Additional skill with ID [{}] is not available&quot;, additionalSkillId);</span>
+<span class="fc" id="L51">      throw new AdditionalSkillNotAvailableException();</span>
+    }
+<span class="fc" id="L53">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
