@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.shared.application.adapter.exception;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.StudentAdditionalSkillConflictException;
 import fr.avenirsesr.portfolio.shared.application.adapter.response.ErrorResponse;
 import fr.avenirsesr.portfolio.shared.domain.exception.BadImageSizeException;
 import fr.avenirsesr.portfolio.shared.domain.exception.BadImageTypeException;
@@ -63,6 +64,13 @@ public class RestExceptionHandler {
   @ExceptionHandler(UserIsNotStudentException.class)
   public ResponseEntity<ErrorResponse> handleUserIsNotStudent(UserIsNotStudentException ex) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+  }
+
+  @ExceptionHandler(StudentAdditionalSkillConflictException.class)
+  public ResponseEntity<ErrorResponse> handleStudentAdditionalSkillConflict(
+      StudentAdditionalSkillConflictException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 

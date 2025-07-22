@@ -63,4 +63,15 @@ public class AdditionalSkillCacheImpl implements AdditionalSkillCache {
     return new PagedResult<>(
         paginatedSkills, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skills.size()));
   }
+
+  @Override
+  public boolean additionalSkillIsAvailable(String id) {
+    try (InputStream is = getClass().getResourceAsStream(JSON_PATH)) {
+      List<CompetenceComplementaireDetaillee> entities =
+          objectMapper.readValue(is, new TypeReference<>() {});
+      return entities.stream().anyMatch(skill -> skill.code().equals(id));
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to load mock additional skills", e);
+    }
+  }
 }

@@ -2,20 +2,20 @@ package fr.avenirsesr.portfolio.additionalskill.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillDTO;
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.AdditionalSkillMapper;
+import fr.avenirsesr.portfolio.additionalskill.application.adapter.request.AddAdditionalSkillDTO;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import java.net.URI;
 import java.security.Principal;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @AllArgsConstructor
@@ -55,5 +55,16 @@ public class AdditionalSkillController {
         new PagedResponse<>(
             result.content().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),
             PageInfoDTO.fromDomain(result.pageInfo())));
+  }
+
+  @PostMapping()
+  public ResponseEntity<Void> createAdditionalSkill(
+      Principal principal, @RequestBody AddAdditionalSkillDTO additionalSkill) {
+    Student student = userUtil.getStudent(principal);
+    log.debug("Received request to create additional skill for student [{}]", student);
+    additionalSkillService.saveAdditionalSkills(
+        student, additionalSkill.getId(), additionalSkill.getType(), additionalSkill.getLevel());
+    return ResponseEntity.created(URI.create("/me/additional-skills/" + additionalSkill.getId()))
+        .build();
   }
 }
