@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.StudentAdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
@@ -29,6 +30,7 @@ public class SeederRunner implements CommandLineRunner {
   private final TrainingPathSeeder trainingPathSeeder;
   private final StudentProgressSeeder studentProgressSeeder;
   private final SkillSeeder skillSeeder;
+  private final StudentAdditionalSkillSeeder studentAdditionalSkillSeeder;
 
   @Value("${seeder.enabled:false}")
   private boolean seedEnabled;
@@ -43,7 +45,8 @@ public class SeederRunner implements CommandLineRunner {
       ProgramSeeder programSeeder,
       TrainingPathSeeder trainingPathSeeder,
       StudentProgressSeeder studentProgressSeeder,
-      SkillSeeder skillSeeder) {
+      SkillSeeder skillSeeder,
+      StudentAdditionalSkillSeeder studentAdditionalSkillSeeder) {
     this.userRepository = userRepository;
     this.cohortSeeder = cohortSeeder;
     this.amsSeeder = amsSeeder;
@@ -54,6 +57,7 @@ public class SeederRunner implements CommandLineRunner {
     this.trainingPathSeeder = trainingPathSeeder;
     this.studentProgressSeeder = studentProgressSeeder;
     this.skillSeeder = skillSeeder;
+    this.studentAdditionalSkillSeeder = studentAdditionalSkillSeeder;
   }
 
   @Override
@@ -79,6 +83,7 @@ public class SeederRunner implements CommandLineRunner {
       var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
       var savedAmses =
           amsSeeder.seed(savedUsers, savedSkillLevelProgresses, savedTraces, savedCohorts);
+      var savedStudentAdditionalSkills = studentAdditionalSkillSeeder.seed(savedUsers);
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);

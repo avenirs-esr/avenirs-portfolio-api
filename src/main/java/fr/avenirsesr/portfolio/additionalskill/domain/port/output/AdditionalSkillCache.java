@@ -8,4 +8,6 @@ public interface AdditionalSkillCache {
   PagedResult<AdditionalSkill> findAll(PageCriteria pageCriteria);
 
   PagedResult<AdditionalSkill> findBySkillTitle(String keyword, PageCriteria pageCriteria);
+
+  boolean additionalSkillIsAvailable(String id);
 }

@@ -19,6 +19,8 @@ public enum EErrorCode {
   USER_IS_NOT_STUDENT_EXCEPTION("User is not student"),
   LANGUAGE_NOT_SUPPORTED("Language not supported"),
   INVALID_ARGUMENT_TYPE("The type of the argument is invalid"),
+  ADDITIONAL_SKILL_NOT_AVAILABLE("Additional skill not available"),
+  STUDENT_ADDITIONAL_SKILL_CONFLICT("This additional skill is already assigned to the student"),
   ;
 
   private final String message;
