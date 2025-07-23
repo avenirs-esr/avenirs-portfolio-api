@@ -5,6 +5,17 @@ the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
 and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
+-## [v1.3.4] - 2025-07-23
+
+- 🛠️ **Enhancements to `StudentProgress`**
+  - Added `LocalDate startDate` and `LocalDate endDate` fields to determine if a training is ongoing or completed.
+
+- ✨ **Enhancement of `SkillDTO`**
+  - Added a new field `boolean isProgramFinished` indicating whether the associated training program is finished.
+
+- ✨ **New Endpoint `/me/skill-level-progress`**
+  - Returns all `SkillLevelProgress` of the connected student for the **Life Project** tab.
+
 
 ## [v1.3.3] - 2025-07-23
 
