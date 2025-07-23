@@ -5,6 +5,18 @@ the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
 and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
+
+## [v1.3.3] - 2025-07-23
+
+- ✨ **Introduction of `PageCriteria`**
+  - Added a new `PageCriteria` class to manage pagination defaults.
+  - Services now require a `PageCriteria` object instead of separate `Integer page` and `Integer pageSize` parameters.
+  - Provides better handling of default pagination values and ensures consistency across the API.
+
+- ✨ **Enhancements to `SortCriteria`**
+  - `SortCriteria` now includes built-in default values.
+  - It can no longer be `null` and defaults to alphabetical ordering if no criteria is provided.
+
 ## [v1.3.2] - 2025-07-21
 
 - ✨ **Enhancement of `SkillView` Payload**
