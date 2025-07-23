@@ -45,8 +45,6 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public List<StudentProgress> getSkillsView(Student student, SortCriteria sortCriteria) {
-    return studentProgressRepository.findAllByStudent(
-        student,
-        sortCriteria != null ? sortCriteria : new SortCriteria(ESortField.NAME, ESortOrder.ASC));
+    return studentProgressRepository.findAllByStudent(student, sortCriteria);
   }
 }

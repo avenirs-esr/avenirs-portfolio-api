@@ -38,10 +38,9 @@ public class StudentProgressController {
   @GetMapping("/view")
   public List<StudentProgressViewDTO> getSkillsView(
       Principal principal, @RequestParam(name = "sort", required = false) String sortRaw) {
-    SortCriteria sortCriteria = SortCriteria.fromString(sortRaw);
     Student student = userUtil.getStudent(principal);
 
-    return studentProgressService.getSkillsView(student, sortCriteria).stream()
+    return studentProgressService.getSkillsView(student, SortCriteria.fromString(sortRaw)).stream()
         .map(StudentProgressViewMapper::fromDomainToDto)
         .toList();
   }

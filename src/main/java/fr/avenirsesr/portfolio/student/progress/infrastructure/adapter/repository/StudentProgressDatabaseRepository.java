@@ -44,8 +44,8 @@ public class StudentProgressDatabaseRepository
   public List<StudentProgress> findAllByStudent(Student student, SortCriteria sortCriteria) {
     Sort sort =
         Sort.by(
-            Sort.Direction.fromString(sortCriteria.getOrder().name()),
-            sortFieldToExactPath(sortCriteria.getField()));
+            Sort.Direction.fromString(sortCriteria.order().name()),
+            sortFieldToExactPath(sortCriteria.field()));
     return entityListToDomainList(
         jpaSpecificationExecutor.findAll(
             StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student)), sort));
