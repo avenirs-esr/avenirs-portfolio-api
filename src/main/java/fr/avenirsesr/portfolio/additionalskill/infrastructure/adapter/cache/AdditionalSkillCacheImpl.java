@@ -3,13 +3,15 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillsPaginated;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.CompetenceComplementaireDetaillee;
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import java.io.InputStream;
 import java.util.List;
+
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,17 +20,16 @@ public class AdditionalSkillCacheImpl implements AdditionalSkillCache {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
-  public AdditionalSkillsPaginated findAll(Integer page, Integer pageSize) {
+  public PagedResult<AdditionalSkill> findAll(PageCriteria pageCriteria) {
     List<AdditionalSkill> additionalSkills = loadAdditionalSkills();
-    return paginate(additionalSkills, page, pageSize);
+    return paginate(additionalSkills, pageCriteria);
   }
 
   @Override
-  public AdditionalSkillsPaginated findBySkillTitle(
-      String keyword, Integer page, Integer pageSize) {
+  public PagedResult<AdditionalSkill> findBySkillTitle(String keyword, PageCriteria pageCriteria) {
     String normalizedKeyword = keyword == null ? "" : keyword.trim().toLowerCase();
     List<AdditionalSkill> filteredSkills = loadAdditionalSkillsByLibelle(normalizedKeyword);
-    return paginate(filteredSkills, page, pageSize);
+    return paginate(filteredSkills, pageCriteria);
   }
 
   private List<AdditionalSkill> loadAdditionalSkills() {
@@ -54,13 +55,13 @@ public class AdditionalSkillCacheImpl implements AdditionalSkillCache {
     }
   }
 
-  private AdditionalSkillsPaginated paginate(List<AdditionalSkill> skills, int page, int pageSize) {
+  private PagedResult<AdditionalSkill> paginate(
+      List<AdditionalSkill> skills, PageCriteria pageCriteria) {
     int totalElements = skills.size();
-    int totalPages = (int) Math.ceil((double) totalElements / pageSize);
-    int start = Math.min(page * pageSize, totalElements);
-    int end = Math.min(start + pageSize, totalElements);
+    int start = Math.min(pageCriteria.page() * pageCriteria.pageSize(), totalElements);
+    int end = Math.min(start + pageCriteria.pageSize(), totalElements);
     List<AdditionalSkill> paginatedSkills = skills.subList(start, end);
-    PageInfo pageInfo = new PageInfo(pageSize, totalElements, totalPages, page);
-    return new AdditionalSkillsPaginated(paginatedSkills, pageInfo);
+    return new PagedResult<>(
+        paginatedSkills, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skills.size()));
   }
 }

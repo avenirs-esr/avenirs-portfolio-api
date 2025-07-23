@@ -4,16 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillsPaginated;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.AdditionalSkillFixture;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.PathSegmentsFixture;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.SegmentDetailFixture;
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import java.util.List;
 import java.util.UUID;
+
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +29,9 @@ class AdditionalSkillServiceImplTest {
 
   @InjectMocks private AdditionalSkillServiceImpl service;
 
-  private AdditionalSkillsPaginated createFakePaginatedResult(int page, int size) {
+  private static final PageCriteria DEFAULT_PAGE_CRITERIA = new PageCriteria(1, 8);
+
+  private PagedResult<AdditionalSkill> createFakePaginatedResult(int page, int size) {
     SegmentDetail issue = SegmentDetailFixture.create().withLibelle("issue").toModel();
     SegmentDetail target = SegmentDetailFixture.create().withLibelle("target").toModel();
     SegmentDetail macroSkill = SegmentDetailFixture.create().withLibelle("macroSkill").toModel();
@@ -49,95 +53,102 @@ class AdditionalSkillServiceImplTest {
                 .withId(UUID.randomUUID())
                 .withPathSegments(pathSegments)
                 .toModel());
-    PageInfo pageInfo = new PageInfo(size, 2, 1, page);
-    return new AdditionalSkillsPaginated(skills, pageInfo);
+    PageInfo pageInfo = new PageInfo(page, size, 2);
+    return new PagedResult<>(skills, pageInfo);
   }
 
   @Test
   void shouldUseDefaultPageAndSizeWhenBothAreNull() {
-    AdditionalSkillsPaginated expected = createFakePaginatedResult(0, 8);
-    when(additionalSkillCache.findAll(0, 8)).thenReturn(expected);
+    PagedResult<AdditionalSkill> expected = createFakePaginatedResult(1, 8);
+    when(additionalSkillCache.findAll(DEFAULT_PAGE_CRITERIA)).thenReturn(expected);
 
-    AdditionalSkillsPaginated result = service.getAdditionalSkills(null, null);
+    PagedResult<AdditionalSkill> result = service.getAdditionalSkills(new PageCriteria(null, null));
 
     assertThat(result).isEqualTo(expected);
-    verify(additionalSkillCache).findAll(0, 8);
+    verify(additionalSkillCache).findAll(DEFAULT_PAGE_CRITERIA);
   }
 
   @Test
   void shouldUseDefaultPageWhenPageIsNull() {
-    AdditionalSkillsPaginated expected = createFakePaginatedResult(0, 20);
-    when(additionalSkillCache.findAll(0, 20)).thenReturn(expected);
+    PagedResult<AdditionalSkill> expected = createFakePaginatedResult(1, 20);
+    when(additionalSkillCache.findAll(new PageCriteria(1, 20))).thenReturn(expected);
 
-    AdditionalSkillsPaginated result = service.getAdditionalSkills(null, 20);
+    PagedResult<AdditionalSkill> result = service.getAdditionalSkills(new PageCriteria(1, 20));
 
     assertThat(result).isEqualTo(expected);
-    verify(additionalSkillCache).findAll(0, 20);
+    verify(additionalSkillCache).findAll(new PageCriteria(1, 20));
   }
 
   @Test
   void shouldUseDefaultPageSizeWhenPageSizeIsNull() {
-    AdditionalSkillsPaginated expected = createFakePaginatedResult(2, 8);
-    when(additionalSkillCache.findAll(2, 8)).thenReturn(expected);
+    PagedResult<AdditionalSkill> expected = createFakePaginatedResult(2, 8);
+    when(additionalSkillCache.findAll(new PageCriteria(2, 8))).thenReturn(expected);
 
-    AdditionalSkillsPaginated result = service.getAdditionalSkills(2, null);
+    PagedResult<AdditionalSkill> result = service.getAdditionalSkills(new PageCriteria(2, null));
 
     assertThat(result).isEqualTo(expected);
-    verify(additionalSkillCache).findAll(2, 8);
+    verify(additionalSkillCache).findAll(new PageCriteria(2, 8));
   }
 
   @Test
   void shouldUseProvidedPageAndSize() {
-    AdditionalSkillsPaginated expected = createFakePaginatedResult(3, 15);
-    when(additionalSkillCache.findAll(3, 15)).thenReturn(expected);
+    PagedResult<AdditionalSkill> expected = createFakePaginatedResult(3, 15);
+    when(additionalSkillCache.findAll(new PageCriteria(3, 15))).thenReturn(expected);
 
-    AdditionalSkillsPaginated result = service.getAdditionalSkills(3, 15);
+    PagedResult<AdditionalSkill> result = service.getAdditionalSkills(new PageCriteria(3, 15));
 
     assertThat(result).isEqualTo(expected);
-    verify(additionalSkillCache).findAll(3, 15);
+    verify(additionalSkillCache).findAll(new PageCriteria(3, 15));
   }
 
   @Test
   void shouldSearchWithDefaultPageAndSizeWhenBothAreNull() {
-    AdditionalSkillsPaginated expected = createFakePaginatedResult(0, 8);
-    when(additionalSkillCache.findBySkillTitle("java", 0, 8)).thenReturn(expected);
+    PagedResult<AdditionalSkill> expected = createFakePaginatedResult(1, 8);
+    when(additionalSkillCache.findBySkillTitle("java", DEFAULT_PAGE_CRITERIA)).thenReturn(expected);
 
-    AdditionalSkillsPaginated result = service.searchAdditionalSkills("java", null, null);
+    PagedResult<AdditionalSkill> result =
+        service.searchAdditionalSkills("java", new PageCriteria(null, null));
 
     assertThat(result).isEqualTo(expected);
-    verify(additionalSkillCache).findBySkillTitle("java", 0, 8);
+    verify(additionalSkillCache).findBySkillTitle("java", DEFAULT_PAGE_CRITERIA);
   }
 
   @Test
   void shouldSearchWithDefaultPageWhenPageIsNull() {
-    AdditionalSkillsPaginated expected = createFakePaginatedResult(0, 20);
-    when(additionalSkillCache.findBySkillTitle("java", 0, 20)).thenReturn(expected);
+    PagedResult<AdditionalSkill> expected = createFakePaginatedResult(1, 20);
+    when(additionalSkillCache.findBySkillTitle("java", new PageCriteria(1, 20)))
+        .thenReturn(expected);
 
-    AdditionalSkillsPaginated result = service.searchAdditionalSkills("java", null, 20);
+    PagedResult<AdditionalSkill> result =
+        service.searchAdditionalSkills("java", new PageCriteria(null, 20));
 
     assertThat(result).isEqualTo(expected);
-    verify(additionalSkillCache).findBySkillTitle("java", 0, 20);
+    verify(additionalSkillCache).findBySkillTitle("java", new PageCriteria(1, 20));
   }
 
   @Test
   void shouldSearchWithDefaultPageSizeWhenPageSizeIsNull() {
-    AdditionalSkillsPaginated expected = createFakePaginatedResult(2, 8);
-    when(additionalSkillCache.findBySkillTitle("java", 2, 8)).thenReturn(expected);
+    PagedResult<AdditionalSkill> expected = createFakePaginatedResult(2, 8);
+    when(additionalSkillCache.findBySkillTitle("java", new PageCriteria(2, 8)))
+        .thenReturn(expected);
 
-    AdditionalSkillsPaginated result = service.searchAdditionalSkills("java", 2, null);
+    PagedResult<AdditionalSkill> result =
+        service.searchAdditionalSkills("java", new PageCriteria(2, null));
 
     assertThat(result).isEqualTo(expected);
-    verify(additionalSkillCache).findBySkillTitle("java", 2, 8);
+    verify(additionalSkillCache).findBySkillTitle("java", new PageCriteria(2, 8));
   }
 
   @Test
   void shouldSearchWithProvidedPageAndSize() {
-    AdditionalSkillsPaginated expected = createFakePaginatedResult(3, 15);
-    when(additionalSkillCache.findBySkillTitle("java", 3, 15)).thenReturn(expected);
+    PagedResult<AdditionalSkill> expected = createFakePaginatedResult(3, 15);
+    when(additionalSkillCache.findBySkillTitle("java", new PageCriteria(3, 15)))
+        .thenReturn(expected);
 
-    AdditionalSkillsPaginated result = service.searchAdditionalSkills("java", 3, 15);
+    PagedResult<AdditionalSkill> result =
+        service.searchAdditionalSkills("java", new PageCriteria(3, 15));
 
     assertThat(result).isEqualTo(expected);
-    verify(additionalSkillCache).findBySkillTitle("java", 3, 15);
+    verify(additionalSkillCache).findBySkillTitle("java", new PageCriteria(3, 15));
   }
 }

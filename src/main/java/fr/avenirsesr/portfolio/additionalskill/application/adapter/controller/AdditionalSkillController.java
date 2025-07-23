@@ -4,10 +4,12 @@ import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.Additi
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.response.AdditionalSkillResponse;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.security.Principal;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,12 +30,17 @@ public class AdditionalSkillController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     User user = userUtil.getUser(principal);
-    log.debug("Received request to trace overview of user [{}]", user);
-    var result = additionalSkillService.getAdditionalSkills(page, pageSize);
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to trace overview of user [{}] (page= {}, size= {})",
+        user,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+    var result = additionalSkillService.getAdditionalSkills(pageCriteria);
     return ResponseEntity.ok(
         new AdditionalSkillResponse(
-            result.data().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),
-            result.page()));
+            result.content().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),
+            result.pageInfo()));
   }
 
   @GetMapping(params = "keyword")
@@ -41,10 +48,11 @@ public class AdditionalSkillController {
       @RequestParam String keyword,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-    var result = additionalSkillService.searchAdditionalSkills(keyword, page, pageSize);
+    var result =
+        additionalSkillService.searchAdditionalSkills(keyword, new PageCriteria(page, pageSize));
     return ResponseEntity.ok(
         new AdditionalSkillResponse(
-            result.data().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),
-            result.page()));
+            result.content().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),
+            result.pageInfo()));
   }
 }

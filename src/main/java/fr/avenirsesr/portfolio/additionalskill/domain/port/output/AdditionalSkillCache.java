@@ -1,9 +1,11 @@
 package fr.avenirsesr.portfolio.additionalskill.domain.port.output;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillsPaginated;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 
 public interface AdditionalSkillCache {
-  AdditionalSkillsPaginated findAll(Integer page, Integer pageSize);
+  PagedResult<AdditionalSkill> findAll(PageCriteria pageCriteria);
 
-  AdditionalSkillsPaginated findBySkillTitle(String keyword, Integer page, Integer pageSize);
+  PagedResult<AdditionalSkill> findBySkillTitle(String keyword, PageCriteria pageCriteria);
 }
