@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.shared.application.adapter.response;
 
-import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
@@ -10,5 +10,5 @@ public interface PagedResponse<T> {
   List<T> data();
 
   @Schema(description = "Pagination information")
-  PageInfo page();
+  PageInfoDTO page();
 }

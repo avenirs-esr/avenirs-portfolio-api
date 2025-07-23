@@ -5,8 +5,9 @@ import fr.avenirsesr.portfolio.ams.application.adapter.mapper.AmsViewMapper;
 import fr.avenirsesr.portfolio.ams.application.adapter.response.AmsViewResponse;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
-import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.security.Principal;
@@ -25,10 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/me/ams")
 public class AMSController {
-
-  // TODO: use a service instead
   private final UserUtil userUtil;
-
   private final AMSService amsService;
 
   @GetMapping("/view")
@@ -37,30 +35,24 @@ public class AMSController {
       @RequestParam(value = "programProgressId") UUID programProgressId,
       @RequestParam(value = "page", required = false) Integer page,
       @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to get AMS view for user [{}], programProgressId [{}] with pagination"
             + " (page={}, pageSize={})",
         principal.getName(),
         programProgressId,
-        page,
-        pageSize);
+        pageCriteria.page(),
+        pageCriteria.pageSize());
     Student student = userUtil.getStudent(principal);
 
     PagedResult<AMS> pagedResult =
-        amsService.findUserAmsByProgramProgressWithPagination(
-            student, programProgressId, page, pageSize);
+        amsService.findUserAmsByProgramProgress(student, programProgressId, pageCriteria);
 
     List<AmsViewDTO> amsViewDTOs =
         pagedResult.content().stream().map(AmsViewMapper::toDto).toList();
 
-    PageInfo pageInfo =
-        new PageInfo(
-            pagedResult.pageSize(),
-            pagedResult.totalElements(),
-            pagedResult.totalPages(),
-            pagedResult.page());
-
-    AmsViewResponse response = new AmsViewResponse(amsViewDTOs, pageInfo);
+    AmsViewResponse response =
+        new AmsViewResponse(amsViewDTOs, PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
     return ResponseEntity.ok(response);
   }

@@ -9,6 +9,9 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.configuration.domain.model.TraceConfigurationInfo;
 import fr.avenirsesr.portfolio.configuration.domain.port.input.ConfigurationService;
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
@@ -16,8 +19,6 @@ import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
 import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -34,10 +35,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 public class TraceServiceImplTest {
@@ -129,52 +126,44 @@ public class TraceServiceImplTest {
     int totalElement = 13;
     TraceConfigurationInfo traceConfigurationInfo = new TraceConfigurationInfo(90, 30, 5);
 
-    Pageable pageable = PageRequest.of(pageNumber, pageSize);
-
-    List<TraceEntity> traceEntities =
+    List<Trace> traces =
         List.of(
-            TraceMapper.fromDomain(
-                TraceFixture.create()
-                    .withUser(student.getUser())
-                    .withCreatedAt(Instant.now().minus(83, ChronoUnit.DAYS))
-                    .toModel()),
-            TraceMapper.fromDomain(
-                TraceFixture.create()
-                    .withUser(student.getUser())
-                    .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
-                    .toModel()),
-            TraceMapper.fromDomain(
-                TraceFixture.create()
-                    .withUser(student.getUser())
-                    .withCreatedAt(Instant.now().minus(85, ChronoUnit.DAYS))
-                    .toModel()),
-            TraceMapper.fromDomain(
-                TraceFixture.create()
-                    .withUser(student.getUser())
-                    .withCreatedAt(Instant.now().minus(86, ChronoUnit.DAYS))
-                    .toModel()),
-            TraceMapper.fromDomain(
-                TraceFixture.create()
-                    .withUser(student.getUser())
-                    .withCreatedAt(Instant.now().minus(87, ChronoUnit.DAYS))
-                    .toModel()));
-
-    Page<TraceEntity> traceEntityPage = new PageImpl<>(traceEntities, pageable, totalElement);
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(83, ChronoUnit.DAYS))
+                .toModel(),
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
+                .toModel(),
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(85, ChronoUnit.DAYS))
+                .toModel(),
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(86, ChronoUnit.DAYS))
+                .toModel(),
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(87, ChronoUnit.DAYS))
+                .toModel());
 
     // When
-    when(traceRepository.findAllUnassociatedPage(student.getUser(), pageNumber, pageSize))
-        .thenReturn(traceEntityPage);
+    when(traceRepository.findAllUnassociated(
+            student.getUser(), new PageCriteria(pageNumber, pageSize)))
+        .thenReturn(new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
     when(configurationService.getTraceConfiguration()).thenReturn(traceConfigurationInfo);
     TraceView traceView =
-        traceService.getUnassociatedTraces(student.getUser(), pageNumber, pageSize);
+        traceService.getUnassociatedTraces(
+            student.getUser(), new PageCriteria(pageNumber, pageSize));
 
     // Then
-    assertEquals(traceView.traces().size(), traceEntities.size());
-    assertEquals(traceView.criticalCount(), 3);
-    assertEquals(traceView.page().pageSize(), traceEntityPage.getSize());
-    assertEquals(traceView.page().totalElements(), traceEntityPage.getTotalElements());
-    assertEquals(traceView.page().totalPages(), traceEntityPage.getTotalPages());
-    assertEquals(traceView.page().number(), traceEntityPage.getNumber());
+    assertEquals(traces.size(), traceView.traces().size());
+    assertEquals(3, traceView.criticalCount());
+    assertEquals(pageSize, traceView.page().pageSize());
+    assertEquals(totalElement, traceView.page().totalElements());
+    assertEquals(pageNumber, traceView.page().page());
   }
 
   @Test

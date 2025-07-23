@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.domain.port.input;
 
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
@@ -13,7 +14,7 @@ public interface TraceService {
 
   List<Trace> lastTracesOf(User user);
 
-  TraceView getUnassociatedTraces(User user, Integer page, Integer pageSize);
+  TraceView getUnassociatedTraces(User user, PageCriteria pageCriteria);
 
   void deleteById(User user, UUID id);
 

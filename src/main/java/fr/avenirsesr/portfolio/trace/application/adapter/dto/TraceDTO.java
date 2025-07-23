@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "title", "status", "createdAt", "updatedAt", "deletedAt"})
-public record TraceViewDTO(
+public record TraceDTO(
     UUID id,
     String title,
     @Schema(ref = "#/components/schemas/TraceStatus") ETraceStatus status,

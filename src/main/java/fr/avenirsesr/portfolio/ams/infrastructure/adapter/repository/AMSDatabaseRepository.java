@@ -5,6 +5,8 @@ import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.specification.AMSSpecification;
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
@@ -27,7 +29,7 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
 
   @Override
   public PagedResult<AMS> findByUserIdViaCohortsAndProgramProgressId(
-      UUID userId, UUID programProgressId, int page, int size) {
+      UUID userId, UUID programProgressId, PageCriteria pageCriteria) {
     Specification<AMSEntity> spec = AMSSpecification.belongsToUserViaCohorts(userId);
 
     if (programProgressId != null) {
@@ -36,12 +38,16 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
 
     Page<AMSEntity> pageResult =
         jpaSpecificationExecutor.findAll(
-            spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "startDate")));
+            spec,
+            PageRequest.of(
+                pageCriteria.page(),
+                pageCriteria.pageSize(),
+                Sort.by(Sort.Direction.DESC, "startDate")));
 
     List<AMS> content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();
 
     return new PagedResult<>(
-        content, pageResult.getTotalElements(), pageResult.getTotalPages(), page, size);
+        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));
   }
 
   public void saveAllEntities(List<AMSEntity> entities) {

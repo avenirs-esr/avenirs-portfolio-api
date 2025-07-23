@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository;
 
-import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
@@ -13,8 +12,6 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
@@ -49,16 +46,6 @@ public class StudentProgressDatabaseRepository
     return entityListToDomainList(
         jpaSpecificationExecutor.findAll(
             StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student)), sort));
-  }
-
-  @Override
-  public List<StudentProgress> findAllByStudent(Student student, PageInfo pageInfo) {
-    Pageable pageable = PageRequest.of(pageInfo.number(), pageInfo.pageSize());
-    return entityListToDomainList(
-        jpaSpecificationExecutor
-            .findAll(
-                StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student)), pageable)
-            .getContent());
   }
 
   @Override

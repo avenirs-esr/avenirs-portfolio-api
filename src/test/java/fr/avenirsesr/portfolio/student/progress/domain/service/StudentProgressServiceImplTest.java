@@ -142,7 +142,7 @@ public class StudentProgressServiceImplTest {
     StudentProgress progress =
         StudentProgressFixture.create().withUser(student.getUser()).toModel();
 
-    when(studentProgressRepository.findAllByStudent(student, customSort))
+    when(studentProgressRepository.findAllByStudent(eq(student), any(SortCriteria.class)))
         .thenReturn(List.of(progress));
 
     // When

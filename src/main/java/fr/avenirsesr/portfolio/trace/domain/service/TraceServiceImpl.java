@@ -2,7 +2,8 @@ package fr.avenirsesr.portfolio.trace.domain.service;
 
 import fr.avenirsesr.portfolio.configuration.domain.model.TraceConfigurationInfo;
 import fr.avenirsesr.portfolio.configuration.domain.port.input.ConfigurationService;
-import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
@@ -11,8 +12,6 @@ import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
 import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Duration;
@@ -22,15 +21,12 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @AllArgsConstructor
 @Service
 public class TraceServiceImpl implements TraceService {
-  private static final int DEFAULT_PAGE = 0;
-  private static final int DEFAULT_PAGESIZE = 8;
   private static final int MAX_TRACES_OVERVIEW = 3;
   private final TraceRepository traceRepository;
   private final ConfigurationService configurationService;
@@ -66,20 +62,15 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public TraceView getUnassociatedTraces(User user, Integer page, Integer pageSize) {
-    page = Optional.ofNullable(page).orElse(DEFAULT_PAGE);
-    pageSize = Optional.ofNullable(pageSize).orElse(DEFAULT_PAGESIZE);
+  public TraceView getUnassociatedTraces(User user, PageCriteria pageCriteria) {
 
-    Page<TraceEntity> traceEntityPage =
-        traceRepository.findAllUnassociatedPage(user, page, pageSize);
+    PagedResult<Trace> pagedResult = traceRepository.findAllUnassociated(user, pageCriteria);
 
-    List<Trace> traceList =
-        traceEntityPage.getContent().stream().map(TraceMapper::toDomain).toList();
     int criticalCount = 0;
 
     TraceConfigurationInfo traceConfigurationInfo = configurationService.getTraceConfiguration();
 
-    for (Trace trace : traceList) {
+    for (Trace trace : pagedResult.content()) {
       if (isBelowThresholdDate(
           trace.getCreatedAt(),
           traceConfigurationInfo.maxDayRemaining()
@@ -88,14 +79,7 @@ public class TraceServiceImpl implements TraceService {
       }
     }
 
-    return new TraceView(
-        traceList,
-        criticalCount,
-        new PageInfo(
-            traceEntityPage.getSize(),
-            (int) traceEntityPage.getTotalElements(),
-            traceEntityPage.getTotalPages(),
-            traceEntityPage.getNumber()));
+    return new TraceView(pagedResult.content(), criticalCount, pagedResult.pageInfo());
   }
 
   @Override

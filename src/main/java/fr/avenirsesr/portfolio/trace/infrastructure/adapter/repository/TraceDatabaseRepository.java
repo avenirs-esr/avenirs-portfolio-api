@@ -1,5 +1,8 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -9,7 +12,6 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceS
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -34,37 +36,28 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, 
   }
 
   @Override
-  public List<Trace> findAllPage(User user, int page, int pageSize) {
-    return jpaSpecificationExecutor
-        .findAll(
-            TraceSpecification.ofUser(UserMapper.fromDomain(user)),
-            PageRequest.of(
-                page,
-                pageSize,
-                Sort.by(Sort.Direction.DESC, "updatedAt")
-                    .and(Sort.by(Sort.Direction.DESC, "createdAt"))))
-        .getContent()
-        .stream()
-        .map(TraceMapper::toDomain)
-        .toList();
-  }
+  public PagedResult<Trace> findAllUnassociated(User user, PageCriteria pageCriteria) {
+    var content =
+        jpaSpecificationExecutor
+            .findAll(
+                TraceSpecification.ofUser(UserMapper.fromDomain(user))
+                    .and(TraceSpecification.unassociated()),
+                PageRequest.of(
+                    pageCriteria.page(),
+                    pageCriteria.pageSize(),
+                    Sort.by(Sort.Direction.DESC, "updatedAt")
+                        .and(Sort.by(Sort.Direction.DESC, "createdAt"))))
+            .getContent()
+            .stream()
+            .map(TraceMapper::toDomain)
+            .toList();
 
-  @Override
-  public Page<TraceEntity> findAllUnassociatedPage(User user, int page, int pageSize) {
-    return jpaSpecificationExecutor.findAll(
-        TraceSpecification.ofUser(UserMapper.fromDomain(user))
-            .and(TraceSpecification.unassociated()),
-        PageRequest.of(
-            page,
-            pageSize,
-            Sort.by(Sort.Direction.DESC, "updatedAt")
-                .and(Sort.by(Sort.Direction.DESC, "createdAt"))));
+    return new PagedResult<>(
+        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));
   }
 
   public void saveAllEntities(List<TraceEntity> entities) {
-    if (entities != null && !entities.isEmpty()) {
-      jpaRepository.saveAll(entities);
-    }
+    super.saveAllEntities(entities);
   }
 
   @Override
