@@ -1,7 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.domain.port.input;
 
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
@@ -13,4 +16,7 @@ public interface StudentProgressService {
   Map<StudentProgress, List<SkillLevelProgress>> getSkillsOverview(Student student);
 
   List<StudentProgress> getSkillsView(Student student, SortCriteria sortCriteria);
+
+  PagedResult<SkillProgress> getSkillsLifeProjectView(
+      Student student, SortCriteria sortCriteria, PageCriteria pageCriteria);
 }

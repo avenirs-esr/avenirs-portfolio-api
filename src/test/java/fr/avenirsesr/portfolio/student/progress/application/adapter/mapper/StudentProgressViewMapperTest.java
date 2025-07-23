@@ -8,7 +8,6 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.StudentProgressViewDTO;
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
@@ -82,11 +81,9 @@ public class StudentProgressViewMapperTest {
       assertEquals(2, dto.skills().size());
 
       mockedSkillViewMapper.verify(
-          () ->
-              SkillViewMapper.fromDomainToDto(
-                  eq(javaProgress_3), eq(3), any(SkillLevelProgress.class)));
+          () -> SkillViewMapper.fromDomainToDto(eq(javaProgress_3), studentProgress));
       mockedSkillViewMapper.verify(
-          () -> SkillViewMapper.fromDomainToDto(eq(pythonProgress_1), eq(2), eq(null)));
+          () -> SkillViewMapper.fromDomainToDto(eq(pythonProgress_1), studentProgress));
     }
   }
 
