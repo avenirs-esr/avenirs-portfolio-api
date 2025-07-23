@@ -4,8 +4,6 @@ import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
@@ -34,10 +32,10 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   @Override
-  public Map<StudentProgress, List<SkillLevelProgress>> getSkillsOverview(Student student) {
-    SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
+  public Map<StudentProgress, List<SkillLevelProgress>> getStudentProgressOverview(
+      Student student) {
     var studentProgresses =
-        studentProgressRepository.findAllByStudent(student, sortCriteria).stream()
+        studentProgressRepository.findAllByStudent(student).stream()
             .filter(StudentProgress::isCurrent)
             .toList();
 
@@ -52,20 +50,17 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   @Override
-  public List<StudentProgress> getSkillsView(Student student, SortCriteria sortCriteria) {
-    return studentProgressRepository.findAllByStudent(student, sortCriteria).stream()
+  public List<StudentProgress> getStudentProgressView(Student student, SortCriteria sortCriteria) {
+    return studentProgressRepository.findAllByStudent(student).stream()
         .filter(StudentProgress::isCurrent)
         .toList();
   }
 
   @Override
-  public PagedResult<SkillProgress> getSkillsLifeProjectView(
+  public PagedResult<SkillProgress> getAllTimeSkillsView(
       Student student, SortCriteria sortCriteria, PageCriteria pageCriteria) {
-    sortCriteria =
-        sortCriteria != null ? sortCriteria : new SortCriteria(ESortField.NAME, ESortOrder.ASC);
 
-    var studentProgresses =
-        studentProgressRepository.findAllByStudent(student, sortCriteria).stream().toList();
+    var studentProgresses = studentProgressRepository.findAllByStudent(student).stream().toList();
 
     var skillProgresses =
         studentProgresses.stream()

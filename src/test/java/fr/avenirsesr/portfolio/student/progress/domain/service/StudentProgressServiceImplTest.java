@@ -105,12 +105,12 @@ public class StudentProgressServiceImplTest {
                     skillLevelsProgress.get(7)))
             .toModel();
 
-    when(studentProgressRepository.findAllByStudent(eq(student), any(SortCriteria.class)))
+    when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(progress1, progress2));
 
     // When
     Map<StudentProgress, List<SkillLevelProgress>> result =
-        studentProgressService.getSkillsOverview(student);
+        studentProgressService.getStudentProgressOverview(student);
 
     // Then
     assertEquals(2, result.size(), "Should contain 2 StudentProgress");
@@ -121,22 +121,21 @@ public class StudentProgressServiceImplTest {
     assertTrue(result.get(progress1).size() <= maxPerProgress);
     assertTrue(result.get(progress2).size() <= maxPerProgress);
 
-    verify(studentProgressRepository).findAllByStudent(eq(student), any(SortCriteria.class));
+    verify(studentProgressRepository).findAllByStudent(eq(student));
   }
 
   @Test
   void shouldReturnEmptySkillsOverviewWhenNoProgress() {
     // Given
-    when(studentProgressRepository.findAllByStudent(eq(student), any(SortCriteria.class)))
-        .thenReturn(List.of());
+    when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of());
 
     // When
     Map<StudentProgress, List<SkillLevelProgress>> result =
-        studentProgressService.getSkillsOverview(student);
+        studentProgressService.getStudentProgressOverview(student);
 
     // Then
     assertTrue(result.isEmpty(), "StudentProgress should be empty");
-    verify(studentProgressRepository).findAllByStudent(eq(student), any(SortCriteria.class));
+    verify(studentProgressRepository).findAllByStudent(eq(student));
   }
 
   @Test
@@ -176,12 +175,12 @@ public class StudentProgressServiceImplTest {
             .toModel();
 
     // Mock repository to return all progress
-    when(studentProgressRepository.findAllByStudent(eq(student), any(SortCriteria.class)))
+    when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
 
     // WHEN
     Map<StudentProgress, List<SkillLevelProgress>> result =
-        studentProgressService.getSkillsOverview(student);
+        studentProgressService.getStudentProgressOverview(student);
 
     // THEN
     assertEquals(1, result.size(), "Only current progress should be returned");
@@ -192,7 +191,7 @@ public class StudentProgressServiceImplTest {
     int maxPerProgress = 3;
     assertTrue(result.get(currentProgress).size() <= maxPerProgress);
 
-    verify(studentProgressRepository).findAllByStudent(eq(student), any(SortCriteria.class));
+    verify(studentProgressRepository).findAllByStudent(eq(student));
   }
 
   @Test
@@ -202,16 +201,16 @@ public class StudentProgressServiceImplTest {
     StudentProgress progress =
         StudentProgressFixture.create().withUser(student.getUser()).toModel();
 
-    when(studentProgressRepository.findAllByStudent(eq(student), any(SortCriteria.class)))
-        .thenReturn(List.of(progress));
+    when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
 
     // When
-    List<StudentProgress> result = studentProgressService.getSkillsView(student, customSort);
+    List<StudentProgress> result =
+        studentProgressService.getStudentProgressView(student, customSort);
 
     // Then
     assertEquals(1, result.size());
     assertEquals(progress, result.getFirst());
-    verify(studentProgressRepository).findAllByStudent(student, customSort);
+    verify(studentProgressRepository).findAllByStudent(student);
   }
 
   @Test
@@ -251,11 +250,11 @@ public class StudentProgressServiceImplTest {
             .toModel();
 
     // Mock repository to return all progress
-    when(studentProgressRepository.findAllByStudent(eq(student), any(SortCriteria.class)))
+    when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
 
     // WHEN
-    List<StudentProgress> result = studentProgressService.getSkillsView(student, null);
+    List<StudentProgress> result = studentProgressService.getStudentProgressView(student, null);
 
     // THEN
     assertEquals(1, result.size(), "Only current progress should be returned");
@@ -263,7 +262,7 @@ public class StudentProgressServiceImplTest {
     assertFalse(result.contains(pastProgress), "Past progress should be filtered out");
     assertFalse(result.contains(futureProgress), "Future progress should be filtered out");
 
-    verify(studentProgressRepository).findAllByStudent(eq(student), any(SortCriteria.class));
+    verify(studentProgressRepository).findAllByStudent(eq(student));
   }
 
   @Test
@@ -298,11 +297,11 @@ public class StudentProgressServiceImplTest {
                     skillLevelsProgress.get(7)))
             .toModel();
 
-    when(studentProgressRepository.findAllByStudent(eq(student), any(SortCriteria.class)))
+    when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(progress1, progress2));
 
     // When
-    List<StudentProgress> result = studentProgressService.getSkillsView(student, null);
+    List<StudentProgress> result = studentProgressService.getStudentProgressView(student, null);
 
     // Then
     assertEquals(2, result.size(), "Should contain 2 StudentProgress");
@@ -313,7 +312,7 @@ public class StudentProgressServiceImplTest {
             .toList()
             .size(),
         "Should contain 2 StudentProgress");
-    verify(studentProgressRepository).findAllByStudent(eq(student), any(SortCriteria.class));
+    verify(studentProgressRepository).findAllByStudent(eq(student));
   }
 
   @Test
@@ -345,7 +344,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     PagedResult<SkillProgress> result =
-        studentProgressService.getSkillsLifeProjectView(student, sortCriteria, pageCriteria);
+        studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     // Then
     assertEquals(1, result.content().size(), "Page should contain 1 element");
@@ -363,7 +362,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     PagedResult<SkillProgress> result =
-        studentProgressService.getSkillsLifeProjectView(student, sortCriteria, pageCriteria);
+        studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     // Then
     assertTrue(result.content().isEmpty(), "Results should be empty");
@@ -406,7 +405,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     PagedResult<SkillProgress> result =
-        studentProgressService.getSkillsLifeProjectView(student, sortCriteria, pageCriteria);
+        studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     // Then
     assertEquals(1, result.content().size(), "Only past progress should be returned");
@@ -444,7 +443,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     PagedResult<SkillProgress> result =
-        studentProgressService.getSkillsLifeProjectView(student, sortCriteria, pageCriteria);
+        studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     // Then
     assertEquals(skillLevelNew.getSkillLevel().getSkill(), result.content().get(0).skill());
@@ -487,7 +486,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     PagedResult<SkillProgress> result =
-        studentProgressService.getSkillsLifeProjectView(student, sortCriteria, pageCriteria);
+        studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     // Then
     assertEquals(1, result.content().size(), "Second page should contain only the last element");
@@ -529,7 +528,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     PagedResult<SkillProgress> result =
-        studentProgressService.getSkillsLifeProjectView(student, sortCriteria, pageCriteria);
+        studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     // Then
     assertEquals(2, result.content().size(), "Only 2 elements should be returned");
@@ -571,7 +570,7 @@ public class StudentProgressServiceImplTest {
 
     // When
     PagedResult<SkillProgress> result =
-        studentProgressService.getSkillsLifeProjectView(student, sortCriteria, pageCriteria);
+        studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     // Then
     assertFalse(result.content().isEmpty(), "Result should not be empty");

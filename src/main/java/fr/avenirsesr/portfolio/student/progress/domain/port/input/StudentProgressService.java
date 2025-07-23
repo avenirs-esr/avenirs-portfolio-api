@@ -13,10 +13,10 @@ import java.util.Map;
 public interface StudentProgressService {
   boolean isStudentFollowingAPCProgram(Student student);
 
-  Map<StudentProgress, List<SkillLevelProgress>> getSkillsOverview(Student student);
+  Map<StudentProgress, List<SkillLevelProgress>> getStudentProgressOverview(Student student);
 
-  List<StudentProgress> getSkillsView(Student student, SortCriteria sortCriteria);
+  List<StudentProgress> getStudentProgressView(Student student, SortCriteria sortCriteria);
 
-  PagedResult<SkillProgress> getSkillsLifeProjectView(
+  PagedResult<SkillProgress> getAllTimeSkillsView(
       Student student, SortCriteria sortCriteria, PageCriteria pageCriteria);
 }

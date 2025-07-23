@@ -1,12 +1,13 @@
 package fr.avenirsesr.portfolio.student.progress.application.adapter.mapper;
 
-import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillViewDTO;
+import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
+import java.time.LocalDate;
 import java.util.Optional;
 
-public interface SkillViewMapper {
-  static SkillViewDTO fromDomainToDto(
+public interface SkillMapper {
+  static SkillDTO fromDomainToDto(
       SkillLevelProgress skillLevelProgress, StudentProgress studentProgress) {
     var skill = skillLevelProgress.getSkillLevel().getSkill();
     int levelBySkill =
@@ -18,7 +19,7 @@ public interface SkillViewMapper {
     SkillLevelProgress lastAchievedSkillLevel =
         studentProgress.getLastAchievedSkillLevelBySkill().get(skill).orElse(null);
 
-    return new SkillViewDTO(
+    return new SkillDTO(
         skillLevelProgress.getSkillLevel().getSkill().getId(),
         skillLevelProgress.getSkillLevel().getSkill().getName(),
         skillLevelProgress.getTraces().size(),
@@ -27,6 +28,7 @@ public interface SkillViewMapper {
         SkillLevelViewMapper.fromDomainToDto(skillLevelProgress),
         Optional.ofNullable(lastAchievedSkillLevel)
             .map(SkillLevelViewMapper::fromDomainToDto)
-            .orElse(null));
+            .orElse(null),
+        studentProgress.getEndDate().isBefore(LocalDate.now()));
   }
 }

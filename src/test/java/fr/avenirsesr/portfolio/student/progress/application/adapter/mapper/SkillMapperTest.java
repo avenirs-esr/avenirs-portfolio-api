@@ -7,16 +7,17 @@ import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
-import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillViewDTO;
+import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
-class SkillViewMapperTest {
+class SkillMapperTest {
 
   @Test
   void shouldMapSkillLevelProgressToDTO() {
@@ -55,7 +56,7 @@ class SkillViewMapperTest {
           .thenReturn(null);
 
       // WHEN
-      SkillViewDTO dto = SkillViewMapper.fromDomainToDto(progress2, studentProgress);
+      SkillDTO dto = SkillMapper.fromDomainToDto(progress2, studentProgress);
 
       // THEN
       assertNotNull(dto);
@@ -86,11 +87,44 @@ class SkillViewMapperTest {
             .toModel();
 
     // WHEN
-    SkillViewDTO dto = SkillViewMapper.fromDomainToDto(pythonProgress, studentProgress);
+    SkillDTO dto = SkillMapper.fromDomainToDto(pythonProgress, studentProgress);
 
     // THEN
     assertNotNull(dto);
     assertEquals(pythonSkill.getId(), dto.id());
     assertNull(dto.achievedSkillLevels(), "Last achieved skill level should be null");
+  }
+
+  @Test
+  void shouldSetIsProgramFinishedBasedOnEndDate() {
+    // GIVEN
+    var student = UserFixture.createStudent().toModel().toStudent();
+    var skill = SkillFixture.create().toModel();
+    var skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
+    var progress =
+        SkillLevelProgressFixture.create(student, skillLevel)
+            .withStatus(ESkillLevelStatus.VALIDATED)
+            .toModel();
+
+    StudentProgress finishedProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevels(List.of(progress))
+            .withStartDate(LocalDate.now().minusMonths(2), Period.ofMonths(1))
+            .toModel();
+    StudentProgress ongoingProgress =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withSkillLevels(List.of(progress))
+            .withStartDate(LocalDate.now().minusMonths(2), Period.ofMonths(3))
+            .toModel();
+
+    // WHEN
+    SkillDTO finishedDto = SkillMapper.fromDomainToDto(progress, finishedProgress);
+    SkillDTO ongoingDto = SkillMapper.fromDomainToDto(progress, ongoingProgress);
+
+    // THEN
+    assertTrue(finishedDto.isProgramFinished(), "Program should be marked as finished");
+    assertFalse(ongoingDto.isProgramFinished(), "Program should not be marked as finished");
   }
 }

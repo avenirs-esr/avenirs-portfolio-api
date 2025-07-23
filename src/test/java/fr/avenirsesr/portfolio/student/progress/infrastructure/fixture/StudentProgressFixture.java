@@ -54,7 +54,7 @@ public class StudentProgressFixture {
         trainingPathSkillLevels.stream()
             .map(skillLevel -> SkillLevelProgressFixture.create(student, skillLevel).toModel())
             .toList();
-    var startDate = LocalDate.of(LocalDate.now().getYear(), 9, 1);
+    var startDate = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
     return new StudentProgressFixture(
         UUID.randomUUID(),
         student,

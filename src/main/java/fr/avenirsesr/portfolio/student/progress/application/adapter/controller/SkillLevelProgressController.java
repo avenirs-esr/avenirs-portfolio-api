@@ -1,12 +1,13 @@
 package fr.avenirsesr.portfolio.student.progress.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.shared.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
-import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.SkillViewMapper;
-import fr.avenirsesr.portfolio.student.progress.application.adapter.response.SkillLifeProjectViewResponse;
+import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO;
+import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -27,8 +28,8 @@ public class SkillLevelProgressController {
   private final StudentProgressService studentProgressService;
   private final UserUtil userUtil;
 
-  @GetMapping("/")
-  public ResponseEntity<SkillLifeProjectViewResponse> get(
+  @GetMapping()
+  public ResponseEntity<PagedResponse<SkillDTO>> get(
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
@@ -36,15 +37,15 @@ public class SkillLevelProgressController {
     Student student = userUtil.getStudent(principal);
 
     PagedResult<SkillProgress> pagedResult =
-        studentProgressService.getSkillsLifeProjectView(
+        studentProgressService.getAllTimeSkillsView(
             student, SortCriteria.fromString(sortRaw), new PageCriteria(page, pageSize));
 
     var response =
-        new SkillLifeProjectViewResponse(
+        new PagedResponse<>(
             pagedResult.content().stream()
                 .map(
                     skillProgress ->
-                        SkillViewMapper.fromDomainToDto(
+                        SkillMapper.fromDomainToDto(
                             skillProgress.currentSkillLevelProgress(),
                             skillProgress.studentProgress()))
                 .toList(),

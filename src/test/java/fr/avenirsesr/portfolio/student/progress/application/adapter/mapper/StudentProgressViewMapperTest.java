@@ -69,7 +69,7 @@ public class StudentProgressViewMapperTest {
                     pythonProgress_2))
             .toModel();
 
-    try (MockedStatic<SkillViewMapper> mockedSkillViewMapper = mockStatic(SkillViewMapper.class)) {
+    try (MockedStatic<SkillMapper> mockedSkillViewMapper = mockStatic(SkillMapper.class)) {
 
       // WHEN
       StudentProgressViewDTO dto = StudentProgressViewMapper.fromDomainToDto(studentProgress);
@@ -81,9 +81,9 @@ public class StudentProgressViewMapperTest {
       assertEquals(2, dto.skills().size());
 
       mockedSkillViewMapper.verify(
-          () -> SkillViewMapper.fromDomainToDto(eq(javaProgress_3), studentProgress));
+          () -> SkillMapper.fromDomainToDto(eq(javaProgress_3), eq(studentProgress)));
       mockedSkillViewMapper.verify(
-          () -> SkillViewMapper.fromDomainToDto(eq(pythonProgress_1), studentProgress));
+          () -> SkillMapper.fromDomainToDto(eq(pythonProgress_1), eq(studentProgress)));
     }
   }
 

@@ -10,13 +10,15 @@ import java.util.UUID;
       "traceCount",
       "activityCount",
       "levelCount",
-      "currentSkillLevel"
+      "currentSkillLevel",
+      "isProgramFinished"
     })
-public record SkillViewDTO(
+public record SkillDTO(
     UUID id,
     String name,
     int traceCount,
     int activityCount,
     int levelCount,
     SkillLevelViewDTO currentSkillLevel,
-    SkillLevelViewDTO achievedSkillLevels) {}
+    SkillLevelViewDTO achievedSkillLevels,
+    boolean isProgramFinished) {}

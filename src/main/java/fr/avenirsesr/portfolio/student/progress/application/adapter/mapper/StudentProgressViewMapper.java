@@ -11,7 +11,7 @@ public interface StudentProgressViewMapper {
         studentProgress.getCurrentSkillLevels().stream()
             .map(
                 skillLevelProgress ->
-                    SkillViewMapper.fromDomainToDto(skillLevelProgress, studentProgress))
+                    SkillMapper.fromDomainToDto(skillLevelProgress, studentProgress))
             .toList());
   }
 }

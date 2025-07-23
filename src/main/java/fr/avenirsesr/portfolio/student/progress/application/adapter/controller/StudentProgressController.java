@@ -26,9 +26,9 @@ public class StudentProgressController {
   private final UserUtil userUtil;
 
   @GetMapping("/overview")
-  public List<StudentProgressOverviewDTO> getSkillsOverview(Principal principal) {
+  public List<StudentProgressOverviewDTO> getStudentProgressOverview(Principal principal) {
     Student student = userUtil.getStudent(principal);
-    return studentProgressService.getSkillsOverview(student).entrySet().stream()
+    return studentProgressService.getStudentProgressOverview(student).entrySet().stream()
         .map(
             entry ->
                 StudentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
@@ -36,11 +36,13 @@ public class StudentProgressController {
   }
 
   @GetMapping("/view")
-  public List<StudentProgressViewDTO> getSkillsView(
+  public List<StudentProgressViewDTO> getStudentProgressView(
       Principal principal, @RequestParam(name = "sort", required = false) String sortRaw) {
     Student student = userUtil.getStudent(principal);
 
-    return studentProgressService.getSkillsView(student, SortCriteria.fromString(sortRaw)).stream()
+    return studentProgressService
+        .getStudentProgressView(student, SortCriteria.fromString(sortRaw))
+        .stream()
         .map(StudentProgressViewMapper::fromDomainToDto)
         .toList();
   }
