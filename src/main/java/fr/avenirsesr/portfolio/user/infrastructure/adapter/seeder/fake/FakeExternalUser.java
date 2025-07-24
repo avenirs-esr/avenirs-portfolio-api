@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake;
 
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakeExternalSource;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
@@ -27,16 +28,9 @@ public class FakeExternalUser {
       throw new IllegalArgumentException("Student cannot be null");
     }
 
-    int externalIdType = faker.call().number().numberBetween(0, 3);
-
     return new FakeExternalUser(
         ExternalUserEntity.of(
-            switch (externalIdType) {
-              case 0 -> faker.call().internet().uuid();
-              case 1 -> String.valueOf(faker.call().number().numberBetween(1, 999_999));
-              case 2 -> faker.call().regexify("[A-Z]{3}[0-9]{3}");
-              default -> throw new IllegalStateException("Unexpected value: " + externalIdType);
-            },
+            FakeExternalSource.generateExternalSourceId(),
             Arrays.stream(EExternalSource.values())
                 .toList()
                 .get(faker.call().random().nextInt(EExternalSource.values().length)),

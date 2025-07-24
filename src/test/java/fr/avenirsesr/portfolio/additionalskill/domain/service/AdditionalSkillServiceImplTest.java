@@ -4,21 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotAvailableException;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.*;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.StudentAdditionalSkillRepository;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.AdditionalSkillFixture;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.PathSegmentsFixture;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.SegmentDetailFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import java.util.UUID;
@@ -32,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AdditionalSkillServiceImplTest {
 
   @Mock private AdditionalSkillCache additionalSkillCache;
-  @Mock private StudentAdditionalSkillRepository studentAdditionalSkillRepository;
+  @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
 
   @InjectMocks private AdditionalSkillServiceImpl service;
 
@@ -162,30 +159,31 @@ class AdditionalSkillServiceImplTest {
   @Test
   void shouldSaveAdditionalSkillWhenAvailable() {
     Student student = mock(Student.class);
-    String skillId = "123";
+    UUID skillId = UUID.randomUUID();
     EAdditionalSkillType type = EAdditionalSkillType.ROME4;
-    ESkillLevelStatus level = ESkillLevelStatus.VALIDATED;
+    EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
+    AdditionalSkill additionalSkill = AdditionalSkillFixture.create().withId(skillId).toModel();
 
-    when(additionalSkillCache.additionalSkillIsAvailable(skillId)).thenReturn(true);
+    when(additionalSkillCache.findById(skillId)).thenReturn(additionalSkill);
 
-    service.saveAdditionalSkills(student, skillId, type, level);
+    service.addAdditionalSkills(student, skillId, type, level);
 
-    verify(studentAdditionalSkillRepository).saveAdditionalSkill(student, skillId, type, level);
+    verify(additionalSkillProgressRepository).save(any(AdditionalSkillProgress.class));
   }
 
   @Test
   void shouldThrowExceptionWhenAdditionalSkillIsNotAvailable() {
     Student student = mock(Student.class);
-    String skillId = "999";
+    UUID skillId = UUID.randomUUID();
     EAdditionalSkillType type = EAdditionalSkillType.ROME4;
-    ESkillLevelStatus level = ESkillLevelStatus.UNDER_ACQUISITION;
+    EAdditionalSkillLevel level = EAdditionalSkillLevel.INTERMEDIATE;
 
-    when(additionalSkillCache.additionalSkillIsAvailable(skillId)).thenReturn(false);
+    when(additionalSkillCache.findById(skillId)).thenThrow(new AdditionalSkillNotFoundException());
 
     assertThrows(
-        AdditionalSkillNotAvailableException.class,
-        () -> service.saveAdditionalSkills(student, skillId, type, level));
+        AdditionalSkillNotFoundException.class,
+        () -> service.addAdditionalSkills(student, skillId, type, level));
 
-    verifyNoInteractions(studentAdditionalSkillRepository);
+    verifyNoInteractions(additionalSkillProgressRepository);
   }
 }

@@ -1,22 +1,21 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-    <changeSet author="nathp (generated)" id="1753189111954-1">
-        <createTable tableName="student_additional_skill">
+    <changeSet author="nathp (generated)" id="1753283494163-1">
+        <createTable tableName="additional_skill_progress">
             <column name="id" type="UUID">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="student_additional_skillPK"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="additional_skill_progressPK"/>
             </column>
             <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE"/>
             <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
-            <column name="additional_skill_id" type="VARCHAR(255)"/>
+            <column name="additional_skill_id" type="UUID"/>
             <column name="level" type="VARCHAR(255)"/>
-            <column name="type" type="VARCHAR(255)"/>
             <column name="student_id" type="UUID"/>
         </createTable>
     </changeSet>
-    <changeSet author="nathp (generated)" id="1753189111954-2">
-        <addUniqueConstraint columnNames="student_id, additional_skill_id" constraintName="UK7jvx4fireo1wmeu0qm40vh50u" tableName="student_additional_skill"/>
+    <changeSet author="nathp (generated)" id="1753283494163-2">
+        <addUniqueConstraint columnNames="student_id, additional_skill_id" constraintName="UKbnc897tuutt3rdooqx2c5gw4i" tableName="additional_skill_progress"/>
     </changeSet>
-    <changeSet author="nathp (generated)" id="1753189111954-3">
-        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="student_additional_skill" constraintName="FKqq3tvqu1e4y6ik2flve7j5yf0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
+    <changeSet author="nathp (generated)" id="1753283494163-3">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="additional_skill_progress" constraintName="FKfim1q8ibr8yo4epoi1q001bpy" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
     </changeSet>
 </databaseChangeLog>

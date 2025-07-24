@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
@@ -11,6 +12,7 @@ import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -65,11 +67,15 @@ public class AdditionalSkillCacheImpl implements AdditionalSkillCache {
   }
 
   @Override
-  public boolean additionalSkillIsAvailable(String id) {
+  public AdditionalSkill findById(UUID id) {
     try (InputStream is = getClass().getResourceAsStream(JSON_PATH)) {
       List<CompetenceComplementaireDetaillee> entities =
           objectMapper.readValue(is, new TypeReference<>() {});
-      return entities.stream().anyMatch(skill -> skill.code().equals(id));
+      return entities.stream()
+          .filter(skill -> skill.id().equals(id))
+          .map(AdditionalSkillMapper::toDomain)
+          .findFirst()
+          .orElseThrow(AdditionalSkillNotFoundException::new);
     } catch (Exception e) {
       throw new RuntimeException("Unable to load mock additional skills", e);
     }
