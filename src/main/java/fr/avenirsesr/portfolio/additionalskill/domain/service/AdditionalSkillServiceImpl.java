@@ -1,19 +1,18 @@
 package fr.avenirsesr.portfolio.additionalskill.domain.service;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
-import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotAvailableException;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillsPaginated;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.StudentAdditionalSkillRepository;
-import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import java.util.Optional;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AdditionalSkillServiceImpl implements AdditionalSkillService {
   private final AdditionalSkillCache additionalSkillCache;
-  private final StudentAdditionalSkillRepository studentAdditionalSkillRepository;
+  private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
 
   @Override
   public PagedResult<AdditionalSkill> getAdditionalSkills(PageCriteria pageCriteria) {
@@ -37,16 +36,41 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
   }
 
   @Override
-  public void saveAdditionalSkills(
+  public void addAdditionalSkills(
       Student student,
-      String additionalSkillId,
+      UUID additionalSkillId,
       EAdditionalSkillType type,
-      ESkillLevelStatus level) {
-    if (additionalSkillCache.additionalSkillIsAvailable(additionalSkillId)) {
-      studentAdditionalSkillRepository.saveAdditionalSkill(student, additionalSkillId, type, level);
-    } else {
-      log.warn("Additional skill with ID [{}] is not available", additionalSkillId);
-      throw new AdditionalSkillNotAvailableException();
+      EAdditionalSkillLevel level) {
+    try {
+      AdditionalSkill additionalSkill = additionalSkillCache.findById(additionalSkillId);
+      AdditionalSkillProgress additionalSkillProgress =
+          AdditionalSkillProgress.create(student, additionalSkill, level);
+      additionalSkillProgressRepository.save(additionalSkillProgress);
+    } catch (AdditionalSkillNotFoundException e) {
+      log.error(
+          "Failed to add additional skill for student [{}]: {}", student.getId(), e.getMessage());
+      throw e;
+    } catch (Exception e) {
+      log.error(
+          "Failed to add additional skill [{}] for student [{}]: {}",
+          additionalSkillId,
+          student.getId(),
+          e.getMessage());
+      if (isUniqueConstraintViolation(e)) {
+        throw new DuplicateAdditionalSkillException();
+      }
+      throw e;
     }
+  }
+
+  private boolean isUniqueConstraintViolation(Exception e) {
+    Throwable cause = e;
+    while (cause != null) {
+      if (cause.getMessage().contains("duplicate key")) {
+        return true;
+      }
+      cause = cause.getCause();
+    }
+    return false;
   }
 }

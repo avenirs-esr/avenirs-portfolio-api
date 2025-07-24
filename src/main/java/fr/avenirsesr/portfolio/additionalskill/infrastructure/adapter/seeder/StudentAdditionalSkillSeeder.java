@@ -1,11 +1,13 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.StudentAdditionalSkillEntity;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.StudentAdditionalSkillDatabaseRepository;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fake.FakeStudentAdditionalSkill;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.AdditionalSkillDatabaseProgressRepository;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fake.FakeAdditionalSkillProgress;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,17 +17,24 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class StudentAdditionalSkillSeeder {
 
-  private final StudentAdditionalSkillDatabaseRepository studentAdditionalSkillDatabaseRepository;
+  private static final Integer MAX_ADDITIONAL_SKILLS_PER_STUDENT = 4;
 
-  public List<StudentAdditionalSkillEntity> seed(List<UserEntity> savedStudents) {
+  private final AdditionalSkillDatabaseProgressRepository studentAdditionalSkillDatabaseRepository;
+
+  public List<AdditionalSkillProgressEntity> seed(List<UserEntity> savedStudents) {
     log.info("Seeding student progress...");
-    List<StudentAdditionalSkillEntity> studentAdditionalSkillEntities = new ArrayList<>();
+    List<AdditionalSkillProgressEntity> studentAdditionalSkillEntities = new ArrayList<>();
     savedStudents.forEach(
         student -> {
-          studentAdditionalSkillEntities.add(
-              FakeStudentAdditionalSkill.of(student, "104174").toEntity());
-          studentAdditionalSkillEntities.add(
-              FakeStudentAdditionalSkill.of(student, "104175").toEntity());
+          int additionalSkillsCount =
+              ThreadLocalRandom.current().nextInt(1, MAX_ADDITIONAL_SKILLS_PER_STUDENT + 1);
+          List<UUID> bannedSkillsIds = new ArrayList<>();
+          for (int i = 0; i < additionalSkillsCount; i++) {
+            AdditionalSkillProgressEntity fakeStudentAdditionalSkill =
+                FakeAdditionalSkillProgress.of(student, bannedSkillsIds).toEntity();
+            bannedSkillsIds.add(fakeStudentAdditionalSkill.getAdditionalSkillId());
+            studentAdditionalSkillEntities.add(fakeStudentAdditionalSkill);
+          }
         });
     studentAdditionalSkillDatabaseRepository.saveAllEntities(studentAdditionalSkillEntities);
     log.info("✔ {} studentAdditionalSkills created", studentAdditionalSkillEntities.size());

@@ -1,5 +1,6 @@
 [
   {
+    "id": "d30ea963-d00e-4cff-81b7-44f66cfb9ac5",
     "type": "ROME4.0",
     "obsolete": false,
     "code": "104174",
@@ -38,6 +39,7 @@
     }
   },
   {
+    "id": "3805a876-0c22-4515-a783-aa244a96063d",
     "type": "ROME4.0",
     "obsolete": false,
     "code": "104175",
@@ -76,6 +78,7 @@
     }
   },
   {
+    "id": "a909ff44-4363-48a3-a020-40934a9d4954",
     "type": "ROME4.0",
     "obsolete": true,
     "code": "104176",
@@ -114,6 +117,7 @@
     }
   },
   {
+    "id": "cce0bde1-f45c-4607-a5df-3083aa643dff",
     "type": "ROME4.0",
     "obsolete": false,
     "code": "104177",
@@ -152,6 +156,7 @@
     }
   },
   {
+    "id": "fea2fea4-9a4a-4c54-bab3-6eedd9f30872",
     "type": "ROME4.0",
     "obsolete": false,
     "code": "104178",
@@ -190,6 +195,7 @@
     }
   },
   {
+    "id": "3f024a1c-5429-43f6-bb2e-ac5a3ca662e6",
     "type": "ROME4.0",
     "obsolete": false,
     "code": "104179",
@@ -228,6 +234,7 @@
     }
   },
   {
+    "id": "959d3fa0-368c-48d8-9f7e-5da9a1718541",
     "type": "ROME4.0",
     "obsolete": false,
     "code": "104180",
@@ -266,6 +273,7 @@
     }
   },
   {
+    "id": "02bd9d93-aef2-492e-95e8-f9e9746f2df1",
     "type": "ROME4.0",
     "obsolete": false,
     "code": "104181",

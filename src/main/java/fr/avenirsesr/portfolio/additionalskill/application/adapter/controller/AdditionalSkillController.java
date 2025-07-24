@@ -7,11 +7,12 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkill
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.net.URI;
 import java.security.Principal;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -62,8 +63,11 @@ public class AdditionalSkillController {
       Principal principal, @RequestBody AddAdditionalSkillDTO additionalSkill) {
     Student student = userUtil.getStudent(principal);
     log.debug("Received request to create additional skill for student [{}]", student);
-    additionalSkillService.saveAdditionalSkills(
-        student, additionalSkill.getId(), additionalSkill.getType(), additionalSkill.getLevel());
+    additionalSkillService.addAdditionalSkills(
+        student,
+        UUID.fromString(additionalSkill.getId()),
+        additionalSkill.getType(),
+        additionalSkill.getLevel());
     return ResponseEntity.created(URI.create("/me/additional-skills/" + additionalSkill.getId()))
         .build();
   }

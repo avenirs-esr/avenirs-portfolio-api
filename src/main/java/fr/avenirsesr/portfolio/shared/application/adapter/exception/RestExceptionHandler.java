@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.shared.application.adapter.exception;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.exception.StudentAdditionalSkillConflictException;
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
 import fr.avenirsesr.portfolio.shared.application.adapter.response.ErrorResponse;
 import fr.avenirsesr.portfolio.shared.domain.exception.BadImageSizeException;
 import fr.avenirsesr.portfolio.shared.domain.exception.BadImageTypeException;
@@ -67,9 +67,9 @@ public class RestExceptionHandler {
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 
-  @ExceptionHandler(StudentAdditionalSkillConflictException.class)
+  @ExceptionHandler(DuplicateAdditionalSkillException.class)
   public ResponseEntity<ErrorResponse> handleStudentAdditionalSkillConflict(
-      StudentAdditionalSkillConflictException ex) {
+      DuplicateAdditionalSkillException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }

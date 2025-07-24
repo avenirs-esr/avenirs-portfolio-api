@@ -83,7 +83,7 @@ public class SeederRunner implements CommandLineRunner {
       var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
       var savedAmses =
           amsSeeder.seed(savedUsers, savedSkillLevelProgresses, savedTraces, savedCohorts);
-      var savedStudentAdditionalSkills = studentAdditionalSkillSeeder.seed(savedUsers);
+      var savedStudentAdditionalSkills = studentAdditionalSkillSeeder.seed(savedStudents);
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
