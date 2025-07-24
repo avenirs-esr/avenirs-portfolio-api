@@ -59,11 +59,11 @@ public class AdditionalSkillController {
   }
 
   @PostMapping()
-  public ResponseEntity<Void> createAdditionalSkill(
+  public ResponseEntity<Void> createAdditionalSkillProgress(
       Principal principal, @RequestBody AddAdditionalSkillDTO additionalSkill) {
     Student student = userUtil.getStudent(principal);
     log.debug("Received request to create additional skill for student [{}]", student);
-    additionalSkillService.addAdditionalSkills(
+    additionalSkillService.createAdditionalSkillProgress(
         student,
         UUID.fromString(additionalSkill.getId()),
         additionalSkill.getType(),
