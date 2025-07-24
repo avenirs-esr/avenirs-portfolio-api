@@ -45,32 +45,18 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
       AdditionalSkill additionalSkill = additionalSkillCache.findById(additionalSkillId);
       AdditionalSkillProgress additionalSkillProgress =
           AdditionalSkillProgress.create(student, additionalSkill, level);
-      additionalSkillProgressRepository.save(additionalSkillProgress);
-    } catch (AdditionalSkillNotFoundException e) {
-      log.error(
-          "Failed to add additional skill for student [{}]: {}", student.getId(), e.getMessage());
-      throw e;
-    } catch (Exception e) {
-      log.error(
-          "Failed to add additional skill [{}] for student [{}]: {}",
-          additionalSkillId,
-          student.getId(),
-          e.getMessage());
-      if (isUniqueConstraintViolation(e)) {
+      if (additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(
+          additionalSkillProgress)) {
+        log.error(
+            "Failed to add additional skill [{}] for student [{}] because it already exists",
+            additionalSkillId,
+            student);
         throw new DuplicateAdditionalSkillException();
       }
+      additionalSkillProgressRepository.save(additionalSkillProgress);
+    } catch (AdditionalSkillNotFoundException e) {
+      log.error("Failed to add additional skill for student [{}]: {}", student, e.getMessage());
       throw e;
     }
-  }
-
-  private boolean isUniqueConstraintViolation(Exception e) {
-    Throwable cause = e;
-    while (cause != null) {
-      if (cause.getMessage().contains("duplicate key")) {
-        return true;
-      }
-      cause = cause.getCause();
-    }
-    return false;
   }
 }

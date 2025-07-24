@@ -2,12 +2,11 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 
 public interface AdditionalSkillProgressMapper {
-  static AdditionalSkillProgressEntity toEntity(AdditionalSkillProgress additionalSkillProgress) {
+  static AdditionalSkillProgressEntity fromDomain(AdditionalSkillProgress additionalSkillProgress) {
 
     return AdditionalSkillProgressEntity.create(
         UserMapper.fromDomain(additionalSkillProgress.getStudent()),
@@ -15,10 +14,16 @@ public interface AdditionalSkillProgressMapper {
         additionalSkillProgress.getLevel());
   }
 
-  static AdditionalSkillProgress toDomain(
-      AdditionalSkillProgressEntity entity, AdditionalSkillCache additionalSkillCache) {
+  static AdditionalSkillProgress toDomain(AdditionalSkillProgressEntity entity) {
+    return AdditionalSkillProgress.toDomain(
+        entity.getId(),
+        UserMapper.toDomain(entity.getStudent()).toStudent(),
+        null,
+        entity.getLevel());
+  }
 
-    AdditionalSkill skill = additionalSkillCache.findById(entity.getAdditionalSkillId());
+  static AdditionalSkillProgress toDomain(
+      AdditionalSkillProgressEntity entity, AdditionalSkill skill) {
 
     return AdditionalSkillProgress.toDomain(
         entity.getId(),
