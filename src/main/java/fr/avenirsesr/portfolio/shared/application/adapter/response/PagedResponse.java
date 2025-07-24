@@ -5,10 +5,4 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 @Schema(requiredProperties = {"data", "page"})
-public interface PagedResponse<T> {
-  @Schema(description = "List of elements on the current page")
-  List<T> data();
-
-  @Schema(description = "Pagination information")
-  PageInfoDTO page();
-}
+public record PagedResponse<T>(List<T> data, PageInfoDTO page) {}

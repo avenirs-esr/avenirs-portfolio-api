@@ -3,8 +3,6 @@ package fr.avenirsesr.portfolio.additionalskill.domain.service;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
-import java.util.Optional;
-
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import lombok.AllArgsConstructor;

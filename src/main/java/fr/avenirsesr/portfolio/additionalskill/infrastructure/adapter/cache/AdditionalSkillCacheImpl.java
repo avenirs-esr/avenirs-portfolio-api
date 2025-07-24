@@ -8,10 +8,9 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.Add
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.CompetenceComplementaireDetaillee;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import java.io.InputStream;
 import java.util.List;
-
-import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import org.springframework.stereotype.Component;
 
 @Component

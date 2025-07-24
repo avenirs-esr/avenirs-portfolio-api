@@ -12,10 +12,9 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.PathSegmen
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.SegmentDetailFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import java.util.List;
 import java.util.UUID;
-
-import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

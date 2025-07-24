@@ -2,10 +2,10 @@ package fr.avenirsesr.portfolio.ams.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.ams.application.adapter.dto.AmsViewDTO;
 import fr.avenirsesr.portfolio.ams.application.adapter.mapper.AmsViewMapper;
-import fr.avenirsesr.portfolio.ams.application.adapter.response.AmsViewResponse;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.shared.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
@@ -30,7 +30,7 @@ public class AMSController {
   private final AMSService amsService;
 
   @GetMapping("/view")
-  public ResponseEntity<AmsViewResponse> getAmsView(
+  public ResponseEntity<PagedResponse<AmsViewDTO>> getAmsView(
       Principal principal,
       @RequestParam(value = "programProgressId") UUID programProgressId,
       @RequestParam(value = "page", required = false) Integer page,
@@ -51,8 +51,8 @@ public class AMSController {
     List<AmsViewDTO> amsViewDTOs =
         pagedResult.content().stream().map(AmsViewMapper::toDto).toList();
 
-    AmsViewResponse response =
-        new AmsViewResponse(amsViewDTOs, PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+    PagedResponse<AmsViewDTO> response =
+        new PagedResponse<>(amsViewDTOs, PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
     return ResponseEntity.ok(response);
   }

@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
@@ -68,7 +68,7 @@ public class TraceController {
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());
-      User user = userUtil.getUser(principal);
+    User user = userUtil.getUser(principal);
 
     TracesViewResponse tracesViewResponse = null;
 
