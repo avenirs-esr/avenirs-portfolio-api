@@ -42,4 +42,8 @@ public class SeederConfig {
 
   public static final int NB_TRACES_MIN_PER_AMS = 0;
   public static final int NB_TRACES_MAX_PER_AMS = 8;
+
+  // Student Additional Skills
+  public static final int MIN_ADDITIONAL_SKILLS_PER_STUDENT = 1;
+  public static final int MAX_ADDITIONAL_SKILLS_PER_STUDENT = 4;
 }

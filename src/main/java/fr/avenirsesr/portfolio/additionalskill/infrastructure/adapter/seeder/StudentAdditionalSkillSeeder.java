@@ -1,13 +1,16 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder;
 
+import static fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig.MAX_ADDITIONAL_SKILLS_PER_STUDENT;
+import static fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig.MIN_ADDITIONAL_SKILLS_PER_STUDENT;
+
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.AdditionalSkillDatabaseProgressRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fake.FakeAdditionalSkillProgress;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,8 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class StudentAdditionalSkillSeeder {
-
-  private static final Integer MAX_ADDITIONAL_SKILLS_PER_STUDENT = 4;
+  private static final FakerProvider faker = new FakerProvider();
 
   private final AdditionalSkillDatabaseProgressRepository studentAdditionalSkillDatabaseRepository;
 
@@ -27,7 +29,10 @@ public class StudentAdditionalSkillSeeder {
     savedStudents.forEach(
         student -> {
           int additionalSkillsCount =
-              ThreadLocalRandom.current().nextInt(1, MAX_ADDITIONAL_SKILLS_PER_STUDENT + 1);
+              faker
+                  .call()
+                  .random()
+                  .nextInt(MIN_ADDITIONAL_SKILLS_PER_STUDENT, MAX_ADDITIONAL_SKILLS_PER_STUDENT);
           List<UUID> bannedSkillsIds = new ArrayList<>();
           for (int i = 0; i < additionalSkillsCount; i++) {
             AdditionalSkillProgressEntity fakeStudentAdditionalSkill =
