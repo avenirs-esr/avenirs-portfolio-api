@@ -19,12 +19,15 @@ public enum EErrorCode {
 <span class="fc" id="L19">  USER_IS_NOT_STUDENT_EXCEPTION(&quot;User is not student&quot;),</span>
 <span class="fc" id="L20">  LANGUAGE_NOT_SUPPORTED(&quot;Language not supported&quot;),</span>
 <span class="fc" id="L21">  INVALID_ARGUMENT_TYPE(&quot;The type of the argument is invalid&quot;),</span>
+<span class="fc" id="L22">  ADDITIONAL_SKILL_NOT_AVAILABLE(&quot;Additional skill not available&quot;),</span>
+<span class="fc" id="L23">  ADDITIONAL_SKILL_NOT_FOUND(&quot;Additional skill not found&quot;),</span>
+<span class="fc" id="L24">  STUDENT_ADDITIONAL_ALREADY_EXIST(&quot;This additional skill is already assigned to the student&quot;),</span>
   ;
 
   private final String message;
 
-<span class="fc" id="L26">  EErrorCode(String message) {</span>
-<span class="fc" id="L27">    this.message = message;</span>
-<span class="fc" id="L28">  }</span>
+<span class="fc" id="L29">  EErrorCode(String message) {</span>
+<span class="fc" id="L30">    this.message = message;</span>
+<span class="fc" id="L31">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
