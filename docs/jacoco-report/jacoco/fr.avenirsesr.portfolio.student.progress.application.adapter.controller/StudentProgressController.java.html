@@ -26,9 +26,9 @@ public class StudentProgressController {
   private final UserUtil userUtil;
 
   @GetMapping(&quot;/overview&quot;)
-  public List&lt;StudentProgressOverviewDTO&gt; getSkillsOverview(Principal principal) {
+  public List&lt;StudentProgressOverviewDTO&gt; getStudentProgressOverview(Principal principal) {
 <span class="nc" id="L30">    Student student = userUtil.getStudent(principal);</span>
-<span class="nc" id="L31">    return studentProgressService.getSkillsOverview(student).entrySet().stream()</span>
+<span class="nc" id="L31">    return studentProgressService.getStudentProgressOverview(student).entrySet().stream()</span>
 <span class="nc" id="L32">        .map(</span>
             entry -&gt;
 <span class="nc" id="L34">                StudentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
@@ -36,14 +36,15 @@ public class StudentProgressController {
   }
 
   @GetMapping(&quot;/view&quot;)
-  public List&lt;StudentProgressViewDTO&gt; getSkillsView(
+  public List&lt;StudentProgressViewDTO&gt; getStudentProgressView(
       Principal principal, @RequestParam(name = &quot;sort&quot;, required = false) String sortRaw) {
-<span class="nc" id="L41">    SortCriteria sortCriteria = SortCriteria.fromString(sortRaw);</span>
-<span class="nc" id="L42">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L41">    Student student = userUtil.getStudent(principal);</span>
 
-<span class="nc" id="L44">    return studentProgressService.getSkillsView(student, sortCriteria).stream()</span>
-<span class="nc" id="L45">        .map(StudentProgressViewMapper::fromDomainToDto)</span>
-<span class="nc" id="L46">        .toList();</span>
+<span class="nc" id="L43">    return studentProgressService</span>
+<span class="nc" id="L44">        .getStudentProgressView(student, SortCriteria.fromString(sortRaw))</span>
+<span class="nc" id="L45">        .stream()</span>
+<span class="nc" id="L46">        .map(StudentProgressViewMapper::fromDomainToDto)</span>
+<span class="nc" id="L47">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

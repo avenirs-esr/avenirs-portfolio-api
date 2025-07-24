@@ -7,38 +7,54 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.Stu
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
+import net.datafaker.Faker;
 
 public class FakeStudentProgress {
-<span class="nc" id="L15">  private static final FakerProvider faker = new FakerProvider();</span>
+<span class="nc" id="L17">  private static final Faker faker = new FakerProvider().call();</span>
   private final StudentProgressEntity studentProgress;
+<span class="nc" id="L19">  private static final Period DEFAULT_STUDENT_PROGRESS_DURATION = Period.ofYears(1);</span>
 
-<span class="nc" id="L18">  private FakeStudentProgress(StudentProgressEntity studentProgress) {</span>
-<span class="nc" id="L19">    this.studentProgress = studentProgress;</span>
-<span class="nc" id="L20">  }</span>
+<span class="nc" id="L21">  private FakeStudentProgress(StudentProgressEntity studentProgress) {</span>
+<span class="nc" id="L22">    this.studentProgress = studentProgress;</span>
+<span class="nc" id="L23">  }</span>
 
   public static FakeStudentProgress of(
       UserEntity student,
       TrainingPathEntity trainingPath,
       List&lt;SkillLevelProgressEntity&gt; skillLevels) {
-<span class="nc" id="L26">    LocalDate today = LocalDate.now();</span>
-<span class="nc" id="L27">    return new FakeStudentProgress(</span>
-<span class="nc" id="L28">        StudentProgressEntity.of(</span>
-<span class="nc" id="L29">            UUID.fromString(faker.call().internet().uuid()),</span>
+
+<span class="nc" id="L30">    var today = LocalDate.now();</span>
+
+<span class="nc" id="L32">    var selectedYearTime = faker.options().option(0, -1, 1);</span>
+<span class="nc" id="L33">    var startDate = LocalDate.of(today.getYear() + selectedYearTime, today.getMonth(), 1);</span>
+
+<span class="nc" id="L35">    return new FakeStudentProgress(</span>
+<span class="nc" id="L36">        StudentProgressEntity.of(</span>
+<span class="nc" id="L37">            UUID.fromString(faker.internet().uuid()),</span>
             student,
             trainingPath,
+            startDate,
+<span class="nc" id="L41">            startDate.plus(DEFAULT_STUDENT_PROGRESS_DURATION),</span>
             skillLevels,
             today
-<span class="nc" id="L34">                .minusDays(faker.call().number().numberBetween(5, 365))</span>
-<span class="nc" id="L35">                .atStartOfDay(ZoneId.systemDefault())</span>
-<span class="nc" id="L36">                .toInstant(),</span>
-<span class="nc" id="L37">            Instant.now()));</span>
+<span class="nc" id="L44">                .minusDays(faker.number().numberBetween(5, 365))</span>
+<span class="nc" id="L45">                .atStartOfDay(ZoneId.systemDefault())</span>
+<span class="nc" id="L46">                .toInstant(),</span>
+<span class="nc" id="L47">            Instant.now()));</span>
+  }
+
+  public FakeStudentProgress withStartDate(LocalDate startDate) {
+<span class="nc" id="L51">    studentProgress.setStartDate(startDate);</span>
+<span class="nc" id="L52">    studentProgress.setEndDate(startDate.plus(DEFAULT_STUDENT_PROGRESS_DURATION));</span>
+<span class="nc" id="L53">    return this;</span>
   }
 
   public StudentProgressEntity toEntity() {
-<span class="nc" id="L41">    return studentProgress;</span>
+<span class="nc" id="L57">    return studentProgress;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
