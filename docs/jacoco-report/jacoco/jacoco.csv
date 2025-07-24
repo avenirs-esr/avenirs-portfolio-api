@@ -111,7 +111,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.model,Cohort,20,29,0,0,
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.model,AMS,23,39,0,0,6,12,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.model,AmsProgress,9,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,RessourceController,77,0,6,0,19,0,8,0,5,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,65,0,2,0,19,0,5,0,4,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,67,0,2,0,19,0,5,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter.utils,UserUtil,29,4,2,0,6,1,3,1,2,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.application.adapter.utils,RessourceUtils,44,0,10,0,13,0,8,0,3,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.model,AvenirsBaseModel,10,36,2,4,1,8,3,4,1,3
