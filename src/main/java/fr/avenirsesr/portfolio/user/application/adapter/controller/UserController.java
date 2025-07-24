@@ -37,11 +37,12 @@ public class UserController {
     EUserCategory userCategory = UserUtils.getUserCategory(profile);
     User user = userService.getProfile(userId);
 
-    if (userCategory == EUserCategory.STUDENT) {
-      return ResponseEntity.ok(ProfileOverviewMapper.userStudentDomainToDto(user.toStudent()));
-    } else {
-      return ResponseEntity.ok(ProfileOverviewMapper.userTeacherDomainToDto(user.toTeacher()));
-    }
+    return switch (userCategory) {
+      case STUDENT ->
+          ResponseEntity.ok(ProfileOverviewMapper.userStudentDomainToDto(user.toStudent()));
+      case TEACHER ->
+          ResponseEntity.ok(ProfileOverviewMapper.userTeacherDomainToDto(user.toTeacher()));
+    };
   }
 
   @PutMapping("/{profile}/update")

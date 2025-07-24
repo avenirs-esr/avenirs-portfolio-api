@@ -10,6 +10,7 @@ public interface ProfileOverviewMapper {
         student.getUser().getFirstName(),
         student.getUser().getLastName(),
         student.getBio(),
+        student.getUser().getEmail(),
         student.getProfilePicture(),
         student.getCoverPicture());
   }
@@ -19,6 +20,7 @@ public interface ProfileOverviewMapper {
         teacher.getUser().getFirstName(),
         teacher.getUser().getLastName(),
         teacher.getBio(),
+        teacher.getUser().getEmail(),
         teacher.getProfilePicture(),
         teacher.getCoverPicture());
   }
