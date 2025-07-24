@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class StudentAdditionalSkillSeeder {
+public class AdditionalSkillSeeder {
   private static final FakerProvider faker = new FakerProvider();
 
   private final AdditionalSkillDatabaseProgressRepository studentAdditionalSkillDatabaseRepository;
