@@ -2,5 +2,6 @@
 
 import java.util.List;
 
-<span class="fc" id="L5">public record PagedResult&lt;T&gt;(List&lt;T&gt; content, PageInfo pageInfo) {}</span>
+<span class="fc" id="L5">public record PagedResult&lt;T&gt;(</span>
+    List&lt;T&gt; content, long totalElements, int totalPages, int page, int pageSize) {}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

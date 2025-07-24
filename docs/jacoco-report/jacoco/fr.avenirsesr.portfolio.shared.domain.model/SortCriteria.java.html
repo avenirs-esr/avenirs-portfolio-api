@@ -3,27 +3,40 @@
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortOrder;
 
-<span class="fc" id="L6">public record SortCriteria(ESortField field, ESortOrder order) {</span>
-<span class="fc" id="L7">  private static final SortCriteria DEFAULT_SORT =</span>
-      new SortCriteria(ESortField.NAME, ESortOrder.ASC);
+public class SortCriteria {
+  private final ESortField field;
+  private final ESortOrder order;
+
+<span class="fc" id="L10">  public SortCriteria(ESortField field, ESortOrder order) {</span>
+<span class="fc" id="L11">    this.field = field;</span>
+<span class="fc" id="L12">    this.order = order;</span>
+<span class="fc" id="L13">  }</span>
+
+  public ESortField getField() {
+<span class="nc" id="L16">    return field;</span>
+  }
+
+  public ESortOrder getOrder() {
+<span class="nc" id="L20">    return order;</span>
+  }
 
   public static SortCriteria fromString(String input) {
-<span class="nc bnc" id="L11" title="All 4 branches missed.">    if (input == null || !input.contains(&quot;,&quot;)) {</span>
-<span class="nc" id="L12">      return DEFAULT_SORT;</span>
+<span class="nc bnc" id="L24" title="All 4 branches missed.">    if (input == null || !input.contains(&quot;,&quot;)) {</span>
+<span class="nc" id="L25">      return null;</span>
     }
 
-<span class="nc" id="L15">    String[] parts = input.split(&quot;,&quot;);</span>
-<span class="nc bnc" id="L16" title="All 2 branches missed.">    if (parts.length != 2) {</span>
-<span class="nc" id="L17">      return DEFAULT_SORT;</span>
+<span class="nc" id="L28">    String[] parts = input.split(&quot;,&quot;);</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">    if (parts.length != 2) {</span>
+<span class="nc" id="L30">      return null;</span>
     }
 
     try {
-<span class="nc" id="L21">      ESortField field = ESortField.fromString(parts[0].trim());</span>
-<span class="nc" id="L22">      ESortOrder order = ESortOrder.fromString(parts[1].trim());</span>
+<span class="nc" id="L34">      ESortField field = ESortField.fromString(parts[0].trim());</span>
+<span class="nc" id="L35">      ESortOrder order = ESortOrder.fromString(parts[1].trim());</span>
 
-<span class="nc" id="L24">      return new SortCriteria(field, order);</span>
-<span class="nc" id="L25">    } catch (Exception exception) {</span>
-<span class="nc" id="L26">      return DEFAULT_SORT;</span>
+<span class="nc" id="L37">      return new SortCriteria(field, order);</span>
+<span class="nc" id="L38">    } catch (Exception exception) {</span>
+<span class="nc" id="L39">      return null;</span>
     }
   }
 }

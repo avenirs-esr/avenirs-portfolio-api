@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudentProgressServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.domain.service</a> &gt; <span class="el_source">StudentProgressServiceImpl.java</span></div><h1>StudentProgressServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.domain.service;
 
-import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
-import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -18,7 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-<span class="fc" id="L21">@Slf4j</span>
+<span class="fc" id="L18">@Slf4j</span>
 @AllArgsConstructor
 @Service
 public class StudentProgressServiceImpl implements StudentProgressService {
@@ -27,65 +24,30 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public boolean isStudentFollowingAPCProgram(Student student) {
-<span class="fc" id="L30">    var studentProgress = studentProgressRepository.findAllAPCByStudent(student);</span>
-<span class="fc bfc" id="L31" title="All 2 branches covered.">    return !studentProgress.isEmpty();</span>
+<span class="fc" id="L27">    var studentProgress = studentProgressRepository.findAllAPCByStudent(student);</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">    return !studentProgress.isEmpty();</span>
   }
 
   @Override
   public Map&lt;StudentProgress, List&lt;SkillLevelProgress&gt;&gt; getSkillsOverview(Student student) {
-<span class="fc" id="L36">    var studentProgresses =</span>
-<span class="fc" id="L37">        studentProgressRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L38">            .filter(StudentProgress::isCurrent)</span>
-<span class="fc" id="L39">            .toList();</span>
+<span class="fc" id="L33">    SortCriteria sortCriteria = new SortCriteria(ESortField.NAME, ESortOrder.ASC);</span>
+<span class="fc" id="L34">    var studentProgresses = studentProgressRepository.findAllByStudent(student, sortCriteria);</span>
 
-<span class="fc" id="L41">    return studentProgresses.stream()</span>
-<span class="fc" id="L42">        .collect(</span>
-<span class="fc" id="L43">            Collectors.toMap(</span>
-<span class="fc" id="L44">                Function.identity(),</span>
+<span class="fc" id="L36">    return studentProgresses.stream()</span>
+<span class="fc" id="L37">        .collect(</span>
+<span class="fc" id="L38">            Collectors.toMap(</span>
+<span class="fc" id="L39">                Function.identity(),</span>
                 studentProgress -&gt;
-<span class="fc" id="L46">                    studentProgress.getCurrentSkillLevels().stream()</span>
-<span class="fc" id="L47">                        .limit(MAX_SKILLS / studentProgresses.size())</span>
-<span class="fc" id="L48">                        .toList()));</span>
+<span class="fc" id="L41">                    studentProgress.getCurrentSkillLevels().stream()</span>
+<span class="fc" id="L42">                        .limit(MAX_SKILLS / studentProgresses.size())</span>
+<span class="fc" id="L43">                        .toList()));</span>
   }
 
   @Override
   public List&lt;StudentProgress&gt; getSkillsView(Student student, SortCriteria sortCriteria) {
-<span class="fc" id="L53">    return studentProgressRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L54">        .filter(StudentProgress::isCurrent)</span>
-<span class="fc" id="L55">        .toList();</span>
-  }
-
-  @Override
-  public PagedResult&lt;SkillProgress&gt; getSkillsLifeProjectView(
-      Student student, SortCriteria sortCriteria, PageCriteria pageCriteria) {
-
-<span class="fc" id="L62">    var studentProgresses = studentProgressRepository.findAllByStudent(student).stream().toList();</span>
-
-<span class="fc" id="L64">    var skillProgresses =</span>
-<span class="fc" id="L65">        studentProgresses.stream()</span>
-<span class="fc" id="L66">            .filter(studentProgress -&gt; studentProgress.getStartDate().isBefore(LocalDate.now()))</span>
-<span class="fc" id="L67">            .flatMap(</span>
-                studentProgress -&gt;
-<span class="fc" id="L69">                    studentProgress.getCurrentSkillLevels().stream()</span>
-<span class="fc" id="L70">                        .map(</span>
-                            currentSkillLevel -&gt;
-<span class="fc" id="L72">                                new SkillProgress(</span>
-<span class="fc" id="L73">                                    currentSkillLevel.getSkillLevel().getSkill(),</span>
-                                    studentProgress,
-                                    currentSkillLevel)))
-<span class="fc" id="L76">            .sorted(</span>
-<span class="fc" id="L77">                Comparator.comparing(</span>
-                        (SkillProgress skillProgress) -&gt;
-<span class="fc bfc" id="L79" title="All 2 branches covered.">                            skillProgress.studentProgress().isCurrent() ? 0 : 1)</span>
-<span class="fc" id="L80">                    .thenComparing(SkillProgress.comparatorOf(sortCriteria)))</span>
-<span class="fc" id="L81">            .toList();</span>
-
-<span class="fc" id="L83">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L84">        skillProgresses.stream()</span>
-<span class="fc" id="L85">            .skip((long) (pageCriteria.page() - 1) * pageCriteria.pageSize())</span>
-<span class="fc" id="L86">            .limit(pageCriteria.pageSize())</span>
-<span class="fc" id="L87">            .toList(),</span>
-<span class="fc" id="L88">        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skillProgresses.size()));</span>
+<span class="fc" id="L48">    return studentProgressRepository.findAllByStudent(</span>
+        student,
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        sortCriteria != null ? sortCriteria : new SortCriteria(ESortField.NAME, ESortOrder.ASC));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
