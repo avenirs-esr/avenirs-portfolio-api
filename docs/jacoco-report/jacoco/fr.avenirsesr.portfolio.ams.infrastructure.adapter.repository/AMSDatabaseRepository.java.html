@@ -5,8 +5,6 @@ import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.specification.AMSSpecification;
-import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
@@ -23,37 +21,33 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter&lt;AMS, A
   private final AMSJpaRepository jpaRepository;
 
   public AMSDatabaseRepository(AMSJpaRepository repository) {
-<span class="fc" id="L26">    super(repository, repository, AMSMapper::fromDomain, AMSMapper::toDomain);</span>
-<span class="fc" id="L27">    this.jpaRepository = repository;</span>
-<span class="fc" id="L28">  }</span>
+<span class="fc" id="L24">    super(repository, repository, AMSMapper::fromDomain, AMSMapper::toDomain);</span>
+<span class="fc" id="L25">    this.jpaRepository = repository;</span>
+<span class="fc" id="L26">  }</span>
 
   @Override
   public PagedResult&lt;AMS&gt; findByUserIdViaCohortsAndProgramProgressId(
-      UUID userId, UUID programProgressId, PageCriteria pageCriteria) {
-<span class="nc" id="L33">    Specification&lt;AMSEntity&gt; spec = AMSSpecification.belongsToUserViaCohorts(userId);</span>
+      UUID userId, UUID programProgressId, int page, int size) {
+<span class="nc" id="L31">    Specification&lt;AMSEntity&gt; spec = AMSSpecification.belongsToUserViaCohorts(userId);</span>
 
-<span class="nc bnc" id="L35" title="All 2 branches missed.">    if (programProgressId != null) {</span>
-<span class="nc" id="L36">      spec = spec.and(AMSSpecification.hasProgramProgressId(programProgressId));</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">    if (programProgressId != null) {</span>
+<span class="nc" id="L34">      spec = spec.and(AMSSpecification.hasProgramProgressId(programProgressId));</span>
     }
 
-<span class="nc" id="L39">    Page&lt;AMSEntity&gt; pageResult =</span>
-<span class="nc" id="L40">        jpaSpecificationExecutor.findAll(</span>
-            spec,
-<span class="nc" id="L42">            PageRequest.of(</span>
-<span class="nc" id="L43">                pageCriteria.page(),</span>
-<span class="nc" id="L44">                pageCriteria.pageSize(),</span>
-<span class="nc" id="L45">                Sort.by(Sort.Direction.DESC, &quot;startDate&quot;)));</span>
+<span class="nc" id="L37">    Page&lt;AMSEntity&gt; pageResult =</span>
+<span class="nc" id="L38">        jpaSpecificationExecutor.findAll(</span>
+<span class="nc" id="L39">            spec, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, &quot;startDate&quot;)));</span>
 
-<span class="nc" id="L47">    List&lt;AMS&gt; content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();</span>
+<span class="nc" id="L41">    List&lt;AMS&gt; content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();</span>
 
-<span class="nc" id="L49">    return new PagedResult&lt;&gt;(</span>
-<span class="nc" id="L50">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));</span>
+<span class="nc" id="L43">    return new PagedResult&lt;&gt;(</span>
+<span class="nc" id="L44">        content, pageResult.getTotalElements(), pageResult.getTotalPages(), page, size);</span>
   }
 
   public void saveAllEntities(List&lt;AMSEntity&gt; entities) {
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">    if (entities != null) {</span>
-<span class="fc" id="L55">      jpaRepository.saveAll(entities);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (entities != null) {</span>
+<span class="fc" id="L49">      jpaRepository.saveAll(entities);</span>
     }
-<span class="fc" id="L57">  }</span>
+<span class="fc" id="L51">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

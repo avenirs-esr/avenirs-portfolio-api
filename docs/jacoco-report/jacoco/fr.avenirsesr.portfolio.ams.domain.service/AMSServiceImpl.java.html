@@ -3,11 +3,11 @@
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
-import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 <span class="fc" id="L13">@Slf4j</span>
@@ -16,21 +16,33 @@ public class AMSServiceImpl implements AMSService {
 
   private final AMSRepository amsRepository;
 
-<span class="fc" id="L19">  public AMSServiceImpl(AMSRepository amsRepository) {</span>
-<span class="fc" id="L20">    this.amsRepository = amsRepository;</span>
-<span class="fc" id="L21">  }</span>
+  @Value(&quot;${pagination.default-page}&quot;)
+  private int defaultPage;
+
+  @Value(&quot;${pagination.default-page-size}&quot;)
+  private int defaultPageSize;
+
+  @Value(&quot;${pagination.max-page-size}&quot;)
+  private int maxPageSize;
+
+<span class="fc" id="L28">  public AMSServiceImpl(AMSRepository amsRepository) {</span>
+<span class="fc" id="L29">    this.amsRepository = amsRepository;</span>
+<span class="fc" id="L30">  }</span>
 
   @Override
-  public PagedResult&lt;AMS&gt; findUserAmsByProgramProgress(
-      Student student, UUID programProgressId, PageCriteria pageCriteria) {
-<span class="fc" id="L26">    log.debug(</span>
+  public PagedResult&lt;AMS&gt; findUserAmsByProgramProgressWithPagination(
+      Student student, UUID programProgressId, Integer page, Integer pageSize) {
+<span class="fc" id="L35">    log.debug(</span>
         &quot;Finding AMS for user with id [{}] with pagination (page={}, pageSize={})&quot;,
-<span class="fc" id="L28">        student.getId(),</span>
-<span class="fc" id="L29">        pageCriteria.page(),</span>
-<span class="fc" id="L30">        pageCriteria.pageSize());</span>
+<span class="fc" id="L37">        student.getId(),</span>
+        page,
+        pageSize);
+<span class="pc bpc" id="L40" title="1 of 4 branches missed.">    int pageValue = (page != null &amp;&amp; page &gt;= 0) ? page : defaultPage;</span>
+    int pageSizeValue =
+<span class="pc bpc" id="L42" title="2 of 6 branches missed.">        (pageSize != null &amp;&amp; pageSize &gt; 0 &amp;&amp; pageSize &lt;= maxPageSize) ? pageSize : defaultPageSize;</span>
 
-<span class="fc" id="L32">    return amsRepository.findByUserIdViaCohortsAndProgramProgressId(</span>
-<span class="fc" id="L33">        student.getId(), programProgressId, pageCriteria);</span>
+<span class="fc" id="L44">    return amsRepository.findByUserIdViaCohortsAndProgramProgressId(</span>
+<span class="fc" id="L45">        student.getId(), programProgressId, pageValue, pageSizeValue);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

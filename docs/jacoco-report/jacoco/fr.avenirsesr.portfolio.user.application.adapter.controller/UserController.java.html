@@ -37,12 +37,11 @@ public class UserController {
 <span class="nc" id="L37">    EUserCategory userCategory = UserUtils.getUserCategory(profile);</span>
 <span class="nc" id="L38">    User user = userService.getProfile(userId);</span>
 
-<span class="nc bnc" id="L40" title="All 2 branches missed.">    return switch (userCategory) {</span>
-      case STUDENT -&gt;
-<span class="nc" id="L42">          ResponseEntity.ok(ProfileOverviewMapper.userStudentDomainToDto(user.toStudent()));</span>
-      case TEACHER -&gt;
-<span class="nc" id="L44">          ResponseEntity.ok(ProfileOverviewMapper.userTeacherDomainToDto(user.toTeacher()));</span>
-    };
+<span class="nc bnc" id="L40" title="All 2 branches missed.">    if (userCategory == EUserCategory.STUDENT) {</span>
+<span class="nc" id="L41">      return ResponseEntity.ok(ProfileOverviewMapper.userStudentDomainToDto(user.toStudent()));</span>
+    } else {
+<span class="nc" id="L43">      return ResponseEntity.ok(ProfileOverviewMapper.userTeacherDomainToDto(user.toTeacher()));</span>
+    }
   }
 
   @PutMapping(&quot;/{profile}/update&quot;)
@@ -50,15 +49,15 @@ public class UserController {
       @RequestHeader(&quot;X-Signed-Context&quot;) String userIdRaw,
       @PathVariable String profile,
       @RequestBody ProfileUpdateRequest request) {
-<span class="nc" id="L53">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
+<span class="nc" id="L52">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
 
-<span class="nc" id="L55">    userService.updateProfile(</span>
+<span class="nc" id="L54">    userService.updateProfile(</span>
         userId,
-<span class="nc" id="L57">        request.getFirstname(),</span>
-<span class="nc" id="L58">        request.getLastname(),</span>
-<span class="nc" id="L59">        request.getEmail(),</span>
-<span class="nc" id="L60">        request.getBio());</span>
-<span class="nc" id="L61">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+<span class="nc" id="L56">        request.getFirstname(),</span>
+<span class="nc" id="L57">        request.getLastname(),</span>
+<span class="nc" id="L58">        request.getEmail(),</span>
+<span class="nc" id="L59">        request.getBio());</span>
+<span class="nc" id="L60">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 
   @PutMapping(&quot;/{profile}/update/photo&quot;)
@@ -67,10 +66,10 @@ public class UserController {
       @PathVariable String profile,
       @RequestParam(&quot;file&quot;) MultipartFile photoFile)
       throws IOException {
-<span class="nc" id="L70">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
+<span class="nc" id="L69">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
 
-<span class="nc" id="L72">    userService.updateProfilePicture(userId, photoFile);</span>
-<span class="nc" id="L73">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+<span class="nc" id="L71">    userService.updateProfilePicture(userId, photoFile);</span>
+<span class="nc" id="L72">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 
   @PutMapping(&quot;/{profile}/update/cover&quot;)
@@ -79,10 +78,10 @@ public class UserController {
       @PathVariable String profile,
       @RequestParam(&quot;file&quot;) MultipartFile coverFile)
       throws IOException {
-<span class="nc" id="L82">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
+<span class="nc" id="L81">    var userId = UUID.fromString(userIdRaw); // @Todo: fetch userLoggedIn</span>
 
-<span class="nc" id="L84">    userService.updateCoverPicture(userId, coverFile);</span>
-<span class="nc" id="L85">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+<span class="nc" id="L83">    userService.updateCoverPicture(userId, coverFile);</span>
+<span class="nc" id="L84">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

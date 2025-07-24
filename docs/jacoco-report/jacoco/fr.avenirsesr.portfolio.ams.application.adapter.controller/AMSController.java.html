@@ -2,12 +2,11 @@
 
 import fr.avenirsesr.portfolio.ams.application.adapter.dto.AmsViewDTO;
 import fr.avenirsesr.portfolio.ams.application.adapter.mapper.AmsViewMapper;
+import fr.avenirsesr.portfolio.ams.application.adapter.response.AmsViewResponse;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
-import fr.avenirsesr.portfolio.shared.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
-import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.security.Principal;
@@ -21,40 +20,49 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L23">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/ams&quot;)
 public class AMSController {
+
+  // TODO: use a service instead
   private final UserUtil userUtil;
+
   private final AMSService amsService;
 
   @GetMapping(&quot;/view&quot;)
-  public ResponseEntity&lt;PagedResponse&lt;AmsViewDTO&gt;&gt; getAmsView(
+  public ResponseEntity&lt;AmsViewResponse&gt; getAmsView(
       Principal principal,
       @RequestParam(value = &quot;programProgressId&quot;) UUID programProgressId,
       @RequestParam(value = &quot;page&quot;, required = false) Integer page,
       @RequestParam(value = &quot;pageSize&quot;, required = false) Integer pageSize) {
-<span class="fc" id="L38">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L39">    log.debug(</span>
+<span class="fc" id="L40">    log.debug(</span>
         &quot;Received request to get AMS view for user [{}], programProgressId [{}] with pagination&quot;
             + &quot; (page={}, pageSize={})&quot;,
-<span class="fc" id="L42">        principal.getName(),</span>
+<span class="fc" id="L43">        principal.getName(),</span>
         programProgressId,
-<span class="fc" id="L44">        pageCriteria.page(),</span>
-<span class="fc" id="L45">        pageCriteria.pageSize());</span>
-<span class="fc" id="L46">    Student student = userUtil.getStudent(principal);</span>
+        page,
+        pageSize);
+<span class="fc" id="L47">    Student student = userUtil.getStudent(principal);</span>
 
-<span class="fc" id="L48">    PagedResult&lt;AMS&gt; pagedResult =</span>
-<span class="fc" id="L49">        amsService.findUserAmsByProgramProgress(student, programProgressId, pageCriteria);</span>
+<span class="fc" id="L49">    PagedResult&lt;AMS&gt; pagedResult =</span>
+<span class="fc" id="L50">        amsService.findUserAmsByProgramProgressWithPagination(</span>
+            student, programProgressId, page, pageSize);
 
-<span class="fc" id="L51">    List&lt;AmsViewDTO&gt; amsViewDTOs =</span>
-<span class="fc" id="L52">        pagedResult.content().stream().map(AmsViewMapper::toDto).toList();</span>
+<span class="fc" id="L53">    List&lt;AmsViewDTO&gt; amsViewDTOs =</span>
+<span class="fc" id="L54">        pagedResult.content().stream().map(AmsViewMapper::toDto).toList();</span>
 
-<span class="fc" id="L54">    PagedResponse&lt;AmsViewDTO&gt; response =</span>
-<span class="fc" id="L55">        new PagedResponse&lt;&gt;(amsViewDTOs, PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="fc" id="L56">    PageInfo pageInfo =</span>
+        new PageInfo(
+<span class="fc" id="L58">            pagedResult.pageSize(),</span>
+<span class="fc" id="L59">            pagedResult.totalElements(),</span>
+<span class="fc" id="L60">            pagedResult.totalPages(),</span>
+<span class="fc" id="L61">            pagedResult.page());</span>
 
-<span class="fc" id="L57">    return ResponseEntity.ok(response);</span>
+<span class="fc" id="L63">    AmsViewResponse response = new AmsViewResponse(amsViewDTOs, pageInfo);</span>
+
+<span class="fc" id="L65">    return ResponseEntity.ok(response);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
