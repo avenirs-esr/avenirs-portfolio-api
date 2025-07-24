@@ -13,7 +13,7 @@ public interface AdditionalSkillService {
 
   PagedResult<AdditionalSkill> searchAdditionalSkills(String keyword, PageCriteria criteria);
 
-  void addAdditionalSkills(
+  void createAdditionalSkillProgress(
       Student student,
       UUID additionalSkillId,
       EAdditionalSkillType type,

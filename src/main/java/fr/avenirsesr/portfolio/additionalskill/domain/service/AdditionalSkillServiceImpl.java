@@ -36,7 +36,7 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
   }
 
   @Override
-  public void addAdditionalSkills(
+  public void createAdditionalSkillProgress(
       Student student,
       UUID additionalSkillId,
       EAdditionalSkillType type,

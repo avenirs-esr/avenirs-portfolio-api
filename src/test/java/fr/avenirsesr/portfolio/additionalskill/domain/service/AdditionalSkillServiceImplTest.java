@@ -166,7 +166,7 @@ class AdditionalSkillServiceImplTest {
 
     when(additionalSkillCache.findById(skillId)).thenReturn(additionalSkill);
 
-    service.addAdditionalSkills(student, skillId, type, level);
+    service.createAdditionalSkillProgress(student, skillId, type, level);
 
     verify(additionalSkillProgressRepository).save(any(AdditionalSkillProgress.class));
   }
@@ -182,7 +182,7 @@ class AdditionalSkillServiceImplTest {
 
     assertThrows(
         AdditionalSkillNotFoundException.class,
-        () -> service.addAdditionalSkills(student, skillId, type, level));
+        () -> service.createAdditionalSkillProgress(student, skillId, type, level));
 
     verifyNoInteractions(additionalSkillProgressRepository);
   }
