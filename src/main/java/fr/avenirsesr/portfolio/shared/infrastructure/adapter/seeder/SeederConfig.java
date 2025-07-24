@@ -21,7 +21,7 @@ public class SeederConfig {
   public static final int TRACES_NB = 20;
 
   // Skill
-  public static final int SKILL_BY_PROGRAM = 6;
+  public static final int SKILL_BY_PROGRAM = 7;
   public static final int SKILL_LEVEL_BY_SKILL = 3;
 
   // Training paths
