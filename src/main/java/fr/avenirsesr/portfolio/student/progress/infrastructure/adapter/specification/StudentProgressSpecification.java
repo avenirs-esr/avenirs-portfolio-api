@@ -12,7 +12,7 @@ public class StudentProgressSpecification {
 
   public static Specification<StudentProgressEntity> isAPC() {
     return (root, query, cb) -> {
-      Join<Object, Object> programJoin = root.join("trainingPath.program");
+      Join<Object, Object> programJoin = root.join("trainingPath").join("program");
       return cb.equal(programJoin.get("isAPC"), true);
     };
   }
