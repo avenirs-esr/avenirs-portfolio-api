@@ -83,7 +83,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
     return new PagedResult<>(
         skillProgresses.stream()
-            .skip((long) (pageCriteria.page() - 1) * pageCriteria.pageSize())
+            .skip((long) (pageCriteria.page()) * pageCriteria.pageSize())
             .limit(pageCriteria.pageSize())
             .toList(),
         new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skillProgresses.size()));

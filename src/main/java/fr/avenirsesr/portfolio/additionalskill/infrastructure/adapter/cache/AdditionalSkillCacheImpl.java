@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache;
 
-import static fr.avenirsesr.portfolio.shared.application.adapter.utils.PaginationUtils.paginate;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
@@ -10,6 +8,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkil
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.CompetenceComplementaireDetaillee;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import java.io.InputStream;
 import java.util.List;
@@ -20,6 +19,16 @@ import org.springframework.stereotype.Component;
 public class AdditionalSkillCacheImpl implements AdditionalSkillCache {
   private static final String JSON_PATH = "/mock/mock-additional-skills.json";
   private final ObjectMapper objectMapper = new ObjectMapper();
+
+  private static <T> PagedResult<T> paginate(List<T> data, PageCriteria pageCriteria) {
+    int totalElements = data.size();
+    int page = pageCriteria.page();
+    int start = Math.min(page * pageCriteria.pageSize(), totalElements);
+    int end = Math.min(start + pageCriteria.pageSize(), totalElements);
+    List<T> paginatedSkills = data.subList(start, end);
+    return new PagedResult<>(
+        paginatedSkills, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), data.size()));
+  }
 
   @Override
   public PagedResult<AdditionalSkill> findAll(PageCriteria pageCriteria) {

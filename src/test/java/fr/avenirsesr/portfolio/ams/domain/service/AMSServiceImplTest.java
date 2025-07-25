@@ -131,10 +131,10 @@ class AMSServiceImplTest {
   void shouldUseDefaultValuesWhenPaginationParametersAreNull() {
     // Given
     List<AMS> amsList = AMSFixture.create().withCount(3);
-    PagedResult<AMS> expectedResult = new PagedResult<>(amsList, new PageInfo(1, 8, 3));
+    PagedResult<AMS> expectedResult = new PagedResult<>(amsList, new PageInfo(0, 8, 3));
 
     when(amsRepository.findByUserIdViaCohortsAndProgramProgressId(
-            any(UUID.class), eq(programProgressId), eq(new PageCriteria(1, 8))))
+            any(UUID.class), eq(programProgressId), eq(new PageCriteria(0, 8))))
         .thenReturn(expectedResult);
 
     // When
@@ -146,10 +146,10 @@ class AMSServiceImplTest {
     assertNotNull(result);
     assertEquals(3, result.pageInfo().totalElements());
     assertEquals(3, result.content().size());
-    assertEquals(1, result.pageInfo().page());
+    assertEquals(0, result.pageInfo().page());
     assertEquals(8, result.pageInfo().pageSize());
     verify(amsRepository)
         .findByUserIdViaCohortsAndProgramProgressId(
-            any(UUID.class), eq(programProgressId), eq(new PageCriteria(1, 8)));
+            any(UUID.class), eq(programProgressId), eq(new PageCriteria(0, 8)));
   }
 }
