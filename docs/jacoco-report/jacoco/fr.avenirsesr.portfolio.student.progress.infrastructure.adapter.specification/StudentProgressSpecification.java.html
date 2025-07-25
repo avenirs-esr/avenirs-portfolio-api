@@ -7,13 +7,13 @@ import org.springframework.data.jpa.domain.Specification;
 
 <span class="nc" id="L8">public class StudentProgressSpecification {</span>
   public static Specification&lt;StudentProgressEntity&gt; hasStudent(UserEntity student) {
-<span class="nc" id="L10">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;student&quot;), student);</span>
+<span class="fc" id="L10">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;student&quot;), student);</span>
   }
 
   public static Specification&lt;StudentProgressEntity&gt; isAPC() {
-<span class="nc" id="L14">    return (root, query, cb) -&gt; {</span>
-<span class="nc" id="L15">      Join&lt;Object, Object&gt; programJoin = root.join(&quot;trainingPath.program&quot;);</span>
-<span class="nc" id="L16">      return cb.equal(programJoin.get(&quot;isAPC&quot;), true);</span>
+<span class="fc" id="L14">    return (root, query, cb) -&gt; {</span>
+<span class="fc" id="L15">      Join&lt;Object, Object&gt; programJoin = root.join(&quot;trainingPath&quot;).join(&quot;program&quot;);</span>
+<span class="fc" id="L16">      return cb.equal(programJoin.get(&quot;isAPC&quot;), true);</span>
     };
   }
 }

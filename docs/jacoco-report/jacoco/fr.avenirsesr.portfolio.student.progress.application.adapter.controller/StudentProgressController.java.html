@@ -27,24 +27,24 @@ public class StudentProgressController {
 
   @GetMapping(&quot;/overview&quot;)
   public List&lt;StudentProgressOverviewDTO&gt; getStudentProgressOverview(Principal principal) {
-<span class="nc" id="L30">    Student student = userUtil.getStudent(principal);</span>
-<span class="nc" id="L31">    return studentProgressService.getStudentProgressOverview(student).entrySet().stream()</span>
-<span class="nc" id="L32">        .map(</span>
+<span class="fc" id="L30">    Student student = userUtil.getStudent(principal);</span>
+<span class="fc" id="L31">    return studentProgressService.getStudentProgressOverview(student).entrySet().stream()</span>
+<span class="fc" id="L32">        .map(</span>
             entry -&gt;
-<span class="nc" id="L34">                StudentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
-<span class="nc" id="L35">        .toList();</span>
+<span class="fc" id="L34">                StudentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="fc" id="L35">        .toList();</span>
   }
 
   @GetMapping(&quot;/view&quot;)
   public List&lt;StudentProgressViewDTO&gt; getStudentProgressView(
       Principal principal, @RequestParam(name = &quot;sort&quot;, required = false) String sortRaw) {
-<span class="nc" id="L41">    Student student = userUtil.getStudent(principal);</span>
+<span class="fc" id="L41">    Student student = userUtil.getStudent(principal);</span>
 
-<span class="nc" id="L43">    return studentProgressService</span>
-<span class="nc" id="L44">        .getStudentProgressView(student, SortCriteria.fromString(sortRaw))</span>
-<span class="nc" id="L45">        .stream()</span>
-<span class="nc" id="L46">        .map(StudentProgressViewMapper::fromDomainToDto)</span>
-<span class="nc" id="L47">        .toList();</span>
+<span class="fc" id="L43">    return studentProgressService</span>
+<span class="fc" id="L44">        .getStudentProgressView(student, SortCriteria.fromString(sortRaw))</span>
+<span class="fc" id="L45">        .stream()</span>
+<span class="fc" id="L46">        .map(StudentProgressViewMapper::fromDomainToDto)</span>
+<span class="fc" id="L47">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

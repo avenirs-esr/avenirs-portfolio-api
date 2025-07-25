@@ -30,29 +30,29 @@ public class StudentProgressDatabaseRepository
 
   @Override
   public List&lt;StudentProgress&gt; findAllByStudent(Student student) {
-<span class="nc" id="L33">    return entityListToDomainList(</span>
-<span class="nc" id="L34">        jpaSpecificationExecutor.findAll(</span>
-<span class="nc" id="L35">            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))));</span>
+<span class="fc" id="L33">    return entityListToDomainList(</span>
+<span class="fc" id="L34">        jpaSpecificationExecutor.findAll(</span>
+<span class="fc" id="L35">            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))));</span>
   }
 
   @Override
   public List&lt;StudentProgress&gt; findAllAPCByStudent(Student student) {
-<span class="nc" id="L40">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L41">        .findAll(</span>
-<span class="nc" id="L42">            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
-<span class="nc" id="L43">                .and(StudentProgressSpecification.isAPC()))</span>
-<span class="nc" id="L44">        .stream()</span>
-<span class="nc" id="L45">        .map(StudentProgressMapper::toDomain)</span>
-<span class="nc" id="L46">        .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))</span>
-<span class="nc" id="L47">        .values()</span>
-<span class="nc" id="L48">        .stream()</span>
-<span class="nc" id="L49">        .map(List::getFirst)</span>
-<span class="nc" id="L50">        .toList();</span>
+<span class="fc" id="L40">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L41">        .findAll(</span>
+<span class="fc" id="L42">            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
+<span class="fc" id="L43">                .and(StudentProgressSpecification.isAPC()))</span>
+<span class="fc" id="L44">        .stream()</span>
+<span class="fc" id="L45">        .map(StudentProgressMapper::toDomain)</span>
+<span class="fc" id="L46">        .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))</span>
+<span class="fc" id="L47">        .values()</span>
+<span class="fc" id="L48">        .stream()</span>
+<span class="fc" id="L49">        .map(List::getFirst)</span>
+<span class="fc" id="L50">        .toList();</span>
   }
 
   private List&lt;StudentProgress&gt; entityListToDomainList(
       List&lt;StudentProgressEntity&gt; trainingPathEntityList) {
-<span class="nc" id="L55">    return trainingPathEntityList.stream().map(StudentProgressMapper::toDomain).toList();</span>
+<span class="fc" id="L55">    return trainingPathEntityList.stream().map(StudentProgressMapper::toDomain).toList();</span>
   }
 
   private String sortFieldToExactPath(ESortField sortField) {
