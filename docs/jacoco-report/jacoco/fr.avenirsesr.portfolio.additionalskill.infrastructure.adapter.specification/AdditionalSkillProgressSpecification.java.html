@@ -12,5 +12,10 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="nc" id="L12">            criteriaBuilder.equal(root.get(&quot;additionalSkillId&quot;), additionalSkillId),</span>
 <span class="nc" id="L13">            criteriaBuilder.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId));</span>
   }
+
+  public static Specification&lt;AdditionalSkillProgressEntity&gt; findAllByStudent(UUID studentId) {
+<span class="nc" id="L17">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="nc" id="L18">        criteriaBuilder.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
