@@ -7,7 +7,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.model
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake,FakeSkillLevelProgress,110,0,4,0,31,0,10,0,7,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake,FakeStudentProgress,92,0,0,0,20,0,5,0,5,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,6,158,0,16,1,42,1,15,1,7
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl,219,8,2,0,46,2,11,1,10,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl,217,8,2,0,46,2,11,1,10,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl.new TypeReference() {...},3,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl.new TypeReference() {...},3,0,0,0,1,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl.new TypeReference() {...},3,0,0,0,1,0,1,0,1,0
@@ -104,7 +104,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.model.enums,EPortfol
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.model.enums,ESortField,4,15,0,0,1,3,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.model.enums,ESortOrder,4,15,0,0,1,3,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.model.enums,EErrorCode,0,137,0,0,0,22,0,2,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.domain.service,StudentProgressServiceImpl,0,141,0,4,0,37,0,12,0,10
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.domain.service,StudentProgressServiceImpl,0,139,0,4,0,37,0,12,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.security.infrastructure.model,HmacAuthenticationToken,0,15,0,0,0,6,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.application.adapter.controller,StudentProgressController,39,4,0,0,11,1,3,1,3,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.application.adapter.controller,SkillLevelProgressController,39,4,0,0,13,1,2,1,2,1

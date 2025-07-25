@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
   private static &lt;T&gt; PagedResult&lt;T&gt; paginate(List&lt;T&gt; data, PageCriteria pageCriteria) {
 <span class="nc" id="L24">    int totalElements = data.size();</span>
-<span class="nc" id="L25">    int page = pageCriteria.page() - 1;</span>
+<span class="nc" id="L25">    int page = pageCriteria.page();</span>
 <span class="nc" id="L26">    int start = Math.min(page * pageCriteria.pageSize(), totalElements);</span>
 <span class="nc" id="L27">    int end = Math.min(start + pageCriteria.pageSize(), totalElements);</span>
 <span class="nc" id="L28">    List&lt;T&gt; paginatedSkills = data.subList(start, end);</span>
