@@ -1,7 +1,9 @@
 package fr.avenirsesr.portfolio.additionalskill.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillDTO;
+import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillProgressDTO;
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.AdditionalSkillMapper;
+import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.request.AddAdditionalSkillDTO;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
@@ -9,7 +11,6 @@ import fr.avenirsesr.portfolio.shared.application.adapter.response.PagedResponse
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.net.URI;
 import java.security.Principal;
 import java.util.UUID;
@@ -27,21 +28,23 @@ public class AdditionalSkillController {
   private final UserUtil userUtil;
 
   @GetMapping()
-  public ResponseEntity<PagedResponse<AdditionalSkillDTO>> getAdditionalSkills(
+  public ResponseEntity<PagedResponse<AdditionalSkillProgressDTO>> getAdditionalSkillsProgresses(
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-    User user = userUtil.getUser(principal);
+    Student student = userUtil.getStudent(principal);
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to trace overview of user [{}] (page= {}, size= {})",
-        user,
+        student,
         pageCriteria.page(),
         pageCriteria.pageSize());
-    var result = additionalSkillService.getAdditionalSkills(pageCriteria);
+    var result = additionalSkillService.getAdditionalSkillsProgresses(student, pageCriteria);
     return ResponseEntity.ok(
         new PagedResponse<>(
-            result.content().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),
+            result.content().stream()
+                .map(AdditionalSkillProgressMapper::toAdditionalSkillProgressDTO)
+                .toList(),
             PageInfoDTO.fromDomain(result.pageInfo())));
   }
 

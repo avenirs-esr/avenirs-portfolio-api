@@ -1,5 +1,8 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository;
 
+import static fr.avenirsesr.portfolio.shared.application.adapter.utils.PaginationUtils.paginate;
+
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
@@ -7,9 +10,11 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Add
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.specification.AdditionalSkillProgressSpecification;
+import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,10 +42,6 @@ public class AdditionalSkillDatabaseProgressRepository
     }
   }
 
-  private AdditionalSkill getAdditionalSkillById(UUID additionalSkillId) {
-    return additionalSkillCache.findById(additionalSkillId);
-  }
-
   @Override
   public boolean additionalSkillProgressAlreadyExists(
       AdditionalSkillProgress additionalSkillProgress) {
@@ -48,5 +49,32 @@ public class AdditionalSkillDatabaseProgressRepository
         AdditionalSkillProgressSpecification.additionalSkillProgressAlreadyExists(
             additionalSkillProgress.getSkill().getId(),
             additionalSkillProgress.getStudent().getId()));
+  }
+
+  @Override
+  public PagedResult<AdditionalSkillProgress> findAllByStudent(
+      Student student, PageCriteria pageCriteria) {
+    List<AdditionalSkillProgressEntity> entities =
+        jpaRepository.findAll(
+            AdditionalSkillProgressSpecification.findAllByStudent(student.getId()));
+
+    List<AdditionalSkill> additionalSkills =
+        additionalSkillCache.findAllByIds(
+            entities.stream().map(AdditionalSkillProgressEntity::getAdditionalSkillId).toList());
+
+    List<AdditionalSkillProgress> progresses =
+        entities.stream()
+            .map(
+                entity ->
+                    AdditionalSkillProgressMapper.toDomain(
+                        entity,
+                        additionalSkills.stream()
+                            .filter(
+                                additionalSkill ->
+                                    additionalSkill.getId().equals(entity.getAdditionalSkillId()))
+                            .findFirst()
+                            .orElseThrow(AdditionalSkillNotFoundException::new)))
+            .toList();
+    return paginate(progresses, pageCriteria);
   }
 }
