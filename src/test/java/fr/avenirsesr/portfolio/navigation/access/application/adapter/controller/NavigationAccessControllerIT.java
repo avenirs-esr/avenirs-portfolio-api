@@ -66,7 +66,7 @@ class NavigationAccessControllerIT {
         .andExpect(jsonPath("$.LIFE_PROJECT").exists())
         .andExpect(jsonPath("$.APC.enabledByInstitution").value(true))
         .andExpect(jsonPath("$.APC.hasProgram").value(true))
-        .andExpect(jsonPath("$.LIFE_PROJECT.enabledByInstitution").value(true));
+        .andExpect(jsonPath("$.LIFE_PROJECT.enabledByInstitution").value(false));
   }
 
   @Test
@@ -115,6 +115,6 @@ class NavigationAccessControllerIT {
         .andExpect(jsonPath("$.LIFE_PROJECT").exists())
         .andExpect(jsonPath("$.APC.enabledByInstitution").value(true))
         .andExpect(jsonPath("$.APC.hasProgram").value(true))
-        .andExpect(jsonPath("$.LIFE_PROJECT.enabledByInstitution").value(true));
+        .andExpect(jsonPath("$.LIFE_PROJECT.enabledByInstitution").value(false));
   }
 }
