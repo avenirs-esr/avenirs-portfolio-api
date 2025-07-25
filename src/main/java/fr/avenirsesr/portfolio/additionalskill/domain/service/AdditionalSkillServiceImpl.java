@@ -25,8 +25,9 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
   private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
 
   @Override
-  public PagedResult<AdditionalSkill> getAdditionalSkills(PageCriteria pageCriteria) {
-    return additionalSkillCache.findAll(pageCriteria);
+  public PagedResult<AdditionalSkillProgress> getAdditionalSkillsProgresses(
+      Student student, PageCriteria pageCriteria) {
+    return additionalSkillProgressRepository.findAllByStudent(student, pageCriteria);
   }
 
   @Override

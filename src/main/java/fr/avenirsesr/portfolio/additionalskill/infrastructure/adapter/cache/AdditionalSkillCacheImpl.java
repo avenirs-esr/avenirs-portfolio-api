@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache;
 
+import static fr.avenirsesr.portfolio.shared.application.adapter.utils.PaginationUtils.paginate;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
@@ -8,7 +10,6 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkil
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.CompetenceComplementaireDetaillee;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import java.io.InputStream;
 import java.util.List;
@@ -56,16 +57,6 @@ public class AdditionalSkillCacheImpl implements AdditionalSkillCache {
     }
   }
 
-  private PagedResult<AdditionalSkill> paginate(
-      List<AdditionalSkill> skills, PageCriteria pageCriteria) {
-    int totalElements = skills.size();
-    int start = Math.min(pageCriteria.page() * pageCriteria.pageSize(), totalElements);
-    int end = Math.min(start + pageCriteria.pageSize(), totalElements);
-    List<AdditionalSkill> paginatedSkills = skills.subList(start, end);
-    return new PagedResult<>(
-        paginatedSkills, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skills.size()));
-  }
-
   @Override
   public AdditionalSkill findById(UUID id) {
     try (InputStream is = getClass().getResourceAsStream(JSON_PATH)) {
@@ -76,6 +67,20 @@ public class AdditionalSkillCacheImpl implements AdditionalSkillCache {
           .map(AdditionalSkillMapper::toDomain)
           .findFirst()
           .orElseThrow(AdditionalSkillNotFoundException::new);
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to load mock additional skills", e);
+    }
+  }
+
+  @Override
+  public List<AdditionalSkill> findAllByIds(List<UUID> ids) {
+    try (InputStream is = getClass().getResourceAsStream(JSON_PATH)) {
+      List<CompetenceComplementaireDetaillee> entities =
+          objectMapper.readValue(is, new TypeReference<>() {});
+      return entities.stream()
+          .filter(skill -> ids.contains(skill.id()))
+          .map(AdditionalSkillMapper::toDomain)
+          .toList();
     } catch (Exception e) {
       throw new RuntimeException("Unable to load mock additional skills", e);
     }
