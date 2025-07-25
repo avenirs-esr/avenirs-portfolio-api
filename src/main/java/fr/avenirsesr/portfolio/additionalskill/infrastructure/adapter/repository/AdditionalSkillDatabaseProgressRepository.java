@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository;
 
-import static fr.avenirsesr.portfolio.shared.application.adapter.utils.PaginationUtils.paginate;
-
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
@@ -11,10 +9,14 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.Add
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.specification.AdditionalSkillProgressSpecification;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -54,9 +56,10 @@ public class AdditionalSkillDatabaseProgressRepository
   @Override
   public PagedResult<AdditionalSkillProgress> findAllByStudent(
       Student student, PageCriteria pageCriteria) {
-    List<AdditionalSkillProgressEntity> entities =
+    Page<AdditionalSkillProgressEntity> entities =
         jpaRepository.findAll(
-            AdditionalSkillProgressSpecification.findAllByStudent(student.getId()));
+            AdditionalSkillProgressSpecification.hasStudent(UserMapper.fromDomain(student)),
+            PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
 
     List<AdditionalSkill> additionalSkills =
         additionalSkillCache.findAllByIds(
@@ -75,6 +78,8 @@ public class AdditionalSkillDatabaseProgressRepository
                             .findFirst()
                             .orElseThrow(AdditionalSkillNotFoundException::new)))
             .toList();
-    return paginate(progresses, pageCriteria);
+    return new PagedResult<>(
+        progresses,
+        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), entities.getTotalElements()));
   }
 }

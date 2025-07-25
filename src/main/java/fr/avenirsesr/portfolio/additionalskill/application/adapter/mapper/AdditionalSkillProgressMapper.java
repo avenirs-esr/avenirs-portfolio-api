@@ -8,7 +8,7 @@ public interface AdditionalSkillProgressMapper {
   static AdditionalSkillProgressDTO toAdditionalSkillProgressDTO(
       AdditionalSkillProgress additionalSkillProgress) {
     return new AdditionalSkillProgressDTO(
-        additionalSkillProgress.getId().toString(),
+        additionalSkillProgress.getId(),
         additionalSkillProgress.getSkill().getPathSegments().getSkill().getLibelle(),
         List.of(
             additionalSkillProgress.getSkill().getPathSegments().getIssue().getLibelle(),

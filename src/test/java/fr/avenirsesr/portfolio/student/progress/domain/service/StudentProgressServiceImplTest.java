@@ -340,7 +340,7 @@ public class StudentProgressServiceImplTest {
         .thenReturn(List.of(currentProgress));
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
-    PageCriteria pageCriteria = new PageCriteria(1, 1); // 1 élément par page
+    PageCriteria pageCriteria = new PageCriteria(0, 1); // 1 élément par page
 
     // When
     PagedResult<SkillProgress> result =
@@ -358,7 +358,7 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of());
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
-    PageCriteria pageCriteria = new PageCriteria(1, 5);
+    PageCriteria pageCriteria = new PageCriteria(0, 5);
 
     // When
     PagedResult<SkillProgress> result =
@@ -401,7 +401,7 @@ public class StudentProgressServiceImplTest {
         .thenReturn(List.of(pastProgress, futureProgress));
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
-    PageCriteria pageCriteria = new PageCriteria(1, 10);
+    PageCriteria pageCriteria = new PageCriteria(0, 10);
 
     // When
     PagedResult<SkillProgress> result =
@@ -439,7 +439,7 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
-    PageCriteria pageCriteria = new PageCriteria(1, 5);
+    PageCriteria pageCriteria = new PageCriteria(0, 5);
 
     // When
     PagedResult<SkillProgress> result =
@@ -482,7 +482,7 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
-    PageCriteria pageCriteria = new PageCriteria(2, 2); // second page, 2 per page
+    PageCriteria pageCriteria = new PageCriteria(1, 2); // second page, 2 per page
 
     // When
     PagedResult<SkillProgress> result =
@@ -491,7 +491,7 @@ public class StudentProgressServiceImplTest {
     // Then
     assertEquals(1, result.content().size(), "Second page should contain only the last element");
     assertEquals(3, result.pageInfo().totalElements(), "Total elements should be 3");
-    assertEquals(2, result.pageInfo().page(), "Current page should be 2");
+    assertEquals(1, result.pageInfo().page(), "Current page should be 1");
   }
 
   @Test
@@ -524,7 +524,7 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
-    PageCriteria pageCriteria = new PageCriteria(1, 2); // limit to 2 elements
+    PageCriteria pageCriteria = new PageCriteria(0, 2); // limit to 2 elements
 
     // When
     PagedResult<SkillProgress> result =
@@ -566,7 +566,7 @@ public class StudentProgressServiceImplTest {
         .thenReturn(List.of(finishedProgress, currentProgress));
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
-    PageCriteria pageCriteria = new PageCriteria(1, 10);
+    PageCriteria pageCriteria = new PageCriteria(0, 10);
 
     // When
     PagedResult<SkillProgress> result =
