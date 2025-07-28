@@ -43,8 +43,8 @@ public abstract class GenericJpaRepositoryAdapter&lt;D, E&gt; implements Generic
 
   @Override
   public Optional&lt;D&gt; findById(UUID id) {
-<span class="fc" id="L46">    E entity = jpaRepository.findById(id).orElse(null);</span>
-<span class="fc bfc" id="L47" title="All 2 branches covered.">    return entity == null ? Optional.empty() : Optional.of(toDomain.apply(entity));</span>
+<span class="nc" id="L46">    E entity = jpaRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">    return entity == null ? Optional.empty() : Optional.of(toDomain.apply(entity));</span>
   }
 
   @Override

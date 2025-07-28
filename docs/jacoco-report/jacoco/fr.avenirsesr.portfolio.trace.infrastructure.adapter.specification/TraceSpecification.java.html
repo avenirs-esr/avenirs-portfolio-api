@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 <span class="nc" id="L13">public class TraceSpecification {</span>
   public static Specification&lt;TraceEntity&gt; ofUser(UserEntity user) {
-<span class="fc" id="L15">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;user&quot;), user);</span>
+<span class="nc" id="L15">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;user&quot;), user);</span>
   }
 
   public static Specification&lt;TraceEntity&gt; unassociated() {

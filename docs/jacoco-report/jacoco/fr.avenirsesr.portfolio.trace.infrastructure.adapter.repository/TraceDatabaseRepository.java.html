@@ -25,14 +25,14 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Trac
 
   @Override
   public List&lt;Trace&gt; findLastsOf(User user, int limit) {
-<span class="fc" id="L28">    return jpaSpecificationExecutor</span>
-<span class="fc" id="L29">        .findAll(</span>
-<span class="fc" id="L30">            TraceSpecification.ofUser(UserMapper.fromDomain(user)),</span>
-<span class="fc" id="L31">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
-<span class="fc" id="L32">        .getContent()</span>
-<span class="fc" id="L33">        .stream()</span>
-<span class="fc" id="L34">        .map(TraceMapper::toDomain)</span>
-<span class="fc" id="L35">        .toList();</span>
+<span class="nc" id="L28">    return jpaSpecificationExecutor</span>
+<span class="nc" id="L29">        .findAll(</span>
+<span class="nc" id="L30">            TraceSpecification.ofUser(UserMapper.fromDomain(user)),</span>
+<span class="nc" id="L31">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
+<span class="nc" id="L32">        .getContent()</span>
+<span class="nc" id="L33">        .stream()</span>
+<span class="nc" id="L34">        .map(TraceMapper::toDomain)</span>
+<span class="nc" id="L35">        .toList();</span>
   }
 
   @Override
