@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.user.domain.service</a> &gt; <span class="el_source">UserServiceImpl.java</span></div><h1>UserServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.user.domain.service;
 
-import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
-import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
+import fr.avenirsesr.portfolio.shared.domain.exception.BadImageSizeException;
+import fr.avenirsesr.portfolio.shared.domain.exception.BadImageTypeException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.model.Teacher;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.port.input.RessourceService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.RessourceRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -16,7 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L21">@Slf4j</span>
 @AllArgsConstructor
 @Service
 public class UserServiceImpl implements UserService {
@@ -24,84 +26,94 @@ public class UserServiceImpl implements UserService {
   public static final long MAX_SIZE = 10 * 1024 * 1024; // 10 Mo
 
   private final UserRepository userRepository;
-  private final RessourceRepository ressourceRepository;
+  private final RessourceService ressourceService;
 
   @Override
   public User getProfile(UUID id) {
-<span class="nc" id="L31">    return getUser(id);</span>
+<span class="nc" id="L33">    return getUser(id);</span>
   }
 
   @Override
-  public void updateProfile(UUID id, String firstname, String lastname, String email, String bio) {
-<span class="fc" id="L36">    User user = getUser(id);</span>
+  public void updateProfile(
+      User user,
+      @NotNull String firstname,
+      @NotNull String lastname,
+      String email,
+      String bio,
+      String profilePictureUrl,
+      String coverPictureUrl) {
+<span class="fc" id="L45">    user.setFirstName(firstname);</span>
+<span class="fc" id="L46">    user.setLastName(lastname);</span>
 
-<span class="fc bfc" id="L38" title="All 2 branches covered.">    if (firstname != null) {</span>
-<span class="fc" id="L39">      user.setFirstName(firstname);</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">    if (email != null) {</span>
+<span class="fc" id="L49">      user.setEmail(email);</span>
     }
 
-<span class="fc bfc" id="L42" title="All 2 branches covered.">    if (lastname != null) {</span>
-<span class="fc" id="L43">      user.setLastName(lastname);</span>
+<span class="fc" id="L52">    userRepository.save(user);</span>
+
+<span class="fc" id="L54">    Student student = user.toStudent();</span>
+
+<span class="fc bfc" id="L56" title="All 2 branches covered.">    if (bio != null) {</span>
+<span class="fc" id="L57">      student.setBio(bio);</span>
     }
 
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">    if (email != null) {</span>
-<span class="fc" id="L47">      user.setEmail(email);</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">    if (profilePictureUrl != null) {</span>
+<span class="fc" id="L61">      student.setProfilePicture(profilePictureUrl);</span>
     }
 
-<span class="fc" id="L50">    userRepository.save(user);</span>
-
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">    if (bio != null) {</span>
-<span class="fc" id="L53">      Student student = user.toStudent();</span>
-<span class="fc" id="L54">      student.setBio(bio);</span>
-<span class="fc" id="L55">      userRepository.save(student);</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">    if (coverPictureUrl != null) {</span>
+<span class="fc" id="L65">      student.setCoverPicture(coverPictureUrl);</span>
     }
-<span class="fc" id="L57">  }</span>
-
-  @Override
-  public void updateProfilePicture(UUID id, MultipartFile photoFile) throws IOException {
-<span class="fc" id="L61">    User user = getUser(id);</span>
-
-<span class="fc" id="L63">    checkImageFormat(photoFile);</span>
-<span class="fc" id="L64">    String profilePicturePath = ressourceRepository.storeStudentProfilePicture(id, photoFile);</span>
-<span class="fc" id="L65">    Student student = user.toStudent();</span>
-<span class="fc" id="L66">    student.setProfilePicture(profilePicturePath);</span>
 
 <span class="fc" id="L68">    userRepository.save(student);</span>
 <span class="fc" id="L69">  }</span>
 
   @Override
-  public void updateCoverPicture(UUID id, MultipartFile coverFile) throws IOException {
-<span class="fc" id="L73">    User user = getUser(id);</span>
+  public String uploadProfilePicture(Student student, MultipartFile photoFile) throws IOException {
+<span class="fc" id="L73">    checkImageFormat(photoFile);</span>
+<span class="fc" id="L74">    return ressourceService.uploadProfilePicture(student, photoFile);</span>
+  }
 
-<span class="fc" id="L75">    checkImageFormat(coverFile);</span>
-<span class="fc" id="L76">    String coverPicturePath = ressourceRepository.storeStudentCoverPicture(id, coverFile);</span>
-<span class="fc" id="L77">    Student student = user.toStudent();</span>
-<span class="fc" id="L78">    student.setCoverPicture(coverPicturePath);</span>
+  @Override
+  public String uploadProfilePicture(Teacher teacher, MultipartFile photoFile) throws IOException {
+<span class="nc" id="L79">    checkImageFormat(photoFile);</span>
+<span class="nc" id="L80">    return ressourceService.uploadProfilePicture(teacher, photoFile);</span>
+  }
 
-<span class="fc" id="L80">    userRepository.save(student);</span>
-<span class="fc" id="L81">  }</span>
+  @Override
+  public String uploadCoverPicture(Student student, MultipartFile coverFile) throws IOException {
+<span class="fc" id="L85">    checkImageFormat(coverFile);</span>
+<span class="fc" id="L86">    return ressourceService.uploadCoverPicture(student, coverFile);</span>
+  }
+
+  @Override
+  public String uploadCoverPicture(Teacher teacher, MultipartFile coverFile) throws IOException {
+<span class="nc" id="L91">    checkImageFormat(coverFile);</span>
+<span class="nc" id="L92">    return ressourceService.uploadCoverPicture(teacher, coverFile);</span>
+  }
 
   private User getUser(UUID id) {
-<span class="fc" id="L84">    var user = userRepository.findById(id);</span>
+<span class="fc" id="L96">    var user = userRepository.findById(id);</span>
 
-<span class="fc bfc" id="L86" title="All 2 branches covered.">    if (user.isEmpty()) {</span>
-<span class="fc" id="L87">      log.error(&quot;User {} not found&quot;, id);</span>
-<span class="fc" id="L88">      throw new UserNotFoundException();</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">    if (user.isEmpty()) {</span>
+<span class="fc" id="L99">      log.error(&quot;User {} not found&quot;, id);</span>
+<span class="fc" id="L100">      throw new UserNotFoundException();</span>
     }
-<span class="fc" id="L90">    return user.get();</span>
+<span class="nc" id="L102">    return user.get();</span>
   }
 
   private void checkImageFormat(MultipartFile file) {
-<span class="fc" id="L94">    String contentType = file.getContentType();</span>
-<span class="fc" id="L95">    long contentSize = file.getSize();</span>
+<span class="fc" id="L106">    String contentType = file.getContentType();</span>
+<span class="fc" id="L107">    long contentSize = file.getSize();</span>
 
-<span class="fc bfc" id="L97" title="All 2 branches covered.">    if (!contentType.equals(MediaType.IMAGE_JPEG_VALUE)</span>
-<span class="pc bpc" id="L98" title="1 of 2 branches missed.">        &amp;&amp; !contentType.equals(MediaType.IMAGE_PNG_VALUE)) {</span>
-<span class="fc" id="L99">      throw new FileTypeNotSupportedException();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">    if (!contentType.equals(MediaType.IMAGE_JPEG_VALUE)</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        &amp;&amp; !contentType.equals(MediaType.IMAGE_PNG_VALUE)) {</span>
+<span class="fc" id="L111">      throw new BadImageTypeException();</span>
     }
 
-<span class="fc bfc" id="L102" title="All 2 branches covered.">    if (contentSize &gt; MAX_SIZE) {</span>
-<span class="fc" id="L103">      throw new FileSizeTooBigException();</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">    if (contentSize &gt; MAX_SIZE) {</span>
+<span class="fc" id="L115">      throw new BadImageSizeException();</span>
     }
-<span class="fc" id="L105">  }</span>
+<span class="fc" id="L117">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
