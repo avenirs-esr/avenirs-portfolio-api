@@ -1,8 +1,10 @@
-package fr.avenirsesr.portfolio.shared.domain.model.enums;
+package fr.avenirsesr.portfolio.file.domain.model.enums;
 
-import fr.avenirsesr.portfolio.shared.domain.model.FileSize;
+import fr.avenirsesr.portfolio.file.domain.model.FileSize;
 import java.util.Arrays;
+import lombok.Getter;
 
+@Getter
 public enum EFileType {
   // Images
   PNG(FileSize.of(5, FileSize.Unit.Mo), "image/png"),
@@ -80,14 +82,6 @@ public enum EFileType {
   EFileType(FileSize sizeLimit, String mimeType) {
     this.mimeType = mimeType;
     this.sizeLimit = sizeLimit;
-  }
-
-  public FileSize getSizeLimit() {
-    return sizeLimit;
-  }
-
-  public String getMimeType() {
-    return mimeType;
   }
 
   public static EFileType fromMimeType(String mimeType) {

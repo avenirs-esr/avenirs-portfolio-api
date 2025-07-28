@@ -2,9 +2,9 @@ package fr.avenirsesr.portfolio.shared.application.adapter.exception;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
+import fr.avenirsesr.portfolio.file.domain.exception.BadImageSizeException;
+import fr.avenirsesr.portfolio.file.domain.exception.BadImageTypeException;
 import fr.avenirsesr.portfolio.shared.application.adapter.response.ErrorResponse;
-import fr.avenirsesr.portfolio.shared.domain.exception.BadImageSizeException;
-import fr.avenirsesr.portfolio.shared.domain.exception.BadImageTypeException;
 import fr.avenirsesr.portfolio.shared.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.StudentProgressNotFoundException;

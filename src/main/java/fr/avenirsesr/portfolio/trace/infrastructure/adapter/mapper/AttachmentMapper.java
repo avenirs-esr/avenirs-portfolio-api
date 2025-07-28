@@ -1,24 +1,24 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper;
 
-import fr.avenirsesr.portfolio.trace.domain.model.Attachment;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.AttachmentEntity;
+import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 
 public interface AttachmentMapper {
-  static AttachmentEntity fromDomain(Attachment attachment) {
-    return AttachmentEntity.of(
-        attachment.getId(),
-        TraceMapper.fromDomain(attachment.getTrace()),
-        attachment.getName(),
-        attachment.getAttachmentType(),
-        attachment.getSize(),
-        attachment.getVersion(),
-        attachment.isActiveVersion(),
-        attachment.getUploadedAt(),
-        attachment.getUri());
+  static TraceAttachmentEntity fromDomain(TraceAttachment traceAttachment) {
+    return TraceAttachmentEntity.of(
+        traceAttachment.getId(),
+        TraceMapper.fromDomain(traceAttachment.getTrace()),
+        traceAttachment.getName(),
+        traceAttachment.getAttachmentType(),
+        traceAttachment.getSize(),
+        traceAttachment.getVersion(),
+        traceAttachment.isActiveVersion(),
+        traceAttachment.getUploadedAt(),
+        traceAttachment.getUri());
   }
 
-  static Attachment toDomain(AttachmentEntity entity) {
-    return Attachment.toDomain(
+  static TraceAttachment toDomain(TraceAttachmentEntity entity) {
+    return TraceAttachment.toDomain(
         entity.getId(),
         TraceMapper.toDomain(entity.getTrace()),
         entity.getName(),

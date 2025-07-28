@@ -1,7 +1,8 @@
-package fr.avenirsesr.portfolio.trace.domain.model;
+package fr.avenirsesr.portfolio.file.domain.model;
 
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
@@ -9,17 +10,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Attachment extends AvenirsBaseModel {
+public class TraceAttachment extends File {
   private final Trace trace;
   private final String name;
-  private final EFileType attachmentType;
-  private final long size;
-  private final int version;
-  private boolean isActiveVersion;
-  private final Instant uploadedAt;
-  private final String uri;
 
-  private Attachment(
+  private TraceAttachment(
       UUID id,
       Trace trace,
       String name,
@@ -29,18 +24,12 @@ public class Attachment extends AvenirsBaseModel {
       boolean isActiveVersion,
       Instant uploadedAt,
       String uri) {
-    super(id);
+    super(id, attachmentType, size, version, isActiveVersion, uploadedAt, uri);
     this.trace = trace;
     this.name = name;
-    this.attachmentType = attachmentType;
-    this.size = size;
-    this.version = version;
-    this.isActiveVersion = isActiveVersion;
-    this.uploadedAt = uploadedAt;
-    this.uri = uri;
   }
 
-  public static Attachment create(
+  public static TraceAttachment create(
       UUID id,
       Trace trace,
       String name,
@@ -49,11 +38,11 @@ public class Attachment extends AvenirsBaseModel {
       int version,
       boolean isActiveVersion,
       String uri) {
-    return new Attachment(
+    return new TraceAttachment(
         id, trace, name, attachmentType, size, version, isActiveVersion, Instant.now(), uri);
   }
 
-  public static Attachment toDomain(
+  public static TraceAttachment toDomain(
       UUID id,
       Trace trace,
       String name,
@@ -63,7 +52,7 @@ public class Attachment extends AvenirsBaseModel {
       boolean isActiveVersion,
       Instant uploadedAt,
       String uri) {
-    return new Attachment(
+    return new TraceAttachment(
         id, trace, name, attachmentType, size, version, isActiveVersion, uploadedAt, uri);
   }
 }

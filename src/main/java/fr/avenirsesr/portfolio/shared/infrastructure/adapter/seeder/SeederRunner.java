@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.TraceAttachmentSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
@@ -25,6 +26,7 @@ public class SeederRunner implements CommandLineRunner {
   private final CohortSeeder cohortSeeder;
   private final AMSSeeder amsSeeder;
   private final TraceSeeder traceSeeder;
+  private final TraceAttachmentSeeder traceAttachmentSeeder;
   private final InstitutionSeeder institutionSeeder;
   private final ProgramSeeder programSeeder;
   private final TrainingPathSeeder trainingPathSeeder;
@@ -41,6 +43,7 @@ public class SeederRunner implements CommandLineRunner {
       CohortSeeder cohortSeeder,
       AMSSeeder amsSeeder,
       TraceSeeder traceSeeder,
+      TraceAttachmentSeeder traceAttachmentSeeder,
       InstitutionSeeder institutionSeeder,
       ProgramSeeder programSeeder,
       TrainingPathSeeder trainingPathSeeder,
@@ -52,6 +55,7 @@ public class SeederRunner implements CommandLineRunner {
     this.amsSeeder = amsSeeder;
     this.traceSeeder = traceSeeder;
     this.userSeeder = userSeeder;
+    this.traceAttachmentSeeder = traceAttachmentSeeder;
     this.institutionSeeder = institutionSeeder;
     this.programSeeder = programSeeder;
     this.trainingPathSeeder = trainingPathSeeder;
@@ -71,6 +75,7 @@ public class SeederRunner implements CommandLineRunner {
       var savedInstitutions = institutionSeeder.seed();
       var savedPrograms = programSeeder.seed(savedInstitutions);
       var savedTraces = traceSeeder.seed(savedUsers);
+      var savedTracesAttachment = traceAttachmentSeeder.seed(savedTraces);
       var savedSkillLevels = skillSeeder.seed(savedPrograms);
       var savedSkills =
           savedSkillLevels.stream().map(SkillLevelEntity::getSkill).distinct().toList();

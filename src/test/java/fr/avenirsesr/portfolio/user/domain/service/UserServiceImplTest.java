@@ -6,8 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import fr.avenirsesr.portfolio.shared.domain.exception.BadImageSizeException;
-import fr.avenirsesr.portfolio.shared.domain.exception.BadImageTypeException;
+import fr.avenirsesr.portfolio.file.domain.exception.BadImageSizeException;
+import fr.avenirsesr.portfolio.file.domain.exception.BadImageTypeException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.RessourceService;

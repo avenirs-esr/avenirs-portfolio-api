@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.shared.application.adapter.utils;
 
-import fr.avenirsesr.portfolio.shared.domain.exception.BadImageTypeException;
+import fr.avenirsesr.portfolio.file.domain.exception.BadImageTypeException;
 import org.springframework.http.MediaType;
 
 public class RessourceUtils {

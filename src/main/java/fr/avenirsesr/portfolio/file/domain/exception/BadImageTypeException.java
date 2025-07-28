@@ -1,5 +1,6 @@
-package fr.avenirsesr.portfolio.shared.domain.exception;
+package fr.avenirsesr.portfolio.file.domain.exception;
 
+import fr.avenirsesr.portfolio.shared.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
 
 public class BadImageTypeException extends BusinessException {

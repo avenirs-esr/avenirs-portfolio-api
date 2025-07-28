@@ -1,7 +1,8 @@
-package fr.avenirsesr.portfolio.trace.infrastructure.adapter.model;
+package fr.avenirsesr.portfolio.file.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,11 +16,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "attachment")
+@Table(name = "trace_attachment")
 @NoArgsConstructor
 @Getter
 @Setter
-public class AttachmentEntity extends AvenirsBaseEntity {
+public class TraceAttachmentEntity extends AvenirsBaseEntity {
 
   @ManyToOne(optional = false)
   private TraceEntity trace;
@@ -46,7 +47,7 @@ public class AttachmentEntity extends AvenirsBaseEntity {
   @Column(nullable = false)
   private String uri;
 
-  private AttachmentEntity(
+  private TraceAttachmentEntity(
       UUID id,
       TraceEntity trace,
       String name,
@@ -67,7 +68,7 @@ public class AttachmentEntity extends AvenirsBaseEntity {
     this.uri = uri;
   }
 
-  public static AttachmentEntity of(
+  public static TraceAttachmentEntity of(
       UUID id,
       TraceEntity trace,
       String name,
@@ -77,7 +78,7 @@ public class AttachmentEntity extends AvenirsBaseEntity {
       boolean isActiveVersion,
       Instant uploadedAt,
       String uri) {
-    return new AttachmentEntity(
+    return new TraceAttachmentEntity(
         id, trace, name, attachmentType, size, version, isActiveVersion, uploadedAt, uri);
   }
 }

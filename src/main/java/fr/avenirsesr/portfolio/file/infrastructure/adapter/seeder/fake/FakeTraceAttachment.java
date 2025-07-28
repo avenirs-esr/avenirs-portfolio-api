@@ -1,23 +1,23 @@
-package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake;
+package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.shared.infrastructure.configuration.FileStorageConfig;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.AttachmentEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.time.Instant;
 import java.util.UUID;
 import net.datafaker.Faker;
 
-public class FakeAttachment {
+public class FakeTraceAttachment {
   private static final Faker faker = new FakerProvider().call();
-  private final AttachmentEntity attachment;
+  private final TraceAttachmentEntity attachment;
 
-  private FakeAttachment(AttachmentEntity attachment) {
+  private FakeTraceAttachment(TraceAttachmentEntity attachment) {
     this.attachment = attachment;
   }
 
-  public static FakeAttachment of(TraceEntity trace) {
+  public static FakeTraceAttachment of(TraceEntity trace) {
     var fileType =
         faker
             .options()
@@ -32,8 +32,8 @@ public class FakeAttachment {
                 EFileType.DOC,
                 EFileType.XLS);
     var id = UUID.fromString(faker.internet().uuid());
-    return new FakeAttachment(
-        AttachmentEntity.of(
+    return new FakeTraceAttachment(
+        TraceAttachmentEntity.of(
             id,
             trace,
             faker.file().fileName("", null, fileType.name().toLowerCase(), ""),
@@ -45,37 +45,37 @@ public class FakeAttachment {
             "%s/traces/%s".formatted(FileStorageConfig.BASE_URL, id)));
   }
 
-  public FakeAttachment withIsActiveVersion(boolean isActiveVersion) {
+  public FakeTraceAttachment withIsActiveVersion(boolean isActiveVersion) {
     attachment.setActiveVersion(isActiveVersion);
     return this;
   }
 
-  public FakeAttachment withVersion(int version) {
+  public FakeTraceAttachment withVersion(int version) {
     attachment.setVersion(version);
     return this;
   }
 
-  public FakeAttachment withUploadedAt(Instant uploadedAt) {
+  public FakeTraceAttachment withUploadedAt(Instant uploadedAt) {
     attachment.setUploadedAt(uploadedAt);
     return this;
   }
 
-  public FakeAttachment withUri(String uri) {
+  public FakeTraceAttachment withUri(String uri) {
     attachment.setUri(uri);
     return this;
   }
 
-  public FakeAttachment withSize(long size) {
+  public FakeTraceAttachment withSize(long size) {
     attachment.setSize(size);
     return this;
   }
 
-  public FakeAttachment withAttachmentType(EFileType type) {
+  public FakeTraceAttachment withAttachmentType(EFileType type) {
     attachment.setAttachmentType(type);
     return this;
   }
 
-  public AttachmentEntity toEntity() {
+  public TraceAttachmentEntity toEntity() {
     return attachment;
   }
 }
