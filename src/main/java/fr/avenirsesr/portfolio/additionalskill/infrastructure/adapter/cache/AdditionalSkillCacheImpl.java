@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.Comp
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
@@ -76,7 +77,7 @@ public class AdditionalSkillCacheImpl implements AdditionalSkillCache {
           .map(AdditionalSkillMapper::toDomain)
           .findFirst()
           .orElseThrow(AdditionalSkillNotFoundException::new);
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Unable to load mock additional skills", e);
     }
   }
@@ -90,7 +91,7 @@ public class AdditionalSkillCacheImpl implements AdditionalSkillCache {
           .filter(skill -> ids.contains(skill.id()))
           .map(AdditionalSkillMapper::toDomain)
           .toList();
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new RuntimeException("Unable to load mock additional skills", e);
     }
   }

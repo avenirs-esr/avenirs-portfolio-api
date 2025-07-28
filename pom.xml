@@ -156,6 +156,10 @@
                         <exclude>**/exception/*</exclude>
                         <exclude>**/config/*</exclude>
                         <exclude>**/configuration/**</exclude>
+                        <exclude>**/seeder/**</exclude>
+                        <exclude>**/request/**</exclude>
+                        <exclude>**/response/**</exclude>
+                        <exclude>**/model/**</exclude>
                     </excludes>
                     <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
                 </configuration>

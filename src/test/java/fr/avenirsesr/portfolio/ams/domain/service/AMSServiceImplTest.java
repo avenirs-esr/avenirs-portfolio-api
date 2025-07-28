@@ -14,10 +14,14 @@ import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,22 +34,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AMSServiceImplTest {
 
   @Mock private AMSRepository amsRepository;
+  @Mock private StudentProgressRepository studentProgressRepository;
 
   @InjectMocks private AMSServiceImpl amsService;
 
   private Student student;
   private UUID studentId;
-  private UUID programProgressId;
+  private UUID studentProgressId;
   private static final Integer DEFAULT_PAGE = 1;
   private static final Integer DEFAULT_SIZE = 10;
   private static final PageCriteria DEFAULT_PAGE_CRITERIA =
       new PageCriteria(DEFAULT_PAGE, DEFAULT_SIZE);
+  private StudentProgress studentProgress;
 
   @BeforeEach
   void setUp() {
     student = UserFixture.createStudent().toModel().toStudent();
     studentId = student.getId();
-    programProgressId = UUID.randomUUID();
+    studentProgressId = UUID.randomUUID();
+    studentProgress = StudentProgressFixture.create().toModel();
   }
 
   @Test
@@ -55,13 +62,15 @@ class AMSServiceImplTest {
     PagedResult<AMS> expectedResult =
         new PagedResult<>(amsList, new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 3));
 
-    when(amsRepository.findByUserIdViaCohortsAndProgramProgressId(
-            any(UUID.class), eq(programProgressId), eq(DEFAULT_PAGE_CRITERIA)))
+    when(amsRepository.findByUserIdViaCohortsAndSkillLevelProgresses(
+            any(UUID.class), any(), eq(DEFAULT_PAGE_CRITERIA)))
         .thenReturn(expectedResult);
+    when(studentProgressRepository.findById(eq(studentProgressId)))
+        .thenReturn(Optional.of(studentProgress));
 
     // When
     PagedResult<AMS> result =
-        amsService.findUserAmsByProgramProgress(student, programProgressId, DEFAULT_PAGE_CRITERIA);
+        amsService.findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA);
 
     // Then
     assertNotNull(result);
@@ -70,8 +79,8 @@ class AMSServiceImplTest {
     assertEquals(DEFAULT_PAGE, result.pageInfo().page());
     assertEquals(DEFAULT_SIZE, result.pageInfo().pageSize());
     verify(amsRepository)
-        .findByUserIdViaCohortsAndProgramProgressId(
-            any(UUID.class), eq(programProgressId), eq(DEFAULT_PAGE_CRITERIA));
+        .findByUserIdViaCohortsAndSkillLevelProgresses(
+            any(UUID.class), any(), eq(DEFAULT_PAGE_CRITERIA));
   }
 
   @Test
@@ -80,13 +89,15 @@ class AMSServiceImplTest {
     PagedResult<AMS> expectedResult =
         new PagedResult<>(new ArrayList<>(), new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 0));
 
-    when(amsRepository.findByUserIdViaCohortsAndProgramProgressId(
-            any(UUID.class), eq(programProgressId), eq(DEFAULT_PAGE_CRITERIA)))
+    when(amsRepository.findByUserIdViaCohortsAndSkillLevelProgresses(
+            any(UUID.class), any(), eq(DEFAULT_PAGE_CRITERIA)))
         .thenReturn(expectedResult);
+    when(studentProgressRepository.findById(eq(studentProgressId)))
+        .thenReturn(Optional.of(studentProgress));
 
     // When
     PagedResult<AMS> result =
-        amsService.findUserAmsByProgramProgress(student, programProgressId, DEFAULT_PAGE_CRITERIA);
+        amsService.findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA);
 
     // Then
     assertNotNull(result);
@@ -95,8 +106,8 @@ class AMSServiceImplTest {
     assertEquals(DEFAULT_PAGE, result.pageInfo().page());
     assertEquals(DEFAULT_SIZE, result.pageInfo().pageSize());
     verify(amsRepository)
-        .findByUserIdViaCohortsAndProgramProgressId(
-            any(UUID.class), eq(programProgressId), eq(DEFAULT_PAGE_CRITERIA));
+        .findByUserIdViaCohortsAndSkillLevelProgresses(
+            any(UUID.class), any(), eq(DEFAULT_PAGE_CRITERIA));
   }
 
   @Test
@@ -107,14 +118,16 @@ class AMSServiceImplTest {
     List<AMS> amsList = AMSFixture.create().withCount(5);
     PagedResult<AMS> expectedResult = new PagedResult<>(amsList, new PageInfo(page, size, 15));
 
-    when(amsRepository.findByUserIdViaCohortsAndProgramProgressId(
-            any(UUID.class), eq(programProgressId), eq(new PageCriteria(page, size))))
+    when(amsRepository.findByUserIdViaCohortsAndSkillLevelProgresses(
+            any(UUID.class), any(), eq(new PageCriteria(page, size))))
         .thenReturn(expectedResult);
+    when(studentProgressRepository.findById(eq(studentProgressId)))
+        .thenReturn(Optional.of(studentProgress));
 
     // When
     PagedResult<AMS> result =
-        amsService.findUserAmsByProgramProgress(
-            student, programProgressId, new PageCriteria(page, size));
+        amsService.findUserAmsByStudentProgress(
+            student, studentProgressId, new PageCriteria(page, size));
 
     // Then
     assertNotNull(result);
@@ -123,8 +136,8 @@ class AMSServiceImplTest {
     assertEquals(page, result.pageInfo().page());
     assertEquals(size, result.pageInfo().pageSize());
     verify(amsRepository)
-        .findByUserIdViaCohortsAndProgramProgressId(
-            any(UUID.class), eq(programProgressId), eq(new PageCriteria(page, size)));
+        .findByUserIdViaCohortsAndSkillLevelProgresses(
+            any(UUID.class), any(), eq(new PageCriteria(page, size)));
   }
 
   @Test
@@ -133,14 +146,16 @@ class AMSServiceImplTest {
     List<AMS> amsList = AMSFixture.create().withCount(3);
     PagedResult<AMS> expectedResult = new PagedResult<>(amsList, new PageInfo(0, 8, 3));
 
-    when(amsRepository.findByUserIdViaCohortsAndProgramProgressId(
-            any(UUID.class), eq(programProgressId), eq(new PageCriteria(0, 8))))
+    when(amsRepository.findByUserIdViaCohortsAndSkillLevelProgresses(
+            any(UUID.class), any(), eq(new PageCriteria(0, 8))))
         .thenReturn(expectedResult);
+    when(studentProgressRepository.findById(eq(studentProgressId)))
+        .thenReturn(Optional.of(studentProgress));
 
     // When
     PagedResult<AMS> result =
-        amsService.findUserAmsByProgramProgress(
-            student, programProgressId, new PageCriteria(null, null));
+        amsService.findUserAmsByStudentProgress(
+            student, studentProgressId, new PageCriteria(null, null));
 
     // Then
     assertNotNull(result);
@@ -149,7 +164,7 @@ class AMSServiceImplTest {
     assertEquals(0, result.pageInfo().page());
     assertEquals(8, result.pageInfo().pageSize());
     verify(amsRepository)
-        .findByUserIdViaCohortsAndProgramProgressId(
-            any(UUID.class), eq(programProgressId), eq(new PageCriteria(0, 8)));
+        .findByUserIdViaCohortsAndSkillLevelProgresses(
+            any(UUID.class), any(), eq(new PageCriteria(0, 8)));
   }
 }

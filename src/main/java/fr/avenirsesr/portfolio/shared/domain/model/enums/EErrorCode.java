@@ -22,6 +22,7 @@ public enum EErrorCode {
   ADDITIONAL_SKILL_NOT_AVAILABLE("Additional skill not available"),
   ADDITIONAL_SKILL_NOT_FOUND("Additional skill not found"),
   STUDENT_ADDITIONAL_ALREADY_EXIST("This additional skill is already assigned to the student"),
+  STUDENT_PROGRESS_NOT_FOUND("Student progress not found"),
   ;
 
   private final String message;

@@ -45,4 +45,17 @@ public interface SkillLevelProgressMapper {
         entity.getTraces().stream().map(TraceMapper::toDomain).toList(),
         ameses);
   }
+
+  static SkillLevelProgress toDomainWithoutRecursion(
+      SkillLevelProgressEntity entity, List<AMS> ameses) {
+    return SkillLevelProgress.toDomain(
+        entity.getId(),
+        UserMapper.toDomain(entity.getStudent()).toStudent(),
+        SkillLevelMapper.toDomain(entity.getSkillLevel()),
+        entity.getStatus(),
+        entity.getStartDate(),
+        entity.getEndDate(),
+        entity.getTraces().stream().map(TraceMapper::toDomainWithoutRecursion).toList(),
+        ameses);
+  }
 }

@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.secutity.configuration;
+package fr.avenirsesr.portfolio.security.infrastructure.configuration;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;

@@ -9,6 +9,8 @@ import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -28,12 +30,17 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
   }
 
   @Override
-  public PagedResult<AMS> findByUserIdViaCohortsAndProgramProgressId(
-      UUID userId, UUID programProgressId, PageCriteria pageCriteria) {
+  public PagedResult<AMS> findByUserIdViaCohortsAndSkillLevelProgresses(
+      UUID userId, List<SkillLevelProgress> skillLevelProgresses, PageCriteria pageCriteria) {
     Specification<AMSEntity> spec = AMSSpecification.belongsToUserViaCohorts(userId);
 
-    if (programProgressId != null) {
-      spec = spec.and(AMSSpecification.hasProgramProgressId(programProgressId));
+    if (!skillLevelProgresses.isEmpty()) {
+      spec =
+          spec.and(
+              AMSSpecification.hasSkillLevelProgress(
+                  skillLevelProgresses.stream()
+                      .map(SkillLevelProgressMapper::fromDomain)
+                      .toList()));
     }
 
     Page<AMSEntity> pageResult =
