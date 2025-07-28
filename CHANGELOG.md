@@ -5,7 +5,17 @@ the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
 and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
--## [v1.3.4] - 2025-07-23
+
+## [v1.3.5] - 2025-07-28
+
+- ✨ **Added endpoint for uploading attachments to traces**
+  - Introduced a feature to associate an attachment with an existing trace, in a two-step process: creating the trace and retrieving its ID, then uploading the associated file via a new dedicated endpoint.
+  - Added a new `feature/file` folder containing abstract classes to facilitate future externalization of file upload handling into a dedicated microservice, reusable for both trace attachments and profile photos.
+  - Defined the list of supported file types based on [MimeTypes.txt](https://github.com/GIP-RECIA/esup-publisher/blob/main/src/main/resources/MimeTypes.txt).
+  - Configured upload size limit to 50MB via Spring, adjustable as needed.
+  - Remaining points to address in future versions: duplicate attachment handling and automatic deletion of trace if attachment upload fails.
+
+## [v1.3.4] - 2025-07-23
 
 - 🛠️ **Enhancements to `StudentProgress`**
   - Added `LocalDate startDate` and `LocalDate endDate` fields to determine if a training is ongoing or completed.
