@@ -1,21 +1,27 @@
-package fr.avenirsesr.portfolio.shared.infrastructure.configuration;
+package fr.avenirsesr.portfolio.file.infrastructure.configuration;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "file.storage")
 public class FileStorageConfig {
+  @Value("${file.storage.base-url}")
   private String baseUrl;
+
+  @Value("${file.storage.local-path}")
+  private String storagePath;
+
   public static String BASE_URL;
+  public static String STORAGE_PATH;
 
   @PostConstruct
   private void init() {
     BASE_URL = baseUrl;
+    STORAGE_PATH = storagePath;
   }
 }

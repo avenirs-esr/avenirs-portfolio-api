@@ -6,8 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import fr.avenirsesr.portfolio.file.domain.exception.BadImageSizeException;
-import fr.avenirsesr.portfolio.file.domain.exception.BadImageTypeException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.RessourceService;
@@ -123,7 +123,7 @@ public class UserServiceImplTest {
 
     // Then
     assertThrows(
-        BadImageSizeException.class,
+        FileSizeTooBigException.class,
         () -> {
           userService.uploadProfilePicture(student, mockFile);
         });
@@ -140,7 +140,7 @@ public class UserServiceImplTest {
 
     // Then
     assertThrows(
-        BadImageTypeException.class,
+        FileTypeNotSupportedException.class,
         () -> {
           userService.uploadProfilePicture(student, mockFile);
         });
@@ -176,7 +176,7 @@ public class UserServiceImplTest {
 
     // Then
     assertThrows(
-        BadImageSizeException.class,
+        FileSizeTooBigException.class,
         () -> {
           userService.uploadCoverPicture(student, mockFile);
         });
@@ -193,7 +193,7 @@ public class UserServiceImplTest {
 
     // Then
     assertThrows(
-        BadImageTypeException.class,
+        FileTypeNotSupportedException.class,
         () -> {
           userService.uploadCoverPicture(student, mockFile);
         });

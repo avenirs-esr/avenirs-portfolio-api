@@ -88,6 +88,7 @@ public class TraceServiceImpl implements TraceService {
 
     traceRepository.save(trace);
     traceRepository.delete(trace);
+    log.info("Deleted trace {}", trace);
   }
 
   @Override

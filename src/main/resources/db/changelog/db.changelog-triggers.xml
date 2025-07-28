@@ -206,4 +206,15 @@
         </sql>
     </changeSet>
 
+    <changeSet id="create-updated-at-trigger-trace-attachment" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_trace_attachment ON "trace_attachment";
+            CREATE TRIGGER trigger_set_updated_at_trace_attachment
+                BEFORE UPDATE
+                ON "trace_attachment"
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

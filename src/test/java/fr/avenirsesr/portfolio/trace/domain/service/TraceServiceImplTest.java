@@ -200,7 +200,7 @@ public class TraceServiceImplTest {
     traceService.deleteById(student.getUser(), trace.getId());
 
     // Then
-    verify(traceRepository).deleteById(trace.getId());
+    verify(traceRepository).delete(trace);
   }
 
   @Test
@@ -219,7 +219,7 @@ public class TraceServiceImplTest {
 
     // Then
     assertEquals(EErrorCode.TRACE_NOT_FOUND, exception.getErrorCode());
-    verify(traceRepository, never()).deleteById(trace.getId());
+    verify(traceRepository, never()).delete(trace);
   }
 
   @Test
@@ -239,7 +239,7 @@ public class TraceServiceImplTest {
 
     // Then
     assertEquals(EErrorCode.USER_NOT_AUTHORIZED, exception.getErrorCode());
-    verify(traceRepository, never()).deleteById(trace.getId());
+    verify(traceRepository, never()).delete(trace);
   }
 
   @Test

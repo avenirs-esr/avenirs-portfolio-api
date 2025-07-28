@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.user.domain.service;
 
-import fr.avenirsesr.portfolio.file.domain.exception.BadImageSizeException;
-import fr.avenirsesr.portfolio.file.domain.exception.BadImageTypeException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.Teacher;
@@ -108,11 +108,11 @@ public class UserServiceImpl implements UserService {
 
     if (!contentType.equals(MediaType.IMAGE_JPEG_VALUE)
         && !contentType.equals(MediaType.IMAGE_PNG_VALUE)) {
-      throw new BadImageTypeException();
+      throw new FileTypeNotSupportedException();
     }
 
     if (contentSize > MAX_SIZE) {
-      throw new BadImageSizeException();
+      throw new FileSizeTooBigException();
     }
   }
 }

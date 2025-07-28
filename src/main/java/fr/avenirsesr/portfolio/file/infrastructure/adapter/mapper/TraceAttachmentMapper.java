@@ -1,20 +1,23 @@
-package fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper;
+package fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 
-public interface AttachmentMapper {
+public interface TraceAttachmentMapper {
   static TraceAttachmentEntity fromDomain(TraceAttachment traceAttachment) {
     return TraceAttachmentEntity.of(
         traceAttachment.getId(),
         TraceMapper.fromDomain(traceAttachment.getTrace()),
         traceAttachment.getName(),
-        traceAttachment.getAttachmentType(),
+        traceAttachment.getFileType(),
         traceAttachment.getSize(),
         traceAttachment.getVersion(),
         traceAttachment.isActiveVersion(),
-        traceAttachment.getUploadedAt(),
-        traceAttachment.getUri());
+        traceAttachment.getUri(),
+        UserMapper.fromDomain(traceAttachment.getUploadedBy()),
+        traceAttachment.getUploadedAt());
   }
 
   static TraceAttachment toDomain(TraceAttachmentEntity entity) {
@@ -26,7 +29,8 @@ public interface AttachmentMapper {
         entity.getSize(),
         entity.getVersion(),
         entity.isActiveVersion(),
-        entity.getUploadedAt(),
-        entity.getUri());
+        entity.getUri(),
+        UserMapper.toDomain(entity.getUploadedBy()),
+        entity.getUploadedAt());
   }
 }

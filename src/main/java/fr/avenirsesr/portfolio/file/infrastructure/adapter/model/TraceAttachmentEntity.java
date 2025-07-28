@@ -1,14 +1,10 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
@@ -41,11 +37,15 @@ public class TraceAttachmentEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "is_active_version")
   private boolean isActiveVersion;
 
-  @Column(nullable = false, name = "uploaded_at")
-  private Instant uploadedAt;
-
   @Column(nullable = false)
   private String uri;
+
+  @ManyToOne()
+  @JoinColumn(name = "uploaded_by", nullable = false)
+  private UserEntity uploadedBy;
+
+  @Column(nullable = false, name = "uploaded_at")
+  private Instant uploadedAt;
 
   private TraceAttachmentEntity(
       UUID id,
@@ -55,8 +55,9 @@ public class TraceAttachmentEntity extends AvenirsBaseEntity {
       long size,
       int version,
       boolean isActiveVersion,
-      Instant uploadedAt,
-      String uri) {
+      String uri,
+      UserEntity uploadedBy,
+      Instant uploadedAt) {
     this.setId(id);
     this.trace = trace;
     this.name = name;
@@ -64,8 +65,9 @@ public class TraceAttachmentEntity extends AvenirsBaseEntity {
     this.size = size;
     this.version = version;
     this.isActiveVersion = isActiveVersion;
-    this.uploadedAt = uploadedAt;
     this.uri = uri;
+    this.uploadedBy = uploadedBy;
+    this.uploadedAt = uploadedAt;
   }
 
   public static TraceAttachmentEntity of(
@@ -76,9 +78,19 @@ public class TraceAttachmentEntity extends AvenirsBaseEntity {
       long size,
       int version,
       boolean isActiveVersion,
-      Instant uploadedAt,
-      String uri) {
+      String uri,
+      UserEntity uploadedBy,
+      Instant uploadedAt) {
     return new TraceAttachmentEntity(
-        id, trace, name, attachmentType, size, version, isActiveVersion, uploadedAt, uri);
+        id,
+        trace,
+        name,
+        attachmentType,
+        size,
+        version,
+        isActiveVersion,
+        uri,
+        uploadedBy,
+        uploadedAt);
   }
 }

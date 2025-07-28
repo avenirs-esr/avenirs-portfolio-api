@@ -1,8 +1,7 @@
 package fr.avenirsesr.portfolio.file.domain.model;
 
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
-import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
@@ -22,9 +21,10 @@ public class TraceAttachment extends File {
       long size,
       int version,
       boolean isActiveVersion,
-      Instant uploadedAt,
-      String uri) {
-    super(id, attachmentType, size, version, isActiveVersion, uploadedAt, uri);
+      String uri,
+      User uploadedBy,
+      Instant uploadedAt) {
+    super(id, attachmentType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
     this.trace = trace;
     this.name = name;
   }
@@ -37,9 +37,20 @@ public class TraceAttachment extends File {
       long size,
       int version,
       boolean isActiveVersion,
-      String uri) {
+      String uri,
+      User uploadedBy) {
+
     return new TraceAttachment(
-        id, trace, name, attachmentType, size, version, isActiveVersion, Instant.now(), uri);
+        id,
+        trace,
+        name,
+        attachmentType,
+        size,
+        version,
+        isActiveVersion,
+        uri,
+        uploadedBy,
+        Instant.now());
   }
 
   public static TraceAttachment toDomain(
@@ -50,9 +61,19 @@ public class TraceAttachment extends File {
       long size,
       int version,
       boolean isActiveVersion,
-      Instant uploadedAt,
-      String uri) {
+      String uri,
+      User uploadedBy,
+      Instant uploadedAt) {
     return new TraceAttachment(
-        id, trace, name, attachmentType, size, version, isActiveVersion, uploadedAt, uri);
+        id,
+        trace,
+        name,
+        attachmentType,
+        size,
+        version,
+        isActiveVersion,
+        uri,
+        uploadedBy,
+        uploadedAt);
   }
 }

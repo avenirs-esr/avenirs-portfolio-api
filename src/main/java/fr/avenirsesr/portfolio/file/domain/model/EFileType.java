@@ -1,6 +1,6 @@
-package fr.avenirsesr.portfolio.file.domain.model.enums;
+package fr.avenirsesr.portfolio.file.domain.model;
 
-import fr.avenirsesr.portfolio.file.domain.model.FileSize;
+import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import java.util.Arrays;
 import lombok.Getter;
 
@@ -84,10 +84,10 @@ public enum EFileType {
     this.sizeLimit = sizeLimit;
   }
 
-  public static EFileType fromMimeType(String mimeType) {
+  public static EFileType fromMimeType(String mimeType) throws FileTypeNotSupportedException {
     return Arrays.stream(values())
         .filter(ct -> ct.mimeType.equalsIgnoreCase(mimeType))
         .findFirst()
-        .orElseThrow(() -> new IllegalArgumentException("Unknown mime type: " + mimeType));
+        .orElseThrow(() -> new FileTypeNotSupportedException("Unknown mime type: " + mimeType));
   }
 }

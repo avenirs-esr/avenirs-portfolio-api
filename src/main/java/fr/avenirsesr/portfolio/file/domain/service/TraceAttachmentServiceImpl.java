@@ -1,0 +1,85 @@
+package fr.avenirsesr.portfolio.file.domain.service;
+
+import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.FileResource;
+import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
+import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStoragePort;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.io.IOException;
+import java.util.UUID;
+import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+@AllArgsConstructor
+public class TraceAttachmentServiceImpl implements TraceAttachmentService {
+  private final TraceAttachmentRepository traceAttachmentRepository;
+  private final TraceRepository traceRepository;
+  private final FileStoragePort fileStorageService;
+  private final TraceService traceService;
+
+  @Override
+  public TraceAttachment uploadTraceAttachment(
+      Student student, UUID traceId, String fileName, String mimeType, long size, byte[] content)
+      throws IOException {
+    var trace =
+        traceRepository
+            .findById(traceId)
+            .orElseThrow(fr.avenirsesr.portfolio.file.domain.exception.TraceNotFoundException::new);
+    var allTraceAttachments = traceAttachmentRepository.findByTrace(trace);
+
+    if (!trace.getUser().equals(student.getUser())) {
+      throw new UserNotAuthorizedException();
+    }
+
+    try {
+      var fileType = EFileType.fromMimeType(mimeType);
+      if (fileType.getSizeLimit().isLessThan(size)) {
+        throw new FileSizeTooBigException();
+      }
+
+      var fileResource = new FileResource(UUID.randomUUID(), fileName, fileType, size, content);
+      var uri = fileStorageService.upload(fileResource);
+
+      var version =
+          allTraceAttachments.stream()
+                  .map(TraceAttachment::getVersion)
+                  .max(Integer::compareTo)
+                  .orElse(0)
+              + 1;
+      allTraceAttachments.forEach(a -> a.setActiveVersion(false));
+
+      var newAttachment =
+          TraceAttachment.create(
+              fileResource.id(),
+              trace,
+              fileResource.fileName(),
+              fileResource.fileType(),
+              fileResource.size(),
+              version,
+              true,
+              uri,
+              student.getUser());
+
+      traceAttachmentRepository.saveAll(
+          Stream.concat(allTraceAttachments.stream(), Stream.of(newAttachment)).toList());
+      log.info("New trace attachment saved: {}", newAttachment);
+      return newAttachment;
+    } catch (Exception e) {
+      log.error("Failed to upload trace attachment for trace {}", trace, e);
+      if (allTraceAttachments.isEmpty()) {
+        traceService.deleteById(student.getUser(), trace.getId());
+      }
+      throw e;
+    }
+  }
+}
