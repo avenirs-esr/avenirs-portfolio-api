@@ -9,17 +9,17 @@ public class SegmentDetail {
   private String code;
   private String libelle;
 
-<span class="nc" id="L12">  private SegmentDetail(String code, String libelle) {</span>
-<span class="nc" id="L13">    this.code = code;</span>
-<span class="nc" id="L14">    this.libelle = libelle;</span>
-<span class="nc" id="L15">  }</span>
+<span class="fc" id="L12">  private SegmentDetail(String code, String libelle) {</span>
+<span class="fc" id="L13">    this.code = code;</span>
+<span class="fc" id="L14">    this.libelle = libelle;</span>
+<span class="fc" id="L15">  }</span>
 
   public static SegmentDetail create(String code, String libelle) {
-<span class="nc" id="L18">    return new SegmentDetail(code, libelle);</span>
+<span class="fc" id="L18">    return new SegmentDetail(code, libelle);</span>
   }
 
   public static SegmentDetail toDomain(String code, String libelle) {
-<span class="nc" id="L22">    return create(code, libelle);</span>
+<span class="fc" id="L22">    return create(code, libelle);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

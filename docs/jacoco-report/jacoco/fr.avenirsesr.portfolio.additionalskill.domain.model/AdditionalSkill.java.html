@@ -14,20 +14,20 @@ public class AdditionalSkill extends AvenirsBaseModel {
   private EAdditionalSkillType type;
 
   private AdditionalSkill(UUID id) {
-<span class="nc" id="L17">    super(id);</span>
-<span class="nc" id="L18">  }</span>
+<span class="fc" id="L17">    super(id);</span>
+<span class="fc" id="L18">  }</span>
 
   public static AdditionalSkill create(
       UUID id, PathSegments pathSegments, EAdditionalSkillType type) {
-<span class="nc" id="L22">    AdditionalSkill additionalSkill = new AdditionalSkill(id);</span>
-<span class="nc" id="L23">    additionalSkill.setPathSegments(pathSegments);</span>
-<span class="nc" id="L24">    additionalSkill.setType(type);</span>
-<span class="nc" id="L25">    return additionalSkill;</span>
+<span class="fc" id="L22">    AdditionalSkill additionalSkill = new AdditionalSkill(id);</span>
+<span class="fc" id="L23">    additionalSkill.setPathSegments(pathSegments);</span>
+<span class="fc" id="L24">    additionalSkill.setType(type);</span>
+<span class="fc" id="L25">    return additionalSkill;</span>
   }
 
   public static AdditionalSkill toDomain(
       UUID id, PathSegments pathSegments, EAdditionalSkillType type) {
-<span class="nc" id="L30">    return create(id, pathSegments, type);</span>
+<span class="fc" id="L30">    return create(id, pathSegments, type);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
