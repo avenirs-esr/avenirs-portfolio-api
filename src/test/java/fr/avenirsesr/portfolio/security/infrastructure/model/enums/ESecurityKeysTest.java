@@ -1,9 +1,8 @@
-package fr.avenirsesr.portfolio.secutity.model.enums;
+package fr.avenirsesr.portfolio.security.infrastructure.model.enums;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import fr.avenirsesr.portfolio.security.infrastructure.model.enums.ESecurityKeys;
 import org.junit.jupiter.api.Test;
 
 class ESecurityKeysTest {

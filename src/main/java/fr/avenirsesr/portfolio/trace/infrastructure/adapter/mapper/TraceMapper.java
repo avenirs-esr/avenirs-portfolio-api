@@ -28,6 +28,13 @@ public interface TraceMapper {
     Trace trace = toDomainWithoutRecursion(traceEntity);
     trace.setAmses(
         traceEntity.getAmses().stream().map(AMSMapper::toDomainWithoutRecursion).toList());
+    trace.setSkillLevels(
+        traceEntity.getSkillLevels().stream()
+            .map(
+                skillLevelProgressEntity ->
+                    SkillLevelProgressMapper.toDomainWithoutRecursion(
+                        skillLevelProgressEntity, trace.getAmses()))
+            .toList());
     return trace;
   }
 

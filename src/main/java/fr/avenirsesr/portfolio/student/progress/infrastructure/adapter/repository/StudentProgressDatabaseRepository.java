@@ -2,8 +2,10 @@ package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.reposito
 
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.StudentProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.StudentProgressSpecification;
@@ -41,6 +43,26 @@ public class StudentProgressDatabaseRepository
         .findAll(
             StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))
                 .and(StudentProgressSpecification.isAPC()))
+        .stream()
+        .map(StudentProgressMapper::toDomain)
+        .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))
+        .values()
+        .stream()
+        .map(List::getFirst)
+        .toList();
+  }
+
+  @Override
+  public List<StudentProgress> findStudentProgressesBySkillLevelProgresses(
+      Student student, List<SkillLevelProgress> skillLevelProgresses) {
+    return jpaSpecificationExecutor
+        .findAll(
+            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))
+                .and(
+                    StudentProgressSpecification.hasSkillLevelProgresses(
+                        skillLevelProgresses.stream()
+                            .map(SkillLevelProgressMapper::fromDomain)
+                            .toList())))
         .stream()
         .map(StudentProgressMapper::toDomain)
         .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))

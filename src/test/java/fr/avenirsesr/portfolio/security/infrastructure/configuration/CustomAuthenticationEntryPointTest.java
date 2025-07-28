@@ -1,10 +1,9 @@
-package fr.avenirsesr.portfolio.secutity.configuration;
+package fr.avenirsesr.portfolio.security.infrastructure.configuration;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.avenirsesr.portfolio.security.infrastructure.configuration.CustomAuthenticationEntryPoint;
 import fr.avenirsesr.portfolio.shared.application.adapter.response.ErrorResponse;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
 import jakarta.servlet.http.HttpServletRequest;

@@ -7,6 +7,6 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.UUID;
 
 public interface AMSService {
-  PagedResult<AMS> findUserAmsByProgramProgress(
-      Student student, UUID programProgressId, PageCriteria pageCriteria);
+  PagedResult<AMS> findUserAmsByStudentProgress(
+      Student student, UUID studentProgressId, PageCriteria pageCriteria);
 }

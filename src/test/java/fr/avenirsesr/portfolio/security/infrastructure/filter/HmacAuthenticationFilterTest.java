@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.secutity.filter;
+package fr.avenirsesr.portfolio.security.infrastructure.filter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import fr.avenirsesr.portfolio.security.infrastructure.filter.HmacAuthenticationFilter;
 import fr.avenirsesr.portfolio.security.infrastructure.model.enums.ESecurityKeys;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserPayload;

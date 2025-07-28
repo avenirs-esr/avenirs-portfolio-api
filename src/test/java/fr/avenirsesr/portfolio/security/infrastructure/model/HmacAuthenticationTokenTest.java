@@ -1,8 +1,7 @@
-package fr.avenirsesr.portfolio.secutity.model;
+package fr.avenirsesr.portfolio.security.infrastructure.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import fr.avenirsesr.portfolio.security.infrastructure.model.HmacAuthenticationToken;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;

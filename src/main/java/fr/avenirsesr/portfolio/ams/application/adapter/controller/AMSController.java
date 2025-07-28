@@ -32,21 +32,21 @@ public class AMSController {
   @GetMapping("/view")
   public ResponseEntity<PagedResponse<AmsViewDTO>> getAmsView(
       Principal principal,
-      @RequestParam(value = "programProgressId") UUID programProgressId,
+      @RequestParam(value = "studentProgressId") UUID studentProgressId,
       @RequestParam(value = "page", required = false) Integer page,
       @RequestParam(value = "pageSize", required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to get AMS view for user [{}], programProgressId [{}] with pagination"
+        "Received request to get AMS view for user [{}], studentProgressId [{}] with pagination"
             + " (page={}, pageSize={})",
         principal.getName(),
-        programProgressId,
+        studentProgressId,
         pageCriteria.page(),
         pageCriteria.pageSize());
     Student student = userUtil.getStudent(principal);
 
     PagedResult<AMS> pagedResult =
-        amsService.findUserAmsByProgramProgress(student, programProgressId, pageCriteria);
+        amsService.findUserAmsByStudentProgress(student, studentProgressId, pageCriteria);
 
     List<AmsViewDTO> amsViewDTOs =
         pagedResult.content().stream().map(AmsViewMapper::toDto).toList();

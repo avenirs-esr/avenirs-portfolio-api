@@ -6,6 +6,8 @@ import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
@@ -16,8 +18,8 @@ import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 public class TraceServiceImpl implements TraceService {
   private static final int MAX_TRACES_OVERVIEW = 3;
   private final TraceRepository traceRepository;
+  private final StudentProgressRepository studentProgressRepository;
   private final ConfigurationService configurationService;
 
   public static boolean isBelowThresholdDate(Instant initialDate, int maxDaySinceCreation) {
@@ -37,23 +40,19 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public String programNameOfTrace(Trace trace) {
-    // TODO: Refactor this method when skill levels are refactored
-    return EPortfolioType.LIFE_PROJECT.name();
-    //    return trace.getSkillLevels().isEmpty()
-    //            || trace.getSkillLevels().stream()
-    //                .noneMatch(
-    //                    skillLevel ->
-    // skillLevel.getSkill().getTrainingPath().getProgram().isAPC())
-    //        ? EPortfolioType.LIFE_PROJECT.title()
-    //        : trace.getSkillLevels().stream()
-    //            .filter(skillLevel ->
-    // skillLevel.getSkill().getTrainingPath().getProgram().isAPC())
-    //            .findAny()
-    //            .orElseThrow()
-    //            .getSkill()
-    //            .getTrainingPath()
-    //            .getProgram()
-    //            .getName();
+    List<StudentProgress> studentProgresses =
+        studentProgressRepository.findStudentProgressesBySkillLevelProgresses(
+            trace.getUser().toStudent(), trace.getSkillLevels());
+    return studentProgresses.isEmpty()
+            || studentProgresses.stream().noneMatch(sp -> sp.getTrainingPath().getProgram().isAPC())
+        ? EPortfolioType.LIFE_PROJECT.name()
+        : studentProgresses.stream()
+            .filter(sp -> sp.getTrainingPath().getProgram().isAPC())
+            .findAny()
+            .orElseThrow()
+            .getTrainingPath()
+            .getProgram()
+            .getName();
   }
 
   @Override
@@ -84,13 +83,23 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public void deleteById(User user, UUID id) {
-    Optional<Trace> traceOptional = traceRepository.findById(id);
+    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
 
-    if (traceOptional.isEmpty()) {
-      throw new TraceNotFoundException();
-    } else if (!traceOptional.get().getUser().getId().equals(user.getId())) {
+    if (!trace.getUser().getId().equals(user.getId())) {
       throw new UserNotAuthorizedException();
     }
+
+    trace.setAmses(
+        trace.getAmses() == null ? new ArrayList<>() : new ArrayList<>(trace.getAmses()));
+    trace.setSkillLevels(
+        trace.getSkillLevels() == null
+            ? new ArrayList<>()
+            : new ArrayList<>(trace.getSkillLevels()));
+
+    trace.getAmses().clear();
+    trace.getSkillLevels().clear();
+
+    traceRepository.save(trace);
 
     traceRepository.deleteById(id);
   }
