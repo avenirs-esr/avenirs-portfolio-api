@@ -1,15 +1,17 @@
 package fr.avenirsesr.portfolio.user.domain.service;
 
-import fr.avenirsesr.portfolio.user.domain.model.UploadLink;
+import fr.avenirsesr.portfolio.user.domain.model.FileUploadLink;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.model.Teacher;
 import fr.avenirsesr.portfolio.user.domain.model.User;
-import fr.avenirsesr.portfolio.user.domain.model.UserUpload;
+import fr.avenirsesr.portfolio.user.domain.model.UserFileUpload;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EContextType;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUploadType;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.input.RessourceService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.RessourceRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UploadLinkRepository;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserUploadRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserFileUploadRepository;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -21,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class RessourceServiceImpl implements RessourceService {
 
   private final RessourceRepository ressourceRepository;
-  private final UserUploadRepository userUploadRepository;
+  private final UserFileUploadRepository userFileUploadRepository;
   private final UploadLinkRepository uploadLinkRepository;
 
   @Override
@@ -43,46 +45,46 @@ public class RessourceServiceImpl implements RessourceService {
   }
 
   @Override
-  public String uploadStudentProfilePicture(User user, MultipartFile photoFile) throws IOException {
-    String pictureUrl = ressourceRepository.storeStudentProfilePicture(user.getId(), photoFile);
-    saveUploadHistory(user, photoFile, EUploadType.PROFILE_PICTURE, pictureUrl);
+  public String uploadProfilePicture(Student student, MultipartFile photoFile) throws IOException {
+    String pictureUrl = ressourceRepository.storeStudentProfilePicture(student.getId(), photoFile);
+    saveUploadHistory(student.getUser(), photoFile, EUploadType.PROFILE_PICTURE, pictureUrl);
     return pictureUrl;
   }
 
   @Override
-  public String uploadStudentCoverPicture(User user, MultipartFile photoFile) throws IOException {
-    String pictureUrl = ressourceRepository.storeStudentCoverPicture(user.getId(), photoFile);
-    saveUploadHistory(user, photoFile, EUploadType.COVER_PICTURE, pictureUrl);
+  public String uploadProfilePicture(Teacher teacher, MultipartFile photoFile) throws IOException {
+    String pictureUrl = ressourceRepository.storeTeacherProfilePicture(teacher.getId(), photoFile);
+    saveUploadHistory(teacher.getUser(), photoFile, EUploadType.PROFILE_PICTURE, pictureUrl);
     return pictureUrl;
   }
 
   @Override
-  public String uploadTeacherProfilePicture(User user, MultipartFile photoFile) throws IOException {
-    String pictureUrl = ressourceRepository.storeTeacherProfilePicture(user.getId(), photoFile);
-    saveUploadHistory(user, photoFile, EUploadType.PROFILE_PICTURE, pictureUrl);
+  public String uploadCoverPicture(Student student, MultipartFile photoFile) throws IOException {
+    String pictureUrl = ressourceRepository.storeStudentCoverPicture(student.getId(), photoFile);
+    saveUploadHistory(student.getUser(), photoFile, EUploadType.COVER_PICTURE, pictureUrl);
     return pictureUrl;
   }
 
   @Override
-  public String uploadTeacherCoverPicture(User user, MultipartFile photoFile) throws IOException {
-    String pictureUrl = ressourceRepository.storeTeacherCoverPicture(user.getId(), photoFile);
-    saveUploadHistory(user, photoFile, EUploadType.COVER_PICTURE, pictureUrl);
+  public String uploadCoverPicture(Teacher teacher, MultipartFile photoFile) throws IOException {
+    String pictureUrl = ressourceRepository.storeTeacherCoverPicture(teacher.getId(), photoFile);
+    saveUploadHistory(teacher.getUser(), photoFile, EUploadType.COVER_PICTURE, pictureUrl);
     return pictureUrl;
   }
 
   private void saveUploadHistory(
       User user, MultipartFile photoFile, EUploadType uploadType, String pictureUrl) {
-    UserUpload userUpload =
-        UserUpload.create(
+    UserFileUpload userFileUpload =
+        UserFileUpload.create(
             UUID.randomUUID(),
-            user.getId(),
+            user,
             uploadType,
             pictureUrl,
             photoFile.getSize(),
             photoFile.getContentType());
-    UploadLink uploadLink =
-        UploadLink.create(userUpload.getId(), EContextType.PROFILE, user.getId());
-    userUploadRepository.save(userUpload);
-    uploadLinkRepository.save(uploadLink);
+    FileUploadLink fileUploadLink =
+        FileUploadLink.create(userFileUpload.getId(), EContextType.PROFILE, user.getId());
+    userFileUploadRepository.save(userFileUpload);
+    uploadLinkRepository.save(fileUploadLink);
   }
 }

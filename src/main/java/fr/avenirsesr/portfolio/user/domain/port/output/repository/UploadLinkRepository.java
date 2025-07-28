@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.user.domain.port.output.repository;
 
-import fr.avenirsesr.portfolio.user.domain.model.UploadLink;
+import fr.avenirsesr.portfolio.user.domain.model.FileUploadLink;
 
 public interface UploadLinkRepository {
-  void save(UploadLink uploadLink);
+  void save(FileUploadLink fileUploadLink);
 }

@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@IdClass(UploadLinkId.class)
-@Table(name = "upload_link")
+@IdClass(FileUploadLinkId.class)
+@Table(name = "file_upload_link")
 @NoArgsConstructor
 @Getter
 @Setter
-public class UploadLinkEntity {
+public class FileUploadLinkEntity {
 
   @Id
   @Column(nullable = false, name = "upload_id")
@@ -34,13 +34,13 @@ public class UploadLinkEntity {
   @Column(nullable = false, name = "context_id")
   private UUID contextId;
 
-  private UploadLinkEntity(UUID uploadId, EContextType contextType, UUID contextId) {
+  private FileUploadLinkEntity(UUID uploadId, EContextType contextType, UUID contextId) {
     this.uploadId = uploadId;
     this.contextType = contextType;
     this.contextId = contextId;
   }
 
-  public static UploadLinkEntity of(UUID uploadId, EContextType contextType, UUID contextId) {
-    return new UploadLinkEntity(uploadId, contextType, contextId);
+  public static FileUploadLinkEntity of(UUID uploadId, EContextType contextType, UUID contextId) {
+    return new FileUploadLinkEntity(uploadId, contextType, contextId);
   }
 }

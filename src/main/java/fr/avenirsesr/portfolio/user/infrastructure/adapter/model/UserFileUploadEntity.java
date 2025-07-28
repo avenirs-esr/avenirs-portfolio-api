@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
 import lombok.Getter;
@@ -13,14 +14,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "user_upload")
+@Table(name = "user_file_upload")
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserUploadEntity extends AvenirsBaseEntity {
+public class UserFileUploadEntity extends AvenirsBaseEntity {
 
-  @Column(nullable = false, name = "user_id")
-  private UUID userId;
+  @ManyToOne(optional = false)
+  private UserEntity user;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -35,18 +36,18 @@ public class UserUploadEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "media_type")
   private String mediaType;
 
-  private UserUploadEntity(
-      UUID id, UUID userId, EUploadType type, String url, Long size, String mediaType) {
+  private UserFileUploadEntity(
+      UUID id, UserEntity user, EUploadType type, String url, Long size, String mediaType) {
     this.setId(id);
-    this.userId = userId;
+    this.user = user;
     this.type = type;
     this.url = url;
     this.size = size;
     this.mediaType = mediaType;
   }
 
-  public static UserUploadEntity of(
-      UUID id, UUID userId, EUploadType type, String url, Long size, String mediaType) {
-    return new UserUploadEntity(id, userId, type, url, size, mediaType);
+  public static UserFileUploadEntity of(
+      UUID id, UserEntity user, EUploadType type, String url, Long size, String mediaType) {
+    return new UserFileUploadEntity(id, user, type, url, size, mediaType);
   }
 }

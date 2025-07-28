@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.user.domain.port.input;
 
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.model.Teacher;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.io.IOException;
 import java.util.UUID;
@@ -17,11 +19,11 @@ public interface UserService {
       String profilePictureUrl,
       String coverPictureUrl);
 
-  String uploadStudentProfilePicture(User user, MultipartFile photoFile) throws IOException;
+  String uploadProfilePicture(Student student, MultipartFile photoFile) throws IOException;
 
-  String uploadStudentCoverPicture(User user, MultipartFile coverFile) throws IOException;
+  String uploadProfilePicture(Teacher teacher, MultipartFile photoFile) throws IOException;
 
-  String uploadTeacherProfilePicture(User user, MultipartFile photoFile) throws IOException;
+  String uploadCoverPicture(Student student, MultipartFile coverFile) throws IOException;
 
-  String uploadTeacherCoverPicture(User user, MultipartFile coverFile) throws IOException;
+  String uploadCoverPicture(Teacher teacher, MultipartFile coverFile) throws IOException;
 }

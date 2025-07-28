@@ -6,15 +6,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.user.domain.model.FileUploadLink;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.model.UploadLink;
-import fr.avenirsesr.portfolio.user.domain.model.UserUpload;
+import fr.avenirsesr.portfolio.user.domain.model.UserFileUpload;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EContextType;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUploadType;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.RessourceRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UploadLinkRepository;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserUploadRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserFileUploadRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ class RessourceServiceImplTest {
 
   @Mock private RessourceRepository ressourceRepository;
 
-  @Mock private UserUploadRepository userUploadRepository;
+  @Mock private UserFileUploadRepository userFileUploadRepository;
 
   @Mock private UploadLinkRepository uploadLinkRepository;
 
@@ -85,7 +85,7 @@ class RessourceServiceImplTest {
   }
 
   @Test
-  void shouldUploadStudentProfilePicture() throws IOException {
+  void shouldUploadProfilePicture() throws IOException {
     // Given
     MultipartFile mockFile = mock(MultipartFile.class);
 
@@ -97,32 +97,32 @@ class RessourceServiceImplTest {
         .thenReturn(
             "https://baseUrl.com/photo/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg");
 
-    ressourceService.uploadStudentProfilePicture(student.getUser(), mockFile);
+    ressourceService.uploadProfilePicture(student, mockFile);
     // Then
-    ArgumentCaptor<UserUpload> userUploadCaptor = ArgumentCaptor.forClass(UserUpload.class);
-    verify(userUploadRepository).save(userUploadCaptor.capture());
+    ArgumentCaptor<UserFileUpload> userUploadCaptor = ArgumentCaptor.forClass(UserFileUpload.class);
+    verify(userFileUploadRepository).save(userUploadCaptor.capture());
 
-    ArgumentCaptor<UploadLink> uploadLinkCaptor = ArgumentCaptor.forClass(UploadLink.class);
+    ArgumentCaptor<FileUploadLink> uploadLinkCaptor = ArgumentCaptor.forClass(FileUploadLink.class);
     verify(uploadLinkRepository).save(uploadLinkCaptor.capture());
 
-    UserUpload savedUserUpload = userUploadCaptor.getValue();
-    UploadLink savedUploadLink = uploadLinkCaptor.getValue();
+    UserFileUpload savedUserFileUpload = userUploadCaptor.getValue();
+    FileUploadLink savedFileUploadLink = uploadLinkCaptor.getValue();
 
-    assertEquals(student.getId(), savedUserUpload.getUserId());
-    assertEquals(EUploadType.PROFILE_PICTURE, savedUserUpload.getType());
+    assertEquals(student.getId(), savedUserFileUpload.getUser().getId());
+    assertEquals(EUploadType.PROFILE_PICTURE, savedUserFileUpload.getType());
     assertEquals(
         "https://baseUrl.com/photo/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg",
-        savedUserUpload.getUrl());
-    assertEquals(UserServiceImpl.MAX_SIZE, savedUserUpload.getSize());
-    assertEquals("image/jpeg", savedUserUpload.getMediaType());
+        savedUserFileUpload.getUrl());
+    assertEquals(UserServiceImpl.MAX_SIZE, savedUserFileUpload.getSize());
+    assertEquals("image/jpeg", savedUserFileUpload.getMediaType());
 
-    assertEquals(savedUserUpload.getId(), savedUploadLink.getUploadId());
-    assertEquals(EContextType.PROFILE, savedUploadLink.getContextType());
-    assertEquals(student.getId(), savedUploadLink.getContextId());
+    assertEquals(savedUserFileUpload.getId(), savedFileUploadLink.getUploadId());
+    assertEquals(EContextType.PROFILE, savedFileUploadLink.getContextType());
+    assertEquals(student.getId(), savedFileUploadLink.getContextId());
   }
 
   @Test
-  void shouldUploadStudentCoverPicture() throws IOException {
+  void shouldUploadCoverPicture() throws IOException {
     // Given
     MultipartFile mockFile = mock(MultipartFile.class);
 
@@ -134,27 +134,27 @@ class RessourceServiceImplTest {
         .thenReturn(
             "https://baseUrl.com/photo/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg");
 
-    ressourceService.uploadStudentCoverPicture(student.getUser(), mockFile);
+    ressourceService.uploadCoverPicture(student, mockFile);
     // Then
-    ArgumentCaptor<UserUpload> userUploadCaptor = ArgumentCaptor.forClass(UserUpload.class);
-    verify(userUploadRepository).save(userUploadCaptor.capture());
+    ArgumentCaptor<UserFileUpload> userUploadCaptor = ArgumentCaptor.forClass(UserFileUpload.class);
+    verify(userFileUploadRepository).save(userUploadCaptor.capture());
 
-    ArgumentCaptor<UploadLink> uploadLinkCaptor = ArgumentCaptor.forClass(UploadLink.class);
+    ArgumentCaptor<FileUploadLink> uploadLinkCaptor = ArgumentCaptor.forClass(FileUploadLink.class);
     verify(uploadLinkRepository).save(uploadLinkCaptor.capture());
 
-    UserUpload savedUserUpload = userUploadCaptor.getValue();
-    UploadLink savedUploadLink = uploadLinkCaptor.getValue();
+    UserFileUpload savedUserFileUpload = userUploadCaptor.getValue();
+    FileUploadLink savedFileUploadLink = uploadLinkCaptor.getValue();
 
-    assertEquals(student.getId(), savedUserUpload.getUserId());
-    assertEquals(EUploadType.COVER_PICTURE, savedUserUpload.getType());
+    assertEquals(student.getId(), savedUserFileUpload.getUser().getId());
+    assertEquals(EUploadType.COVER_PICTURE, savedUserFileUpload.getType());
     assertEquals(
         "https://baseUrl.com/photo/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg",
-        savedUserUpload.getUrl());
-    assertEquals(UserServiceImpl.MAX_SIZE, savedUserUpload.getSize());
-    assertEquals("image/jpeg", savedUserUpload.getMediaType());
+        savedUserFileUpload.getUrl());
+    assertEquals(UserServiceImpl.MAX_SIZE, savedUserFileUpload.getSize());
+    assertEquals("image/jpeg", savedUserFileUpload.getMediaType());
 
-    assertEquals(savedUserUpload.getId(), savedUploadLink.getUploadId());
-    assertEquals(EContextType.PROFILE, savedUploadLink.getContextType());
-    assertEquals(student.getId(), savedUploadLink.getContextId());
+    assertEquals(savedUserFileUpload.getId(), savedFileUploadLink.getUploadId());
+    assertEquals(EContextType.PROFILE, savedFileUploadLink.getContextType());
+    assertEquals(student.getId(), savedFileUploadLink.getContextId());
   }
 }

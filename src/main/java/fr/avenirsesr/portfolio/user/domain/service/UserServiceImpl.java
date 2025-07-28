@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.shared.domain.exception.BadImageSizeException;
 import fr.avenirsesr.portfolio.shared.domain.exception.BadImageTypeException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.model.Teacher;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.port.input.RessourceService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -68,27 +69,27 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public String uploadStudentProfilePicture(User user, MultipartFile photoFile) throws IOException {
+  public String uploadProfilePicture(Student student, MultipartFile photoFile) throws IOException {
     checkImageFormat(photoFile);
-    return ressourceService.uploadStudentProfilePicture(user, photoFile);
+    return ressourceService.uploadProfilePicture(student, photoFile);
   }
 
   @Override
-  public String uploadStudentCoverPicture(User user, MultipartFile coverFile) throws IOException {
-    checkImageFormat(coverFile);
-    return ressourceService.uploadStudentCoverPicture(user, coverFile);
-  }
-
-  @Override
-  public String uploadTeacherProfilePicture(User user, MultipartFile photoFile) throws IOException {
+  public String uploadProfilePicture(Teacher teacher, MultipartFile photoFile) throws IOException {
     checkImageFormat(photoFile);
-    return ressourceService.uploadTeacherProfilePicture(user, photoFile);
+    return ressourceService.uploadProfilePicture(teacher, photoFile);
   }
 
   @Override
-  public String uploadTeacherCoverPicture(User user, MultipartFile coverFile) throws IOException {
+  public String uploadCoverPicture(Student student, MultipartFile coverFile) throws IOException {
     checkImageFormat(coverFile);
-    return ressourceService.uploadTeacherCoverPicture(user, coverFile);
+    return ressourceService.uploadCoverPicture(student, coverFile);
+  }
+
+  @Override
+  public String uploadCoverPicture(Teacher teacher, MultipartFile coverFile) throws IOException {
+    checkImageFormat(coverFile);
+    return ressourceService.uploadCoverPicture(teacher, coverFile);
   }
 
   private User getUser(UUID id) {

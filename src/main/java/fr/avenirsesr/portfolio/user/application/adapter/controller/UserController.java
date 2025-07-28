@@ -75,8 +75,10 @@ public class UserController {
     EUserCategory userCategory = UserUtils.getUserCategory(profile);
 
     return switch (userCategory) {
-      case STUDENT -> ResponseEntity.ok(userService.uploadStudentProfilePicture(user, photoFile));
-      case TEACHER -> ResponseEntity.ok(userService.uploadTeacherProfilePicture(user, photoFile));
+      case STUDENT ->
+          ResponseEntity.ok(userService.uploadProfilePicture(user.toStudent(), photoFile));
+      case TEACHER ->
+          ResponseEntity.ok(userService.uploadProfilePicture(user.toTeacher(), photoFile));
     };
   }
 
@@ -91,8 +93,10 @@ public class UserController {
     EUserCategory userCategory = UserUtils.getUserCategory(profile);
 
     return switch (userCategory) {
-      case STUDENT -> ResponseEntity.ok(userService.uploadStudentCoverPicture(user, coverFile));
-      case TEACHER -> ResponseEntity.ok(userService.uploadTeacherCoverPicture(user, coverFile));
+      case STUDENT ->
+          ResponseEntity.ok(userService.uploadCoverPicture(user.toStudent(), coverFile));
+      case TEACHER ->
+          ResponseEntity.ok(userService.uploadCoverPicture(user.toTeacher(), coverFile));
     };
   }
 }

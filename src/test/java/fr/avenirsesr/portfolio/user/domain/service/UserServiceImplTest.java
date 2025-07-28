@@ -102,14 +102,14 @@ public class UserServiceImplTest {
     when(mockFile.getContentType()).thenReturn("image/jpeg");
     when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE);
 
-    when(ressourceService.uploadStudentProfilePicture(student.getUser(), mockFile))
+    when(ressourceService.uploadProfilePicture(student, mockFile))
         .thenReturn(
             "https://baseUrl.com/photo/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg");
 
-    userService.uploadStudentProfilePicture(student.getUser(), mockFile);
+    userService.uploadProfilePicture(student, mockFile);
 
     // Then
-    verify(ressourceService).uploadStudentProfilePicture(student.getUser(), mockFile);
+    verify(ressourceService).uploadProfilePicture(student, mockFile);
   }
 
   @Test
@@ -125,7 +125,7 @@ public class UserServiceImplTest {
     assertThrows(
         BadImageSizeException.class,
         () -> {
-          userService.uploadStudentProfilePicture(student.getUser(), mockFile);
+          userService.uploadProfilePicture(student, mockFile);
         });
   }
 
@@ -142,7 +142,7 @@ public class UserServiceImplTest {
     assertThrows(
         BadImageTypeException.class,
         () -> {
-          userService.uploadStudentProfilePicture(student.getUser(), mockFile);
+          userService.uploadProfilePicture(student, mockFile);
         });
   }
 
@@ -155,14 +155,14 @@ public class UserServiceImplTest {
     when(mockFile.getContentType()).thenReturn("image/jpeg");
     when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE);
 
-    when(ressourceService.uploadStudentCoverPicture(student.getUser(), mockFile))
+    when(ressourceService.uploadCoverPicture(student, mockFile))
         .thenReturn(
             "https://baseUrl.com/cover/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg");
 
-    userService.uploadStudentCoverPicture(student.getUser(), mockFile);
+    userService.uploadCoverPicture(student, mockFile);
 
     // Then
-    verify(ressourceService).uploadStudentCoverPicture(student.getUser(), mockFile);
+    verify(ressourceService).uploadCoverPicture(student, mockFile);
   }
 
   @Test
@@ -178,7 +178,7 @@ public class UserServiceImplTest {
     assertThrows(
         BadImageSizeException.class,
         () -> {
-          userService.uploadStudentCoverPicture(student.getUser(), mockFile);
+          userService.uploadCoverPicture(student, mockFile);
         });
   }
 
@@ -195,7 +195,7 @@ public class UserServiceImplTest {
     assertThrows(
         BadImageTypeException.class,
         () -> {
-          userService.uploadStudentCoverPicture(student.getUser(), mockFile);
+          userService.uploadCoverPicture(student, mockFile);
         });
   }
 

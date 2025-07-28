@@ -5,15 +5,15 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-public class UploadLinkId implements Serializable {
+public class FileUploadLinkId implements Serializable {
 
   private UUID uploadId;
   private EContextType contextType;
   private UUID contextId;
 
-  public UploadLinkId() {}
+  public FileUploadLinkId() {}
 
-  public UploadLinkId(UUID uploadId, EContextType contextType, UUID contextId) {
+  public FileUploadLinkId(UUID uploadId, EContextType contextType, UUID contextId) {
     this.uploadId = uploadId;
     this.contextType = contextType;
     this.contextId = contextId;
@@ -22,8 +22,8 @@ public class UploadLinkId implements Serializable {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof UploadLinkId)) return false;
-    UploadLinkId that = (UploadLinkId) o;
+    if (!(o instanceof FileUploadLinkId)) return false;
+    FileUploadLinkId that = (FileUploadLinkId) o;
     return Objects.equals(uploadId, that.uploadId)
         && contextType == that.contextType
         && Objects.equals(contextId, that.contextId);
