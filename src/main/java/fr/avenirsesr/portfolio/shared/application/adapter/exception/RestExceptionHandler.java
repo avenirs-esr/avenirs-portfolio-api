@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.shared.application.adapter.exception;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
-import fr.avenirsesr.portfolio.file.domain.exception.BadImageSizeException;
-import fr.avenirsesr.portfolio.file.domain.exception.BadImageTypeException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.shared.application.adapter.response.ErrorResponse;
 import fr.avenirsesr.portfolio.shared.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @Slf4j
 @RestControllerAdvice
@@ -42,21 +43,30 @@ public class RestExceptionHandler {
   }
 
   @ExceptionHandler(UserNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+  public ResponseEntity<ErrorResponse> handle(UserNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 
-  @ExceptionHandler(BadImageTypeException.class)
-  public ResponseEntity<ErrorResponse> handleUserNotFound(BadImageTypeException ex) {
+  @ExceptionHandler(FileTypeNotSupportedException.class)
+  public ResponseEntity<ErrorResponse> handle(FileTypeNotSupportedException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 
-  @ExceptionHandler(BadImageSizeException.class)
-  public ResponseEntity<ErrorResponse> handleUserNotFound(BadImageSizeException ex) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(FileSizeTooBigException.class)
+  public ResponseEntity<ErrorResponse> handle(FileSizeTooBigException ex) {
+    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+  }
+
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  public ResponseEntity<ErrorResponse> handle(MaxUploadSizeExceededException ex) {
+    return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+        .body(
+            new ErrorResponse(
+                EErrorCode.MAX_FILE_SIZE_EXCEEDED.name(),
+                EErrorCode.MAX_FILE_SIZE_EXCEEDED.getMessage()));
   }
 
   @ExceptionHandler(UserCategoryNotRecognizedException.class)
