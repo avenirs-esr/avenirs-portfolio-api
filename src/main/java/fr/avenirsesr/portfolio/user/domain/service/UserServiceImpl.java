@@ -5,9 +5,10 @@ import fr.avenirsesr.portfolio.shared.domain.exception.BadImageTypeException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.port.input.RessourceService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.RessourceRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ public class UserServiceImpl implements UserService {
   public static final long MAX_SIZE = 10 * 1024 * 1024; // 10 Mo
 
   private final UserRepository userRepository;
-  private final RessourceRepository ressourceRepository;
+  private final RessourceService ressourceService;
 
   @Override
   public User getProfile(UUID id) {
@@ -32,16 +33,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void updateProfile(UUID id, String firstname, String lastname, String email, String bio) {
-    User user = getUser(id);
-
-    if (firstname != null) {
-      user.setFirstName(firstname);
-    }
-
-    if (lastname != null) {
-      user.setLastName(lastname);
-    }
+  public void updateProfile(
+      User user,
+      @NotNull String firstname,
+      @NotNull String lastname,
+      String email,
+      String bio,
+      String profilePictureUrl,
+      String coverPictureUrl) {
+    user.setFirstName(firstname);
+    user.setLastName(lastname);
 
     if (email != null) {
       user.setEmail(email);
@@ -49,35 +50,45 @@ public class UserServiceImpl implements UserService {
 
     userRepository.save(user);
 
+    Student student = user.toStudent();
+
     if (bio != null) {
-      Student student = user.toStudent();
       student.setBio(bio);
-      userRepository.save(student);
     }
+
+    if (profilePictureUrl != null) {
+      student.setProfilePicture(profilePictureUrl);
+    }
+
+    if (coverPictureUrl != null) {
+      student.setCoverPicture(coverPictureUrl);
+    }
+
+    userRepository.save(student);
   }
 
   @Override
-  public void updateProfilePicture(UUID id, MultipartFile photoFile) throws IOException {
-    User user = getUser(id);
-
+  public String uploadStudentProfilePicture(User user, MultipartFile photoFile) throws IOException {
     checkImageFormat(photoFile);
-    String profilePicturePath = ressourceRepository.storeStudentProfilePicture(id, photoFile);
-    Student student = user.toStudent();
-    student.setProfilePicture(profilePicturePath);
-
-    userRepository.save(student);
+    return ressourceService.uploadStudentProfilePicture(user, photoFile);
   }
 
   @Override
-  public void updateCoverPicture(UUID id, MultipartFile coverFile) throws IOException {
-    User user = getUser(id);
-
+  public String uploadStudentCoverPicture(User user, MultipartFile coverFile) throws IOException {
     checkImageFormat(coverFile);
-    String coverPicturePath = ressourceRepository.storeStudentCoverPicture(id, coverFile);
-    Student student = user.toStudent();
-    student.setCoverPicture(coverPicturePath);
+    return ressourceService.uploadStudentCoverPicture(user, coverFile);
+  }
 
-    userRepository.save(student);
+  @Override
+  public String uploadTeacherProfilePicture(User user, MultipartFile photoFile) throws IOException {
+    checkImageFormat(photoFile);
+    return ressourceService.uploadTeacherProfilePicture(user, photoFile);
+  }
+
+  @Override
+  public String uploadTeacherCoverPicture(User user, MultipartFile coverFile) throws IOException {
+    checkImageFormat(coverFile);
+    return ressourceService.uploadTeacherCoverPicture(user, coverFile);
   }
 
   private User getUser(UUID id) {

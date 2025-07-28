@@ -8,9 +8,20 @@ import org.springframework.web.multipart.MultipartFile;
 public interface UserService {
   User getProfile(UUID id);
 
-  void updateProfile(UUID id, String firstname, String lastname, String email, String bio);
+  void updateProfile(
+      User user,
+      String firstname,
+      String lastname,
+      String email,
+      String bio,
+      String profilePictureUrl,
+      String coverPictureUrl);
 
-  void updateProfilePicture(UUID id, MultipartFile photoFile) throws IOException;
+  String uploadStudentProfilePicture(User user, MultipartFile photoFile) throws IOException;
 
-  void updateCoverPicture(UUID id, MultipartFile coverFile) throws IOException;
+  String uploadStudentCoverPicture(User user, MultipartFile coverFile) throws IOException;
+
+  String uploadTeacherProfilePicture(User user, MultipartFile photoFile) throws IOException;
+
+  String uploadTeacherCoverPicture(User user, MultipartFile coverFile) throws IOException;
 }
