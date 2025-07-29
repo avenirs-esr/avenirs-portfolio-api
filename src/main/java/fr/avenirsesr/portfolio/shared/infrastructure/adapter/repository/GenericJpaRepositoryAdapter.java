@@ -53,7 +53,7 @@ public abstract class GenericJpaRepositoryAdapter<D, E> implements GenericReposi
   }
 
   @Override
-  public void deleteById(UUID id) {
-    jpaRepository.deleteById(id);
+  public void delete(D domain) {
+    jpaRepository.delete(fromDomain.apply(domain));
   }
 }

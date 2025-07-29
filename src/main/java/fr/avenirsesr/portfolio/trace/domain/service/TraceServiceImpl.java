@@ -87,8 +87,7 @@ public class TraceServiceImpl implements TraceService {
     trace.setSkillLevels(List.of());
 
     traceRepository.save(trace);
-
-    traceRepository.deleteById(id);
+    traceRepository.delete(trace);
   }
 
   @Override

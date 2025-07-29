@@ -13,5 +13,5 @@ public interface GenericRepositoryPort<D> {
 
   void flush();
 
-  void deleteById(UUID id);
+  void delete(D domain);
 }
