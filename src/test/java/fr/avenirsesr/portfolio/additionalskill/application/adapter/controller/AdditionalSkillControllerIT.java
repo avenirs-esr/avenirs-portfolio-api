@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.additionalskill.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.shared.application.adapter.util.TestResourceUtils.loadJson;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,14 +73,7 @@ public class AdditionalSkillControllerIT {
 
   @Test
   void shouldCreateAdditionalSkillProgress() throws Exception {
-    String payloadJson =
-        """
-      {
-        "id": "3f024a1c-5429-43f6-bb2e-ac5a3ca662e6",
-        "level": "BEGINNER",
-        "type": "ROME4.0"
-      }
-      """;
+    String payloadJson = loadJson("additionalskill/mock-new-additional-skill-progress.json");
 
     mockMvc
         .perform(
@@ -96,13 +89,7 @@ public class AdditionalSkillControllerIT {
   @Test
   void shouldReturnConflictWhenAdditionalSkillAlreadyExists() throws Exception {
     String payloadJson =
-        """
-      {
-        "id": "cce0bde1-f45c-4607-a5df-3083aa643dff",
-        "level": "BEGINNER",
-        "type": "ROME4.0"
-      }
-      """;
+        loadJson("additionalskill/mock-new-additional-skill-progress-to-duplicate.json");
 
     mockMvc
         .perform(
@@ -127,16 +114,7 @@ public class AdditionalSkillControllerIT {
 
   @Test
   void shouldReturnNotFoundWhenSkillDoesNotExist() throws Exception {
-    String skillId = UUID.randomUUID().toString();
-    String payloadJson =
-        """
-      {
-        "id": "%s",
-        "level": "BEGINNER",
-        "type": "ROME4.0"
-      }
-      """
-            .formatted(skillId);
+    String payloadJson = loadJson("additionalskill/mock-unknown-additional-skill.json");
 
     mockMvc
         .perform(
