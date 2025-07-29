@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.user.domain.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,7 +10,7 @@ import fr.avenirsesr.portfolio.shared.domain.exception.BadImageSizeException;
 import fr.avenirsesr.portfolio.shared.domain.exception.BadImageTypeException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.RessourceRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.RessourceService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.io.IOException;
@@ -31,7 +30,7 @@ public class UserServiceImplTest {
 
   @Mock private UserRepository userRepository;
 
-  @Mock private RessourceRepository ressourceRepository;
+  @Mock private RessourceService ressourceService;
 
   @InjectMocks private UserServiceImpl userService;
 
@@ -45,10 +44,14 @@ public class UserServiceImplTest {
   @Test
   void shouldUpdateUserFirstnameLastnameEmailAndBio() {
     // When
-    when(userRepository.findById(student.getId())).thenReturn(Optional.of(student.getUser()));
-
     userService.updateProfile(
-        student.getId(), "RandomFirstname", "RandomLastname", "RandomEmail", "RandomBio");
+        student.getUser(),
+        "RandomFirstname",
+        "RandomLastname",
+        "RandomEmail",
+        "RandomBio",
+        "https://RandomProfilePictureUrl.com",
+        "https://RandomCoverPictureUrl.com");
 
     // Then
     ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
@@ -62,25 +65,32 @@ public class UserServiceImplTest {
   }
 
   @Test
-  void shouldUpdateUserEmailAndBioOnly() {
+  void shouldUpdateUserFirstNameLastNameProfileAndCoverOnly() {
     // Given
-    String saveFirstname = student.getUser().getFirstName();
-    String saveLastname = student.getUser().getLastName();
+    String saveEmail = student.getUser().getEmail();
+    String saveBio = student.getUser().toStudent().getBio();
 
     // When
-    when(userRepository.findById(student.getId())).thenReturn(Optional.of(student.getUser()));
-
-    userService.updateProfile(student.getId(), null, null, "RandomEmail", "RandomBio");
+    userService.updateProfile(
+        student.getUser(),
+        "RandomEmail",
+        "RandomEmail",
+        null,
+        null,
+        "https://RandomProfilePictureUrl.com",
+        "https://RandomCoverPictureUrl.com");
 
     // Then
     ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
     verify(userRepository).save(captor.capture());
 
     Student savedStudent = captor.getValue();
-    assertEquals(saveFirstname, savedStudent.getUser().getFirstName());
-    assertEquals(saveLastname, savedStudent.getUser().getLastName());
-    assertEquals("RandomEmail", savedStudent.getUser().getEmail());
-    assertEquals("RandomBio", savedStudent.getBio());
+    assertEquals("RandomEmail", savedStudent.getUser().getFirstName());
+    assertEquals("RandomEmail", savedStudent.getUser().getLastName());
+    assertEquals(saveEmail, savedStudent.getUser().getEmail());
+    assertEquals(saveBio, savedStudent.getBio());
+    assertEquals("https://RandomProfilePictureUrl.com", savedStudent.getProfilePicture());
+    assertEquals("https://RandomCoverPictureUrl.com", savedStudent.getCoverPicture());
   }
 
   @Test
@@ -92,21 +102,14 @@ public class UserServiceImplTest {
     when(mockFile.getContentType()).thenReturn("image/jpeg");
     when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE);
 
-    when(userRepository.findById(student.getId())).thenReturn(Optional.of(student.getUser()));
-    when(ressourceRepository.storeStudentProfilePicture(student.getId(), mockFile))
+    when(ressourceService.uploadProfilePicture(student, mockFile))
         .thenReturn(
             "https://baseUrl.com/photo/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg");
 
-    userService.updateProfilePicture(student.getId(), mockFile);
+    userService.uploadProfilePicture(student, mockFile);
 
     // Then
-    ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
-    verify(userRepository).save(captor.capture());
-
-    Student savedStudent = captor.getValue();
-    assertEquals(
-        "https://baseUrl.com/photo/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg",
-        savedStudent.getProfilePicture());
+    verify(ressourceService).uploadProfilePicture(student, mockFile);
   }
 
   @Test
@@ -117,13 +120,12 @@ public class UserServiceImplTest {
     // When
     when(mockFile.getContentType()).thenReturn("image/jpeg");
     when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE + 1);
-    when(userRepository.findById(student.getId())).thenReturn(Optional.of(student.getUser()));
 
     // Then
     assertThrows(
         BadImageSizeException.class,
         () -> {
-          userService.updateProfilePicture(student.getId(), mockFile);
+          userService.uploadProfilePicture(student, mockFile);
         });
   }
 
@@ -135,13 +137,12 @@ public class UserServiceImplTest {
     // When
     when(mockFile.getContentType()).thenReturn("image/pdf");
     when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE);
-    when(userRepository.findById(student.getId())).thenReturn(Optional.of(student.getUser()));
 
     // Then
     assertThrows(
         BadImageTypeException.class,
         () -> {
-          userService.updateProfilePicture(student.getId(), mockFile);
+          userService.uploadProfilePicture(student, mockFile);
         });
   }
 
@@ -154,21 +155,14 @@ public class UserServiceImplTest {
     when(mockFile.getContentType()).thenReturn("image/jpeg");
     when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE);
 
-    when(userRepository.findById(any(UUID.class))).thenReturn(Optional.of(student.getUser()));
-    when(ressourceRepository.storeStudentCoverPicture(student.getId(), mockFile))
+    when(ressourceService.uploadCoverPicture(student, mockFile))
         .thenReturn(
             "https://baseUrl.com/cover/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg");
 
-    userService.updateCoverPicture(student.getId(), mockFile);
+    userService.uploadCoverPicture(student, mockFile);
 
     // Then
-    ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
-    verify(userRepository).save(captor.capture());
-
-    Student savedStudent = captor.getValue();
-    assertEquals(
-        "https://baseUrl.com/cover/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg",
-        savedStudent.getCoverPicture());
+    verify(ressourceService).uploadCoverPicture(student, mockFile);
   }
 
   @Test
@@ -179,13 +173,12 @@ public class UserServiceImplTest {
     // When
     when(mockFile.getContentType()).thenReturn("image/jpeg");
     when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE + 1);
-    when(userRepository.findById(student.getId())).thenReturn(Optional.of(student.getUser()));
 
     // Then
     assertThrows(
         BadImageSizeException.class,
         () -> {
-          userService.updateCoverPicture(student.getId(), mockFile);
+          userService.uploadCoverPicture(student, mockFile);
         });
   }
 
@@ -197,13 +190,12 @@ public class UserServiceImplTest {
     // When
     when(mockFile.getContentType()).thenReturn("image/pdf");
     when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE);
-    when(userRepository.findById(student.getId())).thenReturn(Optional.of(student.getUser()));
 
     // Then
     assertThrows(
         BadImageTypeException.class,
         () -> {
-          userService.updateCoverPicture(student.getId(), mockFile);
+          userService.uploadCoverPicture(student, mockFile);
         });
   }
 
