@@ -24,13 +24,13 @@ public class TrainingPathDatabaseRepository
 
   @Override
   public List&lt;TrainingPath&gt; findAllTrainingPathsByStudents(Student student) {
-<span class="fc" id="L27">    return jpaRepository.findAllByStudentId(student.getId()).stream()</span>
-<span class="fc" id="L28">        .map(TrainingPathMapper::toDomainWithoutRecursion)</span>
-<span class="fc" id="L29">        .collect(Collectors.groupingBy(TrainingPath::getId))</span>
-<span class="fc" id="L30">        .values()</span>
-<span class="fc" id="L31">        .stream()</span>
-<span class="fc" id="L32">        .map(List::getFirst)</span>
-<span class="fc" id="L33">        .toList();</span>
+<span class="nc" id="L27">    return jpaRepository.findAllByStudentId(student.getId()).stream()</span>
+<span class="nc" id="L28">        .map(TrainingPathMapper::toDomainWithoutRecursion)</span>
+<span class="nc" id="L29">        .collect(Collectors.groupingBy(TrainingPath::getId))</span>
+<span class="nc" id="L30">        .values()</span>
+<span class="nc" id="L31">        .stream()</span>
+<span class="nc" id="L32">        .map(List::getFirst)</span>
+<span class="nc" id="L33">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

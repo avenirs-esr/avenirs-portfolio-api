@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CohortEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.ams.infrastructure.adapter.model</a> &gt; <span class="el_source">CohortEntity.java</span></div><h1>CohortEntity.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.ams.infrastructure.adapter.model;
+
+import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.util.Set;
+import java.util.UUID;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = &quot;cohort&quot;)
+@NoArgsConstructor
+@Getter
+@Setter
+public class CohortEntity extends AvenirsBaseEntity {
+
+  @Column(nullable = false)
+  private String name;
+
+  @Column(length = 255)
+  private String description;
+
+  @ManyToMany
+  @JoinTable(
+      name = &quot;cohort_user&quot;,
+      joinColumns = @JoinColumn(name = &quot;cohort_id&quot;),
+      inverseJoinColumns = @JoinColumn(name = &quot;user_id&quot;))
+  private Set&lt;UserEntity&gt; users;
+
+  @ManyToOne(optional = false)
+  @JoinColumn(name = &quot;training_path_id&quot;)
+  private TrainingPathEntity trainingPath;
+
+  @ManyToMany(mappedBy = &quot;cohorts&quot;)
+  private Set&lt;AMSEntity&gt; amsEntities;
+
+  private CohortEntity(
+      UUID id,
+      String name,
+      String description,
+      Set&lt;UserEntity&gt; users,
+      TrainingPathEntity trainingPath,
+<span class="fc" id="L52">      Set&lt;AMSEntity&gt; amsEntities) {</span>
+<span class="fc" id="L53">    this.setId(id);</span>
+<span class="fc" id="L54">    this.name = name;</span>
+<span class="fc" id="L55">    this.description = description;</span>
+<span class="fc" id="L56">    this.users = users;</span>
+<span class="fc" id="L57">    this.trainingPath = trainingPath;</span>
+<span class="fc" id="L58">    this.amsEntities = amsEntities;</span>
+<span class="fc" id="L59">  }</span>
+
+  public static CohortEntity of(
+      UUID id,
+      String name,
+      String description,
+      Set&lt;UserEntity&gt; users,
+      TrainingPathEntity trainingPathEntity,
+      Set&lt;AMSEntity&gt; amsEntities) {
+<span class="fc" id="L68">    return new CohortEntity(id, name, description, users, trainingPathEntity, amsEntities);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

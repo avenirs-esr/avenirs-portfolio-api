@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FakeExternalUser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake</a> &gt; <span class="el_source">FakeExternalUser.java</span></div><h1>FakeExternalUser.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake;
+
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakeExternalSource;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
+import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.ExternalUserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import java.util.Arrays;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="nc" id="L12">@Slf4j</span>
+public class FakeExternalUser {
+<span class="nc" id="L14">  private static final FakerProvider faker = new FakerProvider();</span>
+  private final ExternalUserEntity externalUser;
+
+<span class="nc" id="L17">  private FakeExternalUser(ExternalUserEntity externalUser) {</span>
+<span class="nc" id="L18">    this.externalUser = externalUser;</span>
+<span class="nc" id="L19">  }</span>
+
+  public static FakeExternalUser of(UserEntity user, EUserCategory category) {
+<span class="nc bnc" id="L22" title="All 2 branches missed.">    if (category == EUserCategory.STUDENT</span>
+<span class="nc bnc" id="L23" title="All 4 branches missed.">        &amp;&amp; (user.getStudent().isEmpty() || !user.getStudent().get().isActive())) {</span>
+<span class="nc" id="L24">      throw new IllegalArgumentException(&quot;Student cannot be null&quot;);</span>
+    }
+<span class="nc bnc" id="L26" title="All 2 branches missed.">    if (category == EUserCategory.TEACHER</span>
+<span class="nc bnc" id="L27" title="All 4 branches missed.">        &amp;&amp; (user.getTeacher().isEmpty() || !user.getTeacher().get().isActive())) {</span>
+<span class="nc" id="L28">      throw new IllegalArgumentException(&quot;Student cannot be null&quot;);</span>
+    }
+
+<span class="nc" id="L31">    return new FakeExternalUser(</span>
+<span class="nc" id="L32">        ExternalUserEntity.of(</span>
+<span class="nc" id="L33">            FakeExternalSource.generateExternalSourceId(),</span>
+<span class="nc" id="L34">            Arrays.stream(EExternalSource.values())</span>
+<span class="nc" id="L35">                .toList()</span>
+<span class="nc" id="L36">                .get(faker.call().random().nextInt(EExternalSource.values().length)),</span>
+            user,
+            category,
+<span class="nc" id="L39">            faker.call().internet().emailAddress(),</span>
+<span class="nc" id="L40">            user.getFirstName(),</span>
+<span class="nc" id="L41">            user.getLastName()));</span>
+  }
+
+  public ExternalUserEntity toEntity() {
+<span class="nc" id="L45">    return externalUser;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

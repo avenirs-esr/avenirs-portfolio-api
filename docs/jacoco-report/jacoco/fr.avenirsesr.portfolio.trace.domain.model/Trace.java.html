@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Trace.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.trace.domain.model</a> &gt; <span class="el_source">Trace.java</span></div><h1>Trace.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.trace.domain.model;
+
+import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.user.domain.model.User;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class Trace extends AvenirsBaseModel {
+  private final User user;
+  private String title;
+  private List&lt;SkillLevelProgress&gt; skillLevels;
+  private List&lt;AMS&gt; amses;
+  private Instant createdAt;
+  private Instant updatedAt;
+  private boolean isGroup;
+  private ELanguage language;
+
+  @Getter(AccessLevel.NONE)
+  private Instant deletedAt;
+
+  @Getter(AccessLevel.NONE)
+  private String aiUseJustification;
+
+  @Getter(AccessLevel.NONE)
+  private String personalNote;
+
+  private Trace(
+      UUID id,
+      User user,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String aiUseJustification,
+      String personalNote,
+      List&lt;SkillLevelProgress&gt; skillLevels,
+      List&lt;AMS&gt; amses,
+      Instant createdAt,
+      Instant updatedAt,
+      Instant deletedAt) {
+<span class="fc" id="L50">    super(id);</span>
+<span class="fc" id="L51">    this.user = user;</span>
+<span class="fc" id="L52">    this.title = title;</span>
+<span class="fc" id="L53">    this.createdAt = createdAt;</span>
+<span class="fc" id="L54">    this.updatedAt = updatedAt;</span>
+<span class="fc" id="L55">    this.deletedAt = deletedAt;</span>
+<span class="fc" id="L56">    this.language = language;</span>
+<span class="fc" id="L57">    this.skillLevels = skillLevels;</span>
+<span class="fc" id="L58">    this.amses = amses;</span>
+<span class="fc" id="L59">    this.isGroup = isGroup;</span>
+<span class="fc" id="L60">    this.aiUseJustification = aiUseJustification;</span>
+<span class="fc" id="L61">    this.personalNote = personalNote;</span>
+<span class="fc" id="L62">  }</span>
+
+  public static Trace create(
+      UUID id,
+      User user,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String aiUseJustification,
+      String personalNote) {
+
+<span class="fc" id="L73">    return new Trace(</span>
+        id,
+        user,
+        title,
+        language,
+        isGroup,
+        aiUseJustification,
+        personalNote,
+<span class="fc" id="L81">        List.of(),</span>
+<span class="fc" id="L82">        List.of(),</span>
+<span class="fc" id="L83">        Instant.now(),</span>
+<span class="fc" id="L84">        Instant.now(),</span>
+        null);
+  }
+
+  public static Trace toDomain(
+      UUID id,
+      User user,
+      String title,
+      List&lt;SkillLevelProgress&gt; skillLevels,
+      List&lt;AMS&gt; amses,
+      boolean group,
+      String aiUseJustification,
+      String personalNote,
+      Instant createdAt,
+      Instant updatedAt,
+      Instant deletedAt,
+      ELanguage language) {
+<span class="fc" id="L101">    return new Trace(</span>
+        id,
+        user,
+        title,
+        language,
+        group,
+        aiUseJustification,
+        personalNote,
+        skillLevels,
+        amses,
+        createdAt,
+        updatedAt,
+        deletedAt);
+  }
+
+  public Optional&lt;Instant&gt; getDeletedAt() {
+<span class="fc" id="L117">    return Optional.ofNullable(deletedAt);</span>
+  }
+
+  public Optional&lt;String&gt; getAiUseJustification() {
+<span class="fc" id="L121">    return Optional.ofNullable(aiUseJustification);</span>
+  }
+
+  public Optional&lt;String&gt; getPersonalNote() {
+<span class="fc" id="L125">    return Optional.ofNullable(personalNote);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
