@@ -27,8 +27,8 @@ public abstract class GenericJpaRepositoryAdapter&lt;D, E&gt; implements Generic
 
   @Override
   public void save(D domain) {
-<span class="nc" id="L30">    jpaRepository.save(fromDomain.apply(domain));</span>
-<span class="nc" id="L31">  }</span>
+<span class="fc" id="L30">    jpaRepository.save(fromDomain.apply(domain));</span>
+<span class="fc" id="L31">  }</span>
 
   @Override
   public void saveAll(List&lt;D&gt; domains) {
@@ -43,8 +43,8 @@ public abstract class GenericJpaRepositoryAdapter&lt;D, E&gt; implements Generic
 
   @Override
   public Optional&lt;D&gt; findById(UUID id) {
-<span class="nc" id="L46">    E entity = jpaRepository.findById(id).orElse(null);</span>
-<span class="nc bnc" id="L47" title="All 2 branches missed.">    return entity == null ? Optional.empty() : Optional.of(toDomain.apply(entity));</span>
+<span class="fc" id="L46">    E entity = jpaRepository.findById(id).orElse(null);</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">    return entity == null ? Optional.empty() : Optional.of(toDomain.apply(entity));</span>
   }
 
   @Override
@@ -54,7 +54,7 @@ public abstract class GenericJpaRepositoryAdapter&lt;D, E&gt; implements Generic
 
   @Override
   public void deleteById(UUID id) {
-<span class="nc" id="L57">    jpaRepository.deleteById(id);</span>
-<span class="nc" id="L58">  }</span>
+<span class="fc" id="L57">    jpaRepository.deleteById(id);</span>
+<span class="fc" id="L58">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

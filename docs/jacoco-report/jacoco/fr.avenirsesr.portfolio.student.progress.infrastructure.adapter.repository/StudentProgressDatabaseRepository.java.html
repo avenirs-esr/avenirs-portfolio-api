@@ -2,8 +2,10 @@
 
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.StudentProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.StudentProgressSpecification;
@@ -20,45 +22,65 @@ public class StudentProgressDatabaseRepository
   private final StudentProgressJpaRepository jpaRepository;
 
   public StudentProgressDatabaseRepository(StudentProgressJpaRepository jpaRepository) {
-<span class="fc" id="L23">    super(</span>
+<span class="fc" id="L25">    super(</span>
         jpaRepository,
         jpaRepository,
         StudentProgressMapper::fromDomain,
         StudentProgressMapper::toDomain);
-<span class="fc" id="L28">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L30">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L31">  }</span>
 
   @Override
   public List&lt;StudentProgress&gt; findAllByStudent(Student student) {
-<span class="nc" id="L33">    return entityListToDomainList(</span>
-<span class="nc" id="L34">        jpaSpecificationExecutor.findAll(</span>
-<span class="nc" id="L35">            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))));</span>
+<span class="fc" id="L35">    return entityListToDomainList(</span>
+<span class="fc" id="L36">        jpaSpecificationExecutor.findAll(</span>
+<span class="fc" id="L37">            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))));</span>
   }
 
   @Override
   public List&lt;StudentProgress&gt; findAllAPCByStudent(Student student) {
-<span class="nc" id="L40">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L41">        .findAll(</span>
-<span class="nc" id="L42">            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
-<span class="nc" id="L43">                .and(StudentProgressSpecification.isAPC()))</span>
-<span class="nc" id="L44">        .stream()</span>
-<span class="nc" id="L45">        .map(StudentProgressMapper::toDomain)</span>
-<span class="nc" id="L46">        .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))</span>
-<span class="nc" id="L47">        .values()</span>
-<span class="nc" id="L48">        .stream()</span>
-<span class="nc" id="L49">        .map(List::getFirst)</span>
-<span class="nc" id="L50">        .toList();</span>
+<span class="fc" id="L42">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L43">        .findAll(</span>
+<span class="fc" id="L44">            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
+<span class="fc" id="L45">                .and(StudentProgressSpecification.isAPC()))</span>
+<span class="fc" id="L46">        .stream()</span>
+<span class="fc" id="L47">        .map(StudentProgressMapper::toDomain)</span>
+<span class="fc" id="L48">        .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))</span>
+<span class="fc" id="L49">        .values()</span>
+<span class="fc" id="L50">        .stream()</span>
+<span class="fc" id="L51">        .map(List::getFirst)</span>
+<span class="fc" id="L52">        .toList();</span>
+  }
+
+  @Override
+  public List&lt;StudentProgress&gt; findStudentProgressesBySkillLevelProgresses(
+      Student student, List&lt;SkillLevelProgress&gt; skillLevelProgresses) {
+<span class="fc" id="L58">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L59">        .findAll(</span>
+<span class="fc" id="L60">            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
+<span class="fc" id="L61">                .and(</span>
+<span class="fc" id="L62">                    StudentProgressSpecification.hasSkillLevelProgresses(</span>
+<span class="fc" id="L63">                        skillLevelProgresses.stream()</span>
+<span class="fc" id="L64">                            .map(SkillLevelProgressMapper::fromDomain)</span>
+<span class="fc" id="L65">                            .toList())))</span>
+<span class="fc" id="L66">        .stream()</span>
+<span class="fc" id="L67">        .map(StudentProgressMapper::toDomain)</span>
+<span class="fc" id="L68">        .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))</span>
+<span class="fc" id="L69">        .values()</span>
+<span class="fc" id="L70">        .stream()</span>
+<span class="fc" id="L71">        .map(List::getFirst)</span>
+<span class="fc" id="L72">        .toList();</span>
   }
 
   private List&lt;StudentProgress&gt; entityListToDomainList(
       List&lt;StudentProgressEntity&gt; trainingPathEntityList) {
-<span class="nc" id="L55">    return trainingPathEntityList.stream().map(StudentProgressMapper::toDomain).toList();</span>
+<span class="fc" id="L77">    return trainingPathEntityList.stream().map(StudentProgressMapper::toDomain).toList();</span>
   }
 
   private String sortFieldToExactPath(ESortField sortField) {
-<span class="nc bnc" id="L59" title="All 2 branches missed.">    return switch (sortField) {</span>
-<span class="nc" id="L60">      case ESortField.NAME -&gt; &quot;trainingPath.program.translations.name&quot;;</span>
-<span class="nc" id="L61">      case ESortField.DATE -&gt; &quot;createdAt&quot;;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">    return switch (sortField) {</span>
+<span class="nc" id="L82">      case ESortField.NAME -&gt; &quot;trainingPath.program.translations.name&quot;;</span>
+<span class="nc" id="L83">      case ESortField.DATE -&gt; &quot;createdAt&quot;;</span>
     };
   }
 }

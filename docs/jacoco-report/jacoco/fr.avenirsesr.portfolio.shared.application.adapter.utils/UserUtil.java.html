@@ -18,18 +18,18 @@ public class UserUtil {
   private final UserService userService;
 
   public Student getStudent(Principal principal) {
-<span class="nc" id="L21">    User user = userService.getProfile(UUID.fromString(principal.getName()));</span>
+<span class="fc" id="L21">    User user = userService.getProfile(UUID.fromString(principal.getName()));</span>
 
-<span class="nc bnc" id="L23" title="All 2 branches missed.">    if (!user.isStudent()) {</span>
-<span class="nc" id="L24">      log.error(&quot;User {} is not a student&quot;, principal.getName());</span>
-<span class="nc" id="L25">      throw new UserIsNotStudentException();</span>
+<span class="fc bfc" id="L23" title="All 2 branches covered.">    if (!user.isStudent()) {</span>
+<span class="fc" id="L24">      log.error(&quot;User {} is not a student&quot;, principal.getName());</span>
+<span class="fc" id="L25">      throw new UserIsNotStudentException();</span>
     }
 
-<span class="nc" id="L28">    return user.toStudent();</span>
+<span class="fc" id="L28">    return user.toStudent();</span>
   }
 
   public User getUser(Principal principal) {
-<span class="nc" id="L32">    return userService.getProfile(UUID.fromString(principal.getName()));</span>
+<span class="fc" id="L32">    return userService.getProfile(UUID.fromString(principal.getName()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

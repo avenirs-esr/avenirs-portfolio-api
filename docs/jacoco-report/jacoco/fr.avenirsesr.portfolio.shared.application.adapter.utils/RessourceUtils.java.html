@@ -6,23 +6,23 @@ import org.springframework.http.MediaType;
 <span class="nc" id="L6">public class RessourceUtils {</span>
 
   public static String getFileExtension(String filename) {
-<span class="nc bnc" id="L9" title="All 2 branches missed.">    if (filename == null) {</span>
+<span class="pc bpc" id="L9" title="1 of 2 branches missed.">    if (filename == null) {</span>
 <span class="nc" id="L10">      return null;</span>
     }
-<span class="nc" id="L12">    int dotIndex = filename.lastIndexOf(&quot;.&quot;);</span>
-<span class="nc bnc" id="L13" title="All 2 branches missed.">    if (dotIndex &gt;= 0) {</span>
-<span class="nc" id="L14">      return filename.substring(dotIndex + 1);</span>
+<span class="fc" id="L12">    int dotIndex = filename.lastIndexOf(&quot;.&quot;);</span>
+<span class="pc bpc" id="L13" title="1 of 2 branches missed.">    if (dotIndex &gt;= 0) {</span>
+<span class="fc" id="L14">      return filename.substring(dotIndex + 1);</span>
     }
 <span class="nc" id="L16">    return &quot;&quot;;</span>
   }
 
   public static MediaType getImageExtensionMediaType(String filename) {
-<span class="nc" id="L20">    String extention = getFileExtension(filename);</span>
+<span class="fc" id="L20">    String extention = getFileExtension(filename);</span>
 
-<span class="nc bnc" id="L22" title="All 4 branches missed.">    if (extention.equalsIgnoreCase(&quot;jpg&quot;) || extention.equalsIgnoreCase(&quot;jpeg&quot;)) {</span>
+<span class="pc bpc" id="L22" title="2 of 4 branches missed.">    if (extention.equalsIgnoreCase(&quot;jpg&quot;) || extention.equalsIgnoreCase(&quot;jpeg&quot;)) {</span>
 <span class="nc" id="L23">      return MediaType.IMAGE_JPEG;</span>
-<span class="nc bnc" id="L24" title="All 2 branches missed.">    } else if (extention.equalsIgnoreCase(&quot;png&quot;)) {</span>
-<span class="nc" id="L25">      return MediaType.IMAGE_PNG;</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">    } else if (extention.equalsIgnoreCase(&quot;png&quot;)) {</span>
+<span class="fc" id="L25">      return MediaType.IMAGE_PNG;</span>
     }
 
 <span class="nc" id="L28">    throw new BadImageTypeException();</span>
