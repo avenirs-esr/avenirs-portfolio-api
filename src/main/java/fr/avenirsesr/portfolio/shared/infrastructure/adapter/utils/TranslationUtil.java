@@ -21,15 +21,9 @@ public class TranslationUtil {
     return translations.stream()
         .filter(t -> t.getLanguage().equals(preferredLanguage))
         .findFirst()
-        .orElseGet(
+        .orElseThrow(
             () ->
-                translations.stream()
-                    .filter(t -> t.getLanguage().equals(ELanguage.FALLBACK))
-                    .findFirst()
-                    .orElseThrow(
-                        () ->
-                            new LanguageException(
-                                String.format(
-                                    "Fallback language [%s] not setup", ELanguage.FALLBACK))));
+                new LanguageException(
+                    String.format("Fallback language [%s] not setup", ELanguage.FALLBACK)));
   }
 }
