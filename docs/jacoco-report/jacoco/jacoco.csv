@@ -1,10 +1,7 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,8,226,2,20,1,61,2,19,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl.new TypeReference() {...},0,3,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl.new TypeReference() {...},0,3,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl.new TypeReference() {...},0,3,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl.new TypeReference() {...},0,3,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl,30,195,1,1,8,40,1,11,0,11
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl,2,156,1,1,0,34,1,11,0,11
 avenirs-portfolio-api,fr.avenirsesr.portfolio.security.infrastructure.filter,HmacAuthenticationFilter,20,169,5,15,0,44,5,12,0,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.security.infrastructure.filter,DevAuthenticationFilter,20,44,4,8,0,14,4,6,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification,TraceSpecification,3,83,0,0,1,18,1,4,1,4
@@ -42,7 +39,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controlle
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.domain.service,AdditionalSkillServiceImpl,0,55,0,2,0,15,0,5,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.service,AMSServiceImpl,0,50,0,0,0,14,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification,StudentProgressSpecification,3,37,0,0,1,8,1,6,1,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils,TranslationUtil,29,28,0,0,7,8,4,3,4,3
+avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils,TranslationUtil,15,27,0,0,3,8,2,3,2,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils,ValidationUtils,8,6,2,2,2,2,3,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio,AvenirsPortfolioApiApplication,5,3,0,0,2,1,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.utils,UserUtils,7,7,1,1,2,3,2,1,1,1
