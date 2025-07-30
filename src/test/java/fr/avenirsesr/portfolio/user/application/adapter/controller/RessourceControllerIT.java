@@ -21,6 +21,10 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 class RessourceControllerIT {
 
+  private final String studentPhotoFile = "photo-student.png";
+  private final String studentCoverFile = "cover-student.jpg";
+  private final String teacherPhotoFile = "photo-teacher.png";
+  private final String teacherCoverFile = "cover-teacher.jpg";
   @Resource private MockMvc mockMvc;
 
   @Value("${hmac.secret-key}")
@@ -32,25 +36,39 @@ class RessourceControllerIT {
   @Value("${user.student.signature}")
   private String studentSignature;
 
+  @Value("${user.teacher.payload}")
+  private String teacherPayload;
+
+  @Value("${user.teacher.signature}")
+  private String teacherSignature;
+
   @Value("${photo.storage.student.path}")
   private String studentPhotoPath;
+
+  @Value("${cover.storage.student.path}")
+  private String studentCoverPath;
 
   @Value("${cover.storage.teacher.path}")
   private String teacherCoverPath;
 
-  private final String studentPhotoFile = "photo.png";
-  private final String teacherCoverFile = "cover.jpg";
+  @Value("${photo.storage.teacher.path}")
+  private String teacherPhotoPath;
 
   @BeforeEach
   void setup() throws Exception {
     Path studentPhoto = Path.of(studentPhotoPath, studentPhotoFile);
     Path teacherCover = Path.of(teacherCoverPath, teacherCoverFile);
+    Path studentCover = Path.of(studentCoverPath, studentCoverFile);
+    Path teacherPhoto = Path.of(teacherPhotoPath, teacherPhotoFile);
 
     Files.createDirectories(studentPhoto.getParent());
     Files.write(studentPhoto, new byte[] {(byte) 137, 80, 78, 71, 13, 10, 26, 10});
-
     Files.createDirectories(teacherCover.getParent());
     Files.write(teacherCover, new byte[] {(byte) 255, (byte) 216, (byte) 255});
+    Files.createDirectories(studentCover.getParent());
+    Files.write(studentCover, new byte[] {(byte) 255, (byte) 216, (byte) 255});
+    Files.createDirectories(teacherPhoto.getParent());
+    Files.write(teacherPhoto, new byte[] {(byte) 137, 80, 78, 71, 13, 10, 26, 10});
   }
 
   @Test
@@ -65,6 +83,22 @@ class RessourceControllerIT {
   void shouldReturnTeacherCoverWithCorrectContentType() throws Exception {
     mockMvc
         .perform(get("/cover/TEACHER/" + teacherCoverFile))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.IMAGE_JPEG));
+  }
+
+  @Test
+  void shouldReturnTeacherPhotoWithCorrectContentType() throws Exception {
+    mockMvc
+        .perform(get("/photo/TEACHER/" + teacherPhotoFile))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.IMAGE_PNG));
+  }
+
+  @Test
+  void shouldReturnStudentCoverWithCorrectContentType() throws Exception {
+    mockMvc
+        .perform(get("/cover/STUDENT/" + studentCoverFile))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.IMAGE_JPEG));
   }
