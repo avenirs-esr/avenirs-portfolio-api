@@ -32,21 +32,21 @@ public class AMSController {
   @GetMapping(&quot;/view&quot;)
   public ResponseEntity&lt;PagedResponse&lt;AmsViewDTO&gt;&gt; getAmsView(
       Principal principal,
-      @RequestParam(value = &quot;programProgressId&quot;) UUID programProgressId,
+      @RequestParam(value = &quot;studentProgressId&quot;) UUID studentProgressId,
       @RequestParam(value = &quot;page&quot;, required = false) Integer page,
       @RequestParam(value = &quot;pageSize&quot;, required = false) Integer pageSize) {
 <span class="fc" id="L38">    var pageCriteria = new PageCriteria(page, pageSize);</span>
 <span class="fc" id="L39">    log.debug(</span>
-        &quot;Received request to get AMS view for user [{}], programProgressId [{}] with pagination&quot;
+        &quot;Received request to get AMS view for user [{}], studentProgressId [{}] with pagination&quot;
             + &quot; (page={}, pageSize={})&quot;,
 <span class="fc" id="L42">        principal.getName(),</span>
-        programProgressId,
+        studentProgressId,
 <span class="fc" id="L44">        pageCriteria.page(),</span>
 <span class="fc" id="L45">        pageCriteria.pageSize());</span>
 <span class="fc" id="L46">    Student student = userUtil.getStudent(principal);</span>
 
 <span class="fc" id="L48">    PagedResult&lt;AMS&gt; pagedResult =</span>
-<span class="fc" id="L49">        amsService.findUserAmsByProgramProgress(student, programProgressId, pageCriteria);</span>
+<span class="fc" id="L49">        amsService.findUserAmsByStudentProgress(student, studentProgressId, pageCriteria);</span>
 
 <span class="fc" id="L51">    List&lt;AmsViewDTO&gt; amsViewDTOs =</span>
 <span class="fc" id="L52">        pagedResult.content().stream().map(AmsViewMapper::toDto).toList();</span>

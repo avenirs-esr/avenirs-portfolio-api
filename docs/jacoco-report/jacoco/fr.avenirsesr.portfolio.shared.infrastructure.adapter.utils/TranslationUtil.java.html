@@ -21,16 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 <span class="fc" id="L21">    return translations.stream()</span>
 <span class="fc" id="L22">        .filter(t -&gt; t.getLanguage().equals(preferredLanguage))</span>
 <span class="fc" id="L23">        .findFirst()</span>
-<span class="fc" id="L24">        .orElseGet(</span>
+<span class="fc" id="L24">        .orElseThrow(</span>
             () -&gt;
-<span class="nc" id="L26">                translations.stream()</span>
-<span class="nc" id="L27">                    .filter(t -&gt; t.getLanguage().equals(ELanguage.FALLBACK))</span>
-<span class="nc" id="L28">                    .findFirst()</span>
-<span class="nc" id="L29">                    .orElseThrow(</span>
-                        () -&gt;
-<span class="nc" id="L31">                            new LanguageException(</span>
-<span class="nc" id="L32">                                String.format(</span>
-                                    &quot;Fallback language [%s] not setup&quot;, ELanguage.FALLBACK))));
+<span class="nc" id="L26">                new LanguageException(</span>
+<span class="nc" id="L27">                    String.format(&quot;Fallback language [%s] not setup&quot;, ELanguage.FALLBACK)));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

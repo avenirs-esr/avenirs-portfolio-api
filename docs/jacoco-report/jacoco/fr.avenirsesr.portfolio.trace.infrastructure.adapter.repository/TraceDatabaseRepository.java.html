@@ -25,35 +25,35 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Trac
 
   @Override
   public List&lt;Trace&gt; findLastsOf(User user, int limit) {
-<span class="nc" id="L28">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L29">        .findAll(</span>
-<span class="nc" id="L30">            TraceSpecification.ofUser(UserMapper.fromDomain(user)),</span>
-<span class="nc" id="L31">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
-<span class="nc" id="L32">        .getContent()</span>
-<span class="nc" id="L33">        .stream()</span>
-<span class="nc" id="L34">        .map(TraceMapper::toDomain)</span>
-<span class="nc" id="L35">        .toList();</span>
+<span class="fc" id="L28">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L29">        .findAll(</span>
+<span class="fc" id="L30">            TraceSpecification.ofUser(UserMapper.fromDomain(user)),</span>
+<span class="fc" id="L31">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
+<span class="fc" id="L32">        .getContent()</span>
+<span class="fc" id="L33">        .stream()</span>
+<span class="fc" id="L34">        .map(TraceMapper::toDomain)</span>
+<span class="fc" id="L35">        .toList();</span>
   }
 
   @Override
   public PagedResult&lt;Trace&gt; findAllUnassociated(User user, PageCriteria pageCriteria) {
-<span class="nc" id="L40">    var content =</span>
+<span class="fc" id="L40">    var content =</span>
         jpaSpecificationExecutor
-<span class="nc" id="L42">            .findAll(</span>
-<span class="nc" id="L43">                TraceSpecification.ofUser(UserMapper.fromDomain(user))</span>
-<span class="nc" id="L44">                    .and(TraceSpecification.unassociated()),</span>
-<span class="nc" id="L45">                PageRequest.of(</span>
-<span class="nc" id="L46">                    pageCriteria.page(),</span>
-<span class="nc" id="L47">                    pageCriteria.pageSize(),</span>
-<span class="nc" id="L48">                    Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
-<span class="nc" id="L49">                        .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;))))</span>
-<span class="nc" id="L50">            .getContent()</span>
-<span class="nc" id="L51">            .stream()</span>
-<span class="nc" id="L52">            .map(TraceMapper::toDomain)</span>
-<span class="nc" id="L53">            .toList();</span>
+<span class="fc" id="L42">            .findAll(</span>
+<span class="fc" id="L43">                TraceSpecification.ofUser(UserMapper.fromDomain(user))</span>
+<span class="fc" id="L44">                    .and(TraceSpecification.unassociated()),</span>
+<span class="fc" id="L45">                PageRequest.of(</span>
+<span class="fc" id="L46">                    pageCriteria.page(),</span>
+<span class="fc" id="L47">                    pageCriteria.pageSize(),</span>
+<span class="fc" id="L48">                    Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
+<span class="fc" id="L49">                        .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;))))</span>
+<span class="fc" id="L50">            .getContent()</span>
+<span class="fc" id="L51">            .stream()</span>
+<span class="fc" id="L52">            .map(TraceMapper::toDomain)</span>
+<span class="fc" id="L53">            .toList();</span>
 
-<span class="nc" id="L55">    return new PagedResult&lt;&gt;(</span>
-<span class="nc" id="L56">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));</span>
+<span class="fc" id="L55">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L56">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));</span>
   }
 
   public void saveAllEntities(List&lt;TraceEntity&gt; entities) {
@@ -62,13 +62,13 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Trac
 
   @Override
   public List&lt;Trace&gt; findAllUnassociated(User user) {
-<span class="nc" id="L65">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L66">        .findAll(</span>
-<span class="nc" id="L67">            TraceSpecification.ofUser(UserMapper.fromDomain(user))</span>
-<span class="nc" id="L68">                .and(TraceSpecification.unassociated()))</span>
-<span class="nc" id="L69">        .stream()</span>
-<span class="nc" id="L70">        .map(TraceMapper::toDomain)</span>
-<span class="nc" id="L71">        .toList();</span>
+<span class="fc" id="L65">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L66">        .findAll(</span>
+<span class="fc" id="L67">            TraceSpecification.ofUser(UserMapper.fromDomain(user))</span>
+<span class="fc" id="L68">                .and(TraceSpecification.unassociated()))</span>
+<span class="fc" id="L69">        .stream()</span>
+<span class="fc" id="L70">        .map(TraceMapper::toDomain)</span>
+<span class="fc" id="L71">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

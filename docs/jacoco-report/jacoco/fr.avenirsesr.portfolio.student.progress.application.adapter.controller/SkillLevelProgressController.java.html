@@ -29,28 +29,28 @@ public class SkillLevelProgressController {
   private final UserUtil userUtil;
 
   @GetMapping()
-  public ResponseEntity&lt;PagedResponse&lt;SkillDTO&gt;&gt; get(
+  public ResponseEntity&lt;PagedResponse&lt;SkillDTO&gt;&gt; getSkillLevelProgresses(
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(name = &quot;sort&quot;, required = false) String sortRaw) {
-<span class="nc" id="L37">    Student student = userUtil.getStudent(principal);</span>
+<span class="fc" id="L37">    Student student = userUtil.getStudent(principal);</span>
 
-<span class="nc" id="L39">    PagedResult&lt;SkillProgress&gt; pagedResult =</span>
-<span class="nc" id="L40">        studentProgressService.getAllTimeSkillsView(</span>
-<span class="nc" id="L41">            student, SortCriteria.fromString(sortRaw), new PageCriteria(page, pageSize));</span>
+<span class="fc" id="L39">    PagedResult&lt;SkillProgress&gt; pagedResult =</span>
+<span class="fc" id="L40">        studentProgressService.getAllTimeSkillsView(</span>
+<span class="fc" id="L41">            student, SortCriteria.fromString(sortRaw), new PageCriteria(page, pageSize));</span>
 
-<span class="nc" id="L43">    var response =</span>
+<span class="fc" id="L43">    var response =</span>
         new PagedResponse&lt;&gt;(
-<span class="nc" id="L45">            pagedResult.content().stream()</span>
-<span class="nc" id="L46">                .map(</span>
+<span class="fc" id="L45">            pagedResult.content().stream()</span>
+<span class="fc" id="L46">                .map(</span>
                     skillProgress -&gt;
-<span class="nc" id="L48">                        SkillMapper.fromDomainToDto(</span>
-<span class="nc" id="L49">                            skillProgress.currentSkillLevelProgress(),</span>
-<span class="nc" id="L50">                            skillProgress.studentProgress()))</span>
-<span class="nc" id="L51">                .toList(),</span>
-<span class="nc" id="L52">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
-<span class="nc" id="L53">    return ResponseEntity.ok(response);</span>
+<span class="fc" id="L48">                        SkillMapper.fromDomainToDto(</span>
+<span class="fc" id="L49">                            skillProgress.currentSkillLevelProgress(),</span>
+<span class="fc" id="L50">                            skillProgress.studentProgress()))</span>
+<span class="fc" id="L51">                .toList(),</span>
+<span class="fc" id="L52">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="fc" id="L53">    return ResponseEntity.ok(response);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

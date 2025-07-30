@@ -2,47 +2,49 @@
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L13">public class AMSSpecification {</span>
+<span class="nc" id="L15">public class AMSSpecification {</span>
 
   public static Specification&lt;AMSEntity&gt; belongsToUserViaCohorts(UUID userId) {
-<span class="nc" id="L16">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L17" title="All 2 branches missed.">      if (query != null) {</span>
-<span class="nc" id="L18">        query.distinct(true);</span>
+<span class="fc" id="L18">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">      if (query != null) {</span>
+<span class="fc" id="L20">        query.distinct(true);</span>
       }
 
-<span class="nc" id="L21">      Join&lt;AMSEntity, CohortEntity&gt; cohortJoin = root.join(&quot;cohorts&quot;, JoinType.INNER);</span>
-<span class="nc" id="L22">      Join&lt;CohortEntity, UserEntity&gt; userJoin = cohortJoin.join(&quot;users&quot;, JoinType.INNER);</span>
+<span class="fc" id="L23">      Join&lt;AMSEntity, CohortEntity&gt; cohortJoin = root.join(&quot;cohorts&quot;, JoinType.INNER);</span>
+<span class="fc" id="L24">      Join&lt;CohortEntity, UserEntity&gt; userJoin = cohortJoin.join(&quot;users&quot;, JoinType.INNER);</span>
 
-<span class="nc" id="L24">      return criteriaBuilder.equal(userJoin.get(&quot;id&quot;), userId);</span>
+<span class="fc" id="L26">      return criteriaBuilder.equal(userJoin.get(&quot;id&quot;), userId);</span>
     };
   }
 
-  public static Specification&lt;AMSEntity&gt; hasProgramProgressId(UUID programProgressId) {
-<span class="nc" id="L29">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L30" title="All 2 branches missed.">      if (query != null) {</span>
-<span class="nc" id="L31">        query.distinct(true);</span>
+  public static Specification&lt;AMSEntity&gt; hasSkillLevelProgress(
+      List&lt;SkillLevelProgressEntity&gt; skillLevelProgresses) {
+<span class="fc" id="L32">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L33" title="2 of 4 branches missed.">      if (skillLevelProgresses == null || skillLevelProgresses.isEmpty()) {</span>
+<span class="nc" id="L34">        return criteriaBuilder.conjunction();</span>
       }
 
-<span class="nc" id="L34">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
-<span class="nc" id="L35">      Root&lt;AMSEntity&gt; subRoot = subquery.from(AMSEntity.class);</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">      if (query != null) {</span>
+<span class="fc" id="L38">        query.distinct(true);</span>
+      }
 
-<span class="nc" id="L37">      Join&lt;AMSEntity, CohortEntity&gt; cohortJoin = subRoot.join(&quot;cohorts&quot;, JoinType.INNER);</span>
+<span class="fc" id="L41">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
+<span class="fc" id="L42">      Root&lt;AMSEntity&gt; amsRoot = subquery.from(AMSEntity.class);</span>
+<span class="fc" id="L43">      Join&lt;AMSEntity, SkillLevelProgressEntity&gt; skillJoin = amsRoot.join(&quot;skillLevels&quot;);</span>
 
-<span class="nc" id="L39">      subquery</span>
-<span class="nc" id="L40">          .select(subRoot.get(&quot;id&quot;))</span>
-<span class="nc" id="L41">          .where(</span>
-<span class="nc" id="L42">              criteriaBuilder.equal(</span>
-<span class="nc" id="L43">                  cohortJoin.get(&quot;programProgress&quot;).get(&quot;id&quot;), programProgressId));</span>
+<span class="fc" id="L45">      subquery.select(amsRoot.get(&quot;id&quot;)).where(skillJoin.in(skillLevelProgresses));</span>
 
-<span class="nc" id="L45">      return criteriaBuilder.in(root.get(&quot;id&quot;)).value(subquery);</span>
+<span class="fc" id="L47">      return criteriaBuilder.in(root.get(&quot;id&quot;)).value(subquery);</span>
     };
   }
 }

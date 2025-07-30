@@ -6,13 +6,13 @@ import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 <span class="nc" id="L6">public class UserUtils {</span>
 
   public static EUserCategory getUserCategory(String profile) {
-<span class="nc" id="L9">    EUserCategory userCategory = EUserCategory.fromString(profile);</span>
+<span class="fc" id="L9">    EUserCategory userCategory = EUserCategory.fromString(profile);</span>
 
-<span class="nc bnc" id="L11" title="All 2 branches missed.">    if (userCategory == null) {</span>
+<span class="pc bpc" id="L11" title="1 of 2 branches missed.">    if (userCategory == null) {</span>
 <span class="nc" id="L12">      throw new UserCategoryNotRecognizedException();</span>
     }
 
-<span class="nc" id="L15">    return userCategory;</span>
+<span class="fc" id="L15">    return userCategory;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

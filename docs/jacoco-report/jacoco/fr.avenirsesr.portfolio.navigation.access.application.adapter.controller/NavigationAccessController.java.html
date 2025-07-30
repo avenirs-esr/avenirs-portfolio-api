@@ -25,21 +25,21 @@ public class NavigationAccessController {
 
   @GetMapping
   public ResponseEntity&lt;NavigationAccessDTO&gt; getStudentNavigationAccess(Principal principal) {
-<span class="nc" id="L28">    Student student = userUtil.getStudent(principal);</span>
+<span class="fc" id="L28">    Student student = userUtil.getStudent(principal);</span>
 
-<span class="nc" id="L30">    var isAPCEnabledByInstitution =</span>
-<span class="nc" id="L31">        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);</span>
-<span class="nc" id="L32">    var isLifeProjectEnabledByInstitution =</span>
-<span class="nc" id="L33">        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);</span>
+<span class="fc" id="L30">    var isAPCEnabledByInstitution =</span>
+<span class="fc" id="L31">        institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);</span>
+<span class="fc" id="L32">    var isLifeProjectEnabledByInstitution =</span>
+<span class="fc" id="L33">        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);</span>
 
-<span class="nc" id="L35">    var isFollowingAPCProgram = studentProgressService.isStudentFollowingAPCProgram(student);</span>
+<span class="fc" id="L35">    var isFollowingAPCProgram = studentProgressService.isStudentFollowingAPCProgram(student);</span>
 
-<span class="nc" id="L37">    var navigationAccess =</span>
+<span class="fc" id="L37">    var navigationAccess =</span>
         new NavigationAccessDTO(
             new NavigationAccessDTO.AccessInfoAPC(isAPCEnabledByInstitution, isFollowingAPCProgram),
             new NavigationAccessDTO.AccessInfoLifeProject(isLifeProjectEnabledByInstitution));
 
-<span class="nc" id="L42">    return ResponseEntity.ok(navigationAccess);</span>
+<span class="fc" id="L42">    return ResponseEntity.ok(navigationAccess);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -9,6 +9,8 @@ import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -23,37 +25,42 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter&lt;AMS, A
   private final AMSJpaRepository jpaRepository;
 
   public AMSDatabaseRepository(AMSJpaRepository repository) {
-<span class="fc" id="L26">    super(repository, repository, AMSMapper::fromDomain, AMSMapper::toDomain);</span>
-<span class="fc" id="L27">    this.jpaRepository = repository;</span>
-<span class="fc" id="L28">  }</span>
+<span class="fc" id="L28">    super(repository, repository, AMSMapper::fromDomain, AMSMapper::toDomain);</span>
+<span class="fc" id="L29">    this.jpaRepository = repository;</span>
+<span class="fc" id="L30">  }</span>
 
   @Override
-  public PagedResult&lt;AMS&gt; findByUserIdViaCohortsAndProgramProgressId(
-      UUID userId, UUID programProgressId, PageCriteria pageCriteria) {
-<span class="nc" id="L33">    Specification&lt;AMSEntity&gt; spec = AMSSpecification.belongsToUserViaCohorts(userId);</span>
+  public PagedResult&lt;AMS&gt; findByUserIdViaCohortsAndSkillLevelProgresses(
+      UUID userId, List&lt;SkillLevelProgress&gt; skillLevelProgresses, PageCriteria pageCriteria) {
+<span class="fc" id="L35">    Specification&lt;AMSEntity&gt; spec = AMSSpecification.belongsToUserViaCohorts(userId);</span>
 
-<span class="nc bnc" id="L35" title="All 2 branches missed.">    if (programProgressId != null) {</span>
-<span class="nc" id="L36">      spec = spec.and(AMSSpecification.hasProgramProgressId(programProgressId));</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">    if (!skillLevelProgresses.isEmpty()) {</span>
+<span class="fc" id="L38">      spec =</span>
+<span class="fc" id="L39">          spec.and(</span>
+<span class="fc" id="L40">              AMSSpecification.hasSkillLevelProgress(</span>
+<span class="fc" id="L41">                  skillLevelProgresses.stream()</span>
+<span class="fc" id="L42">                      .map(SkillLevelProgressMapper::fromDomain)</span>
+<span class="fc" id="L43">                      .toList()));</span>
     }
 
-<span class="nc" id="L39">    Page&lt;AMSEntity&gt; pageResult =</span>
-<span class="nc" id="L40">        jpaSpecificationExecutor.findAll(</span>
+<span class="fc" id="L46">    Page&lt;AMSEntity&gt; pageResult =</span>
+<span class="fc" id="L47">        jpaSpecificationExecutor.findAll(</span>
             spec,
-<span class="nc" id="L42">            PageRequest.of(</span>
-<span class="nc" id="L43">                pageCriteria.page(),</span>
-<span class="nc" id="L44">                pageCriteria.pageSize(),</span>
-<span class="nc" id="L45">                Sort.by(Sort.Direction.DESC, &quot;startDate&quot;)));</span>
+<span class="fc" id="L49">            PageRequest.of(</span>
+<span class="fc" id="L50">                pageCriteria.page(),</span>
+<span class="fc" id="L51">                pageCriteria.pageSize(),</span>
+<span class="fc" id="L52">                Sort.by(Sort.Direction.DESC, &quot;startDate&quot;)));</span>
 
-<span class="nc" id="L47">    List&lt;AMS&gt; content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();</span>
+<span class="fc" id="L54">    List&lt;AMS&gt; content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();</span>
 
-<span class="nc" id="L49">    return new PagedResult&lt;&gt;(</span>
-<span class="nc" id="L50">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));</span>
+<span class="fc" id="L56">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L57">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));</span>
   }
 
   public void saveAllEntities(List&lt;AMSEntity&gt; entities) {
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">    if (entities != null) {</span>
-<span class="fc" id="L55">      jpaRepository.saveAll(entities);</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">    if (entities != null) {</span>
+<span class="fc" id="L62">      jpaRepository.saveAll(entities);</span>
     }
-<span class="fc" id="L57">  }</span>
+<span class="fc" id="L64">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -23,10 +23,10 @@ public class TrainingPathController {
 
   @GetMapping()
   public List&lt;TrainingPathDTO&gt; getAllTrainingPaths(Principal principal) {
-<span class="nc" id="L26">    Student student = userUtil.getStudent(principal);</span>
-<span class="nc" id="L27">    return trainingPathService.getTrainingPathsByStudent(student).stream()</span>
-<span class="nc" id="L28">        .map(TrainingPathMapper::fromDomainToDto)</span>
-<span class="nc" id="L29">        .toList();</span>
+<span class="fc" id="L26">    Student student = userUtil.getStudent(principal);</span>
+<span class="fc" id="L27">    return trainingPathService.getTrainingPathsByStudent(student).stream()</span>
+<span class="fc" id="L28">        .map(TrainingPathMapper::fromDomainToDto)</span>
+<span class="fc" id="L29">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

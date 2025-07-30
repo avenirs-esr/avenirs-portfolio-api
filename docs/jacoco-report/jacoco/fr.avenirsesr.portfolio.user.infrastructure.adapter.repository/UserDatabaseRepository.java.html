@@ -19,8 +19,8 @@ public class UserDatabaseRepository extends GenericJpaRepositoryAdapter&lt;User,
 
   @Override
   public void save(Student student) {
-<span class="nc" id="L22">    jpaRepository.save(UserMapper.fromDomain(student));</span>
-<span class="nc" id="L23">  }</span>
+<span class="fc" id="L22">    jpaRepository.save(UserMapper.fromDomain(student));</span>
+<span class="fc" id="L23">  }</span>
 
   @Override
   public void saveAllStudents(List&lt;Student&gt; students) {
