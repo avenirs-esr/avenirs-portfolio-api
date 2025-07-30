@@ -21,10 +21,10 @@ import org.springframework.data.jpa.domain.Specification;
 
   public static Specification&lt;StudentProgressEntity&gt; hasSkillLevelProgresses(
       List&lt;SkillLevelProgressEntity&gt; skillLevelProgresses) {
-<span class="fc" id="L24">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc" id="L25">      Join&lt;StudentProgressEntity, SkillLevelProgressEntity&gt; skillLevelProgressJoin =</span>
-<span class="fc" id="L26">          root.join(&quot;skillLevels&quot;);</span>
-<span class="fc" id="L27">      return skillLevelProgressJoin.in(skillLevelProgresses);</span>
+<span class="nc" id="L24">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc" id="L25">      Join&lt;StudentProgressEntity, SkillLevelProgressEntity&gt; skillLevelProgressJoin =</span>
+<span class="nc" id="L26">          root.join(&quot;skillLevels&quot;);</span>
+<span class="nc" id="L27">      return skillLevelProgressJoin.in(skillLevelProgresses);</span>
     };
   }
 }

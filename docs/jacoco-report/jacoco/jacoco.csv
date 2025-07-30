@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,0,212,0,18,0,54,0,20,0,11
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,0,193,0,14,0,51,0,17,0,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl.new TypeReference() {...},0,3,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.cache,AdditionalSkillCacheImpl,2,156,1,1,0,34,1,11,0,11
 avenirs-portfolio-api,fr.avenirsesr.portfolio.security.infrastructure.filter,HmacAuthenticationFilter,20,169,5,15,0,44,5,12,0,7
@@ -40,12 +40,12 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controlle
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,4,120,1,5,1,27,1,7,0,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.domain.service,AdditionalSkillServiceImpl,0,55,0,2,0,15,0,5,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.service,AMSServiceImpl,0,50,0,0,0,14,0,3,0,3
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification,StudentProgressSpecification,3,37,0,0,1,8,1,6,1,6
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification,StudentProgressSpecification,14,26,0,0,5,4,3,4,3,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils,TranslationUtil,15,27,0,0,3,8,2,3,2,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils,ValidationUtils,8,6,2,2,2,2,3,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio,AvenirsPortfolioApiApplication,5,3,0,0,2,1,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.utils,UserUtils,7,7,1,1,2,3,2,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository,AdditionalSkillDatabaseProgressRepository,0,99,2,2,0,30,2,6,0,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository,StudentProgressDatabaseRepository,9,72,2,0,3,33,2,5,1,5
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository,StudentProgressDatabaseRepository,40,51,3,1,19,20,3,5,1,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.domain.service,InstitutionServiceImpl,0,27,0,0,0,5,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.domain.service,TrainingPathServiceImpl,0,20,0,0,0,4,0,3,0,3
