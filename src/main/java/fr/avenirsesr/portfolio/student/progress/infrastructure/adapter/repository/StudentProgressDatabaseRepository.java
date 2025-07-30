@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.Stu
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.StudentProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
@@ -54,10 +55,14 @@ public class StudentProgressDatabaseRepository
 
   @Override
   public List<StudentProgress> findStudentProgressesBySkillLevelProgresses(
-      Student student, List<SkillLevelProgress> skillLevelProgresses) {
+      List<SkillLevelProgress> skillLevelProgresses) {
+    if (skillLevelProgresses.isEmpty()) {
+      return List.of();
+    }
+    UserEntity student = UserMapper.fromDomain(skillLevelProgresses.getFirst().getStudent());
     return jpaSpecificationExecutor
         .findAll(
-            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))
+            StudentProgressSpecification.hasStudent(student)
                 .and(
                     StudentProgressSpecification.hasSkillLevelProgresses(
                         skillLevelProgresses.stream()
