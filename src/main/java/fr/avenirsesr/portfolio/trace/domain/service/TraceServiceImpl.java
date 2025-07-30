@@ -18,7 +18,6 @@ import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -42,17 +41,12 @@ public class TraceServiceImpl implements TraceService {
   public String programNameOfTrace(Trace trace) {
     List<StudentProgress> studentProgresses =
         studentProgressRepository.findStudentProgressesBySkillLevelProgresses(
-            trace.getUser().toStudent(), trace.getSkillLevels());
-    return studentProgresses.isEmpty()
-            || studentProgresses.stream().noneMatch(sp -> sp.getTrainingPath().getProgram().isAPC())
-        ? EPortfolioType.LIFE_PROJECT.name()
-        : studentProgresses.stream()
-            .filter(sp -> sp.getTrainingPath().getProgram().isAPC())
-            .findAny()
-            .orElseThrow()
-            .getTrainingPath()
-            .getProgram()
-            .getName();
+            trace.getSkillLevels());
+    return studentProgresses.stream()
+        .filter(sp -> sp.getTrainingPath().getProgram().isAPC())
+        .map(sp -> sp.getTrainingPath().getProgram().getName())
+        .findAny()
+        .orElse(EPortfolioType.LIFE_PROJECT.name());
   }
 
   @Override
@@ -89,15 +83,8 @@ public class TraceServiceImpl implements TraceService {
       throw new UserNotAuthorizedException();
     }
 
-    trace.setAmses(
-        trace.getAmses() == null ? new ArrayList<>() : new ArrayList<>(trace.getAmses()));
-    trace.setSkillLevels(
-        trace.getSkillLevels() == null
-            ? new ArrayList<>()
-            : new ArrayList<>(trace.getSkillLevels()));
-
-    trace.getAmses().clear();
-    trace.getSkillLevels().clear();
+    trace.setAmses(List.of());
+    trace.setSkillLevels(List.of());
 
     traceRepository.save(trace);
 

@@ -21,8 +21,6 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "trace")
@@ -45,11 +43,9 @@ public class TraceEntity extends AvenirsBaseEntity {
       name = "trace_skill_level_progress",
       joinColumns = @JoinColumn(name = "trace_id"),
       inverseJoinColumns = @JoinColumn(name = "skill_level_progress_id"))
-  @OnDelete(action = OnDeleteAction.CASCADE)
   private List<SkillLevelProgressEntity> skillLevels;
 
   @ManyToMany
-  @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinTable(
       name = "trace_ams",
       joinColumns = @JoinColumn(name = "trace_id"),

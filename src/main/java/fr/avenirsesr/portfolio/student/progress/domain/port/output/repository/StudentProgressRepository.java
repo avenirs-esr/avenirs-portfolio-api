@@ -12,5 +12,5 @@ public interface StudentProgressRepository extends GenericRepositoryPort<Student
   List<StudentProgress> findAllAPCByStudent(Student student);
 
   List<StudentProgress> findStudentProgressesBySkillLevelProgresses(
-      Student student, List<SkillLevelProgress> skillLevelProgresses);
+      List<SkillLevelProgress> skillLevelProgresses);
 }

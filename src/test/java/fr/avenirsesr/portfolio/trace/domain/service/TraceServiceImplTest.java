@@ -66,8 +66,7 @@ public class TraceServiceImplTest {
   void givenTraceWithoutSkillLevels_shouldReturnLifeProject() {
     // Given
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
-    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(
-            any(Student.class), any()))
+    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
         .thenReturn(List.of());
 
     // When
@@ -99,8 +98,7 @@ public class TraceServiceImplTest {
             .withSkillLevels(List.of(skillLevelProgress))
             .toModel();
 
-    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(
-            any(Student.class), any()))
+    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
         .thenReturn(List.of(studentProgress));
 
     // When
@@ -132,8 +130,7 @@ public class TraceServiceImplTest {
             .withSkillLevels(List.of(skillLevelProgress))
             .toModel();
 
-    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(
-            any(Student.class), any()))
+    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
         .thenReturn(List.of(studentProgress));
 
     // When
