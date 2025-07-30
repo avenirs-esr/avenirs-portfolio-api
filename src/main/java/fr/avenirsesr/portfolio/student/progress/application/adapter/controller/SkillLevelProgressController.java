@@ -29,7 +29,7 @@ public class SkillLevelProgressController {
   private final UserUtil userUtil;
 
   @GetMapping()
-  public ResponseEntity<PagedResponse<SkillDTO>> get(
+  public ResponseEntity<PagedResponse<SkillDTO>> getSkillLevelProgresses(
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
