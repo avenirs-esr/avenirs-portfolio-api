@@ -8,10 +8,7 @@ import lombok.Setter;
 @Setter
 public class Student {
   private final User user;
-
   private String bio;
-  private String profilePicture;
-  private String coverPicture;
 
   private Student(User user) {
     this.user = user;
@@ -21,18 +18,15 @@ public class Student {
     return new Student(user);
   }
 
-  public static Student of(User user, String bio, String profilePicture, String coverPicture) {
+  public static Student of(User user, String bio) {
     var student = new Student(user);
     student.setBio(bio);
-    student.setProfilePicture(profilePicture);
-    student.setCoverPicture(coverPicture);
 
     return student;
   }
 
-  public static Student toDomain(
-      User user, String bio, String profilePicture, String coverPicture) {
-    return of(user, bio, profilePicture, coverPicture);
+  public static Student toDomain(User user, String bio) {
+    return of(user, bio);
   }
 
   public UUID getId() {

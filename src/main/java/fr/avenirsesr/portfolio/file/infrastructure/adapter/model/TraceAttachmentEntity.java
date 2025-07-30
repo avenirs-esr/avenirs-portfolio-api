@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.file.domain.model.EFileType;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
@@ -16,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class TraceAttachmentEntity extends AvenirsBaseEntity {
+public class TraceAttachmentEntity extends FileEntity {
 
   @ManyToOne(optional = false)
   private TraceEntity trace;
@@ -24,34 +23,11 @@ public class TraceAttachmentEntity extends AvenirsBaseEntity {
   @Column(nullable = false)
   private String name;
 
-  @Column(nullable = false, name = "attachment_type")
-  @Enumerated(EnumType.STRING)
-  private EFileType attachmentType;
-
-  @Column(nullable = false)
-  private long size;
-
-  @Column(nullable = false)
-  private int version;
-
-  @Column(nullable = false, name = "is_active_version")
-  private boolean isActiveVersion;
-
-  @Column(nullable = false)
-  private String uri;
-
-  @ManyToOne()
-  @JoinColumn(name = "uploaded_by", nullable = false)
-  private UserEntity uploadedBy;
-
-  @Column(nullable = false, name = "uploaded_at")
-  private Instant uploadedAt;
-
   private TraceAttachmentEntity(
       UUID id,
       TraceEntity trace,
       String name,
-      EFileType attachmentType,
+      EFileType fileType,
       long size,
       int version,
       boolean isActiveVersion,
@@ -61,20 +37,20 @@ public class TraceAttachmentEntity extends AvenirsBaseEntity {
     this.setId(id);
     this.trace = trace;
     this.name = name;
-    this.attachmentType = attachmentType;
-    this.size = size;
-    this.version = version;
-    this.isActiveVersion = isActiveVersion;
-    this.uri = uri;
-    this.uploadedBy = uploadedBy;
-    this.uploadedAt = uploadedAt;
+    this.setFileType(fileType);
+    this.setSize(size);
+    this.setVersion(version);
+    this.setActiveVersion(isActiveVersion);
+    this.setUri(uri);
+    this.setUploadedBy(uploadedBy);
+    this.setUploadedAt(uploadedAt);
   }
 
   public static TraceAttachmentEntity of(
       UUID id,
       TraceEntity trace,
       String name,
-      EFileType attachmentType,
+      EFileType fileType,
       long size,
       int version,
       boolean isActiveVersion,
@@ -82,15 +58,6 @@ public class TraceAttachmentEntity extends AvenirsBaseEntity {
       UserEntity uploadedBy,
       Instant uploadedAt) {
     return new TraceAttachmentEntity(
-        id,
-        trace,
-        name,
-        attachmentType,
-        size,
-        version,
-        isActiveVersion,
-        uri,
-        uploadedBy,
-        uploadedAt);
+        id, trace, name, fileType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
   }
 }

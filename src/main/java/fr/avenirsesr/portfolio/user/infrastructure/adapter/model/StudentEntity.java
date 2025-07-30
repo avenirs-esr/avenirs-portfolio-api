@@ -11,24 +11,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class StudentEntity {
-
   @Column private String bio;
-
   @Column private boolean isActive;
 
-  @Column private String profilePicture;
-
-  @Column private String coverPicture;
-
-  private StudentEntity(String bio, boolean isActive, String profilePicture, String coverPicture) {
+  private StudentEntity(String bio, boolean isActive) {
     this.bio = bio;
     this.isActive = isActive;
-    this.profilePicture = profilePicture;
-    this.coverPicture = coverPicture;
   }
 
-  public static StudentEntity of(
-      String bio, boolean isActive, String profilePicture, String coverPicture) {
-    return new StudentEntity(bio, isActive, profilePicture, coverPicture);
+  public static StudentEntity of(String bio, boolean isActive) {
+    return new StudentEntity(bio, isActive);
   }
 }

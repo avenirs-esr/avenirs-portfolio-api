@@ -82,12 +82,9 @@ class CohortMapperTest {
     StudentEntity student = new StudentEntity();
     student.setActive(true);
     student.setBio("Student bio");
-    student.setProfilePicture("profile.jpg");
-    student.setCoverPicture("cover.jpg");
     studentEntity.setStudent(student);
 
-    TeacherEntity teacher =
-        TeacherEntity.of("Teacher bio", false, "teacher-profile.jpg", "teacher-cover.jpg");
+    TeacherEntity teacher = TeacherEntity.of("Teacher bio", false);
     studentEntity.setTeacher(teacher);
 
     InstitutionEntity institutionEntity = new InstitutionEntity();
@@ -137,13 +134,9 @@ class CohortMapperTest {
     StudentEntity userStudent = new StudentEntity();
     userStudent.setActive(true);
     userStudent.setBio("User student bio");
-    userStudent.setProfilePicture("user-profile.jpg");
-    userStudent.setCoverPicture("user-cover.jpg");
     userEntity.setStudent(userStudent);
 
-    TeacherEntity userTeacher =
-        TeacherEntity.of(
-            "User teacher bio", false, "user-teacher-profile.jpg", "user-teacher-cover.jpg");
+    TeacherEntity userTeacher = TeacherEntity.of("User teacher bio", false);
     userEntity.setTeacher(userTeacher);
 
     Set<UserEntity> userEntities = new HashSet<>();
@@ -183,12 +176,9 @@ class CohortMapperTest {
     StudentEntity student = new StudentEntity();
     student.setActive(true);
     student.setBio("Student bio");
-    student.setProfilePicture("profile.jpg");
-    student.setCoverPicture("cover.jpg");
     studentEntity.setStudent(student);
 
-    TeacherEntity teacher =
-        TeacherEntity.of("Teacher bio", false, "teacher-profile.jpg", "teacher-cover.jpg");
+    TeacherEntity teacher = TeacherEntity.of("Teacher bio", false);
     studentEntity.setTeacher(teacher);
 
     InstitutionEntity institutionEntity = new InstitutionEntity();

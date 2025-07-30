@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentDTO;
+import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -53,7 +53,8 @@ public class TraceAttachmentControllerTest {
             any(), eq(traceId), anyString(), anyString(), anyLong(), any(byte[].class)))
         .thenReturn(returnedAttachment);
 
-    ResponseEntity<AttachmentDTO> response = controller.uploadAttachment(principal, traceId, file);
+    ResponseEntity<AttachmentUploadDTO> response =
+        controller.uploadAttachment(principal, traceId, file);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     assertThat(response.getBody()).isNotNull();

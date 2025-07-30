@@ -6,6 +6,8 @@ public class SeederConfig {
   public static final int USERS_NB_OF_STUDENT = (int) (0.8 * USERS_NB);
   public static final int USERS_NB_OF_TEACHER = (int) (0.15 * USERS_NB);
   public static final int USERS_NB_OF_BOTH = (int) (0.05 * USERS_NB);
+  public static final int MAX_PROFILE_PHOTO_PER_USER = 3;
+  public static final int MAX_COVER_PHOTO_PER_USER = 2;
 
   // Institutions
   private static final int INSTITUTIONS_NB = 5;

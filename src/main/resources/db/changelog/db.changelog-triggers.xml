@@ -217,4 +217,15 @@
         </sql>
     </changeSet>
 
+    <changeSet id="create-updated-at-trigger-user_photo" author="bilelbanelhaq">
+        <sql>
+            DROP TRIGGER IF EXISTS trigger_set_updated_at_user_photo ON "user_photo";
+            CREATE TRIGGER trigger_set_updated_at_user_photo
+                BEFORE UPDATE
+                ON "user_photo"
+                FOR EACH ROW
+                EXECUTE FUNCTION set_updated_at();
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

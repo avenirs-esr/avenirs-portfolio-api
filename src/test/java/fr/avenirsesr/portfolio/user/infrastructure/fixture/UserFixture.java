@@ -12,12 +12,8 @@ public class UserFixture {
   private String email;
   private boolean isStudent;
   private String studentBio;
-  private String studentProfilePicture;
-  private String studentCoverPicture;
   private boolean isTeacher;
   private String teacherBio;
-  private String teacherProfilePicture;
-  private String teacherCoverPicture;
 
   private UserFixture() {
     var base = FakeUser.create().toEntity();
@@ -27,12 +23,8 @@ public class UserFixture {
     this.email = base.getEmail();
     this.isStudent = false;
     this.studentBio = null;
-    this.studentProfilePicture = null;
-    this.studentCoverPicture = null;
     this.isTeacher = false;
     this.teacherBio = null;
-    this.teacherProfilePicture = null;
-    this.teacherCoverPicture = null;
   }
 
   public static UserFixture create() {
@@ -40,11 +32,11 @@ public class UserFixture {
   }
 
   public static UserFixture createStudent() {
-    return new UserFixture().asStudent("Student Bio", "studentProfile.jpg", "studentCover.jpg");
+    return new UserFixture().asStudent("Student Bio");
   }
 
   public static UserFixture createTeacher() {
-    return new UserFixture().asTeacher("Teacher Bio", "teacherProfile.jpg", "teacherCover.jpg");
+    return new UserFixture().asTeacher("Teacher Bio");
   }
 
   public UserFixture withId(UUID id) {
@@ -67,35 +59,20 @@ public class UserFixture {
     return this;
   }
 
-  public UserFixture asStudent(String studentBio, String profilePicture, String coverPicture) {
+  public UserFixture asStudent(String studentBio) {
     this.isStudent = true;
     this.studentBio = studentBio;
-    this.studentProfilePicture = profilePicture;
-    this.studentCoverPicture = coverPicture;
     return this;
   }
 
-  public UserFixture asTeacher(String teacherBio, String profilePicture, String coverPicture) {
+  public UserFixture asTeacher(String teacherBio) {
     this.isTeacher = true;
     this.teacherBio = teacherBio;
-    this.teacherProfilePicture = profilePicture;
-    this.teacherCoverPicture = coverPicture;
     return this;
   }
 
   public User toModel() {
     return User.toDomain(
-        id,
-        firstName,
-        lastName,
-        email,
-        isStudent,
-        studentBio,
-        studentProfilePicture,
-        studentCoverPicture,
-        isTeacher,
-        teacherBio,
-        teacherProfilePicture,
-        teacherCoverPicture);
+        id, firstName, lastName, email, isStudent, studentBio, isTeacher, teacherBio);
   }
 }

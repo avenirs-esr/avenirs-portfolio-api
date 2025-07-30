@@ -13,8 +13,6 @@ public class Teacher {
   private final User user;
 
   private String bio;
-  private String profilePicture;
-  private String coverPicture;
 
   private Teacher(User user) {
     this.user = user;
@@ -24,18 +22,15 @@ public class Teacher {
     return new Teacher(user);
   }
 
-  public static Teacher of(User user, String bio, String profilePicture, String coverPicture) {
+  public static Teacher of(User user, String bio) {
     var teacher = new Teacher(user);
     teacher.setBio(bio);
-    teacher.setProfilePicture(profilePicture);
-    teacher.setCoverPicture(coverPicture);
 
     return teacher;
   }
 
-  public static Teacher toDomain(
-      User user, String bio, String profilePicture, String coverPicture) {
-    return of(user, bio, profilePicture, coverPicture);
+  public static Teacher toDomain(User user, String bio) {
+    return of(user, bio);
   }
 
   public UUID getId() {

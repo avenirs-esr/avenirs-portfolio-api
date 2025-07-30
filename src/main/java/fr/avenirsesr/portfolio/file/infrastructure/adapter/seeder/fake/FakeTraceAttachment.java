@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.file.domain.model.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
-import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConfig;
+import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.time.Instant;
@@ -41,8 +41,11 @@ public class FakeTraceAttachment {
             faker.random().nextLong(fileType.getSizeLimit().bytes()),
             1,
             true,
-            "/workspace/app%s/placeholder.%s"
-                .formatted(FileStorageConfig.STORAGE_PATH, fileType.name().toLowerCase()),
+            "/workspace/app%s/%s.%s"
+                .formatted(
+                    FileStorageConstants.STORAGE_PATH,
+                    FileStorageConstants.PLACEHOLDER_FILE_UUID,
+                    fileType.name().toLowerCase()),
             trace.getUser(),
             trace.getCreatedAt()));
   }
@@ -72,8 +75,8 @@ public class FakeTraceAttachment {
     return this;
   }
 
-  public FakeTraceAttachment withAttachmentType(EFileType type) {
-    attachment.setAttachmentType(type);
+  public FakeTraceAttachment withFileType(EFileType type) {
+    attachment.setFileType(type);
     return this;
   }
 

@@ -18,7 +18,7 @@ public class UserUtil {
   private final UserService userService;
 
   public Student getStudent(Principal principal) {
-    User user = userService.getProfile(UUID.fromString(principal.getName()));
+    User user = userService.getUser(UUID.fromString(principal.getName()));
 
     if (!user.isStudent()) {
       log.error("User {} is not a student", principal.getName());
@@ -29,6 +29,6 @@ public class UserUtil {
   }
 
   public User getUser(Principal principal) {
-    return userService.getProfile(UUID.fromString(principal.getName()));
+    return userService.getUser(UUID.fromString(principal.getName()));
   }
 }

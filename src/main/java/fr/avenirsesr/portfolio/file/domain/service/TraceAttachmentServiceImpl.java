@@ -1,17 +1,20 @@
 package fr.avenirsesr.portfolio.file.domain.service;
 
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
-import fr.avenirsesr.portfolio.file.domain.model.EFileType;
-import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
-import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStoragePort;
+import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
@@ -24,17 +27,14 @@ import org.springframework.stereotype.Service;
 public class TraceAttachmentServiceImpl implements TraceAttachmentService {
   private final TraceAttachmentRepository traceAttachmentRepository;
   private final TraceRepository traceRepository;
-  private final FileStoragePort fileStorageService;
+  private final FileStorageService fileStorageService;
   private final TraceService traceService;
 
   @Override
   public TraceAttachment uploadTraceAttachment(
       Student student, UUID traceId, String fileName, String mimeType, long size, byte[] content)
       throws IOException {
-    var trace =
-        traceRepository
-            .findById(traceId)
-            .orElseThrow(fr.avenirsesr.portfolio.file.domain.exception.TraceNotFoundException::new);
+    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     var allTraceAttachments = traceAttachmentRepository.findByTrace(trace);
 
     if (!trace.getUser().equals(student.getUser())) {
@@ -50,25 +50,7 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
       var fileResource = new FileResource(UUID.randomUUID(), fileName, fileType, size, content);
       var uri = fileStorageService.upload(fileResource);
 
-      var version =
-          allTraceAttachments.stream()
-                  .map(TraceAttachment::getVersion)
-                  .max(Integer::compareTo)
-                  .orElse(0)
-              + 1;
-      allTraceAttachments.forEach(a -> a.setActiveVersion(false));
-
-      var newAttachment =
-          TraceAttachment.create(
-              fileResource.id(),
-              trace,
-              fileResource.fileName(),
-              fileResource.fileType(),
-              fileResource.size(),
-              version,
-              true,
-              uri,
-              student.getUser());
+      var newAttachment = createAttachment(student, allTraceAttachments, fileResource, trace, uri);
 
       traceAttachmentRepository.saveAll(
           Stream.concat(allTraceAttachments.stream(), Stream.of(newAttachment)).toList());
@@ -81,5 +63,31 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
       }
       throw e;
     }
+  }
+
+  private static TraceAttachment createAttachment(
+      Student student,
+      List<TraceAttachment> allTraceAttachments,
+      FileResource fileResource,
+      Trace trace,
+      String uri) {
+    var version =
+        allTraceAttachments.stream()
+                .map(TraceAttachment::getVersion)
+                .max(Integer::compareTo)
+                .orElse(0)
+            + 1;
+    allTraceAttachments.forEach(a -> a.setActiveVersion(false));
+
+    return TraceAttachment.create(
+        fileResource.id(),
+        trace,
+        fileResource.fileName(),
+        fileResource.fileType(),
+        fileResource.size(),
+        version,
+        true,
+        uri,
+        student.getUser());
   }
 }

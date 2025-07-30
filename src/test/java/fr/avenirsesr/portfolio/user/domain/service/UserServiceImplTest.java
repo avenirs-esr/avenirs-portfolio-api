@@ -2,18 +2,14 @@ package fr.avenirsesr.portfolio.user.domain.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
-import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.input.RessourceService;
+import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,14 +19,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceImplTest {
 
   @Mock private UserRepository userRepository;
-
-  @Mock private RessourceService ressourceService;
 
   @InjectMocks private UserServiceImpl userService;
 
@@ -45,13 +38,12 @@ public class UserServiceImplTest {
   void shouldUpdateUserFirstnameLastnameEmailAndBio() {
     // When
     userService.updateProfile(
+        EUserCategory.STUDENT,
         student.getUser(),
         "RandomFirstname",
         "RandomLastname",
         "RandomEmail",
-        "RandomBio",
-        "https://RandomProfilePictureUrl.com",
-        "https://RandomCoverPictureUrl.com");
+        "RandomBio");
 
     // Then
     ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
@@ -72,13 +64,7 @@ public class UserServiceImplTest {
 
     // When
     userService.updateProfile(
-        student.getUser(),
-        "RandomEmail",
-        "RandomEmail",
-        null,
-        null,
-        "https://RandomProfilePictureUrl.com",
-        "https://RandomCoverPictureUrl.com");
+        EUserCategory.STUDENT, student.getUser(), "RandomEmail", "RandomEmail", null, null);
 
     // Then
     ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
@@ -89,124 +75,16 @@ public class UserServiceImplTest {
     assertEquals("RandomEmail", savedStudent.getUser().getLastName());
     assertEquals(saveEmail, savedStudent.getUser().getEmail());
     assertEquals(saveBio, savedStudent.getBio());
-    assertEquals("https://RandomProfilePictureUrl.com", savedStudent.getProfilePicture());
-    assertEquals("https://RandomCoverPictureUrl.com", savedStudent.getCoverPicture());
   }
 
   @Test
-  void shouldUpdateUserProfilePicture() throws IOException {
-    // Given
-    MultipartFile mockFile = mock(MultipartFile.class);
-
-    // When
-    when(mockFile.getContentType()).thenReturn("image/jpeg");
-    when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE);
-
-    when(ressourceService.uploadProfilePicture(student, mockFile))
-        .thenReturn(
-            "https://baseUrl.com/photo/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg");
-
-    userService.uploadProfilePicture(student, mockFile);
-
-    // Then
-    verify(ressourceService).uploadProfilePicture(student, mockFile);
-  }
-
-  @Test
-  void shouldThrowBadImageSizeExceptionDuringProfilePictureUpdate() {
-    // Given
-    MultipartFile mockFile = mock(MultipartFile.class);
-
-    // When
-    when(mockFile.getContentType()).thenReturn("image/jpeg");
-    when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE + 1);
-
-    // Then
-    assertThrows(
-        FileSizeTooBigException.class,
-        () -> {
-          userService.uploadProfilePicture(student, mockFile);
-        });
-  }
-
-  @Test
-  void shouldThrowBadImageTypeExceptionDuringProfilePictureUpdate() {
-    // Given
-    MultipartFile mockFile = mock(MultipartFile.class);
-
-    // When
-    when(mockFile.getContentType()).thenReturn("image/pdf");
-    when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE);
-
-    // Then
-    assertThrows(
-        FileTypeNotSupportedException.class,
-        () -> {
-          userService.uploadProfilePicture(student, mockFile);
-        });
-  }
-
-  @Test
-  void shouldUpdateUserCoverPicture() throws IOException {
-    // Given
-    MultipartFile mockFile = mock(MultipartFile.class);
-
-    // When
-    when(mockFile.getContentType()).thenReturn("image/jpeg");
-    when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE);
-
-    when(ressourceService.uploadCoverPicture(student, mockFile))
-        .thenReturn(
-            "https://baseUrl.com/cover/student/062f14a0-0575-481b-9457-47005945609d_1748423323502_spring-images-min.jpg");
-
-    userService.uploadCoverPicture(student, mockFile);
-
-    // Then
-    verify(ressourceService).uploadCoverPicture(student, mockFile);
-  }
-
-  @Test
-  void shouldThrowBadImageSizeExceptionDuringCoverPictureUpdate() {
-    // Given
-    MultipartFile mockFile = mock(MultipartFile.class);
-
-    // When
-    when(mockFile.getContentType()).thenReturn("image/jpeg");
-    when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE + 1);
-
-    // Then
-    assertThrows(
-        FileSizeTooBigException.class,
-        () -> {
-          userService.uploadCoverPicture(student, mockFile);
-        });
-  }
-
-  @Test
-  void shouldThrowBadImageTypeExceptionDuringCoverPictureUpdate() {
-    // Given
-    MultipartFile mockFile = mock(MultipartFile.class);
-
-    // When
-    when(mockFile.getContentType()).thenReturn("image/pdf");
-    when(mockFile.getSize()).thenReturn(UserServiceImpl.MAX_SIZE);
-
-    // Then
-    assertThrows(
-        FileTypeNotSupportedException.class,
-        () -> {
-          userService.uploadCoverPicture(student, mockFile);
-        });
-  }
-
-  @Test
-  void getProfile_shouldThrowException_whenUserNotFound() {
+  void getUser_shouldThrowException_whenUserNotFound() {
     // Arrange
     UUID userId = UUID.randomUUID();
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
     // Act + Assert
-    assertThrows(UserNotFoundException.class, () -> userService.getProfile(userId));
+    assertThrows(UserNotFoundException.class, () -> userService.getUser(userId));
     verify(userRepository).findById(userId);
   }
 }

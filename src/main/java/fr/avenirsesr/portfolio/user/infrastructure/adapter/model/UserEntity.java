@@ -33,9 +33,7 @@ public class UserEntity extends AvenirsBaseEntity {
   @Embedded
   @AttributeOverrides({
     @AttributeOverride(name = "bio", column = @Column(name = "student_bio")),
-    @AttributeOverride(name = "isActive", column = @Column(name = "student_is_active")),
-    @AttributeOverride(name = "profilePicture", column = @Column(name = "student_profile_picture")),
-    @AttributeOverride(name = "coverPicture", column = @Column(name = "student_cover_picture"))
+    @AttributeOverride(name = "isActive", column = @Column(name = "student_is_active"))
   })
   private StudentEntity student;
 
@@ -43,9 +41,7 @@ public class UserEntity extends AvenirsBaseEntity {
   @Embedded
   @AttributeOverrides({
     @AttributeOverride(name = "bio", column = @Column(name = "teacher_bio")),
-    @AttributeOverride(name = "isActive", column = @Column(name = "teacher_is_active")),
-    @AttributeOverride(name = "profilePicture", column = @Column(name = "teacher_profile_picture")),
-    @AttributeOverride(name = "coverPicture", column = @Column(name = "teacher_cover_picture"))
+    @AttributeOverride(name = "isActive", column = @Column(name = "teacher_is_active"))
   })
   private TeacherEntity teacher;
 

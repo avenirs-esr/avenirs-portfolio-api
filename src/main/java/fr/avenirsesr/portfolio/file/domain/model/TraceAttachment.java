@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.file.domain.model;
 
+import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.shared.File;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
@@ -17,14 +19,14 @@ public class TraceAttachment extends File {
       UUID id,
       Trace trace,
       String name,
-      EFileType attachmentType,
+      EFileType fileType,
       long size,
       int version,
       boolean isActiveVersion,
       String uri,
       User uploadedBy,
       Instant uploadedAt) {
-    super(id, attachmentType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
+    super(id, fileType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
     this.trace = trace;
     this.name = name;
   }
@@ -33,7 +35,7 @@ public class TraceAttachment extends File {
       UUID id,
       Trace trace,
       String name,
-      EFileType attachmentType,
+      EFileType fileType,
       long size,
       int version,
       boolean isActiveVersion,
@@ -41,23 +43,14 @@ public class TraceAttachment extends File {
       User uploadedBy) {
 
     return new TraceAttachment(
-        id,
-        trace,
-        name,
-        attachmentType,
-        size,
-        version,
-        isActiveVersion,
-        uri,
-        uploadedBy,
-        Instant.now());
+        id, trace, name, fileType, size, version, isActiveVersion, uri, uploadedBy, Instant.now());
   }
 
   public static TraceAttachment toDomain(
       UUID id,
       Trace trace,
       String name,
-      EFileType attachmentType,
+      EFileType fileType,
       long size,
       int version,
       boolean isActiveVersion,
@@ -65,15 +58,6 @@ public class TraceAttachment extends File {
       User uploadedBy,
       Instant uploadedAt) {
     return new TraceAttachment(
-        id,
-        trace,
-        name,
-        attachmentType,
-        size,
-        version,
-        isActiveVersion,
-        uri,
-        uploadedBy,
-        uploadedAt);
+        id, trace, name, fileType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
   }
 }

@@ -25,7 +25,7 @@ public interface TraceAttachmentMapper {
         entity.getId(),
         TraceMapper.toDomain(entity.getTrace()),
         entity.getName(),
-        entity.getAttachmentType(),
+        entity.getFileType(),
         entity.getSize(),
         entity.getVersion(),
         entity.isActiveVersion(),

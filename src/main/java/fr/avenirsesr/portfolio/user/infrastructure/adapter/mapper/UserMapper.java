@@ -53,12 +53,8 @@ public interface UserMapper {
             userEntity.getEmail(),
             userEntity.getStudent().map(StudentEntity::isActive).orElse(false),
             userEntity.getStudent().map(StudentEntity::getBio).orElse(null),
-            userEntity.getStudent().map(StudentEntity::getProfilePicture).orElse(null),
-            userEntity.getStudent().map(StudentEntity::getCoverPicture).orElse(null),
             userEntity.getTeacher().map(TeacherEntity::isActive).orElse(false),
-            userEntity.getTeacher().map(TeacherEntity::getBio).orElse(null),
-            userEntity.getTeacher().map(TeacherEntity::getProfilePicture).orElse(null),
-            userEntity.getTeacher().map(TeacherEntity::getCoverPicture).orElse(null))
+            userEntity.getTeacher().map(TeacherEntity::getBio).orElse(null))
         : null;
   }
 }

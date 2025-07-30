@@ -6,12 +6,13 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
-import fr.avenirsesr.portfolio.file.domain.model.EFileType;
-import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
-import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStoragePort;
+import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
+import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -29,7 +30,7 @@ import org.mockito.*;
 class TraceAttachmentServiceImplTest {
 
   @Mock private TraceAttachmentRepository traceAttachmentRepository;
-  @Mock private FileStoragePort fileStoragePort;
+  @Mock private FileStorageService fileStorageService;
   @Mock private TraceRepository traceRepository;
   @Mock private TraceService traceService;
 
@@ -49,7 +50,7 @@ class TraceAttachmentServiceImplTest {
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
 
     // FileResource real instance
-    when(fileStoragePort.upload(any(FileResource.class))).thenReturn("uri/to/file.txt");
+    when(fileStorageService.upload(any(FileResource.class))).thenReturn("uri/to/file.txt");
 
     // Existing attachments with versions 1 and 2
     TraceAttachment existing1 =
@@ -90,7 +91,7 @@ class TraceAttachmentServiceImplTest {
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
 
-    when(fileStoragePort.upload(any(FileResource.class))).thenReturn("some-uri");
+    when(fileStorageService.upload(any(FileResource.class))).thenReturn("some-uri");
 
     when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
 
@@ -112,7 +113,7 @@ class TraceAttachmentServiceImplTest {
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
 
-    when(fileStoragePort.upload(any(FileResource.class)))
+    when(fileStorageService.upload(any(FileResource.class)))
         .thenThrow(new IOException("Disk write error"));
 
     IOException thrown =
@@ -169,7 +170,7 @@ class TraceAttachmentServiceImplTest {
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
     when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
 
-    when(fileStoragePort.upload(any(FileResource.class)))
+    when(fileStorageService.upload(any(FileResource.class)))
         .thenThrow(new FileTypeNotSupportedException("File type not supported"));
 
     FileTypeNotSupportedException thrown =
@@ -198,7 +199,7 @@ class TraceAttachmentServiceImplTest {
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
     when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
 
-    when(fileStoragePort.upload(any(FileResource.class)))
+    when(fileStorageService.upload(any(FileResource.class)))
         .thenThrow(new IOException("Disk write error"));
 
     IOException thrown =
@@ -236,7 +237,7 @@ class TraceAttachmentServiceImplTest {
                     EFileType.TXT.getMimeType(),
                     1234L,
                     "data".getBytes()))
-        .isInstanceOf(fr.avenirsesr.portfolio.file.domain.exception.TraceNotFoundException.class);
+        .isInstanceOf(TraceNotFoundException.class);
   }
 
   @Test

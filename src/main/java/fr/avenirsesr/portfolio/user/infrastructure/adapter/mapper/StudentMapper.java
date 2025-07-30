@@ -6,18 +6,10 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 
 public interface StudentMapper {
   static StudentEntity fromDomain(Student student) {
-    return StudentEntity.of(
-        student.getBio(),
-        student.getUser().isStudent(),
-        student.getProfilePicture(),
-        student.getCoverPicture());
+    return StudentEntity.of(student.getBio(), student.getUser().isStudent());
   }
 
   static Student toDomain(StudentEntity studentEntity, UserEntity userEntity) {
-    return Student.toDomain(
-        UserMapper.toDomain(userEntity),
-        studentEntity.getBio(),
-        studentEntity.getProfilePicture(),
-        studentEntity.getCoverPicture());
+    return Student.toDomain(UserMapper.toDomain(userEntity), studentEntity.getBio());
   }
 }

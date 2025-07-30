@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.shared.application.adapter.exception;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.shared.application.adapter.response.ErrorResponse;
@@ -51,6 +52,12 @@ public class RestExceptionHandler {
   @ExceptionHandler(FileTypeNotSupportedException.class)
   public ResponseEntity<ErrorResponse> handle(FileTypeNotSupportedException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+  }
+
+  @ExceptionHandler(FileNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handle(FileNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
 

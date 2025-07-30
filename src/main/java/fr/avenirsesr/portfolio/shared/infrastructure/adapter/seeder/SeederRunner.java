@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.Add
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.TraceAttachmentSeeder;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 public class SeederRunner implements CommandLineRunner {
   private final UserRepository userRepository;
   private final UserSeeder userSeeder;
+  private final UserPhotoSeeder userPhotoSeeder;
   private final CohortSeeder cohortSeeder;
   private final AMSSeeder amsSeeder;
   private final TraceSeeder traceSeeder;
@@ -40,6 +42,7 @@ public class SeederRunner implements CommandLineRunner {
   public SeederRunner(
       UserRepository userRepository,
       UserSeeder userSeeder,
+      UserPhotoSeeder userPhotoSeeder,
       CohortSeeder cohortSeeder,
       AMSSeeder amsSeeder,
       TraceSeeder traceSeeder,
@@ -51,6 +54,7 @@ public class SeederRunner implements CommandLineRunner {
       SkillSeeder skillSeeder,
       AdditionalSkillSeeder additionalSkillSeeder) {
     this.userRepository = userRepository;
+    this.userPhotoSeeder = userPhotoSeeder;
     this.cohortSeeder = cohortSeeder;
     this.amsSeeder = amsSeeder;
     this.traceSeeder = traceSeeder;
@@ -72,6 +76,7 @@ public class SeederRunner implements CommandLineRunner {
       log.info("Seeding enabled and starting...");
 
       var savedUsers = userSeeder.seed();
+      var savedUserPhotos = userPhotoSeeder.seed(savedUsers);
       var savedInstitutions = institutionSeeder.seed();
       var savedPrograms = programSeeder.seed(savedInstitutions);
       var savedTraces = traceSeeder.seed(savedUsers);

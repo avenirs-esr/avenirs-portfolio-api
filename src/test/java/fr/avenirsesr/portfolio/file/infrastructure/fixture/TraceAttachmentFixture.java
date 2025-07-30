@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.file.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeTraceAttachment;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake.FakeTrace;
@@ -16,7 +16,7 @@ public class TraceAttachmentFixture {
   private UUID id;
   private Trace trace;
   private String fileName;
-  private EFileType attachmentType;
+  private EFileType fileType;
   private long size;
   private int version;
   private boolean isActiveVersion;
@@ -36,7 +36,7 @@ public class TraceAttachmentFixture {
     this.id = entity.getId();
     this.trace = TraceFixture.create().withUser(user).withId(entity.getTrace().getId()).toModel();
     this.fileName = entity.getName();
-    this.attachmentType = entity.getAttachmentType();
+    this.fileType = entity.getFileType();
     this.size = entity.getSize();
     this.version = entity.getVersion();
     this.isActiveVersion = entity.isActiveVersion();
@@ -64,8 +64,8 @@ public class TraceAttachmentFixture {
     return this;
   }
 
-  public TraceAttachmentFixture withAttachmentType(EFileType attachmentType) {
-    this.attachmentType = attachmentType;
+  public TraceAttachmentFixture withFileType(EFileType fileType) {
+    this.fileType = fileType;
     return this;
   }
 
@@ -101,15 +101,6 @@ public class TraceAttachmentFixture {
 
   public TraceAttachment toModel() {
     return TraceAttachment.toDomain(
-        id,
-        trace,
-        fileName,
-        attachmentType,
-        size,
-        version,
-        isActiveVersion,
-        uri,
-        uploadedBy,
-        uploadedAt);
+        id, trace, fileName, fileType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
   }
 }
