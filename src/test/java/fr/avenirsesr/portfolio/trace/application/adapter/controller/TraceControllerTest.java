@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
@@ -73,15 +74,25 @@ class TraceControllerTest {
   void shouldCreateTraceSuccessfully() {
     // Given
     when(userUtil.getUser(any())).thenReturn(user);
+    when(traceService.createTrace(
+            any(User.class),
+            anyString(),
+            any(ELanguage.class),
+            anyBoolean(),
+            anyString(),
+            anyString()))
+        .thenReturn(trace);
 
     CreateTraceDTO dto =
         new CreateTraceDTO("My Trace", ELanguage.FRENCH, true, "Personal note", "Justification IA");
 
     // When
-    ResponseEntity<Void> response = controller.createTrace(principal, dto);
+    ResponseEntity<TracesCreationResponse> response = controller.createTrace(principal, dto);
 
     // Then
     assertEquals(201, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(trace.getId(), response.getBody().traceId());
 
     verify(userUtil).getUser(principal);
     verify(traceService)
@@ -97,10 +108,12 @@ class TraceControllerTest {
   @Test
   void shouldCreateTraceWithNullFields() {
     when(userUtil.getUser(any())).thenReturn(user);
+    when(traceService.createTrace(user, "Trace sans IA", ELanguage.FRENCH, false, null, null))
+        .thenReturn(trace);
 
     CreateTraceDTO dto = new CreateTraceDTO("Trace sans IA", ELanguage.FRENCH, false, null, null);
 
-    ResponseEntity<Void> response = controller.createTrace(principal, dto);
+    ResponseEntity<TracesCreationResponse> response = controller.createTrace(principal, dto);
 
     assertEquals(201, response.getStatusCode().value());
 

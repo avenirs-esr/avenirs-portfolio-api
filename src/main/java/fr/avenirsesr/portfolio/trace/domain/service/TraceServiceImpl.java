@@ -117,7 +117,7 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public void createTrace(
+  public Trace createTrace(
       User user,
       String title,
       ELanguage language,
@@ -129,5 +129,6 @@ public class TraceServiceImpl implements TraceService {
             UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);
 
     traceRepository.save(trace);
+    return trace;
   }
 }

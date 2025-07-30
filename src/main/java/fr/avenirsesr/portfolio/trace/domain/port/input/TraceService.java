@@ -20,7 +20,7 @@ public interface TraceService {
 
   UnassociatedTracesSummary getUnassociatedTracesSummary(User user);
 
-  void createTrace(
+  Trace createTrace(
       User user,
       String title,
       ELanguage language,

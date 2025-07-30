@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -120,15 +119,11 @@ class TraceControllerIT {
         new CreateTraceDTO(
             "Nouvelle trace", ELanguage.FRENCH, false, "Note personnelle", "Justification IA");
 
-    MockMultipartFile multipartJson =
-        new MockMultipartFile(
-            "trace", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(dto));
-
     mockMvc
         .perform(
-            multipart("/me/traces")
-                .file(multipartJson)
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            post("/me/traces")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))

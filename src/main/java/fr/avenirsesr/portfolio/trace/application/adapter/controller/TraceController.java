@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.trace.application.adapter.dto.UnassociatedTracesS
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceViewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.UnassociatedTracesSummaryMapper;
+import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesResponse;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesViewResponse;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -22,16 +23,8 @@ import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @AllArgsConstructor
@@ -109,20 +102,21 @@ public class TraceController {
         UnassociatedTracesSummaryMapper.toDTO(traceService.getUnassociatedTracesSummary(user)));
   }
 
-  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<Void> createTrace(
-      Principal principal, @Valid @RequestPart("trace") CreateTraceDTO createTraceDTO) {
+  @PostMapping
+  public ResponseEntity<TracesCreationResponse> createTrace(
+      Principal principal, @Valid @RequestBody CreateTraceDTO createTraceDTO) {
     log.debug("Received request to create new trace for user [{}]", principal.getName());
     User user = userUtil.getUser(principal);
 
-    traceService.createTrace(
-        user,
-        createTraceDTO.title(),
-        createTraceDTO.language(),
-        createTraceDTO.isGroup(),
-        createTraceDTO.personalNote(),
-        createTraceDTO.iaJustification());
+    var trace =
+        traceService.createTrace(
+            user,
+            createTraceDTO.title(),
+            createTraceDTO.language(),
+            createTraceDTO.isGroup(),
+            createTraceDTO.personalNote(),
+            createTraceDTO.iaJustification());
 
-    return ResponseEntity.status(201).build();
+    return ResponseEntity.status(201).body(new TracesCreationResponse(trace.getId()));
   }
 }
