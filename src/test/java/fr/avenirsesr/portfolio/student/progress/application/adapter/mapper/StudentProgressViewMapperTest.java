@@ -57,22 +57,21 @@ public class StudentProgressViewMapperTest {
             .withEndDate(LocalDate.now().plusMonths(4))
             .toModel();
 
+    var skillLevelProgresses =
+        List.of(javaProgress_1, javaProgress_2, javaProgress_3, pythonProgress_1, pythonProgress_2);
+
     StudentProgress studentProgress =
         StudentProgressFixture.create()
             .withUser(student.getUser())
-            .withSkillLevels(
-                List.of(
-                    javaProgress_1,
-                    javaProgress_2,
-                    javaProgress_3,
-                    pythonProgress_1,
-                    pythonProgress_2))
+            .withSkillLevels(skillLevelProgresses)
             .toModel();
 
     try (MockedStatic<SkillMapper> mockedSkillViewMapper = mockStatic(SkillMapper.class)) {
 
       // WHEN
-      StudentProgressViewDTO dto = StudentProgressViewMapper.fromDomainToDto(studentProgress);
+      StudentProgressViewDTO dto =
+          StudentProgressViewMapper.fromDomainToDto(
+              studentProgress, List.of(javaProgress_3, pythonProgress_2));
 
       // THEN
       assertNotNull(dto);
@@ -83,7 +82,7 @@ public class StudentProgressViewMapperTest {
       mockedSkillViewMapper.verify(
           () -> SkillMapper.fromDomainToDto(eq(javaProgress_3), eq(studentProgress)));
       mockedSkillViewMapper.verify(
-          () -> SkillMapper.fromDomainToDto(eq(pythonProgress_1), eq(studentProgress)));
+          () -> SkillMapper.fromDomainToDto(eq(pythonProgress_2), eq(studentProgress)));
     }
   }
 
@@ -92,7 +91,8 @@ public class StudentProgressViewMapperTest {
     StudentProgress studentProgress =
         StudentProgressFixture.create().withSkillLevels(List.of()).toModel();
 
-    StudentProgressViewDTO dto = StudentProgressViewMapper.fromDomainToDto(studentProgress);
+    StudentProgressViewDTO dto =
+        StudentProgressViewMapper.fromDomainToDto(studentProgress, List.of());
 
     assertNotNull(dto);
     assertTrue(dto.skills().isEmpty(), "DTO should have empty skills list");

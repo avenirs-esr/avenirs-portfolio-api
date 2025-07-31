@@ -6,8 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
-import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
-import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
@@ -24,6 +23,8 @@ import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -204,12 +205,12 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
 
     // When
-    List<StudentProgress> result =
+    Map<StudentProgress, List<SkillLevelProgress>> result =
         studentProgressService.getStudentProgressView(student, customSort);
 
     // Then
     assertEquals(1, result.size());
-    assertEquals(progress, result.getFirst());
+    assertEquals(progress, result.keySet().stream().toList().getFirst());
     verify(studentProgressRepository).findAllByStudent(student);
   }
 
@@ -254,13 +255,15 @@ public class StudentProgressServiceImplTest {
         .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
 
     // WHEN
-    List<StudentProgress> result = studentProgressService.getStudentProgressView(student, null);
+    Map<StudentProgress, List<SkillLevelProgress>> result =
+        studentProgressService.getStudentProgressView(
+            student, new SortCriteria(ESortField.DATE, ESortOrder.ASC));
 
     // THEN
     assertEquals(1, result.size(), "Only current progress should be returned");
-    assertTrue(result.contains(currentProgress), "Current progress should be present");
-    assertFalse(result.contains(pastProgress), "Past progress should be filtered out");
-    assertFalse(result.contains(futureProgress), "Future progress should be filtered out");
+    assertTrue(result.containsKey(currentProgress), "Current progress should be present");
+    assertFalse(result.containsKey(pastProgress), "Past progress should be filtered out");
+    assertFalse(result.containsKey(futureProgress), "Future progress should be filtered out");
 
     verify(studentProgressRepository).findAllByStudent(eq(student));
   }
@@ -301,18 +304,188 @@ public class StudentProgressServiceImplTest {
         .thenReturn(List.of(progress1, progress2));
 
     // When
-    List<StudentProgress> result = studentProgressService.getStudentProgressView(student, null);
+    Map<StudentProgress, List<SkillLevelProgress>> result =
+        studentProgressService.getStudentProgressView(
+            student, new SortCriteria(ESortField.DATE, ESortOrder.ASC));
 
     // Then
     assertEquals(2, result.size(), "Should contain 2 StudentProgress");
     assertEquals(
         8,
-        result.stream()
+        result.keySet().stream()
             .flatMap(studentProgress -> studentProgress.getAllSkillLevels().stream())
             .toList()
             .size(),
-        "Should contain 2 StudentProgress");
+        "Should contain 8 skillLevelsProgresses");
     verify(studentProgressRepository).findAllByStudent(eq(student));
+  }
+
+  @ParameterizedTest
+  @EnumSource(ESortOrder.class)
+  void shouldSortStudentProgressAndSkillsByName(ESortOrder order) {
+    // Given
+    var skillAA =
+        SkillLevelProgressFixture.create(student)
+            .withSkillLevel(
+                SkillLevelFixture.create()
+                    .withSkill(SkillFixture.create().withName("Skill A").toModel())
+                    .toModel())
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .toModel();
+    var skillAB =
+        SkillLevelProgressFixture.create(student)
+            .withSkillLevel(
+                SkillLevelFixture.create()
+                    .withSkill(SkillFixture.create().withName("Skill B").toModel())
+                    .toModel())
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .toModel();
+    var progressA =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withTrainingPath(
+                TrainingPathFixture.create()
+                    .withProgram(ProgramFixture.create().withName("Program A").toModel())
+                    .toModel())
+            .withSkillLevels(List.of(skillAA, skillAB))
+            .toModel();
+
+    var skillBA =
+        SkillLevelProgressFixture.create(student)
+            .withSkillLevel(
+                SkillLevelFixture.create()
+                    .withSkill(SkillFixture.create().withName("Skill A").toModel())
+                    .toModel())
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .toModel();
+    var skillBB =
+        SkillLevelProgressFixture.create(student)
+            .withSkillLevel(
+                SkillLevelFixture.create()
+                    .withSkill(SkillFixture.create().withName("Skill B").toModel())
+                    .toModel())
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .toModel();
+    var progressB =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withTrainingPath(
+                TrainingPathFixture.create()
+                    .withProgram(ProgramFixture.create().withName("Program B").toModel())
+                    .toModel())
+            .withSkillLevels(List.of(skillBB, skillBA))
+            .toModel();
+
+    when(studentProgressRepository.findAllByStudent(eq(student)))
+        .thenReturn(List.of(progressB, progressA));
+
+    // When
+    var result =
+        studentProgressService.getStudentProgressView(
+            student, new SortCriteria(ESortField.NAME, order));
+
+    // Then
+    List<StudentProgress> orderedKeys = new ArrayList<>(result.keySet());
+    if (order == ESortOrder.ASC) {
+      assertEquals(progressA, orderedKeys.get(0));
+      assertEquals(progressB, orderedKeys.get(1));
+    } else {
+      assertEquals(progressB, orderedKeys.get(0));
+      assertEquals(progressA, orderedKeys.get(1));
+    }
+
+    // Vérifie que les skills de chaque progress sont triés par nom
+    List<SkillLevelProgress> skillsOfFirst = result.get(orderedKeys.get(0));
+    List<String> skillNamesOfFirst =
+        skillsOfFirst.stream().map(slp -> slp.getSkillLevel().getSkill().getName()).toList();
+
+    List<SkillLevelProgress> skillsOfSecond = result.get(orderedKeys.get(1));
+    List<String> skillNamesOfSecond =
+        skillsOfSecond.stream().map(slp -> slp.getSkillLevel().getSkill().getName()).toList();
+
+    List<String> expectedOrder =
+        (order == ESortOrder.ASC) ? List.of("Skill A", "Skill B") : List.of("Skill B", "Skill A");
+
+    assertEquals(expectedOrder, skillNamesOfFirst);
+    assertEquals(expectedOrder, skillNamesOfSecond);
+  }
+
+  @ParameterizedTest
+  @EnumSource(ESortOrder.class)
+  void shouldSortStudentProgressAndSkillsByDate(ESortOrder order) {
+    // Given
+    var skillOld1 =
+        SkillLevelProgressFixture.create(student)
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .withStartDate(LocalDate.now().minusMonths(2))
+            .toModel();
+    var skillOld2 =
+        SkillLevelProgressFixture.create(student)
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .withStartDate(LocalDate.now().minusMonths(1))
+            .toModel();
+    var skillNew1 =
+        SkillLevelProgressFixture.create(student)
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .withStartDate(LocalDate.now().minusWeeks(2))
+            .toModel();
+    var skillNew2 =
+        SkillLevelProgressFixture.create(student)
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .withStartDate(LocalDate.now().minusWeeks(1))
+            .toModel();
+
+    var progressOld =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withStartDate(LocalDate.now().minusMonths(2))
+            .withSkillLevels(List.of(skillOld2, skillOld1))
+            .toModel();
+
+    var progressNew =
+        StudentProgressFixture.create()
+            .withUser(student.getUser())
+            .withStartDate(LocalDate.now().minusWeeks(2))
+            .withSkillLevels(List.of(skillNew2, skillNew1))
+            .toModel();
+
+    when(studentProgressRepository.findAllByStudent(eq(student)))
+        .thenReturn(List.of(progressOld, progressNew));
+
+    // When
+    var result =
+        studentProgressService.getStudentProgressView(
+            student, new SortCriteria(ESortField.DATE, order));
+
+    // Then
+    List<StudentProgress> orderedKeys = new ArrayList<>(result.keySet());
+    if (order == ESortOrder.ASC) {
+      assertEquals(progressOld, orderedKeys.get(0));
+      assertEquals(progressNew, orderedKeys.get(1));
+    } else {
+      assertEquals(progressNew, orderedKeys.get(0));
+      assertEquals(progressOld, orderedKeys.get(1));
+    }
+
+    List<SkillLevelProgress> skillsFirst = result.get(orderedKeys.get(0));
+    List<LocalDate> datesFirst =
+        skillsFirst.stream().map(SkillLevelProgress::getStartDate).toList();
+
+    List<SkillLevelProgress> skillsSecond = result.get(orderedKeys.get(1));
+    List<LocalDate> datesSecond =
+        skillsSecond.stream().map(SkillLevelProgress::getStartDate).toList();
+
+    List<LocalDate> expectedFirst =
+        (order == ESortOrder.ASC)
+            ? datesFirst.stream().sorted().toList()
+            : datesFirst.stream().sorted(Comparator.reverseOrder()).toList();
+    List<LocalDate> expectedSecond =
+        (order == ESortOrder.ASC)
+            ? datesSecond.stream().sorted().toList()
+            : datesSecond.stream().sorted(Comparator.reverseOrder()).toList();
+
+    assertEquals(expectedFirst, datesFirst);
+    assertEquals(expectedSecond, datesSecond);
   }
 
   @Test

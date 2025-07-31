@@ -4,9 +4,11 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
@@ -66,5 +68,21 @@ public class SkillLevelProgress extends AvenirsBaseModel {
       List<AMS> amses) {
     return new SkillLevelProgress(
         id, student, skillLevel, status, startDate, endDate, traces, amses);
+  }
+
+  public static Comparator<SkillLevelProgress> comparatorOf(SortCriteria sortCriteria) {
+    Comparator<SkillLevelProgress> comparator =
+        switch (sortCriteria.field()) {
+          case NAME -> Comparator.comparing(e -> e.getSkillLevel().getSkill().getName());
+          case DATE -> Comparator.comparing(SkillLevelProgress::getStartDate);
+        };
+
+    comparator =
+        switch (sortCriteria.order()) {
+          case ASC -> comparator;
+          case DESC -> comparator.reversed();
+        };
+
+    return comparator;
   }
 }

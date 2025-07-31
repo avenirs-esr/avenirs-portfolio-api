@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
 import java.util.*;
@@ -107,5 +108,23 @@ public class StudentProgress extends AvenirsBaseModel {
                             .filter(s -> s.getEndDate().isBefore(LocalDate.now()))
                             .filter(s -> !getCurrentSkillLevels().contains(s))
                             .max(Comparator.comparing(SkillLevelProgress::getEndDate)))));
+  }
+
+  public static Comparator<StudentProgress> comparatorOf(SortCriteria sortCriteria) {
+    Comparator<StudentProgress> comparator =
+        switch (sortCriteria.field()) {
+          case NAME ->
+              Comparator.comparing(
+                  studentProgress -> studentProgress.getTrainingPath().getProgram().getName());
+          case DATE -> Comparator.comparing(StudentProgress::getStartDate);
+        };
+
+    comparator =
+        switch (sortCriteria.order()) {
+          case ASC -> comparator;
+          case DESC -> comparator.reversed();
+        };
+
+    return comparator;
   }
 }

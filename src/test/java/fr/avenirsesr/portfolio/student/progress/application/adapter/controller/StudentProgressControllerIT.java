@@ -141,8 +141,8 @@ class StudentProgressControllerIT {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value("dd6d1d9a-da85-4fd3-94d5-cc89deb42028"))
         .andExpect(jsonPath("$[0].name").value("South Associate - 4 [fr_FR]"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("1a480f26-03a4-48da-b29f-3b7afddeda4b"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Skill nesciunt - [fr_FR]"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("b47d81ab-6b60-4aa9-a810-3ffe69e7f622"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill amet - [fr_FR]"))
         .andExpect(jsonPath("$[0].skills[0].traceCount").value(0))
         .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
@@ -195,8 +195,8 @@ class StudentProgressControllerIT {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value("dd6d1d9a-da85-4fd3-94d5-cc89deb42028"))
         .andExpect(jsonPath("$[0].name").value("South Associate - 4 [fr_FR]"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("1a480f26-03a4-48da-b29f-3b7afddeda4b"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Skill nesciunt - [fr_FR]"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("b47d81ab-6b60-4aa9-a810-3ffe69e7f622"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill amet - [fr_FR]"))
         .andExpect(jsonPath("$[0].skills[0].traceCount").value(0))
         .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());

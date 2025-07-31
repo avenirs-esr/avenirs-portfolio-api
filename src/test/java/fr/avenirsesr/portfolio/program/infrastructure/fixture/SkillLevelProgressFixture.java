@@ -15,7 +15,7 @@ import java.util.UUID;
 public class SkillLevelProgressFixture {
   private final UUID id;
   private final Student student;
-  private final SkillLevel skillLevel;
+  private SkillLevel skillLevel;
   private ESkillLevelStatus status;
   private LocalDate startDate;
   private LocalDate endDate;
@@ -81,6 +81,11 @@ public class SkillLevelProgressFixture {
 
   public SkillLevelProgressFixture withAmses(List<AMS> amses) {
     this.amses = amses;
+    return this;
+  }
+
+  public SkillLevelProgressFixture withSkillLevel(SkillLevel skillLevel) {
+    this.skillLevel = skillLevel;
     return this;
   }
 

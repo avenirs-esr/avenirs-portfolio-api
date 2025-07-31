@@ -42,8 +42,9 @@ public class StudentProgressController {
 
     return studentProgressService
         .getStudentProgressView(student, SortCriteria.fromString(sortRaw))
+        .entrySet()
         .stream()
-        .map(StudentProgressViewMapper::fromDomainToDto)
+        .map(entry -> StudentProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
         .toList();
   }
 }

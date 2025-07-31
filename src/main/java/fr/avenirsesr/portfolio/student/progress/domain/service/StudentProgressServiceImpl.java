@@ -50,10 +50,20 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   @Override
-  public List<StudentProgress> getStudentProgressView(Student student, SortCriteria sortCriteria) {
+  public Map<StudentProgress, List<SkillLevelProgress>> getStudentProgressView(
+      Student student, SortCriteria sortCriteria) {
     return studentProgressRepository.findAllByStudent(student).stream()
         .filter(StudentProgress::isCurrent)
-        .toList();
+        .sorted(StudentProgress.comparatorOf(sortCriteria))
+        .collect(
+            Collectors.toMap(
+                Function.identity(),
+                studentProgress ->
+                    studentProgress.getCurrentSkillLevels().stream()
+                        .sorted(SkillLevelProgress.comparatorOf(sortCriteria))
+                        .toList(),
+                (v1, v2) -> v1,
+                LinkedHashMap::new));
   }
 
   @Override

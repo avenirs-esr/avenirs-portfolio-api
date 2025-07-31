@@ -15,7 +15,8 @@ public interface StudentProgressService {
 
   Map<StudentProgress, List<SkillLevelProgress>> getStudentProgressOverview(Student student);
 
-  List<StudentProgress> getStudentProgressView(Student student, SortCriteria sortCriteria);
+  Map<StudentProgress, List<SkillLevelProgress>> getStudentProgressView(
+      Student student, SortCriteria sortCriteria);
 
   PagedResult<SkillProgress> getAllTimeSkillsView(
       Student student, SortCriteria sortCriteria, PageCriteria pageCriteria);
