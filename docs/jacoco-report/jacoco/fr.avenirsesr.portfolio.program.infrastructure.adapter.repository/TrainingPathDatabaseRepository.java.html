@@ -8,9 +8,9 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJ
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component
+@Repository
 public class TrainingPathDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;TrainingPath, TrainingPathEntity&gt;
     implements TrainingPathRepository {
