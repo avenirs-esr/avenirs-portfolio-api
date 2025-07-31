@@ -8,9 +8,9 @@ import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.List;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component
+@Repository
 public class UserDatabaseRepository extends GenericJpaRepositoryAdapter<User, UserEntity>
     implements UserRepository {
   public UserDatabaseRepository(UserJpaRepository jpaRepository) {

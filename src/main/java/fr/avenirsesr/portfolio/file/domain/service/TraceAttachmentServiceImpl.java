@@ -19,10 +19,8 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Slf4j
-@Service
 @AllArgsConstructor
 public class TraceAttachmentServiceImpl implements TraceAttachmentService {
   private final TraceAttachmentRepository traceAttachmentRepository;

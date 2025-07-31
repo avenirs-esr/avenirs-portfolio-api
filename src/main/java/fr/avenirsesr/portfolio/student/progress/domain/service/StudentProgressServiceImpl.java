@@ -16,11 +16,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @AllArgsConstructor
-@Service
 public class StudentProgressServiceImpl implements StudentProgressService {
   private static final int MAX_SKILLS = 6;
   private final StudentProgressRepository studentProgressRepository;

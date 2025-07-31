@@ -14,9 +14,9 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component
+@Repository
 public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, TraceEntity>
     implements TraceRepository {
   public TraceDatabaseRepository(TraceJpaRepository jpaRepository) {

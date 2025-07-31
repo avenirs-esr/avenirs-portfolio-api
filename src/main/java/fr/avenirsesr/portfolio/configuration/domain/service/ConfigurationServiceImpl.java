@@ -8,11 +8,9 @@ import fr.avenirsesr.portfolio.configuration.infrastructure.adapter.model.Config
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @AllArgsConstructor
-@Service
 public class ConfigurationServiceImpl implements ConfigurationService {
   private final ConfigurationRepository configurationRepository;
 

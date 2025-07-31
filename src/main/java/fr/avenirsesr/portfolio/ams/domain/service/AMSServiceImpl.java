@@ -11,10 +11,8 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.St
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Slf4j
-@Service
 public class AMSServiceImpl implements AMSService {
 
   private final AMSRepository amsRepository;

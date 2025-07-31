@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.additionalskill.domain.model.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 
 @Getter
@@ -14,7 +13,6 @@ public enum EAdditionalSkillType {
     this.value = value;
   }
 
-  @JsonCreator
   public static EAdditionalSkillType fromValue(String value) {
     for (EAdditionalSkillType type : EAdditionalSkillType.values()) {
       if (type.getValue().equals(value)) {

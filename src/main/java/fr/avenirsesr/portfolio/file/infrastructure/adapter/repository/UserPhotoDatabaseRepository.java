@@ -12,9 +12,9 @@ import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component
+@Repository
 public class UserPhotoDatabaseRepository
     extends GenericJpaRepositoryAdapter<UserPhoto, UserPhotoEntity> implements UserPhotoRepository {
   public UserPhotoDatabaseRepository(UserPhotoJpaRepository jpaRepository) {

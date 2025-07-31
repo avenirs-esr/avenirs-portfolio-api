@@ -10,15 +10,12 @@ import fr.avenirsesr.portfolio.user.domain.model.UserPhotos;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
-import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @AllArgsConstructor
-@Service
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final UserResourceService userResourceService;
@@ -49,12 +46,18 @@ public class UserServiceImpl implements UserService {
   public void updateProfile(
       EUserCategory userCategory,
       User user,
-      @NotNull String firstname,
-      @NotNull String lastname,
+      String firstname,
+      String lastname,
       String email,
       String bio) {
     user.setFirstName(firstname);
     user.setLastName(lastname);
+    if (firstname == null) {
+      throw new IllegalArgumentException("Firstname is null");
+    }
+    if (lastname == null) {
+      throw new IllegalArgumentException("Firstname is null");
+    }
 
     if (email != null) {
       user.setEmail(email);

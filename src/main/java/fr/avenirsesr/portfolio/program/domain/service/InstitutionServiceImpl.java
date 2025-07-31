@@ -6,11 +6,9 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.St
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @AllArgsConstructor
-@Service
 public class InstitutionServiceImpl implements InstitutionService {
   private final StudentProgressRepository studentProgressRepository;
 

@@ -9,9 +9,9 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJ
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import java.util.List;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-@Component
+@Repository
 public class TraceAttachmentDatabaseRepository
     extends GenericJpaRepositoryAdapter<TraceAttachment, TraceAttachmentEntity>
     implements TraceAttachmentRepository {
