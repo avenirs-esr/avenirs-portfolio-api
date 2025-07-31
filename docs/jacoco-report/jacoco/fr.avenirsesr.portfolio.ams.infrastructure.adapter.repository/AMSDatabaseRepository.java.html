@@ -32,29 +32,29 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter&lt;AMS, A
   @Override
   public PagedResult&lt;AMS&gt; findByUserIdViaCohortsAndSkillLevelProgresses(
       UUID userId, List&lt;SkillLevelProgress&gt; skillLevelProgresses, PageCriteria pageCriteria) {
-<span class="fc" id="L35">    Specification&lt;AMSEntity&gt; spec = AMSSpecification.belongsToUserViaCohorts(userId);</span>
+<span class="nc" id="L35">    Specification&lt;AMSEntity&gt; spec = AMSSpecification.belongsToUserViaCohorts(userId);</span>
 
-<span class="pc bpc" id="L37" title="1 of 2 branches missed.">    if (!skillLevelProgresses.isEmpty()) {</span>
-<span class="fc" id="L38">      spec =</span>
-<span class="fc" id="L39">          spec.and(</span>
-<span class="fc" id="L40">              AMSSpecification.hasSkillLevelProgress(</span>
-<span class="fc" id="L41">                  skillLevelProgresses.stream()</span>
-<span class="fc" id="L42">                      .map(SkillLevelProgressMapper::fromDomain)</span>
-<span class="fc" id="L43">                      .toList()));</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">    if (!skillLevelProgresses.isEmpty()) {</span>
+<span class="nc" id="L38">      spec =</span>
+<span class="nc" id="L39">          spec.and(</span>
+<span class="nc" id="L40">              AMSSpecification.hasSkillLevelProgress(</span>
+<span class="nc" id="L41">                  skillLevelProgresses.stream()</span>
+<span class="nc" id="L42">                      .map(SkillLevelProgressMapper::fromDomain)</span>
+<span class="nc" id="L43">                      .toList()));</span>
     }
 
-<span class="fc" id="L46">    Page&lt;AMSEntity&gt; pageResult =</span>
-<span class="fc" id="L47">        jpaSpecificationExecutor.findAll(</span>
+<span class="nc" id="L46">    Page&lt;AMSEntity&gt; pageResult =</span>
+<span class="nc" id="L47">        jpaSpecificationExecutor.findAll(</span>
             spec,
-<span class="fc" id="L49">            PageRequest.of(</span>
-<span class="fc" id="L50">                pageCriteria.page(),</span>
-<span class="fc" id="L51">                pageCriteria.pageSize(),</span>
-<span class="fc" id="L52">                Sort.by(Sort.Direction.DESC, &quot;startDate&quot;)));</span>
+<span class="nc" id="L49">            PageRequest.of(</span>
+<span class="nc" id="L50">                pageCriteria.page(),</span>
+<span class="nc" id="L51">                pageCriteria.pageSize(),</span>
+<span class="nc" id="L52">                Sort.by(Sort.Direction.DESC, &quot;startDate&quot;)));</span>
 
-<span class="fc" id="L54">    List&lt;AMS&gt; content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();</span>
+<span class="nc" id="L54">    List&lt;AMS&gt; content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();</span>
 
-<span class="fc" id="L56">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L57">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));</span>
+<span class="nc" id="L56">    return new PagedResult&lt;&gt;(</span>
+<span class="nc" id="L57">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));</span>
   }
 
   public void saveAllEntities(List&lt;AMSEntity&gt; entities) {

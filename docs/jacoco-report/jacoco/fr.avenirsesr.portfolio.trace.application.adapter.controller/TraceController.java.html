@@ -55,51 +55,51 @@ public class TraceController {
       @RequestParam(required = false) ETraceStatus status,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L58">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L59">    log.debug(</span>
+<span class="nc" id="L58">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="nc" id="L59">    log.debug(</span>
         &quot;Received request to trace view of user [{}] (page= {}, size= {})&quot;,
-<span class="fc" id="L61">        principal.getName(),</span>
-<span class="fc" id="L62">        pageCriteria.page(),</span>
-<span class="fc" id="L63">        pageCriteria.pageSize());</span>
-<span class="fc" id="L64">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L61">        principal.getName(),</span>
+<span class="nc" id="L62">        pageCriteria.page(),</span>
+<span class="nc" id="L63">        pageCriteria.pageSize());</span>
+<span class="nc" id="L64">    User user = userUtil.getUser(principal);</span>
 
-<span class="fc" id="L66">    TracesViewResponse tracesViewResponse = null;</span>
+<span class="nc" id="L66">    TracesViewResponse tracesViewResponse = null;</span>
 
-<span class="pc bpc" id="L68" title="1 of 2 branches missed.">    if (status == ETraceStatus.UNASSOCIATED) {</span>
-<span class="fc" id="L69">      TraceView tracesView = traceService.getUnassociatedTraces(user, pageCriteria);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">    if (status == ETraceStatus.UNASSOCIATED) {</span>
+<span class="nc" id="L69">      TraceView tracesView = traceService.getUnassociatedTraces(user, pageCriteria);</span>
 
-<span class="fc" id="L71">      tracesViewResponse =</span>
+<span class="nc" id="L71">      tracesViewResponse =</span>
           new TracesViewResponse(
               new TracesResponse(
-<span class="fc" id="L74">                  tracesView.traces().stream()</span>
-<span class="fc" id="L75">                      .map(trace -&gt; TraceViewMapper.toDTO(trace, ETraceStatus.UNASSOCIATED))</span>
-<span class="fc" id="L76">                      .toList(),</span>
-<span class="fc" id="L77">                  tracesView.criticalCount()),</span>
-<span class="fc" id="L78">              PageInfoDTO.fromDomain(tracesView.page()));</span>
+<span class="nc" id="L74">                  tracesView.traces().stream()</span>
+<span class="nc" id="L75">                      .map(trace -&gt; TraceViewMapper.toDTO(trace, ETraceStatus.UNASSOCIATED))</span>
+<span class="nc" id="L76">                      .toList(),</span>
+<span class="nc" id="L77">                  tracesView.criticalCount()),</span>
+<span class="nc" id="L78">              PageInfoDTO.fromDomain(tracesView.page()));</span>
     }
 
-<span class="fc" id="L81">    return ResponseEntity.ok(tracesViewResponse);</span>
+<span class="nc" id="L81">    return ResponseEntity.ok(tracesViewResponse);</span>
   }
 
   @DeleteMapping(&quot;/{traceId}&quot;)
   public ResponseEntity&lt;String&gt; deleteTrace(Principal principal, @PathVariable UUID traceId) {
-<span class="fc" id="L86">    log.debug(&quot;Received request to delete trace [{}] of user [{}]&quot;, traceId, principal.getName());</span>
-<span class="fc" id="L87">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L86">    log.debug(&quot;Received request to delete trace [{}] of user [{}]&quot;, traceId, principal.getName());</span>
+<span class="nc" id="L87">    User user = userUtil.getUser(principal);</span>
 
-<span class="fc" id="L89">    traceService.deleteById(user, traceId);</span>
+<span class="nc" id="L89">    traceService.deleteById(user, traceId);</span>
 
-<span class="fc" id="L91">    return ResponseEntity.ok(&quot;Resource successfully deleted.&quot;);</span>
+<span class="nc" id="L91">    return ResponseEntity.ok(&quot;Resource successfully deleted.&quot;);</span>
   }
 
   @GetMapping(&quot;/unassociated/summary&quot;)
   public ResponseEntity&lt;UnassociatedTracesSummaryDTO&gt; getTracesUnassociatedSummary(
       Principal principal) {
-<span class="fc" id="L97">    log.debug(</span>
-<span class="fc" id="L98">        &quot;Received request to get unassociated trace summary of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L99">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L97">    log.debug(</span>
+<span class="nc" id="L98">        &quot;Received request to get unassociated trace summary of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L99">    User user = userUtil.getUser(principal);</span>
 
-<span class="fc" id="L101">    return ResponseEntity.ok(</span>
-<span class="fc" id="L102">        UnassociatedTracesSummaryMapper.toDTO(traceService.getUnassociatedTracesSummary(user)));</span>
+<span class="nc" id="L101">    return ResponseEntity.ok(</span>
+<span class="nc" id="L102">        UnassociatedTracesSummaryMapper.toDTO(traceService.getUnassociatedTracesSummary(user)));</span>
   }
 
   @PostMapping

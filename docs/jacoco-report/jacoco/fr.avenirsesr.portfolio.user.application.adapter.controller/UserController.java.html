@@ -7,8 +7,7 @@ import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateReq
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
-import fr.avenirsesr.portfolio.user.domain.utils.UserUtils;
-import java.io.IOException;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,86 +17,42 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-<span class="fc" id="L25">@Slf4j</span>
+<span class="fc" id="L22">@Slf4j</span>
 @AllArgsConstructor
 @RestController
-@RequestMapping(&quot;/me/user&quot;)
+@RequestMapping(&quot;/me/users&quot;)
 public class UserController {
 
   private final UserService userService;
   private final UserUtil userUtil;
 
-  @GetMapping(&quot;/{profile}/overview&quot;)
+  @GetMapping(&quot;/{userCategory}/overview&quot;)
   public ResponseEntity&lt;ProfileOverviewDTO&gt; getProfile(
-      Principal principal, @PathVariable String profile) {
-<span class="fc" id="L37">    User user = userUtil.getUser(principal);</span>
-<span class="fc" id="L38">    EUserCategory userCategory = UserUtils.getUserCategory(profile);</span>
+      Principal principal, @Valid @PathVariable EUserCategory userCategory) {
+<span class="nc" id="L34">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L35">    var userPhotos = userService.getUserPhotos(user.getId(), userCategory);</span>
 
-<span class="pc bpc" id="L40" title="1 of 2 branches missed.">    return switch (userCategory) {</span>
-      case STUDENT -&gt;
-<span class="fc" id="L42">          ResponseEntity.ok(ProfileOverviewMapper.userStudentDomainToDto(user.toStudent()));</span>
-      case TEACHER -&gt;
-<span class="nc" id="L44">          ResponseEntity.ok(ProfileOverviewMapper.userTeacherDomainToDto(user.toTeacher()));</span>
-    };
+<span class="nc" id="L37">    return ResponseEntity.ok(ProfileOverviewMapper.userDomainToDto(user, userCategory, userPhotos));</span>
   }
 
-  @PutMapping(&quot;/{profile}/update&quot;)
-  public ResponseEntity&lt;String&gt; updateProfile(
+  @PutMapping(&quot;/{userCategory}/update&quot;)
+  public ResponseEntity&lt;String&gt; update(
       Principal principal,
-      @PathVariable String profile,
+      @Valid @PathVariable EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {
-<span class="fc" id="L53">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L54">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L45">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L46">    User user = userUtil.getUser(principal);</span>
 
-<span class="fc" id="L56">    userService.updateProfile(</span>
+<span class="nc" id="L48">    userService.updateProfile(</span>
+        userCategory,
         user,
-<span class="fc" id="L58">        request.getFirstname(),</span>
-<span class="fc" id="L59">        request.getLastname(),</span>
-<span class="fc" id="L60">        request.getEmail(),</span>
-<span class="fc" id="L61">        request.getBio(),</span>
-<span class="fc" id="L62">        request.getProfilePicture(),</span>
-<span class="fc" id="L63">        request.getProfilePicture());</span>
-<span class="fc" id="L64">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
-  }
-
-  @PutMapping(value = &quot;/{profile}/update/photo&quot;, consumes = &quot;multipart/form-data&quot;)
-  public ResponseEntity&lt;String&gt; updateProfilePhoto(
-      Principal principal,
-      @PathVariable String profile,
-      @RequestParam(&quot;file&quot;) MultipartFile photoFile)
-      throws IOException {
-<span class="fc" id="L73">    log.debug(&quot;Received request to upload profile picture of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L74">    User user = userUtil.getUser(principal);</span>
-<span class="fc" id="L75">    EUserCategory userCategory = UserUtils.getUserCategory(profile);</span>
-
-<span class="fc bfc" id="L77" title="All 2 branches covered.">    return switch (userCategory) {</span>
-      case STUDENT -&gt;
-<span class="fc" id="L79">          ResponseEntity.ok(userService.uploadProfilePicture(user.toStudent(), photoFile));</span>
-      case TEACHER -&gt;
-<span class="fc" id="L81">          ResponseEntity.ok(userService.uploadProfilePicture(user.toTeacher(), photoFile));</span>
-    };
-  }
-
-  @PutMapping(value = &quot;/{profile}/update/cover&quot;, consumes = &quot;multipart/form-data&quot;)
-  public ResponseEntity&lt;String&gt; updateProfileCover(
-      Principal principal,
-      @PathVariable String profile,
-      @RequestParam(&quot;file&quot;) MultipartFile coverFile)
-      throws IOException {
-<span class="fc" id="L91">    log.debug(&quot;Received request to upload cover picture of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L92">    User user = userUtil.getUser(principal);</span>
-<span class="fc" id="L93">    EUserCategory userCategory = UserUtils.getUserCategory(profile);</span>
-
-<span class="fc bfc" id="L95" title="All 2 branches covered.">    return switch (userCategory) {</span>
-      case STUDENT -&gt;
-<span class="fc" id="L97">          ResponseEntity.ok(userService.uploadCoverPicture(user.toStudent(), coverFile));</span>
-      case TEACHER -&gt;
-<span class="fc" id="L99">          ResponseEntity.ok(userService.uploadCoverPicture(user.toTeacher(), coverFile));</span>
-    };
+<span class="nc" id="L51">        request.getFirstname(),</span>
+<span class="nc" id="L52">        request.getLastname(),</span>
+<span class="nc" id="L53">        request.getEmail(),</span>
+<span class="nc" id="L54">        request.getBio());</span>
+<span class="nc" id="L55">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

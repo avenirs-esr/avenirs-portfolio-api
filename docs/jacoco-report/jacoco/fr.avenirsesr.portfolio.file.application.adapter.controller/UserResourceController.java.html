@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserResourceController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.file.application.adapter.controller</a> &gt; <span class="el_source">UserResourceController.java</span></div><h1>UserResourceController.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.file.application.adapter.controller;
+
+import fr.avenirsesr.portfolio.file.application.adapter.dto.UserPhotoUploadDTO;
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.UserPhotoUploadDTOMapper;
+import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
+import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
+import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
+import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import jakarta.validation.Valid;
+import java.io.IOException;
+import java.security.Principal;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+<span class="fc" id="L19">@Slf4j</span>
+@AllArgsConstructor
+@RestController
+@RequestMapping(&quot;/me/users&quot;)
+public class UserResourceController {
+  private final UserUtil userUtil;
+  private final UserResourceService userResourceService;
+
+  @PutMapping(value = &quot;/upload/{userCategory}/{photoType}&quot;, consumes = &quot;multipart/form-data&quot;)
+  public ResponseEntity&lt;UserPhotoUploadDTO&gt; updateProfilePhoto(
+      Principal principal,
+      @Valid @PathVariable EUserCategory userCategory,
+      @Valid @PathVariable EUserPhotoType photoType,
+      @RequestParam(&quot;file&quot;) MultipartFile file)
+      throws IOException {
+<span class="nc" id="L34">    log.debug(&quot;Received request to upload profile picture of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L35">    User user = userUtil.getUser(principal);</span>
+
+<span class="nc" id="L37">    var userPhoto =</span>
+<span class="nc" id="L38">        userResourceService.uploadPhoto(</span>
+            user,
+            userCategory,
+            photoType,
+<span class="nc" id="L42">            file.getOriginalFilename(),</span>
+<span class="nc" id="L43">            file.getContentType(),</span>
+<span class="nc" id="L44">            file.getSize(),</span>
+<span class="nc" id="L45">            file.getBytes());</span>
+<span class="nc" id="L46">    return ResponseEntity.ok(UserPhotoUploadDTOMapper.fromDomain(userPhoto));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

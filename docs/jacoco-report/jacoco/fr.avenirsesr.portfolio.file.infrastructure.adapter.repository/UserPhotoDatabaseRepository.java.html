@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserPhotoDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.file.infrastructure.adapter.repository</a> &gt; <span class="el_source">UserPhotoDatabaseRepository.java</span></div><h1>UserPhotoDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.file.infrastructure.adapter.repository;
+
+import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
+import fr.avenirsesr.portfolio.file.domain.model.UserPhoto;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.UserPhotoMapper;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.specification.UserResourceSpecification;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.stereotype.Component;
+
+@Component
+public class UserPhotoDatabaseRepository
+    extends GenericJpaRepositoryAdapter&lt;UserPhoto, UserPhotoEntity&gt; implements UserPhotoRepository {
+  public UserPhotoDatabaseRepository(UserPhotoJpaRepository jpaRepository) {
+<span class="fc" id="L21">    super(jpaRepository, jpaRepository, UserPhotoMapper::fromDomain, UserPhotoMapper::toDomain);</span>
+<span class="fc" id="L22">  }</span>
+
+  @Override
+  public List&lt;UserPhoto&gt; findAllByUser(User user, EUserCategory userCategory, EUserPhotoType type) {
+<span class="nc" id="L26">    return jpaSpecificationExecutor</span>
+<span class="nc" id="L27">        .findAll(UserResourceSpecification.ofUser(UserMapper.fromDomain(user), userCategory, type))</span>
+<span class="nc" id="L28">        .stream()</span>
+<span class="nc" id="L29">        .map(UserPhotoMapper::toDomain)</span>
+<span class="nc" id="L30">        .toList();</span>
+  }
+
+  @Override
+  public Optional&lt;UserPhoto&gt; findActiveByUser(
+      User user, EUserCategory userCategory, EUserPhotoType type) {
+<span class="nc" id="L36">    return jpaSpecificationExecutor</span>
+<span class="nc" id="L37">        .findOne(</span>
+<span class="nc" id="L38">            UserResourceSpecification.ofUser(UserMapper.fromDomain(user), userCategory, type)</span>
+<span class="nc" id="L39">                .and(UserResourceSpecification.onlyActiveVersion()))</span>
+<span class="nc" id="L40">        .stream()</span>
+<span class="nc" id="L41">        .map(UserPhotoMapper::toDomain)</span>
+<span class="nc" id="L42">        .findAny();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

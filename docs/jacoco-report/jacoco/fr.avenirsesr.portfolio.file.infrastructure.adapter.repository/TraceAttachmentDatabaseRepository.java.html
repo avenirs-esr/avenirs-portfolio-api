@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceAttachmentDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.file.infrastructure.adapter.repository</a> &gt; <span class="el_source">TraceAttachmentDatabaseRepository.java</span></div><h1>TraceAttachmentDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.file.infrastructure.adapter.repository;
+
+import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.TraceAttachmentMapper;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.specification.TraceAttachmentSpecification;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
+import java.util.List;
+import org.springframework.stereotype.Component;
+
+@Component
+public class TraceAttachmentDatabaseRepository
+    extends GenericJpaRepositoryAdapter&lt;TraceAttachment, TraceAttachmentEntity&gt;
+    implements TraceAttachmentRepository {
+  public TraceAttachmentDatabaseRepository(TraceAttachmentJpaRepository jpaRepository) {
+<span class="fc" id="L19">    super(</span>
+        jpaRepository,
+        jpaRepository,
+        TraceAttachmentMapper::fromDomain,
+        TraceAttachmentMapper::toDomain);
+<span class="fc" id="L24">  }</span>
+
+  @Override
+  public List&lt;TraceAttachment&gt; findByTrace(Trace trace) {
+<span class="nc" id="L28">    return jpaSpecificationExecutor</span>
+<span class="nc" id="L29">        .findAll(TraceAttachmentSpecification.ofTrace(TraceMapper.fromDomain(trace)))</span>
+<span class="nc" id="L30">        .stream()</span>
+<span class="nc" id="L31">        .map(TraceAttachmentMapper::toDomain)</span>
+<span class="nc" id="L32">        .toList();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -51,7 +51,7 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public List&lt;Trace&gt; lastTracesOf(User user) {
-<span class="fc" id="L54">    return traceRepository.findLastsOf(user, MAX_TRACES_OVERVIEW);</span>
+<span class="nc" id="L54">    return traceRepository.findLastsOf(user, MAX_TRACES_OVERVIEW);</span>
   }
 
   @Override
@@ -87,8 +87,8 @@ public class TraceServiceImpl implements TraceService {
 <span class="fc" id="L87">    trace.setSkillLevels(List.of());</span>
 
 <span class="fc" id="L89">    traceRepository.save(trace);</span>
-
-<span class="fc" id="L91">    traceRepository.deleteById(id);</span>
+<span class="fc" id="L90">    traceRepository.delete(trace);</span>
+<span class="fc" id="L91">    log.info(&quot;Deleted trace {}&quot;, trace);</span>
 <span class="fc" id="L92">  }</span>
 
   @Override

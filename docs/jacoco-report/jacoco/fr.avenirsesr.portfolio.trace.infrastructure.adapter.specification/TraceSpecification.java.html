@@ -12,33 +12,33 @@ import org.springframework.data.jpa.domain.Specification;
 
 <span class="nc" id="L13">public class TraceSpecification {</span>
   public static Specification&lt;TraceEntity&gt; ofUser(UserEntity user) {
-<span class="fc" id="L15">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;user&quot;), user);</span>
+<span class="nc" id="L15">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;user&quot;), user);</span>
   }
 
   public static Specification&lt;TraceEntity&gt; unassociated() {
-<span class="fc" id="L19">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc" id="L20">      Subquery&lt;SkillLevelEntity&gt; skillLevelSubquery = query.subquery(SkillLevelEntity.class);</span>
-<span class="fc" id="L21">      Root&lt;TraceEntity&gt; skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);</span>
-<span class="fc" id="L22">      Join&lt;TraceEntity, SkillLevelEntity&gt; skillLevelJoin = skillLevelSubRoot.join(&quot;skillLevels&quot;);</span>
+<span class="nc" id="L19">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc" id="L20">      Subquery&lt;SkillLevelEntity&gt; skillLevelSubquery = query.subquery(SkillLevelEntity.class);</span>
+<span class="nc" id="L21">      Root&lt;TraceEntity&gt; skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);</span>
+<span class="nc" id="L22">      Join&lt;TraceEntity, SkillLevelEntity&gt; skillLevelJoin = skillLevelSubRoot.join(&quot;skillLevels&quot;);</span>
 
-<span class="fc" id="L24">      skillLevelSubquery</span>
-<span class="fc" id="L25">          .select(skillLevelJoin)</span>
-<span class="fc" id="L26">          .where(criteriaBuilder.equal(skillLevelSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
+<span class="nc" id="L24">      skillLevelSubquery</span>
+<span class="nc" id="L25">          .select(skillLevelJoin)</span>
+<span class="nc" id="L26">          .where(criteriaBuilder.equal(skillLevelSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
 
-<span class="fc" id="L28">      Subquery&lt;AMSEntity&gt; amsSubquery = query.subquery(AMSEntity.class);</span>
-<span class="fc" id="L29">      Root&lt;TraceEntity&gt; amsSubRoot = amsSubquery.from(TraceEntity.class);</span>
-<span class="fc" id="L30">      Join&lt;TraceEntity, AMSEntity&gt; amsJoin = amsSubRoot.join(&quot;amses&quot;);</span>
+<span class="nc" id="L28">      Subquery&lt;AMSEntity&gt; amsSubquery = query.subquery(AMSEntity.class);</span>
+<span class="nc" id="L29">      Root&lt;TraceEntity&gt; amsSubRoot = amsSubquery.from(TraceEntity.class);</span>
+<span class="nc" id="L30">      Join&lt;TraceEntity, AMSEntity&gt; amsJoin = amsSubRoot.join(&quot;amses&quot;);</span>
 
-<span class="fc" id="L32">      amsSubquery</span>
-<span class="fc" id="L33">          .select(amsJoin)</span>
-<span class="fc" id="L34">          .where(criteriaBuilder.equal(amsSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
+<span class="nc" id="L32">      amsSubquery</span>
+<span class="nc" id="L33">          .select(amsJoin)</span>
+<span class="nc" id="L34">          .where(criteriaBuilder.equal(amsSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
 
-<span class="fc" id="L36">      Predicate noSkillLevels = criteriaBuilder.not(criteriaBuilder.exists(skillLevelSubquery));</span>
-<span class="fc" id="L37">      Predicate noAmses = criteriaBuilder.not(criteriaBuilder.exists(amsSubquery));</span>
+<span class="nc" id="L36">      Predicate noSkillLevels = criteriaBuilder.not(criteriaBuilder.exists(skillLevelSubquery));</span>
+<span class="nc" id="L37">      Predicate noAmses = criteriaBuilder.not(criteriaBuilder.exists(amsSubquery));</span>
 
-<span class="fc" id="L39">      query.distinct(true);</span>
+<span class="nc" id="L39">      query.distinct(true);</span>
 
-<span class="fc" id="L41">      return criteriaBuilder.and(noSkillLevels, noAmses);</span>
+<span class="nc" id="L41">      return criteriaBuilder.and(noSkillLevels, noAmses);</span>
     };
   }
 }
