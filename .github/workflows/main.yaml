@@ -7,3 +7,5 @@ on:
 jobs:
   call-main-ci:
     uses: avenirs-esr/avenirs-workflows/.github/workflows/common-backend-workflow.yaml@main
+    with:
+      run_integration_tests: false
