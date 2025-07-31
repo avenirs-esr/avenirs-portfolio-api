@@ -117,7 +117,7 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public Trace createTrace(
+  public void createTrace(
       User user,
       String title,
       ELanguage language,
@@ -129,7 +129,6 @@ public class TraceServiceImpl implements TraceService {
 <span class="fc" id="L129">            UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);</span>
 
 <span class="fc" id="L131">    traceRepository.save(trace);</span>
-<span class="fc" id="L132">    return trace;</span>
-  }
+<span class="fc" id="L132">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

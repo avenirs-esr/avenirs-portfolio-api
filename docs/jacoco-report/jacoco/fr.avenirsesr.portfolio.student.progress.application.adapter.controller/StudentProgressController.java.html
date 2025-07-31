@@ -42,9 +42,10 @@ public class StudentProgressController {
 
 <span class="fc" id="L43">    return studentProgressService</span>
 <span class="fc" id="L44">        .getStudentProgressView(student, SortCriteria.fromString(sortRaw))</span>
-<span class="fc" id="L45">        .stream()</span>
-<span class="fc" id="L46">        .map(StudentProgressViewMapper::fromDomainToDto)</span>
-<span class="fc" id="L47">        .toList();</span>
+<span class="fc" id="L45">        .entrySet()</span>
+<span class="fc" id="L46">        .stream()</span>
+<span class="fc" id="L47">        .map(entry -&gt; StudentProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="fc" id="L48">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
