@@ -22,9 +22,11 @@ import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
-<span class="fc" id="L26">@Slf4j</span>
+<span class="fc" id="L27">@Slf4j</span>
 @AllArgsConstructor
+@Service
 public class TraceServiceImpl implements TraceService {
   private static final int MAX_TRACES_OVERVIEW = 3;
   private final TraceRepository traceRepository;
@@ -32,86 +34,86 @@ public class TraceServiceImpl implements TraceService {
   private final ConfigurationService configurationService;
 
   public static boolean isBelowThresholdDate(Instant initialDate, int maxDaySinceCreation) {
-<span class="fc bfc" id="L35" title="All 2 branches covered.">    return Duration.between(initialDate, Instant.now()).toDays() &gt;= maxDaySinceCreation;</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">    return Duration.between(initialDate, Instant.now()).toDays() &gt;= maxDaySinceCreation;</span>
   }
 
   @Override
   public String programNameOfTrace(Trace trace) {
-<span class="fc" id="L40">    List&lt;StudentProgress&gt; studentProgresses =</span>
-<span class="fc" id="L41">        studentProgressRepository.findStudentProgressesBySkillLevelProgresses(</span>
-<span class="fc" id="L42">            trace.getSkillLevels());</span>
-<span class="fc" id="L43">    return studentProgresses.stream()</span>
-<span class="fc" id="L44">        .filter(sp -&gt; sp.getTrainingPath().getProgram().isAPC())</span>
-<span class="fc" id="L45">        .map(sp -&gt; sp.getTrainingPath().getProgram().getName())</span>
-<span class="fc" id="L46">        .findAny()</span>
-<span class="fc" id="L47">        .orElse(EPortfolioType.LIFE_PROJECT.name());</span>
+<span class="fc" id="L42">    List&lt;StudentProgress&gt; studentProgresses =</span>
+<span class="fc" id="L43">        studentProgressRepository.findStudentProgressesBySkillLevelProgresses(</span>
+<span class="fc" id="L44">            trace.getSkillLevels());</span>
+<span class="fc" id="L45">    return studentProgresses.stream()</span>
+<span class="fc" id="L46">        .filter(sp -&gt; sp.getTrainingPath().getProgram().isAPC())</span>
+<span class="fc" id="L47">        .map(sp -&gt; sp.getTrainingPath().getProgram().getName())</span>
+<span class="fc" id="L48">        .findAny()</span>
+<span class="fc" id="L49">        .orElse(EPortfolioType.LIFE_PROJECT.name());</span>
   }
 
   @Override
   public List&lt;Trace&gt; lastTracesOf(User user) {
-<span class="nc" id="L52">    return traceRepository.findLastsOf(user, MAX_TRACES_OVERVIEW);</span>
+<span class="nc" id="L54">    return traceRepository.findLastsOf(user, MAX_TRACES_OVERVIEW);</span>
   }
 
   @Override
   public TraceView getUnassociatedTraces(User user, PageCriteria pageCriteria) {
 
-<span class="fc" id="L58">    PagedResult&lt;Trace&gt; pagedResult = traceRepository.findAllUnassociated(user, pageCriteria);</span>
+<span class="fc" id="L60">    PagedResult&lt;Trace&gt; pagedResult = traceRepository.findAllUnassociated(user, pageCriteria);</span>
 
-<span class="fc" id="L60">    int criticalCount = 0;</span>
+<span class="fc" id="L62">    int criticalCount = 0;</span>
 
-<span class="fc" id="L62">    TraceConfigurationInfo traceConfigurationInfo = configurationService.getTraceConfiguration();</span>
+<span class="fc" id="L64">    TraceConfigurationInfo traceConfigurationInfo = configurationService.getTraceConfiguration();</span>
 
-<span class="fc bfc" id="L64" title="All 2 branches covered.">    for (Trace trace : pagedResult.content()) {</span>
-<span class="fc bfc" id="L65" title="All 2 branches covered.">      if (isBelowThresholdDate(</span>
-<span class="fc" id="L66">          trace.getCreatedAt(),</span>
-<span class="fc" id="L67">          traceConfigurationInfo.maxDayRemaining()</span>
-<span class="fc" id="L68">              - traceConfigurationInfo.maxDayRemainingCritical())) {</span>
-<span class="fc" id="L69">        criticalCount++;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">    for (Trace trace : pagedResult.content()) {</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">      if (isBelowThresholdDate(</span>
+<span class="fc" id="L68">          trace.getCreatedAt(),</span>
+<span class="fc" id="L69">          traceConfigurationInfo.maxDayRemaining()</span>
+<span class="fc" id="L70">              - traceConfigurationInfo.maxDayRemainingCritical())) {</span>
+<span class="fc" id="L71">        criticalCount++;</span>
       }
-<span class="fc" id="L71">    }</span>
+<span class="fc" id="L73">    }</span>
 
-<span class="fc" id="L73">    return new TraceView(pagedResult.content(), criticalCount, pagedResult.pageInfo());</span>
+<span class="fc" id="L75">    return new TraceView(pagedResult.content(), criticalCount, pagedResult.pageInfo());</span>
   }
 
   @Override
   public void deleteById(User user, UUID id) {
-<span class="fc" id="L78">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L80">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
 
-<span class="fc bfc" id="L80" title="All 2 branches covered.">    if (!trace.getUser().getId().equals(user.getId())) {</span>
-<span class="fc" id="L81">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">    if (!trace.getUser().getId().equals(user.getId())) {</span>
+<span class="fc" id="L83">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L84">    trace.setAmses(List.of());</span>
-<span class="fc" id="L85">    trace.setSkillLevels(List.of());</span>
+<span class="fc" id="L86">    trace.setAmses(List.of());</span>
+<span class="fc" id="L87">    trace.setSkillLevels(List.of());</span>
 
-<span class="fc" id="L87">    traceRepository.save(trace);</span>
-<span class="fc" id="L88">    traceRepository.delete(trace);</span>
-<span class="fc" id="L89">    log.info(&quot;Deleted trace {}&quot;, trace);</span>
-<span class="fc" id="L90">  }</span>
+<span class="fc" id="L89">    traceRepository.save(trace);</span>
+<span class="fc" id="L90">    traceRepository.delete(trace);</span>
+<span class="fc" id="L91">    log.info(&quot;Deleted trace {}&quot;, trace);</span>
+<span class="fc" id="L92">  }</span>
 
   @Override
   public UnassociatedTracesSummary getUnassociatedTracesSummary(User user) {
-<span class="fc" id="L94">    List&lt;Trace&gt; unassociatedTraces = traceRepository.findAllUnassociated(user);</span>
-<span class="fc" id="L95">    TraceConfigurationInfo traceConfigurationInfo = configurationService.getTraceConfiguration();</span>
+<span class="fc" id="L96">    List&lt;Trace&gt; unassociatedTraces = traceRepository.findAllUnassociated(user);</span>
+<span class="fc" id="L97">    TraceConfigurationInfo traceConfigurationInfo = configurationService.getTraceConfiguration();</span>
 
-<span class="fc" id="L97">    int criticalCount = 0;</span>
-<span class="fc" id="L98">    int warningCount = 0;</span>
-<span class="fc bfc" id="L99" title="All 2 branches covered.">    for (Trace trace : unassociatedTraces) {</span>
-<span class="fc bfc" id="L100" title="All 2 branches covered.">      if (isBelowThresholdDate(</span>
-<span class="fc" id="L101">          trace.getCreatedAt(),</span>
-<span class="fc" id="L102">          traceConfigurationInfo.maxDayRemaining()</span>
-<span class="fc" id="L103">              - traceConfigurationInfo.maxDayRemainingCritical())) {</span>
-<span class="fc" id="L104">        criticalCount++;</span>
+<span class="fc" id="L99">    int criticalCount = 0;</span>
+<span class="fc" id="L100">    int warningCount = 0;</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">    for (Trace trace : unassociatedTraces) {</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">      if (isBelowThresholdDate(</span>
+<span class="fc" id="L103">          trace.getCreatedAt(),</span>
+<span class="fc" id="L104">          traceConfigurationInfo.maxDayRemaining()</span>
+<span class="fc" id="L105">              - traceConfigurationInfo.maxDayRemainingCritical())) {</span>
+<span class="fc" id="L106">        criticalCount++;</span>
       }
-<span class="fc bfc" id="L106" title="All 2 branches covered.">      if (isBelowThresholdDate(</span>
-<span class="fc" id="L107">          trace.getCreatedAt(),</span>
-<span class="fc" id="L108">          traceConfigurationInfo.maxDayRemaining()</span>
-<span class="fc" id="L109">              - traceConfigurationInfo.maxDayRemainingWarning())) {</span>
-<span class="fc" id="L110">        warningCount++;</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">      if (isBelowThresholdDate(</span>
+<span class="fc" id="L109">          trace.getCreatedAt(),</span>
+<span class="fc" id="L110">          traceConfigurationInfo.maxDayRemaining()</span>
+<span class="fc" id="L111">              - traceConfigurationInfo.maxDayRemainingWarning())) {</span>
+<span class="fc" id="L112">        warningCount++;</span>
       }
-<span class="fc" id="L112">    }</span>
+<span class="fc" id="L114">    }</span>
 
-<span class="fc" id="L114">    return new UnassociatedTracesSummary(unassociatedTraces.size(), warningCount, criticalCount);</span>
+<span class="fc" id="L116">    return new UnassociatedTracesSummary(unassociatedTraces.size(), warningCount, criticalCount);</span>
   }
 
   @Override
@@ -123,11 +125,11 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification) {
     var trace =
-<span class="fc" id="L126">        Trace.create(</span>
-<span class="fc" id="L127">            UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);</span>
+<span class="fc" id="L128">        Trace.create(</span>
+<span class="fc" id="L129">            UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);</span>
 
-<span class="fc" id="L129">    traceRepository.save(trace);</span>
-<span class="fc" id="L130">    return trace;</span>
+<span class="fc" id="L131">    traceRepository.save(trace);</span>
+<span class="fc" id="L132">    return trace;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

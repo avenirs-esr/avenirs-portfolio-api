@@ -8,17 +8,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
-<span class="fc" id="L12">@Slf4j</span>
+<span class="fc" id="L13">@Slf4j</span>
 @AllArgsConstructor
+@Service
 public class TrainingPathServiceImpl implements TrainingPathService {
   private final TrainingPathRepository trainingPathRepository;
 
   @Override
   public List&lt;TrainingPath&gt; getTrainingPathsByStudent(Student student) {
-<span class="fc" id="L19">    return trainingPathRepository.findAllTrainingPathsByStudents(student).stream()</span>
-<span class="fc" id="L20">        .sorted(Comparator.comparing(p -&gt; p.getProgram().getName()))</span>
-<span class="fc" id="L21">        .collect(Collectors.toList());</span>
+<span class="fc" id="L21">    return trainingPathRepository.findAllTrainingPathsByStudents(student).stream()</span>
+<span class="fc" id="L22">        .sorted(Comparator.comparing(p -&gt; p.getProgram().getName()))</span>
+<span class="fc" id="L23">        .collect(Collectors.toList());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
