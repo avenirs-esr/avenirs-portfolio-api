@@ -19,7 +19,7 @@ public class AdditionalSkill extends AvenirsBaseModel {
   }
 
   public static AdditionalSkill create(
-      UUID id, PathSegments pathSegments, EAdditionalSkillType type) {
+          UUID id, PathSegments pathSegments, EAdditionalSkillType type) {
     AdditionalSkill additionalSkill = new AdditionalSkill(id, Instant.now(), Instant.now());
     additionalSkill.setPathSegments(pathSegments);
     additionalSkill.setType(type);
@@ -27,7 +27,7 @@ public class AdditionalSkill extends AvenirsBaseModel {
   }
 
   public static AdditionalSkill toDomain(
-      UUID id, PathSegments pathSegments, EAdditionalSkillType type) {
+          UUID id, PathSegments pathSegments, EAdditionalSkillType type) {
     return create(id, pathSegments, type);
   }
 }

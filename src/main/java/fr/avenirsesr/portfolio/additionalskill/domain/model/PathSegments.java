@@ -6,26 +6,40 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PathSegments {
-  private SegmentDetail issue;
-  private SegmentDetail target;
-  private SegmentDetail macroSkill;
   private SegmentDetail skill;
+  private SegmentDetail macroSkill;
+  private SegmentDetail target;
+  private SegmentDetail issue;
+  private SegmentDetail domain;
 
   private PathSegments(
-      SegmentDetail issue, SegmentDetail target, SegmentDetail macroSkill, SegmentDetail skill) {
-    this.issue = issue;
-    this.target = target;
-    this.macroSkill = macroSkill;
+      SegmentDetail skill,
+      SegmentDetail macroSkill,
+      SegmentDetail target,
+      SegmentDetail issue,
+      SegmentDetail domain) {
     this.skill = skill;
+    this.macroSkill = macroSkill;
+    this.target = target;
+    this.issue = issue;
+    this.domain = domain;
   }
 
   public static PathSegments create(
-      SegmentDetail issue, SegmentDetail target, SegmentDetail macroSkill, SegmentDetail skill) {
-    return new PathSegments(issue, target, macroSkill, skill);
+      SegmentDetail skill,
+      SegmentDetail macroSkill,
+      SegmentDetail target,
+      SegmentDetail issue,
+      SegmentDetail domain) {
+    return new PathSegments(skill, macroSkill, target, issue, domain);
   }
 
   public static PathSegments toDomain(
-      SegmentDetail issue, SegmentDetail target, SegmentDetail macroSkill, SegmentDetail skill) {
-    return create(issue, target, macroSkill, skill);
+      SegmentDetail skill,
+      SegmentDetail macroSkill,
+      SegmentDetail target,
+      SegmentDetail issue,
+      SegmentDetail domain) {
+    return new PathSegments(skill, macroSkill, target, issue, domain);
   }
 }

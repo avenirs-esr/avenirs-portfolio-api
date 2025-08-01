@@ -19,6 +19,6 @@ public class SegmentDetail {
   }
 
   public static SegmentDetail toDomain(String code, String libelle) {
-    return create(code, libelle);
+    return new SegmentDetail(code, libelle);
   }
 }

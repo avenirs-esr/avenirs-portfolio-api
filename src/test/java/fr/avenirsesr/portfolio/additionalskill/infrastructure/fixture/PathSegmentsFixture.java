@@ -4,29 +4,26 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
 
 public class PathSegmentsFixture {
-  private SegmentDetail issue;
-  private SegmentDetail target;
-  private SegmentDetail macroSkill;
   private SegmentDetail skill;
+  private SegmentDetail macroSkill;
+  private SegmentDetail target;
+  private SegmentDetail issue;
+  private SegmentDetail domain;
 
   private PathSegmentsFixture() {
-    this.issue = SegmentDetailFixture.create().toModel();
-    this.target = SegmentDetailFixture.create().toModel();
-    this.macroSkill = SegmentDetailFixture.create().toModel();
     this.skill = SegmentDetailFixture.create().toModel();
+    this.macroSkill = SegmentDetailFixture.create().toModel();
+    this.target = SegmentDetailFixture.create().toModel();
+    this.issue = SegmentDetailFixture.create().toModel();
+    this.domain = SegmentDetailFixture.create().toModel();
   }
 
   public static PathSegmentsFixture create() {
     return new PathSegmentsFixture();
   }
 
-  public PathSegmentsFixture withIssue(SegmentDetail issue) {
-    this.issue = issue;
-    return this;
-  }
-
-  public PathSegmentsFixture withTarget(SegmentDetail target) {
-    this.target = target;
+  public PathSegmentsFixture withSkill(SegmentDetail skill) {
+    this.skill = skill;
     return this;
   }
 
@@ -35,12 +32,22 @@ public class PathSegmentsFixture {
     return this;
   }
 
-  public PathSegmentsFixture withSkill(SegmentDetail skill) {
-    this.skill = skill;
+  public PathSegmentsFixture withTarget(SegmentDetail target) {
+    this.target = target;
+    return this;
+  }
+
+  public PathSegmentsFixture withIssue(SegmentDetail issue) {
+    this.issue = issue;
+    return this;
+  }
+
+  public PathSegmentsFixture withDomain(SegmentDetail domain) {
+    this.domain = domain;
     return this;
   }
 
   public PathSegments toModel() {
-    return PathSegments.create(issue, target, macroSkill, skill);
+    return PathSegments.create(skill, macroSkill, target, issue, domain);
   }
 }
