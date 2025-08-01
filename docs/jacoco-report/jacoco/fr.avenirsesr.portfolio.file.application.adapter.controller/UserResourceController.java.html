@@ -7,9 +7,6 @@ import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
@@ -19,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-<span class="fc" id="L22">@Slf4j</span>
+<span class="fc" id="L19">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/storage/users&quot;)
@@ -30,37 +27,23 @@ public class UserResourceController {
   @PutMapping(value = &quot;/{userCategory}/{photoType}&quot;, consumes = &quot;multipart/form-data&quot;)
   public ResponseEntity&lt;UserPhotoUploadDTO&gt; updateProfilePhoto(
       Principal principal,
-      @Valid
-          @Parameter(
-              name = &quot;userCategory&quot;,
-              in = ParameterIn.PATH,
-              required = true,
-              schema = @Schema(ref = &quot;#/components/schemas/UserCategory&quot;))
-          @PathVariable
-          EUserCategory userCategory,
-      @Valid
-          @Parameter(
-              name = &quot;photoType&quot;,
-              in = ParameterIn.PATH,
-              required = true,
-              schema = @Schema(ref = &quot;#/components/schemas/UserPhotoType&quot;))
-          @PathVariable
-          EUserPhotoType photoType,
+      @Valid @PathVariable EUserCategory userCategory,
+      @Valid @PathVariable EUserPhotoType photoType,
       @RequestParam(&quot;file&quot;) MultipartFile file)
       throws IOException {
-<span class="nc" id="L51">    log.debug(&quot;Received request to upload profile picture of user [{}]&quot;, principal.getName());</span>
-<span class="nc" id="L52">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L34">    log.debug(&quot;Received request to upload profile picture of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L35">    User user = userUtil.getUser(principal);</span>
 
-<span class="nc" id="L54">    var userPhoto =</span>
-<span class="nc" id="L55">        userResourceService.uploadPhoto(</span>
+<span class="nc" id="L37">    var userPhoto =</span>
+<span class="nc" id="L38">        userResourceService.uploadPhoto(</span>
             user,
             userCategory,
             photoType,
-<span class="nc" id="L59">            file.getOriginalFilename(),</span>
-<span class="nc" id="L60">            file.getContentType(),</span>
-<span class="nc" id="L61">            file.getSize(),</span>
-<span class="nc" id="L62">            file.getBytes());</span>
-<span class="nc" id="L63">    return ResponseEntity.ok(UserPhotoUploadDTOMapper.fromDomain(userPhoto));</span>
+<span class="nc" id="L42">            file.getOriginalFilename(),</span>
+<span class="nc" id="L43">            file.getContentType(),</span>
+<span class="nc" id="L44">            file.getSize(),</span>
+<span class="nc" id="L45">            file.getBytes());</span>
+<span class="nc" id="L46">    return ResponseEntity.ok(UserPhotoUploadDTOMapper.fromDomain(userPhoto));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

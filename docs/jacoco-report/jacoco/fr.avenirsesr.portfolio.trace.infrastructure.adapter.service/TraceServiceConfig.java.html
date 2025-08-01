@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceServiceConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.trace.infrastructure.adapter.service</a> &gt; <span class="el_source">TraceServiceConfig.java</span></div><h1>TraceServiceConfig.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.trace.infrastructure.adapter.service;
+
+import fr.avenirsesr.portfolio.configuration.domain.port.input.ConfigurationService;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.trace.domain.service.TraceServiceImpl;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class TraceServiceConfig {
+  private final TraceDatabaseRepository traceRepository;
+  private final StudentProgressDatabaseRepository studentProgressRepository;
+  private final ConfigurationService configurationService;
+
+  public TraceServiceConfig(
+      TraceDatabaseRepository traceRepository,
+      StudentProgressDatabaseRepository studentProgressRepository,
+<span class="fc" id="L20">      ConfigurationService configurationService) {</span>
+<span class="fc" id="L21">    this.traceRepository = traceRepository;</span>
+<span class="fc" id="L22">    this.studentProgressRepository = studentProgressRepository;</span>
+<span class="fc" id="L23">    this.configurationService = configurationService;</span>
+<span class="fc" id="L24">  }</span>
+
+  @Bean
+  public TraceService traceService() {
+<span class="fc" id="L28">    return new TraceServiceImpl(traceRepository, studentProgressRepository, configurationService);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

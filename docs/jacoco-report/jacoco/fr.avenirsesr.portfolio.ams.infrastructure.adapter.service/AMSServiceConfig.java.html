@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMSServiceConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.ams.infrastructure.adapter.service</a> &gt; <span class="el_source">AMSServiceConfig.java</span></div><h1>AMSServiceConfig.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.ams.infrastructure.adapter.service;
+
+import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
+import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
+import fr.avenirsesr.portfolio.ams.domain.service.AMSServiceImpl;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+<span class="fc" id="L11">@Slf4j</span>
+@Configuration
+public class AMSServiceConfig {
+  private final AMSRepository amsRepository;
+  private final StudentProgressRepository studentProgressRepository;
+
+  public AMSServiceConfig(
+<span class="fc" id="L18">      AMSRepository amsRepository, StudentProgressRepository studentProgressRepository) {</span>
+<span class="fc" id="L19">    this.amsRepository = amsRepository;</span>
+<span class="fc" id="L20">    this.studentProgressRepository = studentProgressRepository;</span>
+<span class="fc" id="L21">  }</span>
+
+  @Bean
+  public AMSService amsService() {
+<span class="fc" id="L25">    return new AMSServiceImpl(amsRepository, studentProgressRepository);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
