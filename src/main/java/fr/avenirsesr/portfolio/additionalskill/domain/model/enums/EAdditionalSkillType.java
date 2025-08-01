@@ -1,9 +1,8 @@
 package fr.avenirsesr.portfolio.additionalskill.domain.model.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonValue;
 
-@Getter
 public enum EAdditionalSkillType {
   ROME4("ROME4.0"),
   ;
@@ -12,6 +11,11 @@ public enum EAdditionalSkillType {
 
   EAdditionalSkillType(String value) {
     this.value = value;
+  }
+
+  @JsonValue
+  public String getValue() {
+    return value;
   }
 
   @JsonCreator
