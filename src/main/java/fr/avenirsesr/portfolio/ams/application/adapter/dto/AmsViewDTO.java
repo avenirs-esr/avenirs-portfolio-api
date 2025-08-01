@@ -10,5 +10,5 @@ public record AmsViewDTO(
     String title,
     int countSkills,
     int countTraces,
-    EAmsStatus status,
+    @Schema(ref = "#/components/schemas/AmsStatus") EAmsStatus status,
     AmsProgressDTO progress) {}

@@ -7,6 +7,9 @@ import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
@@ -27,8 +30,22 @@ public class UserResourceController {
   @PutMapping(value = "/{userCategory}/{photoType}", consumes = "multipart/form-data")
   public ResponseEntity<UserPhotoUploadDTO> updateProfilePhoto(
       Principal principal,
-      @Valid @PathVariable EUserCategory userCategory,
-      @Valid @PathVariable EUserPhotoType photoType,
+      @Valid
+          @Parameter(
+              name = "userCategory",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/UserCategory"))
+          @PathVariable
+          EUserCategory userCategory,
+      @Valid
+          @Parameter(
+              name = "photoType",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/UserPhotoType"))
+          @PathVariable
+          EUserPhotoType photoType,
       @RequestParam("file") MultipartFile file)
       throws IOException {
     log.debug("Received request to upload profile picture of user [{}]", principal.getName());

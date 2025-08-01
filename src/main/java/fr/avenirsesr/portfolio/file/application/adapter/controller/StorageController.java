@@ -4,6 +4,9 @@ import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.UUID;
@@ -40,7 +43,15 @@ public class StorageController {
 
   @GetMapping("/users/default/{photoType}")
   public ResponseEntity<ByteArrayResource> getDefaultResource(
-      @Valid @PathVariable EUserPhotoType photoType) throws IOException {
+      @Valid
+          @Parameter(
+              name = "photoType",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/UserPhotoType"))
+          @PathVariable
+          EUserPhotoType photoType)
+      throws IOException {
     log.debug("Received request to get default {} photo", photoType);
     byte[] photo =
         fileStorageService.get(

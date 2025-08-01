@@ -7,6 +7,9 @@ import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateReq
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.AllArgsConstructor;
@@ -30,7 +33,15 @@ public class UserController {
 
   @GetMapping("/{userCategory}/overview")
   public ResponseEntity<ProfileOverviewDTO> getProfile(
-      Principal principal, @Valid @PathVariable EUserCategory userCategory) {
+      Principal principal,
+      @Valid
+          @Parameter(
+              name = "userCategory",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/UserCategory"))
+          @PathVariable
+          EUserCategory userCategory) {
     User user = userUtil.getUser(principal);
     var userPhotos = userService.getUserPhotos(user.getId(), userCategory);
 
@@ -40,7 +51,14 @@ public class UserController {
   @PutMapping("/{userCategory}/update")
   public ResponseEntity<String> update(
       Principal principal,
-      @Valid @PathVariable EUserCategory userCategory,
+      @Valid
+          @Parameter(
+              name = "userCategory",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/UserCategory"))
+          @PathVariable
+          EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {
     log.debug("Received request to update profile of user [{}]", principal.getName());
     User user = userUtil.getUser(principal);
