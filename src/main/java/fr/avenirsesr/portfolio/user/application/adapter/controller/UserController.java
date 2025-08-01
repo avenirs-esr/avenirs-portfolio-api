@@ -49,7 +49,7 @@ public class UserController {
   }
 
   @PutMapping("/{userCategory}/update")
-  public ResponseEntity<String> update(
+  public ResponseEntity<String> updateProfile(
       Principal principal,
       @Valid
           @Parameter(
