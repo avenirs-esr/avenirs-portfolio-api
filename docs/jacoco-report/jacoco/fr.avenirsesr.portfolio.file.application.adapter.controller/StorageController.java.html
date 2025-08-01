@@ -4,6 +4,9 @@ import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.UUID;
@@ -18,7 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-<span class="fc" id="L21">@Slf4j</span>
+<span class="fc" id="L24">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/storage&quot;)
@@ -29,35 +32,43 @@ public class StorageController {
   @GetMapping(&quot;/users/{fileId}&quot;)
   public ResponseEntity&lt;ByteArrayResource&gt; getUserResourceByFileId(@Valid @PathVariable UUID fileId)
       throws IOException {
-<span class="nc" id="L32">    log.debug(&quot;Received request to get user photo id [{}]&quot;, fileId);</span>
-<span class="nc" id="L33">    var userPhoto = userResourceService.getUserPhotoById(fileId);</span>
-<span class="nc" id="L34">    byte[] photo = userResourceService.fetchContent(userPhoto);</span>
+<span class="nc" id="L35">    log.debug(&quot;Received request to get user photo id [{}]&quot;, fileId);</span>
+<span class="nc" id="L36">    var userPhoto = userResourceService.getUserPhotoById(fileId);</span>
+<span class="nc" id="L37">    byte[] photo = userResourceService.fetchContent(userPhoto);</span>
 
-<span class="nc" id="L36">    return ResponseEntity.ok()</span>
-<span class="nc" id="L37">        .contentType(MediaType.asMediaType(MimeType.valueOf(userPhoto.getFileType().getMimeType())))</span>
-<span class="nc" id="L38">        .body(new ByteArrayResource(photo));</span>
+<span class="nc" id="L39">    return ResponseEntity.ok()</span>
+<span class="nc" id="L40">        .contentType(MediaType.asMediaType(MimeType.valueOf(userPhoto.getFileType().getMimeType())))</span>
+<span class="nc" id="L41">        .body(new ByteArrayResource(photo));</span>
   }
 
   @GetMapping(&quot;/users/default/{photoType}&quot;)
   public ResponseEntity&lt;ByteArrayResource&gt; getDefaultResource(
-      @Valid @PathVariable EUserPhotoType photoType) throws IOException {
-<span class="nc" id="L44">    log.debug(&quot;Received request to get default {} photo&quot;, photoType);</span>
-<span class="nc" id="L45">    byte[] photo =</span>
-<span class="nc" id="L46">        fileStorageService.get(</span>
-<span class="nc bnc" id="L47" title="All 2 branches missed.">            switch (photoType) {</span>
-<span class="nc" id="L48">              case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_PATH;</span>
-<span class="nc" id="L49">              case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_PATH;</span>
+      @Valid
+          @Parameter(
+              name = &quot;photoType&quot;,
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = &quot;#/components/schemas/UserPhotoType&quot;))
+          @PathVariable
+          EUserPhotoType photoType)
+      throws IOException {
+<span class="nc" id="L55">    log.debug(&quot;Received request to get default {} photo&quot;, photoType);</span>
+<span class="nc" id="L56">    byte[] photo =</span>
+<span class="nc" id="L57">        fileStorageService.get(</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            switch (photoType) {</span>
+<span class="nc" id="L59">              case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_PATH;</span>
+<span class="nc" id="L60">              case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_PATH;</span>
             });
 
-<span class="nc" id="L52">    var fileType =</span>
-<span class="nc bnc" id="L53" title="All 2 branches missed.">        switch (photoType) {</span>
-<span class="nc" id="L54">          case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_FILE_TYPE;</span>
-<span class="nc" id="L55">          case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_FILE_TYPE;</span>
+<span class="nc" id="L63">    var fileType =</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        switch (photoType) {</span>
+<span class="nc" id="L65">          case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_FILE_TYPE;</span>
+<span class="nc" id="L66">          case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_FILE_TYPE;</span>
         };
 
-<span class="nc" id="L58">    return ResponseEntity.ok()</span>
-<span class="nc" id="L59">        .contentType(MediaType.asMediaType(MimeType.valueOf(fileType.getMimeType())))</span>
-<span class="nc" id="L60">        .body(new ByteArrayResource(photo));</span>
+<span class="nc" id="L69">    return ResponseEntity.ok()</span>
+<span class="nc" id="L70">        .contentType(MediaType.asMediaType(MimeType.valueOf(fileType.getMimeType())))</span>
+<span class="nc" id="L71">        .body(new ByteArrayResource(photo));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
