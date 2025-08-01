@@ -27,7 +27,7 @@ public class FileStorageConstants {
   @Value("${file.storage.user.cover.default-path}")
   private String userCoverDefaultPath;
 
-  @Value("${file.storage.user.endpoint-prefix")
+  @Value("${file.storage.user.endpoint-prefix}")
   private String photoEndpointPrefix;
 
   @Value("${file.storage.user.profile.default-endpoint}")
