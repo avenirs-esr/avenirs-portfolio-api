@@ -26,13 +26,15 @@ public abstract class GenericJpaRepositoryAdapter<D, E> implements GenericReposi
   }
 
   @Override
-  public void save(D domain) {
-    jpaRepository.save(fromDomain.apply(domain));
+  public D save(D domain) {
+    return toDomain.apply(jpaRepository.save(fromDomain.apply(domain)));
   }
 
   @Override
-  public void saveAll(List<D> domains) {
-    jpaRepository.saveAll(domains.stream().map(fromDomain).toList());
+  public List<D> saveAll(List<D> domains) {
+    return jpaRepository.saveAll(domains.stream().map(fromDomain).toList()).stream()
+        .map(toDomain)
+        .toList();
   }
 
   public void saveAllEntities(List<E> entities) {
