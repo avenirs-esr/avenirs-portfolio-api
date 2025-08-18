@@ -5,11 +5,13 @@ import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.model.UserPhotos;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Slf4j
 @AllArgsConstructor
@@ -34,6 +37,7 @@ public class UserController {
   @GetMapping("/{userCategory}/overview")
   public ResponseEntity<ProfileOverviewDTO> getProfile(
       Principal principal,
+      HttpServletRequest request,
       @Valid
           @Parameter(
               name = "userCategory",
@@ -44,8 +48,14 @@ public class UserController {
           EUserCategory userCategory) {
     User user = userUtil.getUser(principal);
     var userPhotos = userService.getUserPhotos(user.getId(), userCategory);
+    String baseUrl =
+        ServletUriComponentsBuilder.fromRequestUri(request).replacePath(null).build().toUriString();
 
-    return ResponseEntity.ok(ProfileOverviewMapper.userDomainToDto(user, userCategory, userPhotos));
+    return ResponseEntity.ok(
+        ProfileOverviewMapper.userDomainToDto(
+            user,
+            userCategory,
+            new UserPhotos(baseUrl + userPhotos.profileUrl(), baseUrl + userPhotos.coverUrl())));
   }
 
   @PutMapping("/{userCategory}/update")
