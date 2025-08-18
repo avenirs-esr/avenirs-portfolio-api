@@ -5,11 +5,13 @@ import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.model.UserPhotos;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import lombok.AllArgsConstructor;
@@ -21,8 +23,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-<span class="fc" id="L25">@Slf4j</span>
+<span class="fc" id="L28">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/users&quot;)
@@ -34,6 +37,7 @@ public class UserController {
   @GetMapping(&quot;/{userCategory}/overview&quot;)
   public ResponseEntity&lt;ProfileOverviewDTO&gt; getProfile(
       Principal principal,
+      HttpServletRequest request,
       @Valid
           @Parameter(
               name = &quot;userCategory&quot;,
@@ -42,10 +46,16 @@ public class UserController {
               schema = @Schema(ref = &quot;#/components/schemas/UserCategory&quot;))
           @PathVariable
           EUserCategory userCategory) {
-<span class="nc" id="L45">    User user = userUtil.getUser(principal);</span>
-<span class="nc" id="L46">    var userPhotos = userService.getUserPhotos(user.getId(), userCategory);</span>
+<span class="nc" id="L49">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L50">    var userPhotos = userService.getUserPhotos(user.getId(), userCategory);</span>
+<span class="nc" id="L51">    String baseUrl =</span>
+<span class="nc" id="L52">        ServletUriComponentsBuilder.fromRequestUri(request).replacePath(null).build().toUriString();</span>
 
-<span class="nc" id="L48">    return ResponseEntity.ok(ProfileOverviewMapper.userDomainToDto(user, userCategory, userPhotos));</span>
+<span class="nc" id="L54">    return ResponseEntity.ok(</span>
+<span class="nc" id="L55">        ProfileOverviewMapper.userDomainToDto(</span>
+            user,
+            userCategory,
+<span class="nc" id="L58">            new UserPhotos(baseUrl + userPhotos.profileUrl(), baseUrl + userPhotos.coverUrl())));</span>
   }
 
   @PutMapping(&quot;/{userCategory}/update&quot;)
@@ -60,17 +70,17 @@ public class UserController {
           @PathVariable
           EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {
-<span class="nc" id="L63">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
-<span class="nc" id="L64">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L73">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L74">    User user = userUtil.getUser(principal);</span>
 
-<span class="nc" id="L66">    userService.updateProfile(</span>
+<span class="nc" id="L76">    userService.updateProfile(</span>
         userCategory,
         user,
-<span class="nc" id="L69">        request.getFirstname(),</span>
-<span class="nc" id="L70">        request.getLastname(),</span>
-<span class="nc" id="L71">        request.getEmail(),</span>
-<span class="nc" id="L72">        request.getBio());</span>
-<span class="nc" id="L73">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+<span class="nc" id="L79">        request.getFirstname(),</span>
+<span class="nc" id="L80">        request.getLastname(),</span>
+<span class="nc" id="L81">        request.getEmail(),</span>
+<span class="nc" id="L82">        request.getBio());</span>
+<span class="nc" id="L83">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
