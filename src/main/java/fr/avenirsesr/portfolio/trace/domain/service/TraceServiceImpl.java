@@ -9,8 +9,8 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
 import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -53,24 +53,10 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public TraceView getUnassociatedTraces(User user, PageCriteria pageCriteria) {
-
-    PagedResult<Trace> pagedResult = traceRepository.findAllUnassociated(user, pageCriteria);
-
-    int criticalCount = 0;
-
-    TraceConfigurationInfo traceConfigurationInfo = configurationService.getTraceConfiguration();
-
-    for (Trace trace : pagedResult.content()) {
-      if (isBelowThresholdDate(
-          trace.getCreatedAt(),
-          traceConfigurationInfo.maxDayRemaining()
-              - traceConfigurationInfo.maxDayRemainingCritical())) {
-        criticalCount++;
-      }
-    }
-
-    return new TraceView(pagedResult.content(), criticalCount, pagedResult.pageInfo());
+  public PagedResult<Trace> getTracesView(
+      User user, PageCriteria pageCriteria, ETraceStatus status) {
+    PagedResult<Trace> pagedResult = traceRepository.findAll(user, pageCriteria, status);
+    return new PagedResult<>(pagedResult.content(), pagedResult.pageInfo());
   }
 
   @Override
@@ -94,22 +80,27 @@ public class TraceServiceImpl implements TraceService {
     List<Trace> unassociatedTraces = traceRepository.findAllUnassociated(user);
     TraceConfiguration traceConfiguration = traceConfigurationService.getTraceConfiguration();
 
-    int criticalCount = 0;
-    int warningCount = 0;
-    for (Trace trace : unassociatedTraces) {
-      if (isBelowThresholdDate(
-          trace.getCreatedAt(),
-          traceConfigurationInfo.maxDayRemaining()
-              - traceConfigurationInfo.maxDayRemainingCritical())) {
-        criticalCount++;
-      }
-      if (isBelowThresholdDate(
-          trace.getCreatedAt(),
-          traceConfigurationInfo.maxDayRemaining()
-              - traceConfigurationInfo.maxDayRemainingWarning())) {
-        warningCount++;
-      }
-    }
+    int criticalCount =
+        unassociatedTraces.stream()
+            .filter(
+                t ->
+                    Duration.between(t.getCreatedAt(), Instant.now())
+                        .minus(Duration.ofDays(traceConfiguration.maxRemainingDays()))
+                        .plus(Duration.ofDays(traceConfiguration.maxRemainingDaysBeforeCritical()))
+                        .isPositive())
+            .toList()
+            .size();
+
+    int warningCount =
+        unassociatedTraces.stream()
+            .filter(
+                t ->
+                    Duration.between(t.getCreatedAt(), Instant.now())
+                        .minus(Duration.ofDays(traceConfiguration.maxRemainingDays()))
+                        .plus(Duration.ofDays(traceConfiguration.maxRemainingDaysBeforeWarning()))
+                        .isPositive())
+            .toList()
+            .size();
 
     return new UnassociatedTracesSummary(unassociatedTraces.size(), warningCount, criticalCount);
   }

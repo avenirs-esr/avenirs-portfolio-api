@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceStatus;
+import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

@@ -41,4 +41,31 @@ public class TraceSpecification {
       return criteriaBuilder.and(noSkillLevels, noAmses);
     };
   }
+
+  public static Specification<TraceEntity> associated() {
+    return (root, query, criteriaBuilder) -> {
+      Subquery<SkillLevelEntity> skillLevelSubquery = query.subquery(SkillLevelEntity.class);
+      Root<TraceEntity> skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);
+      Join<TraceEntity, SkillLevelEntity> skillLevelJoin = skillLevelSubRoot.join("skillLevels");
+
+      skillLevelSubquery
+          .select(skillLevelJoin)
+          .where(criteriaBuilder.equal(skillLevelSubRoot.get("id"), root.get("id")));
+
+      Subquery<AMSEntity> amsSubquery = query.subquery(AMSEntity.class);
+      Root<TraceEntity> amsSubRoot = amsSubquery.from(TraceEntity.class);
+      Join<TraceEntity, AMSEntity> amsJoin = amsSubRoot.join("amses");
+
+      amsSubquery
+          .select(amsJoin)
+          .where(criteriaBuilder.equal(amsSubRoot.get("id"), root.get("id")));
+
+      Predicate hasSkillLevels = criteriaBuilder.exists(skillLevelSubquery);
+      Predicate hasAmses = criteriaBuilder.exists(amsSubquery);
+
+      query.distinct(true);
+
+      return criteriaBuilder.or(hasSkillLevels, hasAmses);
+    };
+  }
 }

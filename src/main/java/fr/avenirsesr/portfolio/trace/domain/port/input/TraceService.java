@@ -1,9 +1,10 @@
 package fr.avenirsesr.portfolio.trace.domain.port.input;
 
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
 import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.util.List;
@@ -14,7 +15,7 @@ public interface TraceService {
 
   List<Trace> lastTracesOf(User user);
 
-  TraceView getUnassociatedTraces(User user, PageCriteria pageCriteria);
+  PagedResult<Trace> getTracesView(User user, PageCriteria pageCriteria, ETraceStatus status);
 
   void deleteById(User user, UUID id);
 

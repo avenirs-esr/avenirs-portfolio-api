@@ -1,8 +1,10 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.shared.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceViewDTO;
@@ -11,11 +13,9 @@ import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMap
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceViewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.UnassociatedTracesSummaryMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
-import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesResponse;
-import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesViewResponse;
+import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceStatus;
+import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import jakarta.validation.Valid;
@@ -51,7 +51,7 @@ public class TraceController {
   }
 
   @GetMapping("/view")
-  public ResponseEntity<List<TraceViewDTO>> getTracesView(
+  public ResponseEntity<PagedResponse<TraceViewDTO>> getTracesView(
       Principal principal,
       @RequestParam(required = false) ETraceStatus status,
       @RequestParam(required = false) Integer page,
@@ -64,20 +64,12 @@ public class TraceController {
         pageCriteria.pageSize());
     User user = userUtil.getUser(principal);
 
-    TracesViewResponse tracesViewResponse = null;
+    PagedResult<Trace> tracesResult = traceService.getTracesView(user, pageCriteria, status);
 
-    if (status == ETraceStatus.UNASSOCIATED) {
-      TraceView tracesView = traceService.getUnassociatedTraces(user, pageCriteria);
-
-      tracesViewResponse =
-          new TracesViewResponse(
-              new TracesResponse(
-                  tracesView.traces().stream()
-                      .map(trace -> TraceViewMapper.toDTO(trace, ETraceStatus.UNASSOCIATED))
-                      .toList()
-              ),
-              PageInfoDTO.fromDomain(tracesView.page()));
-    }
+    var tracesViewResponse =
+        new PagedResponse<>(
+            tracesResult.content().stream().map(TraceViewMapper::toDTO).toList(),
+            PageInfoDTO.fromDomain(tracesResult.pageInfo()));
 
     return ResponseEntity.ok(tracesViewResponse);
   }
@@ -99,8 +91,9 @@ public class TraceController {
         "Received request to get unassociated trace summary of user [{}]", principal.getName());
     User user = userUtil.getUser(principal);
 
-    return ResponseEntity.ok(
-        UnassociatedTracesSummaryMapper.toDTO(traceService.getUnassociatedTracesSummary(user)));
+    UnassociatedTracesSummary summary = traceService.getUnassociatedTracesSummary(user);
+
+    return ResponseEntity.ok(UnassociatedTracesSummaryMapper.toDTO(summary));
   }
 
   @PostMapping

@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
@@ -36,12 +37,21 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, 
   }
 
   @Override
-  public PagedResult<Trace> findAllUnassociated(User user, PageCriteria pageCriteria) {
+  public PagedResult<Trace> findAll(User user, PageCriteria pageCriteria, ETraceStatus status) {
+    var specification =
+        switch (status) {
+          case UNASSOCIATED ->
+              TraceSpecification.ofUser(UserMapper.fromDomain(user))
+                  .and(TraceSpecification.unassociated());
+          case ASSOCIATED ->
+              TraceSpecification.ofUser(UserMapper.fromDomain(user))
+                  .and(TraceSpecification.associated());
+          case null -> TraceSpecification.ofUser(UserMapper.fromDomain(user));
+        };
     var content =
         jpaSpecificationExecutor
             .findAll(
-                TraceSpecification.ofUser(UserMapper.fromDomain(user))
-                    .and(TraceSpecification.unassociated()),
+                specification,
                 PageRequest.of(
                     pageCriteria.page(),
                     pageCriteria.pageSize(),

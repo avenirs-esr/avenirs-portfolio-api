@@ -124,4 +124,8 @@ public class Trace extends AvenirsBaseModel {
   public Optional<String> getPersonalNote() {
     return Optional.ofNullable(personalNote);
   }
+
+  public boolean isUnassociated() {
+    return amses.isEmpty() && skillLevels.isEmpty();
+  }
 }
