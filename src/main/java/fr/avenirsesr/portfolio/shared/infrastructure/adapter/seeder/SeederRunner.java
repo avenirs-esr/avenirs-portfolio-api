@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
+import fr.avenirsesr.portfolio.backoffice.configuration.trace.infrastructure.seeder.TraceConfigSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.TraceAttachmentSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class SeederRunner implements CommandLineRunner {
+  private final TraceConfigSeeder traceConfigSeeder;
   private final UserRepository userRepository;
   private final UserSeeder userSeeder;
   private final UserPhotoSeeder userPhotoSeeder;
@@ -40,6 +42,7 @@ public class SeederRunner implements CommandLineRunner {
   private boolean seedEnabled;
 
   public SeederRunner(
+      TraceConfigSeeder traceConfigSeeder,
       UserRepository userRepository,
       UserSeeder userSeeder,
       UserPhotoSeeder userPhotoSeeder,
@@ -53,6 +56,7 @@ public class SeederRunner implements CommandLineRunner {
       StudentProgressSeeder studentProgressSeeder,
       SkillSeeder skillSeeder,
       AdditionalSkillSeeder additionalSkillSeeder) {
+    this.traceConfigSeeder = traceConfigSeeder;
     this.userRepository = userRepository;
     this.userPhotoSeeder = userPhotoSeeder;
     this.cohortSeeder = cohortSeeder;
@@ -74,6 +78,8 @@ public class SeederRunner implements CommandLineRunner {
 
     if (seedEnabled && userCont == 0) {
       log.info("Seeding enabled and starting...");
+
+      traceConfigSeeder.seed();
 
       var savedUsers = userSeeder.seed();
       var savedUserPhotos = userPhotoSeeder.seed(savedUsers);
