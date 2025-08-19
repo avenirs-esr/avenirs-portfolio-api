@@ -54,13 +54,17 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter&lt;AMS, A
 <span class="nc" id="L54">    List&lt;AMS&gt; content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();</span>
 
 <span class="nc" id="L56">    return new PagedResult&lt;&gt;(</span>
-<span class="nc" id="L57">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));</span>
+        content,
+        new PageInfo(
+<span class="nc" id="L59">            pageResult.getPageable().getPageNumber(),</span>
+<span class="nc" id="L60">            pageResult.getPageable().getPageSize(),</span>
+<span class="nc" id="L61">            pageResult.getTotalElements()));</span>
   }
 
   public void saveAllEntities(List&lt;AMSEntity&gt; entities) {
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">    if (entities != null) {</span>
-<span class="fc" id="L62">      jpaRepository.saveAll(entities);</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">    if (entities != null) {</span>
+<span class="fc" id="L66">      jpaRepository.saveAll(entities);</span>
     }
-<span class="fc" id="L64">  }</span>
+<span class="fc" id="L68">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
