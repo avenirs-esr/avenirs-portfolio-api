@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
-import fr.avenirsesr.portfolio.configuration.domain.model.TraceConfigurationInfo;
-import fr.avenirsesr.portfolio.configuration.domain.port.input.ConfigurationService;
+import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
+import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
@@ -25,8 +25,8 @@ import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceView;
 import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
@@ -51,7 +51,7 @@ public class TraceServiceImplTest {
   @Mock private TraceRepository traceRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
 
-  @Mock private ConfigurationService configurationService;
+  @Mock private TraceConfigurationService traceConfigurationService;
 
   @InjectMocks private TraceServiceImpl traceService;
 
@@ -141,12 +141,12 @@ public class TraceServiceImplTest {
   }
 
   @Test
-  void givenPageAndPageSize_shouldGetUnassociatedTraces() {
+  void givenPageAndPageSize_shouldGetTracesView() {
     // Given
     int pageNumber = 1;
     int pageSize = 8;
     int totalElement = 13;
-    TraceConfigurationInfo traceConfigurationInfo = new TraceConfigurationInfo(90, 30, 5);
+    TraceConfiguration traceConfiguration = new TraceConfiguration(90, 30, 5);
 
     List<Trace> traces =
         List.of(
@@ -172,20 +172,18 @@ public class TraceServiceImplTest {
                 .toModel());
 
     // When
-    when(traceRepository.findAllUnassociated(
-            student.getUser(), new PageCriteria(pageNumber, pageSize)))
+    when(traceRepository.findAll(
+            student.getUser(), new PageCriteria(pageNumber, pageSize), ETraceStatus.UNASSOCIATED))
         .thenReturn(new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
-    when(configurationService.getTraceConfiguration()).thenReturn(traceConfigurationInfo);
-    TraceView traceView =
-        traceService.getUnassociatedTraces(
-            student.getUser(), new PageCriteria(pageNumber, pageSize));
+    PagedResult<Trace> traceView =
+        traceService.getTracesView(
+            student.getUser(), new PageCriteria(pageNumber, pageSize), ETraceStatus.UNASSOCIATED);
 
     // Then
-    assertEquals(traces.size(), traceView.traces().size());
-    assertEquals(3, traceView.criticalCount());
-    assertEquals(pageSize, traceView.page().pageSize());
-    assertEquals(totalElement, traceView.page().totalElements());
-    assertEquals(pageNumber, traceView.page().page());
+    assertEquals(traces.size(), traceView.content().size());
+    assertEquals(pageSize, traceView.pageInfo().pageSize());
+    assertEquals(totalElement, traceView.pageInfo().totalElements());
+    assertEquals(pageNumber, traceView.pageInfo().page());
   }
 
   @Test
@@ -245,7 +243,7 @@ public class TraceServiceImplTest {
   @Test
   void givenUnassociatedTraces_shouldReturnSummary() {
     // Given
-    TraceConfigurationInfo traceConfigurationInfo = new TraceConfigurationInfo(90, 30, 5);
+    TraceConfiguration traceConfiguration = new TraceConfiguration(90, 30, 5);
     List<Trace> unassociatedTraces =
         List.of(
             TraceFixture.create()
@@ -267,7 +265,7 @@ public class TraceServiceImplTest {
 
     // When
     when(traceRepository.findAllUnassociated(student.getUser())).thenReturn(unassociatedTraces);
-    when(configurationService.getTraceConfiguration()).thenReturn(traceConfigurationInfo);
+    when(traceConfigurationService.getTraceConfiguration()).thenReturn(traceConfiguration);
     UnassociatedTracesSummary summary =
         traceService.getUnassociatedTracesSummary(student.getUser());
 

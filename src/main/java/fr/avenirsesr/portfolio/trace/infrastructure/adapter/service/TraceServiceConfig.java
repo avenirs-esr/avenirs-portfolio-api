@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.service;
 
-import fr.avenirsesr.portfolio.configuration.domain.port.input.ConfigurationService;
+import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.service.TraceServiceImpl;
@@ -12,19 +12,20 @@ import org.springframework.context.annotation.Configuration;
 public class TraceServiceConfig {
   private final TraceDatabaseRepository traceRepository;
   private final StudentProgressDatabaseRepository studentProgressRepository;
-  private final ConfigurationService configurationService;
+  private final TraceConfigurationService traceConfigurationService;
 
   public TraceServiceConfig(
       TraceDatabaseRepository traceRepository,
       StudentProgressDatabaseRepository studentProgressRepository,
-      ConfigurationService configurationService) {
+      TraceConfigurationService traceConfigurationService) {
     this.traceRepository = traceRepository;
     this.studentProgressRepository = studentProgressRepository;
-    this.configurationService = configurationService;
+    this.traceConfigurationService = traceConfigurationService;
   }
 
   @Bean
   public TraceService traceService() {
-    return new TraceServiceImpl(traceRepository, studentProgressRepository, configurationService);
+    return new TraceServiceImpl(
+        traceRepository, studentProgressRepository, traceConfigurationService);
   }
 }

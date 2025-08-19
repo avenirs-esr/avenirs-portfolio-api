@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.trace.domain.service;
 
-import fr.avenirsesr.portfolio.configuration.domain.model.TraceConfigurationInfo;
-import fr.avenirsesr.portfolio.configuration.domain.port.input.ConfigurationService;
+import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
+import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
@@ -29,7 +29,7 @@ public class TraceServiceImpl implements TraceService {
   private static final int MAX_TRACES_OVERVIEW = 3;
   private final TraceRepository traceRepository;
   private final StudentProgressRepository studentProgressRepository;
-  private final ConfigurationService configurationService;
+  private final TraceConfigurationService traceConfigurationService;
 
   public static boolean isBelowThresholdDate(Instant initialDate, int maxDaySinceCreation) {
     return Duration.between(initialDate, Instant.now()).toDays() >= maxDaySinceCreation;
@@ -92,7 +92,7 @@ public class TraceServiceImpl implements TraceService {
   @Override
   public UnassociatedTracesSummary getUnassociatedTracesSummary(User user) {
     List<Trace> unassociatedTraces = traceRepository.findAllUnassociated(user);
-    TraceConfigurationInfo traceConfigurationInfo = configurationService.getTraceConfiguration();
+    TraceConfiguration traceConfiguration = traceConfigurationService.getTraceConfiguration();
 
     int criticalCount = 0;
     int warningCount = 0;

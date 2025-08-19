@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceViewDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.UnassociatedTracesSummaryDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceViewMapper;
@@ -50,7 +51,7 @@ public class TraceController {
   }
 
   @GetMapping("/view")
-  public ResponseEntity<TracesViewResponse> getTracesView(
+  public ResponseEntity<List<TraceViewDTO>> getTracesView(
       Principal principal,
       @RequestParam(required = false) ETraceStatus status,
       @RequestParam(required = false) Integer page,
@@ -73,8 +74,8 @@ public class TraceController {
               new TracesResponse(
                   tracesView.traces().stream()
                       .map(trace -> TraceViewMapper.toDTO(trace, ETraceStatus.UNASSOCIATED))
-                      .toList(),
-                  tracesView.criticalCount()),
+                      .toList()
+              ),
               PageInfoDTO.fromDomain(tracesView.page()));
     }
 
