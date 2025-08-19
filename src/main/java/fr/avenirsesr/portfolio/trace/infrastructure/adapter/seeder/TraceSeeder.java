@@ -23,11 +23,6 @@ public class TraceSeeder {
 
   private final TraceRepository traceRepository;
 
-  private UserEntity getRandomUserOf(List<UserEntity> users) {
-    int randomIndex = faker.number().numberBetween(0, users.size());
-    return users.get(randomIndex);
-  }
-
   public List<TraceEntity> seed(List<UserEntity> users) {
     ValidationUtils.requireNonEmpty(users, "users cannot be empty");
 
@@ -35,17 +30,18 @@ public class TraceSeeder {
 
     List<TraceEntity> traceList = new ArrayList<>();
 
-    for (int i = 0; i < SeederConfig.TRACES_NB; i++) {
-      var fakeTrace = FakeTrace.of(getRandomUserOf(users));
+    for (UserEntity user : users) {
+      for (int i = 0; i < faker.random().nextInt(SeederConfig.TRACES_NB); i++) {
+        var fakeTrace = FakeTrace.of(user);
 
-      if (faker.random().nextBoolean()) fakeTrace = fakeTrace.withAiUseJustification();
-      if (faker.random().nextBoolean()) fakeTrace = fakeTrace.withPersonalNote();
-      if (faker.random().nextBoolean()) fakeTrace = fakeTrace.isGroup();
+        if (faker.random().nextBoolean()) fakeTrace = fakeTrace.withAiUseJustification();
+        if (faker.random().nextBoolean()) fakeTrace = fakeTrace.withPersonalNote();
+        if (faker.random().nextBoolean()) fakeTrace = fakeTrace.isGroup();
 
-      var trace = fakeTrace.toEntity();
-      traceList.add(trace);
+        var trace = fakeTrace.toEntity();
+        traceList.add(trace);
+      }
     }
-
     traceRepository.saveAll(traceList.stream().map(TraceMapper::toDomain).toList());
 
     log.info("✔ {} traces created", traceList.size());
