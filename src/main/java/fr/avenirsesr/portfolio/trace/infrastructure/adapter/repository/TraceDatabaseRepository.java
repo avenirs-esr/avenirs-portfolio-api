@@ -13,10 +13,12 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceS
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+@Slf4j
 @Repository
 public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, TraceEntity>
     implements TraceRepository {
@@ -38,32 +40,31 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, 
 
   @Override
   public PagedResult<Trace> findAll(User user, PageCriteria pageCriteria, ETraceStatus status) {
-    var specification =
-        switch (status) {
-          case UNASSOCIATED ->
-              TraceSpecification.ofUser(UserMapper.fromDomain(user))
-                  .and(TraceSpecification.unassociated());
-          case ASSOCIATED ->
-              TraceSpecification.ofUser(UserMapper.fromDomain(user))
-                  .and(TraceSpecification.associated());
-          case null -> TraceSpecification.ofUser(UserMapper.fromDomain(user));
-        };
-    var content =
-        jpaSpecificationExecutor
-            .findAll(
-                specification,
-                PageRequest.of(
-                    pageCriteria.page(),
-                    pageCriteria.pageSize(),
-                    Sort.by(Sort.Direction.DESC, "updatedAt")
-                        .and(Sort.by(Sort.Direction.DESC, "createdAt"))))
-            .getContent()
-            .stream()
-            .map(TraceMapper::toDomain)
-            .toList();
+    var specification = TraceSpecification.ofUser(UserMapper.fromDomain(user));
+
+    switch (status) {
+      case UNASSOCIATED -> specification = specification.and(TraceSpecification.unassociated());
+      case ASSOCIATED -> specification = specification.and(TraceSpecification.associated());
+      case null -> {}
+    }
+
+    var results =
+        jpaSpecificationExecutor.findAll(
+            specification,
+            PageRequest.of(
+                pageCriteria.page(),
+                pageCriteria.pageSize(),
+                Sort.by(Sort.Direction.DESC, "updatedAt")
+                    .and(Sort.by(Sort.Direction.DESC, "createdAt"))));
+
+    var content = results.getContent().stream().map(TraceMapper::toDomain).toList();
 
     return new PagedResult<>(
-        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), content.size()));
+        content,
+        new PageInfo(
+            results.getPageable().getPageNumber(),
+            results.getPageable().getPageSize(),
+            results.getTotalElements()));
   }
 
   public void saveAllEntities(List<TraceEntity> entities) {
