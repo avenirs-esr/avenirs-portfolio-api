@@ -1,6 +1,6 @@
-package fr.avenirsesr.portfolio.backoffice.configuration.trace.application.controller.controller;
+package fr.avenirsesr.portfolio.backoffice.configuration.trace.application.controller;
 
-import fr.avenirsesr.portfolio.backoffice.configuration.trace.application.controller.dto.TraceConfigurationDTO;
+import fr.avenirsesr.portfolio.backoffice.configuration.trace.application.dto.TraceConfigurationDTO;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
 import lombok.AllArgsConstructor;
