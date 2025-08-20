@@ -58,7 +58,7 @@ class TraceAttachmentControllerIT {
 
   @Test
   void shouldUploadAttachmentSuccessfully() throws Exception {
-    UUID existingTraceId = UUID.fromString("01012cc9-762e-46cc-9b7b-810bca86d427");
+    UUID existingTraceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
 
     byte[] fileContent = "Contenu du fichier de test".getBytes(StandardCharsets.UTF_8);
     MockMultipartFile file =
@@ -66,7 +66,7 @@ class TraceAttachmentControllerIT {
 
     mockMvc
         .perform(
-            multipart("/me/traces/upload/{traceId}", existingTraceId)
+            multipart("/me/storage/traces/{traceId}", existingTraceId)
                 .file(file)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                 .header("X-Signed-Context", studentPayload)
@@ -90,7 +90,7 @@ class TraceAttachmentControllerIT {
 
     mockMvc
         .perform(
-            multipart("/me/traces/upload/{traceId}", unknownTraceId)
+            multipart("/me/storage/traces/{traceId}", unknownTraceId)
                 .file(file)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                 .header("X-Signed-Context", studentPayload)
@@ -103,7 +103,7 @@ class TraceAttachmentControllerIT {
 
   @Test
   void shouldReturn403WhenUserNotAuthorized() throws Exception {
-    UUID traceIdNotOwnedByUser = UUID.fromString("efed73b3-a161-4886-87d1-4f19d41dd145");
+    UUID traceIdNotOwnedByUser = UUID.fromString("e5e328dc-328e-4f22-962b-9a78864e02f5");
 
     MockMultipartFile file =
         new MockMultipartFile(
@@ -111,7 +111,7 @@ class TraceAttachmentControllerIT {
 
     mockMvc
         .perform(
-            multipart("/me/traces/upload/{traceId}", traceIdNotOwnedByUser)
+            multipart("/me/storage/traces/{traceId}", traceIdNotOwnedByUser)
                 .file(file)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                 .header("X-Signed-Context", studentPayload)

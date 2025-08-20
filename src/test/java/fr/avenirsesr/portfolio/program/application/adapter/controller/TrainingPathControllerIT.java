@@ -64,10 +64,10 @@ public class TrainingPathControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("64e9ef37-e847-467c-81e5-4d27d4cdf905"))
-        .andExpect(jsonPath("$[0].name").value("Eastern Doctoral - 1 [fr_FR]"))
-        .andExpect(jsonPath("$[0].durationUnit").value("YEAR"))
-        .andExpect(jsonPath("$[0].durationCount").value(1));
+        .andExpect(jsonPath("$[0].id").value("3b3c65dc-61b4-4c5a-8507-b6392df949fc"))
+        .andExpect(jsonPath("$[0].name").value("East Post-doctoral - 3 [fr_FR]"))
+        .andExpect(jsonPath("$[0].durationUnit").value("MONTH"))
+        .andExpect(jsonPath("$[0].durationCount").value(3));
   }
 
   @Test
@@ -116,9 +116,9 @@ public class TrainingPathControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("64e9ef37-e847-467c-81e5-4d27d4cdf905"))
-        .andExpect(jsonPath("$[0].name").value("Eastern Doctoral - 1 [fr_FR]"))
-        .andExpect(jsonPath("$[0].durationUnit").value("YEAR"))
-        .andExpect(jsonPath("$[0].durationCount").value(1));
+        .andExpect(jsonPath("$[0].id").value("3b3c65dc-61b4-4c5a-8507-b6392df949fc"))
+        .andExpect(jsonPath("$[0].name").value("East Post-doctoral - 3 [fr_FR]"))
+        .andExpect(jsonPath("$[0].durationUnit").value("MONTH"))
+        .andExpect(jsonPath("$[0].durationCount").value(3));
   }
 }

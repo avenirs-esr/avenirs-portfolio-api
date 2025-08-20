@@ -63,13 +63,13 @@ class StorageControllerIT {
 
   @Test
   void shouldGetUserResourceByFileId() throws Exception {
-    UUID existingFileId = UUID.fromString("1d90989c-0f99-4a9c-a834-8a97d8b39d23");
+    UUID existingFileId = UUID.fromString("c4e8acc0-5f44-4e19-a53c-d560d5e5a951");
 
     when(fileStorageService.get(anyString()))
         .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
     mockMvc
         .perform(
-            get("/storage/storage/users/{fileId}", existingFileId)
+            get("/storage/users/{fileId}", existingFileId)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
@@ -83,7 +83,7 @@ class StorageControllerIT {
         .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
     mockMvc
         .perform(
-            get("/storage/storage/users/default/{photoType}", EUserPhotoType.PROFILE)
+            get("/storage/users/default/{photoType}", EUserPhotoType.PROFILE)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
@@ -97,7 +97,7 @@ class StorageControllerIT {
         .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
     mockMvc
         .perform(
-            get("/storage/storage/users/default/{photoType}", EUserPhotoType.COVER)
+            get("/storage/users/default/{photoType}", EUserPhotoType.COVER)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))

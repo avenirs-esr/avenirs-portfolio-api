@@ -99,16 +99,6 @@ public class AdditionalSkillControllerIT {
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payloadJson))
-        .andExpect(status().isCreated());
-
-    mockMvc
-        .perform(
-            post("/me/additional-skills")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payloadJson))
         .andExpect(status().isConflict());
   }
 

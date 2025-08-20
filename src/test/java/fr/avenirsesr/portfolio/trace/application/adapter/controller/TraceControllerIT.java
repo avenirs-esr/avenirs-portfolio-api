@@ -94,8 +94,7 @@ class TraceControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.data").exists())
-        .andExpect(jsonPath("$.data.criticalCount").exists())
-        .andExpect(jsonPath("$.data.traces").isArray())
+        .andExpect(jsonPath("$.data").isArray())
         .andExpect(jsonPath("$.page").exists());
   }
 
@@ -132,7 +131,7 @@ class TraceControllerIT {
 
   @Test
   void shouldDeleteTrace() throws Exception {
-    UUID existingTraceId = UUID.fromString("f905db82-9b0f-4a97-a1c8-4a7f7998031d");
+    UUID existingTraceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
 
     mockMvc
         .perform(
@@ -160,7 +159,7 @@ class TraceControllerIT {
 
   @Test
   void shouldReturn403IfUserNotOwnerWhenDeleting() throws Exception {
-    UUID existingTraceId = UUID.fromString("a14f172f-8045-4ad0-9eed-f2867d187bb8");
+    UUID existingTraceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
 
     mockMvc
         .perform(

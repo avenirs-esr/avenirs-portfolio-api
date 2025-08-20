@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class AMSControllerIT {
 
   private static final String BASE_PATH = "/me/ams/view";
-  private static final String VALID_STUDENT_PROGRESS_ID = "dd6d1d9a-da85-4fd3-94d5-cc89deb42028";
+  private static final String VALID_STUDENT_PROGRESS_ID = "96c16cc8-4ae8-4ffe-bb37-d55d0832c36b";
   private static final String UNKNOWN_STUDENT_PROGRESS_ID = "00000000-0000-0000-0000-000000000000";
   private final ELanguage language = ELanguage.FRENCH;
   @Autowired private MockMvc mockMvc;

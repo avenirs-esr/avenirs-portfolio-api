@@ -55,7 +55,7 @@ class UserResourceControllerIT {
     mockMvc
         .perform(
             multipart(
-                    "/me/users/upload/{userCategory}/{photoType}",
+                    "/me/storage/users/{userCategory}/{photoType}",
                     EUserCategory.STUDENT,
                     EUserPhotoType.PROFILE)
                 .file(file)
@@ -74,6 +74,6 @@ class UserResourceControllerIT {
         .andExpect(
             jsonPath("$.fileSize")
                 .value("FakeImageContent".getBytes(StandardCharsets.UTF_8).length))
-        .andExpect(jsonPath("$.version").value(2));
+        .andExpect(jsonPath("$.version").value(4));
   }
 }

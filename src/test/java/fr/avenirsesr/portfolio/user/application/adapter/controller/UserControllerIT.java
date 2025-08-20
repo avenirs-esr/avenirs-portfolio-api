@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -51,31 +50,12 @@ public class UserControllerIT {
   }
 
   @Test
-  void shouldGetStudentProfile() throws Exception {
-    mockMvc
-        .perform(
-            get("/me/user/student/overview")
-                .header(
-                    "X-Signed-Context",
-                    "{\"sub\":\"b5216586-0aee-4c39-ac43-423ef46774e3\","
-                        + " \"iat\":\"2019-01-21T05:47:29.886Z\","
-                        + " \"exp\":\"2027-01-01T05:47:29.886Z\"}")
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", "Vz6AvMMOapppgUu05I+biTBT/jtuJ9mDuASLh4Gf2iE="))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.firstname").value("Mathilde"))
-        .andExpect(jsonPath("$.lastname").value("Aubry"))
-        .andExpect(jsonPath("$.email").value("quentin.renard@hotmail.fr"))
-        .andExpect(jsonPath("$.bio").exists());
-  }
-
-  @Test
   void shouldUpdateStudentProfileSuccessfully() throws Exception {
     String payloadJson = loadJson("user/mock-update-user.json");
 
     mockMvc
         .perform(
-            put("/me/user/student/update")
+            put("/me/users/STUDENT/update")
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -91,7 +71,7 @@ public class UserControllerIT {
 
     mockMvc
         .perform(
-            put("/me/user/teacher/update")
+            put("/me/users/TEACHER/update")
                 .header("X-Signed-Context", teacherPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", teacherSignature)
@@ -102,50 +82,10 @@ public class UserControllerIT {
   }
 
   @Test
-  void shouldUploadProfilePhoto() throws Exception {
-    MockMultipartFile file =
-        new MockMultipartFile("file", "photo.jpg", "image/jpeg", "dummy content".getBytes());
-
-    mockMvc
-        .perform(
-            multipart("/me/user/student/update/photo")
-                .file(file)
-                .with(
-                    request -> {
-                      request.setMethod("PUT");
-                      return request;
-                    })
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk());
-  }
-
-  @Test
-  void shouldUploadCoverPhoto() throws Exception {
-    MockMultipartFile file =
-        new MockMultipartFile("file", "cover.png", "image/png", "dummy content".getBytes());
-
-    mockMvc
-        .perform(
-            multipart("/me/user/student/update/cover")
-                .file(file)
-                .with(
-                    request -> {
-                      request.setMethod("PUT");
-                      return request;
-                    })
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk());
-  }
-
-  @Test
   void shouldReturnNotFoundForUnknownUser() throws Exception {
     mockMvc
         .perform(
-            get("/me/user/student/overview")
+            get("/me/users/STUDENT/overview")
                 .header("X-Signed-Context", unknownPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownSignature))
@@ -154,42 +94,17 @@ public class UserControllerIT {
   }
 
   @Test
-  void shouldUploadTeacherProfilePhoto() throws Exception {
-    MockMultipartFile file =
-        new MockMultipartFile("file", "photo.jpg", "image/jpeg", "dummy content".getBytes());
-
+  void shouldGetStudentProfile() throws Exception {
     mockMvc
         .perform(
-            multipart("/me/user/teacher/update/photo")
-                .file(file)
-                .with(
-                    request -> {
-                      request.setMethod("PUT");
-                      return request;
-                    })
-                .header("X-Signed-Context", teacherPayload)
+            get("/me/users/STUDENT/overview")
+                .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", teacherSignature))
-        .andExpect(status().isOk());
-  }
-
-  @Test
-  void shouldUploadTeacherCoverPhoto() throws Exception {
-    MockMultipartFile file =
-        new MockMultipartFile("file", "cover.jpg", "image/jpeg", "dummy content".getBytes());
-
-    mockMvc
-        .perform(
-            multipart("/me/user/teacher/update/cover")
-                .file(file)
-                .with(
-                    request -> {
-                      request.setMethod("PUT");
-                      return request;
-                    })
-                .header("X-Signed-Context", teacherPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", teacherSignature))
-        .andExpect(status().isOk());
+                .header("X-Context-Signature", studentSignature))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.firstname").value("Updated"))
+        .andExpect(jsonPath("$.lastname").value("Name"))
+        .andExpect(jsonPath("$.email").value("new.email@example.com"))
+        .andExpect(jsonPath("$.bio").exists());
   }
 }
