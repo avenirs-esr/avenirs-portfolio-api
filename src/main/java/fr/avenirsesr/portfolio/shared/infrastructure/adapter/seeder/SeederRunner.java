@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
+import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.infrastructure.seeder.AdditionalSkillConfigSeeder;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.infrastructure.seeder.TraceConfigSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.TraceAttachmentSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class SeederRunner implements CommandLineRunner {
+  private final AdditionalSkillConfigSeeder additionalSkillConfigSeeder;
   private final TraceConfigSeeder traceConfigSeeder;
   private final UserRepository userRepository;
   private final UserSeeder userSeeder;
@@ -42,6 +44,7 @@ public class SeederRunner implements CommandLineRunner {
   private boolean seedEnabled;
 
   public SeederRunner(
+      AdditionalSkillConfigSeeder additionalSkillConfigSeeder,
       TraceConfigSeeder traceConfigSeeder,
       UserRepository userRepository,
       UserSeeder userSeeder,
@@ -56,6 +59,7 @@ public class SeederRunner implements CommandLineRunner {
       StudentProgressSeeder studentProgressSeeder,
       SkillSeeder skillSeeder,
       AdditionalSkillSeeder additionalSkillSeeder) {
+    this.additionalSkillConfigSeeder = additionalSkillConfigSeeder;
     this.traceConfigSeeder = traceConfigSeeder;
     this.userRepository = userRepository;
     this.userPhotoSeeder = userPhotoSeeder;
@@ -79,6 +83,7 @@ public class SeederRunner implements CommandLineRunner {
     if (seedEnabled && userCont == 0) {
       log.info("Seeding enabled and starting...");
 
+      additionalSkillConfigSeeder.seed();
       traceConfigSeeder.seed();
 
       var savedUsers = userSeeder.seed();

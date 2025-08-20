@@ -18,7 +18,7 @@ public class TraceConfigurationServiceConfig {
   }
 
   @Bean
-  public TraceConfigurationService configurationService() {
+  public TraceConfigurationService traceConfigurationService() {
     return new TraceConfigurationServiceImpl(configurationRepository);
   }
 }

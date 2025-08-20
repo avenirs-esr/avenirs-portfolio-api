@@ -23,7 +23,9 @@ public class ConfigurationDatabaseRepository
   }
 
   @Override
-  public List<ConfigurationEntity> inScope(EConfigurationScope scope) {
-    return jpaSpecificationExecutor.findAll(ConfigurationSpecification.inScope(scope));
+  public List<Configuration> inScope(EConfigurationScope scope) {
+    return jpaSpecificationExecutor.findAll(ConfigurationSpecification.inScope(scope)).stream()
+        .map(ConfigurationMapper::toDomain)
+        .toList();
   }
 }

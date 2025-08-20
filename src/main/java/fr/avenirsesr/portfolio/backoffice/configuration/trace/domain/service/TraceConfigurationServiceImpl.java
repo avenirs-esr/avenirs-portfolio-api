@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.service;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.Configuration;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.EConfigurationScope;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.output.repository.ConfigurationRepository;
-import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.mapper.ConfigurationMapper;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.ETraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
@@ -19,10 +18,7 @@ public class TraceConfigurationServiceImpl implements TraceConfigurationService 
 
   @Override
   public TraceConfiguration getTraceConfiguration() {
-    List<Configuration> configurations =
-        configurationRepository.inScope(EConfigurationScope.TRACE).stream()
-            .map(ConfigurationMapper::toDomain)
-            .toList();
+    List<Configuration> configurations = configurationRepository.inScope(EConfigurationScope.TRACE);
 
     int maxDayRemaining =
         findTraceConfigurationMaxDay(configurations, ETraceConfiguration.MAX_REMINING_DAYS);
@@ -50,10 +46,7 @@ public class TraceConfigurationServiceImpl implements TraceConfigurationService 
 
   @Override
   public void postTraceConfiguration(TraceConfiguration traceConfiguration) {
-    List<Configuration> configurations =
-        configurationRepository.inScope(EConfigurationScope.TRACE).stream()
-            .map(ConfigurationMapper::toDomain)
-            .toList();
+    List<Configuration> configurations = configurationRepository.inScope(EConfigurationScope.TRACE);
 
     var maxRemainingDays =
         configurations.stream()
