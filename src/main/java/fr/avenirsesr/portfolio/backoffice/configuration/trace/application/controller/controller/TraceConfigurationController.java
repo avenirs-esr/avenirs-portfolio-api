@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @AllArgsConstructor
 @RestController
-@RequestMapping("/me/config/traces")
+@RequestMapping("back-office/config/traces")
 public class TraceConfigurationController {
   private final TraceConfigurationService traceConfigurationService;
 
