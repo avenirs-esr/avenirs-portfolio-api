@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class FakeCohort {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(FakeCohort.class);
   private final CohortEntity cohort;
 
   private FakeCohort(CohortEntity cohort) {
@@ -18,9 +18,9 @@ public class FakeCohort {
   public static FakeCohort of(TrainingPathEntity trainingPath, Set<UserEntity> users) {
     final CohortEntity cohort =
         CohortEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
-            faker.call().educator().course(),
-            faker.call().lorem().sentence(),
+            UUID.fromString(faker.call("id").internet().uuid()),
+            faker.call("course").educator().course(),
+            faker.call("sentence").lorem().sentence(),
             users,
             trainingPath,
             Set.of());

@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class FakeSkill {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(FakeSkill.class);
   private final SkillEntity skill;
 
   private FakeSkill(SkillEntity skill) {
@@ -18,17 +18,17 @@ public class FakeSkill {
   }
 
   public static FakeSkill of(List<SkillLevelEntity> skillLevels) {
-    var entity = SkillEntity.of(UUID.fromString(faker.call().internet().uuid()));
+    var entity = SkillEntity.of(UUID.fromString(faker.call("id").internet().uuid()));
 
     skillLevels.forEach(skillLevel -> skillLevel.setSkill(entity));
 
     entity.setTranslations(
         Set.of(
             SkillTranslationEntity.of(
-                UUID.fromString(faker.call().internet().uuid()),
+                UUID.fromString(faker.call("FALLBACK-translation-id").internet().uuid()),
                 ELanguage.FALLBACK,
                 "Skill %s - [%s]"
-                    .formatted(faker.call().lorem().word(), ELanguage.FALLBACK.getCode()),
+                    .formatted(faker.call("word").lorem().word(), ELanguage.FALLBACK.getCode()),
                 entity)));
     return new FakeSkill(entity);
   }
@@ -37,9 +37,10 @@ public class FakeSkill {
     var translations = new java.util.HashSet<>(Set.copyOf(skill.getTranslations()));
     translations.add(
         SkillTranslationEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
+            UUID.fromString(faker.call("translation-id").internet().uuid()),
             language,
-            "Skill %s - [%s]".formatted(faker.call().lorem().word(), language.getCode()),
+            "Skill %s - [%s]"
+                .formatted(faker.call("translation word").lorem().word(), language.getCode()),
             skill));
 
     skill.setTranslations(translations);

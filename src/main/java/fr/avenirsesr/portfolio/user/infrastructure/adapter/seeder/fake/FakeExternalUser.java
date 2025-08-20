@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FakeExternalUser {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(FakeExternalUser.class);
   private final ExternalUserEntity externalUser;
 
   private FakeExternalUser(ExternalUserEntity externalUser) {
@@ -33,10 +33,14 @@ public class FakeExternalUser {
             FakeExternalSource.generateExternalSourceId(),
             Arrays.stream(EExternalSource.values())
                 .toList()
-                .get(faker.call().random().nextInt(EExternalSource.values().length)),
+                .get(
+                    faker
+                        .call("EExternalSource")
+                        .random()
+                        .nextInt(EExternalSource.values().length)),
             user,
             category,
-            faker.call().internet().emailAddress(),
+            faker.call("email").internet().emailAddress(),
             user.getFirstName(),
             user.getLastName()));
   }

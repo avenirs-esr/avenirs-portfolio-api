@@ -11,10 +11,9 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
-import net.datafaker.Faker;
 
 public class FakeStudentProgress {
-  private static final Faker faker = new FakerProvider().call();
+  private static final FakerProvider faker = new FakerProvider().init(FakeStudentProgress.class);
   private final StudentProgressEntity studentProgress;
   private static final Period DEFAULT_STUDENT_PROGRESS_DURATION = Period.ofYears(1);
 
@@ -29,19 +28,19 @@ public class FakeStudentProgress {
 
     var today = LocalDate.now();
 
-    var selectedYearTime = faker.options().option(0, -1, 1);
+    var selectedYearTime = faker.call("selectedYearTime").options().option(0, -1, 1);
     var startDate = LocalDate.of(today.getYear() + selectedYearTime, today.getMonth(), 1);
 
     return new FakeStudentProgress(
         StudentProgressEntity.of(
-            UUID.fromString(faker.internet().uuid()),
+            UUID.fromString(faker.call("id").internet().uuid()),
             student,
             trainingPath,
             startDate,
             startDate.plus(DEFAULT_STUDENT_PROGRESS_DURATION),
             skillLevels,
             today
-                .minusDays(faker.number().numberBetween(5, 365))
+                .minusDays(faker.call("minus-day").number().numberBetween(5, 365))
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant(),
             Instant.now()));

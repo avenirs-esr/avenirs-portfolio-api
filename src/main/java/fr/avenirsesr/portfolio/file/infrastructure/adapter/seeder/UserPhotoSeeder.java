@@ -14,20 +14,19 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class UserPhotoSeeder {
-  private static final Faker faker = new FakerProvider().call();
+  private static final FakerProvider faker = new FakerProvider().init(UserPhotoSeeder.class);
   private final UserPhotoRepository userPhotoRepository;
 
   private List<UserPhotoEntity> generatePhotosOf(
       UserEntity user, EUserPhotoType type, EUserCategory userCategory, int maxNumber) {
     List<UserPhotoEntity> photos = new ArrayList<>();
-    var nbOfProfileVersions = faker.random().nextInt(1, maxNumber);
+    var nbOfProfileVersions = faker.call("random-number").random().nextInt(1, maxNumber);
     for (int j = 1; j <= nbOfProfileVersions; j++) {
       photos.add(
           FakeUserPhoto.of(user)
@@ -63,7 +62,7 @@ public class UserPhotoSeeder {
               SeederConfig.MAX_COVER_PHOTO_PER_USER));
 
       if (user.getStudent().isPresent() && user.getTeacher().isPresent()) {
-        if (faker.random().nextBoolean()) {
+        if (faker.call("has-photo").random().nextBoolean()) {
           userPhotoEntities.addAll(
               generatePhotosOf(
                   user,

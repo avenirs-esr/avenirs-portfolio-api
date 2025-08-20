@@ -9,10 +9,9 @@ import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
 import java.util.UUID;
-import net.datafaker.Faker;
 
 public class FakeUserPhoto {
-  private static final Faker faker = new FakerProvider().call();
+  private static final FakerProvider faker = new FakerProvider().init(FakeUserPhoto.class);
   private final UserPhotoEntity userPhoto;
 
   private FakeUserPhoto(UserPhotoEntity userPhoto) {
@@ -20,8 +19,8 @@ public class FakeUserPhoto {
   }
 
   public static FakeUserPhoto of(UserEntity user) {
-    var fileType = faker.options().option(EFileType.PNG, EFileType.JPEG);
-    var id = UUID.fromString(faker.internet().uuid());
+    var fileType = faker.call("file-type").options().option(EFileType.PNG, EFileType.JPEG);
+    var id = UUID.fromString(faker.call("id").internet().uuid());
     return new FakeUserPhoto(
         UserPhotoEntity.of(
             id,
@@ -29,7 +28,7 @@ public class FakeUserPhoto {
             user.getStudent().isPresent() ? EUserCategory.STUDENT : EUserCategory.TEACHER,
             EUserPhotoType.PROFILE,
             fileType,
-            faker.random().nextLong(fileType.getSizeLimit().bytes()),
+            faker.call("size").random().nextLong(fileType.getSizeLimit().bytes()),
             1,
             true,
             "/workspace/app%s/%s.%s"

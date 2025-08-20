@@ -12,14 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class TraceSeeder {
-  private static final Faker faker = new FakerProvider().call();
+  private static final FakerProvider faker = new FakerProvider().init(TraceSeeder.class);
 
   private final TraceRepository traceRepository;
 
@@ -31,12 +30,14 @@ public class TraceSeeder {
     List<TraceEntity> traceList = new ArrayList<>();
 
     for (UserEntity user : users) {
-      for (int i = 0; i < faker.random().nextInt(SeederConfig.TRACES_NB); i++) {
+      for (int i = 0; i < faker.call("nb-traces").random().nextInt(SeederConfig.TRACES_NB); i++) {
         var fakeTrace = FakeTrace.of(user);
 
-        if (faker.random().nextBoolean()) fakeTrace = fakeTrace.withAiUseJustification();
-        if (faker.random().nextBoolean()) fakeTrace = fakeTrace.withPersonalNote();
-        if (faker.random().nextBoolean()) fakeTrace = fakeTrace.isGroup();
+        if (faker.call("withAiUseJustification").random().nextBoolean())
+          fakeTrace = fakeTrace.withAiUseJustification();
+        if (faker.call("withPersonalNote").random().nextBoolean())
+          fakeTrace = fakeTrace.withPersonalNote();
+        if (faker.call("isGroup").random().nextBoolean()) fakeTrace = fakeTrace.isGroup();
 
         var trace = fakeTrace.toEntity();
         traceList.add(trace);

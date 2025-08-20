@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class FakeProgram {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(FakeProgram.class);
   private final ProgramEntity program;
 
   private FakeProgram(ProgramEntity program) {
@@ -18,22 +18,22 @@ public class FakeProgram {
   }
 
   private static EDurationUnit randomDurationUnit() {
-    return faker.call().options().option(EDurationUnit.values());
+    return faker.call("EDurationUnit").options().option(EDurationUnit.values());
   }
 
   public static FakeProgram of(InstitutionEntity institution) {
     var entity =
         ProgramEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
+            UUID.fromString(faker.call("id").internet().uuid()),
             true,
             institution,
             randomDurationUnit(),
-            faker.call().number().numberBetween(1, 5));
+            faker.call("skill-count").number().numberBetween(1, 5));
 
     entity.setTranslations(
         Set.of(
             ProgramTranslationEntity.of(
-                UUID.fromString(faker.call().internet().uuid()),
+                UUID.fromString(faker.call("translation-id").internet().uuid()),
                 ELanguage.FRENCH,
                 createName(ELanguage.FRENCH),
                 entity)));
@@ -50,7 +50,7 @@ public class FakeProgram {
     var translations = new java.util.HashSet<>(Set.copyOf(program.getTranslations()));
     translations.add(
         ProgramTranslationEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
+            UUID.fromString(faker.call("id").internet().uuid()),
             language,
             createName(language),
             program));
@@ -67,9 +67,9 @@ public class FakeProgram {
   private static String createName(ELanguage language) {
     return "%s %s - %s [%s]"
         .formatted(
-            faker.call().university().prefix(),
-            faker.call().university().degree(),
-            faker.call().number().numberBetween(1, 11),
+            faker.call("prefix").university().prefix(),
+            faker.call("degree").university().degree(),
+            faker.call("random number").number().numberBetween(1, 11),
             language.getCode());
   }
 }

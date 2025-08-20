@@ -15,27 +15,31 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class StudentProgressSeeder {
-  private static final Faker faker = new FakerProvider().call();
+  private static final FakerProvider faker = new FakerProvider().init(StudentProgressSeeder.class);
 
   private final StudentProgressDatabaseRepository studentProgressRepository;
 
   private static StudentProgressEntity buildStudentProgressEntity(
       UserEntity student, LocalDate startDate, List<TrainingPathEntity> savedTrainingPaths) {
-    TrainingPathEntity selectedTrainingPath = faker.options().nextElement(savedTrainingPaths);
+    TrainingPathEntity selectedTrainingPath =
+        faker.call("selectedTrainingPath").options().nextElement(savedTrainingPaths);
 
     var skillLevelProgressEntities =
         selectedTrainingPath.getSkillLevels().stream()
             .map(
                 level ->
                     FakeSkillLevelProgress.create(student, level)
-                        .withStatus(faker.options().option(ESkillLevelStatus.class))
+                        .withStatus(
+                            faker
+                                .call("ESkillLevelStatus")
+                                .options()
+                                .option(ESkillLevelStatus.class))
                         .toEntity())
             .toList();
 

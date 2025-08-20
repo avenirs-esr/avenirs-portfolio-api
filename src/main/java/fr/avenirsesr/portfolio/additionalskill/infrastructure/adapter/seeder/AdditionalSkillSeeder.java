@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AdditionalSkillSeeder {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(AdditionalSkillSeeder.class);
 
   private final AdditionalSkillDatabaseProgressRepository studentAdditionalSkillDatabaseRepository;
 
@@ -30,7 +30,7 @@ public class AdditionalSkillSeeder {
         student -> {
           int additionalSkillsCount =
               faker
-                  .call()
+                  .call("ADDITIONAL_SKILLS_PER_STUDENT")
                   .random()
                   .nextInt(MIN_ADDITIONAL_SKILLS_PER_STUDENT, MAX_ADDITIONAL_SKILLS_PER_STUDENT);
           List<UUID> bannedSkillsIds = new ArrayList<>();

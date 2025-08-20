@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class FakeSkillLevel {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(FakeSkillLevel.class);
   private final SkillLevelEntity skillLevel;
 
   private FakeSkillLevel(SkillLevelEntity skillLevel) {
@@ -17,17 +17,19 @@ public class FakeSkillLevel {
 
   public static FakeSkillLevel create() {
     SkillLevelEntity entity =
-        SkillLevelEntity.of(UUID.fromString(faker.call().internet().uuid()), null);
+        SkillLevelEntity.of(UUID.fromString(faker.call("id").internet().uuid()), null);
 
     entity.setTranslations(
         Set.of(
             SkillLevelTranslationEntity.of(
-                UUID.fromString(faker.call().internet().uuid()),
+                UUID.fromString(faker.call("fallback-translation-id").internet().uuid()),
                 ELanguage.FALLBACK,
                 "Niv. %s - [%s]"
-                    .formatted(faker.call().lorem().character(), ELanguage.FALLBACK.getCode()),
+                    .formatted(
+                        faker.call("character").lorem().character(), ELanguage.FALLBACK.getCode()),
                 "%s - [%s]"
-                    .formatted(faker.call().lorem().sentence(), ELanguage.FALLBACK.getCode()),
+                    .formatted(
+                        faker.call("sentence").lorem().sentence(), ELanguage.FALLBACK.getCode()),
                 entity)));
 
     return new FakeSkillLevel(entity);
@@ -37,10 +39,14 @@ public class FakeSkillLevel {
     var translations = new java.util.HashSet<>(Set.copyOf(skillLevel.getTranslations()));
     translations.add(
         SkillLevelTranslationEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
+            UUID.fromString(faker.call("translation-id").internet().uuid()),
             language,
-            "Niv. %s - [%s]".formatted(faker.call().lorem().character(), language.getCode()),
-            "%s - [%s]".formatted(faker.call().lorem().sentence(), language.getCode()),
+            "Niv. %s - [%s]"
+                .formatted(
+                    faker.call("translation-character").lorem().character(), language.getCode()),
+            "%s - [%s]"
+                .formatted(
+                    faker.call("translation-sentence").lorem().sentence(), language.getCode()),
             skillLevel));
 
     skillLevel.setTranslations(translations);

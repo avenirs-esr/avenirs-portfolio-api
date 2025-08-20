@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class FakeTrainingPath {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(FakeTrainingPath.class);
   private final TrainingPathEntity trainingPath;
 
   private FakeTrainingPath(TrainingPathEntity trainingPath) {
@@ -18,7 +18,7 @@ public class FakeTrainingPath {
   public static FakeTrainingPath of(ProgramEntity program, Set<SkillLevelEntity> skillLevels) {
     var entity =
         TrainingPathEntity.of(
-            UUID.fromString(faker.call().internet().uuid()), program, skillLevels);
+            UUID.fromString(faker.call("id").internet().uuid()), program, skillLevels);
     return new FakeTrainingPath(entity);
   }
 

@@ -11,10 +11,9 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 import java.util.UUID;
-import net.datafaker.Faker;
 
 public class FakeSkillLevelProgress {
-  private static final Faker faker = new FakerProvider().call();
+  private static final FakerProvider faker = new FakerProvider().init(FakeSkillLevelProgress.class);
   private final SkillLevelProgressEntity skillLevelProgress;
 
   private FakeSkillLevelProgress(SkillLevelProgressEntity skillLevelProgress) {
@@ -26,7 +25,7 @@ public class FakeSkillLevelProgress {
     LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));
     return new FakeSkillLevelProgress(
         SkillLevelProgressEntity.of(
-            UUID.fromString(faker.internet().uuid()),
+            UUID.fromString(faker.call("id").internet().uuid()),
             student,
             skillLevel,
             ESkillLevelStatus.NOT_STARTED,

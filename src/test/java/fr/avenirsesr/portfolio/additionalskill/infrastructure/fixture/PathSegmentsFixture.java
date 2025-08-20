@@ -2,11 +2,8 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 
 public class PathSegmentsFixture {
-  private static final FakerProvider faker = new FakerProvider();
-
   private SegmentDetail issue;
   private SegmentDetail target;
   private SegmentDetail macroSkill;

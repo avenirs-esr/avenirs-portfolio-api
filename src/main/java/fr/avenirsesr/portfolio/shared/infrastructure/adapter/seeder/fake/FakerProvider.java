@@ -1,34 +1,28 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
 
 @Slf4j
 public class FakerProvider {
-  private final boolean fixSeedEnabled = true;
-  private static final long DEFAULT_SEED = 100000L;
   private static final Locale LOCALE = Locale.FRENCH;
-  private static Faker FIXED_SEED_FAKER;
-  private final long seed;
+  private static final HashMap<String, Integer> seedCounts = new HashMap<>();
+  private String globalSeed;
 
-  public FakerProvider() {
-    this(DEFAULT_SEED);
+  public FakerProvider init(Class<?> clazz) {
+    globalSeed = clazz.getSimpleName();
+    return this;
   }
 
-  public FakerProvider(long seed) {
-    this.seed = seed;
-  }
-
-  public Faker call() {
-    if (fixSeedEnabled) {
-      if (FIXED_SEED_FAKER == null) {
-        FIXED_SEED_FAKER = new Faker(LOCALE, new Random(seed));
-      }
-      return FIXED_SEED_FAKER;
-    }
-
-    return new Faker(LOCALE);
+  public Faker call(String seed) {
+    var key = String.join(globalSeed, "-", seed);
+    int count = Optional.ofNullable(seedCounts.get(key)).orElse(0);
+    count += 1;
+    seedCounts.put(key, count);
+    return new Faker(LOCALE, new Random((long) key.hashCode() * count));
   }
 }

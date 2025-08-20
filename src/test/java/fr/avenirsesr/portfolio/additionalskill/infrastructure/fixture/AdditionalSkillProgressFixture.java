@@ -9,7 +9,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.UUID;
 
 public class AdditionalSkillProgressFixture {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(AdditionalSkillFixture.class);
 
   private UUID id;
   private Student student;
@@ -17,10 +17,10 @@ public class AdditionalSkillProgressFixture {
   private EAdditionalSkillLevel level;
 
   private AdditionalSkillProgressFixture() {
-    this.id = UUID.fromString(faker.call().internet().uuid());
+    this.id = UUID.fromString(faker.call("id").internet().uuid());
     this.student = UserFixture.create().toModel().toStudent();
     this.skill = AdditionalSkillFixture.create().toModel();
-    this.level = faker.call().options().option(EAdditionalSkillLevel.class);
+    this.level = faker.call("level").options().option(EAdditionalSkillLevel.class);
   }
 
   public static AdditionalSkillProgressFixture create() {

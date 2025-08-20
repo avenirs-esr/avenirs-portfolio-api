@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.UUID;
 
 public class AdditionalSkillFixture {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(AdditionalSkillFixture.class);
 
   private UUID id;
   private PathSegments pathSegments;
   private EAdditionalSkillType type;
 
   private AdditionalSkillFixture() {
-    this.id = UUID.fromString(faker.call().internet().uuid());
+    this.id = UUID.fromString(faker.call("id").internet().uuid());
     this.pathSegments = PathSegmentsFixture.create().toModel();
     this.type = EAdditionalSkillType.fromValue("ROME4.0");
   }

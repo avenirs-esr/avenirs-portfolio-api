@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class FakeInstitution {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(FakeInstitution.class);
   private final InstitutionEntity institution;
 
   private FakeInstitution(InstitutionEntity institution) {
@@ -17,15 +17,16 @@ public class FakeInstitution {
   }
 
   public static FakeInstitution create() {
-    var entity = InstitutionEntity.of(UUID.fromString(faker.call().internet().uuid()), Set.of());
+    var entity =
+        InstitutionEntity.of(UUID.fromString(faker.call("id").internet().uuid()), Set.of());
     var fakeInstitution = new FakeInstitution(entity);
 
     entity.setTranslations(
         Set.of(
             InstitutionTranslationEntity.of(
-                UUID.fromString(faker.call().internet().uuid()),
+                UUID.fromString(faker.call("fallback-translation-id").internet().uuid()),
                 ELanguage.FRENCH,
-                faker.call().university().name(),
+                faker.call("university").university().name(),
                 entity)));
 
     return fakeInstitution;
@@ -36,9 +37,9 @@ public class FakeInstitution {
 
     translations.add(
         InstitutionTranslationEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
+            UUID.fromString(faker.call("translation-id").internet().uuid()),
             language,
-            faker.call().university().name(),
+            faker.call("university-translation").university().name(),
             institution));
 
     institution.setTranslations(translations);

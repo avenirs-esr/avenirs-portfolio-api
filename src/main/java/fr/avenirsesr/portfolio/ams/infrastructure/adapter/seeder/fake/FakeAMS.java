@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 public class FakeAMS {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(FakeAMS.class);
   private final AMSEntity ams;
 
   private FakeAMS(AMSEntity ams) {
@@ -28,7 +28,7 @@ public class FakeAMS {
     FakePeriod<Instant> period = FakePeriod.createMin24hoursInstantPeriodInAcademicPeriod();
     var entity =
         AMSEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
+            UUID.fromString(faker.call("id").internet().uuid()),
             user,
             EAmsStatus.NOT_STARTED,
             period.getStartDate(),
@@ -40,9 +40,9 @@ public class FakeAMS {
     entity.setTranslations(
         Set.of(
             AMSTranslationEntity.of(
-                UUID.fromString(faker.call().internet().uuid()),
+                UUID.fromString(faker.call("id").internet().uuid()),
                 ELanguage.FRENCH,
-                faker.call().name().title(),
+                faker.call("title").name().title(),
                 entity)));
 
     return new FakeAMS(entity);
@@ -52,9 +52,10 @@ public class FakeAMS {
     var translations = new java.util.HashSet<>(Set.copyOf(ams.getTranslations()));
     translations.add(
         AMSTranslationEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
+            UUID.fromString(faker.call("id").internet().uuid()),
             language,
-            "%s - [%s]".formatted(faker.call().name().title(), language.getCode()),
+            "%s - [%s]"
+                .formatted(faker.call("title-translation").name().title(), language.getCode()),
             ams));
 
     ams.setTranslations(translations);

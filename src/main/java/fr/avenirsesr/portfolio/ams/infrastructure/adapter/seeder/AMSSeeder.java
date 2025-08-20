@@ -29,14 +29,14 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class AMSSeeder {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(AMSSeeder.class);
 
   private final AMSDatabaseRepository amsRepository;
 
   private Set<CohortEntity> getRandomCohorts(List<CohortEntity> savedCohorts) {
     int cohortCount =
         faker
-            .call()
+            .call("cohortCount")
             .number()
             .numberBetween(
                 SeederConfig.NB_COHORTS_MIN_PER_AMS, SeederConfig.NB_COHORTS_MAX_PER_AMS + 1);
@@ -51,7 +51,7 @@ public class AMSSeeder {
   private List<TraceEntity> getRandomTraces(List<TraceEntity> savedTraces) {
     int tracesCount =
         faker
-            .call()
+            .call("traceCount")
             .number()
             .numberBetween(
                 SeederConfig.NB_TRACES_MIN_PER_AMS, SeederConfig.NB_TRACES_MAX_PER_AMS + 1);
@@ -67,7 +67,7 @@ public class AMSSeeder {
       List<SkillLevelProgressEntity> savedSkillLevels) {
     int skillLevelCount =
         faker
-            .call()
+            .call("skillLevelCount")
             .number()
             .numberBetween(
                 SeederConfig.NB_SKILL_LEVEL_MIN_PER_AMS,
@@ -81,13 +81,13 @@ public class AMSSeeder {
   }
 
   private UserEntity getRandomUser(List<UserEntity> savedUsers) {
-    int userIndex = faker.call().number().numberBetween(0, savedUsers.size());
+    int userIndex = faker.call("userIdx").number().numberBetween(0, savedUsers.size());
     return savedUsers.get(userIndex);
   }
 
   private EAmsStatus getRandomStatus() {
     EAmsStatus[] statuses = EAmsStatus.values();
-    int statusIndex = faker.call().number().numberBetween(0, statuses.length);
+    int statusIndex = faker.call("statusIdx").number().numberBetween(0, statuses.length);
     return statuses[statusIndex];
   }
 

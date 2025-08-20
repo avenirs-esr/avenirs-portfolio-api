@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class FakeAdditionalSkillProgress {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker =
+      new FakerProvider().init(FakeAdditionalSkillProgress.class);
   private static final String JSON_PATH = "/mock/mock-additional-skills.json";
   private static final ObjectMapper objectMapper = new ObjectMapper();
   private final AdditionalSkillProgressEntity additionalSkillProgressEntity;
@@ -25,10 +26,10 @@ public class FakeAdditionalSkillProgress {
   public static FakeAdditionalSkillProgress of(UserEntity student, List<UUID> bannedSkillsIds) {
     return new FakeAdditionalSkillProgress(
         AdditionalSkillProgressEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
+            UUID.fromString(faker.call("id").internet().uuid()),
             student,
             getRandomIdByExternalSourceMockFile(bannedSkillsIds),
-            faker.call().options().option(EAdditionalSkillLevel.class)));
+            faker.call("EAdditionalSkillLevel").options().option(EAdditionalSkillLevel.class)));
   }
 
   public AdditionalSkillProgressEntity toEntity() {
@@ -48,7 +49,11 @@ public class FakeAdditionalSkillProgress {
       }
 
       CompetenceComplementaireDetaillee fakeObject =
-          filteredEntities.get(faker.call().random().nextInt(filteredEntities.size()));
+          filteredEntities.get(
+              faker
+                  .call("CompetenceComplementaireDetaillee")
+                  .random()
+                  .nextInt(filteredEntities.size()));
       return fakeObject.id();
     } catch (Exception e) {
       throw new RuntimeException("Unable to load mock additional skills", e);

@@ -27,14 +27,14 @@ import org.springframework.stereotype.Component;
 @Setter
 public class CohortSeeder {
 
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(CohortSeeder.class);
 
   private final CohortRepository cohortRepository;
 
   private Set<UserEntity> getRandomUsers(List<UserEntity> savedUsers) {
     int userCount =
         faker
-            .call()
+            .call("userCount")
             .number()
             .numberBetween(SeederConfig.COHORT_NB_USERS_MIN, SeederConfig.COHORT_NB_USERS_MAX + 1);
 
@@ -46,7 +46,7 @@ public class CohortSeeder {
   }
 
   private TrainingPathEntity getRandomTrainingPath(List<TrainingPathEntity> savedTrainingPath) {
-    int randomIndex = faker.call().number().numberBetween(0, savedTrainingPath.size());
+    int randomIndex = faker.call("randomIdx").number().numberBetween(0, savedTrainingPath.size());
     return savedTrainingPath.get(randomIndex);
   }
 

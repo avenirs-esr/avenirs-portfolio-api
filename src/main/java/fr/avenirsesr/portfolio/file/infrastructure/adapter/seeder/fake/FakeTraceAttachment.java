@@ -7,10 +7,9 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerPr
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.time.Instant;
 import java.util.UUID;
-import net.datafaker.Faker;
 
 public class FakeTraceAttachment {
-  private static final Faker faker = new FakerProvider().call();
+  private static final FakerProvider faker = new FakerProvider().init(FakeTraceAttachment.class);
   private final TraceAttachmentEntity attachment;
 
   private FakeTraceAttachment(TraceAttachmentEntity attachment) {
@@ -20,6 +19,7 @@ public class FakeTraceAttachment {
   public static FakeTraceAttachment of(TraceEntity trace) {
     var fileType =
         faker
+            .call("file-type")
             .options()
             .option(
                 EFileType.PDF,
@@ -31,14 +31,14 @@ public class FakeTraceAttachment {
                 EFileType.CSV,
                 EFileType.DOC,
                 EFileType.XLS);
-    var id = UUID.fromString(faker.internet().uuid());
+    var id = UUID.fromString(faker.call("id").internet().uuid());
     return new FakeTraceAttachment(
         TraceAttachmentEntity.of(
             id,
             trace,
-            faker.file().fileName("", null, fileType.name().toLowerCase(), ""),
+            faker.call("filename").file().fileName("", null, fileType.name().toLowerCase(), ""),
             fileType,
-            faker.random().nextLong(fileType.getSizeLimit().bytes()),
+            faker.call("size").random().nextLong(fileType.getSizeLimit().bytes()),
             1,
             true,
             "/workspace/app%s/%s.%s"

@@ -11,8 +11,7 @@ import lombok.Getter;
 
 @Getter
 public class FakePeriod<T extends Temporal> {
-
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(FakePeriod.class);
   private static final int academicYear = 2024;
 
   private final Function<LocalDate, T> localDateConverter;
@@ -24,8 +23,8 @@ public class FakePeriod<T extends Temporal> {
   public static FakePeriod<Instant> createInstantPeriod() {
     return new FakePeriod<>(
         localDate -> {
-          int hour = faker.call().number().numberBetween(8, 20);
-          int minute = faker.call().number().numberBetween(0, 60);
+          int hour = faker.call("hour").number().numberBetween(8, 20);
+          int minute = faker.call("minute").number().numberBetween(0, 60);
           return localDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();
         },
         instant -> instant);
@@ -46,7 +45,10 @@ public class FakePeriod<T extends Temporal> {
 
     long randomDay =
         startEpochDay
-            + faker.call().number().numberBetween(0, (int) (endEpochDay - startEpochDay + 1));
+            + faker
+                .call("randomDay")
+                .number()
+                .numberBetween(0, (int) (endEpochDay - startEpochDay + 1));
 
     LocalDate randomLocalDate = LocalDate.ofEpochDay(randomDay);
     startDate = localDateConverter.apply(randomLocalDate);
@@ -94,14 +96,17 @@ public class FakePeriod<T extends Temporal> {
             minimumEndDate.atZone(ZoneId.systemDefault()).toLocalDate(), julyFirstBoundary);
 
     int additionalDays =
-        faker.call().number().numberBetween(1, (int) Math.min(180, daysUntilJulyFirst));
+        faker
+            .call("additionalDays")
+            .number()
+            .numberBetween(1, (int) Math.min(180, daysUntilJulyFirst));
 
     return minimumEndDate.plus(additionalDays, ChronoUnit.DAYS);
   }
 
   private Instant adjustTimeForInstantType(Instant startInstant, Instant baseEndDate) {
-    int hour = faker.call().number().numberBetween(8, 20);
-    int minute = faker.call().number().numberBetween(0, 60);
+    int hour = faker.call("adjust-hour").number().numberBetween(8, 20);
+    int minute = faker.call("adjust-minute").number().numberBetween(0, 60);
     LocalDate endLocalDate = baseEndDate.atZone(ZoneId.systemDefault()).toLocalDate();
     Instant adjustedEndDate =
         endLocalDate.atTime(hour, minute).atZone(ZoneId.systemDefault()).toInstant();

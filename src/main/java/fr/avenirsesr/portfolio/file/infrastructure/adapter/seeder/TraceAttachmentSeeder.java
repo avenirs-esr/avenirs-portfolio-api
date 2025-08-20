@@ -12,14 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.datafaker.Faker;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class TraceAttachmentSeeder {
-  private static final Faker faker = new FakerProvider().call();
+  private static final FakerProvider faker = new FakerProvider().init(TraceAttachmentSeeder.class);
 
   private final TraceAttachmentRepository attachmentRepository;
 
@@ -30,7 +29,8 @@ public class TraceAttachmentSeeder {
 
     List<TraceAttachmentEntity> attachmentEntities = new ArrayList<>();
     for (TraceEntity trace : traces) {
-      var nbOfVersions = faker.random().nextInt(1, SeederConfig.MAX_ATTACHMENT_PER_TRACE);
+      var nbOfVersions =
+          faker.call("number").random().nextInt(1, SeederConfig.MAX_ATTACHMENT_PER_TRACE);
       for (int j = 1; j <= nbOfVersions; j++) {
         attachmentEntities.add(
             FakeTraceAttachment.of(trace)

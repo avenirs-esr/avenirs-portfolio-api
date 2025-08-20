@@ -10,7 +10,7 @@ import java.util.UUID;
 import lombok.Getter;
 
 public class FakeUser {
-  private static final FakerProvider faker = new FakerProvider();
+  private static final FakerProvider faker = new FakerProvider().init(FakeUser.class);
   private final UserEntity user;
   @Getter private Student student;
   @Getter private Teacher teacher;
@@ -22,26 +22,28 @@ public class FakeUser {
   public static FakeUser create() {
     return new FakeUser(
         UserEntity.of(
-            UUID.fromString(faker.call().internet().uuid()),
-            faker.call().name().firstName(),
-            faker.call().name().lastName(),
+            UUID.fromString(faker.call("id").internet().uuid()),
+            faker.call("firstName").name().firstName(),
+            faker.call("lastName").name().lastName(),
             null,
             null,
             null));
   }
 
   public FakeUser withEmail() {
-    user.setEmail(faker.call().internet().emailAddress());
+    user.setEmail(faker.call("email").internet().emailAddress());
     return this;
   }
 
   public FakeUser withStudent() {
-    user.setStudent(StudentEntity.of(faker.call().lorem().characters(50, 255, true), true));
+    user.setStudent(
+        StudentEntity.of(faker.call("student-bio").lorem().characters(50, 255, true), true));
     return this;
   }
 
   public FakeUser withTeacher() {
-    user.setTeacher(TeacherEntity.of(faker.call().lorem().characters(50, 255, true), true));
+    user.setTeacher(
+        TeacherEntity.of(faker.call("teacher-bio").lorem().characters(50, 255, true), true));
     return this;
   }
 
