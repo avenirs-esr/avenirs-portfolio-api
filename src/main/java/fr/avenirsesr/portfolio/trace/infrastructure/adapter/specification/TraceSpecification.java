@@ -68,4 +68,8 @@ public class TraceSpecification {
       return criteriaBuilder.or(hasSkillLevels, hasAmses);
     };
   }
+
+  public static Specification<TraceEntity> notDeleted() {
+    return (root, query, cb) -> cb.isNull(root.get("deletedAt"));
+  }
 }

@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericDeletableJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -14,14 +14,17 @@ import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.Where;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Slf4j
 @Repository
-public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, TraceEntity>
-    implements TraceRepository {
+@Where(clause = "deleted_at IS NULL")
+public class TraceDatabaseRepository
+    extends GenericDeletableJpaRepositoryAdapter<Trace, TraceEntity> implements TraceRepository {
   public TraceDatabaseRepository(TraceJpaRepository jpaRepository) {
     super(jpaRepository, jpaRepository, TraceMapper::fromDomain, TraceMapper::toDomain);
   }
@@ -30,7 +33,8 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, 
   public List<Trace> findLastsOf(User user, int limit) {
     return jpaSpecificationExecutor
         .findAll(
-            TraceSpecification.ofUser(UserMapper.fromDomain(user)),
+            TraceSpecification.ofUser(UserMapper.fromDomain(user))
+                .and(TraceSpecification.notDeleted()),
             PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt")))
         .getContent()
         .stream()
@@ -40,7 +44,8 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, 
 
   @Override
   public PagedResult<Trace> findAll(User user, PageCriteria pageCriteria, ETraceStatus status) {
-    var specification = TraceSpecification.ofUser(UserMapper.fromDomain(user));
+    Specification<TraceEntity> specification =
+        TraceSpecification.ofUser(UserMapper.fromDomain(user)).and(TraceSpecification.notDeleted());
 
     switch (status) {
       case UNASSOCIATED -> specification = specification.and(TraceSpecification.unassociated());
@@ -76,6 +81,7 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, 
     return jpaSpecificationExecutor
         .findAll(
             TraceSpecification.ofUser(UserMapper.fromDomain(user))
+                .and(TraceSpecification.notDeleted())
                 .and(TraceSpecification.unassociated()))
         .stream()
         .map(TraceMapper::toDomain)

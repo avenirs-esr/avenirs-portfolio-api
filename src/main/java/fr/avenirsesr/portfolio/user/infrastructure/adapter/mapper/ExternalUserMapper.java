@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.ExternalUserEnt
 public interface ExternalUserMapper {
   static ExternalUserEntity fromDomain(ExternalUser externalUser) {
     return ExternalUserEntity.of(
+        externalUser.getId(),
         externalUser.getExternalId(),
         externalUser.getSource(),
         UserMapper.fromDomain(externalUser.getUser()),
@@ -16,7 +17,10 @@ public interface ExternalUserMapper {
   }
 
   static ExternalUser toDomain(ExternalUserEntity externalUserEntity) {
-    return ExternalUser.create(
+    return ExternalUser.toDomain(
+        externalUserEntity.getId(),
+        externalUserEntity.getCreatedAt(),
+        externalUserEntity.getUpdatedAt(),
         UserMapper.toDomain(externalUserEntity.getUser()),
         externalUserEntity.getExternalId(),
         externalUserEntity.getSource(),

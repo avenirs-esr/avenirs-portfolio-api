@@ -1,21 +1,18 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import java.time.Instant;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,12 +24,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ExternalUserEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  @Setter(AccessLevel.NONE)
-  private UUID id;
-
+public class ExternalUserEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "external_id")
   private String externalId;
 
@@ -73,6 +65,7 @@ public class ExternalUserEntity {
   private Instant updatedAt;
 
   private ExternalUserEntity(
+      UUID id,
       String externalId,
       EExternalSource source,
       UserEntity user,
@@ -80,6 +73,7 @@ public class ExternalUserEntity {
       String email,
       String firstName,
       String lastName) {
+    this.setId(id);
     this.externalId = externalId;
     this.source = source;
     this.user = user;
@@ -90,6 +84,7 @@ public class ExternalUserEntity {
   }
 
   public static ExternalUserEntity of(
+      UUID id,
       String externalId,
       EExternalSource source,
       UserEntity user,
@@ -97,6 +92,7 @@ public class ExternalUserEntity {
       String email,
       String firstName,
       String lastName) {
-    return new ExternalUserEntity(externalId, source, user, category, email, firstName, lastName);
+    return new ExternalUserEntity(
+        id, externalId, source, user, category, email, firstName, lastName);
   }
 }

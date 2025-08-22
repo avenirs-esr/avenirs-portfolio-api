@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.DeletableAvenirsBaseEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.Column;
@@ -27,7 +27,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class TraceEntity extends AvenirsBaseEntity {
+public class TraceEntity extends DeletableAvenirsBaseEntity {
   @ManyToOne(optional = false)
   private UserEntity user;
 
@@ -55,9 +55,6 @@ public class TraceEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "is_group")
   private boolean isGroup;
 
-  @Column(name = "deleted_at")
-  private Instant deletedAt;
-
   @Size(max = 200, message = "ai use justification can not exceed 200 characters")
   @Column(name = "ai_use_justification")
   private String aiUseJustification;
@@ -80,6 +77,9 @@ public class TraceEntity extends AvenirsBaseEntity {
       Instant updatedAt,
       Instant deletedAt) {
     this.setId(id);
+    this.setDeletedAt(deletedAt);
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
     this.user = user;
     this.title = title;
     this.language = language;
@@ -88,9 +88,6 @@ public class TraceEntity extends AvenirsBaseEntity {
     this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
-    this.setCreatedAt(createdAt);
-    this.setUpdatedAt(updatedAt);
-    this.setDeletedAt(deletedAt);
   }
 
   public static TraceEntity of(

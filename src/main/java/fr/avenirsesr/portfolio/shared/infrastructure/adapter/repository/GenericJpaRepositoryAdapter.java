@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.shared.domain.port.output.repository.GenericRepositoryPort;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -8,7 +10,9 @@ import java.util.function.Function;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public abstract class GenericJpaRepositoryAdapter<D, E> implements GenericRepositoryPort<D> {
+public abstract class GenericJpaRepositoryAdapter<
+        D extends AvenirsBaseModel, E extends AvenirsBaseEntity>
+    implements GenericRepositoryPort<D> {
   protected final JpaRepository<E, UUID> jpaRepository;
   protected final JpaSpecificationExecutor<E> jpaSpecificationExecutor;
   private final Function<D, E> fromDomain;
@@ -50,10 +54,5 @@ public abstract class GenericJpaRepositoryAdapter<D, E> implements GenericReposi
   @Override
   public void flush() {
     jpaRepository.flush();
-  }
-
-  @Override
-  public void delete(D domain) {
-    jpaRepository.delete(fromDomain.apply(domain));
   }
 }

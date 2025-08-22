@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.ExternalUserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.Arrays;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -30,6 +31,7 @@ public class FakeExternalUser {
 
     return new FakeExternalUser(
         ExternalUserEntity.of(
+            UUID.fromString(faker.call("id").internet().uuid()),
             FakeExternalSource.generateExternalSourceId(),
             Arrays.stream(EExternalSource.values())
                 .toList()

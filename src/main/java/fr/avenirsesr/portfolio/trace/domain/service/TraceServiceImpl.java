@@ -31,10 +31,6 @@ public class TraceServiceImpl implements TraceService {
   private final StudentProgressRepository studentProgressRepository;
   private final TraceConfigurationService traceConfigurationService;
 
-  public static boolean isBelowThresholdDate(Instant initialDate, int maxDaySinceCreation) {
-    return Duration.between(initialDate, Instant.now()).toDays() >= maxDaySinceCreation;
-  }
-
   @Override
   public String programNameOfTrace(Trace trace) {
     List<StudentProgress> studentProgresses =
@@ -69,9 +65,9 @@ public class TraceServiceImpl implements TraceService {
 
     trace.setAmses(List.of());
     trace.setSkillLevels(List.of());
+    trace.setDeletedAt(Instant.now());
 
     traceRepository.save(trace);
-    traceRepository.delete(trace);
     log.info("Deleted trace {}", trace);
   }
 

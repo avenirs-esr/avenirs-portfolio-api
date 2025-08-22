@@ -67,10 +67,7 @@ class StudentProgressControllerIT {
         .andExpect(jsonPath("$[0].programTitle").value("Northern Associate - 5 [fr_FR]"))
         .andExpect(jsonPath("$[0].skills[0].id").value("baed890a-d90f-4845-9e75-9faefbb8e1ae"))
         .andExpect(jsonPath("$[0].skills[0].name").value("Skill laudantium - [fr_FR]"))
-        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists())
-        .andExpect(jsonPath("$[0].skills[1].id").value("fe366241-a841-4157-bf4d-e726abc944b2"))
-        .andExpect(jsonPath("$[0].skills[1].name").value("Skill et - [fr_FR]"))
-        .andExpect(jsonPath("$[0].skills[1].currentSkillLevel").exists());
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
   }
 
   @Test

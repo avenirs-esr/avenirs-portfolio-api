@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.trace.domain.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.shared.domain.model.DeletableAvenirsBaseModel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
@@ -15,16 +15,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Trace extends AvenirsBaseModel {
+public class Trace extends DeletableAvenirsBaseModel {
   private final User user;
   private String title;
   private List<SkillLevelProgress> skillLevels;
   private List<AMS> amses;
   private boolean isGroup;
   private ELanguage language;
-
-  @Getter(AccessLevel.NONE)
-  private Instant deletedAt;
 
   @Getter(AccessLevel.NONE)
   private String aiUseJustification;
@@ -45,10 +42,9 @@ public class Trace extends AvenirsBaseModel {
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
-    super(id, createdAt, updatedAt);
+    super(id, deletedAt, createdAt, updatedAt);
     this.user = user;
     this.title = title;
-    this.deletedAt = deletedAt;
     this.language = language;
     this.skillLevels = skillLevels;
     this.amses = amses;
@@ -107,10 +103,6 @@ public class Trace extends AvenirsBaseModel {
         createdAt,
         updatedAt,
         deletedAt);
-  }
-
-  public Optional<Instant> getDeletedAt() {
-    return Optional.ofNullable(deletedAt);
   }
 
   public Optional<String> getAiUseJustification() {

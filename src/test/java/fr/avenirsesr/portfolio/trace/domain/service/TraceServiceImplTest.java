@@ -198,7 +198,8 @@ public class TraceServiceImplTest {
     traceService.deleteById(student.getUser(), trace.getId());
 
     // Then
-    verify(traceRepository).delete(trace);
+    verify(traceRepository).save(trace);
+    assertTrue(trace.getDeletedAt().isPresent());
   }
 
   @Test
