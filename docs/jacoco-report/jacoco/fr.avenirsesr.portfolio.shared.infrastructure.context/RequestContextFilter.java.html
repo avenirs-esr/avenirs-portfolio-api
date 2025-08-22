@@ -22,18 +22,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
     try {
 <span class="fc" id="L23">      var languageCode = Optional.ofNullable(request.getHeader(&quot;Accept-Language&quot;));</span>
 <span class="fc bfc" id="L24" title="All 2 branches covered.">      if (languageCode.isEmpty()) {</span>
-<span class="fc" id="L25">        log.error(</span>
-            &quot;Accept-Language header not present, using fallback language {}&quot;, ELanguage.FALLBACK);
-<span class="fc" id="L27">        languageCode = Optional.of(ELanguage.FALLBACK.getCode());</span>
+<span class="fc" id="L25">        languageCode = Optional.of(ELanguage.FALLBACK.getCode());</span>
       }
-<span class="fc" id="L29">      ELanguage preferredLanguage = ELanguage.fromCode(languageCode.get());</span>
+<span class="fc" id="L27">      ELanguage preferredLanguage = ELanguage.fromCode(languageCode.get());</span>
 
-<span class="fc" id="L31">      RequestContext.set(new RequestData(preferredLanguage));</span>
+<span class="fc" id="L29">      RequestContext.set(new RequestData(preferredLanguage));</span>
 
-<span class="fc" id="L33">      filterChain.doFilter(request, response);</span>
+<span class="fc" id="L31">      filterChain.doFilter(request, response);</span>
     } finally {
-<span class="fc" id="L35">      RequestContext.clear();</span>
+<span class="fc" id="L33">      RequestContext.clear();</span>
     }
-<span class="fc" id="L37">  }</span>
+<span class="fc" id="L35">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
