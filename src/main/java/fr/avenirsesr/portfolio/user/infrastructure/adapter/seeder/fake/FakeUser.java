@@ -36,14 +36,12 @@ public class FakeUser {
   }
 
   public FakeUser withStudent() {
-    user.setStudent(
-        StudentEntity.of(faker.call("student-bio").lorem().characters(50, 255, true), true));
+    user.setStudent(StudentEntity.of(faker.call("student-bio").lorem().sentence(10), true));
     return this;
   }
 
   public FakeUser withTeacher() {
-    user.setTeacher(
-        TeacherEntity.of(faker.call("teacher-bio").lorem().characters(50, 255, true), true));
+    user.setTeacher(TeacherEntity.of(faker.call("teacher-bio").lorem().sentence(10), true));
     return this;
   }
 
