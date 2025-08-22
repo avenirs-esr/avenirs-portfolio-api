@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
@@ -33,8 +34,10 @@ public class StudentProgress extends AvenirsBaseModel {
       TrainingPath trainingPath,
       LocalDate startDate,
       LocalDate endDate,
-      List<SkillLevelProgress> skillLevelProgresses) {
-    super(id);
+      List<SkillLevelProgress> skillLevelProgresses,
+      Instant createdAt,
+      Instant updatedAt) {
+    super(id, createdAt, updatedAt);
     this.student = student;
     this.trainingPath = trainingPath;
     this.startDate = startDate;
@@ -49,7 +52,14 @@ public class StudentProgress extends AvenirsBaseModel {
       LocalDate endDate,
       List<SkillLevelProgress> skillLevels) {
     return new StudentProgress(
-        UUID.randomUUID(), student, trainingPath, startDate, endDate, skillLevels);
+        UUID.randomUUID(),
+        student,
+        trainingPath,
+        startDate,
+        endDate,
+        skillLevels,
+        Instant.now(),
+        Instant.now());
   }
 
   public static StudentProgress toDomain(
@@ -58,8 +68,11 @@ public class StudentProgress extends AvenirsBaseModel {
       TrainingPath trainingPath,
       LocalDate startDate,
       LocalDate endDate,
-      List<SkillLevelProgress> skillLevels) {
-    return new StudentProgress(id, student, trainingPath, startDate, endDate, skillLevels);
+      List<SkillLevelProgress> skillLevels,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new StudentProgress(
+        id, student, trainingPath, startDate, endDate, skillLevels, createdAt, updatedAt);
   }
 
   public boolean isCurrent() {

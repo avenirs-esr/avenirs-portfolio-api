@@ -48,6 +48,8 @@ public interface AMSMapper {
         List.of(),
         List.of(),
         Set.of(),
-        entity.getStatus());
+        entity.getStatus(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
   }
 }

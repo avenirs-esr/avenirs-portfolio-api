@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -33,8 +34,10 @@ public class SkillLevelProgress extends AvenirsBaseModel {
       LocalDate startDate,
       LocalDate endDate,
       List<Trace> traces,
-      List<AMS> amses) {
-    super(id);
+      List<AMS> amses,
+      Instant createdAt,
+      Instant updatedAt) {
+    super(id, createdAt, updatedAt);
     this.student = student;
     this.skillLevel = skillLevel;
     this.status = status;
@@ -54,7 +57,9 @@ public class SkillLevelProgress extends AvenirsBaseModel {
         startDate,
         endDate,
         List.of(),
-        List.of());
+        List.of(),
+        Instant.now(),
+        Instant.now());
   }
 
   public static SkillLevelProgress toDomain(
@@ -65,9 +70,11 @@ public class SkillLevelProgress extends AvenirsBaseModel {
       LocalDate startDate,
       LocalDate endDate,
       List<Trace> traces,
-      List<AMS> amses) {
+      List<AMS> amses,
+      Instant createdAt,
+      Instant updatedAt) {
     return new SkillLevelProgress(
-        id, student, skillLevel, status, startDate, endDate, traces, amses);
+        id, student, skillLevel, status, startDate, endDate, traces, amses, createdAt, updatedAt);
   }
 
   public static Comparator<SkillLevelProgress> comparatorOf(SortCriteria sortCriteria) {

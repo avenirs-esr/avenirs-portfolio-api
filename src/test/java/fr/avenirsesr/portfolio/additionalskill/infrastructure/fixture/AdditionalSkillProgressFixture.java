@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSki
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.time.Instant;
 import java.util.UUID;
 
 public class AdditionalSkillProgressFixture {
@@ -15,12 +16,16 @@ public class AdditionalSkillProgressFixture {
   private Student student;
   private AdditionalSkill skill;
   private EAdditionalSkillLevel level;
+  private Instant createdAt;
+  private Instant updatedAt;
 
   private AdditionalSkillProgressFixture() {
     this.id = UUID.fromString(faker.call("id").internet().uuid());
     this.student = UserFixture.create().toModel().toStudent();
     this.skill = AdditionalSkillFixture.create().toModel();
     this.level = faker.call("level").options().option(EAdditionalSkillLevel.class);
+    this.createdAt = Instant.now();
+    this.updatedAt = Instant.now();
   }
 
   public static AdditionalSkillProgressFixture create() {
@@ -47,7 +52,17 @@ public class AdditionalSkillProgressFixture {
     return this;
   }
 
+  public AdditionalSkillProgressFixture withCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  public AdditionalSkillProgressFixture withUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
   public AdditionalSkillProgress toModel() {
-    return AdditionalSkillProgress.toDomain(id, student, skill, level);
+    return AdditionalSkillProgress.toDomain(id, student, skill, level, createdAt, updatedAt);
   }
 }

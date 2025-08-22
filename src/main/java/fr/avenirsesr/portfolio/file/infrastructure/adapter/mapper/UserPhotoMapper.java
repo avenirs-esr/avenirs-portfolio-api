@@ -32,6 +32,8 @@ public interface UserPhotoMapper {
         entity.getUploadedAt(),
         UserMapper.toDomain(entity.getUser()),
         entity.getUserCategory(),
-        entity.getUserPhotoType());
+        entity.getUserPhotoType(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
   }
 }

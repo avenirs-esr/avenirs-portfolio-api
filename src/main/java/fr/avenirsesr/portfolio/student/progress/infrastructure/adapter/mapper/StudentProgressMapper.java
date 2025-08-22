@@ -24,6 +24,8 @@ public interface StudentProgressMapper {
         studentProgressEntity.getEndDate(),
         studentProgressEntity.getSkillLevels().stream()
             .map(SkillLevelProgressMapper::toDomain)
-            .toList());
+            .toList(),
+        studentProgressEntity.getCreatedAt(),
+        studentProgressEntity.getUpdatedAt());
   }
 }

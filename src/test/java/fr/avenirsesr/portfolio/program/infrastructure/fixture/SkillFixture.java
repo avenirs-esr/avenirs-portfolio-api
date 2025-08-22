@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillMapper
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeSkill;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeSkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import java.time.Instant;
 import java.util.*;
 
 public class SkillFixture {
@@ -12,6 +13,8 @@ public class SkillFixture {
   private UUID id;
   private String name;
   private ELanguage language = ELanguage.FALLBACK;
+  private Instant createdAt;
+  private Instant updatedAt;
 
   private SkillFixture() {
     var skillLevelEntity = FakeSkillLevel.create().toEntity();
@@ -21,6 +24,8 @@ public class SkillFixture {
 
     this.id = base.getId();
     this.name = base.getName();
+    this.createdAt = base.getCreatedAt();
+    this.updatedAt = base.getUpdatedAt();
   }
 
   public static SkillFixture create() {
@@ -42,7 +47,17 @@ public class SkillFixture {
     return this;
   }
 
+  public SkillFixture withCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  public SkillFixture withUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
   public Skill toModel() {
-    return Skill.toDomain(id, name);
+    return Skill.toDomain(id, name, createdAt, updatedAt);
   }
 }

@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -22,6 +23,8 @@ public class SkillLevelProgressFixture {
   private List<Trace> traces;
   private List<AMS> amses;
   private static final Period DEFAULT_SKILL_LEVEL_PERIOD = Period.ofMonths(3);
+  private Instant createdAt;
+  private Instant updatedAt;
 
   private SkillLevelProgressFixture(Student student, SkillLevel skillLevel) {
     this.id = UUID.randomUUID();
@@ -32,6 +35,8 @@ public class SkillLevelProgressFixture {
     this.endDate = startDate.plus(DEFAULT_SKILL_LEVEL_PERIOD);
     this.traces = List.of();
     this.amses = List.of();
+    this.createdAt = Instant.now();
+    this.updatedAt = Instant.now();
   }
 
   public static SkillLevelProgressFixture create(Student student, SkillLevel skillLevel) {
@@ -112,8 +117,18 @@ public class SkillLevelProgressFixture {
     return this;
   }
 
+  public SkillLevelProgressFixture withCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  public SkillLevelProgressFixture withUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
   public SkillLevelProgress toModel() {
     return SkillLevelProgress.toDomain(
-        id, student, skillLevel, status, startDate, endDate, traces, amses);
+        id, student, skillLevel, status, startDate, endDate, traces, amses, createdAt, updatedAt);
   }
 }

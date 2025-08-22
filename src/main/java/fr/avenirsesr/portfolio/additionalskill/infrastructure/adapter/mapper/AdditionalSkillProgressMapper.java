@@ -19,7 +19,9 @@ public interface AdditionalSkillProgressMapper {
         entity.getId(),
         UserMapper.toDomain(entity.getStudent()).toStudent(),
         null,
-        entity.getLevel());
+        entity.getLevel(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
   }
 
   static AdditionalSkillProgress toDomain(
@@ -29,6 +31,8 @@ public interface AdditionalSkillProgressMapper {
         entity.getId(),
         UserMapper.toDomain(entity.getStudent()).toStudent(),
         skill,
-        entity.getLevel());
+        entity.getLevel(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
   }
 }

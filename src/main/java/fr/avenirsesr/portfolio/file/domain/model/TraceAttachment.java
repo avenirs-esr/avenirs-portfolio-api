@@ -25,8 +25,20 @@ public class TraceAttachment extends File {
       boolean isActiveVersion,
       String uri,
       User uploadedBy,
-      Instant uploadedAt) {
-    super(id, fileType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
+      Instant uploadedAt,
+      Instant createdAt,
+      Instant updatedAt) {
+    super(
+        id,
+        fileType,
+        size,
+        version,
+        isActiveVersion,
+        uri,
+        uploadedBy,
+        uploadedAt,
+        createdAt,
+        updatedAt);
     this.trace = trace;
     this.name = name;
   }
@@ -43,7 +55,18 @@ public class TraceAttachment extends File {
       User uploadedBy) {
 
     return new TraceAttachment(
-        id, trace, name, fileType, size, version, isActiveVersion, uri, uploadedBy, Instant.now());
+        id,
+        trace,
+        name,
+        fileType,
+        size,
+        version,
+        isActiveVersion,
+        uri,
+        uploadedBy,
+        Instant.now(),
+        Instant.now(),
+        Instant.now());
   }
 
   public static TraceAttachment toDomain(
@@ -56,8 +79,21 @@ public class TraceAttachment extends File {
       boolean isActiveVersion,
       String uri,
       User uploadedBy,
-      Instant uploadedAt) {
+      Instant uploadedAt,
+      Instant createdAt,
+      Instant updatedAt) {
     return new TraceAttachment(
-        id, trace, name, fileType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
+        id,
+        trace,
+        name,
+        fileType,
+        size,
+        version,
+        isActiveVersion,
+        uri,
+        uploadedBy,
+        uploadedAt,
+        createdAt,
+        updatedAt);
   }
 }

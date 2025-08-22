@@ -24,6 +24,8 @@ public interface ProgramMapper {
         translationEntity.getName(),
         programEntity.isAPC(),
         programEntity.getDurationUnit(),
-        programEntity.getDurationCount());
+        programEntity.getDurationCount(),
+        programEntity.getCreatedAt(),
+        programEntity.getUpdatedAt());
   }
 }

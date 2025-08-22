@@ -54,7 +54,9 @@ public interface UserMapper {
             userEntity.getStudent().map(StudentEntity::isActive).orElse(false),
             userEntity.getStudent().map(StudentEntity::getBio).orElse(null),
             userEntity.getTeacher().map(TeacherEntity::isActive).orElse(false),
-            userEntity.getTeacher().map(TeacherEntity::getBio).orElse(null))
+            userEntity.getTeacher().map(TeacherEntity::getBio).orElse(null),
+            userEntity.getCreatedAt(),
+            userEntity.getUpdatedAt())
         : null;
   }
 }

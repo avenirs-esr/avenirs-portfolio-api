@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EDurationUnit;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,12 +18,16 @@ public class ProgramFixture {
   private ELanguage language = ELanguage.FRENCH;
   private EDurationUnit durationUnit = EDurationUnit.YEAR;
   private int durationCount = 2;
+  private Instant createdAt;
+  private Instant updatedAt;
 
   private ProgramFixture() {
     this.id = UUID.randomUUID();
     this.institution = InstitutionFixture.create().toModel();
     this.name = "Default Program";
     this.isAPC = false;
+    this.createdAt = Instant.now();
+    this.updatedAt = Instant.now();
   }
 
   public static ProgramFixture create() {
@@ -80,7 +85,18 @@ public class ProgramFixture {
     return this;
   }
 
+  public ProgramFixture withCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  public ProgramFixture withUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
   public Program toModel() {
-    return Program.toDomain(id, institution, name, isAPC, durationUnit, durationCount);
+    return Program.toDomain(
+        id, institution, name, isAPC, durationUnit, durationCount, createdAt, updatedAt);
   }
 }

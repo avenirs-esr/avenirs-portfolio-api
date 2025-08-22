@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.program.domain.model;
 
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EDurationUnit;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -28,8 +29,10 @@ public class Program extends AvenirsBaseModel {
       String name,
       boolean isAPC,
       EDurationUnit durationUnit,
-      Integer durationCount) {
-    super(id);
+      Integer durationCount,
+      Instant createdAt,
+      Instant updatedAt) {
+    super(id, createdAt, updatedAt);
     this.institution = institution;
     this.name = name;
     this.isAPC = isAPC;
@@ -44,7 +47,8 @@ public class Program extends AvenirsBaseModel {
       boolean isAPC,
       EDurationUnit durationUnit,
       Integer durationCount) {
-    return new Program(id, institution, name, isAPC, durationUnit, durationCount);
+    return new Program(
+        id, institution, name, isAPC, durationUnit, durationCount, Instant.now(), Instant.now());
   }
 
   public static Program toDomain(
@@ -53,8 +57,11 @@ public class Program extends AvenirsBaseModel {
       String name,
       boolean isAPC,
       EDurationUnit durationUnit,
-      Integer durationCount) {
-    return new Program(id, institution, name, isAPC, durationUnit, durationCount);
+      Integer durationCount,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new Program(
+        id, institution, name, isAPC, durationUnit, durationCount, createdAt, updatedAt);
   }
 
   public Optional<EDurationUnit> getDurationUnit() {

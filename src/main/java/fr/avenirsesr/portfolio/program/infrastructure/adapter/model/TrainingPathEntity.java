@@ -4,14 +4,12 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEn
 import jakarta.persistence.*;
 import java.util.Set;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "training_path")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter

@@ -23,6 +23,8 @@ public class TraceAttachmentFixture {
   private String uri;
   private User uploadedBy;
   private Instant uploadedAt;
+  private Instant createdAt;
+  private Instant updatedAt;
 
   private TraceAttachmentFixture() {
     // Default: create a TraceFixture and use FakeTraceAttachment to generate default entity, then
@@ -43,6 +45,8 @@ public class TraceAttachmentFixture {
     this.uri = entity.getUri();
     this.uploadedBy = user;
     this.uploadedAt = entity.getUploadedAt();
+    this.createdAt = entity.getCreatedAt();
+    this.updatedAt = entity.getUpdatedAt();
   }
 
   public static TraceAttachmentFixture create() {
@@ -99,8 +103,29 @@ public class TraceAttachmentFixture {
     return this;
   }
 
+  public TraceAttachmentFixture withCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  public TraceAttachmentFixture withUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
   public TraceAttachment toModel() {
     return TraceAttachment.toDomain(
-        id, trace, fileName, fileType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
+        id,
+        trace,
+        fileName,
+        fileType,
+        size,
+        version,
+        isActiveVersion,
+        uri,
+        uploadedBy,
+        uploadedAt,
+        createdAt,
+        updatedAt);
   }
 }

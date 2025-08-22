@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,8 @@ public class CohortFixture {
   private TrainingPath trainingPath;
   private Set<User> users;
   private Set<AMS> amsSet;
+  private Instant createdAt;
+  private Instant updatedAt;
 
   private CohortFixture() {
     this.id = UUID.randomUUID();
@@ -28,6 +31,8 @@ public class CohortFixture {
     this.trainingPath = TrainingPathFixture.create().toModel();
     this.users = new HashSet<>();
     this.amsSet = new HashSet<>();
+    this.createdAt = Instant.now();
+    this.updatedAt = Instant.now();
   }
 
   public static CohortFixture create() {
@@ -90,7 +95,18 @@ public class CohortFixture {
     return cohorts;
   }
 
+  public CohortFixture withCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  public CohortFixture withUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
   public Cohort toModel() {
-    return Cohort.toDomain(id, name, description, trainingPath, users, amsSet);
+    return Cohort.toDomain(
+        id, name, description, trainingPath, users, amsSet, createdAt, updatedAt);
   }
 }

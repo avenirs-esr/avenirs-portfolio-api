@@ -23,6 +23,8 @@ public interface SkillLevelMapper {
         skillLevelEntity.getId(),
         skillLevelTranslationEntity.getName(),
         skillLevelTranslationEntity.getDescription(),
-        SkillMapper.toDomain(skillLevelEntity.getSkill()));
+        SkillMapper.toDomain(skillLevelEntity.getSkill()),
+        skillLevelEntity.getCreatedAt(),
+        skillLevelEntity.getUpdatedAt());
   }
 }

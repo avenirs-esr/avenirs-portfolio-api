@@ -31,6 +31,8 @@ public interface TraceAttachmentMapper {
         entity.isActiveVersion(),
         entity.getUri(),
         UserMapper.toDomain(entity.getUploadedBy()),
-        entity.getUploadedAt());
+        entity.getUploadedAt(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
   }
 }

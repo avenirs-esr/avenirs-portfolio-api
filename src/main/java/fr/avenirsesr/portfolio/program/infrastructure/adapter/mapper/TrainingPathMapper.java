@@ -28,7 +28,9 @@ public interface TrainingPathMapper {
         TrainingPath.toDomain(
             trainingPathEntity.getId(),
             ProgramMapper.toDomain(trainingPathEntity.getProgram()),
-            Set.of());
+            Set.of(),
+            trainingPathEntity.getCreatedAt(),
+            trainingPathEntity.getUpdatedAt());
 
     trainingPath.setSkillLevels(
         trainingPathEntity.getSkillLevels().stream()
@@ -43,6 +45,8 @@ public interface TrainingPathMapper {
     return TrainingPath.toDomain(
         studentTrainingPathSummaryDTO.id(),
         ProgramMapper.toDomain(studentTrainingPathSummaryDTO.program()),
-        Set.of());
+        Set.of(),
+        studentTrainingPathSummaryDTO.program().getCreatedAt(),
+        studentTrainingPathSummaryDTO.program().getUpdatedAt());
   }
 }

@@ -20,8 +20,6 @@ public class Trace extends AvenirsBaseModel {
   private String title;
   private List<SkillLevelProgress> skillLevels;
   private List<AMS> amses;
-  private Instant createdAt;
-  private Instant updatedAt;
   private boolean isGroup;
   private ELanguage language;
 
@@ -47,11 +45,9 @@ public class Trace extends AvenirsBaseModel {
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
-    super(id);
+    super(id, createdAt, updatedAt);
     this.user = user;
     this.title = title;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
     this.deletedAt = deletedAt;
     this.language = language;
     this.skillLevels = skillLevels;

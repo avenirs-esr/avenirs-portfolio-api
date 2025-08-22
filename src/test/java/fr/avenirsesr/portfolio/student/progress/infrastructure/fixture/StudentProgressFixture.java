@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
@@ -22,6 +23,8 @@ public class StudentProgressFixture {
   private LocalDate startDate;
   private LocalDate endDate;
   private List<SkillLevelProgress> skillLevels;
+  private Instant createdAt;
+  private Instant updatedAt;
 
   private static final Period DEFAULT_STUDENT_PROGRESS_DURATION = Period.ofYears(1);
 
@@ -38,6 +41,8 @@ public class StudentProgressFixture {
     this.startDate = startDate;
     this.endDate = endDate;
     this.skillLevels = skillLevels;
+    this.createdAt = Instant.now();
+    this.updatedAt = Instant.now();
   }
 
   public static StudentProgressFixture create() {
@@ -96,7 +101,18 @@ public class StudentProgressFixture {
     return this;
   }
 
+  public StudentProgressFixture withCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  public StudentProgressFixture withUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
   public StudentProgress toModel() {
-    return StudentProgress.toDomain(id, student, trainingPath, startDate, endDate, skillLevels);
+    return StudentProgress.toDomain(
+        id, student, trainingPath, startDate, endDate, skillLevels, createdAt, updatedAt);
   }
 }

@@ -14,6 +14,10 @@ public interface InstitutionMapper {
     InstitutionTranslationEntity translationEntity =
         TranslationUtil.getTranslation(entity.getTranslations());
     return Institution.toDomain(
-        entity.getId(), translationEntity.getName(), entity.getEnabledFields());
+        entity.getId(),
+        translationEntity.getName(),
+        entity.getEnabledFields(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
   }
 }

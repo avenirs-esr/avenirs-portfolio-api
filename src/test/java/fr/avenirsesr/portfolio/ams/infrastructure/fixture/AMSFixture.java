@@ -24,6 +24,8 @@ public class AMSFixture {
   private ELanguage language = ELanguage.FRENCH;
   private Instant startDate;
   private Instant endDate;
+  private Instant createdAt;
+  private Instant updatedAt;
 
   private AMSFixture() {
     var fakeUser = UserFixture.create().toModel();
@@ -32,6 +34,8 @@ public class AMSFixture {
     this.user = fakeUser;
     this.title = "fake ams title";
     this.skillLevels = List.of();
+    this.createdAt = base.getCreatedAt();
+    this.updatedAt = base.getUpdatedAt();
   }
 
   public static AMSFixture create() {
@@ -81,6 +85,16 @@ public class AMSFixture {
     return this;
   }
 
+  public AMSFixture withCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  public AMSFixture withUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
   public AMS toModel() {
     return AMS.toDomain(
         id,
@@ -91,6 +105,8 @@ public class AMSFixture {
         skillLevels,
         List.of(),
         new HashSet<Cohort>(),
-        EAmsStatus.NOT_STARTED);
+        EAmsStatus.NOT_STARTED,
+        createdAt,
+        updatedAt);
   }
 }

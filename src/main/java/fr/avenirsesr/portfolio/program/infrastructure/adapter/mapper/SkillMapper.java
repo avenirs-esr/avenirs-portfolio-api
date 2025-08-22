@@ -14,6 +14,10 @@ public interface SkillMapper {
     SkillTranslationEntity skillTranslationEntity =
         TranslationUtil.getTranslation(skillEntity.getTranslations());
 
-    return Skill.toDomain(skillEntity.getId(), skillTranslationEntity.getName());
+    return Skill.toDomain(
+        skillEntity.getId(),
+        skillTranslationEntity.getName(),
+        skillEntity.getCreatedAt(),
+        skillEntity.getUpdatedAt());
   }
 }

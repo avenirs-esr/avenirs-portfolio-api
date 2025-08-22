@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeUser;
+import java.time.Instant;
 import java.util.UUID;
 
 public class UserFixture {
@@ -14,6 +15,8 @@ public class UserFixture {
   private String studentBio;
   private boolean isTeacher;
   private String teacherBio;
+  private Instant createdAt;
+  private Instant updatedAt;
 
   private UserFixture() {
     var base = FakeUser.create().toEntity();
@@ -25,6 +28,8 @@ public class UserFixture {
     this.studentBio = null;
     this.isTeacher = false;
     this.teacherBio = null;
+    this.createdAt = base.getCreatedAt();
+    this.updatedAt = base.getUpdatedAt();
   }
 
   public static UserFixture create() {
@@ -71,8 +76,27 @@ public class UserFixture {
     return this;
   }
 
+  public UserFixture withCreatedAt(Instant createdAt) {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  public UserFixture withUpdatedAt(Instant updatedAt) {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
   public User toModel() {
     return User.toDomain(
-        id, firstName, lastName, email, isStudent, studentBio, isTeacher, teacherBio);
+        id,
+        firstName,
+        lastName,
+        email,
+        isStudent,
+        studentBio,
+        isTeacher,
+        teacherBio,
+        createdAt,
+        updatedAt);
   }
 }

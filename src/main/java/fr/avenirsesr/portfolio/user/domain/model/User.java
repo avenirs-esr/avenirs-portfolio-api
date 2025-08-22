@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.user.domain.model;
 
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,12 +24,12 @@ public class User extends AvenirsBaseModel {
   @Setter(AccessLevel.PRIVATE)
   private String teacherBio;
 
-  private User(UUID id) {
-    super(id);
+  private User(UUID id, Instant createdAt, Instant updatedAt) {
+    super(id, createdAt, updatedAt);
   }
 
   public static User create(UUID id, String firstName, String lastName) {
-    var user = new User(id);
+    var user = new User(id, Instant.now(), Instant.now());
     user.setFirstName(firstName);
     user.setLastName(lastName);
     user.setStudent(false);
@@ -44,8 +45,10 @@ public class User extends AvenirsBaseModel {
       boolean isStudent,
       String studentBio,
       boolean isTeacher,
-      String teacherBio) {
-    var user = new User(id);
+      String teacherBio,
+      Instant createdAt,
+      Instant updatedAt) {
+    var user = new User(id, createdAt, updatedAt);
     user.setFirstName(firstName);
     user.setLastName(lastName);
     user.setEmail(email);

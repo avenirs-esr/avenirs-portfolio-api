@@ -31,7 +31,9 @@ public interface SkillLevelProgressMapper {
         entity.getStartDate(),
         entity.getEndDate(),
         entity.getTraces().stream().map(TraceMapper::toDomain).toList(),
-        entity.getAmses().stream().map(AMSMapper::toDomain).toList());
+        entity.getAmses().stream().map(AMSMapper::toDomain).toList(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
   }
 
   static SkillLevelProgress toDomain(SkillLevelProgressEntity entity, List<AMS> ameses) {
@@ -43,7 +45,9 @@ public interface SkillLevelProgressMapper {
         entity.getStartDate(),
         entity.getEndDate(),
         entity.getTraces().stream().map(TraceMapper::toDomain).toList(),
-        ameses);
+        ameses,
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
   }
 
   static SkillLevelProgress toDomainWithoutRecursion(
@@ -56,6 +60,8 @@ public interface SkillLevelProgressMapper {
         entity.getStartDate(),
         entity.getEndDate(),
         entity.getTraces().stream().map(TraceMapper::toDomainWithoutRecursion).toList(),
-        ameses);
+        ameses,
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
   }
 }

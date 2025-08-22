@@ -26,8 +26,10 @@ public abstract class File extends AvenirsBaseModel {
       boolean isActiveVersion,
       String uri,
       User uploadedBy,
-      Instant uploadedAt) {
-    super(id);
+      Instant uploadedAt,
+      Instant createdAt,
+      Instant updatedAt) {
+    super(id, createdAt, updatedAt);
     this.fileType = fileType;
     this.size = size;
     this.version = version;

@@ -20,6 +20,8 @@ public interface ConfigurationMapper {
         switch (configurationEntity.getScope()) {
           case TRACE -> ETraceConfiguration.valueOf(configurationEntity.getKey());
         },
-        configurationEntity.getValue());
+        configurationEntity.getValue(),
+        configurationEntity.getCreatedAt(),
+        configurationEntity.getUpdatedAt());
   }
 }

@@ -25,8 +25,15 @@ public class AMS extends AvenirsBaseModel {
   private List<Trace> traces;
   private Set<Cohort> cohorts;
 
-  private AMS(UUID id, User user, String title, Instant startDate, Instant endDate) {
-    super(id);
+  private AMS(
+      UUID id,
+      User user,
+      String title,
+      Instant startDate,
+      Instant endDate,
+      Instant createdAt,
+      Instant updatedAt) {
+    super(id, createdAt, updatedAt);
     this.user = user;
     this.title = title;
     this.startDate = startDate;
@@ -34,7 +41,7 @@ public class AMS extends AvenirsBaseModel {
   }
 
   public static AMS create(UUID id, User user, String title, Instant startDate, Instant endDate) {
-    var ams = new AMS(id, user, title, startDate, endDate);
+    var ams = new AMS(id, user, title, startDate, endDate, Instant.now(), Instant.now());
     ams.setSkillLevels(List.of());
     ams.setTraces(List.of());
     ams.setCohorts(Set.of());
@@ -52,8 +59,10 @@ public class AMS extends AvenirsBaseModel {
       List<SkillLevelProgress> skillLevels,
       List<Trace> traces,
       Set<Cohort> cohorts,
-      EAmsStatus status) {
-    var ams = new AMS(id, user, title, startDate, endDate);
+      EAmsStatus status,
+      Instant createdAt,
+      Instant updatedAt) {
+    var ams = new AMS(id, user, title, startDate, endDate, createdAt, updatedAt);
     ams.setSkillLevels(skillLevels);
     ams.setTraces(traces);
     ams.setCohorts(cohorts);

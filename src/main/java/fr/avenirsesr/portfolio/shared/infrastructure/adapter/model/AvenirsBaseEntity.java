@@ -17,6 +17,7 @@ public abstract class AvenirsBaseEntity {
 
   @Column(
       name = "created_at",
+      nullable = false,
       insertable = false,
       updatable = false,
       columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
@@ -24,7 +25,9 @@ public abstract class AvenirsBaseEntity {
 
   @Column(
       name = "updated_at",
+      nullable = false,
       insertable = false,
+      updatable = false,
       columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
   private Instant updatedAt;
 }

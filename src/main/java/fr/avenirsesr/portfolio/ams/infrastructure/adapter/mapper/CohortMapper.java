@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.TrainingPathMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface CohortMapper {
@@ -38,6 +39,8 @@ public interface CohortMapper {
         entity.getDescription(),
         TrainingPathMapper.toDomain(entity.getTrainingPath()),
         entity.getUsers().stream().map(UserMapper::toDomain).collect(Collectors.toSet()),
-        java.util.Collections.emptySet());
+        Set.of(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
   }
 }

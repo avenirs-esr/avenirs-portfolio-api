@@ -27,8 +27,20 @@ public class UserPhoto extends File {
       Instant uploadedAt,
       User user,
       EUserCategory userCategory,
-      EUserPhotoType userPhotoType) {
-    super(id, fileType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
+      EUserPhotoType userPhotoType,
+      Instant createdAt,
+      Instant updatedAt) {
+    super(
+        id,
+        fileType,
+        size,
+        version,
+        isActiveVersion,
+        uri,
+        uploadedBy,
+        uploadedAt,
+        createdAt,
+        updatedAt);
     this.user = user;
     this.userCategory = userCategory;
     this.userPhotoType = userPhotoType;
@@ -56,7 +68,9 @@ public class UserPhoto extends File {
         Instant.now(),
         user,
         userCategory,
-        userPhotoType);
+        userPhotoType,
+        Instant.now(),
+        Instant.now());
   }
 
   public static UserPhoto toDomain(
@@ -70,7 +84,9 @@ public class UserPhoto extends File {
       Instant uploadedAt,
       User user,
       EUserCategory userCategory,
-      EUserPhotoType userPhotoType) {
+      EUserPhotoType userPhotoType,
+      Instant createdAt,
+      Instant updatedAt) {
     return new UserPhoto(
         id,
         fileType,
@@ -82,6 +98,8 @@ public class UserPhoto extends File {
         uploadedAt,
         user,
         userCategory,
-        userPhotoType);
+        userPhotoType,
+        createdAt,
+        updatedAt);
   }
 }
