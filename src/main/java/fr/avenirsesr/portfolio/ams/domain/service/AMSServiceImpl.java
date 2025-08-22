@@ -38,6 +38,14 @@ public class AMSServiceImpl implements AMSService {
             .findById(studentProgressId)
             .orElseThrow(StudentProgressNotFoundException::new);
 
+    if (!studentProgress.getStudent().equals(student)) {
+      log.error(
+          "{} want to get access to {} but it is not his studentProgress",
+          student,
+          studentProgress);
+      throw new UserNotAuthorizedException();
+    }
+
     return amsRepository.findByUserIdViaCohortsAndSkillLevelProgresses(
         student.getId(), studentProgress.getAllSkillLevels(), pageCriteria);
   }
