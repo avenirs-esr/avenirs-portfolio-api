@@ -28,7 +28,7 @@ public class AMSServiceImpl implements AMSService {
   public PagedResult<AMS> findUserAmsByStudentProgress(
       Student student, UUID studentProgressId, PageCriteria pageCriteria) {
     log.debug(
-        "Finding AMS for user with id [{}] with pagination (page={}, pageSize={})",
+        "Fetching AMS for user with id [{}] with pagination (page={}, pageSize={})",
         student.getId(),
         pageCriteria.page(),
         pageCriteria.pageSize());
