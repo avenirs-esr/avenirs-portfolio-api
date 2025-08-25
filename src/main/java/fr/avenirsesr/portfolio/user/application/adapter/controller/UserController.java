@@ -49,7 +49,12 @@ public class UserController {
     User user = userUtil.getUser(principal);
     var userPhotos = userService.getUserPhotos(user.getId(), userCategory);
     String baseUrl =
-        ServletUriComponentsBuilder.fromRequestUri(request).replacePath(null).build().toUriString();
+            ServletUriComponentsBuilder.fromRequestUri(request)
+                    .replacePath(null)
+                    .host(request.getServerName())
+                    .port(request.getServerPort())
+                    .build()
+                    .toUriString();
 
     return ResponseEntity.ok(
         ProfileOverviewMapper.userDomainToDto(
