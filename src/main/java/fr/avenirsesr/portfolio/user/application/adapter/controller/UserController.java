@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.security.Principal;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,13 +49,7 @@ public class UserController {
           EUserCategory userCategory) {
     User user = userUtil.getUser(principal);
     var userPhotos = userService.getUserPhotos(user.getId(), userCategory);
-    String baseUrl =
-            ServletUriComponentsBuilder.fromRequestUri(request)
-                    .replacePath(null)
-                    .host(request.getServerName())
-                    .port(request.getServerPort())
-                    .build()
-                    .toUriString();
+    String baseUrl = extractOrigin(request);
 
     return ResponseEntity.ok(
         ProfileOverviewMapper.userDomainToDto(
@@ -86,5 +81,21 @@ public class UserController {
         request.getEmail(),
         request.getBio());
     return ResponseEntity.ok("Mise à jour faite.");
+  }
+
+  private static String extractOrigin(HttpServletRequest request) {
+    try {
+      URI referer = URI.create(request.getHeader("Referer"));
+
+      return ServletUriComponentsBuilder.fromRequestUri(request)
+          .replacePath(null)
+          .scheme(referer.getScheme() != null ? referer.getScheme() : request.getScheme())
+          .host(referer.getHost() != null ? referer.getHost() : request.getServerName())
+          .port(referer.getHost() != null ? referer.getPort() : request.getServerPort())
+          .build()
+          .toUriString();
+    } catch (Exception e) {
+      return null;
+    }
   }
 }
