@@ -48,7 +48,7 @@ public class AdditionalSkillController {
             PageInfoDTO.fromDomain(result.pageInfo())));
   }
 
-  @GetMapping(params = "keyword")
+  @GetMapping(path = "/search")
   public ResponseEntity<PagedResponse<AdditionalSkillDTO>> searchAdditionalSkills(
       @RequestParam String keyword,
       @RequestParam(required = false) Integer page,
