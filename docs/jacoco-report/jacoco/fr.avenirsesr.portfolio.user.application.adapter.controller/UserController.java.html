@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.security.Principal;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-<span class="fc" id="L28">@Slf4j</span>
+<span class="fc" id="L29">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/users&quot;)
@@ -46,10 +47,9 @@ public class UserController {
               schema = @Schema(ref = &quot;#/components/schemas/UserCategory&quot;))
           @PathVariable
           EUserCategory userCategory) {
-<span class="fc" id="L49">    User user = userUtil.getUser(principal);</span>
-<span class="fc" id="L50">    var userPhotos = userService.getUserPhotos(user.getId(), userCategory);</span>
-<span class="fc" id="L51">    String baseUrl =</span>
-<span class="fc" id="L52">        ServletUriComponentsBuilder.fromRequestUri(request).replacePath(null).build().toUriString();</span>
+<span class="fc" id="L50">    User user = userUtil.getUser(principal);</span>
+<span class="fc" id="L51">    var userPhotos = userService.getUserPhotos(user.getId(), userCategory);</span>
+<span class="fc" id="L52">    String baseUrl = extractOrigin(request);</span>
 
 <span class="fc" id="L54">    return ResponseEntity.ok(</span>
 <span class="fc" id="L55">        ProfileOverviewMapper.userDomainToDto(</span>
@@ -81,6 +81,22 @@ public class UserController {
 <span class="fc" id="L81">        request.getEmail(),</span>
 <span class="fc" id="L82">        request.getBio());</span>
 <span class="fc" id="L83">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+  }
+
+  private static String extractOrigin(HttpServletRequest request) {
+    try {
+<span class="nc" id="L88">      URI referer = URI.create(request.getHeader(&quot;Referer&quot;));</span>
+
+<span class="nc" id="L90">      return ServletUriComponentsBuilder.fromRequestUri(request)</span>
+<span class="nc" id="L91">          .replacePath(&quot;/apim&quot;)</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">          .scheme(referer.getScheme() != null ? referer.getScheme() : request.getScheme())</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">          .host(referer.getHost() != null ? referer.getHost() : request.getServerName())</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">          .port(referer.getHost() != null ? referer.getPort() : request.getServerPort())</span>
+<span class="nc" id="L95">          .build()</span>
+<span class="nc" id="L96">          .toUriString();</span>
+<span class="fc" id="L97">    } catch (Exception e) {</span>
+<span class="fc" id="L98">      return null;</span>
+    }
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
