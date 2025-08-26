@@ -48,17 +48,17 @@ public class AdditionalSkillController {
 <span class="fc" id="L48">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
   }
 
-  @GetMapping(params = &quot;keyword&quot;)
+  @GetMapping(path = &quot;/search&quot;)
   public ResponseEntity&lt;PagedResponse&lt;AdditionalSkillDTO&gt;&gt; searchAdditionalSkills(
       @RequestParam String keyword,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L56">    var result =</span>
-<span class="fc" id="L57">        additionalSkillService.searchAdditionalSkills(keyword, new PageCriteria(page, pageSize));</span>
-<span class="fc" id="L58">    return ResponseEntity.ok(</span>
+<span class="nc" id="L56">    var result =</span>
+<span class="nc" id="L57">        additionalSkillService.searchAdditionalSkills(keyword, new PageCriteria(page, pageSize));</span>
+<span class="nc" id="L58">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L60">            result.content().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),</span>
-<span class="fc" id="L61">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
+<span class="nc" id="L60">            result.content().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),</span>
+<span class="nc" id="L61">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
   }
 
   @PostMapping()
