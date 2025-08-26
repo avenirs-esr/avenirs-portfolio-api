@@ -20,7 +20,8 @@ public class SeederConfig {
   public static final int PROGRAM_NB_APC = 2;
 
   // Traces
-  public static final int TRACES_NB = 20;
+  public static final int TRACES_NB_MIN = 10;
+  public static final int TRACES_NB_MAX = 20;
   public static final int MAX_ATTACHMENT_PER_TRACE = 3;
 
   // Skill

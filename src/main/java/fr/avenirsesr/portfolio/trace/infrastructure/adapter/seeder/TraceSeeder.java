@@ -30,7 +30,13 @@ public class TraceSeeder {
     List<TraceEntity> traceList = new ArrayList<>();
 
     for (UserEntity user : users) {
-      for (int i = 0; i < faker.call("nb-traces").random().nextInt(SeederConfig.TRACES_NB); i++) {
+      for (int i = 0;
+          i
+              < faker
+                  .call("nb-traces")
+                  .random()
+                  .nextInt(SeederConfig.TRACES_NB_MIN, SeederConfig.TRACES_NB_MAX);
+          i++) {
         var fakeTrace = FakeTrace.of(user);
 
         if (faker.call("withAiUseJustification").random().nextBoolean())
