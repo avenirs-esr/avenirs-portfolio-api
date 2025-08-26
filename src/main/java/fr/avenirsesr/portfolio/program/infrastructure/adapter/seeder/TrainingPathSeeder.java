@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -61,6 +62,7 @@ public class TrainingPathSeeder {
     return trainingPathEntities;
   }
 
+  @Transactional
   public List<TrainingPathEntity> seed(
       List<ProgramEntity> savedPrograms, List<SkillLevelEntity> savedSkillLevels) {
     ValidationUtils.requireNonEmpty(savedPrograms, "programs cannot be empty");

@@ -14,7 +14,7 @@ public interface AdditionalSkillMapper {
   static AdditionalSkill toDomain(CompetenceComplementaireDetaillee entity) {
     PathSegments pathSegments = PathSegmentsMapper.toDomain(entity);
     return AdditionalSkill.toDomain(
-        entity.id(), pathSegments, EAdditionalSkillType.fromValue(entity.type()));
+        entity.id(), pathSegments, EAdditionalSkillType.valueOf(entity.type()));
   }
 
   static AdditionalSkill toDomain(AdditionalSkillEntity entity) {

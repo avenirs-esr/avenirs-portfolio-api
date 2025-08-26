@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -26,6 +27,7 @@ public class UserSeeder {
   private final UserRepository userRepository;
   private final ExternalUserRepository externalUserRepository;
 
+  @Transactional
   public List<UserEntity> seed() {
     log.info("Seeding Users...");
 

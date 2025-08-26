@@ -14,7 +14,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.Rome4Version;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearch;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rome4VersionRepository;
@@ -37,7 +37,7 @@ class RomeAdditionalSkillServiceImplTest {
 
   @Mock private RomeAdditionalSkillApi romeAdditionalSkillApi;
 
-  @Mock private OpenSearch openSearch;
+  @Mock private OpenSearchIndex openSearchIndex;
 
   @InjectMocks private RomeAdditionalSkillServiceImpl service;
 
@@ -74,7 +74,7 @@ class RomeAdditionalSkillServiceImplTest {
     service.cleanAndCreateAdditionalSkillIndex();
 
     // Then
-    verify(openSearch).cleanAndCreateAdditionalSkillIndex();
+    verify(openSearchIndex).cleanAndCreateAdditionalSkillIndex();
   }
 
   // --- synchronizeAndIndexAdditionalSkills ---
@@ -94,7 +94,7 @@ class RomeAdditionalSkillServiceImplTest {
     verify(additionalSkillRepository)
         .findByPathSegmentsSkillCodeIn(List.of("skillCode1", "skillCode2"));
     verify(additionalSkillRepository).saveAll(anyList());
-    verify(openSearch).indexAll(result);
+    verify(openSearchIndex).indexAll(result);
   }
 
   @Test
@@ -122,7 +122,7 @@ class RomeAdditionalSkillServiceImplTest {
     // Then
     assertThat(result).hasSize(1);
     assertThat(result.getFirst().getType()).isEqualTo(EAdditionalSkillType.ROME4);
-    verify(openSearch).indexAll(result);
+    verify(openSearchIndex).indexAll(result);
   }
 
   // --- checkRomeVersionUpdated ---

@@ -15,6 +15,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -40,6 +41,7 @@ public class UserPhotoSeeder {
     return photos;
   }
 
+  @Transactional
   public List<UserPhotoEntity> seed(List<UserEntity> users) {
     ValidationUtils.requireNonEmpty(users, "users cannot be empty");
 

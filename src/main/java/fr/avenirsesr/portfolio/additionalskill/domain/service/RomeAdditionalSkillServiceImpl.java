@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.additionalskill.domain.service;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.Rome4Version;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.RomeAdditionalSkillService;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearch;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rome4VersionRepository;
@@ -15,20 +15,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @AllArgsConstructor
-@Service
 public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillService {
   private final AdditionalSkillRepository additionalSkillRepository;
   private final Rome4VersionRepository rome4VersionRepository;
   private final RomeAdditionalSkillApi romeAdditionalSkillApi;
-  private final OpenSearch openSearch;
+  private final OpenSearchIndex openSearchIndex;
 
   @Override
   public void cleanAndCreateAdditionalSkillIndex() {
-    openSearch.cleanAndCreateAdditionalSkillIndex();
+    openSearchIndex.cleanAndCreateAdditionalSkillIndex();
   }
 
   @Override
@@ -53,7 +51,7 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
     List<AdditionalSkill> toSave =
         getAdditionalSkillsToSave(additionalSkillList, existingSkillByCode);
     List<AdditionalSkill> savedAdditionalSkill = additionalSkillRepository.saveAll(toSave);
-    openSearch.indexAll(savedAdditionalSkill);
+    openSearchIndex.indexAll(savedAdditionalSkill);
     return savedAdditionalSkill;
   }
 
@@ -68,8 +66,9 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
             .orElse(true);
 
     if (shouldSave) {
-      rome4VersionRepository.save(
-          Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate()));
+      var rome4Version =
+          Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate());
+      rome4VersionRepository.save(rome4Version);
     }
 
     return shouldSave;

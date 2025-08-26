@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Slf4j
@@ -35,6 +36,7 @@ public class SkillSeeder {
     return FakeSkill.of(skillLevels).addTranslation(ELanguage.ENGLISH);
   }
 
+  @Transactional
   public List<SkillLevelEntity> seed(List<ProgramEntity> programEntities) {
     ValidationUtils.requireNonEmpty(programEntities, "programs cannot be empty");
 

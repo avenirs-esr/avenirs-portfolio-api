@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillPaged
 import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearch;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.utils.AdditionalSkillConstants;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class OpenSearchIndex implements OpenSearch {
+public class OpenSearchIndexImpl implements OpenSearchIndex {
   private final RestHighLevelClient client;
 
   @Override
@@ -84,7 +84,7 @@ public class OpenSearchIndex implements OpenSearch {
         log.info("Bulk indexing succeeded for {} documents", additionalSkillList.size());
       }
     } catch (IOException e) {
-      throw new RuntimeException("OpenSearch bulk indexing failed", e);
+      throw new RuntimeException("OpenSearchIndex bulk indexing failed", e);
     }
   }
 
@@ -117,7 +117,7 @@ public class OpenSearchIndex implements OpenSearch {
           new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), totalHits));
     } catch (IOException e) {
       throw new RuntimeException(
-          "OpenSearch search failed with param keyword="
+          "OpenSearchIndex search failed with param keyword="
               + keyword
               + ", page="
               + pageCriteria.page()

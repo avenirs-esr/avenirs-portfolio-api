@@ -70,7 +70,8 @@ public class AdditionalSkillBatchLoader {
                 contribution.setExitStatus(ExitStatus.NOOP);
               } else {
                 System.out.println(
-                    "checkROME4VersionUpdateStep (COMPLETED) because there are updates to ROME 4.0");
+                    "checkROME4VersionUpdateStep (COMPLETED) because there are updates to ROME"
+                        + " 4.0");
               }
 
               return RepeatStatus.FINISHED;

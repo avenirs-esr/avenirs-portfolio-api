@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.p
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class AdditionalSkillConfigSeeder {
   private final AdditionalSkillConfigurationService additionalSkillConfigurationService;
 
+  @Transactional
   public void seed() {
     log.info("Seeding trace configuration...");
     var config =

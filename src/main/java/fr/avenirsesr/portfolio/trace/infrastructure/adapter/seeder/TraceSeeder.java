@@ -13,6 +13,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -22,6 +23,7 @@ public class TraceSeeder {
 
   private final TraceRepository traceRepository;
 
+  @Transactional
   public List<TraceEntity> seed(List<UserEntity> users) {
     ValidationUtils.requireNonEmpty(users, "users cannot be empty");
 

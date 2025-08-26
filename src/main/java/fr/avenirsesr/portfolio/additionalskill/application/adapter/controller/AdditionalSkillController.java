@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.Additi
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.request.AddAdditionalSkillDTO;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearch;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/me/additional-skills")
 public class AdditionalSkillController {
-  private final OpenSearch openSearch;
+  private final OpenSearchIndex openSearchIndex;
   private final AdditionalSkillService additionalSkillService;
   private final UserUtil userUtil;
 
@@ -55,7 +55,7 @@ public class AdditionalSkillController {
       @RequestParam String keyword,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-    var result = openSearch.search(keyword, new PageCriteria(page, pageSize));
+    var result = openSearchIndex.search(keyword, new PageCriteria(page, pageSize));
     return ResponseEntity.ok(
         new PagedResponse<>(
             result.content().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),

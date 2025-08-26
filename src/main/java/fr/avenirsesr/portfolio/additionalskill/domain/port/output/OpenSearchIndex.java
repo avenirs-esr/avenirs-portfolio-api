@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillPaged
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import java.util.List;
 
-public interface OpenSearch {
+public interface OpenSearchIndex {
 
   void cleanAndCreateAdditionalSkillIndex();
 
