@@ -14,8 +14,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +32,6 @@ public class AdditionalSkillSeeder {
 
   @Transactional
   public List<AdditionalSkillProgressEntity> seed(List<UserEntity> savedStudents) {
-    log.info("Seeding additional skills...");
-    // seedAdditionalSkills();
     log.info("Seeding student progress...");
     List<AdditionalSkillProgressEntity> studentAdditionalSkillEntities = new ArrayList<>();
     savedStudents.forEach(
@@ -56,18 +52,5 @@ public class AdditionalSkillSeeder {
     studentAdditionalSkillDatabaseRepository.saveAllEntities(studentAdditionalSkillEntities);
     log.info("✔ {} studentAdditionalSkills created", studentAdditionalSkillEntities.size());
     return studentAdditionalSkillEntities;
-  }
-
-  public void seedAdditionalSkills() {
-    JobParameters params =
-        new JobParametersBuilder()
-            .addLong("time", System.currentTimeMillis()) // identifie l'exécution
-            .toJobParameters();
-
-    try {
-      jobLauncher.run(importROME4CompetenceJob, params);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 }
