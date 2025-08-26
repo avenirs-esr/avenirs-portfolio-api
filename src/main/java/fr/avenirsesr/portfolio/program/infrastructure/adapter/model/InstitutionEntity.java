@@ -29,8 +29,7 @@ public class InstitutionEntity extends AvenirsBaseEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set<InstitutionTranslationEntity> translations =
-      new HashSet<>(); // TODO: Remove this SET and get it in queries
+  private Set<InstitutionTranslationEntity> translations = new HashSet<>();
 
   private InstitutionEntity(UUID id, Set<EPortfolioType> enabledFields) {
     this.setId(id);

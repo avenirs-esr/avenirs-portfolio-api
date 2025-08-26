@@ -28,4 +28,12 @@ public class ConfigurationDatabaseRepository
         .map(ConfigurationMapper::toDomain)
         .toList();
   }
+
+  public List<ConfigurationEntity> inScopeEntities(EConfigurationScope scope) {
+    return jpaSpecificationExecutor.findAll(ConfigurationSpecification.inScope(scope));
+  }
+
+  public void saveAllEntities(List<ConfigurationEntity> entities) {
+    super.saveAllEntities(entities);
+  }
 }

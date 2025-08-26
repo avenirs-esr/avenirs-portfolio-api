@@ -4,13 +4,19 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.ECon
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.EConfigurationScope;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "configuration")
+@Table(
+    name = "configuration",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"scope", "key"})})
 @NoArgsConstructor
 @Getter
 @Setter
@@ -19,11 +25,19 @@ public class ConfigurationEntity extends AvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private EConfigurationScope scope;
 
-  @Column(name = "\"key\"", nullable = false, unique = true)
+  @Column(name = "\"key\"", nullable = false)
   private String key;
 
-  @Column(name = "\"value\"", nullable = false)
+  @Getter(AccessLevel.NONE)
+  @Column(name = "\"value\"")
   private String value;
+
+  @OneToMany(
+      mappedBy = "configuration",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private Set<ConfigurationTranslationEntity> translations = new HashSet<>();
 
   private ConfigurationEntity(
       UUID id, EConfigurationScope scope, EConfiguration key, String value) {
@@ -36,5 +50,9 @@ public class ConfigurationEntity extends AvenirsBaseEntity {
   public static ConfigurationEntity of(
       UUID id, EConfigurationScope scope, EConfiguration key, String value) {
     return new ConfigurationEntity(id, scope, key, value);
+  }
+
+  public Optional<String> getValue() {
+    return Optional.ofNullable(value);
   }
 }

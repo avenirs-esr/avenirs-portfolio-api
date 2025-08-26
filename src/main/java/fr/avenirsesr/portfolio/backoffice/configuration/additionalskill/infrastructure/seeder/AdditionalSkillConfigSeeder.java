@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.infrast
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.model.AdditionalSkillConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.model.AdditionalSkillLevel;
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.port.input.AdditionalSkillConfigurationService;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,8 +18,8 @@ public class AdditionalSkillConfigSeeder {
 
   @Transactional
   public void seed() {
-    log.info("Seeding trace configuration...");
-    var config =
+    log.info("Seeding additional skills configuration...");
+    var frenchConfig =
         new AdditionalSkillConfiguration(
             new AdditionalSkillLevel("Débutant", "pas beaucoup d'experience"),
             new AdditionalSkillLevel("Intermediaire", "un peu d'experience"),
@@ -25,8 +27,28 @@ public class AdditionalSkillConfigSeeder {
             new AdditionalSkillLevel("Avancé", "pas mal d'experience"),
             new AdditionalSkillLevel("Expert", "parfaite maîtrise"));
 
-    additionalSkillConfigurationService.postConfiguration(config);
+    var englishConfig =
+        new AdditionalSkillConfiguration(
+            new AdditionalSkillLevel("Beginner", "not much experience"),
+            new AdditionalSkillLevel("Intermediate", "some experience"),
+            new AdditionalSkillLevel("Competent", "good knowledge"),
+            new AdditionalSkillLevel("Advanced", "quite a lot of experience"),
+            new AdditionalSkillLevel("Expert", "perfect mastery"));
 
-    log.info("✔ additional skills configuration saved : {}", config);
+    var spanishConfig =
+        new AdditionalSkillConfiguration(
+            new AdditionalSkillLevel("Principiante", "poca experiencia"),
+            new AdditionalSkillLevel("Intermedio", "algo de experiencia"),
+            new AdditionalSkillLevel("Competente", "buen conocimiento"),
+            new AdditionalSkillLevel("Avanzado", "bastante experiencia"),
+            new AdditionalSkillLevel("Experto", "dominio perfecto"));
+
+    additionalSkillConfigurationService.postConfiguration(
+        Map.of(
+            ELanguage.FRENCH, frenchConfig,
+            ELanguage.ENGLISH, englishConfig,
+            ELanguage.SPANISH, spanishConfig));
+
+    log.info("✔ additional skills configuration saved : {}", frenchConfig);
   }
 }

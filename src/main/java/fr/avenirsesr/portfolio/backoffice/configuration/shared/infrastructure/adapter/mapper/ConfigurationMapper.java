@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.m
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.Configuration;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.ETraceConfiguration;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 
 public interface ConfigurationMapper {
   static ConfigurationEntity fromDomain(Configuration configuration) {
@@ -12,6 +13,11 @@ public interface ConfigurationMapper {
         configuration.getScope(),
         configuration.getKey(),
         configuration.getValue());
+  }
+
+  static ConfigurationEntity fromDomainWithoutValue(Configuration configuration) {
+    return ConfigurationEntity.of(
+        configuration.getId(), configuration.getScope(), configuration.getKey(), null);
   }
 
   static Configuration toDomain(ConfigurationEntity configurationEntity) {
@@ -23,7 +29,9 @@ public interface ConfigurationMapper {
           case ADDITIONAL_SKILL ->
               EAdditionalSkillConfiguration.valueOf(configurationEntity.getKey());
         },
-        configurationEntity.getValue(),
+        configurationEntity.getValue().isPresent()
+            ? configurationEntity.getValue().get()
+            : TranslationUtil.getTranslation(configurationEntity.getTranslations()).getValue(),
         configurationEntity.getCreatedAt(),
         configurationEntity.getUpdatedAt());
   }
