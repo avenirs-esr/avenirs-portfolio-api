@@ -30,32 +30,30 @@ public abstract class GenericJpaRepositoryAdapter&lt;
 <span class="fc" id="L30">  }</span>
 
   @Override
-  public D save(D domain) {
-<span class="nc" id="L34">    return toDomain.apply(jpaRepository.save(fromDomain.apply(domain)));</span>
-  }
+  public void save(D domain) {
+<span class="fc" id="L34">    jpaRepository.save(fromDomain.apply(domain));</span>
+<span class="fc" id="L35">  }</span>
 
   @Override
-  public List&lt;D&gt; saveAll(List&lt;D&gt; domains) {
-<span class="fc" id="L39">    return jpaRepository.saveAll(domains.stream().map(fromDomain).toList()).stream()</span>
-<span class="fc" id="L40">        .map(toDomain)</span>
-<span class="fc" id="L41">        .toList();</span>
-  }
+  public void saveAll(List&lt;D&gt; domains) {
+<span class="fc" id="L39">    jpaRepository.saveAll(domains.stream().map(fromDomain).toList());</span>
+<span class="fc" id="L40">  }</span>
 
   public void saveAllEntities(List&lt;E&gt; entities) {
-<span class="pc bpc" id="L45" title="2 of 4 branches missed.">    if (entities != null &amp;&amp; !entities.isEmpty()) {</span>
-<span class="fc" id="L46">      jpaRepository.saveAll(entities);</span>
+<span class="pc bpc" id="L43" title="2 of 4 branches missed.">    if (entities != null &amp;&amp; !entities.isEmpty()) {</span>
+<span class="fc" id="L44">      jpaRepository.saveAll(entities);</span>
     }
-<span class="fc" id="L48">  }</span>
+<span class="fc" id="L46">  }</span>
 
   @Override
   public Optional&lt;D&gt; findById(UUID id) {
-<span class="nc" id="L52">    E entity = jpaRepository.findById(id).orElse(null);</span>
-<span class="nc bnc" id="L53" title="All 2 branches missed.">    return entity == null ? Optional.empty() : Optional.of(toDomain.apply(entity));</span>
+<span class="fc" id="L50">    E entity = jpaRepository.findById(id).orElse(null);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    return entity == null ? Optional.empty() : Optional.of(toDomain.apply(entity));</span>
   }
 
   @Override
   public void flush() {
-<span class="nc" id="L58">    jpaRepository.flush();</span>
-<span class="nc" id="L59">  }</span>
+<span class="nc" id="L56">    jpaRepository.flush();</span>
+<span class="nc" id="L57">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

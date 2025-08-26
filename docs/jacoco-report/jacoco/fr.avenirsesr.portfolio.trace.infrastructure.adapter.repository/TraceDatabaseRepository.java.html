@@ -31,45 +31,45 @@ public class TraceDatabaseRepository
 
   @Override
   public List&lt;Trace&gt; findLastsOf(User user, int limit) {
-<span class="nc" id="L34">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L35">        .findAll(</span>
-<span class="nc" id="L36">            TraceSpecification.ofUser(UserMapper.fromDomain(user))</span>
-<span class="nc" id="L37">                .and(TraceSpecification.notDeleted()),</span>
-<span class="nc" id="L38">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
-<span class="nc" id="L39">        .getContent()</span>
-<span class="nc" id="L40">        .stream()</span>
-<span class="nc" id="L41">        .map(TraceMapper::toDomain)</span>
-<span class="nc" id="L42">        .toList();</span>
+<span class="fc" id="L34">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L35">        .findAll(</span>
+<span class="fc" id="L36">            TraceSpecification.ofUser(UserMapper.fromDomain(user))</span>
+<span class="fc" id="L37">                .and(TraceSpecification.notDeleted()),</span>
+<span class="fc" id="L38">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
+<span class="fc" id="L39">        .getContent()</span>
+<span class="fc" id="L40">        .stream()</span>
+<span class="fc" id="L41">        .map(TraceMapper::toDomain)</span>
+<span class="fc" id="L42">        .toList();</span>
   }
 
   @Override
   public PagedResult&lt;Trace&gt; findAll(User user, PageCriteria pageCriteria, ETraceStatus status) {
-<span class="nc" id="L47">    Specification&lt;TraceEntity&gt; specification =</span>
-<span class="nc" id="L48">        TraceSpecification.ofUser(UserMapper.fromDomain(user)).and(TraceSpecification.notDeleted());</span>
+<span class="fc" id="L47">    Specification&lt;TraceEntity&gt; specification =</span>
+<span class="fc" id="L48">        TraceSpecification.ofUser(UserMapper.fromDomain(user)).and(TraceSpecification.notDeleted());</span>
 
-<span class="nc bnc" id="L50" title="All 3 branches missed.">    switch (status) {</span>
-<span class="nc" id="L51">      case UNASSOCIATED -&gt; specification = specification.and(TraceSpecification.unassociated());</span>
+<span class="pc bpc" id="L50" title="1 of 3 branches missed.">    switch (status) {</span>
+<span class="fc" id="L51">      case UNASSOCIATED -&gt; specification = specification.and(TraceSpecification.unassociated());</span>
 <span class="nc" id="L52">      case ASSOCIATED -&gt; specification = specification.and(TraceSpecification.associated());</span>
       case null -&gt; {}
     }
 
-<span class="nc" id="L56">    var results =</span>
-<span class="nc" id="L57">        jpaSpecificationExecutor.findAll(</span>
+<span class="fc" id="L56">    var results =</span>
+<span class="fc" id="L57">        jpaSpecificationExecutor.findAll(</span>
             specification,
-<span class="nc" id="L59">            PageRequest.of(</span>
-<span class="nc" id="L60">                pageCriteria.page(),</span>
-<span class="nc" id="L61">                pageCriteria.pageSize(),</span>
-<span class="nc" id="L62">                Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
-<span class="nc" id="L63">                    .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;))));</span>
+<span class="fc" id="L59">            PageRequest.of(</span>
+<span class="fc" id="L60">                pageCriteria.page(),</span>
+<span class="fc" id="L61">                pageCriteria.pageSize(),</span>
+<span class="fc" id="L62">                Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
+<span class="fc" id="L63">                    .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;))));</span>
 
-<span class="nc" id="L65">    var content = results.getContent().stream().map(TraceMapper::toDomain).toList();</span>
+<span class="fc" id="L65">    var content = results.getContent().stream().map(TraceMapper::toDomain).toList();</span>
 
-<span class="nc" id="L67">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L67">    return new PagedResult&lt;&gt;(</span>
         content,
         new PageInfo(
-<span class="nc" id="L70">            results.getPageable().getPageNumber(),</span>
-<span class="nc" id="L71">            results.getPageable().getPageSize(),</span>
-<span class="nc" id="L72">            results.getTotalElements()));</span>
+<span class="fc" id="L70">            results.getPageable().getPageNumber(),</span>
+<span class="fc" id="L71">            results.getPageable().getPageSize(),</span>
+<span class="fc" id="L72">            results.getTotalElements()));</span>
   }
 
   public void saveAllEntities(List&lt;TraceEntity&gt; entities) {
@@ -78,14 +78,14 @@ public class TraceDatabaseRepository
 
   @Override
   public List&lt;Trace&gt; findAllUnassociated(User user) {
-<span class="nc" id="L81">    return jpaSpecificationExecutor</span>
-<span class="nc" id="L82">        .findAll(</span>
-<span class="nc" id="L83">            TraceSpecification.ofUser(UserMapper.fromDomain(user))</span>
-<span class="nc" id="L84">                .and(TraceSpecification.notDeleted())</span>
-<span class="nc" id="L85">                .and(TraceSpecification.unassociated()))</span>
-<span class="nc" id="L86">        .stream()</span>
-<span class="nc" id="L87">        .map(TraceMapper::toDomain)</span>
-<span class="nc" id="L88">        .toList();</span>
+<span class="fc" id="L81">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L82">        .findAll(</span>
+<span class="fc" id="L83">            TraceSpecification.ofUser(UserMapper.fromDomain(user))</span>
+<span class="fc" id="L84">                .and(TraceSpecification.notDeleted())</span>
+<span class="fc" id="L85">                .and(TraceSpecification.unassociated()))</span>
+<span class="fc" id="L86">        .stream()</span>
+<span class="fc" id="L87">        .map(TraceMapper::toDomain)</span>
+<span class="fc" id="L88">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

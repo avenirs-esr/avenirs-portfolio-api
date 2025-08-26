@@ -24,22 +24,22 @@ public class UserServiceImpl implements UserService {
   public User getUser(UUID id) {
 <span class="fc" id="L25">    var user = userRepository.findById(id);</span>
 
-<span class="pc bpc" id="L27" title="1 of 2 branches missed.">    if (user.isEmpty()) {</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">    if (user.isEmpty()) {</span>
 <span class="fc" id="L28">      log.error(&quot;User {} not found&quot;, id);</span>
 <span class="fc" id="L29">      throw new UserNotFoundException();</span>
     }
 
-<span class="nc" id="L32">    return user.get();</span>
+<span class="fc" id="L32">    return user.get();</span>
   }
 
   @Override
   public UserPhotos getUserPhotos(UUID userId, EUserCategory userCategory) {
-<span class="nc" id="L37">    var user = getUser(userId);</span>
-<span class="nc" id="L38">    var profileUrl =</span>
-<span class="nc" id="L39">        userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.PROFILE);</span>
-<span class="nc" id="L40">    var coverUrl = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.COVER);</span>
+<span class="fc" id="L37">    var user = getUser(userId);</span>
+<span class="fc" id="L38">    var profileUrl =</span>
+<span class="fc" id="L39">        userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.PROFILE);</span>
+<span class="fc" id="L40">    var coverUrl = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.COVER);</span>
 
-<span class="nc" id="L42">    return new UserPhotos(profileUrl, coverUrl);</span>
+<span class="fc" id="L42">    return new UserPhotos(profileUrl, coverUrl);</span>
   }
 
   @Override
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     }
 <span class="fc" id="L65">    userRepository.save(user);</span>
 
-<span class="pc bpc" id="L67" title="2 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="pc bpc" id="L67" title="1 of 3 branches missed.">    switch (userCategory) {</span>
       case STUDENT:
         {
 <span class="fc" id="L70">          Student student = user.toStudent();</span>

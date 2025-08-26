@@ -32,13 +32,13 @@ public class StorageController {
   @GetMapping(&quot;/users/{fileId}&quot;)
   public ResponseEntity&lt;ByteArrayResource&gt; getUserResourceByFileId(@Valid @PathVariable UUID fileId)
       throws IOException {
-<span class="nc" id="L35">    log.debug(&quot;Received request to get user photo id [{}]&quot;, fileId);</span>
-<span class="nc" id="L36">    var userPhoto = userResourceService.getUserPhotoById(fileId);</span>
-<span class="nc" id="L37">    byte[] photo = userResourceService.fetchContent(userPhoto);</span>
+<span class="fc" id="L35">    log.debug(&quot;Received request to get user photo id [{}]&quot;, fileId);</span>
+<span class="fc" id="L36">    var userPhoto = userResourceService.getUserPhotoById(fileId);</span>
+<span class="fc" id="L37">    byte[] photo = userResourceService.fetchContent(userPhoto);</span>
 
-<span class="nc" id="L39">    return ResponseEntity.ok()</span>
-<span class="nc" id="L40">        .contentType(MediaType.asMediaType(MimeType.valueOf(userPhoto.getFileType().getMimeType())))</span>
-<span class="nc" id="L41">        .body(new ByteArrayResource(photo));</span>
+<span class="fc" id="L39">    return ResponseEntity.ok()</span>
+<span class="fc" id="L40">        .contentType(MediaType.asMediaType(MimeType.valueOf(userPhoto.getFileType().getMimeType())))</span>
+<span class="fc" id="L41">        .body(new ByteArrayResource(photo));</span>
   }
 
   @GetMapping(&quot;/users/default/{photoType}&quot;)
@@ -52,23 +52,23 @@ public class StorageController {
           @PathVariable
           EUserPhotoType photoType)
       throws IOException {
-<span class="nc" id="L55">    log.debug(&quot;Received request to get default {} photo&quot;, photoType);</span>
-<span class="nc" id="L56">    byte[] photo =</span>
-<span class="nc" id="L57">        fileStorageService.get(</span>
-<span class="nc bnc" id="L58" title="All 2 branches missed.">            switch (photoType) {</span>
-<span class="nc" id="L59">              case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_PATH;</span>
-<span class="nc" id="L60">              case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_PATH;</span>
+<span class="fc" id="L55">    log.debug(&quot;Received request to get default {} photo&quot;, photoType);</span>
+<span class="fc" id="L56">    byte[] photo =</span>
+<span class="fc" id="L57">        fileStorageService.get(</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">            switch (photoType) {</span>
+<span class="fc" id="L59">              case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_PATH;</span>
+<span class="fc" id="L60">              case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_PATH;</span>
             });
 
-<span class="nc" id="L63">    var fileType =</span>
-<span class="nc bnc" id="L64" title="All 2 branches missed.">        switch (photoType) {</span>
-<span class="nc" id="L65">          case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_FILE_TYPE;</span>
-<span class="nc" id="L66">          case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_FILE_TYPE;</span>
+<span class="fc" id="L63">    var fileType =</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        switch (photoType) {</span>
+<span class="fc" id="L65">          case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_FILE_TYPE;</span>
+<span class="fc" id="L66">          case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_FILE_TYPE;</span>
         };
 
-<span class="nc" id="L69">    return ResponseEntity.ok()</span>
-<span class="nc" id="L70">        .contentType(MediaType.asMediaType(MimeType.valueOf(fileType.getMimeType())))</span>
-<span class="nc" id="L71">        .body(new ByteArrayResource(photo));</span>
+<span class="fc" id="L69">    return ResponseEntity.ok()</span>
+<span class="fc" id="L70">        .contentType(MediaType.asMediaType(MimeType.valueOf(fileType.getMimeType())))</span>
+<span class="fc" id="L71">        .body(new ByteArrayResource(photo));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
