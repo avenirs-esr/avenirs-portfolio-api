@@ -88,7 +88,7 @@ public class UserController {
       URI referer = URI.create(request.getHeader("Referer"));
 
       return ServletUriComponentsBuilder.fromRequestUri(request)
-          .replacePath(null)
+          .replacePath("/apim")
           .scheme(referer.getScheme() != null ? referer.getScheme() : request.getScheme())
           .host(referer.getHost() != null ? referer.getHost() : request.getServerName())
           .port(referer.getHost() != null ? referer.getPort() : request.getServerPort())
