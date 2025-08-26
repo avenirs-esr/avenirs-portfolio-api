@@ -25,11 +25,11 @@ public class TraceAttachmentDatabaseRepository
 
   @Override
   public List&lt;TraceAttachment&gt; findByTrace(Trace trace) {
-<span class="fc" id="L28">    return jpaSpecificationExecutor</span>
-<span class="fc" id="L29">        .findAll(TraceAttachmentSpecification.ofTrace(TraceMapper.fromDomain(trace)))</span>
-<span class="fc" id="L30">        .stream()</span>
-<span class="fc" id="L31">        .map(TraceAttachmentMapper::toDomain)</span>
-<span class="fc" id="L32">        .toList();</span>
+<span class="nc" id="L28">    return jpaSpecificationExecutor</span>
+<span class="nc" id="L29">        .findAll(TraceAttachmentSpecification.ofTrace(TraceMapper.fromDomain(trace)))</span>
+<span class="nc" id="L30">        .stream()</span>
+<span class="nc" id="L31">        .map(TraceAttachmentMapper::toDomain)</span>
+<span class="nc" id="L32">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

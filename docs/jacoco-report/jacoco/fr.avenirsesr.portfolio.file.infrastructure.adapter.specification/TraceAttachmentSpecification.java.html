@@ -6,7 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 public interface TraceAttachmentSpecification {
   static Specification&lt;TraceAttachmentEntity&gt; ofTrace(TraceEntity trace) {
-<span class="fc" id="L9">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;trace&quot;), trace);</span>
+<span class="nc" id="L9">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;trace&quot;), trace);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

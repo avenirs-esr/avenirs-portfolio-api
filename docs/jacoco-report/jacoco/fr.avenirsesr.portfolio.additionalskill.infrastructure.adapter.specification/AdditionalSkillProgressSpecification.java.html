@@ -8,14 +8,14 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="nc" id="L8">public class AdditionalSkillProgressSpecification {</span>
   public static Specification&lt;AdditionalSkillProgressEntity&gt; additionalSkillProgressAlreadyExists(
       UUID additionalSkillId, UUID studentId) {
-<span class="fc" id="L11">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L12">        criteriaBuilder.and(</span>
-<span class="fc" id="L13">            criteriaBuilder.equal(root.get(&quot;additionalSkillId&quot;), additionalSkillId),</span>
-<span class="fc" id="L14">            criteriaBuilder.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId));</span>
+<span class="nc" id="L11">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="nc" id="L12">        criteriaBuilder.and(</span>
+<span class="nc" id="L13">            criteriaBuilder.equal(root.get(&quot;additionalSkillId&quot;), additionalSkillId),</span>
+<span class="nc" id="L14">            criteriaBuilder.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId));</span>
   }
 
   public static Specification&lt;AdditionalSkillProgressEntity&gt; hasStudent(UserEntity student) {
-<span class="fc" id="L18">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;student&quot;), student);</span>
+<span class="nc" id="L18">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;student&quot;), student);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

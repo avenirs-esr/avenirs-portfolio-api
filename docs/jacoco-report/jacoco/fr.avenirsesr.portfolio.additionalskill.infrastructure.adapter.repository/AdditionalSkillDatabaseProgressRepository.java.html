@@ -47,40 +47,40 @@ public class AdditionalSkillDatabaseProgressRepository
   @Override
   public boolean additionalSkillProgressAlreadyExists(
       AdditionalSkillProgress additionalSkillProgress) {
-<span class="fc" id="L50">    return jpaRepository.exists(</span>
-<span class="fc" id="L51">        AdditionalSkillProgressSpecification.additionalSkillProgressAlreadyExists(</span>
-<span class="fc" id="L52">            additionalSkillProgress.getSkill().getId(),</span>
-<span class="fc" id="L53">            additionalSkillProgress.getStudent().getId()));</span>
+<span class="nc" id="L50">    return jpaRepository.exists(</span>
+<span class="nc" id="L51">        AdditionalSkillProgressSpecification.additionalSkillProgressAlreadyExists(</span>
+<span class="nc" id="L52">            additionalSkillProgress.getSkill().getId(),</span>
+<span class="nc" id="L53">            additionalSkillProgress.getStudent().getId()));</span>
   }
 
   @Override
   public PagedResult&lt;AdditionalSkillProgress&gt; findAllByStudent(
       Student student, PageCriteria pageCriteria) {
-<span class="fc" id="L59">    Page&lt;AdditionalSkillProgressEntity&gt; entities =</span>
-<span class="fc" id="L60">        jpaRepository.findAll(</span>
-<span class="fc" id="L61">            AdditionalSkillProgressSpecification.hasStudent(UserMapper.fromDomain(student)),</span>
-<span class="fc" id="L62">            PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
+<span class="nc" id="L59">    Page&lt;AdditionalSkillProgressEntity&gt; entities =</span>
+<span class="nc" id="L60">        jpaRepository.findAll(</span>
+<span class="nc" id="L61">            AdditionalSkillProgressSpecification.hasStudent(UserMapper.fromDomain(student)),</span>
+<span class="nc" id="L62">            PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
 
-<span class="fc" id="L64">    List&lt;AdditionalSkill&gt; additionalSkills =</span>
-<span class="fc" id="L65">        additionalSkillCache.findAllByIds(</span>
-<span class="fc" id="L66">            entities.stream().map(AdditionalSkillProgressEntity::getAdditionalSkillId).toList());</span>
+<span class="nc" id="L64">    List&lt;AdditionalSkill&gt; additionalSkills =</span>
+<span class="nc" id="L65">        additionalSkillCache.findAllByIds(</span>
+<span class="nc" id="L66">            entities.stream().map(AdditionalSkillProgressEntity::getAdditionalSkillId).toList());</span>
 
-<span class="fc" id="L68">    List&lt;AdditionalSkillProgress&gt; progresses =</span>
-<span class="fc" id="L69">        entities.stream()</span>
-<span class="fc" id="L70">            .map(</span>
+<span class="nc" id="L68">    List&lt;AdditionalSkillProgress&gt; progresses =</span>
+<span class="nc" id="L69">        entities.stream()</span>
+<span class="nc" id="L70">            .map(</span>
                 entity -&gt;
-<span class="fc" id="L72">                    AdditionalSkillProgressMapper.toDomain(</span>
+<span class="nc" id="L72">                    AdditionalSkillProgressMapper.toDomain(</span>
                         entity,
-<span class="fc" id="L74">                        additionalSkills.stream()</span>
-<span class="fc" id="L75">                            .filter(</span>
+<span class="nc" id="L74">                        additionalSkills.stream()</span>
+<span class="nc" id="L75">                            .filter(</span>
                                 additionalSkill -&gt;
-<span class="fc" id="L77">                                    additionalSkill.getId().equals(entity.getAdditionalSkillId()))</span>
-<span class="fc" id="L78">                            .findFirst()</span>
-<span class="fc" id="L79">                            .orElseThrow(AdditionalSkillNotFoundException::new)))</span>
-<span class="fc" id="L80">            .toList();</span>
-<span class="fc" id="L81">    return new PagedResult&lt;&gt;(</span>
+<span class="nc" id="L77">                                    additionalSkill.getId().equals(entity.getAdditionalSkillId()))</span>
+<span class="nc" id="L78">                            .findFirst()</span>
+<span class="nc" id="L79">                            .orElseThrow(AdditionalSkillNotFoundException::new)))</span>
+<span class="nc" id="L80">            .toList();</span>
+<span class="nc" id="L81">    return new PagedResult&lt;&gt;(</span>
         progresses,
-<span class="fc" id="L83">        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), entities.getTotalElements()));</span>
+<span class="nc" id="L83">        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), entities.getTotalElements()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

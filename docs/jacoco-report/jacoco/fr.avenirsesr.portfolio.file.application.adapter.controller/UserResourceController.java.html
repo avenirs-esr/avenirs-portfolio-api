@@ -48,19 +48,19 @@ public class UserResourceController {
           EUserPhotoType photoType,
       @RequestParam(&quot;file&quot;) MultipartFile file)
       throws IOException {
-<span class="fc" id="L51">    log.debug(&quot;Received request to upload profile picture of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L52">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L51">    log.debug(&quot;Received request to upload profile picture of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L52">    User user = userUtil.getUser(principal);</span>
 
-<span class="fc" id="L54">    var userPhoto =</span>
-<span class="fc" id="L55">        userResourceService.uploadPhoto(</span>
+<span class="nc" id="L54">    var userPhoto =</span>
+<span class="nc" id="L55">        userResourceService.uploadPhoto(</span>
             user,
             userCategory,
             photoType,
-<span class="fc" id="L59">            file.getOriginalFilename(),</span>
-<span class="fc" id="L60">            file.getContentType(),</span>
-<span class="fc" id="L61">            file.getSize(),</span>
-<span class="fc" id="L62">            file.getBytes());</span>
-<span class="fc" id="L63">    return ResponseEntity.ok(UserPhotoUploadDTOMapper.fromDomain(userPhoto));</span>
+<span class="nc" id="L59">            file.getOriginalFilename(),</span>
+<span class="nc" id="L60">            file.getContentType(),</span>
+<span class="nc" id="L61">            file.getSize(),</span>
+<span class="nc" id="L62">            file.getBytes());</span>
+<span class="nc" id="L63">    return ResponseEntity.ok(UserPhotoUploadDTOMapper.fromDomain(userPhoto));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

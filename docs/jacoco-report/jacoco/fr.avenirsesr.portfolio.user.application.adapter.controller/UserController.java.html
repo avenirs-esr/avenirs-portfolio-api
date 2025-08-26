@@ -46,16 +46,16 @@ public class UserController {
               schema = @Schema(ref = &quot;#/components/schemas/UserCategory&quot;))
           @PathVariable
           EUserCategory userCategory) {
-<span class="fc" id="L49">    User user = userUtil.getUser(principal);</span>
-<span class="fc" id="L50">    var userPhotos = userService.getUserPhotos(user.getId(), userCategory);</span>
-<span class="fc" id="L51">    String baseUrl =</span>
-<span class="fc" id="L52">        ServletUriComponentsBuilder.fromRequestUri(request).replacePath(null).build().toUriString();</span>
+<span class="nc" id="L49">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L50">    var userPhotos = userService.getUserPhotos(user.getId(), userCategory);</span>
+<span class="nc" id="L51">    String baseUrl =</span>
+<span class="nc" id="L52">        ServletUriComponentsBuilder.fromRequestUri(request).replacePath(null).build().toUriString();</span>
 
-<span class="fc" id="L54">    return ResponseEntity.ok(</span>
-<span class="fc" id="L55">        ProfileOverviewMapper.userDomainToDto(</span>
+<span class="nc" id="L54">    return ResponseEntity.ok(</span>
+<span class="nc" id="L55">        ProfileOverviewMapper.userDomainToDto(</span>
             user,
             userCategory,
-<span class="fc" id="L58">            new UserPhotos(baseUrl + userPhotos.profileUrl(), baseUrl + userPhotos.coverUrl())));</span>
+<span class="nc" id="L58">            new UserPhotos(baseUrl + userPhotos.profileUrl(), baseUrl + userPhotos.coverUrl())));</span>
   }
 
   @PutMapping(&quot;/{userCategory}/update&quot;)
@@ -70,17 +70,17 @@ public class UserController {
           @PathVariable
           EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {
-<span class="fc" id="L73">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L74">    User user = userUtil.getUser(principal);</span>
+<span class="nc" id="L73">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L74">    User user = userUtil.getUser(principal);</span>
 
-<span class="fc" id="L76">    userService.updateProfile(</span>
+<span class="nc" id="L76">    userService.updateProfile(</span>
         userCategory,
         user,
-<span class="fc" id="L79">        request.getFirstname(),</span>
-<span class="fc" id="L80">        request.getLastname(),</span>
-<span class="fc" id="L81">        request.getEmail(),</span>
-<span class="fc" id="L82">        request.getBio());</span>
-<span class="fc" id="L83">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+<span class="nc" id="L79">        request.getFirstname(),</span>
+<span class="nc" id="L80">        request.getLastname(),</span>
+<span class="nc" id="L81">        request.getEmail(),</span>
+<span class="nc" id="L82">        request.getBio());</span>
+<span class="nc" id="L83">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

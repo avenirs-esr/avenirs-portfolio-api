@@ -16,20 +16,20 @@ import org.springframework.stereotype.Component;
 
   @Override
   public String upload(FileResource fileResource) throws IOException {
-<span class="fc" id="L19">    String uploadDir = System.getProperty(&quot;user.dir&quot;) + FileStorageConstants.STORAGE_PATH;</span>
+<span class="nc" id="L19">    String uploadDir = System.getProperty(&quot;user.dir&quot;) + FileStorageConstants.STORAGE_PATH;</span>
 
-<span class="fc" id="L21">    File dir = new File(uploadDir);</span>
-<span class="fc bfc" id="L22" title="All 2 branches covered.">    if (!dir.exists()) dir.mkdirs();</span>
+<span class="nc" id="L21">    File dir = new File(uploadDir);</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">    if (!dir.exists()) dir.mkdirs();</span>
 
-<span class="fc" id="L24">    var fileName = fileResource.id() + &quot;.&quot; + fileResource.fileType().name().toLowerCase();</span>
+<span class="nc" id="L24">    var fileName = fileResource.id() + &quot;.&quot; + fileResource.fileType().name().toLowerCase();</span>
 
-<span class="fc" id="L26">    String filePath = String.join(&quot;&quot;, uploadDir, &quot;/&quot;, fileName);</span>
-<span class="fc" id="L27">    try (FileOutputStream fos = new FileOutputStream(filePath)) {</span>
-<span class="fc" id="L28">      fos.write(fileResource.content());</span>
+<span class="nc" id="L26">    String filePath = String.join(&quot;&quot;, uploadDir, &quot;/&quot;, fileName);</span>
+<span class="nc" id="L27">    try (FileOutputStream fos = new FileOutputStream(filePath)) {</span>
+<span class="nc" id="L28">      fos.write(fileResource.content());</span>
     }
 
-<span class="fc" id="L31">    log.info(&quot;File {} has been uploaded as {}&quot;, fileResource.fileName(), fileName);</span>
-<span class="fc" id="L32">    return filePath;</span>
+<span class="nc" id="L31">    log.info(&quot;File {} has been uploaded as {}&quot;, fileResource.fileName(), fileName);</span>
+<span class="nc" id="L32">    return filePath;</span>
   }
 
   @Override
