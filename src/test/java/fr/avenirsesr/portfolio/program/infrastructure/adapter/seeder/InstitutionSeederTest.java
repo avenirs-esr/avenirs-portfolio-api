@@ -9,11 +9,13 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class InstitutionSeederTest {
 
@@ -23,7 +25,7 @@ class InstitutionSeederTest {
   private static List<InstitutionEntity> institutions;
 
   @BeforeAll
-  static void setUp(@Autowired InstitutionSeeder institutionSeeder) {
+  void setUp() {
     institutions = institutionSeeder.seed();
   }
 

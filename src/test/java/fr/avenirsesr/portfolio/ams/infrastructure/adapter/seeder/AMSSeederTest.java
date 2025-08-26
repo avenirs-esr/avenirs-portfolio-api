@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,25 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class AMSSeederTest {
+
+  @Autowired UserSeeder userSeeder;
+
+  @Autowired TraceSeeder traceSeeder;
+
+  @Autowired SkillSeeder skillSeeder;
+
+  @Autowired CohortSeeder cohortSeeder;
+
+  @Autowired ProgramSeeder programSeeder;
+
+  @Autowired TrainingPathSeeder trainingPathSeeder;
+
+  @Autowired StudentProgressSeeder studentProgressSeeder;
+
+  @Autowired InstitutionSeeder institutionSeeder;
 
   @Mock private AMSDatabaseRepository amsRepository;
 
@@ -42,15 +60,7 @@ class AMSSeederTest {
   private static List<CohortEntity> cohorts;
 
   @BeforeAll
-  static void setUp(
-      @Autowired UserSeeder userSeeder,
-      @Autowired TraceSeeder traceSeeder,
-      @Autowired SkillSeeder skillSeeder,
-      @Autowired CohortSeeder cohortSeeder,
-      @Autowired ProgramSeeder programSeeder,
-      @Autowired TrainingPathSeeder trainingPathSeeder,
-      @Autowired StudentProgressSeeder studentProgressSeeder,
-      @Autowired InstitutionSeeder institutionSeeder) {
+  void setUp() {
 
     // Seed les données comme dans SeederRunner
     var savedUsers = userSeeder.seed();

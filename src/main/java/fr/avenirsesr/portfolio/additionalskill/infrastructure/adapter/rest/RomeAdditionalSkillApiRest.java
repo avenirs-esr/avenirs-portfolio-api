@@ -39,10 +39,10 @@ public class RomeAdditionalSkillApiRest implements RomeAdditionalSkillApi {
   @Value("${rome.4.competence.base.url}")
   private String rome4CompetenceBaseUrl;
 
-  @Value("${rome.4.competence.client.id}")
+  @Value("${rome.4.competence.client.id:}")
   private String rome4CompetenceClientId;
 
-  @Value("${rome.4.competence.client.secret}")
+  @Value("${rome.4.competence.client.secret:}")
   private String rome4CompetenceClientSecret;
 
   private WebClient rome4WebClient;

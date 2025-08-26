@@ -25,9 +25,11 @@ import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
+@Profile("!test")
 @AllArgsConstructor
 public class AdditionalSkillBatchLoader {
   private final RomeAdditionalSkillApi romeAdditionalSkillApi;

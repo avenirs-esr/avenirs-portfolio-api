@@ -16,17 +16,20 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class StudentProgressSeederTest {
 
   @Autowired private StudentProgressSeeder studentProgressSeeder;
   @Autowired private StudentProgressDatabaseRepository studentProgressRepository;
   @Autowired private UserSeeder userSeeder;
+  @Autowired private InstitutionSeeder institutionSeeder;
   @Autowired private ProgramSeeder programSeeder;
   @Autowired private SkillSeeder skillSeeder;
   @Autowired private TrainingPathSeeder trainingPathSeeder;
@@ -36,12 +39,7 @@ class StudentProgressSeederTest {
   private static List<TrainingPathEntity> trainingPaths;
 
   @BeforeAll
-  static void setUp(
-      @Autowired UserSeeder userSeeder,
-      @Autowired ProgramSeeder programSeeder,
-      @Autowired SkillSeeder skillSeeder,
-      @Autowired TrainingPathSeeder trainingPathSeeder,
-      @Autowired InstitutionSeeder institutionSeeder) {
+  void setUp() {
 
     // Seed des utilisateurs
     var savedUsers = userSeeder.seed();

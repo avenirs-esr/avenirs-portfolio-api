@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +23,6 @@ public class AdditionalSkillSeeder {
   private static final FakerProvider faker = new FakerProvider().init(AdditionalSkillSeeder.class);
 
   private final AdditionalSkillDatabaseProgressRepository studentAdditionalSkillDatabaseRepository;
-
-  private final JobLauncher jobLauncher;
-
-  private final Job importROME4CompetenceJob;
 
   @Transactional
   public List<AdditionalSkillProgressEntity> seed(List<UserEntity> savedStudents) {
