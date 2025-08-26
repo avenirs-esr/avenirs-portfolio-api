@@ -5,5 +5,5 @@ import fr.avenirsesr.portfolio.shared.domain.port.output.repository.GenericRepos
 import java.util.List;
 
 public interface AdditionalSkillRepository extends GenericRepositoryPort<AdditionalSkill> {
-  List<AdditionalSkill> findByPathSegments_Skill_CodeIn(List<String> skillCodes);
+  List<AdditionalSkill> findByPathSegmentsSkillCodeIn(List<String> skillCodes);
 }

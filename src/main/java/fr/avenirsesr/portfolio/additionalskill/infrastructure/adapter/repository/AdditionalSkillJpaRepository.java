@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface AdditionalSkillJpaRepository
     extends JpaRepository<AdditionalSkillEntity, UUID>,
         JpaSpecificationExecutor<AdditionalSkillEntity> {
-  List<AdditionalSkillEntity> findByPathSegments_Skill_CodeIn(List<String> skillCodes);
+  List<AdditionalSkillEntity> findByPathSegmentsSkillCodeIn(List<String> skillCodes);
 }

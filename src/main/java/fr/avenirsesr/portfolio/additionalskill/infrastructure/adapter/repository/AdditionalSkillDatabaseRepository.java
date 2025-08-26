@@ -24,8 +24,8 @@ public class AdditionalSkillDatabaseRepository
   }
 
   @Override
-  public List<AdditionalSkill> findByPathSegments_Skill_CodeIn(List<String> skillCodes) {
-    return jpaRepository.findByPathSegments_Skill_CodeIn(skillCodes).stream()
+  public List<AdditionalSkill> findByPathSegmentsSkillCodeIn(List<String> skillCodes) {
+    return jpaRepository.findByPathSegmentsSkillCodeIn(skillCodes).stream()
         .map(AdditionalSkillMapper::toDomain)
         .toList();
   }

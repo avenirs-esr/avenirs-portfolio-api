@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @Embeddable
 public class SegmentDetailEmbeddable {
+
+  @Column(nullable = false)
   private String code;
+
+  @Column(nullable = false)
   private String libelle;
 
   private SegmentDetailEmbeddable(String code, String libelle) {

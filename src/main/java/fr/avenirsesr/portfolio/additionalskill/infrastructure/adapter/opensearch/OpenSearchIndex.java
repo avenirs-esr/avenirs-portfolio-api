@@ -28,6 +28,7 @@ import org.opensearch.client.indices.CreateIndexRequest;
 import org.opensearch.client.indices.GetIndexRequest;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.search.builder.SearchSourceBuilder;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +39,7 @@ public class OpenSearchIndex implements OpenSearch {
   private final RestHighLevelClient client;
 
   @Override
+  @CacheEvict(value = AdditionalSkillConstants.INDEX)
   public void cleanAndCreateAdditionalSkillIndex() {
     try {
       if (client
@@ -64,42 +66,7 @@ public class OpenSearchIndex implements OpenSearch {
 
     for (AdditionalSkill additionalSkill : additionalSkillList) {
       try {
-        Map<String, Object> source =
-            Map.ofEntries(
-                Map.entry(AdditionalSkillConstants.FIELD_ID, additionalSkill.getId().toString()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_SKILL_CODE,
-                    additionalSkill.getPathSegments().getSkill().getCode()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_SKILL_LIBELLE,
-                    additionalSkill.getPathSegments().getSkill().getLibelle()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_MACRO_SKILL_CODE,
-                    additionalSkill.getPathSegments().getMacroSkill().getCode()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_MACRO_SKILL_LIBELLE,
-                    additionalSkill.getPathSegments().getMacroSkill().getLibelle()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_TARGET_CODE,
-                    additionalSkill.getPathSegments().getTarget().getCode()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_TARGET_LIBELLE,
-                    additionalSkill.getPathSegments().getTarget().getLibelle()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_ISSUE_CODE,
-                    additionalSkill.getPathSegments().getIssue().getCode()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_ISSUE_LIBELLE,
-                    additionalSkill.getPathSegments().getIssue().getLibelle()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_DOMAIN_CODE,
-                    additionalSkill.getPathSegments().getDomain().getCode()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_DOMAIN_LIBELLE,
-                    additionalSkill.getPathSegments().getDomain().getLibelle()),
-                Map.entry(
-                    AdditionalSkillConstants.FIELD_TYPE, additionalSkill.getType().getValue()));
-
+        Map<String, Object> source = getAdditionalSkillSourceMap(additionalSkill);
         bulkRequest.add(
             new IndexRequest(AdditionalSkillConstants.INDEX)
                 .id(additionalSkill.getId().toString())
@@ -143,34 +110,7 @@ public class OpenSearchIndex implements OpenSearch {
       SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
       long totalHits = response.getHits().getTotalHits().value;
 
-      List<AdditionalSkill> additionalSkillList =
-          Arrays.stream(response.getHits().getHits())
-              .map(
-                  hit -> {
-                    Map<String, Object> src = hit.getSourceAsMap();
-                    return AdditionalSkill.toDomain(
-                        UUID.fromString((String) src.get(AdditionalSkillConstants.FIELD_ID)),
-                        PathSegments.toDomain(
-                            SegmentDetail.toDomain(
-                                (String) src.get(AdditionalSkillConstants.FIELD_SKILL_CODE),
-                                (String) src.get(AdditionalSkillConstants.FIELD_SKILL_LIBELLE)),
-                            SegmentDetail.toDomain(
-                                (String) src.get(AdditionalSkillConstants.FIELD_MACRO_SKILL_CODE),
-                                (String)
-                                    src.get(AdditionalSkillConstants.FIELD_MACRO_SKILL_LIBELLE)),
-                            SegmentDetail.toDomain(
-                                (String) src.get(AdditionalSkillConstants.FIELD_TARGET_CODE),
-                                (String) src.get(AdditionalSkillConstants.FIELD_TARGET_LIBELLE)),
-                            SegmentDetail.toDomain(
-                                (String) src.get(AdditionalSkillConstants.FIELD_ISSUE_CODE),
-                                (String) src.get(AdditionalSkillConstants.FIELD_ISSUE_LIBELLE)),
-                            SegmentDetail.toDomain(
-                                (String) src.get(AdditionalSkillConstants.FIELD_DOMAIN_CODE),
-                                (String) src.get(AdditionalSkillConstants.FIELD_DOMAIN_LIBELLE))),
-                        EAdditionalSkillType.fromValue(
-                            (String) src.get(AdditionalSkillConstants.FIELD_TYPE)));
-                  })
-              .toList();
+      List<AdditionalSkill> additionalSkillList = getAdditionalSkillList(response);
 
       return new AdditionalSkillPagedResult(
           additionalSkillList,
@@ -185,5 +125,70 @@ public class OpenSearchIndex implements OpenSearch {
               + pageCriteria.pageSize(),
           e);
     }
+  }
+
+  private Map<String, Object> getAdditionalSkillSourceMap(AdditionalSkill additionalSkill) {
+    return Map.ofEntries(
+        Map.entry(AdditionalSkillConstants.FIELD_ID, additionalSkill.getId().toString()),
+        Map.entry(
+            AdditionalSkillConstants.FIELD_SKILL_CODE,
+            additionalSkill.getPathSegments().getSkill().getCode()),
+        Map.entry(
+            AdditionalSkillConstants.FIELD_SKILL_LIBELLE,
+            additionalSkill.getPathSegments().getSkill().getLibelle()),
+        Map.entry(
+            AdditionalSkillConstants.FIELD_MACRO_SKILL_CODE,
+            additionalSkill.getPathSegments().getMacroSkill().getCode()),
+        Map.entry(
+            AdditionalSkillConstants.FIELD_MACRO_SKILL_LIBELLE,
+            additionalSkill.getPathSegments().getMacroSkill().getLibelle()),
+        Map.entry(
+            AdditionalSkillConstants.FIELD_TARGET_CODE,
+            additionalSkill.getPathSegments().getTarget().getCode()),
+        Map.entry(
+            AdditionalSkillConstants.FIELD_TARGET_LIBELLE,
+            additionalSkill.getPathSegments().getTarget().getLibelle()),
+        Map.entry(
+            AdditionalSkillConstants.FIELD_ISSUE_CODE,
+            additionalSkill.getPathSegments().getIssue().getCode()),
+        Map.entry(
+            AdditionalSkillConstants.FIELD_ISSUE_LIBELLE,
+            additionalSkill.getPathSegments().getIssue().getLibelle()),
+        Map.entry(
+            AdditionalSkillConstants.FIELD_DOMAIN_CODE,
+            additionalSkill.getPathSegments().getDomain().getCode()),
+        Map.entry(
+            AdditionalSkillConstants.FIELD_DOMAIN_LIBELLE,
+            additionalSkill.getPathSegments().getDomain().getLibelle()),
+        Map.entry(AdditionalSkillConstants.FIELD_TYPE, additionalSkill.getType()));
+  }
+
+  private List<AdditionalSkill> getAdditionalSkillList(SearchResponse response) {
+    return Arrays.stream(response.getHits().getHits())
+        .map(
+            hit -> {
+              Map<String, Object> src = hit.getSourceAsMap();
+              return AdditionalSkill.toDomain(
+                  UUID.fromString((String) src.get(AdditionalSkillConstants.FIELD_ID)),
+                  PathSegments.toDomain(
+                      SegmentDetail.toDomain(
+                          (String) src.get(AdditionalSkillConstants.FIELD_SKILL_CODE),
+                          (String) src.get(AdditionalSkillConstants.FIELD_SKILL_LIBELLE)),
+                      SegmentDetail.toDomain(
+                          (String) src.get(AdditionalSkillConstants.FIELD_MACRO_SKILL_CODE),
+                          (String) src.get(AdditionalSkillConstants.FIELD_MACRO_SKILL_LIBELLE)),
+                      SegmentDetail.toDomain(
+                          (String) src.get(AdditionalSkillConstants.FIELD_TARGET_CODE),
+                          (String) src.get(AdditionalSkillConstants.FIELD_TARGET_LIBELLE)),
+                      SegmentDetail.toDomain(
+                          (String) src.get(AdditionalSkillConstants.FIELD_ISSUE_CODE),
+                          (String) src.get(AdditionalSkillConstants.FIELD_ISSUE_LIBELLE)),
+                      SegmentDetail.toDomain(
+                          (String) src.get(AdditionalSkillConstants.FIELD_DOMAIN_CODE),
+                          (String) src.get(AdditionalSkillConstants.FIELD_DOMAIN_LIBELLE))),
+                  EAdditionalSkillType.valueOf(
+                      (String) src.get(AdditionalSkillConstants.FIELD_TYPE)));
+            })
+        .toList();
   }
 }

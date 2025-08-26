@@ -13,6 +13,6 @@ public interface AdditionalSkillMapper {
             additionalSkill.getPathSegments().getIssue().getLibelle(),
             additionalSkill.getPathSegments().getTarget().getLibelle(),
             additionalSkill.getPathSegments().getMacroSkill().getLibelle()),
-        additionalSkill.getType().getValue());
+        additionalSkill.getType());
   }
 }

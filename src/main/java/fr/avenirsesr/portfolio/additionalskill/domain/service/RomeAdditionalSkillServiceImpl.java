@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearch;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rome4VersionRepository;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.utils.AdditionalSkillConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -29,7 +27,6 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
   private final OpenSearch openSearch;
 
   @Override
-  @CacheEvict(value = AdditionalSkillConstants.INDEX)
   public void cleanAndCreateAdditionalSkillIndex() {
     openSearch.cleanAndCreateAdditionalSkillIndex();
   }
@@ -45,7 +42,7 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
             .toList();
 
     List<AdditionalSkill> existingSkillList =
-        additionalSkillRepository.findByPathSegments_Skill_CodeIn(skillCodes);
+        additionalSkillRepository.findByPathSegmentsSkillCodeIn(skillCodes);
 
     Map<String, AdditionalSkill> existingSkillByCode =
         existingSkillList.stream()
@@ -53,7 +50,34 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
                 Collectors.toMap(
                     skill -> skill.getPathSegments().getSkill().getCode(), Function.identity()));
 
-    List<AdditionalSkill> toSave = new ArrayList<>();
+    List<AdditionalSkill> toSave =
+        getAdditionalSkillsToSave(additionalSkillList, existingSkillByCode);
+    List<AdditionalSkill> savedAdditionalSkill = additionalSkillRepository.saveAll(toSave);
+    openSearch.indexAll(savedAdditionalSkill);
+    return savedAdditionalSkill;
+  }
+
+  @Override
+  public boolean checkRomeVersionUpdated() {
+    Rome4Version newVersion = romeAdditionalSkillApi.fetchRomeVersion();
+
+    boolean shouldSave =
+        rome4VersionRepository
+            .findFirstByOrderByVersionDesc()
+            .map(oldVersion -> newVersion.getVersion() > oldVersion.getVersion())
+            .orElse(true);
+
+    if (shouldSave) {
+      rome4VersionRepository.save(
+          Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate()));
+    }
+
+    return shouldSave;
+  }
+
+  private List<AdditionalSkill> getAdditionalSkillsToSave(
+      List<AdditionalSkill> additionalSkillList, Map<String, AdditionalSkill> existingSkillByCode) {
+    List<AdditionalSkill> toSave = new ArrayList<>(additionalSkillList.size());
 
     for (AdditionalSkill additionalSkill : additionalSkillList) {
       String skillCode = additionalSkill.getPathSegments().getSkill().getCode();
@@ -67,32 +91,6 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
         toSave.add(additionalSkill);
       }
     }
-
-    List<AdditionalSkill> savedAdditionalSkill = additionalSkillRepository.saveAll(toSave);
-    openSearch.indexAll(savedAdditionalSkill);
-    return savedAdditionalSkill;
-  }
-
-  @Override
-  public boolean checkRomeVersionUpdated() {
-    Rome4Version newVersion = romeAdditionalSkillApi.fetchRomeVersion();
-
-    return rome4VersionRepository
-        .findFirstByOrderByVersionDesc()
-        .map(
-            oldVersion -> {
-              if (newVersion.getVersion() > oldVersion.getVersion()) {
-                rome4VersionRepository.save(
-                    Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate()));
-                return true;
-              }
-              return false;
-            })
-        .orElseGet(
-            () -> {
-              rome4VersionRepository.save(
-                  Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate()));
-              return true;
-            });
+    return toSave;
   }
 }

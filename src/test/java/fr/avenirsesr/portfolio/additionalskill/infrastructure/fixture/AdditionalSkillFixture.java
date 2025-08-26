@@ -18,7 +18,7 @@ public class AdditionalSkillFixture {
   private AdditionalSkillFixture() {
     this.id = UUID.fromString(faker.call("id").internet().uuid());
     this.pathSegments = PathSegmentsFixture.create().toModel();
-    this.type = EAdditionalSkillType.fromValue("ROME4.0");
+    this.type = EAdditionalSkillType.valueOf("ROME4");
   }
 
   public static AdditionalSkillFixture create() {

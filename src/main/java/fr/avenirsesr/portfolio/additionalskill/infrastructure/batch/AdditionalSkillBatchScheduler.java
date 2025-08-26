@@ -19,13 +19,10 @@ public class AdditionalSkillBatchScheduler {
   @Scheduled(cron = "${additional.skill.batch.cron}")
   public void runJob() {
     try {
-      // Lancer le job
       jobLauncher.run(importROME4CompetenceJob, new JobParameters());
-      System.out.println("Le job d'import des compétences du ROME 4.0 a été lancé avec succès !");
+      System.out.println("The ROME 4.0 skills import job has been successfully launched !");
     } catch (Exception e) {
-      System.err.println(
-          "Erreur lors du lancement du job d'import des compétences du ROME 4.0 : "
-              + e.getMessage());
+      System.err.println("Error when launching the ROME 4.0 skills import job : " + e.getMessage());
     }
   }
 }

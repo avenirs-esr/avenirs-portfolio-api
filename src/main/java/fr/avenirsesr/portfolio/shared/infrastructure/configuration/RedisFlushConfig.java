@@ -14,9 +14,9 @@ public class RedisFlushConfig {
     return args -> {
       try (RedisConnection connection = redisConnectionFactory.getConnection()) {
         connection.execute("FLUSHDB");
-        System.out.println("Cache Redis vidé au démarrage");
+        System.out.println("Redis cache cleared on startup");
       } catch (Exception e) {
-        System.err.println("Erreur lors du vidage du cache Redis : " + e.getMessage());
+        System.err.println("Error while clearing the Redis cache : " + e.getMessage());
       }
     };
   }
