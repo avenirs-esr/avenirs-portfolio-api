@@ -32,7 +32,7 @@ public class FakeInstitution {
     return fakeInstitution;
   }
 
-  public FakeInstitution addTranslation(ELanguage language) {
+  public void addTranslation(ELanguage language) {
     var translations = new java.util.HashSet<>(Set.copyOf(institution.getTranslations()));
 
     translations.add(
@@ -43,8 +43,6 @@ public class FakeInstitution {
             institution));
 
     institution.setTranslations(translations);
-
-    return this;
   }
 
   public FakeInstitution withEnabledFiled(Set<EPortfolioType> enabledFields) {

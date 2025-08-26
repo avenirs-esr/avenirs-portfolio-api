@@ -2,8 +2,10 @@ package fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.applica
 
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.application.dto.AdditionalSkillConfigurationDTO;
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.model.AdditionalSkillConfiguration;
-import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.model.AdditionalSkillLevel;
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.port.input.AdditionalSkillConfigurationService;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,27 +20,32 @@ public class AdditionalSkillConfigController {
   private final AdditionalSkillConfigurationService service;
 
   @GetMapping
-  public ResponseEntity<AdditionalSkillConfigurationDTO> getAdditionalSkillConfig() {
+  public ResponseEntity<Map<ELanguage, AdditionalSkillConfigurationDTO>>
+      getAdditionalSkillConfig() {
     log.debug("Received request to get additional-skills config");
 
-    var config = service.getConfiguration();
+    Map<ELanguage, AdditionalSkillConfiguration> config =
+        service.getConfigurationWithAllTranslations();
 
-    return ResponseEntity.ok(AdditionalSkillConfigurationDTO.from(config));
+    return ResponseEntity.ok(
+        config.entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> AdditionalSkillConfigurationDTO.fromModel(entry.getValue()))));
   }
 
   @PostMapping
   public ResponseEntity<Void> postAdditionalSkillConfig(
-      @RequestBody AdditionalSkillConfigurationDTO config) {
-    log.debug("Received request to post additional-skills config : {}", config);
+      @RequestBody Map<ELanguage, AdditionalSkillConfigurationDTO> configurations) {
+    log.debug("Received request to post additional-skills config : {}", configurations);
 
     service.postConfiguration(
-        new AdditionalSkillConfiguration(
-            new AdditionalSkillLevel(config.BEGINNER().label(), config.BEGINNER().description()),
-            new AdditionalSkillLevel(
-                config.INTERMEDIATE().label(), config.INTERMEDIATE().description()),
-            new AdditionalSkillLevel(config.COMPETENT().label(), config.COMPETENT().description()),
-            new AdditionalSkillLevel(config.ADVANCED().label(), config.ADVANCED().description()),
-            new AdditionalSkillLevel(config.EXPERT().label(), config.EXPERT().description())));
+        configurations.entrySet().stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> AdditionalSkillConfigurationDTO.toModel(entry.getValue()))));
 
     return ResponseEntity.status(HttpStatus.ACCEPTED).build();
   }

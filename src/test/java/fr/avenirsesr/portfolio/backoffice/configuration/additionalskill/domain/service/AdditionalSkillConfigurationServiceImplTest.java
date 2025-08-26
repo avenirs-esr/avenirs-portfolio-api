@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.model.AdditionalSkillConfiguration;
@@ -9,8 +8,11 @@ import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.m
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.model.EAdditionalSkillConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.Configuration;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.EConfigurationScope;
+import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.input.service.ConfigurationTranslationService;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.output.repository.ConfigurationRepository;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AdditionalSkillConfigurationServiceImplTest {
 
   @Mock private ConfigurationRepository configurationRepository;
+  @Mock private ConfigurationTranslationService configurationTranslationService;
 
   @InjectMocks private AdditionalSkillConfigurationServiceImpl service;
 
@@ -81,7 +84,8 @@ class AdditionalSkillConfigurationServiceImplTest {
                 EAdditionalSkillConfiguration.LEVEL_EXPERT_DESCRIPTION,
                 "Description expert"));
 
-    when(configurationRepository.inScope(EConfigurationScope.ADDITIONAL_SKILL))
+    lenient()
+        .when(configurationRepository.inScope(EConfigurationScope.ADDITIONAL_SKILL))
         .thenReturn(mockConfigurations);
   }
 
@@ -111,10 +115,11 @@ class AdditionalSkillConfigurationServiceImplTest {
             new AdditionalSkillLevel("New Expert", "New Desc Expert"));
 
     // When
-    service.postConfiguration(newConfig);
+    service.postConfiguration(Map.of(ELanguage.FRENCH, newConfig));
 
     // Then
-    verify(configurationRepository).saveAll(anyList());
+    verify(configurationTranslationService)
+        .buildAndSaveTranslatedEntities(anyMap(), eq(EConfigurationScope.ADDITIONAL_SKILL));
   }
 
   @Test
@@ -129,9 +134,10 @@ class AdditionalSkillConfigurationServiceImplTest {
             new AdditionalSkillLevel("Expert modifié", "Description expert modifiée"));
 
     // When
-    service.postConfiguration(updatedConfig);
+    service.postConfiguration(Map.of(ELanguage.FRENCH, updatedConfig));
 
     // Then
-    verify(configurationRepository).saveAll(anyList());
+    verify(configurationTranslationService)
+        .buildAndSaveTranslatedEntities(anyMap(), eq(EConfigurationScope.ADDITIONAL_SKILL));
   }
 }
