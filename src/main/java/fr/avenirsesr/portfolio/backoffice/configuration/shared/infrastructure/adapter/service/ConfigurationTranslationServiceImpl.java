@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +31,8 @@ public class ConfigurationTranslationServiceImpl implements ConfigurationTransla
                     .map(
                         translation ->
                             Map.entry(
-                                translation.getLanguage(), ConfigurationMapper.toDomain(entity))))
+                                translation.getLanguage(),
+                                ConfigurationMapper.toDomain(entity, translation.getLanguage()))))
         .collect(
             Collectors.groupingBy(
                 Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
@@ -85,9 +85,7 @@ public class ConfigurationTranslationServiceImpl implements ConfigurationTransla
             () -> {
               var newTranslation =
                   ConfigurationTranslationEntity.of(UUID.randomUUID(), language, entity, newValue);
-              entity.setTranslations(
-                  Stream.concat(entity.getTranslations().stream(), Stream.of(newTranslation))
-                      .collect(Collectors.toSet()));
+              entity.getTranslations().add(newTranslation);
             });
   }
 }

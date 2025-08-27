@@ -14,7 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ConfigurationTranslationEntity extends TranslationEntity {
-  @Column(name = "\"value\"", nullable = false)
+  @Column(name = "\"value\"", columnDefinition = "TEXT", nullable = false)
   private String value;
 
   @ManyToOne(fetch = FetchType.LAZY)

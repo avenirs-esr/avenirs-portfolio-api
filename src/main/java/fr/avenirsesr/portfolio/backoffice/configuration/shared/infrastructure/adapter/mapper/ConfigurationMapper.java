@@ -4,6 +4,8 @@ import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.m
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.Configuration;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.ETraceConfiguration;
+import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.domain.model.EWebsiteContentConfiguration;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 
 public interface ConfigurationMapper {
@@ -21,6 +23,18 @@ public interface ConfigurationMapper {
   }
 
   static Configuration toDomain(ConfigurationEntity configurationEntity) {
+    return toDomain(configurationEntity, null);
+  }
+
+  static Configuration toDomain(ConfigurationEntity configurationEntity, ELanguage language) {
+    var translatedValue =
+        configurationEntity.getValue().isPresent()
+            ? configurationEntity.getValue().get()
+            : language == null
+                ? TranslationUtil.getTranslation(configurationEntity.getTranslations()).getValue()
+                : TranslationUtil.getTranslation(configurationEntity.getTranslations(), language)
+                    .getValue();
+
     return Configuration.toDomain(
         configurationEntity.getId(),
         configurationEntity.getScope(),
@@ -28,10 +42,10 @@ public interface ConfigurationMapper {
           case TRACE -> ETraceConfiguration.valueOf(configurationEntity.getKey());
           case ADDITIONAL_SKILL ->
               EAdditionalSkillConfiguration.valueOf(configurationEntity.getKey());
+          case WEBSITE_CONTENT ->
+              EWebsiteContentConfiguration.valueOf(configurationEntity.getKey());
         },
-        configurationEntity.getValue().isPresent()
-            ? configurationEntity.getValue().get()
-            : TranslationUtil.getTranslation(configurationEntity.getTranslations()).getValue(),
+        translatedValue,
         configurationEntity.getCreatedAt(),
         configurationEntity.getUpdatedAt());
   }

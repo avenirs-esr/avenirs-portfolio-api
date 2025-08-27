@@ -35,10 +35,11 @@ class ConfigurationTranslationServiceImplTest {
     entityFr.setKey("LEVEL_BEGINNER_LABEL");
     entityFr.setValue("Débutant");
 
-    ConfigurationTranslationEntity translationFr =
+    var translations = new HashSet<ConfigurationTranslationEntity>();
+    translations.add(
         ConfigurationTranslationEntity.of(
-            UUID.randomUUID(), ELanguage.FRENCH, entityFr, "Débutant");
-    entityFr.setTranslations(Set.of(translationFr));
+            UUID.randomUUID(), ELanguage.FRENCH, entityFr, "Débutant"));
+    entityFr.setTranslations(translations);
   }
 
   @Test

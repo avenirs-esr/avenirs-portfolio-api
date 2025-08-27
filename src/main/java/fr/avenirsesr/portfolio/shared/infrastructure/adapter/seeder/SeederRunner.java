@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.infrastructure.seeder.AdditionalSkillConfigSeeder;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.infrastructure.seeder.TraceConfigSeeder;
+import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.infrastructure.seeder.WebsiteContentConfigurationSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.TraceAttachmentSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 public class SeederRunner implements CommandLineRunner {
   private final AdditionalSkillConfigSeeder additionalSkillConfigSeeder;
   private final TraceConfigSeeder traceConfigSeeder;
+  private final WebsiteContentConfigurationSeeder websiteContentConfigurationSeeder;
   private final UserRepository userRepository;
   private final UserSeeder userSeeder;
   private final UserPhotoSeeder userPhotoSeeder;
@@ -46,6 +48,7 @@ public class SeederRunner implements CommandLineRunner {
   public SeederRunner(
       AdditionalSkillConfigSeeder additionalSkillConfigSeeder,
       TraceConfigSeeder traceConfigSeeder,
+      WebsiteContentConfigurationSeeder websiteContentConfigurationSeeder,
       UserRepository userRepository,
       UserSeeder userSeeder,
       UserPhotoSeeder userPhotoSeeder,
@@ -61,6 +64,7 @@ public class SeederRunner implements CommandLineRunner {
       AdditionalSkillSeeder additionalSkillSeeder) {
     this.additionalSkillConfigSeeder = additionalSkillConfigSeeder;
     this.traceConfigSeeder = traceConfigSeeder;
+    this.websiteContentConfigurationSeeder = websiteContentConfigurationSeeder;
     this.userRepository = userRepository;
     this.userPhotoSeeder = userPhotoSeeder;
     this.cohortSeeder = cohortSeeder;
@@ -85,6 +89,7 @@ public class SeederRunner implements CommandLineRunner {
 
       additionalSkillConfigSeeder.seed();
       traceConfigSeeder.seed();
+      websiteContentConfigurationSeeder.seed();
 
       var savedUsers = userSeeder.seed();
       var savedUserPhotos = userPhotoSeeder.seed(savedUsers);
