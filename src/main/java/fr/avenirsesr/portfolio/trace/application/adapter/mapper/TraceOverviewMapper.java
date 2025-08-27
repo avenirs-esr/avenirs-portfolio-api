@@ -13,7 +13,6 @@ public interface TraceOverviewMapper {
         programName,
         trace.isGroup(),
         trace.getCreatedAt(),
-        trace.getUpdatedAt(),
-        trace.getDeletedAt().orElse(null));
+        trace.getUpdatedAt());
   }
 }

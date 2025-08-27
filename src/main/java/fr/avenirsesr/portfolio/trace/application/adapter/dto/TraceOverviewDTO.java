@@ -13,8 +13,7 @@ import java.util.UUID;
       "programName",
       "isGroup",
       "createdAt",
-      "updatedAt",
-      "willBeDeletedAt"
+      "updatedAt"
     })
 public record TraceOverviewDTO(
     UUID traceId,
@@ -24,5 +23,4 @@ public record TraceOverviewDTO(
     String programName,
     boolean isGroup,
     Instant createdAt,
-    Instant updatedAt,
-    Instant deletedAt) {}
+    Instant updatedAt) {}
