@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class ProgramSeederTest {
 
@@ -27,7 +29,7 @@ class ProgramSeederTest {
   private static List<InstitutionEntity> institutions;
 
   @BeforeAll
-  static void setUp(@Autowired InstitutionSeeder institutionSeeder) {
+  void setUp() {
     // Seed des institutions
     institutions = institutionSeeder.seed();
   }

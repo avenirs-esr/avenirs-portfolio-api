@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 public class TraceConfigSeeder {
   private final TraceConfigurationService traceConfigurationService;
 
+  @Transactional
   public void seed() {
     log.info("Seeding trace configuration...");
     var config = new TraceConfiguration(90, 10, 5);

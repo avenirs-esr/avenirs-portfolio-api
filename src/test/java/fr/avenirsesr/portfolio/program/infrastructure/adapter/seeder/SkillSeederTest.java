@@ -11,15 +11,19 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 class SkillSeederTest {
 
   @Autowired private SkillSeeder skillSeeder;
+
+  @Autowired private InstitutionSeeder institutionSeeder;
 
   @Autowired private SkillDatabaseRepository skillRepository;
 
@@ -30,8 +34,7 @@ class SkillSeederTest {
   private static List<ProgramEntity> programs;
 
   @BeforeAll
-  static void setUp(
-      @Autowired ProgramSeeder programSeeder, @Autowired InstitutionSeeder institutionSeeder) {
+  void setUp() {
     programs = programSeeder.seed(institutionSeeder.seed());
   }
 

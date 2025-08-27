@@ -7,12 +7,12 @@ import java.util.List;
 public interface AdditionalSkillMapper {
   static AdditionalSkillDTO toAdditionalSkillDTO(AdditionalSkill additionalSkill) {
     return new AdditionalSkillDTO(
-        additionalSkill.getId().toString(),
+        additionalSkill.getId(),
         additionalSkill.getPathSegments().getSkill().getLibelle(),
         List.of(
             additionalSkill.getPathSegments().getIssue().getLibelle(),
             additionalSkill.getPathSegments().getTarget().getLibelle(),
             additionalSkill.getPathSegments().getMacroSkill().getLibelle()),
-        additionalSkill.getType().getValue());
+        additionalSkill.getType());
   }
 }

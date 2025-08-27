@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -50,6 +51,7 @@ public class CohortSeeder {
     return savedTrainingPath.get(randomIndex);
   }
 
+  @Transactional
   public List<CohortEntity> seed(
       List<UserEntity> savedUsers, List<TrainingPathEntity> savedTrainingPath) {
     ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");

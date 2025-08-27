@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -91,6 +92,7 @@ public class AMSSeeder {
     return statuses[statusIndex];
   }
 
+  @Transactional
   public List<AMSEntity> seed(
       List<UserEntity> savedUsers,
       List<SkillLevelProgressEntity> savedSkillLevels,
