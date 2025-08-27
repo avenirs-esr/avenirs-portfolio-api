@@ -22,11 +22,11 @@ public interface PathSegmentsMapper {
             entity.macroCompetence().objectif().enjeu().code(),
             entity.macroCompetence().objectif().enjeu().libelle());
 
-    return PathSegments.toDomain(
-        skill,
-        macroSkill,
-        target,
-        issue,
-        issue); // TODO : inclure le domain à la place du dernier issue
+    SegmentDetail domain =
+        SegmentDetailMapper.toDomain(
+            entity.macroCompetence().objectif().enjeu().domaineCompetence().code(),
+            entity.macroCompetence().objectif().enjeu().domaineCompetence().libelle());
+
+    return PathSegments.toDomain(skill, macroSkill, target, issue, domain);
   }
 }
