@@ -9,7 +9,9 @@ import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.domain.service.UserResourceServiceImpl;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.UserPhotoDatabaseRepository;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,6 +36,7 @@ class StorageControllerIT {
 
   @Autowired private MockMvc mockMvc;
 
+  @Spy private UuidGenerator uuidGenerator = new UuidV7Generator();
   @Mock private FileStorageService fileStorageService;
   @Autowired private StorageController storageController;
   @Autowired private UserPhotoDatabaseRepository userPhotoDatabaseRepository;
@@ -56,7 +60,8 @@ class StorageControllerIT {
     MockitoAnnotations.openMocks(this);
     storageController =
         new StorageController(
-            new UserResourceServiceImpl(fileStorageService, userPhotoDatabaseRepository),
+            new UserResourceServiceImpl(
+                uuidGenerator, fileStorageService, userPhotoDatabaseRepository),
             fileStorageService);
     mockMvc = MockMvcBuilders.standaloneSetup(storageController).build();
   }

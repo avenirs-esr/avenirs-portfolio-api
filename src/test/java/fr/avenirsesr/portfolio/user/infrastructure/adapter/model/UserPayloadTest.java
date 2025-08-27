@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +15,8 @@ class UserPayloadTest {
 
   private ObjectMapper objectMapper;
 
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
+
   @BeforeEach
   void setUp() {
     objectMapper = new ObjectMapper();
@@ -21,7 +25,7 @@ class UserPayloadTest {
 
   @Test
   void shouldCreateUserPayload() {
-    UUID sub = UUID.randomUUID();
+    UUID sub = uuidGenerator.generate();
     Instant iat = Instant.now();
     Instant exp = iat.plusSeconds(3600);
 
@@ -37,7 +41,7 @@ class UserPayloadTest {
 
   @Test
   void shouldSerializeAndDeserializeUserPayload() throws Exception {
-    UUID sub = UUID.randomUUID();
+    UUID sub = uuidGenerator.generate();
     Instant iat = Instant.now();
     Instant exp = iat.plusSeconds(3600);
 

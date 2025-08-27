@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class TraceServiceImpl implements TraceService {
   private static final int MAX_TRACES_OVERVIEW = 3;
+  private final UuidGenerator uuidGenerator;
   private final TraceRepository traceRepository;
   private final StudentProgressRepository studentProgressRepository;
   private final TraceConfigurationService traceConfigurationService;
@@ -114,7 +116,13 @@ public class TraceServiceImpl implements TraceService {
       String aiJustification) {
     var trace =
         Trace.create(
-            UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);
+            uuidGenerator.generate(),
+            user,
+            title,
+            language,
+            isGroup,
+            aiJustification,
+            personalNote);
 
     traceRepository.save(trace);
     return trace;

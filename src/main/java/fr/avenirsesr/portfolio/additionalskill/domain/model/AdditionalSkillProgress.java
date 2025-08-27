@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.additionalskill.domain.model;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.util.UUID;
@@ -29,9 +30,12 @@ public class AdditionalSkillProgress extends AvenirsBaseModel {
   }
 
   public static AdditionalSkillProgress create(
-      Student student, AdditionalSkill skill, EAdditionalSkillLevel level) {
+      UuidGenerator uuidGenerator,
+      Student student,
+      AdditionalSkill skill,
+      EAdditionalSkillLevel level) {
     return new AdditionalSkillProgress(
-        UUID.randomUUID(), student, skill, level, Instant.now(), Instant.now());
+        uuidGenerator.generate(), student, skill, level, Instant.now(), Instant.now());
   }
 
   public static AdditionalSkillProgress toDomain(

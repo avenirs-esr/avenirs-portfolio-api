@@ -20,6 +20,8 @@ import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
@@ -47,13 +49,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class TraceServiceImplTest {
+
+  @Spy private UuidGenerator uuidGenerator = new UuidV7Generator();
   @Mock private TraceRepository traceRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
-
   @Mock private TraceConfigurationService traceConfigurationService;
 
   @InjectMocks private TraceServiceImpl traceService;

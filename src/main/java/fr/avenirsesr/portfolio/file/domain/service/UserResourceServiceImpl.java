@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.*;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
@@ -27,6 +28,7 @@ public class UserResourceServiceImpl implements UserResourceService {
   public static final List<EFileType> ALLOWED_FILE_TYPES =
       List.of(EFileType.PNG, EFileType.JPEG, EFileType.GIF, EFileType.WEBP, EFileType.PJPEG);
 
+  private final UuidGenerator uuidGenerator;
   private final FileStorageService fileStorageService;
   private final UserPhotoRepository userPhotoRepository;
 
@@ -66,7 +68,7 @@ public class UserResourceServiceImpl implements UserResourceService {
 
     var fileResource =
         new FileResource(
-            UUID.randomUUID(), fileName, EFileType.fromMimeType(mimeType), size, content);
+            uuidGenerator.generate(), fileName, EFileType.fromMimeType(mimeType), size, content);
 
     if (!ALLOWED_FILE_TYPES.contains(fileResource.fileType())) {
       throw new FileTypeNotSupportedException();

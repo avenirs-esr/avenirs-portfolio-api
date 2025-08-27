@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.input.RomeAdditionalS
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.Competence;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,6 +42,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Profile("!test")
 @RequiredArgsConstructor
 public class AdditionalSkillBatchLoader {
+  private final UuidGenerator uuidGenerator;
   private final RomeAdditionalSkillApi romeAdditionalSkillApi;
   private final RomeAdditionalSkillService romeAdditionalSkillService;
 
@@ -146,7 +148,7 @@ public class AdditionalSkillBatchLoader {
 
   @Bean
   public ItemProcessor<Competence, AdditionalSkill> itemProcessor() {
-    return AdditionalSkillMapper::createToDomain;
+    return competence -> AdditionalSkillMapper.createToDomain(competence, uuidGenerator);
   }
 
   @Bean

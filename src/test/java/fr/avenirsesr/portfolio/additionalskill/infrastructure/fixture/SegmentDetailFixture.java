@@ -1,8 +1,9 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import java.util.UUID;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 
 public class SegmentDetailFixture {
   private static final FakerProvider faker = new FakerProvider().init(SegmentDetailFixture.class);
@@ -11,7 +12,8 @@ public class SegmentDetailFixture {
   private String libelle;
 
   private SegmentDetailFixture() {
-    this.code = UUID.randomUUID().toString();
+    UuidGenerator uuidGenerator = new UuidV7Generator();
+    this.code = uuidGenerator.generate().toString();
     this.libelle = faker.call("libelle").name().title();
   }
 

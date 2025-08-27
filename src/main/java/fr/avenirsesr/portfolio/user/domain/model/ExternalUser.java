@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.user.domain.model;
 
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import java.time.Instant;
@@ -40,6 +41,7 @@ public class ExternalUser extends AvenirsBaseModel {
   }
 
   public static ExternalUser create(
+      UuidGenerator uuidGenerator,
       User user,
       String externalId,
       EExternalSource source,
@@ -48,7 +50,7 @@ public class ExternalUser extends AvenirsBaseModel {
       String firstName,
       String lastName) {
     return new ExternalUser(
-        UUID.randomUUID(),
+        uuidGenerator.generate(),
         Instant.now(),
         Instant.now(),
         user,

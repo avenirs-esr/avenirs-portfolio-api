@@ -5,6 +5,8 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
@@ -34,10 +36,11 @@ class TraceControllerTest {
   private User user;
   private Trace trace;
   private Principal principal;
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   @BeforeEach
   void setUp() {
-    userId = UUID.randomUUID();
+    userId = uuidGenerator.generate();
     user = UserFixture.create().withId(userId).toModel();
     trace = TraceFixture.create().withUser(user).toModel();
     principal = () -> userId.toString();

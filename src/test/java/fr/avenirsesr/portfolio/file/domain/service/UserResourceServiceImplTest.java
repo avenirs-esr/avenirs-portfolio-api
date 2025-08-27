@@ -13,6 +13,8 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +37,7 @@ public class UserResourceServiceImplTest {
   @InjectMocks private UserResourceServiceImpl service;
   @Mock private UserPhotoRepository userPhotoRepository;
   @Mock private FileStorageService fileStorageService;
+  @Spy private UuidGenerator uuidGenerator = new UuidV7Generator();
 
   private Student student;
 
@@ -59,7 +63,7 @@ public class UserResourceServiceImplTest {
 
     var existingPhoto =
         UserPhoto.create(
-            UUID.randomUUID(),
+            uuidGenerator.generate(),
             EFileType.PNG,
             456,
             1,

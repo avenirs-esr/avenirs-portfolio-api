@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.domain.model;
 
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
@@ -17,9 +18,10 @@ public class Rome4Version extends AvenirsBaseModel {
     this.lastModifiedDate = lastModifiedDate;
   }
 
-  public static Rome4Version create(int version, Instant lastModifiedDate) {
+  public static Rome4Version create(
+      UuidGenerator uuidGenerator, int version, Instant lastModifiedDate) {
     Instant now = Instant.now();
-    return new Rome4Version(UUID.randomUUID(), now, now, version, lastModifiedDate);
+    return new Rome4Version(uuidGenerator.generate(), now, now, version, lastModifiedDate);
   }
 
   public static Rome4Version toDomain(UUID id, int version, Instant lastModifiedDate) {

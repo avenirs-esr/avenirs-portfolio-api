@@ -6,6 +6,8 @@ import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillN
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.Test;
 class AdditionalSkillCacheImplTest {
 
   private AdditionalSkillCacheImpl cache;
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   @BeforeEach
   void setUp() {
@@ -47,7 +50,7 @@ class AdditionalSkillCacheImplTest {
 
   @Test
   void shouldThrowExceptionIfSkillIdNotFound() {
-    UUID invalidId = UUID.randomUUID();
+    UUID invalidId = uuidGenerator.generate();
     assertThrows(AdditionalSkillNotFoundException.class, () -> cache.findById(invalidId));
   }
 

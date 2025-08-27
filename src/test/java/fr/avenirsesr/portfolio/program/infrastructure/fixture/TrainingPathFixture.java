@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.program.infrastructure.fixture;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import java.time.Instant;
 import java.util.*;
 
@@ -13,9 +15,10 @@ public class TrainingPathFixture {
   private Set<SkillLevel> skillLevels;
   private Instant createdAt;
   private Instant updatedAt;
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   private TrainingPathFixture() {
-    this.id = UUID.randomUUID();
+    this.id = uuidGenerator.generate();
     this.program = ProgramFixture.create().toModel();
     this.skillLevels = new LinkedHashSet<>();
     this.createdAt = Instant.now();

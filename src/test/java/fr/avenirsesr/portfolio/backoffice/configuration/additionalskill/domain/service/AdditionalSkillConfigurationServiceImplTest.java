@@ -11,19 +11,22 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.ECon
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.input.service.ConfigurationTranslationService;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.output.repository.ConfigurationRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AdditionalSkillConfigurationServiceImplTest {
 
+  @Spy private UuidGenerator uuidGenerator = new UuidV7Generator();
   @Mock private ConfigurationRepository configurationRepository;
   @Mock private ConfigurationTranslationService configurationTranslationService;
 
@@ -34,52 +37,52 @@ class AdditionalSkillConfigurationServiceImplTest {
     List<Configuration> mockConfigurations =
         List.of(
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.ADDITIONAL_SKILL,
                 EAdditionalSkillConfiguration.LEVEL_BEGINNER_LABEL,
                 "Débutant"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.ADDITIONAL_SKILL,
                 EAdditionalSkillConfiguration.LEVEL_BEGINNER_DESCRIPTION,
                 "Description débutant"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.ADDITIONAL_SKILL,
                 EAdditionalSkillConfiguration.LEVEL_INTERMEDIATE_LABEL,
                 "Intermédiaire"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.ADDITIONAL_SKILL,
                 EAdditionalSkillConfiguration.LEVEL_INTERMEDIATE_DESCRIPTION,
                 "Description intermédiaire"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.ADDITIONAL_SKILL,
                 EAdditionalSkillConfiguration.LEVEL_COMPETENT_LABEL,
                 "Compétent"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.ADDITIONAL_SKILL,
                 EAdditionalSkillConfiguration.LEVEL_COMPETENT_DESCRIPTION,
                 "Description compétent"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.ADDITIONAL_SKILL,
                 EAdditionalSkillConfiguration.LEVEL_ADVANCED_LABEL,
                 "Avancé"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.ADDITIONAL_SKILL,
                 EAdditionalSkillConfiguration.LEVEL_ADVANCED_DESCRIPTION,
                 "Description avancé"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.ADDITIONAL_SKILL,
                 EAdditionalSkillConfiguration.LEVEL_EXPERT_LABEL,
                 "Expert"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.ADDITIONAL_SKILL,
                 EAdditionalSkillConfiguration.LEVEL_EXPERT_DESCRIPTION,
                 "Description expert"));

@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rom
 import fr.avenirsesr.portfolio.additionalskill.domain.service.AdditionalSkillServiceImpl;
 import fr.avenirsesr.portfolio.additionalskill.domain.service.RomeAdditionalSkillServiceImpl;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.AdditionalSkillDatabaseProgressRepository;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,7 @@ public class AdditionalSkillServiceConfig {
   private final Rome4VersionRepository rome4VersionRepository;
   private final RomeAdditionalSkillApi romeAdditionalSkillApi;
   private final OpenSearchIndex openSearchIndex;
+  private final UuidGenerator uuidGenerator;
 
   public AdditionalSkillServiceConfig(
       AdditionalSkillCache additionalSkillCache,
@@ -30,23 +32,30 @@ public class AdditionalSkillServiceConfig {
       AdditionalSkillRepository additionalSkillRepository,
       Rome4VersionRepository rome4VersionRepository,
       RomeAdditionalSkillApi romeAdditionalSkillApi,
-      OpenSearchIndex openSearchIndex) {
+      OpenSearchIndex openSearchIndex,
+      UuidGenerator uuidGenerator) {
     this.additionalSkillCache = additionalSkillCache;
     this.additionalSkillProgressRepository = additionalSkillProgressRepository;
     this.additionalSkillRepository = additionalSkillRepository;
     this.rome4VersionRepository = rome4VersionRepository;
     this.romeAdditionalSkillApi = romeAdditionalSkillApi;
     this.openSearchIndex = openSearchIndex;
+    this.uuidGenerator = uuidGenerator;
   }
 
   @Bean
   public AdditionalSkillService additionalSkillService() {
-    return new AdditionalSkillServiceImpl(additionalSkillCache, additionalSkillProgressRepository);
+    return new AdditionalSkillServiceImpl(
+        uuidGenerator, additionalSkillCache, additionalSkillProgressRepository);
   }
 
   @Bean
   public RomeAdditionalSkillService romeAdditionalSkillService() {
     return new RomeAdditionalSkillServiceImpl(
-        additionalSkillRepository, rome4VersionRepository, romeAdditionalSkillApi, openSearchIndex);
+        uuidGenerator,
+        additionalSkillRepository,
+        rome4VersionRepository,
+        romeAdditionalSkillApi,
+        openSearchIndex);
   }
 }

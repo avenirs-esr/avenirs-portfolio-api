@@ -7,6 +7,8 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.io.IOException;
@@ -30,6 +32,7 @@ public class TraceAttachmentControllerTest {
   private User user;
   private Trace trace;
   private UUID traceId;
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   @BeforeEach
   void setup() {
@@ -37,7 +40,7 @@ public class TraceAttachmentControllerTest {
 
     user = mock(User.class);
     trace = mock(Trace.class);
-    traceId = UUID.randomUUID();
+    traceId = uuidGenerator.generate();
 
     when(principal.getName()).thenReturn("user123");
     when(userUtil.getUser(principal)).thenReturn(user);

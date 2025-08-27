@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -37,7 +38,7 @@ public class AdditionalSkillEntity extends AvenirsBaseEntity {
   }
 
   public static AdditionalSkillEntity create(
-      PathSegmentsEmbeddable pathSegments, EAdditionalSkillType type) {
-    return new AdditionalSkillEntity(UUID.randomUUID(), pathSegments, type);
+      UuidGenerator uuidGenerator, PathSegmentsEmbeddable pathSegments, EAdditionalSkillType type) {
+    return new AdditionalSkillEntity(uuidGenerator.generate(), pathSegments, type);
   }
 }

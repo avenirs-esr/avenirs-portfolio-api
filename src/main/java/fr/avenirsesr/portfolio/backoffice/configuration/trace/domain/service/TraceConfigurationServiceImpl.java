@@ -6,14 +6,15 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.outpu
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.ETraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AllArgsConstructor
 public class TraceConfigurationServiceImpl implements TraceConfigurationService {
+  private final UuidGenerator uuidGenerator;
   private final ConfigurationRepository configurationRepository;
 
   @Override
@@ -54,7 +55,7 @@ public class TraceConfigurationServiceImpl implements TraceConfigurationService 
             .findAny()
             .orElse(
                 Configuration.create(
-                    UUID.randomUUID(),
+                    uuidGenerator.generate(),
                     EConfigurationScope.TRACE,
                     ETraceConfiguration.MAX_REMINING_DAYS,
                     String.valueOf(traceConfiguration.maxRemainingDays())));
@@ -65,7 +66,7 @@ public class TraceConfigurationServiceImpl implements TraceConfigurationService 
             .findAny()
             .orElse(
                 Configuration.create(
-                    UUID.randomUUID(),
+                    uuidGenerator.generate(),
                     EConfigurationScope.TRACE,
                     ETraceConfiguration.MAX_REMINING_DAYS_BEFORE_WARNING,
                     String.valueOf(traceConfiguration.maxRemainingDaysBeforeWarning())));
@@ -76,7 +77,7 @@ public class TraceConfigurationServiceImpl implements TraceConfigurationService 
             .findAny()
             .orElse(
                 Configuration.create(
-                    UUID.randomUUID(),
+                    uuidGenerator.generate(),
                     EConfigurationScope.TRACE,
                     ETraceConfiguration.MAX_REMINING_DAYS_BEFORE_CRITICAL,
                     String.valueOf(traceConfiguration.maxRemainingDaysBeforeCritical())));

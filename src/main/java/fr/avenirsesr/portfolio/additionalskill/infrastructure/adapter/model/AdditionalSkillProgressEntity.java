@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
@@ -44,7 +45,11 @@ public class AdditionalSkillProgressEntity extends AvenirsBaseEntity {
   }
 
   public static AdditionalSkillProgressEntity create(
-      UserEntity student, UUID additionalSkillId, EAdditionalSkillLevel level) {
-    return new AdditionalSkillProgressEntity(UUID.randomUUID(), student, additionalSkillId, level);
+      UuidGenerator uuidGenerator,
+      UserEntity student,
+      UUID additionalSkillId,
+      EAdditionalSkillLevel level) {
+    return new AdditionalSkillProgressEntity(
+        uuidGenerator.generate(), student, additionalSkillId, level);
   }
 }

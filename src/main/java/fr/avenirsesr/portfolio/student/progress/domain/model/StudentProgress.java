@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -46,13 +47,14 @@ public class StudentProgress extends AvenirsBaseModel {
   }
 
   public static StudentProgress create(
+      UuidGenerator uuidGenerator,
       Student student,
       TrainingPath trainingPath,
       LocalDate startDate,
       LocalDate endDate,
       List<SkillLevelProgress> skillLevels) {
     return new StudentProgress(
-        UUID.randomUUID(),
+        uuidGenerator.generate(),
         student,
         trainingPath,
         startDate,

@@ -9,10 +9,10 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.ECon
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.input.service.ConfigurationTranslationService;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.output.repository.ConfigurationRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class AdditionalSkillConfigurationServiceImpl
     implements AdditionalSkillConfigurationService {
+  private final UuidGenerator uuidGenerator;
   private final ConfigurationRepository configurationRepository;
   private final ConfigurationTranslationService configurationTranslationService;
 
@@ -133,7 +134,7 @@ public class AdditionalSkillConfigurationServiceImpl
                   .findAny()
                   .orElseThrow()
               : Configuration.create(
-                  UUID.randomUUID(), EConfigurationScope.ADDITIONAL_SKILL, key, value);
+                  uuidGenerator.generate(), EConfigurationScope.ADDITIONAL_SKILL, key, value);
 
       newConfiguration.setValue(value);
       newConfigurations.add(newConfiguration);

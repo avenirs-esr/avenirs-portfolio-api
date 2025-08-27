@@ -5,7 +5,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,6 +44,8 @@ class TraceAttachmentControllerIT {
 
   @Value("${file.storage.local-path}")
   private String storagePath;
+
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   @BeforeAll
   static void setup(@Autowired SeederRunner seederRunner) {
@@ -82,7 +86,7 @@ class TraceAttachmentControllerIT {
 
   @Test
   void shouldReturn404WhenTraceNotFound() throws Exception {
-    UUID unknownTraceId = UUID.randomUUID();
+    UUID unknownTraceId = uuidGenerator.generate();
 
     MockMultipartFile file =
         new MockMultipartFile(

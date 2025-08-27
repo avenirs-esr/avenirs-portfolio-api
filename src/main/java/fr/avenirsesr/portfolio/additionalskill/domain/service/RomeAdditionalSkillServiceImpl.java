@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchInde
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rome4VersionRepository;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillService {
+  private final UuidGenerator uuidGenerator;
   private final AdditionalSkillRepository additionalSkillRepository;
   private final Rome4VersionRepository rome4VersionRepository;
   private final RomeAdditionalSkillApi romeAdditionalSkillApi;
@@ -67,7 +69,8 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
 
     if (shouldSave) {
       var rome4Version =
-          Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate());
+          Rome4Version.create(
+              uuidGenerator, newVersion.getVersion(), newVersion.getLastModifiedDate());
       rome4VersionRepository.save(rome4Version);
     }
 

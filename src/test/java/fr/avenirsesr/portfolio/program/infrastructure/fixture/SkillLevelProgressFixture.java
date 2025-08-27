@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.program.infrastructure.fixture;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -25,9 +27,10 @@ public class SkillLevelProgressFixture {
   private static final Period DEFAULT_SKILL_LEVEL_PERIOD = Period.ofMonths(3);
   private Instant createdAt;
   private Instant updatedAt;
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   private SkillLevelProgressFixture(Student student, SkillLevel skillLevel) {
-    this.id = UUID.randomUUID();
+    this.id = uuidGenerator.generate();
     this.student = student;
     this.skillLevel = skillLevel;
     this.status = ESkillLevelStatus.NOT_STARTED;

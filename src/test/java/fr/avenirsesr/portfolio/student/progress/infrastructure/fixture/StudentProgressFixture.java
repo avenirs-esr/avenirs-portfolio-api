@@ -4,6 +4,8 @@ import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -27,6 +29,8 @@ public class StudentProgressFixture {
   private Instant updatedAt;
 
   private static final Period DEFAULT_STUDENT_PROGRESS_DURATION = Period.ofYears(1);
+
+  private static final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   private StudentProgressFixture(
       UUID id,
@@ -61,7 +65,7 @@ public class StudentProgressFixture {
             .toList();
     var startDate = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
     return new StudentProgressFixture(
-        UUID.randomUUID(),
+        uuidGenerator.generate(),
         student,
         trainingPath,
         startDate,

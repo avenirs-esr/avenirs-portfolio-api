@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class TraceAttachmentServiceImpl implements TraceAttachmentService {
+  private final UuidGenerator uuidGenerator;
   private final TraceAttachmentRepository traceAttachmentRepository;
   private final TraceRepository traceRepository;
   private final FileStorageService fileStorageService;
@@ -45,7 +47,8 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
         throw new FileSizeTooBigException();
       }
 
-      var fileResource = new FileResource(UUID.randomUUID(), fileName, fileType, size, content);
+      var fileResource =
+          new FileResource(uuidGenerator.generate(), fileName, fileType, size, content);
       var uri = fileStorageService.upload(fileResource);
 
       var newAttachment = createAttachment(student, allTraceAttachments, fileResource, trace, uri);

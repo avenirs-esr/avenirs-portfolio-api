@@ -4,6 +4,8 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
@@ -23,9 +25,10 @@ public class CohortFixture {
   private Set<AMS> amsSet;
   private Instant createdAt;
   private Instant updatedAt;
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   private CohortFixture() {
-    this.id = UUID.randomUUID();
+    this.id = uuidGenerator.generate();
     this.name = "Test Cohort";
     this.description = "Test Cohort Description";
     this.trainingPath = TrainingPathFixture.create().toModel();

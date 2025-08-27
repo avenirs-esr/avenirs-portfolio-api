@@ -11,6 +11,8 @@ import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.*;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.*;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
@@ -30,7 +32,8 @@ class CohortMapperTest {
 
   private final String name = "Test Cohort";
   private final String description = "Test Cohort Description";
-  private final UUID id = UUID.randomUUID();
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
+  private final UUID id = uuidGenerator.generate();
   private final ELanguage language = ELanguage.FRENCH;
 
   @Test
@@ -74,7 +77,7 @@ class CohortMapperTest {
   void shouldMapFromEntityToDomain() {
     // Given
     UserEntity studentEntity = new UserEntity();
-    studentEntity.setId(UUID.randomUUID());
+    studentEntity.setId(uuidGenerator.generate());
     studentEntity.setFirstName("John");
     studentEntity.setLastName("Doe");
     studentEntity.setEmail("john.doe@example.com");
@@ -88,7 +91,7 @@ class CohortMapperTest {
     studentEntity.setTeacher(teacher);
 
     InstitutionEntity institutionEntity = new InstitutionEntity();
-    institutionEntity.setId(UUID.randomUUID());
+    institutionEntity.setId(uuidGenerator.generate());
     institutionEntity.setEnabledFields(new HashSet<>());
 
     InstitutionTranslationEntity institutionTranslationEntity = new InstitutionTranslationEntity();
@@ -101,7 +104,7 @@ class CohortMapperTest {
     institutionEntity.setTranslations(institutionTranslations);
 
     ProgramEntity programEntity = new ProgramEntity();
-    programEntity.setId(UUID.randomUUID());
+    programEntity.setId(uuidGenerator.generate());
     programEntity.setAPC(true);
     programEntity.setInstitution(institutionEntity);
 
@@ -115,18 +118,18 @@ class CohortMapperTest {
     programEntity.setTranslations(translations);
 
     TrainingPathEntity trainingPathEntity = new TrainingPathEntity();
-    trainingPathEntity.setId(UUID.randomUUID());
+    trainingPathEntity.setId(uuidGenerator.generate());
     trainingPathEntity.setProgram(programEntity);
     trainingPathEntity.setSkillLevels(new HashSet<>());
 
     StudentProgressEntity studentProgressEntity = new StudentProgressEntity();
-    studentProgressEntity.setId(UUID.randomUUID());
+    studentProgressEntity.setId(uuidGenerator.generate());
     studentProgressEntity.setStudent(studentEntity);
     studentProgressEntity.setTrainingPath(trainingPathEntity);
     studentProgressEntity.setSkillLevels(List.of(new SkillLevelProgressEntity()));
 
     UserEntity userEntity = new UserEntity();
-    userEntity.setId(UUID.randomUUID());
+    userEntity.setId(uuidGenerator.generate());
     userEntity.setFirstName("Jane");
     userEntity.setLastName("Smith");
     userEntity.setEmail("jane.smith@example.com");
@@ -168,7 +171,7 @@ class CohortMapperTest {
   void shouldMapWithEmptyCollections() {
     // Given
     UserEntity studentEntity = new UserEntity();
-    studentEntity.setId(UUID.randomUUID());
+    studentEntity.setId(uuidGenerator.generate());
     studentEntity.setFirstName("John");
     studentEntity.setLastName("Doe");
     studentEntity.setEmail("john.doe@example.com");
@@ -182,7 +185,7 @@ class CohortMapperTest {
     studentEntity.setTeacher(teacher);
 
     InstitutionEntity institutionEntity = new InstitutionEntity();
-    institutionEntity.setId(UUID.randomUUID());
+    institutionEntity.setId(uuidGenerator.generate());
     institutionEntity.setEnabledFields(new HashSet<>());
 
     InstitutionTranslationEntity institutionTranslationEntity = new InstitutionTranslationEntity();
@@ -195,7 +198,7 @@ class CohortMapperTest {
     institutionEntity.setTranslations(institutionTranslations);
 
     ProgramEntity programEntity = new ProgramEntity();
-    programEntity.setId(UUID.randomUUID());
+    programEntity.setId(uuidGenerator.generate());
     programEntity.setAPC(true);
     programEntity.setInstitution(institutionEntity);
 
@@ -209,12 +212,12 @@ class CohortMapperTest {
     programEntity.setTranslations(translations);
 
     TrainingPathEntity trainingPathEntity = new TrainingPathEntity();
-    trainingPathEntity.setId(UUID.randomUUID());
+    trainingPathEntity.setId(uuidGenerator.generate());
     trainingPathEntity.setProgram(programEntity);
     trainingPathEntity.setSkillLevels(new HashSet<>());
 
     StudentProgressEntity studentProgressEntity = new StudentProgressEntity();
-    studentProgressEntity.setId(UUID.randomUUID());
+    studentProgressEntity.setId(uuidGenerator.generate());
     studentProgressEntity.setStudent(studentEntity);
     studentProgressEntity.setTrainingPath(trainingPathEntity);
     studentProgressEntity.setSkillLevels(List.of(new SkillLevelProgressEntity()));

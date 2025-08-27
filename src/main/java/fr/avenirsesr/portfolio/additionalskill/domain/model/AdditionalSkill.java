@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.additionalskill.domain.model;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
@@ -25,9 +26,10 @@ public class AdditionalSkill extends AvenirsBaseModel {
     this.type = type;
   }
 
-  public static AdditionalSkill create(PathSegments pathSegments, EAdditionalSkillType type) {
+  public static AdditionalSkill create(
+      UuidGenerator uuidGenerator, PathSegments pathSegments, EAdditionalSkillType type) {
     Instant now = Instant.now();
-    return new AdditionalSkill(UUID.randomUUID(), now, now, pathSegments, type);
+    return new AdditionalSkill(uuidGenerator.generate(), now, now, pathSegments, type);
   }
 
   public static AdditionalSkill toDomain(

@@ -9,6 +9,8 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.ECon
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.output.repository.ConfigurationRepository;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.ETraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,10 +18,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class TraceConfigurationServiceImplTest {
+
+  @Spy private UuidGenerator uuidGenerator = new UuidV7Generator();
 
   @Mock private ConfigurationRepository configurationRepository;
 
@@ -32,17 +37,17 @@ class TraceConfigurationServiceImplTest {
     mockConfigurations =
         List.of(
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.TRACE,
                 ETraceConfiguration.MAX_REMINING_DAYS,
                 "30"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.TRACE,
                 ETraceConfiguration.MAX_REMINING_DAYS_BEFORE_WARNING,
                 "10"),
             Configuration.create(
-                UUID.randomUUID(),
+                uuidGenerator.generate(),
                 EConfigurationScope.TRACE,
                 ETraceConfiguration.MAX_REMINING_DAYS_BEFORE_CRITICAL,
                 "5"));
@@ -66,16 +71,19 @@ class TraceConfigurationServiceImplTest {
   @Test
   void shouldThrowExceptionIfConfigurationMissing() {
     // Given repository missing CRITICAL key
+    UUID configId1 = uuidGenerator.generate();
+    UUID configId2 = uuidGenerator.generate();
+
     when(configurationRepository.inScope(EConfigurationScope.TRACE))
         .thenReturn(
             List.of(
                 Configuration.create(
-                    UUID.randomUUID(),
+                    configId1,
                     EConfigurationScope.TRACE,
                     ETraceConfiguration.MAX_REMINING_DAYS,
                     "30"),
                 Configuration.create(
-                    UUID.randomUUID(),
+                    configId2,
                     EConfigurationScope.TRACE,
                     ETraceConfiguration.MAX_REMINING_DAYS_BEFORE_WARNING,
                     "10")));

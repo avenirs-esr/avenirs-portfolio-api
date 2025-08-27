@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
@@ -28,6 +30,8 @@ public class UserServiceImplTest {
   @InjectMocks private UserServiceImpl userService;
 
   private Student student;
+
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   @BeforeEach
   void setUp() {
@@ -80,7 +84,7 @@ public class UserServiceImplTest {
   @Test
   void getUser_shouldThrowException_whenUserNotFound() {
     // Arrange
-    UUID userId = UUID.randomUUID();
+    UUID userId = uuidGenerator.generate();
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
     // Act + Assert

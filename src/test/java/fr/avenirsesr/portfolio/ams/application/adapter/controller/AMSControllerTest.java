@@ -16,6 +16,8 @@ import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -41,6 +43,8 @@ class AMSControllerTest {
 
   @InjectMocks private AMSController controller;
 
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
+
   private UUID userId;
   private UUID studentProgressId;
   private Student student;
@@ -52,8 +56,8 @@ class AMSControllerTest {
 
   @BeforeEach
   void setUp() {
-    userId = UUID.randomUUID();
-    studentProgressId = UUID.randomUUID();
+    userId = uuidGenerator.generate();
+    studentProgressId = uuidGenerator.generate();
     User user = UserFixture.createStudent().withId(userId).toModel();
     student = user.toStudent();
     principal = () -> userId.toString();

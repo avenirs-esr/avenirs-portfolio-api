@@ -14,17 +14,21 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkil
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AdditionalSkillServiceImplTest {
 
+  @Spy private UuidGenerator uuidGenerator = new UuidV7Generator();
   @Mock private AdditionalSkillCache additionalSkillCache;
   @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
 
@@ -65,7 +69,7 @@ class AdditionalSkillServiceImplTest {
   @Test
   void createAdditionalSkillProgress_shouldSaveWhenSkillIsAvailableAndNotDuplicate() {
     Student student = mock(Student.class);
-    UUID skillId = UUID.randomUUID();
+    UUID skillId = uuidGenerator.generate();
     EAdditionalSkillType type = EAdditionalSkillType.ROME4;
     EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
     AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
@@ -84,7 +88,7 @@ class AdditionalSkillServiceImplTest {
   @Test
   void createAdditionalSkillProgress_shouldThrowDuplicateWhenAlreadyExists() {
     Student student = mock(Student.class);
-    UUID skillId = UUID.randomUUID();
+    UUID skillId = uuidGenerator.generate();
     EAdditionalSkillType type = EAdditionalSkillType.ROME4;
     EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
     AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
@@ -105,7 +109,7 @@ class AdditionalSkillServiceImplTest {
   @Test
   void createAdditionalSkillProgress_shouldRethrowWhenSkillNotFound() {
     Student student = mock(Student.class);
-    UUID skillId = UUID.randomUUID();
+    UUID skillId = uuidGenerator.generate();
     EAdditionalSkillType type = EAdditionalSkillType.ROME4;
     EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
 

@@ -5,6 +5,8 @@ import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EDurationUnit;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
@@ -20,9 +22,10 @@ public class ProgramFixture {
   private int durationCount = 2;
   private Instant createdAt;
   private Instant updatedAt;
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   private ProgramFixture() {
-    this.id = UUID.randomUUID();
+    this.id = uuidGenerator.generate();
     this.institution = InstitutionFixture.create().toModel();
     this.name = "Default Program";
     this.isAPC = false;

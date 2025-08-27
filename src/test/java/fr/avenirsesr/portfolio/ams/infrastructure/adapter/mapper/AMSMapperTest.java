@@ -14,6 +14,8 @@ import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.CohortFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -46,7 +48,8 @@ class AMSMapperTest {
   private final Instant startDate = Instant.parse("2023-01-01T00:00:00Z");
   private final Instant endDate = Instant.parse("2023-12-31T23:59:59Z");
   private final EAmsStatus status = EAmsStatus.IN_PROGRESS;
-  private final UUID id = UUID.randomUUID();
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
+  private final UUID id = uuidGenerator.generate();
 
   @BeforeEach
   void setUp() {

@@ -6,7 +6,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import java.util.UUID;
@@ -42,6 +44,8 @@ class TraceControllerIT {
 
   @Value("${user.unknown.signature}")
   private String unknownUserSignature;
+
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
 
   @BeforeAll
   static void setup(@Autowired SeederRunner seederRunner) {
@@ -145,7 +149,7 @@ class TraceControllerIT {
 
   @Test
   void shouldReturn403IfTraceNotFoundWhenDeleting() throws Exception {
-    UUID traceIdNotOwned = UUID.randomUUID();
+    UUID traceIdNotOwned = uuidGenerator.generate();
 
     mockMvc
         .perform(

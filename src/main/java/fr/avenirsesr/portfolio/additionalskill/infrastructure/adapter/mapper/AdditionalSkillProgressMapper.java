@@ -8,7 +8,8 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 public interface AdditionalSkillProgressMapper {
   static AdditionalSkillProgressEntity fromDomain(AdditionalSkillProgress additionalSkillProgress) {
 
-    return AdditionalSkillProgressEntity.create(
+    return AdditionalSkillProgressEntity.of(
+        additionalSkillProgress.getId(),
         UserMapper.fromDomain(additionalSkillProgress.getStudent()),
         additionalSkillProgress.getSkill().getId(),
         additionalSkillProgress.getLevel());

@@ -12,6 +12,8 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
@@ -29,6 +31,7 @@ import org.mockito.*;
 
 class TraceAttachmentServiceImplTest {
 
+  @Spy private UuidGenerator uuidGenerator = new UuidV7Generator();
   @Mock private TraceAttachmentRepository traceAttachmentRepository;
   @Mock private FileStorageService fileStorageService;
   @Mock private TraceRepository traceRepository;
@@ -44,7 +47,7 @@ class TraceAttachmentServiceImplTest {
   @Test
   void uploadTraceAttachment_shouldSaveNewAttachmentAndReturnIt() throws IOException {
     Student student = UserFixture.createStudent().toModel().toStudent();
-    UUID traceId = UUID.randomUUID();
+    UUID traceId = uuidGenerator.generate();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
@@ -86,7 +89,7 @@ class TraceAttachmentServiceImplTest {
   @Test
   void uploadTraceAttachment_noExistingAttachments_shouldVersionOne() throws IOException {
     Student student = UserFixture.createStudent().toModel().toStudent();
-    UUID traceId = UUID.randomUUID();
+    UUID traceId = uuidGenerator.generate();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
@@ -108,7 +111,7 @@ class TraceAttachmentServiceImplTest {
   @Test
   void uploadTraceAttachment_shouldPropagateIOException() throws IOException {
     Student student = UserFixture.createStudent().toModel().toStudent();
-    UUID traceId = UUID.randomUUID();
+    UUID traceId = uuidGenerator.generate();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
@@ -137,7 +140,7 @@ class TraceAttachmentServiceImplTest {
   @Test
   void uploadTraceAttachment_shouldThrowFileSizeTooBigException_andDeleteTraceWhenNoAttachments() {
     Student student = UserFixture.createStudent().toModel().toStudent();
-    UUID traceId = UUID.randomUUID();
+    UUID traceId = uuidGenerator.generate();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
@@ -164,7 +167,7 @@ class TraceAttachmentServiceImplTest {
       uploadTraceAttachment_shouldThrowFileTypeNotSupportedException_andDeleteTraceWhenNoAttachments()
           throws IOException {
     Student student = UserFixture.createStudent().toModel().toStudent();
-    UUID traceId = UUID.randomUUID();
+    UUID traceId = uuidGenerator.generate();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
@@ -193,7 +196,7 @@ class TraceAttachmentServiceImplTest {
   void uploadTraceAttachment_shouldPropagateIOException_andDeleteTraceWhenNoAttachments()
       throws IOException {
     Student student = UserFixture.createStudent().toModel().toStudent();
-    UUID traceId = UUID.randomUUID();
+    UUID traceId = uuidGenerator.generate();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
@@ -224,7 +227,7 @@ class TraceAttachmentServiceImplTest {
   @Test
   void uploadTraceAttachment_shouldThrowTraceNotFoundException() {
     Student student = UserFixture.createStudent().toModel().toStudent();
-    UUID traceId = UUID.randomUUID();
+    UUID traceId = uuidGenerator.generate();
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
 
@@ -243,7 +246,7 @@ class TraceAttachmentServiceImplTest {
   @Test
   void uploadTraceAttachment_shouldThrowUserNotAuthorizedException() {
     Student student = UserFixture.createStudent().toModel().toStudent();
-    UUID traceId = UUID.randomUUID();
+    UUID traceId = uuidGenerator.generate();
     // Trace owned by a different user
     Trace trace = TraceFixture.create().toModel();
 

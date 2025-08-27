@@ -8,10 +8,10 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.ad
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationTranslationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.repository.ConfigurationDatabaseRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Service
 public class ConfigurationTranslationServiceImpl implements ConfigurationTranslationService {
+  private final UuidGenerator uuidGenerator;
   private final ConfigurationDatabaseRepository configurationRepository;
 
   @Override
@@ -65,7 +66,7 @@ public class ConfigurationTranslationServiceImpl implements ConfigurationTransla
     configurationRepository.saveAllEntities(configurationsToSave);
   }
 
-  private static void addTranslationToEntity(
+  private void addTranslationToEntity(
       Map<ELanguage, List<Configuration>> domains,
       Configuration configuration,
       ELanguage language,
@@ -84,7 +85,8 @@ public class ConfigurationTranslationServiceImpl implements ConfigurationTransla
             translation -> translation.setValue(newValue),
             () -> {
               var newTranslation =
-                  ConfigurationTranslationEntity.of(UUID.randomUUID(), language, entity, newValue);
+                  ConfigurationTranslationEntity.of(
+                      uuidGenerator.generate(), language, entity, newValue);
               entity.getTranslations().add(newTranslation);
             });
   }

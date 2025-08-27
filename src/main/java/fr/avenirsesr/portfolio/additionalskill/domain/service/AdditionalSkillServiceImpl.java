@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkil
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class AdditionalSkillServiceImpl implements AdditionalSkillService {
+  private final UuidGenerator uuidGenerator;
   private final AdditionalSkillCache additionalSkillCache;
   private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
 
@@ -43,7 +45,7 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
     try {
       AdditionalSkill additionalSkill = additionalSkillCache.findById(additionalSkillId);
       AdditionalSkillProgress additionalSkillProgress =
-          AdditionalSkillProgress.create(student, additionalSkill, level);
+          AdditionalSkillProgress.create(uuidGenerator, student, additionalSkill, level);
       if (additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(
           additionalSkillProgress)) {
         log.error(

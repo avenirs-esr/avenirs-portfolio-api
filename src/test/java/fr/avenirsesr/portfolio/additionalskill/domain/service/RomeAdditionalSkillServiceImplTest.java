@@ -18,6 +18,8 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchInde
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rome4VersionRepository;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -26,10 +28,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class RomeAdditionalSkillServiceImplTest {
+
+  @Spy private UuidGenerator uuidGenerator = new UuidV7Generator();
 
   @Mock private AdditionalSkillRepository additionalSkillRepository;
 
@@ -48,6 +53,7 @@ class RomeAdditionalSkillServiceImplTest {
   void setUp() {
     additionalSkill1 =
         AdditionalSkill.create(
+            uuidGenerator,
             PathSegments.create(
                 SegmentDetail.create("skillCode1", "skillLibelle1"),
                 SegmentDetail.create("macroSkillCode1", "macroSkillLibelle1"),
@@ -58,6 +64,7 @@ class RomeAdditionalSkillServiceImplTest {
 
     additionalSkill2 =
         AdditionalSkill.create(
+            uuidGenerator,
             PathSegments.create(
                 SegmentDetail.create("skillCode2", "skillLibelle2"),
                 SegmentDetail.create("macroSkillCode2", "macroSkillLibelle2"),
@@ -102,6 +109,7 @@ class RomeAdditionalSkillServiceImplTest {
     // Given
     AdditionalSkill existingSkill =
         AdditionalSkill.create(
+            uuidGenerator,
             PathSegments.create(
                 SegmentDetail.create("skillCode1", "newSkillLibelle1"),
                 SegmentDetail.create("macroSkillCode1", "macroSkillLibelle1"),
@@ -129,7 +137,7 @@ class RomeAdditionalSkillServiceImplTest {
   @Test
   void shouldSaveNewVersion_WhenNoExistingVersion() {
     // Given
-    Rome4Version newVersion = Rome4Version.create(1, Instant.now());
+    Rome4Version newVersion = Rome4Version.create(uuidGenerator, 1, Instant.now());
     when(romeAdditionalSkillApi.fetchRomeVersion()).thenReturn(newVersion);
     when(rome4VersionRepository.findFirstByOrderByVersionDesc()).thenReturn(Optional.empty());
 
@@ -144,8 +152,8 @@ class RomeAdditionalSkillServiceImplTest {
   @Test
   void shouldSaveNewVersion_WhenNewerVersionFound() {
     // Given
-    Rome4Version oldVersion = Rome4Version.create(1, Instant.now());
-    Rome4Version newVersion = Rome4Version.create(2, Instant.now());
+    Rome4Version oldVersion = Rome4Version.create(uuidGenerator, 1, Instant.now());
+    Rome4Version newVersion = Rome4Version.create(uuidGenerator, 2, Instant.now());
 
     when(romeAdditionalSkillApi.fetchRomeVersion()).thenReturn(newVersion);
     when(rome4VersionRepository.findFirstByOrderByVersionDesc())
@@ -162,8 +170,8 @@ class RomeAdditionalSkillServiceImplTest {
   @Test
   void shouldNotSave_WhenVersionIsUpToDate() {
     // Given
-    Rome4Version oldVersion = Rome4Version.create(2, Instant.now());
-    Rome4Version newVersion = Rome4Version.create(2, Instant.now());
+    Rome4Version oldVersion = Rome4Version.create(uuidGenerator, 2, Instant.now());
+    Rome4Version newVersion = Rome4Version.create(uuidGenerator, 2, Instant.now());
 
     when(romeAdditionalSkillApi.fetchRomeVersion()).thenReturn(newVersion);
     when(rome4VersionRepository.findFirstByOrderByVersionDesc())

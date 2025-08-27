@@ -14,6 +14,8 @@ import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
@@ -41,6 +43,7 @@ class AMSServiceImplTest {
   private Student student;
   private UUID studentId;
   private UUID studentProgressId;
+  private final UuidGenerator uuidGenerator = new UuidV7Generator();
   private static final Integer DEFAULT_PAGE = 1;
   private static final Integer DEFAULT_SIZE = 10;
   private static final PageCriteria DEFAULT_PAGE_CRITERIA =
@@ -51,7 +54,7 @@ class AMSServiceImplTest {
   void setUp() {
     student = UserFixture.createStudent().toModel().toStudent();
     studentId = student.getId();
-    studentProgressId = UUID.randomUUID();
+    studentProgressId = uuidGenerator.generate();
     studentProgress = StudentProgressFixture.create().toModel();
   }
 

@@ -11,13 +11,17 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.ad
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationTranslationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.repository.ConfigurationDatabaseRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.UuidV7Generator;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Spy;
 
 class ConfigurationTranslationServiceImplTest {
 
+  @Spy private UuidGenerator uuidGenerator = new UuidV7Generator();
   private ConfigurationDatabaseRepository repository;
   private ConfigurationTranslationServiceImpl service;
 
@@ -26,11 +30,11 @@ class ConfigurationTranslationServiceImplTest {
   @BeforeEach
   void setUp() {
     repository = mock(ConfigurationDatabaseRepository.class);
-    service = new ConfigurationTranslationServiceImpl(repository);
+    service = new ConfigurationTranslationServiceImpl(uuidGenerator, repository);
 
     // Entité de base avec traduction FR
     entityFr = new ConfigurationEntity();
-    entityFr.setId(UUID.randomUUID());
+    entityFr.setId(uuidGenerator.generate());
     entityFr.setScope(EConfigurationScope.ADDITIONAL_SKILL);
     entityFr.setKey("LEVEL_BEGINNER_LABEL");
     entityFr.setValue("Débutant");
@@ -38,7 +42,7 @@ class ConfigurationTranslationServiceImplTest {
     var translations = new HashSet<ConfigurationTranslationEntity>();
     translations.add(
         ConfigurationTranslationEntity.of(
-            UUID.randomUUID(), ELanguage.FRENCH, entityFr, "Débutant"));
+            uuidGenerator.generate(), ELanguage.FRENCH, entityFr, "Débutant"));
     entityFr.setTranslations(translations);
   }
 
@@ -69,7 +73,7 @@ class ConfigurationTranslationServiceImplTest {
     // given
     Configuration configFr =
         Configuration.create(
-            UUID.randomUUID(),
+            uuidGenerator.generate(),
             EConfigurationScope.ADDITIONAL_SKILL,
             EAdditionalSkillConfiguration.LEVEL_BEGINNER_LABEL,
             "Débutant");

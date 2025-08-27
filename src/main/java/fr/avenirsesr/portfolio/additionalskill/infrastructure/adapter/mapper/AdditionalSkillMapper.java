@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.Comp
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.CompetenceComplementaireDetaillee;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.PathSegmentsEmbeddable;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.SegmentDetailEmbeddable;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 
 public interface AdditionalSkillMapper {
   static AdditionalSkill toDomain(CompetenceComplementaireDetaillee entity) {
@@ -39,8 +40,9 @@ public interface AdditionalSkillMapper {
         entity.getType());
   }
 
-  static AdditionalSkill createToDomain(Competence competence) {
+  static AdditionalSkill createToDomain(Competence competence, UuidGenerator uuidGenerator) {
     return AdditionalSkill.create(
+        uuidGenerator,
         PathSegments.toDomain(
             SegmentDetail.toDomain(competence.getCode(), competence.getLibelle()),
             SegmentDetail.toDomain(
