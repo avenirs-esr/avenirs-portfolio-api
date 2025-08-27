@@ -14,7 +14,7 @@ public interface AdditionalSkillProgressMapper {
             additionalSkillProgress.getSkill().getPathSegments().getIssue().getLibelle(),
             additionalSkillProgress.getSkill().getPathSegments().getTarget().getLibelle(),
             additionalSkillProgress.getSkill().getPathSegments().getMacroSkill().getLibelle()),
-        additionalSkillProgress.getSkill().getType().name(),
+        additionalSkillProgress.getSkill().getType(),
         additionalSkillProgress.getLevel());
   }
 }
