@@ -21,15 +21,14 @@ is_allowed_import() {
 
 echo "🔍 Checking imports in domain layer..."
 
-for module_dir in "$BASE_DIR"/*; do
-  [ -d "$module_dir/domain" ] || continue
-
-  echo -n "📁 Module : $(basename "$module_dir")"
+while IFS= read -r -d '' domain_dir; do
+  module_dir=$(basename "$(dirname "$domain_dir")")
+  echo -n "📁 Module : $module_dir"
 
   module_violations=0
 
   # Use a simple for loop to avoid subshell scope issues
-  for java_file in $(find "$module_dir/domain" -name "*.java"); do
+  for java_file in $(find "$domain_dir" -name "*.java"); do
     while read -r line; do
       [[ "$line" =~ ^import\  ]] || continue
       import_stmt="${line%;}"
@@ -48,7 +47,7 @@ for module_dir in "$BASE_DIR"/*; do
   fi
 
   violations=$((violations + module_violations))
-done
+done < <(find "$BASE_DIR" -type d -name domain -print0)
 
 if [[ $violations -gt 0 ]]; then
   echo -e "\n\033[1;31m× Forbidden imports were found.${NC}"
