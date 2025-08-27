@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
-import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,21 +47,6 @@ public class ExternalUserEntity extends AvenirsBaseEntity {
 
   @Column(nullable = false, name = "last_name")
   private String lastName;
-
-  @Column(
-      name = "created_at",
-      nullable = false,
-      insertable = false,
-      updatable = false,
-      columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
-  private Instant createdAt;
-
-  @Column(
-      name = "updated_at",
-      nullable = false,
-      insertable = false,
-      columnDefinition = "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
-  private Instant updatedAt;
 
   private ExternalUserEntity(
       UUID id,
