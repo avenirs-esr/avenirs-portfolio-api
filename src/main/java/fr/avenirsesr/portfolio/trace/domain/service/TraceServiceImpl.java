@@ -18,7 +18,10 @@ import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -115,5 +118,19 @@ public class TraceServiceImpl implements TraceService {
 
     traceRepository.save(trace);
     return trace;
+  }
+
+  @Override
+  public Optional<LocalDate> getWillBeDeletedAt(Trace trace) {
+    var config = traceConfigurationService.getTraceConfiguration();
+
+    return trace.isUnassociated()
+        ? Optional.of(
+            trace
+                .getCreatedAt()
+                .plus(Duration.ofDays(config.maxRemainingDays()))
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate())
+        : Optional.empty();
   }
 }

@@ -7,7 +7,9 @@ import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface TraceService {
@@ -28,4 +30,6 @@ public interface TraceService {
       boolean isGroup,
       String personalNote,
       String aiJustification);
+
+  Optional<LocalDate> getWillBeDeletedAt(Trace trace);
 }

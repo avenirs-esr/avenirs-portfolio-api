@@ -68,7 +68,12 @@ public class TraceController {
 
     var tracesViewResponse =
         new PagedResponse<>(
-            tracesResult.content().stream().map(TraceViewMapper::toDTO).toList(),
+            tracesResult.content().stream()
+                .map(
+                    trace ->
+                        TraceViewMapper.toDTO(
+                            trace, traceService.getWillBeDeletedAt(trace).orElse(null)))
+                .toList(),
             PageInfoDTO.fromDomain(tracesResult.pageInfo()));
 
     return ResponseEntity.ok(tracesViewResponse);

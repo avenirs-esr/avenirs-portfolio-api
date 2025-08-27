@@ -34,7 +34,10 @@ import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -328,5 +331,56 @@ public class TraceServiceImplTest {
     assertEquals(ELanguage.FRENCH, trace.getLanguage());
     assertTrue(trace.getPersonalNote().isEmpty());
     assertTrue(trace.getAiUseJustification().isEmpty());
+  }
+
+  @Test
+  void givenUnassociatedTrace_shouldReturnWillBeDeletedAt() {
+    // Given
+    TraceConfiguration config = new TraceConfiguration(90, 30, 5);
+    when(traceConfigurationService.getTraceConfiguration()).thenReturn(config);
+
+    Instant createdAt = Instant.now().minus(10, ChronoUnit.DAYS);
+    Trace trace =
+        TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
+
+    // Mock isUnassociated() à true
+    trace.setSkillLevels(List.of()); // pour simuler une trace non associée
+    assertTrue(trace.isUnassociated());
+
+    // When
+    Optional<LocalDate> willBeDeletedAt = traceService.getWillBeDeletedAt(trace);
+
+    // Then
+    assertTrue(willBeDeletedAt.isPresent());
+    LocalDate expectedDate =
+        createdAt
+            .plus(Duration.ofDays(config.maxRemainingDays()))
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate();
+    assertEquals(expectedDate, willBeDeletedAt.get());
+  }
+
+  @Test
+  void givenAssociatedTrace_shouldReturnEmpty() {
+    // Given
+    TraceConfiguration config = new TraceConfiguration(90, 30, 5);
+    when(traceConfigurationService.getTraceConfiguration()).thenReturn(config);
+
+    Instant createdAt = Instant.now();
+    Trace trace =
+        TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
+
+    // Simule une trace associée → isUnassociated() == false
+    SkillLevelProgress skillLevelProgress =
+        SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel()).toModel();
+    trace.setSkillLevels(List.of(skillLevelProgress));
+
+    assertFalse(trace.isUnassociated());
+
+    // When
+    Optional<LocalDate> willBeDeletedAt = traceService.getWillBeDeletedAt(trace);
+
+    // Then
+    assertTrue(willBeDeletedAt.isEmpty());
   }
 }
