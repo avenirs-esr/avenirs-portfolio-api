@@ -78,4 +78,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.ad
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.domain.service,InstitutionServiceImpl,0,27,0,0,0,5,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.domain.service,TrainingPathServiceImpl,0,20,0,0,0,4,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.batch,AdditionalSkillBatchScheduler,40,0,0,0,13,0,3,0,3,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.batch,AdditionalSkillBatchLoader,124,0,2,0,40,0,12,0,11,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.batch,AdditionalSkillBatchLoader,153,0,2,0,49,0,16,0,15,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.batch,AdditionalSkillBatchLoader.new ItemReader() {...},39,0,4,0,9,0,4,0,2,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.batch,AdditionalSkillBatchLoader.new JobExecutionListener() {...},73,0,16,0,17,0,12,0,4,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.batch,AdditionalSkillBatchLoader.new SkipListener() {...},23,0,0,0,7,0,4,0,4,0
