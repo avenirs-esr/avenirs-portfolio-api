@@ -16,9 +16,9 @@ import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.User;
-import java.time.Duration;
-import java.time.Instant;
+import java.time.*;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -115,6 +115,20 @@ public class TraceServiceImpl implements TraceService {
 
 <span class="fc" id="L116">    traceRepository.save(trace);</span>
 <span class="fc" id="L117">    return trace;</span>
+  }
+
+  @Override
+  public Optional&lt;LocalDate&gt; getWillBeDeletedAt(Trace trace) {
+<span class="fc" id="L122">    var config = traceConfigurationService.getTraceConfiguration();</span>
+
+<span class="fc bfc" id="L124" title="All 2 branches covered.">    return trace.isUnassociated()</span>
+<span class="fc" id="L125">        ? Optional.of(</span>
+            trace
+<span class="fc" id="L127">                .getCreatedAt()</span>
+<span class="fc" id="L128">                .plus(Duration.ofDays(config.maxRemainingDays()))</span>
+<span class="fc" id="L129">                .atZone(ZoneId.systemDefault())</span>
+<span class="fc" id="L130">                .toLocalDate())</span>
+<span class="fc" id="L131">        : Optional.empty();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
