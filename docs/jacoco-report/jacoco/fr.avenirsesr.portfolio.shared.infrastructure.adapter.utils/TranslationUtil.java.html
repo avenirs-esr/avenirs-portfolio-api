@@ -7,24 +7,27 @@ import fr.avenirsesr.portfolio.shared.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.shared.infrastructure.context.RequestData;
 import java.util.Optional;
 import java.util.Set;
-import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L12">@Slf4j</span>
-<span class="nc" id="L13">public class TranslationUtil {</span>
+public interface TranslationUtil {
 
-  public static &lt;T extends TranslationEntity&gt; T getTranslation(Set&lt;T&gt; translations) {
+  static &lt;T extends TranslationEntity&gt; T getTranslation(Set&lt;T&gt; translations) {
     var preferredLanguage =
-<span class="fc" id="L17">        Optional.ofNullable(RequestContext.get())</span>
-<span class="fc" id="L18">            .map(RequestData::preferredLanguage)</span>
-<span class="fc" id="L19">            .orElse(ELanguage.FALLBACK);</span>
+<span class="fc" id="L15">        Optional.ofNullable(RequestContext.get())</span>
+<span class="fc" id="L16">            .map(RequestData::preferredLanguage)</span>
+<span class="fc" id="L17">            .orElse(ELanguage.FALLBACK);</span>
 
-<span class="fc" id="L21">    return translations.stream()</span>
-<span class="fc" id="L22">        .filter(t -&gt; t.getLanguage().equals(preferredLanguage))</span>
-<span class="fc" id="L23">        .findFirst()</span>
-<span class="fc" id="L24">        .orElseThrow(</span>
+<span class="fc" id="L19">    return getTranslation(translations, preferredLanguage);</span>
+  }
+
+  static &lt;T extends TranslationEntity&gt; T getTranslation(
+      Set&lt;T&gt; translations, ELanguage selectedLanguage) {
+<span class="fc" id="L24">    return translations.stream()</span>
+<span class="fc" id="L25">        .filter(t -&gt; t.getLanguage().equals(selectedLanguage))</span>
+<span class="fc" id="L26">        .findFirst()</span>
+<span class="fc" id="L27">        .orElseThrow(</span>
             () -&gt;
-<span class="nc" id="L26">                new LanguageException(</span>
-<span class="nc" id="L27">                    String.format(&quot;Fallback language [%s] not setup&quot;, ELanguage.FALLBACK)));</span>
+<span class="nc" id="L29">                new LanguageException(</span>
+<span class="nc" id="L30">                    String.format(&quot;Fallback language [%s] not setup&quot;, ELanguage.FALLBACK)));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
