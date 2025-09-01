@@ -8,5 +8,4 @@ jobs:
     uses: avenirs-esr/avenirs-workflows/.github/workflows/deploy-workflow.yaml@feat/518-deploy-workflow
     with:
       target_env: dev
-      tag_name: "test"
     secrets: inherit
