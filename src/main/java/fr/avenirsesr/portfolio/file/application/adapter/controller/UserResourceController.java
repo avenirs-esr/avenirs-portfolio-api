@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -61,5 +62,17 @@ public class UserResourceController {
             file.getSize(),
             file.getBytes());
     return ResponseEntity.ok(UserPhotoUploadDTOMapper.fromDomain(userPhoto));
+  }
+
+  @DeleteMapping(path = "/{fileId}")
+  public ResponseEntity<String> deleteUserPhoto(
+      Principal principal, @Valid @PathVariable UUID fileId) {
+    log.debug(
+        "Received request to delete user picture [{}] of user [{}]", fileId, principal.getName());
+    User user = userUtil.getUser(principal);
+
+    userResourceService.deletePhoto(fileId, user);
+
+    return ResponseEntity.ok("Resource successfully deleted");
   }
 }

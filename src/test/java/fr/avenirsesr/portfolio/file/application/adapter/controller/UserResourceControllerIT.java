@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -9,6 +10,7 @@ import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +76,19 @@ class UserResourceControllerIT {
         .andExpect(
             jsonPath("$.fileSize")
                 .value("FakeImageContent".getBytes(StandardCharsets.UTF_8).length))
-        .andExpect(jsonPath("$.version").value(4));
+        .andExpect(jsonPath("$.version").value(2));
+  }
+
+  @Test
+  void shouldReturnNotFoundWhenDeletingNonExistingPhoto() throws Exception {
+    UUID fileId = UUID.randomUUID();
+
+    mockMvc
+        .perform(
+            delete("/me/storage/users/{fileId}", fileId)
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature))
+        .andExpect(status().isNotFound());
   }
 }

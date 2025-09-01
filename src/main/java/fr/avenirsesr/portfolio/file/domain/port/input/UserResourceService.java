@@ -23,4 +23,6 @@ public interface UserResourceService {
       long size,
       byte[] content)
       throws IOException;
+
+  void deletePhoto(UUID fileId, User user);
 }

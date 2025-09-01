@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
@@ -12,11 +13,13 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -122,5 +125,95 @@ public class UserResourceServiceImplTest {
     org.junit.jupiter.api.Assertions.assertThrows(
         FileSizeTooBigException.class,
         () -> service.uploadPhoto(user, category, photoType, fileName, mimeType, size, content));
+  }
+
+  @Test
+  void deletePhoto_shouldDeletePhotoSuccessfully() throws IOException {
+    // Given
+    var user = student.getUser();
+    var photoId = UUID.randomUUID();
+    var photo =
+        UserPhoto.create(
+            photoId,
+            EFileType.PNG,
+            456,
+            1,
+            true,
+            "uri/to/photo.png",
+            user,
+            user,
+            EUserCategory.STUDENT,
+            EUserPhotoType.PROFILE);
+    when(userPhotoRepository.findById(photoId)).thenReturn(Optional.of(photo));
+
+    // When
+    service.deletePhoto(photoId, user);
+
+    // Then
+    verify(fileStorageService).delete(photo.getId());
+    verify(userPhotoRepository).removeFromDatabase(photo);
+  }
+
+  @Test
+  void deletePhoto_shouldThrowFileNotFoundException_whenPhotoDoesNotExist() {
+    // Given
+    var user = student.getUser();
+    var photoId = UUID.randomUUID();
+    when(userPhotoRepository.findById(photoId)).thenReturn(Optional.empty());
+
+    // Then
+    org.junit.jupiter.api.Assertions.assertThrows(
+        FileNotFoundException.class, () -> service.deletePhoto(photoId, user));
+  }
+
+  @Test
+  void deletePhoto_shouldThrowUserNotAuthorizedException_whenPhotoBelongsToAnotherUser() {
+    // Given
+    var user = student.getUser();
+    var otherUser = UserFixture.createStudent().toModel().toStudent().getUser();
+    var photoId = UUID.randomUUID();
+    var photo =
+        UserPhoto.create(
+            photoId,
+            EFileType.PNG,
+            456,
+            1,
+            true,
+            "uri/to/photo.png",
+            otherUser,
+            otherUser,
+            EUserCategory.STUDENT,
+            EUserPhotoType.PROFILE);
+    when(userPhotoRepository.findById(photoId)).thenReturn(Optional.of(photo));
+
+    // Then
+    org.junit.jupiter.api.Assertions.assertThrows(
+        UserNotAuthorizedException.class, () -> service.deletePhoto(photoId, user));
+  }
+
+  @Test
+  void deletePhoto_shouldWrapIOExceptionInRuntimeException() throws IOException {
+    // Given
+    var user = student.getUser();
+    var photoId = UUID.randomUUID();
+    var photo =
+        UserPhoto.create(
+            photoId,
+            EFileType.PNG,
+            456,
+            1,
+            true,
+            "uri/to/photo.png",
+            user,
+            user,
+            EUserCategory.STUDENT,
+            EUserPhotoType.PROFILE);
+    when(userPhotoRepository.findById(photoId)).thenReturn(Optional.of(photo));
+    doThrow(new IOException("IO error")).when(fileStorageService).delete(photo.getId());
+
+    // Then
+    org.junit.jupiter.api.Assertions.assertThrows(
+        RuntimeException.class, () -> service.deletePhoto(photoId, user));
+    verify(userPhotoRepository, never()).removeFromDatabase(photo);
   }
 }

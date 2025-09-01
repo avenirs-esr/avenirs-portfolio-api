@@ -50,12 +50,12 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     File dir = new File(uploadDir);
     if (!dir.exists()) {
-      throw new FileNotFoundException();
+      throw new IllegalStateException("File storage directory does not exist");
     }
 
-    // Search for the file with the given id (extension is unknown, so we check all)
     File[] matchingFiles = dir.listFiles((d, name) -> name.startsWith(id.toString() + "."));
     if (matchingFiles == null || matchingFiles.length == 0) {
+      log.error("No file found with id {} found", id);
       throw new FileNotFoundException();
     }
 
