@@ -50,12 +50,12 @@ import org.springframework.stereotype.Component;
 
 <span class="nc" id="L51">    File dir = new File(uploadDir);</span>
 <span class="nc bnc" id="L52" title="All 2 branches missed.">    if (!dir.exists()) {</span>
-<span class="nc" id="L53">      throw new FileNotFoundException();</span>
+<span class="nc" id="L53">      throw new IllegalStateException(&quot;File storage directory does not exist&quot;);</span>
     }
 
-    // Search for the file with the given id (extension is unknown, so we check all)
-<span class="nc" id="L57">    File[] matchingFiles = dir.listFiles((d, name) -&gt; name.startsWith(id.toString() + &quot;.&quot;));</span>
-<span class="nc bnc" id="L58" title="All 4 branches missed.">    if (matchingFiles == null || matchingFiles.length == 0) {</span>
+<span class="nc" id="L56">    File[] matchingFiles = dir.listFiles((d, name) -&gt; name.startsWith(id.toString() + &quot;.&quot;));</span>
+<span class="nc bnc" id="L57" title="All 4 branches missed.">    if (matchingFiles == null || matchingFiles.length == 0) {</span>
+<span class="nc" id="L58">      log.error(&quot;No file found with id {} found&quot;, id);</span>
 <span class="nc" id="L59">      throw new FileNotFoundException();</span>
     }
 

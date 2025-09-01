@@ -13,13 +13,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-<span class="fc" id="L22">@Slf4j</span>
+<span class="fc" id="L23">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/storage/users&quot;)
@@ -48,19 +49,31 @@ public class UserResourceController {
           EUserPhotoType photoType,
       @RequestParam(&quot;file&quot;) MultipartFile file)
       throws IOException {
-<span class="fc" id="L51">    log.debug(&quot;Received request to upload profile picture of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L52">    User user = userUtil.getUser(principal);</span>
+<span class="fc" id="L52">    log.debug(&quot;Received request to upload profile picture of user [{}]&quot;, principal.getName());</span>
+<span class="fc" id="L53">    User user = userUtil.getUser(principal);</span>
 
-<span class="fc" id="L54">    var userPhoto =</span>
-<span class="fc" id="L55">        userResourceService.uploadPhoto(</span>
+<span class="fc" id="L55">    var userPhoto =</span>
+<span class="fc" id="L56">        userResourceService.uploadPhoto(</span>
             user,
             userCategory,
             photoType,
-<span class="fc" id="L59">            file.getOriginalFilename(),</span>
-<span class="fc" id="L60">            file.getContentType(),</span>
-<span class="fc" id="L61">            file.getSize(),</span>
-<span class="fc" id="L62">            file.getBytes());</span>
-<span class="fc" id="L63">    return ResponseEntity.ok(UserPhotoUploadDTOMapper.fromDomain(userPhoto));</span>
+<span class="fc" id="L60">            file.getOriginalFilename(),</span>
+<span class="fc" id="L61">            file.getContentType(),</span>
+<span class="fc" id="L62">            file.getSize(),</span>
+<span class="fc" id="L63">            file.getBytes());</span>
+<span class="fc" id="L64">    return ResponseEntity.ok(UserPhotoUploadDTOMapper.fromDomain(userPhoto));</span>
+  }
+
+  @DeleteMapping(path = &quot;/{fileId}&quot;)
+  public ResponseEntity&lt;String&gt; deleteUserPhoto(
+      Principal principal, @Valid @PathVariable UUID fileId) {
+<span class="fc" id="L70">    log.debug(</span>
+<span class="fc" id="L71">        &quot;Received request to delete user picture [{}] of user [{}]&quot;, fileId, principal.getName());</span>
+<span class="fc" id="L72">    User user = userUtil.getUser(principal);</span>
+
+<span class="nc" id="L74">    userResourceService.deletePhoto(fileId, user);</span>
+
+<span class="nc" id="L76">    return ResponseEntity.ok(&quot;Resource successfully deleted&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
