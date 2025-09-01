@@ -13,4 +13,6 @@ public interface GenericRepositoryPort<D extends AvenirsBaseModel> {
   List<D> saveAll(List<D> collection);
 
   void flush();
+
+  void removeFromDatabase(D domain);
 }

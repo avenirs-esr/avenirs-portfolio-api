@@ -57,4 +57,9 @@ public abstract class GenericJpaRepositoryAdapter<
   public void flush() {
     jpaRepository.flush();
   }
+
+  @Override
+  public void removeFromDatabase(D domain) {
+    jpaRepository.delete(fromDomain.apply(domain));
+  }
 }
