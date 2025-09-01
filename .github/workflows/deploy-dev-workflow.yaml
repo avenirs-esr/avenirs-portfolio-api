@@ -6,6 +6,4 @@ on:
 jobs:
   call-main-ci:
     uses: avenirs-esr/avenirs-workflows/.github/workflows/deploy-workflow.yaml@main
-    with:
-      target_env: dev
     secrets: inherit
