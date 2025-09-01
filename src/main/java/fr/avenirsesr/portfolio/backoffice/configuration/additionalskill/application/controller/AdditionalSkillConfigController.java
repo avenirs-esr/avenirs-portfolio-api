@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.*;
 public class AdditionalSkillConfigController {
   private final AdditionalSkillConfigurationService service;
 
-  @GetMapping
+  @GetMapping(path = "setup")
   public ResponseEntity<Map<ELanguage, AdditionalSkillConfigurationDTO>>
-      getAdditionalSkillConfig() {
-    log.debug("Received request to get additional-skills config");
+      getAdditionalSkillConfigWithAllTranslations() {
+    log.debug("Received request to get additional-skills config for setup");
 
     Map<ELanguage, AdditionalSkillConfiguration> config =
         service.getConfigurationWithAllTranslations();
@@ -35,7 +35,7 @@ public class AdditionalSkillConfigController {
                     entry -> AdditionalSkillConfigurationDTO.fromModel(entry.getValue()))));
   }
 
-  @PostMapping
+  @PostMapping(path = "setup")
   public ResponseEntity<Void> postAdditionalSkillConfig(
       @RequestBody Map<ELanguage, AdditionalSkillConfigurationDTO> configurations) {
     log.debug("Received request to post additional-skills config : {}", configurations);
@@ -48,5 +48,14 @@ public class AdditionalSkillConfigController {
                     entry -> AdditionalSkillConfigurationDTO.toModel(entry.getValue()))));
 
     return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+  }
+
+  @GetMapping()
+  public ResponseEntity<AdditionalSkillConfigurationDTO> getAdditionalSkillConfig() {
+    log.debug("Received request to get additional-skills config");
+
+    AdditionalSkillConfiguration config = service.getConfiguration();
+
+    return ResponseEntity.ok(AdditionalSkillConfigurationDTO.fromModel(config));
   }
 }

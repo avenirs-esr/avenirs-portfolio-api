@@ -6,20 +6,25 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(requiredProperties = {"BEGINNER", "INTERMEDIATE", "COMPETENT", "ADVANCED", "EXPERT"})
 public record AdditionalSkillConfigurationDTO(
-    AdditionalSkillLevel BEGINNER,
-    AdditionalSkillLevel INTERMEDIATE,
-    AdditionalSkillLevel COMPETENT,
-    AdditionalSkillLevel ADVANCED,
-    AdditionalSkillLevel EXPERT) {
+    AdditionalSkillLevelDTO BEGINNER,
+    AdditionalSkillLevelDTO INTERMEDIATE,
+    AdditionalSkillLevelDTO COMPETENT,
+    AdditionalSkillLevelDTO ADVANCED,
+    AdditionalSkillLevelDTO EXPERT) {
 
   public static AdditionalSkillConfigurationDTO fromModel(
       AdditionalSkillConfiguration configuration) {
     return new AdditionalSkillConfigurationDTO(
-        configuration.BEGINNER(),
-        configuration.INTERMEDIATE(),
-        configuration.COMPETENT(),
-        configuration.ADVANCED(),
-        configuration.EXPERT());
+        new AdditionalSkillLevelDTO(
+            configuration.BEGINNER().label(), configuration.BEGINNER().description()),
+        new AdditionalSkillLevelDTO(
+            configuration.INTERMEDIATE().label(), configuration.INTERMEDIATE().description()),
+        new AdditionalSkillLevelDTO(
+            configuration.COMPETENT().label(), configuration.COMPETENT().description()),
+        new AdditionalSkillLevelDTO(
+            configuration.ADVANCED().label(), configuration.ADVANCED().description()),
+        new AdditionalSkillLevelDTO(
+            configuration.EXPERT().label(), configuration.EXPERT().description()));
   }
 
   public static AdditionalSkillConfiguration toModel(AdditionalSkillConfigurationDTO dto) {
