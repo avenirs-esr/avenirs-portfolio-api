@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
         userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.PROFILE);
     var coverUrl = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.COVER);
 
-    return new UserPhotos(profileUrl, coverUrl);
+    return new UserPhotos(profileUrl.id(), profileUrl.url(), coverUrl.id(), coverUrl.url());
   }
 
   @Override

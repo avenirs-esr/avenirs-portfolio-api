@@ -1,3 +1,7 @@
 package fr.avenirsesr.portfolio.user.domain.model;
 
-public record UserPhotos(String profileUrl, String coverUrl) {}
+import java.util.Optional;
+import java.util.UUID;
+
+public record UserPhotos(
+    Optional<UUID> profileFileId, String profileUrl, Optional<UUID> coverFileId, String coverUrl) {}

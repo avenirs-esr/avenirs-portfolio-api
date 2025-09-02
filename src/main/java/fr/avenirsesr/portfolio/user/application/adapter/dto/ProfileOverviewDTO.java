@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.user.application.adapter.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.UUID;
 
 @Schema(
     requiredProperties = {
@@ -16,5 +17,9 @@ public record ProfileOverviewDTO(
     String lastname,
     String bio,
     String email,
-    String profilePicture,
-    String coverPicture) {}
+    PictureDTO profilePicture,
+    PictureDTO coverPicture) {
+
+  @Schema(requiredProperties = {"url"})
+  public record PictureDTO(UUID fileId, String url) {}
+}

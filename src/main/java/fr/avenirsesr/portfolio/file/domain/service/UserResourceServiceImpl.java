@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.model.UserPhoto;
+import fr.avenirsesr.portfolio.file.domain.model.UserPhotoUrlAndId;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
@@ -16,6 +17,7 @@ import fr.avenirsesr.portfolio.user.domain.model.*;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
@@ -31,16 +33,21 @@ public class UserResourceServiceImpl implements UserResourceService {
   private final UserPhotoRepository userPhotoRepository;
 
   @Override
-  public String getUserPhotoUrl(User user, EUserCategory userCategory, EUserPhotoType type) {
+  public UserPhotoUrlAndId getUserPhotoUrl(
+      User user, EUserCategory userCategory, EUserPhotoType type) {
 
-    return userPhotoRepository.findActiveByUser(user, userCategory, type).stream()
-        .map(photo -> FileStorageConstants.PHOTO_ENDPOINT_PREFIX + "/" + photo.getId())
-        .findAny()
-        .orElse(
-            switch (type) {
-              case PROFILE -> FileStorageConstants.DEFAULT_PROFILE_FILE_URL;
-              case COVER -> FileStorageConstants.DEFAULT_COVER_FILE_URL;
-            });
+    Optional<UserPhoto> userPhoto =
+        userPhotoRepository.findActiveByUser(user, userCategory, type).stream().findFirst();
+
+    return new UserPhotoUrlAndId(
+        userPhoto.map(UserPhoto::getId),
+        userPhoto
+            .map(photo -> FileStorageConstants.PHOTO_ENDPOINT_PREFIX + "/" + photo.getId())
+            .orElse(
+                switch (type) {
+                  case PROFILE -> FileStorageConstants.DEFAULT_PROFILE_FILE_URL;
+                  case COVER -> FileStorageConstants.DEFAULT_COVER_FILE_URL;
+                }));
   }
 
   @Override

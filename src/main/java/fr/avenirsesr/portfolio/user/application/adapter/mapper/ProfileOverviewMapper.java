@@ -16,7 +16,9 @@ public interface ProfileOverviewMapper {
           case TEACHER -> user.toTeacher().getBio();
         },
         user.getEmail(),
-        userPhotos.profileUrl(),
-        userPhotos.coverUrl());
+        new ProfileOverviewDTO.PictureDTO(
+            userPhotos.profileFileId().orElse(null), userPhotos.profileUrl()),
+        new ProfileOverviewDTO.PictureDTO(
+            userPhotos.coverFileId().orElse(null), userPhotos.coverUrl()));
   }
 }

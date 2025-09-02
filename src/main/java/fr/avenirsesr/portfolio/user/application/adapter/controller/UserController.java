@@ -55,7 +55,11 @@ public class UserController {
         ProfileOverviewMapper.userDomainToDto(
             user,
             userCategory,
-            new UserPhotos(baseUrl + userPhotos.profileUrl(), baseUrl + userPhotos.coverUrl())));
+            new UserPhotos(
+                userPhotos.profileFileId(),
+                baseUrl + userPhotos.profileUrl(),
+                userPhotos.coverFileId(),
+                baseUrl + userPhotos.coverUrl())));
   }
 
   @PutMapping("/{userCategory}/update")
