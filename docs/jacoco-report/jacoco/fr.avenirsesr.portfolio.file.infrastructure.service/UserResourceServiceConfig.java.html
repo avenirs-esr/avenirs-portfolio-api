@@ -3,23 +3,28 @@
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.domain.service.UserResourceServiceImpl;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.service.FileStorageServiceImpl;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class UserResourceServiceConfig {
+  private final UuidGenerator uuidGenerator;
   private final FileStorageServiceImpl fileStorageService;
   private final UserPhotoRepository userPhotoRepository;
 
   public UserResourceServiceConfig(
-<span class="fc" id="L15">      FileStorageServiceImpl fileStorageService, UserPhotoRepository userPhotoRepository) {</span>
-<span class="fc" id="L16">    this.fileStorageService = fileStorageService;</span>
-<span class="fc" id="L17">    this.userPhotoRepository = userPhotoRepository;</span>
-<span class="fc" id="L18">  }</span>
+      UuidGenerator uuidGenerator,
+      FileStorageServiceImpl fileStorageService,
+<span class="fc" id="L19">      UserPhotoRepository userPhotoRepository) {</span>
+<span class="fc" id="L20">    this.uuidGenerator = uuidGenerator;</span>
+<span class="fc" id="L21">    this.fileStorageService = fileStorageService;</span>
+<span class="fc" id="L22">    this.userPhotoRepository = userPhotoRepository;</span>
+<span class="fc" id="L23">  }</span>
 
   @Bean
   public UserResourceServiceImpl userResourceService() {
-<span class="fc" id="L22">    return new UserResourceServiceImpl(fileStorageService, userPhotoRepository);</span>
+<span class="fc" id="L27">    return new UserResourceServiceImpl(uuidGenerator, fileStorageService, userPhotoRepository);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchInde
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rome4VersionRepository;
+import fr.avenirsesr.portfolio.shared.domain.port.output.utils.UuidGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +17,10 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L20">@Slf4j</span>
 @AllArgsConstructor
 public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillService {
+  private final UuidGenerator uuidGenerator;
   private final AdditionalSkillRepository additionalSkillRepository;
   private final Rome4VersionRepository rome4VersionRepository;
   private final RomeAdditionalSkillApi romeAdditionalSkillApi;
@@ -26,71 +28,72 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
 
   @Override
   public void cleanAndCreateAdditionalSkillIndex() {
-<span class="fc" id="L29">    openSearchIndex.cleanAndCreateAdditionalSkillIndex();</span>
-<span class="fc" id="L30">  }</span>
+<span class="fc" id="L31">    openSearchIndex.cleanAndCreateAdditionalSkillIndex();</span>
+<span class="fc" id="L32">  }</span>
 
   @Override
   public List&lt;AdditionalSkill&gt; synchronizeAndIndexAdditionalSkills(
       List&lt;AdditionalSkill&gt; additionalSkillList) {
-<span class="fc" id="L35">    List&lt;String&gt; skillCodes =</span>
-<span class="fc" id="L36">        additionalSkillList.stream()</span>
-<span class="fc" id="L37">            .map(additionalSkill -&gt; additionalSkill.getPathSegments().getSkill().getCode())</span>
-<span class="fc" id="L38">            .filter(Objects::nonNull)</span>
-<span class="fc" id="L39">            .distinct()</span>
-<span class="fc" id="L40">            .toList();</span>
+<span class="fc" id="L37">    List&lt;String&gt; skillCodes =</span>
+<span class="fc" id="L38">        additionalSkillList.stream()</span>
+<span class="fc" id="L39">            .map(additionalSkill -&gt; additionalSkill.getPathSegments().getSkill().getCode())</span>
+<span class="fc" id="L40">            .filter(Objects::nonNull)</span>
+<span class="fc" id="L41">            .distinct()</span>
+<span class="fc" id="L42">            .toList();</span>
 
-<span class="fc" id="L42">    List&lt;AdditionalSkill&gt; existingSkillList =</span>
-<span class="fc" id="L43">        additionalSkillRepository.findByPathSegmentsSkillCodeIn(skillCodes);</span>
+<span class="fc" id="L44">    List&lt;AdditionalSkill&gt; existingSkillList =</span>
+<span class="fc" id="L45">        additionalSkillRepository.findByPathSegmentsSkillCodeIn(skillCodes);</span>
 
-<span class="fc" id="L45">    Map&lt;String, AdditionalSkill&gt; existingSkillByCode =</span>
-<span class="fc" id="L46">        existingSkillList.stream()</span>
-<span class="fc" id="L47">            .collect(</span>
-<span class="fc" id="L48">                Collectors.toMap(</span>
-<span class="fc" id="L49">                    skill -&gt; skill.getPathSegments().getSkill().getCode(), Function.identity()));</span>
+<span class="fc" id="L47">    Map&lt;String, AdditionalSkill&gt; existingSkillByCode =</span>
+<span class="fc" id="L48">        existingSkillList.stream()</span>
+<span class="fc" id="L49">            .collect(</span>
+<span class="fc" id="L50">                Collectors.toMap(</span>
+<span class="fc" id="L51">                    skill -&gt; skill.getPathSegments().getSkill().getCode(), Function.identity()));</span>
 
-<span class="fc" id="L51">    List&lt;AdditionalSkill&gt; toSave =</span>
-<span class="fc" id="L52">        getAdditionalSkillsToSave(additionalSkillList, existingSkillByCode);</span>
-<span class="fc" id="L53">    List&lt;AdditionalSkill&gt; savedAdditionalSkill = additionalSkillRepository.saveAll(toSave);</span>
-<span class="fc" id="L54">    openSearchIndex.indexAll(savedAdditionalSkill);</span>
-<span class="fc" id="L55">    return savedAdditionalSkill;</span>
+<span class="fc" id="L53">    List&lt;AdditionalSkill&gt; toSave =</span>
+<span class="fc" id="L54">        getAdditionalSkillsToSave(additionalSkillList, existingSkillByCode);</span>
+<span class="fc" id="L55">    List&lt;AdditionalSkill&gt; savedAdditionalSkill = additionalSkillRepository.saveAll(toSave);</span>
+<span class="fc" id="L56">    openSearchIndex.indexAll(savedAdditionalSkill);</span>
+<span class="fc" id="L57">    return savedAdditionalSkill;</span>
   }
 
   @Override
   public boolean checkRomeVersionUpdated() {
-<span class="fc" id="L60">    Rome4Version newVersion = romeAdditionalSkillApi.fetchRomeVersion();</span>
+<span class="fc" id="L62">    Rome4Version newVersion = romeAdditionalSkillApi.fetchRomeVersion();</span>
 
-<span class="fc" id="L62">    boolean shouldSave =</span>
+<span class="fc" id="L64">    boolean shouldSave =</span>
         rome4VersionRepository
-<span class="fc" id="L64">            .findFirstByOrderByVersionDesc()</span>
-<span class="fc bfc" id="L65" title="All 2 branches covered.">            .map(oldVersion -&gt; newVersion.getVersion() &gt; oldVersion.getVersion())</span>
-<span class="fc" id="L66">            .orElse(true);</span>
+<span class="fc" id="L66">            .findFirstByOrderByVersionDesc()</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            .map(oldVersion -&gt; newVersion.getVersion() &gt; oldVersion.getVersion())</span>
+<span class="fc" id="L68">            .orElse(true);</span>
 
-<span class="fc bfc" id="L68" title="All 2 branches covered.">    if (shouldSave) {</span>
-<span class="fc" id="L69">      var rome4Version =</span>
-<span class="fc" id="L70">          Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate());</span>
-<span class="fc" id="L71">      rome4VersionRepository.save(rome4Version);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">    if (shouldSave) {</span>
+<span class="fc" id="L71">      var rome4Version =</span>
+<span class="fc" id="L72">          Rome4Version.create(</span>
+<span class="fc" id="L73">              uuidGenerator, newVersion.getVersion(), newVersion.getLastModifiedDate());</span>
+<span class="fc" id="L74">      rome4VersionRepository.save(rome4Version);</span>
     }
 
-<span class="fc" id="L74">    return shouldSave;</span>
+<span class="fc" id="L77">    return shouldSave;</span>
   }
 
   private List&lt;AdditionalSkill&gt; getAdditionalSkillsToSave(
       List&lt;AdditionalSkill&gt; additionalSkillList, Map&lt;String, AdditionalSkill&gt; existingSkillByCode) {
-<span class="fc" id="L79">    List&lt;AdditionalSkill&gt; toSave = new ArrayList&lt;&gt;(additionalSkillList.size());</span>
+<span class="fc" id="L82">    List&lt;AdditionalSkill&gt; toSave = new ArrayList&lt;&gt;(additionalSkillList.size());</span>
 
-<span class="fc bfc" id="L81" title="All 2 branches covered.">    for (AdditionalSkill additionalSkill : additionalSkillList) {</span>
-<span class="fc" id="L82">      String skillCode = additionalSkill.getPathSegments().getSkill().getCode();</span>
-<span class="fc" id="L83">      AdditionalSkill existingSkill = existingSkillByCode.get(skillCode);</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">    for (AdditionalSkill additionalSkill : additionalSkillList) {</span>
+<span class="fc" id="L85">      String skillCode = additionalSkill.getPathSegments().getSkill().getCode();</span>
+<span class="fc" id="L86">      AdditionalSkill existingSkill = existingSkillByCode.get(skillCode);</span>
 
-<span class="fc bfc" id="L85" title="All 2 branches covered.">      if (existingSkill != null) {</span>
-<span class="fc" id="L86">        existingSkill.setPathSegments(additionalSkill.getPathSegments());</span>
-<span class="fc" id="L87">        existingSkill.setType(additionalSkill.getType());</span>
-<span class="fc" id="L88">        toSave.add(existingSkill);</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">      if (existingSkill != null) {</span>
+<span class="fc" id="L89">        existingSkill.setPathSegments(additionalSkill.getPathSegments());</span>
+<span class="fc" id="L90">        existingSkill.setType(additionalSkill.getType());</span>
+<span class="fc" id="L91">        toSave.add(existingSkill);</span>
       } else {
-<span class="fc" id="L90">        toSave.add(additionalSkill);</span>
+<span class="fc" id="L93">        toSave.add(additionalSkill);</span>
       }
-<span class="fc" id="L92">    }</span>
-<span class="fc" id="L93">    return toSave;</span>
+<span class="fc" id="L95">    }</span>
+<span class="fc" id="L96">    return toSave;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
