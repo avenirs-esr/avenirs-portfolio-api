@@ -20,10 +20,8 @@ public interface SkillMapper {
         studentProgress.getLastAchievedSkillLevelBySkill().get(skill).orElse(null);
 
     return new SkillDTO(
-        skillLevelProgress.getSkillLevel().getSkill().getId(),
-        skillLevelProgress.getSkillLevel().getSkill().getName(),
-        skillLevelProgress.getTraces().size(),
-        skillLevelProgress.getAmses().size(),
+        skill.getId(),
+        skill.getName(),
         levelBySkill,
         SkillLevelViewMapper.fromDomainToDto(skillLevelProgress),
         Optional.ofNullable(lastAchievedSkillLevel)
