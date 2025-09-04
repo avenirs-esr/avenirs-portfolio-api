@@ -7,4 +7,7 @@ import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "title", "pathSegments", "type"})
 public record AdditionalSkillDTO(
-    UUID id, String title, List<String> pathSegments, EAdditionalSkillType type) {}
+    UUID id,
+    String title,
+    List<String> pathSegments,
+    @Schema(ref = "#/components/schemas/EAdditionalSkillType") EAdditionalSkillType type) {}

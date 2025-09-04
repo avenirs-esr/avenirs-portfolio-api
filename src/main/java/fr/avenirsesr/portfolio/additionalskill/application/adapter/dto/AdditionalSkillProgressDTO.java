@@ -11,5 +11,5 @@ public record AdditionalSkillProgressDTO(
     UUID id,
     String title,
     List<String> pathSegments,
-    EAdditionalSkillType type,
-    EAdditionalSkillLevel level) {}
+    @Schema(ref = "#/components/schemas/EAdditionalSkillType") EAdditionalSkillType type,
+    @Schema(ref = "#/components/schemas/EAdditionalSkillLevel") EAdditionalSkillLevel level) {}
