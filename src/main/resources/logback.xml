@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+    <!-- TurboFilter custom pour ignorer les DEBUG sur /actuator/prometheus -->
+    <turboFilter class="fr.avenirsesr.portfolio.shared.infrastructure.context.PrometheusLogFilter" />
+
     <!-- Désactivation des logs ArchUnit et ASM -->
     <logger name="com.tngtech.archunit" level="OFF"/>
     <logger name="com.tngtech.archunit.thirdparty" level="OFF"/>
     <logger name="org.objectweb.asm" level="OFF"/>
+
+    <!-- Désactivation des DEBUG verbeux Spring Security & Web -->
+    <logger name="org.springframework.security.web.authentication.AnonymousAuthenticationFilter" level="INFO"/>
+    <logger name="org.springframework.security.web.FilterChainProxy" level="INFO"/>
+    <logger name="org.springframework.web.servlet.DispatcherServlet" level="INFO"/>
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor" level="INFO"/>
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.HttpEntityMethodProcessor" level="INFO"/>
 
     <!-- Appender console -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
