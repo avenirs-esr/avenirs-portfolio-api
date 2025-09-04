@@ -8,6 +8,8 @@ public interface SkillLevelProgressOverviewMapper {
     return new SkillLevelProgressOverviewDTO(
         skillLevelProgress.getSkillLevel().getId(),
         skillLevelProgress.getSkillLevel().getName(),
+        skillLevelProgress.getTraces().size(),
+        skillLevelProgress.getAmses().size(),
         skillLevelProgress.getStatus());
   }
 }

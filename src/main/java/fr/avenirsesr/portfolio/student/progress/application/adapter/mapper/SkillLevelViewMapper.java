@@ -9,6 +9,8 @@ public interface SkillLevelViewMapper {
         skillLevelProgress.getSkillLevel().getId(),
         skillLevelProgress.getSkillLevel().getName(),
         skillLevelProgress.getSkillLevel().getDescription().orElse(null),
+        skillLevelProgress.getTraces().size(),
+        skillLevelProgress.getAmses().size(),
         skillLevelProgress.getStatus());
   }
 }
