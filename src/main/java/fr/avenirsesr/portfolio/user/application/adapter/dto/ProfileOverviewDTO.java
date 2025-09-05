@@ -21,5 +21,5 @@ public record ProfileOverviewDTO(
     PictureDTO coverPicture) {
 
   @Schema(requiredProperties = {"url"})
-  public record PictureDTO(UUID fileId, String url) {}
+  public record PictureDTO(UUID fileId, String fileName, String url) {}
 }

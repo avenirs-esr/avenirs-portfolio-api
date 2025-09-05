@@ -61,6 +61,7 @@ public class UserResourceServiceImplTest {
     var existingPhoto =
         UserPhoto.create(
             UUID.randomUUID(),
+            "filename",
             EFileType.PNG,
             456,
             1,
@@ -138,6 +139,7 @@ public class UserResourceServiceImplTest {
     var photo =
         UserPhoto.create(
             photoId,
+            "filename",
             EFileType.PNG,
             456,
             1,
@@ -179,6 +181,7 @@ public class UserResourceServiceImplTest {
     var photo =
         UserPhoto.create(
             photoId,
+            "filename",
             EFileType.PNG,
             456,
             1,
@@ -204,6 +207,7 @@ public class UserResourceServiceImplTest {
     var photo =
         UserPhoto.create(
             photoId,
+            "filename",
             EFileType.PNG,
             456,
             1,

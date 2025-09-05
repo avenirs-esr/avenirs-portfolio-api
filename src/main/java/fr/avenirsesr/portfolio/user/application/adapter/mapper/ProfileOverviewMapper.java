@@ -17,8 +17,12 @@ public interface ProfileOverviewMapper {
         },
         user.getEmail(),
         new ProfileOverviewDTO.PictureDTO(
-            userPhotos.profileFileId().orElse(null), userPhotos.profileUrl()),
+            userPhotos.profileFileId().orElse(null),
+            userPhotos.profileFileName().orElse(null),
+            userPhotos.profileFileUrl()),
         new ProfileOverviewDTO.PictureDTO(
-            userPhotos.coverFileId().orElse(null), userPhotos.coverUrl()));
+            userPhotos.coverFileId().orElse(null),
+            userPhotos.coverFileName().orElse(null),
+            userPhotos.coverFileUrl()));
   }
 }

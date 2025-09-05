@@ -21,6 +21,9 @@ public class UserPhotoEntity extends FileEntity {
   @ManyToOne(optional = false)
   private UserEntity user;
 
+  @Column(nullable = false)
+  private String name;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, name = "user_category")
   private EUserCategory userCategory;
@@ -31,6 +34,7 @@ public class UserPhotoEntity extends FileEntity {
 
   private UserPhotoEntity(
       UUID id,
+      String name,
       UserEntity user,
       EUserCategory userCategory,
       EUserPhotoType userPhotoType,
@@ -42,6 +46,7 @@ public class UserPhotoEntity extends FileEntity {
       UserEntity uploadedBy,
       Instant uploadedAt) {
     this.setId(id);
+    this.name = name;
     this.user = user;
     this.userCategory = userCategory;
     this.userPhotoType = userPhotoType;
@@ -56,6 +61,7 @@ public class UserPhotoEntity extends FileEntity {
 
   public static UserPhotoEntity of(
       UUID id,
+      String name,
       UserEntity user,
       EUserCategory userCategory,
       EUserPhotoType userPhotoType,
@@ -68,6 +74,7 @@ public class UserPhotoEntity extends FileEntity {
       Instant uploadedAt) {
     return new UserPhotoEntity(
         id,
+        name,
         user,
         userCategory,
         userPhotoType,

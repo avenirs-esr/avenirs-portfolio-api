@@ -8,6 +8,7 @@ public interface UserPhotoMapper {
   static UserPhotoEntity fromDomain(UserPhoto userPhoto) {
     return UserPhotoEntity.of(
         userPhoto.getId(),
+        userPhoto.getName(),
         UserMapper.fromDomain(userPhoto.getUser()),
         userPhoto.getUserCategory(),
         userPhoto.getUserPhotoType(),
@@ -23,6 +24,7 @@ public interface UserPhotoMapper {
   static UserPhoto toDomain(UserPhotoEntity entity) {
     return UserPhoto.toDomain(
         entity.getId(),
+        entity.getName(),
         entity.getFileType(),
         entity.getSize(),
         entity.getVersion(),

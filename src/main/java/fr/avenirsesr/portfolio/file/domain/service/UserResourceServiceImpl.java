@@ -41,6 +41,7 @@ public class UserResourceServiceImpl implements UserResourceService {
 
     return new UserPhotoUrlAndId(
         userPhoto.map(UserPhoto::getId),
+        userPhoto.map(UserPhoto::getName),
         userPhoto
             .map(photo -> FileStorageConstants.PHOTO_ENDPOINT_PREFIX + "/" + photo.getId())
             .orElse(
@@ -92,6 +93,7 @@ public class UserResourceServiceImpl implements UserResourceService {
     var photo =
         UserPhoto.create(
             fileResource.id(),
+            fileResource.fileName(),
             fileResource.fileType(),
             fileResource.size(),
             version,

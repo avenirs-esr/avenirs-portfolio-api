@@ -57,9 +57,11 @@ public class UserController {
             userCategory,
             new UserPhotos(
                 userPhotos.profileFileId(),
-                baseUrl + userPhotos.profileUrl(),
+                userPhotos.profileFileName(),
+                baseUrl + userPhotos.profileFileUrl(),
                 userPhotos.coverFileId(),
-                baseUrl + userPhotos.coverUrl())));
+                userPhotos.coverFileName(),
+                baseUrl + userPhotos.coverFileUrl())));
   }
 
   @PutMapping("/{userCategory}/update")

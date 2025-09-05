@@ -24,6 +24,7 @@ public class FakeUserPhoto {
     return new FakeUserPhoto(
         UserPhotoEntity.of(
             id,
+            faker.call("file-name").lorem().word() + "." + fileType.name().toLowerCase(),
             user,
             user.getStudent().isPresent() ? EUserCategory.STUDENT : EUserCategory.TEACHER,
             EUserPhotoType.PROFILE,

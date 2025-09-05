@@ -13,11 +13,13 @@ import lombok.Setter;
 @Setter
 public class UserPhoto extends File {
   private final User user;
+  private final String name;
   private final EUserCategory userCategory;
   private final EUserPhotoType userPhotoType;
 
   private UserPhoto(
       UUID id,
+      String name,
       EFileType fileType,
       long size,
       int version,
@@ -44,10 +46,12 @@ public class UserPhoto extends File {
     this.user = user;
     this.userCategory = userCategory;
     this.userPhotoType = userPhotoType;
+    this.name = name;
   }
 
   public static UserPhoto create(
       UUID id,
+      String name,
       EFileType fileType,
       long size,
       int version,
@@ -59,6 +63,7 @@ public class UserPhoto extends File {
       EUserPhotoType userPhotoType) {
     return new UserPhoto(
         id,
+        name,
         fileType,
         size,
         version,
@@ -75,6 +80,7 @@ public class UserPhoto extends File {
 
   public static UserPhoto toDomain(
       UUID id,
+      String name,
       EFileType fileType,
       long size,
       int version,
@@ -89,6 +95,7 @@ public class UserPhoto extends File {
       Instant updatedAt) {
     return new UserPhoto(
         id,
+        name,
         fileType,
         size,
         version,

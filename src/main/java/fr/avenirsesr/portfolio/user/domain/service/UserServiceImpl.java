@@ -35,11 +35,11 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserPhotos getUserPhotos(UUID userId, EUserCategory userCategory) {
     var user = getUser(userId);
-    var profileUrl =
-        userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.PROFILE);
-    var coverUrl = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.COVER);
+    var profile = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.PROFILE);
+    var cover = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.COVER);
 
-    return new UserPhotos(profileUrl.id(), profileUrl.url(), coverUrl.id(), coverUrl.url());
+    return new UserPhotos(
+        profile.id(), profile.name(), profile.url(), cover.id(), cover.name(), cover.url());
   }
 
   @Override
