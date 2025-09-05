@@ -36,7 +36,7 @@ public class UserResourceController {
               name = &quot;userCategory&quot;,
               in = ParameterIn.PATH,
               required = true,
-              schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
+              schema = @Schema(ref = &quot;#/components/schemas/UserCategory&quot;))
           @PathVariable
           EUserCategory userCategory,
       @Valid
@@ -44,7 +44,7 @@ public class UserResourceController {
               name = &quot;photoType&quot;,
               in = ParameterIn.PATH,
               required = true,
-              schema = @Schema(ref = &quot;#/components/schemas/EUserPhotoType&quot;))
+              schema = @Schema(ref = &quot;#/components/schemas/UserPhotoType&quot;))
           @PathVariable
           EUserPhotoType photoType,
       @RequestParam(&quot;file&quot;) MultipartFile file)

@@ -8,7 +8,7 @@ import java.util.Arrays;
 public interface SwaggerSchema {
 <span class="fc" id="L9">  Schema&lt;String&gt; skillLevelStatusSchema =</span>
       new StringSchema()
-<span class="fc" id="L11">          .name(&quot;ESkillLevelStatus&quot;)</span>
+<span class="fc" id="L11">          .name(&quot;SkillLevelStatus&quot;)</span>
 <span class="fc" id="L12">          ._enum(Arrays.stream(ESkillLevelStatus.values()).map(Enum::name).toList())</span>
 <span class="fc" id="L13">          .description(&quot;Enum for skill level status&quot;);</span>
 }

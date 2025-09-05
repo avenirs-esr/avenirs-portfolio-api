@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
   @Bean
   public OpenApiCustomizer programEnumCustomizer() {
 <span class="fc" id="L11">    return openApi -&gt; {</span>
-<span class="fc" id="L12">      openApi.getComponents().addSchemas(&quot;ESkillLevelStatus&quot;, SwaggerSchema.skillLevelStatusSchema);</span>
+<span class="fc" id="L12">      openApi.getComponents().addSchemas(&quot;SkillLevelStatus&quot;, SwaggerSchema.skillLevelStatusSchema);</span>
 <span class="fc" id="L13">    };</span>
   }
 }

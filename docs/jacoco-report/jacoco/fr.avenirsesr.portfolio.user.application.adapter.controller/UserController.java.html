@@ -44,7 +44,7 @@ public class UserController {
               name = &quot;userCategory&quot;,
               in = ParameterIn.PATH,
               required = true,
-              schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
+              schema = @Schema(ref = &quot;#/components/schemas/UserCategory&quot;))
           @PathVariable
           EUserCategory userCategory) {
 <span class="fc" id="L50">    User user = userUtil.getUser(principal);</span>
@@ -66,7 +66,7 @@ public class UserController {
               name = &quot;userCategory&quot;,
               in = ParameterIn.PATH,
               required = true,
-              schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
+              schema = @Schema(ref = &quot;#/components/schemas/UserCategory&quot;))
           @PathVariable
           EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {
