@@ -9,9 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public enum ELanguage {
-  FRENCH("fr_FR"),
-  ENGLISH("en_US"),
-  SPANISH("es_ES");
+  FRENCH("fr-FR"),
+  ENGLISH("en-US"),
+  SPANISH("es-ES");
 
   private final String code;
 

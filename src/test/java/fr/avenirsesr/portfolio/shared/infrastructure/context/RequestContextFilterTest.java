@@ -31,7 +31,7 @@ class RequestContextFilterTest {
 
   @Test
   void shouldSetPreferredLanguageWhenHeaderPresent() throws Exception {
-    when(request.getHeader("Accept-Language")).thenReturn("fr_FR");
+    when(request.getHeader("Accept-Language")).thenReturn("fr-FR");
 
     doAnswer(
             invocation -> {
