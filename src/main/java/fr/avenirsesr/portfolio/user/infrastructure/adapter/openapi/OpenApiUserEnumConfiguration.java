@@ -11,8 +11,9 @@ public class OpenApiUserEnumConfiguration {
     return openApi -> {
       openApi
           .getComponents()
-          .addSchemas("UserCategory", SwaggerSchema.userCategorySchema)
-          .addSchemas("UserPhotoType", SwaggerSchema.userPhotoTypeSchema);
+          .addSchemas("EContextType", SwaggerSchema.userContextSchema)
+          .addSchemas("EExternalSource", SwaggerSchema.userExternalSourceSchema)
+          .addSchemas("EUserCategory", SwaggerSchema.userCategorySchema);
     };
   }
 }

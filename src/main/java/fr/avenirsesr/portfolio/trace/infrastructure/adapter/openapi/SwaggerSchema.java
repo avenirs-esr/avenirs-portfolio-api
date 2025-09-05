@@ -8,7 +8,7 @@ import java.util.Arrays;
 public interface SwaggerSchema {
   Schema<String> traceStatusSchema =
       new StringSchema()
-          .name("TraceStatus")
+          .name("ETraceStatus")
           ._enum(Arrays.stream(ETraceStatus.values()).map(Enum::name).toList())
           .description("Enum for trace status");
 }

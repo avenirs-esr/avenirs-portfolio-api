@@ -44,7 +44,7 @@ public class UserController {
               name = "userCategory",
               in = ParameterIn.PATH,
               required = true,
-              schema = @Schema(ref = "#/components/schemas/UserCategory"))
+              schema = @Schema(ref = "#/components/schemas/EUserCategory"))
           @PathVariable
           EUserCategory userCategory) {
     User user = userUtil.getUser(principal);
@@ -66,7 +66,7 @@ public class UserController {
               name = "userCategory",
               in = ParameterIn.PATH,
               required = true,
-              schema = @Schema(ref = "#/components/schemas/UserCategory"))
+              schema = @Schema(ref = "#/components/schemas/EUserCategory"))
           @PathVariable
           EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {

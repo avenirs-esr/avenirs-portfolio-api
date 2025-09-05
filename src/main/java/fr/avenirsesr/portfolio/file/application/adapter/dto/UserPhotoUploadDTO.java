@@ -5,4 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "fileType", "fileSize", "version"})
-public record UserPhotoUploadDTO(UUID id, EFileType fileType, long fileSize, int version) {}
+public record UserPhotoUploadDTO(
+    UUID id,
+    @Schema(ref = "#/components/schemas/EFileType") EFileType fileType,
+    long fileSize,
+    int version) {}

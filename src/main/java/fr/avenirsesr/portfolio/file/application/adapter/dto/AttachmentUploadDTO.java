@@ -6,4 +6,8 @@ import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "fileName", "fileType", "fileSize", "version"})
 public record AttachmentUploadDTO(
-    UUID id, String fileName, EFileType fileType, long fileSize, int version) {}
+    UUID id,
+    String fileName,
+    @Schema(ref = "#/components/schemas/EFileType") EFileType fileType,
+    long fileSize,
+    int version) {}
