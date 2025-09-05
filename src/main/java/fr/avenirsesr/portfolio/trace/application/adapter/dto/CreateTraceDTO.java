@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 @Schema(requiredProperties = {"title", "language", "isGroup"})
 public record CreateTraceDTO(
     @NotBlank @Size(max = 70) String title,
-    @Schema(implementation = ELanguage.class) ELanguage language,
+    @Schema(ref = "#/components/schemas/ELanguage") ELanguage language,
     boolean isGroup,
     String personalNote,
     String iaJustification) {}

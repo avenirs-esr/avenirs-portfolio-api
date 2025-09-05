@@ -9,7 +9,7 @@ public class OpenApiProgramEnumConfiguration {
   @Bean
   public OpenApiCustomizer programEnumCustomizer() {
     return openApi -> {
-      openApi.getComponents().addSchemas("SkillLevelStatus", SwaggerSchema.skillLevelStatusSchema);
+      openApi.getComponents().addSchemas("ESkillLevelStatus", SwaggerSchema.skillLevelStatusSchema);
     };
   }
 }

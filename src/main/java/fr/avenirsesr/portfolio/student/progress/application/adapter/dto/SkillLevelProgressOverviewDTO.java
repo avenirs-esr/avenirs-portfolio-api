@@ -10,4 +10,4 @@ public record SkillLevelProgressOverviewDTO(
     String name,
     int traceCount,
     int activityCount,
-    @Schema(ref = "#/components/schemas/SkillLevelStatus") ESkillLevelStatus status) {}
+    @Schema(ref = "#/components/schemas/ESkillLevelStatus") ESkillLevelStatus status) {}

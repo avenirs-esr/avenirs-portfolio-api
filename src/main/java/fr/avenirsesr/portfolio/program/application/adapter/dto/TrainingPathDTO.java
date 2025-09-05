@@ -6,4 +6,7 @@ import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "name", "durationUnit", "durationCount"})
 public record TrainingPathDTO(
-    UUID id, String name, EDurationUnit durationUnit, Integer durationCount) {}
+    UUID id,
+    String name,
+    @Schema(ref = "#/components/schemas/EDurationUnit") EDurationUnit durationUnit,
+    Integer durationCount) {}

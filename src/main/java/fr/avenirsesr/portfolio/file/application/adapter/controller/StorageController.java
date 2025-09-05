@@ -48,7 +48,7 @@ public class StorageController {
               name = "photoType",
               in = ParameterIn.PATH,
               required = true,
-              schema = @Schema(ref = "#/components/schemas/UserPhotoType"))
+              schema = @Schema(ref = "#/components/schemas/EUserPhotoType"))
           @PathVariable
           EUserPhotoType photoType)
       throws IOException {

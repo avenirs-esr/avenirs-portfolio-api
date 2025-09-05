@@ -19,4 +19,4 @@ public record SkillLevelViewDTO(
     String shortDescription,
     int traceCount,
     int activityCount,
-    @Schema(ref = "#/components/schemas/SkillLevelStatus") ESkillLevelStatus status) {}
+    @Schema(ref = "#/components/schemas/ESkillLevelStatus") ESkillLevelStatus status) {}

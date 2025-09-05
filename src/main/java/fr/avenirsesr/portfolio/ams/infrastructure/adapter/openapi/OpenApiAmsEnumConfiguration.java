@@ -9,7 +9,7 @@ public class OpenApiAmsEnumConfiguration {
   @Bean
   public OpenApiCustomizer amsEnumCustomizer() {
     return openApi -> {
-      openApi.getComponents().addSchemas("AmsStatus", SwaggerSchema.amsStatusSchema);
+      openApi.getComponents().addSchemas("EAmsStatus", SwaggerSchema.amsStatusSchema);
     };
   }
 }

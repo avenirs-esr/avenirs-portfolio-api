@@ -8,7 +8,7 @@ import java.util.Arrays;
 public interface SwaggerSchema {
   Schema<String> amsStatusSchema =
       new StringSchema()
-          .name("AmsStatus")
+          .name("EAmsStatus")
           ._enum(Arrays.stream(EAmsStatus.values()).map(Enum::name).toList())
           .description("Enum for ams status");
 }
