@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
   @Bean
   public OpenApiCustomizer traceEnumCustomizer() {
 <span class="fc" id="L11">    return openApi -&gt; {</span>
-<span class="fc" id="L12">      openApi.getComponents().addSchemas(&quot;TraceStatus&quot;, SwaggerSchema.traceStatusSchema);</span>
+<span class="fc" id="L12">      openApi.getComponents().addSchemas(&quot;ETraceStatus&quot;, SwaggerSchema.traceStatusSchema);</span>
 <span class="fc" id="L13">    };</span>
   }
 }
