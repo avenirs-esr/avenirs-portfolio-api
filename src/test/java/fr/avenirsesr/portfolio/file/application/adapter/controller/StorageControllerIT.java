@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageServic
 import fr.avenirsesr.portfolio.file.domain.service.UserResourceServiceImpl;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.UserPhotoDatabaseRepository;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,6 +31,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class StorageControllerIT {
+
+  private static final String RESSOURCE_BASE_PATH = "/storage/users/{fileId}";
+  private static final String DEFAULT_BASE_PATH = "/storage/users/default/{photoType}";
 
   @Autowired private MockMvc mockMvc;
 
@@ -63,13 +67,17 @@ class StorageControllerIT {
 
   @Test
   void shouldGetUserResourceByFileId() throws Exception {
+    BddLogger.given("the " + RESSOURCE_BASE_PATH + " endpoint");
     UUID existingFileId = UUID.fromString("c4e8acc0-5f44-4e19-a53c-d560d5e5a951");
 
     when(fileStorageService.get(anyString()))
         .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
+
+    BddLogger.when("performing a GET with a FileID");
+    BddLogger.then("it should return the corresponding user ressource");
     mockMvc
         .perform(
-            get("/storage/users/{fileId}", existingFileId)
+            get(RESSOURCE_BASE_PATH, existingFileId)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
@@ -79,11 +87,15 @@ class StorageControllerIT {
 
   @Test
   void shouldGetDefaultUserProfilePhoto() throws Exception {
+    BddLogger.given("the " + DEFAULT_BASE_PATH + " endpoint");
     when(fileStorageService.get(anyString()))
         .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
+
+    BddLogger.when("performing a GET with a PROFILE photo type");
+    BddLogger.then("it should return the default user profile photo");
     mockMvc
         .perform(
-            get("/storage/users/default/{photoType}", EUserPhotoType.PROFILE)
+            get(DEFAULT_BASE_PATH, EUserPhotoType.PROFILE)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
@@ -93,11 +105,15 @@ class StorageControllerIT {
 
   @Test
   void shouldGetDefaultUserCoverPhoto() throws Exception {
+    BddLogger.given("the " + DEFAULT_BASE_PATH + " endpoint");
     when(fileStorageService.get(anyString()))
         .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
+
+    BddLogger.when("performing a GET with a COVER photo type");
+    BddLogger.then("it should return the default user cover photo");
     mockMvc
         .perform(
-            get("/storage/users/default/{photoType}", EUserPhotoType.COVER)
+            get(DEFAULT_BASE_PATH, EUserPhotoType.COVER)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))

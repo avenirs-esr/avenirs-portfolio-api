@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.List;
@@ -38,7 +39,8 @@ class InstitutionServiceImplTest {
 
   @Test
   void shouldReturnTrueWhenInstitutionHasEnabledNavigationField() {
-    // Given
+    BddLogger.given(
+        "an InstitutionServiceImpl service and checking if the navigation is enabled for student");
     TrainingPath apcTrainingPath = TrainingPathFixture.createWithAPC().toModel();
     TrainingPath lifeProjectTrainingPath = TrainingPathFixture.createWithoutAPC().toModel();
     StudentProgress studentProgressAPC =
@@ -55,17 +57,18 @@ class InstitutionServiceImplTest {
     when(studentProgressRepository.findAllByStudent(student))
         .thenReturn(List.of(studentProgressAPC, studentProgressLifeProject));
 
-    // When
+    BddLogger.when("at least one institution has enabled navigation field");
     boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
 
-    // Then
+    BddLogger.when("it should return true");
     assertTrue(result);
     verify(studentProgressRepository).findAllByStudent(student);
   }
 
   @Test
   void shouldReturnFalseWhenNoInstitutionHasEnabledNavigationField() {
-    // Given
+    BddLogger.given(
+        "an InstitutionServiceImpl service and checking if the navigation is enabled for student");
     TrainingPath apcTrainingPath = TrainingPathFixture.createWithAPC().toModel();
     TrainingPath apcTrainingPath2 = TrainingPathFixture.createWithAPC().toModel();
     StudentProgress studentProgressAPC =
@@ -82,24 +85,24 @@ class InstitutionServiceImplTest {
     when(studentProgressRepository.findAllByStudent(student))
         .thenReturn(List.of(studentProgressAPC, studentProgress2));
 
-    // When
+    BddLogger.when("no institutions has enabled navigation field");
     boolean result =
         institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);
 
-    // Then
+    BddLogger.when("it should return false");
     assertFalse(result);
     verify(studentProgressRepository).findAllByStudent(student);
   }
 
   @Test
   void shouldReturnFalseWhenStudentHasNoProgramProgress() {
-    // Given
+    BddLogger.given("a InstitutionServiceImpl service");
     when(studentProgressRepository.findAllByStudent(student)).thenReturn(List.of());
 
-    // When
+    BddLogger.when("student has no program progresses");
     boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
 
-    // Then
+    BddLogger.when("it should return false");
     assertFalse(result);
     verify(studentProgressRepository).findAllByStudent(student);
   }

@@ -24,6 +24,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -67,21 +68,21 @@ public class TraceServiceImplTest {
 
   @Test
   void givenTraceWithoutSkillLevels_shouldReturnLifeProject() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service and a trace without skill levels");
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
     when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
         .thenReturn(List.of());
 
-    // When
+    BddLogger.when("getting the progam name of the trace");
     String result = traceService.programNameOfTrace(trace);
 
-    // Then
+    BddLogger.then("it should return LIFE_PROJECT");
     assertEquals("LIFE_PROJECT", result);
   }
 
   @Test
   void givenTraceWithSkillLevelsButNoApc_shouldReturnLifeProject() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service and a trace with skill levels and without APC");
     Program program = ProgramFixture.create().withAPC(false).toModel();
     TrainingPath progress = TrainingPathFixture.create().withProgram(program).toModel();
     SkillLevel skillLevel = SkillLevelFixture.create().toModel();
@@ -104,16 +105,16 @@ public class TraceServiceImplTest {
     when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
         .thenReturn(List.of(studentProgress));
 
-    // When
+    BddLogger.when("getting the progam name of the trace");
     String result = traceService.programNameOfTrace(trace);
 
-    // Then
+    BddLogger.then("it should return LIFE_PROJECT");
     assertEquals("LIFE_PROJECT", result);
   }
 
   @Test
   void givenTraceWithApcProgram_shouldReturnProgramName() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service and a trace with APC program");
     Program program = ProgramFixture.create().withAPC(true).withName("Program name").toModel();
     TrainingPath progress = TrainingPathFixture.create().withProgram(program).toModel();
     SkillLevel skillLevel = SkillLevelFixture.create().toModel();
@@ -136,16 +137,16 @@ public class TraceServiceImplTest {
     when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
         .thenReturn(List.of(studentProgress));
 
-    // When
+    BddLogger.when("getting the progam name of the trace");
     String result = traceService.programNameOfTrace(trace);
 
-    // Then
+    BddLogger.then("it should return the APC program name");
     assertEquals("Program name", result);
   }
 
   @Test
   void givenPageAndPageSize_shouldGetTracesView() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service and a pagination configuration");
     int pageNumber = 1;
     int pageSize = 8;
     int totalElement = 13;
@@ -174,7 +175,7 @@ public class TraceServiceImplTest {
                 .withCreatedAt(Instant.now().minus(87, ChronoUnit.DAYS))
                 .toModel());
 
-    // When
+    BddLogger.when("getting the traces view");
     when(traceRepository.findAll(
             student.getUser(), new PageCriteria(pageNumber, pageSize), ETraceStatus.UNASSOCIATED))
         .thenReturn(new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
@@ -182,7 +183,7 @@ public class TraceServiceImplTest {
         traceService.getTracesView(
             student.getUser(), new PageCriteria(pageNumber, pageSize), ETraceStatus.UNASSOCIATED);
 
-    // Then
+    BddLogger.then("it should return the traces view");
     assertEquals(traces.size(), traceView.content().size());
     assertEquals(pageSize, traceView.pageInfo().pageSize());
     assertEquals(totalElement, traceView.pageInfo().totalElements());
@@ -191,62 +192,62 @@ public class TraceServiceImplTest {
 
   @Test
   void givenTraceWithAmsAndSkillLevels_shouldDeleteTraceAndLinksToAmsAndSkillLevels() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service and a trace with AMS and skill levels");
     AMS ams = AMSFixture.create().toModel();
     Trace trace =
         TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
 
-    // When
+    BddLogger.when("deleting the trace");
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
     traceService.deleteById(student.getUser(), trace.getId());
 
-    // Then
+    BddLogger.then("it should delete the trace and its links to AMS and skill levels");
     verify(traceRepository).save(trace);
     assertTrue(trace.getDeletedAt().isPresent());
   }
 
   @Test
   void givenTraceWithAmsAndSkillLevels_shouldThrowTraceNotFoundException() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service and a trace with AMS and skill levels");
     AMS ams = AMSFixture.create().toModel();
     Trace trace =
         TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
 
-    // When
+    BddLogger.when("deleting the trace but the trace is not found");
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.empty());
     TraceNotFoundException exception =
         assertThrows(
             TraceNotFoundException.class,
             () -> traceService.deleteById(student.getUser(), trace.getId()));
 
-    // Then
+    BddLogger.then("it should throw TRACE_NOT_FOUND");
     assertEquals(EErrorCode.TRACE_NOT_FOUND, exception.getErrorCode());
     verify(traceRepository, never()).delete(trace);
   }
 
   @Test
   void givenTraceWithAmsAndSkillLevels_shouldThrowUserNotAuthorizedException() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service and a trace with AMS and skill levels");
     User otherUser = UserFixture.createStudent().toModel();
     AMS ams = AMSFixture.create().toModel();
     Trace trace =
         TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
 
-    // When
+    BddLogger.when("deleting the trace of another user");
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
     UserNotAuthorizedException exception =
         assertThrows(
             UserNotAuthorizedException.class,
             () -> traceService.deleteById(otherUser, trace.getId()));
 
-    // Then
+    BddLogger.then("it should throw UserNotAuthorizedException");
     assertEquals(EErrorCode.USER_NOT_AUTHORIZED, exception.getErrorCode());
     verify(traceRepository, never()).delete(trace);
   }
 
   @Test
   void givenUnassociatedTraces_shouldReturnSummary() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service and unassociated traces");
     TraceConfiguration traceConfiguration = new TraceConfiguration(90, 30, 5);
     List<Trace> unassociatedTraces =
         List.of(
@@ -267,13 +268,13 @@ public class TraceServiceImplTest {
                 .withCreatedAt(Instant.now().minus(85, ChronoUnit.DAYS))
                 .toModel());
 
-    // When
+    BddLogger.when("getting the unassociated traces summary");
     when(traceRepository.findAllUnassociated(student.getUser())).thenReturn(unassociatedTraces);
     when(traceConfigurationService.getTraceConfiguration()).thenReturn(traceConfiguration);
     UnassociatedTracesSummary summary =
         traceService.getUnassociatedTracesSummary(student.getUser());
 
-    // Then
+    BddLogger.then("it should return the unassociated traces summary");
     assertEquals(4, summary.total());
     assertEquals(3, summary.totalWarnings());
     assertEquals(1, summary.totalCriticals());
@@ -281,7 +282,7 @@ public class TraceServiceImplTest {
 
   @Test
   void shouldCreateAndSaveNewTrace() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service");
     User user = student.getUser();
     String title = "Test Title";
     ELanguage language = ELanguage.FRENCH;
@@ -289,10 +290,10 @@ public class TraceServiceImplTest {
     String personalNote = "Some personal note";
     String iaJustification = "Justified by AI";
 
-    // When
+    BddLogger.when("creating a new trace");
     traceService.createTrace(user, title, language, isGroup, personalNote, iaJustification);
 
-    // Then
+    BddLogger.then("it should create and save the new trace");
     ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
     verify(traceRepository).save(captor.capture());
 
@@ -314,14 +315,14 @@ public class TraceServiceImplTest {
 
   @Test
   void shouldCreateTraceWithNullFields() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service");
     User user = student.getUser();
     String title = "Trace with null fields";
 
-    // When
+    BddLogger.when("creating a new trace with null fields");
     traceService.createTrace(user, title, ELanguage.FRENCH, false, null, null);
 
-    // Then
+    BddLogger.then("it should create and save the new trace with null fields");
     ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
     verify(traceRepository).save(captor.capture());
 
@@ -335,7 +336,7 @@ public class TraceServiceImplTest {
 
   @Test
   void givenUnassociatedTrace_shouldReturnWillBeDeletedAt() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service and an unassociated trace");
     TraceConfiguration config = new TraceConfiguration(90, 30, 5);
     when(traceConfigurationService.getTraceConfiguration()).thenReturn(config);
 
@@ -347,10 +348,10 @@ public class TraceServiceImplTest {
     trace.setSkillLevels(List.of()); // pour simuler une trace non associée
     assertTrue(trace.isUnassociated());
 
-    // When
+    BddLogger.when("getting willBeDeletedAt");
     Optional<LocalDate> willBeDeletedAt = traceService.getWillBeDeletedAt(trace);
 
-    // Then
+    BddLogger.then("it should return willBeDeletedAt");
     assertTrue(willBeDeletedAt.isPresent());
     LocalDate expectedDate =
         createdAt
@@ -362,7 +363,7 @@ public class TraceServiceImplTest {
 
   @Test
   void givenAssociatedTrace_shouldReturnEmpty() {
-    // Given
+    BddLogger.given("a TraceServiceImpl service and an associated trace");
     TraceConfiguration config = new TraceConfiguration(90, 30, 5);
     when(traceConfigurationService.getTraceConfiguration()).thenReturn(config);
 
@@ -377,10 +378,10 @@ public class TraceServiceImplTest {
 
     assertFalse(trace.isUnassociated());
 
-    // When
+    BddLogger.when("getting willBeDeletedAt");
     Optional<LocalDate> willBeDeletedAt = traceService.getWillBeDeletedAt(trace);
 
-    // Then
+    BddLogger.then("it should return empty");
     assertTrue(willBeDeletedAt.isEmpty());
   }
 }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
@@ -34,6 +35,9 @@ class UserPhotoSeederTest {
 
   @Test
   void seed_shouldThrowException_whenUsersEmpty() {
+    BddLogger.given("a user photo seeder");
+    BddLogger.when("there is no users");
+    BddLogger.then("it should throw IllegalArgumentException");
     Exception exception =
         assertThrows(IllegalArgumentException.class, () -> userPhotoSeeder.seed(List.of()));
     assertTrue(exception.getMessage().contains("users cannot be empty"));
@@ -41,8 +45,11 @@ class UserPhotoSeederTest {
 
   @Test
   void seed_shouldReturnUserPhotos_forAllUsers() {
+    BddLogger.given("a user photo seeder");
+    BddLogger.when("there is a list of users");
     List<UserPhotoEntity> photos = userPhotoSeeder.seed(users);
 
+    BddLogger.then("it should return user photos for all users");
     assertNotNull(photos);
     assertFalse(photos.isEmpty());
 
@@ -64,8 +71,11 @@ class UserPhotoSeederTest {
 
   @Test
   void seed_shouldRespectMaxNumberConstraints() {
+    BddLogger.given("a user photo seeder");
     List<UserPhotoEntity> photos = userPhotoSeeder.seed(users);
 
+    BddLogger.when("there is a list of users");
+    BddLogger.then("it should respect max number constraints");
     users.forEach(
         user -> {
           long profileCount =

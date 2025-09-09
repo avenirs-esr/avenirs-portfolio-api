@@ -16,6 +16,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -61,7 +62,7 @@ class AMSControllerTest {
 
   @Test
   void shouldReturnAmsViewForUser() {
-    // Given
+    BddLogger.given("an user with AMS");
     List<AMS> amsList = AMSFixture.create().withCount(3);
     PagedResult<AMS> pagedResult =
         new PagedResult<>(amsList, new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 3));
@@ -70,11 +71,11 @@ class AMSControllerTest {
     when(amsService.findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA))
         .thenReturn(pagedResult);
 
-    // When
+    BddLogger.when("getting the AMS view");
     ResponseEntity<PagedResponse<AmsViewDTO>> response =
         controller.getAmsView(principal, studentProgressId, DEFAULT_PAGE, DEFAULT_SIZE);
 
-    // Then
+    BddLogger.then("it should return the AMS view");
     assertEquals(200, response.getStatusCode().value());
 
     PagedResponse<AmsViewDTO> body = response.getBody();
@@ -100,7 +101,7 @@ class AMSControllerTest {
 
   @Test
   void shouldReturnEmptyListWhenUserHasNoAMS() {
-    // Given
+    BddLogger.given("an user without AMS");
     PagedResult<AMS> emptyPagedResult =
         new PagedResult<>(new ArrayList<>(), new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 0));
 
@@ -108,11 +109,11 @@ class AMSControllerTest {
     when(amsService.findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA))
         .thenReturn(emptyPagedResult);
 
-    // When
+    BddLogger.when("getting the AMS view");
     ResponseEntity<PagedResponse<AmsViewDTO>> response =
         controller.getAmsView(principal, studentProgressId, DEFAULT_PAGE, DEFAULT_SIZE);
 
-    // Then
+    BddLogger.then("it should return and empty AMS view");
     assertEquals(200, response.getStatusCode().value());
 
     PagedResponse<AmsViewDTO> body = response.getBody();
@@ -130,7 +131,7 @@ class AMSControllerTest {
 
   @Test
   void shouldHandlePagination() {
-    // Given
+    BddLogger.given("an user with a large amount of AMS");
     Integer page = 1;
     Integer size = 5;
     List<AMS> amsList = AMSFixture.create().withCount(5);
@@ -141,11 +142,11 @@ class AMSControllerTest {
             student, studentProgressId, new PageCriteria(page, size)))
         .thenReturn(pagedResult);
 
-    // When
+    BddLogger.when("getting the AMS view");
     ResponseEntity<PagedResponse<AmsViewDTO>> response =
         controller.getAmsView(principal, studentProgressId, page, size);
 
-    // Then
+    BddLogger.then("it should return a paged AMS view");
     assertEquals(200, response.getStatusCode().value());
 
     PagedResponse<AmsViewDTO> body = response.getBody();
@@ -163,10 +164,11 @@ class AMSControllerTest {
 
   @Test
   void shouldPropagateUserNotFoundException() {
-    // Given
+    BddLogger.given("a not found user");
     when(userUtil.getStudent(principal)).thenThrow(new UserNotFoundException());
 
-    // When & Then
+    BddLogger.when("getting the AMS view");
+    BddLogger.then("it should throw an UserNotFoundException");
     assertThrows(
         UserNotFoundException.class,
         () -> controller.getAmsView(principal, studentProgressId, DEFAULT_PAGE, DEFAULT_SIZE));
@@ -177,10 +179,11 @@ class AMSControllerTest {
 
   @Test
   void shouldPropagateUserIsNotStudentException() {
-    // Given
+    BddLogger.given("a non student user");
     when(userUtil.getStudent(principal)).thenThrow(new UserIsNotStudentException());
 
-    // When & Then
+    BddLogger.when("getting the AMS view");
+    BddLogger.then("it should throw an UserIsNotStudentException");
     assertThrows(
         UserIsNotStudentException.class,
         () -> controller.getAmsView(principal, studentProgressId, DEFAULT_PAGE, DEFAULT_SIZE));

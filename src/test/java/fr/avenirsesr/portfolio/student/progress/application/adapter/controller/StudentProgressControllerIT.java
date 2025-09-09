@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class StudentProgressControllerIT {
+
+  private static final String OVERVIEW_BASE_PATH = "/me/student-progress/overview";
+  private static final String VIEW_BASE_PATH = "/me/student-progress/view";
 
   @Autowired private MockMvc mockMvc;
 
@@ -52,9 +56,12 @@ class StudentProgressControllerIT {
 
   @Test
   void shouldReturnSkillsOverviewForStudentForOverviewEndpoint() throws Exception {
+    BddLogger.given("the " + OVERVIEW_BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET");
+    BddLogger.then("it should return skills overview");
     mockMvc
         .perform(
-            get("/me/student-progress/overview")
+            get(OVERVIEW_BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -72,9 +79,12 @@ class StudentProgressControllerIT {
 
   @Test
   void shouldReturn404WhenUserNotFoundForOverviewEndpoint() throws Exception {
+    BddLogger.given("the " + OVERVIEW_BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a not found user");
+    BddLogger.then("it should return a 404");
     mockMvc
         .perform(
-            get("/me/student-progress/overview")
+            get(OVERVIEW_BASE_PATH)
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature)
@@ -88,9 +98,12 @@ class StudentProgressControllerIT {
 
   @Test
   void shouldReturn403WhenUserIsNotStudentForOverviewEndpoint() throws Exception {
+    BddLogger.given("the " + OVERVIEW_BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a non student user");
+    BddLogger.then("it should return a 403");
     mockMvc
         .perform(
-            get("/me/student-progress/overview")
+            get(OVERVIEW_BASE_PATH)
                 .header("X-Signed-Context", teacherPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", teacherSignature)
@@ -105,9 +118,12 @@ class StudentProgressControllerIT {
   @Test
   void shouldFallbackInDefaultLanguageWhenLanguageNotSupportedForOverviewEndpoint()
       throws Exception {
+    BddLogger.given("the " + OVERVIEW_BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a not supported language");
+    BddLogger.then("it should fallback in default language");
     mockMvc
         .perform(
-            get("/me/student-progress/overview")
+            get(OVERVIEW_BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -125,9 +141,12 @@ class StudentProgressControllerIT {
 
   @Test
   void shouldReturnSkillsViewForStudentForViewEndpoint() throws Exception {
+    BddLogger.given("the " + VIEW_BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET");
+    BddLogger.then("it should return the skills view");
     mockMvc
         .perform(
-            get("/me/student-progress/view")
+            get(VIEW_BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -148,9 +167,12 @@ class StudentProgressControllerIT {
 
   @Test
   void shouldReturn404WhenUserNotFoundForViewEndpoint() throws Exception {
+    BddLogger.given("the " + VIEW_BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a not found user");
+    BddLogger.then("it should return a 404");
     mockMvc
         .perform(
-            get("/me/student-progress/view")
+            get(VIEW_BASE_PATH)
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature)
@@ -164,9 +186,12 @@ class StudentProgressControllerIT {
 
   @Test
   void shouldReturn403WhenUserIsNotStudentForViewEndpoint() throws Exception {
+    BddLogger.given("the " + VIEW_BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a non student user");
+    BddLogger.then("it should return a 403");
     mockMvc
         .perform(
-            get("/me/student-progress/view")
+            get(VIEW_BASE_PATH)
                 .header("X-Signed-Context", teacherPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", teacherSignature)
@@ -180,9 +205,12 @@ class StudentProgressControllerIT {
 
   @Test
   void shouldFallbackInDefaultLanguageWhenLanguageNotSupportedForViewEndpoint() throws Exception {
+    BddLogger.given("the " + VIEW_BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a not supported language");
+    BddLogger.then("it should fallback in default language");
     mockMvc
         .perform(
-            get("/me/student-progress/view")
+            get(VIEW_BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)

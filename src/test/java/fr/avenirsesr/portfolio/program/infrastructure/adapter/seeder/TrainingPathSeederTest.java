@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntit
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.SkillLevelDatabaseRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.TrainingPathDatabaseRepository;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class TrainingPathSeederTest {
 
   @Test
   void seed_shouldThrowException_whenProgramsEmpty() {
+    BddLogger.given("a training path seeder");
+    BddLogger.when("there is no programs");
+    BddLogger.then("it should throw IllegalArgumentException");
     List<ProgramEntity> emptyPrograms = List.of();
     Exception exception =
         assertThrows(
@@ -49,7 +53,11 @@ class TrainingPathSeederTest {
 
   @Test
   void seed_shouldThrowException_whenSkillLevelsEmpty() {
+    BddLogger.given("a training path seeder");
+    BddLogger.when("there is no skill levels");
     List<SkillLevelEntity> emptySkills = List.of();
+
+    BddLogger.then("it should throw IllegalArgumentException");
     Exception exception =
         assertThrows(
             IllegalArgumentException.class, () -> trainingPathSeeder.seed(programs, emptySkills));

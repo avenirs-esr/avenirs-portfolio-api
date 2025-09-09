@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.shared.application.adapter.response.ErrorResponse;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -44,8 +45,11 @@ class CustomAuthenticationEntryPointTest {
 
   @Test
   void shouldReturnUnauthorizedWithErrorResponse() throws Exception {
+    BddLogger.given("a CustomAuthenticationEntryPoint");
+    BddLogger.when("trying a request");
     entryPoint.commence(request, response, authException);
 
+    BddLogger.then("it should return unauthorized with error response");
     verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     verify(response).setContentType("application/json");
 

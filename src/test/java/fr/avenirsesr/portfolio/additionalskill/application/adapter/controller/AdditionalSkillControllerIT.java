@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class AdditionalSkillControllerIT {
+
+  private static final String BASE_PATH = "/me/additional-skills";
 
   @Autowired private MockMvc mockMvc;
 
@@ -39,9 +42,12 @@ public class AdditionalSkillControllerIT {
 
   @Test
   void shouldReturnPagedAdditionalSkillProgresses() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET");
+    BddLogger.then("it should return paged additional skill progresses");
     mockMvc
         .perform(
-            get("/me/additional-skills")
+            get(BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -56,9 +62,12 @@ public class AdditionalSkillControllerIT {
 
   @Test
   void shouldSearchAdditionalSkillsByKeyword() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with keywords");
+    BddLogger.then("it should return paged additional skill progresses filtered by keywords");
     mockMvc
         .perform(
-            get("/me/additional-skills")
+            get(BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -75,9 +84,12 @@ public class AdditionalSkillControllerIT {
   void shouldCreateAdditionalSkillProgress() throws Exception {
     String payloadJson = loadJson("additionalskill/mock-new-additional-skill-progress.json");
 
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a POST with a non already existing additional skill progress");
+    BddLogger.then("it should create the additional skill progress and return the created status");
     mockMvc
         .perform(
-            post("/me/additional-skills")
+            post(BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -91,9 +103,13 @@ public class AdditionalSkillControllerIT {
     String payloadJson =
         loadJson("additionalskill/mock-new-additional-skill-progress-to-duplicate.json");
 
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a POST with and already existing additional skill progress");
+    BddLogger.then(
+        "it should return a conflict status and not create the additional skill progress");
     mockMvc
         .perform(
-            post("/me/additional-skills")
+            post(BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -106,9 +122,13 @@ public class AdditionalSkillControllerIT {
   void shouldReturnNotFoundWhenSkillDoesNotExist() throws Exception {
     String payloadJson = loadJson("additionalskill/mock-unknown-additional-skill.json");
 
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a POST with an unknown additionnal skill progress");
+    BddLogger.then(
+        "it should return not found status and not create the additional skill progress");
     mockMvc
         .perform(
-            post("/me/additional-skills")
+            post(BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)

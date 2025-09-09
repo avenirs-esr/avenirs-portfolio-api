@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPat
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.StudentProgressSeeder;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -84,7 +85,11 @@ class AMSSeederTest {
 
   @Test
   void seed_shouldThrowException_whenUsersEmpty() {
+    BddLogger.given("an AMS seeder");
+    BddLogger.when("users list is empty");
     List<UserEntity> emptyUsers = List.of();
+
+    BddLogger.then("it should throw IllegalArgumentException");
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
@@ -94,8 +99,12 @@ class AMSSeederTest {
 
   @Test
   void seed_shouldReturnAMSList_withCorrectSizeAndFields() {
+    BddLogger.given("an AMS seeder");
+    BddLogger.when("the seeder is called with correct arguments");
     List<AMSEntity> result = amsSeeder.seed(users, skillLevels, traces, cohorts);
 
+    BddLogger.then(
+        "it should return an AMS list with correct size and fields and call the amsRepository");
     assertNotNull(result);
     assertEquals(SeederConfig.AMS_NB, result.size());
 
@@ -118,8 +127,11 @@ class AMSSeederTest {
 
   @Test
   void seed_shouldIncludeAllTranslations() {
+    BddLogger.given("an AMS seeder");
+    BddLogger.when("the seeder is called with correct arguments");
     List<AMSEntity> result = amsSeeder.seed(users, skillLevels, traces, cohorts);
 
+    BddLogger.then("it should return an AMS list with all translations");
     for (AMSEntity ams : result) {
       assertTrue(
           ams.getTranslations().stream().anyMatch(t -> t.getLanguage().name().equals("ENGLISH")));

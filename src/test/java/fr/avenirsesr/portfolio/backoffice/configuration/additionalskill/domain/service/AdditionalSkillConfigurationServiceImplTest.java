@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.model.AdditionalSkillConfiguration;
@@ -11,6 +13,7 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.ECon
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.input.service.ConfigurationTranslationService;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.output.repository.ConfigurationRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -91,10 +94,11 @@ class AdditionalSkillConfigurationServiceImplTest {
 
   @Test
   void shouldReturnConfigurationFromRepository() {
-    // When
+    BddLogger.given("an AdditionalSkillConfigurationServiceImpl service");
+    BddLogger.when("getting the AdditionalSkillConfiguration");
     AdditionalSkillConfiguration configuration = service.getConfiguration();
 
-    // Then
+    BddLogger.then("it should return the correct configuration from repository");
     assertNotNull(configuration);
     assertEquals("Débutant", configuration.BEGINNER().label());
     assertEquals("Description débutant", configuration.BEGINNER().description());
@@ -105,7 +109,7 @@ class AdditionalSkillConfigurationServiceImplTest {
 
   @Test
   void shouldSaveNewConfigurationValues() {
-    // Given
+    BddLogger.given("an AdditionalSkillConfigurationServiceImpl service");
     AdditionalSkillConfiguration newConfig =
         new AdditionalSkillConfiguration(
             new AdditionalSkillLevel("New Débutant", "New Desc Débutant"),
@@ -114,17 +118,17 @@ class AdditionalSkillConfigurationServiceImplTest {
             new AdditionalSkillLevel("New Avancé", "New Desc Avancé"),
             new AdditionalSkillLevel("New Expert", "New Desc Expert"));
 
-    // When
+    BddLogger.when("posting a new AdditionalSkillConfiguration");
     service.postConfiguration(Map.of(ELanguage.FRENCH, newConfig));
 
-    // Then
+    BddLogger.then("it should save the new configuration values");
     verify(configurationTranslationService)
         .buildAndSaveTranslatedEntities(anyMap(), eq(EConfigurationScope.ADDITIONAL_SKILL));
   }
 
   @Test
   void shouldUpdateExistingConfigurationValues() {
-    // Given
+    BddLogger.given("an AdditionalSkillConfigurationServiceImpl service");
     AdditionalSkillConfiguration updatedConfig =
         new AdditionalSkillConfiguration(
             new AdditionalSkillLevel("Débutant modifié", "Description débutant modifiée"),
@@ -133,10 +137,10 @@ class AdditionalSkillConfigurationServiceImplTest {
             new AdditionalSkillLevel("Avancé modifié", "Description avancé modifiée"),
             new AdditionalSkillLevel("Expert modifié", "Description expert modifiée"));
 
-    // When
+    BddLogger.when("posting existing AdditionalSkillConfiguration values");
     service.postConfiguration(Map.of(ELanguage.FRENCH, updatedConfig));
 
-    // Then
+    BddLogger.then("it should update the new configuration values");
     verify(configurationTranslationService)
         .buildAndSaveTranslatedEntities(anyMap(), eq(EConfigurationScope.ADDITIONAL_SKILL));
   }

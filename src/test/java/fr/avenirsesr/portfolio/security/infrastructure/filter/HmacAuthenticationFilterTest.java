@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fr.avenirsesr.portfolio.security.infrastructure.model.enums.ESecurityKeys;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserPayload;
 import jakarta.servlet.FilterChain;
@@ -65,6 +66,9 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldNotFilterPublicPaths() throws ServletException {
+    BddLogger.given("a request on any public path");
+    BddLogger.when("performing the request");
+    BddLogger.then("it should not filter");
     when(request.getRequestURI()).thenReturn("/avenirs-portfolio-api/swagger-ui/index.html");
     assertTrue(filter.shouldNotFilter(request));
 
@@ -83,6 +87,9 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldNotFilterPublicPath() {
+    BddLogger.given("a request on any public path");
+    BddLogger.when("performing the request");
+    BddLogger.then("it should not filter");
     try {
       ReflectionTestUtils.setField(filter, "permitAllPathsString", "/public/path,/another/path");
       ReflectionTestUtils.setField(
@@ -98,6 +105,9 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldFilterNonPublicPath() {
+    BddLogger.given("a request on any non public path");
+    BddLogger.when("performing the request");
+    BddLogger.then("it should filter");
     try {
       ReflectionTestUtils.setField(filter, "permitAllPathsString", "/public/path,/another/path");
       ReflectionTestUtils.setField(
@@ -113,6 +123,7 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldAuthenticateWithValidSignature() throws ServletException, IOException {
+    BddLogger.given("a request");
     UserPayload userPayload = new UserPayload();
     userPayload.setSub(TEST_UUID);
     userPayload.setExp(Instant.now().plusSeconds(3600));
@@ -124,6 +135,8 @@ class HmacAuthenticationFilterTest {
     when(request.getHeader("X-Context-Signature")).thenReturn(signature);
     when(request.getHeader("X-Signed-Context")).thenReturn(payload);
 
+    BddLogger.when("performing the request with valid signature");
+    BddLogger.then("it should authenticate");
     try (var mockedStatic = mockStatic(ESecurityKeys.class)) {
       mockedStatic.when(() -> ESecurityKeys.getSecretByKey(TEST_KEY)).thenReturn(TEST_SECRET);
 
@@ -138,10 +151,13 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldRejectExpiredPayload() {
+    BddLogger.given("a request");
     UserPayload userPayload = new UserPayload();
     userPayload.setSub(TEST_UUID);
     userPayload.setExp(Instant.now().minusSeconds(3600));
 
+    BddLogger.when("performing the request with expired payload");
+    BddLogger.then("it should reject it");
     try {
       String payload = objectMapper.writeValueAsString(userPayload);
       String signature = generateHmacSignature(payload);
@@ -164,10 +180,13 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldRejectInvalidSignature() {
+    BddLogger.given("a request");
     UserPayload userPayload = new UserPayload();
     userPayload.setSub(TEST_UUID);
     userPayload.setExp(Instant.now().plusSeconds(3600));
 
+    BddLogger.when("performing the request with invalid signature");
+    BddLogger.then("it should reject it");
     try {
       String payload = objectMapper.writeValueAsString(userPayload);
       String invalidSignature = "invalid-signature";
@@ -190,10 +209,13 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldHandleExceptionDuringSignatureVerification() {
+    BddLogger.given("a request");
     UserPayload userPayload = new UserPayload();
     userPayload.setSub(TEST_UUID);
     userPayload.setExp(Instant.now().plusSeconds(3600));
 
+    BddLogger.when("performing the request and an exception occurs during signature verification");
+    BddLogger.then("it should handle it");
     try {
       String payload = objectMapper.writeValueAsString(userPayload);
 
@@ -215,6 +237,9 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldRejectNullPayload() {
+    BddLogger.given("a request");
+    BddLogger.when("performing the request with null payload");
+    BddLogger.then("it should reject it");
     try {
       when(request.getHeader("X-Context-Kid")).thenReturn(TEST_KEY);
       when(request.getHeader("X-Context-Signature")).thenReturn("some-signature");
@@ -233,6 +258,9 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldRejectNullPayloadString() {
+    BddLogger.given("a request");
+    BddLogger.when("performing the request with null payload string");
+    BddLogger.then("it should reject it");
     try {
       when(request.getHeader("X-Context-Kid")).thenReturn(TEST_KEY);
       when(request.getHeader("X-Context-Signature")).thenReturn("some-signature");
@@ -251,10 +279,13 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldRejectMissingSecretKey() {
+    BddLogger.given("a request");
     UserPayload userPayload = new UserPayload();
     userPayload.setSub(TEST_UUID);
     userPayload.setExp(Instant.now().plusSeconds(3600));
 
+    BddLogger.when("performing the request without secret key");
+    BddLogger.then("it should reject it");
     try {
       String payload = objectMapper.writeValueAsString(userPayload);
       String signature = generateHmacSignature(payload);
@@ -277,10 +308,13 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldRejectMissingSignature() {
+    BddLogger.given("a request");
     UserPayload userPayload = new UserPayload();
     userPayload.setSub(TEST_UUID);
     userPayload.setExp(Instant.now().plusSeconds(3600));
 
+    BddLogger.when("performing the request without signature");
+    BddLogger.then("it should reject it");
     try {
       String payload = objectMapper.writeValueAsString(userPayload);
 
@@ -302,10 +336,13 @@ class HmacAuthenticationFilterTest {
 
   @Test
   void shouldRejectPayloadWithNullExpiration() {
+    BddLogger.given("a request");
     UserPayload userPayload = new UserPayload();
     userPayload.setSub(TEST_UUID);
     userPayload.setExp(null);
 
+    BddLogger.when("performing the request without expiration");
+    BddLogger.then("it should reject it");
     try {
       String payload = objectMapper.writeValueAsString(userPayload);
       String signature = generateHmacSignature(payload);

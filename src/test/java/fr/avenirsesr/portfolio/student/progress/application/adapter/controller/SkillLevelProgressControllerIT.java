@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class SkillLevelProgressControllerIT {
+
+  private static final String BASE_PATH = "/me/skill-level-progress";
 
   @Autowired private MockMvc mockMvc;
 
@@ -53,9 +56,12 @@ public class SkillLevelProgressControllerIT {
 
   @Test
   void shouldReturnSkillLevelProgressForStudent() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a student user");
+    BddLogger.then("it should return paged skill level progresses");
     mockMvc
         .perform(
-            get("/me/skill-level-progress")
+            get(BASE_PATH)
                 .param("page", "0")
                 .param("pageSize", "10")
                 .param("sort", "NAME")
@@ -71,9 +77,12 @@ public class SkillLevelProgressControllerIT {
 
   @Test
   void shouldReturnDefaultPaginationWhenNoParamsProvided() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET without pagination params");
+    BddLogger.then("it should return default pagination");
     mockMvc
         .perform(
-            get("/me/skill-level-progress")
+            get(BASE_PATH)
                 .header("Accept-Language", language.getCode())
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
@@ -86,9 +95,12 @@ public class SkillLevelProgressControllerIT {
 
   @Test
   void shouldReturn404WhenUserUnknown() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with an unknown user");
+    BddLogger.then("it should return 404");
     mockMvc
         .perform(
-            get("/me/skill-level-progress")
+            get(BASE_PATH)
                 .header("Accept-Language", language.getCode())
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
@@ -100,9 +112,12 @@ public class SkillLevelProgressControllerIT {
 
   @Test
   void shouldReturn403WhenUserIsNotStudent() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a non student user");
+    BddLogger.then("it should return 403");
     mockMvc
         .perform(
-            get("/me/skill-level-progress")
+            get(BASE_PATH)
                 .header("Accept-Language", language.getCode())
                 .header("X-Signed-Context", teacherPayload)
                 .header("X-Context-Kid", secretKey)
@@ -114,9 +129,12 @@ public class SkillLevelProgressControllerIT {
 
   @Test
   void shouldSupportSortingByDate() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a sorting by date param");
+    BddLogger.then("it should return paged skill level progresses sorted by date");
     mockMvc
         .perform(
-            get("/me/skill-level-progress")
+            get(BASE_PATH)
                 .param("sort", "DATE")
                 .header("Accept-Language", language.getCode())
                 .header("X-Signed-Context", studentPayload)

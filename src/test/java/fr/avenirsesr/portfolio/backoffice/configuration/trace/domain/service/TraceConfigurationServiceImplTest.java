@@ -9,8 +9,8 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.ECon
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.output.repository.ConfigurationRepository;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.ETraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
-import java.util.List;
-import java.util.UUID;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,10 +52,11 @@ class TraceConfigurationServiceImplTest {
 
   @Test
   void shouldReturnTraceConfigurationFromRepository() {
-    // When
+    BddLogger.given("a TraceConfigurationServiceImpl service");
+    BddLogger.when("getting the trace configuration");
     TraceConfiguration traceConfiguration = service.getTraceConfiguration();
 
-    // Then
+    BddLogger.then("it should return the trace configuration from repository");
     assertNotNull(traceConfiguration);
     assertEquals(30, traceConfiguration.maxRemainingDays());
     assertEquals(10, traceConfiguration.maxRemainingDaysBeforeWarning());
@@ -65,7 +66,8 @@ class TraceConfigurationServiceImplTest {
 
   @Test
   void shouldThrowExceptionIfConfigurationMissing() {
-    // Given repository missing CRITICAL key
+    BddLogger.given(
+        "a TraceConfigurationServiceImpl service and a repository missing CRITICAL key");
     when(configurationRepository.inScope(EConfigurationScope.TRACE))
         .thenReturn(
             List.of(
@@ -80,31 +82,32 @@ class TraceConfigurationServiceImplTest {
                     ETraceConfiguration.MAX_REMINING_DAYS_BEFORE_WARNING,
                     "10")));
 
-    // Then
-    assertThrows(java.util.NoSuchElementException.class, () -> service.getTraceConfiguration());
+    BddLogger.when("getting the trace configuration");
+    BddLogger.then("it should throw NoSuchElementException");
+    assertThrows(NoSuchElementException.class, () -> service.getTraceConfiguration());
   }
 
   @Test
   void shouldSaveNewTraceConfigurationValues() {
-    // Given
+    BddLogger.given("a TraceConfigurationServiceImpl service");
     TraceConfiguration newConfig = new TraceConfiguration(60, 20, 8);
 
-    // When
+    BddLogger.when("posting a new trace configuration");
     service.postTraceConfiguration(newConfig);
 
-    // Then
+    BddLogger.then("it should save the new trace configuration values");
     verify(configurationRepository).saveAll(anyList());
   }
 
   @Test
   void shouldUpdateExistingTraceConfigurationValues() {
-    // Given
+    BddLogger.given("a TraceConfigurationServiceImpl service");
     TraceConfiguration updatedConfig = new TraceConfiguration(40, 15, 7);
 
-    // When
+    BddLogger.when("posting an existing trace configuration with new values");
     service.postTraceConfiguration(updatedConfig);
 
-    // Then
+    BddLogger.then("it should update the new trace configuration values");
     verify(configurationRepository).saveAll(anyList());
   }
 }

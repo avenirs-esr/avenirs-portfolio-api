@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import fr.avenirsesr.portfolio.security.infrastructure.filter.HmacAuthenticationFilter;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -41,6 +42,9 @@ class SecurityConfigTest {
 
   @Test
   void shouldRequireAuthenticationForProtectedEndpoints() {
+    BddLogger.given("some protected endpoint");
+    BddLogger.when("when performing a GET");
+    BddLogger.then("it should throw an UserNotAuthorizedException");
     org.junit.jupiter.api.Assertions.assertThrows(
         UserNotAuthorizedException.class,
         () ->
@@ -55,6 +59,9 @@ class SecurityConfigTest {
 
   @Test
   void shouldAllowAccessToAllPermitAllPaths() throws Exception {
+    BddLogger.given("all permit paths");
+    BddLogger.when("when performing a GET");
+    BddLogger.then("it should return a response");
     String[] paths = permitAllPathsString.split(",");
     for (String path : paths) {
       String cleanPath = path.trim().replace("/**", "");

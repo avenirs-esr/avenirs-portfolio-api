@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import java.util.UUID;
@@ -24,6 +25,12 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class TraceControllerIT {
+
+  private static final String BASE_PATH = "/me/traces";
+  private static final String BASE_PATH_WITH_ID = BASE_PATH + "/{traceId}";
+  private static final String OVERVIEW_BASE_PATH = BASE_PATH + "/overview";
+  private static final String VIEW_BASE_PATH = BASE_PATH + "/view";
+  private static final String UNASSOCIATED_SUMMARY_BASE_PATH = BASE_PATH + "/unassociated/summary";
 
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
@@ -50,9 +57,12 @@ class TraceControllerIT {
 
   @Test
   void shouldReturnTraceOverview() throws Exception {
+    BddLogger.given("the " + OVERVIEW_BASE_PATH + " endpoint");
+    BddLogger.when("performing a GET");
+    BddLogger.then("it should return the trace overview");
     mockMvc
         .perform(
-            get("/me/traces/overview")
+            get(OVERVIEW_BASE_PATH)
                 .header("Accept-Language", ELanguage.FRENCH.getCode())
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
@@ -68,9 +78,12 @@ class TraceControllerIT {
 
   @Test
   void shouldReturn404WhenUserNotExist() throws Exception {
+    BddLogger.given("the " + OVERVIEW_BASE_PATH + " endpoint");
+    BddLogger.when("performing a GET with unknown user");
+    BddLogger.then("it should return a 404");
     mockMvc
         .perform(
-            get("/me/traces/overview")
+            get(OVERVIEW_BASE_PATH)
                 .header("Accept-Language", ELanguage.FRENCH.getCode())
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
@@ -82,9 +95,12 @@ class TraceControllerIT {
 
   @Test
   void shouldReturnTraceViewUnassociated() throws Exception {
+    BddLogger.given("the " + VIEW_BASE_PATH + " endpoint");
+    BddLogger.when("performing a GET");
+    BddLogger.then("it should return the trace view unassociated");
     mockMvc
         .perform(
-            get("/me/traces/view")
+            get(VIEW_BASE_PATH)
                 .param("status", ETraceStatus.UNASSOCIATED.name())
                 .param("page", "0")
                 .param("pageSize", "10")
@@ -100,9 +116,12 @@ class TraceControllerIT {
 
   @Test
   void shouldReturnUnassociatedSummary() throws Exception {
+    BddLogger.given("the " + UNASSOCIATED_SUMMARY_BASE_PATH + " endpoint");
+    BddLogger.when("performing a GET");
+    BddLogger.then("it should return the unassociated summary");
     mockMvc
         .perform(
-            get("/me/traces/unassociated/summary")
+            get(UNASSOCIATED_SUMMARY_BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
@@ -114,13 +133,16 @@ class TraceControllerIT {
 
   @Test
   void shouldCreateNewTrace() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " endpoint");
     CreateTraceDTO dto =
         new CreateTraceDTO(
             "Nouvelle trace", ELanguage.FRENCH, false, "Note personnelle", "Justification IA");
 
+    BddLogger.when("performing a POST");
+    BddLogger.then("it should create a new trace");
     mockMvc
         .perform(
-            post("/me/traces")
+            post(BASE_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("X-Signed-Context", studentPayload)
@@ -131,11 +153,14 @@ class TraceControllerIT {
 
   @Test
   void shouldDeleteTrace() throws Exception {
+    BddLogger.given("the " + BASE_PATH_WITH_ID + " endpoint");
     UUID existingTraceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
 
+    BddLogger.when("performing a DELETE with trace id");
+    BddLogger.then("it should delete the corresponding trace");
     mockMvc
         .perform(
-            delete("/me/traces/{traceId}", existingTraceId)
+            delete(BASE_PATH_WITH_ID, existingTraceId)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
@@ -145,11 +170,14 @@ class TraceControllerIT {
 
   @Test
   void shouldReturn403IfTraceNotFoundWhenDeleting() throws Exception {
+    BddLogger.given("the " + BASE_PATH_WITH_ID + " endpoint");
     UUID traceIdNotOwned = UUID.randomUUID();
 
+    BddLogger.when("performing a DELETE with a not found trace id");
+    BddLogger.then("it should return a 404");
     mockMvc
         .perform(
-            delete("/me/traces/{traceId}", traceIdNotOwned)
+            delete(BASE_PATH_WITH_ID, traceIdNotOwned)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
@@ -159,11 +187,14 @@ class TraceControllerIT {
 
   @Test
   void shouldReturn403IfUserNotOwnerWhenDeleting() throws Exception {
+    BddLogger.given("the " + BASE_PATH_WITH_ID + " endpoint");
     UUID existingTraceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
 
+    BddLogger.when("performing a DELETE with trace id but the user is not its owner");
+    BddLogger.then("it should return a 403");
     mockMvc
         .perform(
-            delete("/me/traces/{traceId}", existingTraceId)
+            delete(BASE_PATH_WITH_ID, existingTraceId)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))

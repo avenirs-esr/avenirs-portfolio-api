@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
@@ -36,7 +37,8 @@ public class UserServiceImplTest {
 
   @Test
   void shouldUpdateUserFirstnameLastnameEmailAndBio() {
-    // When
+    BddLogger.given("a UserServiceImpl service");
+    BddLogger.when("updating firstname, lastname, email and bio");
     userService.updateProfile(
         EUserCategory.STUDENT,
         student.getUser(),
@@ -45,7 +47,7 @@ public class UserServiceImplTest {
         "RandomEmail",
         "RandomBio");
 
-    // Then
+    BddLogger.when("it should update firstname, lastname, email and bio");
     ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
     verify(userRepository).save(captor.capture());
 
@@ -58,15 +60,15 @@ public class UserServiceImplTest {
 
   @Test
   void shouldUpdateUserFirstNameLastNameProfileAndCoverOnly() {
-    // Given
+    BddLogger.given("a UserServiceImpl service");
     String saveEmail = student.getUser().getEmail();
     String saveBio = student.getUser().toStudent().getBio();
 
-    // When
+    BddLogger.when("only updating firstname and lastname");
     userService.updateProfile(
         EUserCategory.STUDENT, student.getUser(), "RandomEmail", "RandomEmail", null, null);
 
-    // Then
+    BddLogger.then("it should only update firstname and lastname");
     ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
     verify(userRepository).save(captor.capture());
 
@@ -79,10 +81,13 @@ public class UserServiceImplTest {
 
   @Test
   void getUser_shouldThrowException_whenUserNotFound() {
+    BddLogger.given("a UserServiceImpl service");
     // Arrange
     UUID userId = UUID.randomUUID();
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
+    BddLogger.when("getting an unknwon user");
+    BddLogger.then("it should throw UserNotFoundException");
     // Act + Assert
     assertThrows(UserNotFoundException.class, () -> userService.getUser(userId));
     verify(userRepository).findById(userId);

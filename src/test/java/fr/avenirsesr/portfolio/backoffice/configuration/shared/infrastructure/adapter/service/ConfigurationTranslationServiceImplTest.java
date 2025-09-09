@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.model.EAdditionalSkillConfiguration;
@@ -11,6 +12,7 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.ad
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationTranslationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.repository.ConfigurationDatabaseRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,21 +46,27 @@ class ConfigurationTranslationServiceImplTest {
 
   @Test
   void shouldReturnEmptyMapWhenNoEntities() {
+    BddLogger.given("a ConfigurationTranslationServiceImpl service");
     when(repository.inScopeEntities(EConfigurationScope.ADDITIONAL_SKILL)).thenReturn(List.of());
 
+    BddLogger.when("searching in an empty list");
     var result = service.findInScopeWithAllTranslations(EConfigurationScope.ADDITIONAL_SKILL);
 
+    BddLogger.then("it should return an empty configuration");
     assertNotNull(result);
     assertTrue(result.isEmpty());
   }
 
   @Test
   void shouldReturnConfigurationsGroupedByLanguage() {
+    BddLogger.given("a ConfigurationTranslationServiceImpl service");
     when(repository.inScopeEntities(EConfigurationScope.ADDITIONAL_SKILL))
         .thenReturn(List.of(entityFr));
 
+    BddLogger.when("searching in a list of ConfigurationEntity");
     var result = service.findInScopeWithAllTranslations(EConfigurationScope.ADDITIONAL_SKILL);
 
+    BddLogger.then("it should return configurations grouped by language");
     assertTrue(result.containsKey(ELanguage.FRENCH));
     assertEquals(1, result.get(ELanguage.FRENCH).size());
     assertEquals("Débutant", result.get(ELanguage.FRENCH).get(0).getValue());
@@ -66,7 +74,7 @@ class ConfigurationTranslationServiceImplTest {
 
   @Test
   void shouldSaveNewEntityWhenNotExists() {
-    // given
+    BddLogger.given("a ConfigurationTranslationServiceImpl service");
     Configuration configFr =
         Configuration.create(
             UUID.randomUUID(),
@@ -77,10 +85,10 @@ class ConfigurationTranslationServiceImplTest {
 
     when(repository.inScopeEntities(EConfigurationScope.ADDITIONAL_SKILL)).thenReturn(List.of());
 
-    // when
+    BddLogger.when("building and saving non existing translated entities");
     service.buildAndSaveTranslatedEntities(input, EConfigurationScope.ADDITIONAL_SKILL);
 
-    // then
+    BddLogger.then("it should save the new entities");
     ArgumentCaptor<List<ConfigurationEntity>> captor = ArgumentCaptor.forClass(List.class);
     verify(repository).saveAllEntities(captor.capture());
 
@@ -91,7 +99,7 @@ class ConfigurationTranslationServiceImplTest {
 
   @Test
   void shouldUpdateExistingEntityValueForLanguage() {
-    // given
+    BddLogger.given("a ConfigurationTranslationServiceImpl service");
     Configuration configFrUpdated =
         Configuration.create(
             entityFr.getId(),
@@ -104,10 +112,10 @@ class ConfigurationTranslationServiceImplTest {
     when(repository.inScopeEntities(EConfigurationScope.ADDITIONAL_SKILL))
         .thenReturn(List.of(entityFr));
 
-    // when
+    BddLogger.when("building and saving non existing translated entities");
     service.buildAndSaveTranslatedEntities(input, EConfigurationScope.ADDITIONAL_SKILL);
 
-    // then
+    BddLogger.then("it should update the existing entities");
     assertEquals(
         "Débutant modifié",
         entityFr.getTranslations().stream().findFirst().orElseThrow().getValue());
@@ -116,7 +124,7 @@ class ConfigurationTranslationServiceImplTest {
 
   @Test
   void shouldAddNewTranslationForAnotherLanguage() {
-    // given
+    BddLogger.given("a ConfigurationTranslationServiceImpl service");
     Configuration configFr = ConfigurationMapper.toDomain(entityFr);
     Configuration configEn =
         Configuration.create(
@@ -133,10 +141,10 @@ class ConfigurationTranslationServiceImplTest {
     when(repository.inScopeEntities(EConfigurationScope.ADDITIONAL_SKILL))
         .thenReturn(List.of(entityFr));
 
-    // when
+    BddLogger.when("building and saving existing translated entities for another language");
     service.buildAndSaveTranslatedEntities(input, EConfigurationScope.ADDITIONAL_SKILL);
 
-    // then
+    BddLogger.then("it should add the new translation for this language");
     assertTrue(
         entityFr.getTranslations().stream().anyMatch(t -> t.getLanguage() == ELanguage.ENGLISH));
     verify(repository).saveAllEntities(anyList());
@@ -144,6 +152,7 @@ class ConfigurationTranslationServiceImplTest {
 
   @Test
   void shouldThrowWhenMissingTranslationForLanguage() {
+    BddLogger.given("a ConfigurationTranslationServiceImpl service");
     Configuration configFr = ConfigurationMapper.toDomain(entityFr);
     Map<ELanguage, List<Configuration>> input =
         Map.of(
@@ -154,6 +163,8 @@ class ConfigurationTranslationServiceImplTest {
     when(repository.inScopeEntities(EConfigurationScope.ADDITIONAL_SKILL))
         .thenReturn(List.of(entityFr));
 
+    BddLogger.when("building and saving missing translation for a specific language");
+    BddLogger.then("it should throw NoSuchElementException");
     assertThrows(
         NoSuchElementException.class,
         () -> service.buildAndSaveTranslatedEntities(input, EConfigurationScope.ADDITIONAL_SKILL));

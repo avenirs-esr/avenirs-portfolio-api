@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntity;
@@ -8,6 +9,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEn
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.SkillDatabaseRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.SkillLevelDatabaseRepository;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -40,6 +42,9 @@ class SkillSeederTest {
 
   @Test
   void seed_shouldThrowException_whenProgramsEmpty() {
+    BddLogger.given("a skill seeder");
+    BddLogger.when("there is no programs");
+    BddLogger.then("it should throw IllegalArgumentException");
     List<ProgramEntity> emptyPrograms = List.of();
     Exception exception =
         assertThrows(IllegalArgumentException.class, () -> skillSeeder.seed(emptyPrograms));
@@ -48,8 +53,11 @@ class SkillSeederTest {
 
   @Test
   void seed_shouldReturnSkillLevels_withCorrectSize() {
+    BddLogger.given("a skill seeder");
+    BddLogger.when("seeding skills");
     List<SkillLevelEntity> skillLevels = skillSeeder.seed(programs);
 
+    BddLogger.then("it should return skills levels with correct size");
     assertNotNull(skillLevels);
     assertFalse(skillLevels.isEmpty());
 
@@ -68,12 +76,15 @@ class SkillSeederTest {
 
   @Test
   void seed_shouldCallRepositorySaveAllEntities() {
+    BddLogger.given("a skill seeder");
     SkillDatabaseRepository mockSkillRepo = mock(SkillDatabaseRepository.class);
     SkillLevelDatabaseRepository mockSkillLevelRepo = mock(SkillLevelDatabaseRepository.class);
     SkillSeeder seederWithMock = new SkillSeeder(mockSkillRepo, mockSkillLevelRepo);
 
+    BddLogger.when("seeding skills");
     List<SkillLevelEntity> result = seederWithMock.seed(programs);
 
+    BddLogger.then("it should call repository and save all entities");
     verify(mockSkillRepo, times(1)).saveAllEntities(any());
     verify(mockSkillLevelRepo, times(1)).saveAllEntities(result);
   }

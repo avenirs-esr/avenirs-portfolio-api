@@ -18,6 +18,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchInde
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rome4VersionRepository;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -70,26 +71,29 @@ class RomeAdditionalSkillServiceImplTest {
   // --- cleanAndCreateAdditionalSkillIndex ---
   @Test
   void shouldDelegateCleanAndCreateAdditionalSkillIndex() {
-    // When
+    BddLogger.given("the method cleanAndCreateAdditionalSkillIndex");
+
+    BddLogger.when("calling the method from the RomeAdditionalSkillServiceImpl service");
     service.cleanAndCreateAdditionalSkillIndex();
 
-    // Then
+    BddLogger.then("it should delegate the method to openSearchIndex");
     verify(openSearchIndex).cleanAndCreateAdditionalSkillIndex();
   }
 
   // --- synchronizeAndIndexAdditionalSkills ---
   @Test
   void shouldSaveAndIndexAdditionalSkills_WhenNewSkills() {
-    // Given
+    BddLogger.given("the method synchronizeAndIndexAdditionalSkills");
     List<AdditionalSkill> inputSkills = List.of(additionalSkill1, additionalSkill2);
     when(additionalSkillRepository.findByPathSegmentsSkillCodeIn(anyList())).thenReturn(List.of());
     when(additionalSkillRepository.saveAll(anyList()))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    // When
+    BddLogger.when(
+        "calling the method from the RomeAdditionalSkillServiceImpl service with new skills");
     List<AdditionalSkill> result = service.synchronizeAndIndexAdditionalSkills(inputSkills);
 
-    // Then
+    BddLogger.then("it should save and index additional skills");
     assertThat(result).hasSize(2);
     verify(additionalSkillRepository)
         .findByPathSegmentsSkillCodeIn(List.of("skillCode1", "skillCode2"));
@@ -99,7 +103,7 @@ class RomeAdditionalSkillServiceImplTest {
 
   @Test
   void shouldUpdateExistingSkillAndIndex() {
-    // Given
+    BddLogger.given("the method synchronizeAndIndexAdditionalSkills");
     AdditionalSkill existingSkill =
         AdditionalSkill.create(
             PathSegments.create(
@@ -115,11 +119,12 @@ class RomeAdditionalSkillServiceImplTest {
     when(additionalSkillRepository.saveAll(anyList()))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    // When
+    BddLogger.when(
+        "calling the method from the RomeAdditionalSkillServiceImpl service with existing skills");
     List<AdditionalSkill> result =
         service.synchronizeAndIndexAdditionalSkills(List.of(additionalSkill1));
 
-    // Then
+    BddLogger.then("it should update existing additional skill and index");
     assertThat(result).hasSize(1);
     assertThat(result.getFirst().getType()).isEqualTo(EAdditionalSkillType.ROME4);
     verify(openSearchIndex).indexAll(result);
@@ -128,22 +133,23 @@ class RomeAdditionalSkillServiceImplTest {
   // --- checkRomeVersionUpdated ---
   @Test
   void shouldSaveNewVersion_WhenNoExistingVersion() {
-    // Given
+    BddLogger.given("the method checkRomeVersionUpdated");
     Rome4Version newVersion = Rome4Version.create(1, Instant.now());
     when(romeAdditionalSkillApi.fetchRomeVersion()).thenReturn(newVersion);
     when(rome4VersionRepository.findFirstByOrderByVersionDesc()).thenReturn(Optional.empty());
 
-    // When
+    BddLogger.when(
+        "calling the method from the RomeAdditionalSkillServiceImpl service with no existing version");
     boolean result = service.checkRomeVersionUpdated();
 
-    // Then
+    BddLogger.then("it should save the new version");
     assertTrue(result);
     verify(rome4VersionRepository).save(any(Rome4Version.class));
   }
 
   @Test
   void shouldSaveNewVersion_WhenNewerVersionFound() {
-    // Given
+    BddLogger.given("the method checkRomeVersionUpdated");
     Rome4Version oldVersion = Rome4Version.create(1, Instant.now());
     Rome4Version newVersion = Rome4Version.create(2, Instant.now());
 
@@ -151,17 +157,18 @@ class RomeAdditionalSkillServiceImplTest {
     when(rome4VersionRepository.findFirstByOrderByVersionDesc())
         .thenReturn(Optional.of(oldVersion));
 
-    // When
+    BddLogger.when(
+        "calling the method from the RomeAdditionalSkillServiceImpl service with newer version");
     boolean result = service.checkRomeVersionUpdated();
 
-    // Then
+    BddLogger.then("it should save the new version");
     assertTrue(result);
     verify(rome4VersionRepository).save(any(Rome4Version.class));
   }
 
   @Test
   void shouldNotSave_WhenVersionIsUpToDate() {
-    // Given
+    BddLogger.given("the method checkRomeVersionUpdated");
     Rome4Version oldVersion = Rome4Version.create(2, Instant.now());
     Rome4Version newVersion = Rome4Version.create(2, Instant.now());
 
@@ -169,10 +176,11 @@ class RomeAdditionalSkillServiceImplTest {
     when(rome4VersionRepository.findFirstByOrderByVersionDesc())
         .thenReturn(Optional.of(oldVersion));
 
-    // When
+    BddLogger.when(
+        "calling the method from the RomeAdditionalSkillServiceImpl service with up-to-date version");
     boolean result = service.checkRomeVersionUpdated();
 
-    // Then
+    BddLogger.then("it should not save the new version");
     assertFalse(result);
     verify(rome4VersionRepository, never()).save(any());
   }

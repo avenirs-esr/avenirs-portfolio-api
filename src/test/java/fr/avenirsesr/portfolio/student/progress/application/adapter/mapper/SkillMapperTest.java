@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgress
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.LocalDate;
 import java.time.Period;
@@ -21,7 +22,7 @@ class SkillMapperTest {
 
   @Test
   void shouldMapSkillLevelProgressToDTO() {
-    // GIVEN
+    BddLogger.given("a skill mapper");
     var student = UserFixture.createStudent().toModel().toStudent();
     var javaSkill = SkillFixture.create().toModel();
 
@@ -55,10 +56,10 @@ class SkillMapperTest {
           .when(() -> SkillLevelViewMapper.fromDomainToDto(progress1))
           .thenReturn(null);
 
-      // WHEN
+      BddLogger.when("mapping a domain SkillLevelProgress to SkillDTO");
       SkillDTO dto = SkillMapper.fromDomainToDto(progress2, studentProgress);
 
-      // THEN
+      BddLogger.then("it should return a correct SkillDTO");
       assertNotNull(dto);
       assertEquals(javaSkill.getId(), dto.id());
       assertEquals(javaSkill.getName(), dto.name());
@@ -70,7 +71,7 @@ class SkillMapperTest {
 
   @Test
   void shouldHandleNoLastAchievedSkillLevel() {
-    // GIVEN
+    BddLogger.given("a skill mapper");
     var student = UserFixture.createStudent().toModel().toStudent();
     var pythonSkill = SkillFixture.create().toModel();
 
@@ -86,10 +87,11 @@ class SkillMapperTest {
             .withSkillLevels(List.of(pythonProgress))
             .toModel();
 
-    // WHEN
+    BddLogger.when(
+        "mapping a domain SkillLevelProgress without last achieved skill level to SkillDTO");
     SkillDTO dto = SkillMapper.fromDomainToDto(pythonProgress, studentProgress);
 
-    // THEN
+    BddLogger.then("it should handle no last achieved skill level");
     assertNotNull(dto);
     assertEquals(pythonSkill.getId(), dto.id());
     assertNull(dto.achievedSkillLevels(), "Last achieved skill level should be null");
@@ -97,7 +99,7 @@ class SkillMapperTest {
 
   @Test
   void shouldSetIsProgramFinishedBasedOnEndDate() {
-    // GIVEN
+    BddLogger.given("a skill mapper");
     var student = UserFixture.createStudent().toModel().toStudent();
     var skill = SkillFixture.create().toModel();
     var skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
@@ -119,11 +121,11 @@ class SkillMapperTest {
             .withStartDate(LocalDate.now().minusMonths(2), Period.ofMonths(3))
             .toModel();
 
-    // WHEN
+    BddLogger.when("mapping a domain SkillLevelProgress with end dates to SkillDTO");
     SkillDTO finishedDto = SkillMapper.fromDomainToDto(progress, finishedProgress);
     SkillDTO ongoingDto = SkillMapper.fromDomainToDto(progress, ongoingProgress);
 
-    // THEN
+    BddLogger.then("it should set IsProgramFinished based on end date");
     assertTrue(finishedDto.isProgramFinished(), "Program should be marked as finished");
     assertFalse(ongoingDto.isProgramFinished(), "Program should not be marked as finished");
   }
