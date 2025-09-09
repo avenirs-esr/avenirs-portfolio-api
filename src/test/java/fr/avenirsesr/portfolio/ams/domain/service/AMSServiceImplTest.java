@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ class AMSServiceImplTest {
 
   @Test
   void shouldReturnPagedAMSForUser() {
-    // Given
+    BddLogger.given("the findUserAmsByStudentProgress method from AMSServiceImpl");
     List<AMS> amsList = AMSFixture.create().withCount(3);
     PagedResult<AMS> expectedResult =
         new PagedResult<>(amsList, new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 3));
@@ -68,11 +69,11 @@ class AMSServiceImplTest {
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
 
-    // When
+    BddLogger.when("calling the method with an user with AMS");
     PagedResult<AMS> result =
         amsService.findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA);
 
-    // Then
+    BddLogger.then("it should return paged AMS");
     assertNotNull(result);
     assertEquals(3, result.pageInfo().totalElements());
     assertEquals(3, result.content().size());
@@ -85,7 +86,7 @@ class AMSServiceImplTest {
 
   @Test
   void shouldReturnEmptyPagedResultWhenUserHasNoAMS() {
-    // Given
+    BddLogger.given("the findUserAmsByStudentProgress method from AMSServiceImpl");
     PagedResult<AMS> expectedResult =
         new PagedResult<>(new ArrayList<>(), new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 0));
 
@@ -95,11 +96,11 @@ class AMSServiceImplTest {
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
 
-    // When
+    BddLogger.when("calling the method with an user without AMS");
     PagedResult<AMS> result =
         amsService.findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA);
 
-    // Then
+    BddLogger.then("it should return an empty paged result");
     assertNotNull(result);
     assertEquals(0, result.pageInfo().totalElements());
     assertTrue(result.content().isEmpty());
@@ -112,7 +113,7 @@ class AMSServiceImplTest {
 
   @Test
   void shouldHandlePagination() {
-    // Given
+    BddLogger.given("the findUserAmsByStudentProgress method from AMSServiceImpl");
     Integer page = 1;
     Integer size = 5;
     List<AMS> amsList = AMSFixture.create().withCount(5);
@@ -124,12 +125,12 @@ class AMSServiceImplTest {
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
 
-    // When
+    BddLogger.when("calling the method with an user with a large amount of AMS");
     PagedResult<AMS> result =
         amsService.findUserAmsByStudentProgress(
             student, studentProgressId, new PageCriteria(page, size));
 
-    // Then
+    BddLogger.then("it should return paged AMS");
     assertNotNull(result);
     assertEquals(15, result.pageInfo().totalElements());
     assertEquals(5, result.content().size());
@@ -142,7 +143,7 @@ class AMSServiceImplTest {
 
   @Test
   void shouldUseDefaultValuesWhenPaginationParametersAreNull() {
-    // Given
+    BddLogger.given("the findUserAmsByStudentProgress method from AMSServiceImpl");
     List<AMS> amsList = AMSFixture.create().withCount(3);
     PagedResult<AMS> expectedResult = new PagedResult<>(amsList, new PageInfo(0, 8, 3));
 
@@ -152,12 +153,12 @@ class AMSServiceImplTest {
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
 
-    // When
+    BddLogger.when("calling the method with null pagination parameters");
     PagedResult<AMS> result =
         amsService.findUserAmsByStudentProgress(
             student, studentProgressId, new PageCriteria(null, null));
 
-    // Then
+    BddLogger.then("it should return paged AMS with default pagination values");
     assertNotNull(result);
     assertEquals(3, result.pageInfo().totalElements());
     assertEquals(3, result.content().size());

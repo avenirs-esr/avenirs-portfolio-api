@@ -2,11 +2,15 @@ package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.io.IOException;
@@ -45,6 +49,7 @@ public class TraceAttachmentControllerTest {
 
   @Test
   void uploadAttachment_success_shouldReturn201() throws IOException {
+    BddLogger.given("a TraceAttachmentController");
     MockMultipartFile file =
         new MockMultipartFile("file", "test.pdf", "application/pdf", new byte[10]);
 
@@ -53,9 +58,11 @@ public class TraceAttachmentControllerTest {
             any(), eq(traceId), anyString(), anyString(), anyLong(), any(byte[].class)))
         .thenReturn(returnedAttachment);
 
+    BddLogger.when("the attachment upload success");
     ResponseEntity<AttachmentUploadDTO> response =
         controller.uploadAttachment(principal, traceId, file);
 
+    BddLogger.then("it should return a 201");
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     assertThat(response.getBody()).isNotNull();
 

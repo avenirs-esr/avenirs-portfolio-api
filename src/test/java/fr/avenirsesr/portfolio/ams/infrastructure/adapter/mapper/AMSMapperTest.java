@@ -16,6 +16,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgress
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
@@ -76,8 +77,11 @@ class AMSMapperTest {
 
   @Test
   void shouldMapFromDomainToEntity() {
+    BddLogger.given("an AMS mapper");
+    BddLogger.when("mapping a domain AMS to AMSEntity");
     AMSEntity entity = AMSMapper.fromDomain(ams);
 
+    BddLogger.then("it should return a correct AMSEntity");
     assertNotNull(entity);
     assertEquals(id, entity.getId());
     assertEquals(user.getId(), entity.getUser().getId());
@@ -106,6 +110,7 @@ class AMSMapperTest {
 
   @Test
   void shouldMapFromEntityToDomain() {
+    BddLogger.given("an AMS mapper");
     AMSEntity entity = new AMSEntity();
     entity.setId(id);
     entity.setUser(UserMapper.fromDomain(user));
@@ -125,8 +130,10 @@ class AMSMapperTest {
     translations.add(translationEntity);
     entity.setTranslations(translations);
 
+    BddLogger.when("mapping an AMSEntity to domain AMS");
     AMS mappedAms = AMSMapper.toDomain(entity);
 
+    BddLogger.then("it should return a correct domain AMS");
     assertNotNull(mappedAms);
     assertEquals(id, mappedAms.getId());
     assertEquals(user.getId(), mappedAms.getUser().getId());
@@ -136,6 +143,7 @@ class AMSMapperTest {
 
   @Test
   void shouldMapWithEmptyCollections() {
+    BddLogger.given("an AMS mapper");
     AMSEntity entity = new AMSEntity();
     entity.setId(id);
     entity.setUser(UserMapper.fromDomain(user));
@@ -160,8 +168,10 @@ class AMSMapperTest {
     translations.add(translationEntity);
     entity.setTranslations(translations);
 
+    BddLogger.when("mapping an empty collection to domain AMS");
     AMS mappedAms = AMSMapper.toDomain(entity);
 
+    BddLogger.then("it should return a correct domain AMS");
     assertNotNull(mappedAms);
     assertTrue(mappedAms.getSkillLevels() != null && mappedAms.getSkillLevels().isEmpty());
     assertTrue(mappedAms.getTraces() != null && mappedAms.getTraces().isEmpty());

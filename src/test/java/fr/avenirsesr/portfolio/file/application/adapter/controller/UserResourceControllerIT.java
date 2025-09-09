@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -47,6 +48,7 @@ class UserResourceControllerIT {
 
   @Test
   void shouldUploadUserProfilePhotoSuccessfully() throws Exception {
+    BddLogger.given("the /me/storage/users/{userCategory}/{photoType} endpoint");
     MockMultipartFile file =
         new MockMultipartFile(
             "file",
@@ -54,6 +56,8 @@ class UserResourceControllerIT {
             MediaType.IMAGE_JPEG_VALUE,
             "FakeImageContent".getBytes(StandardCharsets.UTF_8));
 
+    BddLogger.when("performing a MULTIPART");
+    BddLogger.then("it should upload user profile photo successfully");
     mockMvc
         .perform(
             multipart(
@@ -81,8 +85,11 @@ class UserResourceControllerIT {
 
   @Test
   void shouldReturnNotFoundWhenDeletingNonExistingPhoto() throws Exception {
+    BddLogger.given("the /me/storage/users/{fileId} endpoint");
     UUID fileId = UUID.randomUUID();
 
+    BddLogger.when("performing a DELETE ob bib existing photo");
+    BddLogger.then("it should return the not found status");
     mockMvc
         .perform(
             delete("/me/storage/users/{fileId}", fileId)

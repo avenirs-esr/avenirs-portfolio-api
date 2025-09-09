@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.Configuration;
@@ -9,6 +11,7 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.input
 import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.domain.model.BuildLifeProjectConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.domain.model.EWebsiteContentConfiguration;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -27,7 +30,7 @@ class WebsiteContentConfigurationServiceImplTest {
 
   @Test
   void shouldReturnConfigurationByLanguage() {
-    // Given
+    BddLogger.given("a WebsiteContentConfigurationServiceImpl service");
     Configuration configFr =
         Configuration.create(
             UUID.randomUUID(),
@@ -49,11 +52,11 @@ class WebsiteContentConfigurationServiceImplTest {
                 ELanguage.FRENCH, List.of(configFr),
                 ELanguage.ENGLISH, List.of(configEn)));
 
-    // When
+    BddLogger.when("getting life project configuration with all translations");
     Map<ELanguage, BuildLifeProjectConfiguration> result =
         service.getLiefProjectConfigurationWithAllTranslations();
 
-    // Then
+    BddLogger.then("it should return configuration by language");
     assertNotNull(result);
     assertEquals("<p>Projet de vie</p>", result.get(ELanguage.FRENCH).html());
     assertEquals("<p>Life project</p>", result.get(ELanguage.ENGLISH).html());
@@ -63,7 +66,7 @@ class WebsiteContentConfigurationServiceImplTest {
 
   @Test
   void shouldSaveNewConfigurations() {
-    // Given
+    BddLogger.given("a WebsiteContentConfigurationServiceImpl service");
     BuildLifeProjectConfiguration config =
         new BuildLifeProjectConfiguration("<p>Nouveau contenu</p>");
 
@@ -71,17 +74,17 @@ class WebsiteContentConfigurationServiceImplTest {
             EConfigurationScope.WEBSITE_CONTENT))
         .thenReturn(Map.of(ELanguage.FRENCH, List.of()));
 
-    // When
+    BddLogger.when("posting life project configuration");
     service.postLiefProjectConfiguration(Map.of(ELanguage.FRENCH, config));
 
-    // Then
+    BddLogger.then("it should save new configurations");
     verify(configurationTranslationService)
         .buildAndSaveTranslatedEntities(anyMap(), eq(EConfigurationScope.WEBSITE_CONTENT));
   }
 
   @Test
   void shouldUpdateExistingConfiguration() {
-    // Given
+    BddLogger.given("a WebsiteContentConfigurationServiceImpl service");
     Configuration existing =
         Configuration.create(
             UUID.randomUUID(),
@@ -96,10 +99,10 @@ class WebsiteContentConfigurationServiceImplTest {
             EConfigurationScope.WEBSITE_CONTENT))
         .thenReturn(Map.of(ELanguage.FRENCH, List.of(existing)));
 
-    // When
+    BddLogger.when("posting existing life project configuration with new values");
     service.postLiefProjectConfiguration(Map.of(ELanguage.FRENCH, updated));
 
-    // Then
+    BddLogger.then("it should update the existing configuration");
     verify(configurationTranslationService)
         .buildAndSaveTranslatedEntities(anyMap(), eq(EConfigurationScope.WEBSITE_CONTENT));
     assertEquals("<p>Contenu mis à jour</p>", existing.getValue());

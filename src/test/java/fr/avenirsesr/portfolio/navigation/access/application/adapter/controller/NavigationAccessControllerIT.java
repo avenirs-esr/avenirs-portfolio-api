@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class NavigationAccessControllerIT {
+
+  private static final String BASE_PATH = "/me/navigation-access";
 
   @Autowired private MockMvc mockMvc;
 
@@ -52,9 +55,12 @@ class NavigationAccessControllerIT {
 
   @Test
   void shouldReturnNavigationAccessForStudent() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET");
+    BddLogger.then("it should return navigation access");
     mockMvc
         .perform(
-            get("/me/navigation-access")
+            get(BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
@@ -71,9 +77,12 @@ class NavigationAccessControllerIT {
 
   @Test
   void shouldReturn404WhenUserNotFound() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET and the user is not found");
+    BddLogger.then("it should return a 404");
     mockMvc
         .perform(
-            get("/me/navigation-access")
+            get(BASE_PATH)
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature)
@@ -86,9 +95,12 @@ class NavigationAccessControllerIT {
 
   @Test
   void shouldReturn403WhenUserIsNotStudent() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a non student user");
+    BddLogger.then("it should return a 403");
     mockMvc
         .perform(
-            get("/me/navigation-access")
+            get(BASE_PATH)
                 .header("X-Signed-Context", teacherPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", teacherSignature)
@@ -101,9 +113,12 @@ class NavigationAccessControllerIT {
 
   @Test
   void shouldFallbackInDefaultLanguageWhenLanguageNotSupported() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a non supported language");
+    BddLogger.then("it should fallback in default language");
     mockMvc
         .perform(
-            get("/me/navigation-access")
+            get(BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)

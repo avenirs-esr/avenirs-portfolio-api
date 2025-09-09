@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +27,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class TraceAttachmentControllerIT {
+
+  private static final String BASE_PATH = "/me/storage/traces/{traceId}";
 
   @Autowired private MockMvc mockMvc;
 
@@ -58,15 +61,19 @@ class TraceAttachmentControllerIT {
 
   @Test
   void shouldUploadAttachmentSuccessfully() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " endpoint");
     UUID existingTraceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
 
     byte[] fileContent = "Contenu du fichier de test".getBytes(StandardCharsets.UTF_8);
     MockMultipartFile file =
         new MockMultipartFile("file", "test-file.txt", MediaType.TEXT_PLAIN_VALUE, fileContent);
 
+    BddLogger.when("performing a MULTIPART with a correct attachment");
+    BddLogger.then("it should successfully upload the attachment");
+
     mockMvc
         .perform(
-            multipart("/me/storage/traces/{traceId}", existingTraceId)
+            multipart(BASE_PATH, existingTraceId)
                 .file(file)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                 .header("X-Signed-Context", studentPayload)
@@ -82,15 +89,18 @@ class TraceAttachmentControllerIT {
 
   @Test
   void shouldReturn404WhenTraceNotFound() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " endpoint");
     UUID unknownTraceId = UUID.randomUUID();
 
     MockMultipartFile file =
         new MockMultipartFile(
             "file", "test-file.txt", MediaType.TEXT_PLAIN_VALUE, "Contenu".getBytes());
 
+    BddLogger.when("performing a MULTIPART with an unknown trace ID");
+    BddLogger.then("it should return 404");
     mockMvc
         .perform(
-            multipart("/me/storage/traces/{traceId}", unknownTraceId)
+            multipart(BASE_PATH, unknownTraceId)
                 .file(file)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                 .header("X-Signed-Context", studentPayload)
@@ -103,15 +113,18 @@ class TraceAttachmentControllerIT {
 
   @Test
   void shouldReturn403WhenUserNotAuthorized() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " endpoint");
     UUID traceIdNotOwnedByUser = UUID.fromString("e5e328dc-328e-4f22-962b-9a78864e02f5");
 
     MockMultipartFile file =
         new MockMultipartFile(
             "file", "test-file.txt", MediaType.TEXT_PLAIN_VALUE, "Contenu".getBytes());
 
+    BddLogger.when("performing a MULTIPART with a not authorized user");
+    BddLogger.then("it should return 403");
     mockMvc
         .perform(
-            multipart("/me/storage/traces/{traceId}", traceIdNotOwnedByUser)
+            multipart(BASE_PATH, traceIdNotOwnedByUser)
                 .file(file)
                 .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                 .header("X-Signed-Context", studentPayload)

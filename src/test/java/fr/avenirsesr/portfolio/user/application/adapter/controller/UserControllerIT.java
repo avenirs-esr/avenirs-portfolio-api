@@ -4,9 +4,9 @@ import static fr.avenirsesr.portfolio.shared.application.adapter.util.TestResour
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +51,11 @@ public class UserControllerIT {
 
   @Test
   void shouldUpdateStudentProfileSuccessfully() throws Exception {
+    BddLogger.given("the /me/users/STUDENT/update endpoint");
     String payloadJson = loadJson("user/mock-update-user.json");
 
+    BddLogger.when("performing a PUT");
+    BddLogger.then("it should update the student profile successfully");
     mockMvc
         .perform(
             put("/me/users/STUDENT/update")
@@ -67,8 +70,11 @@ public class UserControllerIT {
 
   @Test
   void shouldUpdateTeacherProfileSuccessfully() throws Exception {
+    BddLogger.given("the /me/users/TEACHER/update endpoint");
     String payloadJson = loadJson("user/mock-update-user.json");
 
+    BddLogger.when("performing a PUT");
+    BddLogger.then("it should update the teacher profile successfully");
     mockMvc
         .perform(
             put("/me/users/TEACHER/update")
@@ -83,6 +89,9 @@ public class UserControllerIT {
 
   @Test
   void shouldReturnNotFoundForUnknownUser() throws Exception {
+    BddLogger.given("the /me/users/STUDENT/overview endpoint");
+    BddLogger.when("performing a GET with an unknown user");
+    BddLogger.then("it should return a 404");
     mockMvc
         .perform(
             get("/me/users/STUDENT/overview")
@@ -95,6 +104,9 @@ public class UserControllerIT {
 
   @Test
   void shouldGetStudentProfile() throws Exception {
+    BddLogger.given("the /me/users/STUDENT/overview endpoint");
+    BddLogger.when("performing a GET");
+    BddLogger.then("it should return the student profile");
     mockMvc
         .perform(
             get("/me/users/STUDENT/overview")

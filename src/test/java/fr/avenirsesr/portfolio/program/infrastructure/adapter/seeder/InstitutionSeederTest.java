@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.InstitutionDatabaseRepository;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ class InstitutionSeederTest {
 
   @Test
   void seed_shouldReturnNonEmptyList() {
+    BddLogger.given("an institution seeder");
+    BddLogger.when("seeding institutions");
+    BddLogger.then("it should return a non empty list");
     assertNotNull(institutions);
     assertFalse(institutions.isEmpty());
 
@@ -43,6 +47,9 @@ class InstitutionSeederTest {
 
   @Test
   void seed_shouldIncludeAllTranslations() {
+    BddLogger.given("an institution seeder");
+    BddLogger.when("seeding institutions");
+    BddLogger.then("it should include all translations");
     for (InstitutionEntity inst : institutions) {
       assertTrue(inst.getTranslations().stream().anyMatch(t -> t.getLanguage() != null));
     }
@@ -50,10 +57,14 @@ class InstitutionSeederTest {
 
   @Test
   void seed_shouldCallRepositorySaveAllEntities() {
+    BddLogger.given("an institution seeder");
     InstitutionDatabaseRepository mockRepo = mock(InstitutionDatabaseRepository.class);
     InstitutionSeeder seederWithMock = new InstitutionSeeder(mockRepo);
 
+    BddLogger.when("seeding institutions");
     List<InstitutionEntity> result = seederWithMock.seed();
+
+    BddLogger.then("it should call repository and save all entities");
     verify(mockRepo, times(1)).saveAllEntities(result);
   }
 }

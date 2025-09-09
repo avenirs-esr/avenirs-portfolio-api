@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionE
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.ProgramDatabaseRepository;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ class ProgramSeederTest {
 
   @Test
   void seed_shouldThrowException_whenInstitutionsEmpty() {
+    BddLogger.given("a program seeder");
+    BddLogger.when("there is no institutions");
+    BddLogger.then("it should throw IllegalArgumentException");
     List<InstitutionEntity> emptyInstitutions = List.of();
     Exception exception =
         assertThrows(IllegalArgumentException.class, () -> programSeeder.seed(emptyInstitutions));
@@ -44,8 +48,11 @@ class ProgramSeederTest {
 
   @Test
   void seed_shouldReturnPrograms_withCorrectSize() {
+    BddLogger.given("a program seeder");
+    BddLogger.when("seeding programs");
     List<ProgramEntity> programs = programSeeder.seed(institutions);
 
+    BddLogger.then("it should return programs with correct size");
     assertNotNull(programs);
     assertFalse(programs.isEmpty());
 
@@ -62,8 +69,11 @@ class ProgramSeederTest {
 
   @Test
   void seed_shouldIncludeAllTranslationsExceptFrench() {
+    BddLogger.given("a program seeder");
+    BddLogger.when("seeding programs");
     List<ProgramEntity> programs = programSeeder.seed(institutions);
 
+    BddLogger.then("it should include all translations except french");
     programs.forEach(
         program -> {
           assertTrue(program.getTranslations().stream().anyMatch(t -> t.getLanguage() != null));
@@ -72,10 +82,14 @@ class ProgramSeederTest {
 
   @Test
   void seed_shouldCallRepositorySaveAllEntities() {
+    BddLogger.given("a program seeder");
     ProgramDatabaseRepository mockRepo = mock(ProgramDatabaseRepository.class);
     ProgramSeeder seederWithMock = new ProgramSeeder(mockRepo);
 
+    BddLogger.when("seeding programs");
     List<ProgramEntity> result = seederWithMock.seed(institutions);
+
+    BddLogger.then("it should call repository and save all entities");
     verify(mockRepo, times(1)).saveAllEntities(result);
   }
 }

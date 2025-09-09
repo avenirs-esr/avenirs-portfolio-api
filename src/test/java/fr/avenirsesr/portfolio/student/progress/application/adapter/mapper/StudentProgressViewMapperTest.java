@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.application.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
@@ -10,6 +11,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgress
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.StudentProgressViewDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,7 +22,7 @@ public class StudentProgressViewMapperTest {
 
   @Test
   void shouldMapStudentProgressToDTO() {
-    // GIVEN
+    BddLogger.given("a student progress view mapper");
     var student = UserFixture.createStudent().toModel().toStudent();
     var javaSkill = SkillFixture.create().toModel();
     var pythonSkill = SkillFixture.create().toModel();
@@ -68,12 +70,12 @@ public class StudentProgressViewMapperTest {
 
     try (MockedStatic<SkillMapper> mockedSkillViewMapper = mockStatic(SkillMapper.class)) {
 
-      // WHEN
+      BddLogger.when("mapping a domain StudentProgress to StudentProgressViewDTO");
       StudentProgressViewDTO dto =
           StudentProgressViewMapper.fromDomainToDto(
               studentProgress, List.of(javaProgress_3, pythonProgress_2));
 
-      // THEN
+      BddLogger.then("it should return a correct StudentProgressViewDTO");
       assertNotNull(dto);
       assertEquals(studentProgress.getId(), dto.id());
       assertEquals(studentProgress.getTrainingPath().getProgram().getName(), dto.name());
@@ -88,12 +90,16 @@ public class StudentProgressViewMapperTest {
 
   @Test
   void shouldHandleEmptyCurrentSkillLevels() {
+    BddLogger.given("a student progress view mapper");
     StudentProgress studentProgress =
         StudentProgressFixture.create().withSkillLevels(List.of()).toModel();
 
+    BddLogger.when(
+        "mapping a domain StudentProgress without current skill levels to StudentProgressViewDTO");
     StudentProgressViewDTO dto =
         StudentProgressViewMapper.fromDomainToDto(studentProgress, List.of());
 
+    BddLogger.then("it should handle empty current skill levels");
     assertNotNull(dto);
     assertTrue(dto.skills().isEmpty(), "DTO should have empty skills list");
   }

@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
@@ -37,6 +38,9 @@ class TraceAttachmentSeederTest {
 
   @Test
   void seed_shouldThrowException_whenTracesEmpty() {
+    BddLogger.given("a trace attachment seeder");
+    BddLogger.when("there is no traces");
+    BddLogger.then("it should throw IllegalArgumentException");
     Exception exception =
         assertThrows(IllegalArgumentException.class, () -> traceAttachmentSeeder.seed(List.of()));
     assertTrue(exception.getMessage().contains("traces cannot be empty"));
@@ -44,8 +48,11 @@ class TraceAttachmentSeederTest {
 
   @Test
   void seed_shouldReturnAttachments_forAllTraces() {
+    BddLogger.given("a trace attachment seeder");
+    BddLogger.when("there is a list of traces");
     List<TraceAttachmentEntity> attachments = traceAttachmentSeeder.seed(traces);
 
+    BddLogger.then("it should return attachments for all traces");
     assertNotNull(attachments);
     assertFalse(attachments.isEmpty());
 

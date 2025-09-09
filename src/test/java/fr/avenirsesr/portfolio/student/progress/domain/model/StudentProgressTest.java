@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,35 +17,35 @@ public class StudentProgressTest {
 
   @Test
   void testEmptySkillLevels() {
-    // Given
+    BddLogger.given("a student progress without skill levels");
     StudentProgress studentProgress =
         StudentProgressFixture.create().withSkillLevels(List.of()).toModel();
 
-    // When
+    BddLogger.when("getting current skill levels");
     List<SkillLevelProgress> result = studentProgress.getCurrentSkillLevels();
 
-    // Then
+    BddLogger.then("it should return an empty skill level progress");
     assertTrue(result.isEmpty(), "SkillLevelProgress should be empty");
   }
 
   @Test
   void testAllNotStarted() {
-    // Given
+    BddLogger.given("a student progress without started skill levels");
     StudentProgress studentProgress = StudentProgressFixture.create().toModel();
     studentProgress
         .getAllSkillLevels()
         .forEach(skillLevel -> skillLevel.setStatus(ESkillLevelStatus.NOT_STARTED));
 
-    // When
+    BddLogger.when("getting current skill levels");
     List<SkillLevelProgress> result = studentProgress.getCurrentSkillLevels();
 
-    // Then
+    BddLogger.then("it should return an empty skill level progress");
     assertTrue(result.isEmpty(), "NOT_STARTED should be ignored");
   }
 
   @Test
   void testSelectLatestStartDateForSkill() {
-    // Given
+    BddLogger.given("a student progress with some skill level progresses");
     var student = UserFixture.createStudent().toModel().toStudent();
     var skill = SkillFixture.create().toModel();
     var skillLevels =
@@ -71,17 +72,17 @@ public class StudentProgressTest {
             .withSkillLevels(skillLevelProgress)
             .toModel();
 
-    // When
+    BddLogger.when("getting current skill levels");
     List<SkillLevelProgress> result = studentProgress.getCurrentSkillLevels();
 
-    // Then
+    BddLogger.then("it should return the skill level with the latest start date");
     assertEquals(1, result.size());
     assertEquals(newestProgress, result.getFirst(), "should return latest start date");
   }
 
   @Test
   void testMultipleSkills() {
-    // Given
+    BddLogger.given("a student progress with some skill level progresses");
     var student = UserFixture.createStudent().toModel().toStudent();
     var javaSkill = SkillFixture.create().toModel();
     var pythonSkill = SkillFixture.create().toModel();
@@ -107,7 +108,7 @@ public class StudentProgressTest {
     pythonNewest.setStartDate(LocalDate.of(2024, 1, 1));
     skillLevelProgress.get(3).setStartDate(LocalDate.of(2023, 1, 1));
 
-    // When
+    BddLogger.when("getting current skill levels");
     StudentProgress studentProgress =
         StudentProgressFixture.create()
             .withUser(student.getUser())
@@ -115,7 +116,7 @@ public class StudentProgressTest {
             .toModel();
     List<SkillLevelProgress> result = studentProgress.getCurrentSkillLevels();
 
-    // Then
+    BddLogger.then("it should return all the newest skill level progresses");
     assertEquals(2, result.size());
     assertTrue(result.contains(javaNewest));
     assertTrue(result.contains(pythonNewest));
@@ -123,7 +124,7 @@ public class StudentProgressTest {
 
   @Test
   void testMixedStatuses() {
-    // Given
+    BddLogger.given("a student progress with some skill level progresses");
     var student = UserFixture.createStudent().toModel().toStudent();
     var javaSkill = SkillFixture.create().toModel();
     var skillLevels =
@@ -148,9 +149,10 @@ public class StudentProgressTest {
             .withSkillLevels(skillLevelProgress)
             .toModel();
 
-    // When
+    BddLogger.when("getting current skill levels");
     List<SkillLevelProgress> result = studentProgress.getCurrentSkillLevels();
 
+    BddLogger.then("it should only return all the newest skill level progresses that has started");
     assertEquals(1, result.size());
     assertEquals(skillLevelProgress.get(1), result.getFirst(), "NOT_STARTED should be ignored");
   }

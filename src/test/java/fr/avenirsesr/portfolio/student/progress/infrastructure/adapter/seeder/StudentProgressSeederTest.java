@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
@@ -64,6 +65,9 @@ class StudentProgressSeederTest {
 
   @Test
   void seed_shouldThrowException_whenTrainingPathsEmpty() {
+    BddLogger.given("a student progress seeder");
+    BddLogger.when("seeding student progress and there is no training paths");
+    BddLogger.then("it should throw IllegalArgumentException");
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
@@ -73,6 +77,9 @@ class StudentProgressSeederTest {
 
   @Test
   void seed_shouldThrowException_whenUsersEmpty() {
+    BddLogger.given("a student progress seeder");
+    BddLogger.when("seeding student progress and there is no users");
+    BddLogger.then("it should throw IllegalArgumentException");
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
@@ -82,6 +89,9 @@ class StudentProgressSeederTest {
 
   @Test
   void seed_shouldThrowException_whenSkillLevelsEmpty() {
+    BddLogger.given("a student progress seeder");
+    BddLogger.when("seeding student progress and there is no skill levels");
+    BddLogger.then("it should throw IllegalArgumentException");
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
@@ -91,9 +101,12 @@ class StudentProgressSeederTest {
 
   @Test
   void seed_shouldReturnStudentProgress_withCorrectRelations() {
+    BddLogger.given("a student progress seeder");
+    BddLogger.when("seeding student progress");
     List<StudentProgressEntity> result =
         studentProgressSeeder.seed(trainingPaths, users, skillLevels);
 
+    BddLogger.then("it should return student progresses");
     assertNotNull(result);
     assertFalse(result.isEmpty());
 
@@ -108,11 +121,14 @@ class StudentProgressSeederTest {
 
   @Test
   void seed_shouldCallRepositorySaveAllEntities() {
+    BddLogger.given("a student progress seeder");
     StudentProgressDatabaseRepository mockRepo = mock(StudentProgressDatabaseRepository.class);
     StudentProgressSeeder seederWithMock = new StudentProgressSeeder(mockRepo);
 
+    BddLogger.when("seeding student progress");
     List<StudentProgressEntity> result = seederWithMock.seed(trainingPaths, users, skillLevels);
 
+    BddLogger.then("it should call repository and save all entities");
     verify(mockRepo, times(1)).saveAllEntities(result);
   }
 }

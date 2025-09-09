@@ -55,7 +55,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     File[] matchingFiles = dir.listFiles((d, name) -> name.startsWith(id.toString() + "."));
     if (matchingFiles == null || matchingFiles.length == 0) {
-      log.error("No file found with id {} found", id);
+      log.error("No file with id {} found", id);
       throw new FileNotFoundException();
     }
 

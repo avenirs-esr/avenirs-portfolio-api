@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.*;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.*;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
@@ -35,7 +36,7 @@ class CohortMapperTest {
 
   @Test
   void shouldMapFromDomainToEntity() {
-    // Given
+    BddLogger.given("a Cohort mapper");
     TrainingPath trainingPath = TrainingPathFixture.create().toModel();
     User user = UserFixture.createStudent().toModel();
     Set<User> users = new HashSet<>();
@@ -51,10 +52,10 @@ class CohortMapperTest {
             .withAmsSet(new HashSet<>())
             .toModel();
 
-    // When
+    BddLogger.when("mapping a domain Cohort to CohortEntity");
     CohortEntity entity = CohortMapper.fromDomain(cohort);
 
-    // Then
+    BddLogger.when("it should return a correct CohortEntity");
     assertNotNull(entity);
     assertEquals(id, entity.getId());
     assertEquals(name, entity.getName());
@@ -72,7 +73,7 @@ class CohortMapperTest {
 
   @Test
   void shouldMapFromEntityToDomain() {
-    // Given
+    BddLogger.given("a Cohort mapper");
     UserEntity studentEntity = new UserEntity();
     studentEntity.setId(UUID.randomUUID());
     studentEntity.setFirstName("John");
@@ -150,10 +151,10 @@ class CohortMapperTest {
     entity.setUsers(userEntities);
     entity.setAmsEntities(new HashSet<>());
 
-    // When
+    BddLogger.when("mapping a CohortEntity to domain Cohort");
     Cohort mappedCohort = CohortMapper.toDomain(entity);
 
-    // Then
+    BddLogger.when("it should return a correct domain Cohort");
     assertNotNull(mappedCohort);
     assertEquals(id, mappedCohort.getId());
     assertEquals(name, mappedCohort.getName());
@@ -166,7 +167,7 @@ class CohortMapperTest {
 
   @Test
   void shouldMapWithEmptyCollections() {
-    // Given
+    BddLogger.given("a Cohort mapper");
     UserEntity studentEntity = new UserEntity();
     studentEntity.setId(UUID.randomUUID());
     studentEntity.setFirstName("John");
@@ -227,15 +228,14 @@ class CohortMapperTest {
     entity.setUsers(new HashSet<>());
     entity.setAmsEntities(new HashSet<>());
 
-    // Then
     assertNotNull(entity);
     assertTrue(entity.getUsers().isEmpty());
     assertTrue(entity.getAmsEntities().isEmpty());
 
-    // When
+    BddLogger.when("mapping an empty collection to domain Cohort");
     Cohort mappedCohort = CohortMapper.toDomain(entity);
 
-    // Then
+    BddLogger.then("it should return a correct domain Cohort");
     assertNotNull(mappedCohort);
     assertTrue(mappedCohort.getUsers().isEmpty());
     assertTrue(mappedCohort.getAmsSet().isEmpty());

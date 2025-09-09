@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.port.output.TrainingPathRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.ProgramFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class TrainingPathServiceImplTest {
 
   @Test
   void shouldReturnAllProgramProgressForStudent() {
-    // Given
+    BddLogger.given("a TrainingPathServiceImpl service");
     Program program1 = ProgramFixture.create().withName("Beta").toModel();
     Program program2 = ProgramFixture.create().withName("Alpha").toModel();
     TrainingPath trainingPath1 = TrainingPathFixture.create().withProgram(program1).toModel();
@@ -53,10 +54,10 @@ public class TrainingPathServiceImplTest {
     when(trainingPathRepository.findAllTrainingPathsByStudents(any(Student.class)))
         .thenReturn(allTrainingPaths);
 
-    // When
+    BddLogger.when("getting training paths for a student");
     List<TrainingPath> result = trainingPathServiceImpl.getTrainingPathsByStudent(student);
 
-    // Then
+    BddLogger.then("it should return all program progresses for this student");
     assertEquals(2, result.size());
     assertEquals("Alpha", result.get(0).getProgram().getName());
     assertEquals("Beta", result.get(1).getProgram().getName());

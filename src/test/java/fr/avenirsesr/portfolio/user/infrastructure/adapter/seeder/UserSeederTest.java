@@ -1,9 +1,11 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.ExternalUserRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -34,6 +36,9 @@ class UserSeederTest {
 
   @Test
   void seed_shouldReturnNonEmptyUsersList() {
+    BddLogger.given("a user seeder");
+    BddLogger.when("seeding users");
+    BddLogger.then("it should return users");
     assertNotNull(users);
     assertFalse(users.isEmpty());
 
@@ -46,22 +51,28 @@ class UserSeederTest {
 
   @Test
   void seed_shouldHaveStudentsAndTeachers() {
+    BddLogger.given("a user seeder");
+    BddLogger.when("seeding users");
     long studentCount = users.stream().filter(u -> u.getStudent() != null).count();
     long teacherCount = users.stream().filter(u -> u.getTeacher() != null).count();
 
+    BddLogger.then("it should return student and teacher users");
     assertTrue(studentCount >= SeederConfig.USERS_NB_OF_STUDENT);
     assertTrue(teacherCount >= SeederConfig.USERS_NB_OF_TEACHER);
   }
 
   @Test
   void seed_shouldCallRepositories() {
+    BddLogger.given("a user seeder");
     // Mock les repositories pour vérifier les appels
     UserRepository mockUserRepo = mock(UserRepository.class);
     ExternalUserRepository mockExternalRepo = mock(ExternalUserRepository.class);
     UserSeeder seederWithMock = new UserSeeder(mockUserRepo, mockExternalRepo);
 
+    BddLogger.when("seeding users");
     List<UserEntity> result = seederWithMock.seed();
 
+    BddLogger.then("it should call repositories");
     verify(mockUserRepo, atLeastOnce()).saveAll(any());
     verify(mockExternalRepo, atLeastOnce()).saveAll(any());
     verify(mockUserRepo, atLeastOnce()).saveAllStudents(any());

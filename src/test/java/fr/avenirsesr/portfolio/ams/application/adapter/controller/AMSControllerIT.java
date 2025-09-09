@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,9 @@ public class AMSControllerIT {
 
   @Test
   void shouldReturnAmsForStudent() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a valid student");
+    BddLogger.then("it should return paged ams");
     mockMvc
         .perform(
             get(BASE_PATH)
@@ -73,6 +77,9 @@ public class AMSControllerIT {
 
   @Test
   void shouldReturnExceptionIfStudentProgressIdIsUnknown() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with an unknown student progress ID");
+    BddLogger.then("it should return the STUDENT_PROGRESS_NOT_FOUND exception");
     mockMvc
         .perform(
             get(BASE_PATH)
@@ -90,6 +97,9 @@ public class AMSControllerIT {
 
   @Test
   void shouldReturn404IfUserIsUnknown() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with an unknown user");
+    BddLogger.then("it should return a 404");
     mockMvc
         .perform(
             get(BASE_PATH)
@@ -105,6 +115,9 @@ public class AMSControllerIT {
 
   @Test
   void shouldReturn403IfUserIsNotStudent() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET with a non student user");
+    BddLogger.then("it should return a 403");
     mockMvc
         .perform(
             get(BASE_PATH)
@@ -120,6 +133,9 @@ public class AMSControllerIT {
 
   @Test
   void shouldReturn400IfstudentProgressIdMissing() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET without student progress ID");
+    BddLogger.then("it should return a 400");
     mockMvc
         .perform(
             get(BASE_PATH)

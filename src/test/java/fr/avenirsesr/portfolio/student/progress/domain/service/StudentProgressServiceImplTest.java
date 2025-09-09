@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.student.progress.domain.model.*;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.*;
+import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.LocalDate;
@@ -42,7 +43,8 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldReturnTrueWhenStudentIsFollowingProgramWithLearningMethod() {
-    // Given
+    BddLogger.given(
+        "a StudentProgressServiceImpl service and a student following at least one program with learning method");
     var progressAPC = TrainingPathFixture.createWithAPC().toModel();
     StudentProgress progressAPCModel =
         StudentProgressFixture.create()
@@ -53,29 +55,32 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllAPCByStudent(student))
         .thenReturn(List.of(progressAPCModel));
 
-    // When
+    BddLogger.when("checking if the student is following an APC program");
     boolean result = studentProgressService.isStudentFollowingAPCProgram(student);
 
-    // Then
+    BddLogger.then("it should return true");
     assertTrue(result);
     verify(studentProgressRepository).findAllAPCByStudent(student);
   }
 
   @Test
   void shouldReturnFalseWhenStudentIsNotFollowingAnyProgramWithLearningMethod() {
-    // Given
+    BddLogger.given(
+        "a StudentProgressServiceImpl service and a student not following any program with learning method");
     when(studentProgressRepository.findAllAPCByStudent(student)).thenReturn(List.of());
 
-    // When
+    BddLogger.when("checking if the student is following an APC program");
     boolean result = studentProgressService.isStudentFollowingAPCProgram(student);
 
-    // Then
+    BddLogger.then("it should return false");
     assertFalse(result);
     verify(studentProgressRepository).findAllAPCByStudent(student);
   }
 
   @Test
   void shouldReturnSkillsOverviewWithLimitedSkills() {
+    BddLogger.given(
+        "a StudentProgressServiceImpl service and a student with a large amount of skill levels");
     var skillLevelsProgress = new ArrayList<SkillLevelProgress>();
     for (int i = 0; i < 8; i++) {
       skillLevelsProgress.add(
@@ -84,7 +89,6 @@ public class StudentProgressServiceImplTest {
               .toModel());
     }
 
-    // Given
     StudentProgress progress1 =
         StudentProgressFixture.create()
             .withUser(student.getUser())
@@ -109,11 +113,12 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(progress1, progress2));
 
-    // When
+    BddLogger.when("getting the student progress overview");
     Map<StudentProgress, List<SkillLevelProgress>> result =
         studentProgressService.getStudentProgressOverview(student);
 
-    // Then
+    BddLogger.then(
+        "it should return student progresses with limited number of skill level progresses");
     assertEquals(2, result.size(), "Should contain 2 StudentProgress");
     assertTrue(result.containsKey(progress1));
     assertTrue(result.containsKey(progress2));
@@ -127,20 +132,22 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldReturnEmptySkillsOverviewWhenNoProgress() {
-    // Given
+    BddLogger.given("a StudentProgressServiceImpl service and a student without student progress");
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of());
 
-    // When
+    BddLogger.when("getting the student progress overview");
     Map<StudentProgress, List<SkillLevelProgress>> result =
         studentProgressService.getStudentProgressOverview(student);
 
-    // Then
+    BddLogger.then("it should return empty student progress");
     assertTrue(result.isEmpty(), "StudentProgress should be empty");
     verify(studentProgressRepository).findAllByStudent(eq(student));
   }
 
   @Test
   void shouldReturnOnlyCurrentStudentProgressOnOverview() {
+    BddLogger.given(
+        "a StudentProgressServiceImpl service and a student with current, past and future progresses");
     var skillLevelsProgress = new ArrayList<SkillLevelProgress>();
     for (int i = 0; i < 6; i++) {
       skillLevelsProgress.add(
@@ -179,11 +186,11 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
 
-    // WHEN
+    BddLogger.when("getting the student progress overview");
     Map<StudentProgress, List<SkillLevelProgress>> result =
         studentProgressService.getStudentProgressOverview(student);
 
-    // THEN
+    BddLogger.then("it should only return current progress");
     assertEquals(1, result.size(), "Only current progress should be returned");
     assertTrue(result.containsKey(currentProgress), "Current progress should be present");
     assertFalse(result.containsKey(pastProgress), "Past progress should be filtered out");
@@ -197,18 +204,18 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldReturnSkillsViewWithCustomSortCriteria() {
-    // Given
+    BddLogger.given("a StudentProgressServiceImpl service and a sorting criteria");
     SortCriteria customSort = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
     StudentProgress progress =
         StudentProgressFixture.create().withUser(student.getUser()).toModel();
 
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
 
-    // When
+    BddLogger.when("getting the student progress view");
     Map<StudentProgress, List<SkillLevelProgress>> result =
         studentProgressService.getStudentProgressView(student, customSort);
 
-    // Then
+    BddLogger.then("it should return skills view sorted by the criteria");
     assertEquals(1, result.size());
     assertEquals(progress, result.keySet().stream().toList().getFirst());
     verify(studentProgressRepository).findAllByStudent(student);
@@ -216,6 +223,8 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldReturnOnlyCurrentStudentProgressOnView() {
+    BddLogger.given(
+        "a StudentProgressServiceImpl service and a student with current, past and future progresses");
     var skillLevelsProgress = new ArrayList<SkillLevelProgress>();
     for (int i = 0; i < 6; i++) {
       skillLevelsProgress.add(
@@ -254,12 +263,12 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
 
-    // WHEN
+    BddLogger.when("getting the student progress view");
     Map<StudentProgress, List<SkillLevelProgress>> result =
         studentProgressService.getStudentProgressView(
             student, new SortCriteria(ESortField.DATE, ESortOrder.ASC));
 
-    // THEN
+    BddLogger.then("it should only return current progress");
     assertEquals(1, result.size(), "Only current progress should be returned");
     assertTrue(result.containsKey(currentProgress), "Current progress should be present");
     assertFalse(result.containsKey(pastProgress), "Past progress should be filtered out");
@@ -270,6 +279,8 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldReturnSkillsViewWithoutLimitedSkills() {
+    BddLogger.given(
+        "a StudentProgressServiceImpl service and a student with a large amount of skill level progress");
     var skillLevelsProgress = new ArrayList<SkillLevelProgress>();
     for (int i = 0; i < 8; i++) {
       skillLevelsProgress.add(
@@ -278,7 +289,6 @@ public class StudentProgressServiceImplTest {
               .toModel());
     }
 
-    // Given
     StudentProgress progress1 =
         StudentProgressFixture.create()
             .withUser(student.getUser())
@@ -303,12 +313,12 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(progress1, progress2));
 
-    // When
+    BddLogger.when("getting the student progress view");
     Map<StudentProgress, List<SkillLevelProgress>> result =
         studentProgressService.getStudentProgressView(
             student, new SortCriteria(ESortField.DATE, ESortOrder.ASC));
 
-    // Then
+    BddLogger.then("it should return all skill levels progresses");
     assertEquals(2, result.size(), "Should contain 2 StudentProgress");
     assertEquals(
         8,
@@ -323,7 +333,8 @@ public class StudentProgressServiceImplTest {
   @ParameterizedTest
   @EnumSource(ESortOrder.class)
   void shouldSortStudentProgressAndSkillsByName(ESortOrder order) {
-    // Given
+    BddLogger.given(
+        "a StudentProgressServiceImpl service and a student with multiple progresses and skills");
     var skillAA =
         SkillLevelProgressFixture.create(student)
             .withSkillLevel(
@@ -379,12 +390,13 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(progressB, progressA));
 
-    // When
+    BddLogger.when("getting the student progress view with the ordered by name criteria");
     var result =
         studentProgressService.getStudentProgressView(
             student, new SortCriteria(ESortField.NAME, order));
 
-    // Then
+    BddLogger.then(
+        "it should return all student progresses and all skill levels progresses ordered by name");
     List<StudentProgress> orderedKeys = new ArrayList<>(result.keySet());
     if (order == ESortOrder.ASC) {
       assertEquals(progressA, orderedKeys.get(0));
@@ -413,7 +425,8 @@ public class StudentProgressServiceImplTest {
   @ParameterizedTest
   @EnumSource(ESortOrder.class)
   void shouldSortStudentProgressAndSkillsByDate(ESortOrder order) {
-    // Given
+    BddLogger.given(
+        "a StudentProgressServiceImpl service and a student with multiple progresses and skills");
     var skillOld1 =
         SkillLevelProgressFixture.create(student)
             .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
@@ -452,12 +465,13 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(progressOld, progressNew));
 
-    // When
+    BddLogger.when("getting the student progress view with the ordered by date criteria");
     var result =
         studentProgressService.getStudentProgressView(
             student, new SortCriteria(ESortField.DATE, order));
 
-    // Then
+    BddLogger.then(
+        "it should return all student progresses and all skill levels progresses ordered by date");
     List<StudentProgress> orderedKeys = new ArrayList<>(result.keySet());
     if (order == ESortOrder.ASC) {
       assertEquals(progressOld, orderedKeys.get(0));
@@ -490,7 +504,7 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldReturnPagedSkillsLifeProjectView() {
-    // Given
+    BddLogger.given("a StudentProgressServiceImpl service");
     LocalDate now = LocalDate.now();
 
     SkillLevelProgress skillLevel1 =
@@ -515,11 +529,11 @@ public class StudentProgressServiceImplTest {
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
     PageCriteria pageCriteria = new PageCriteria(0, 1); // 1 élément par page
 
-    // When
+    BddLogger.when("getting the skills life project view");
     PagedResult<SkillProgress> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
-    // Then
+    BddLogger.then("it should return paged skill progress");
     assertEquals(1, result.content().size(), "Page should contain 1 element");
     assertEquals(2, result.pageInfo().totalElements(), "Total elements should match");
     verify(studentProgressRepository).findAllByStudent(eq(student));
@@ -527,17 +541,17 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldReturnEmptyResultWhenNoStudentProgress() {
-    // Given
+    BddLogger.given("a StudentProgressServiceImpl service and a student without student progress");
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of());
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
     PageCriteria pageCriteria = new PageCriteria(0, 5);
 
-    // When
+    BddLogger.when("getting the skills life project view");
     PagedResult<SkillProgress> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
-    // Then
+    BddLogger.then("it should return an empty result");
     assertTrue(result.content().isEmpty(), "Results should be empty");
     assertEquals(0, result.pageInfo().totalElements(), "Total elements should be 0");
     verify(studentProgressRepository).findAllByStudent(eq(student));
@@ -545,7 +559,8 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldFilterOutFutureStudentProgress() {
-    // Given
+    BddLogger.given(
+        "a StudentProgressServiceImpl service and a student with past and future progresses");
     LocalDate now = LocalDate.now();
 
     StudentProgress pastProgress =
@@ -576,11 +591,11 @@ public class StudentProgressServiceImplTest {
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
     PageCriteria pageCriteria = new PageCriteria(0, 10);
 
-    // When
+    BddLogger.when("getting the skills life project view");
     PagedResult<SkillProgress> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
-    // Then
+    BddLogger.then("it should only return past progress");
     assertEquals(1, result.content().size(), "Only past progress should be returned");
     assertTrue(result.content().stream().allMatch(sp -> sp.studentProgress().equals(pastProgress)));
     verify(studentProgressRepository).findAllByStudent(eq(student));
@@ -588,7 +603,7 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldSortSkillProgressAccordingToSortCriteria() {
-    // Given
+    BddLogger.given("a StudentProgressServiceImpl service");
     LocalDate now = LocalDate.now();
 
     SkillLevelProgress skillLevelOld =
@@ -614,11 +629,11 @@ public class StudentProgressServiceImplTest {
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
     PageCriteria pageCriteria = new PageCriteria(0, 5);
 
-    // When
+    BddLogger.when("getting the skills life project view with a sorting criteria");
     PagedResult<SkillProgress> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
-    // Then
+    BddLogger.then("it should return paged skill progress sorted by the criteria");
     assertEquals(skillLevelNew.getSkillLevel().getSkill(), result.content().get(0).skill());
     verify(studentProgressRepository).findAllByStudent(eq(student));
   }
@@ -627,7 +642,7 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldSkipFirstPageElementsWhenFetchingSecondPage() {
-    // Given
+    BddLogger.given("a StudentProgressServiceImpl service");
     LocalDate now = LocalDate.now();
     SkillLevelProgress skill1 =
         SkillLevelProgressFixture.create(student)
@@ -657,11 +672,11 @@ public class StudentProgressServiceImplTest {
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
     PageCriteria pageCriteria = new PageCriteria(1, 2); // second page, 2 per page
 
-    // When
+    BddLogger.when("getting the second page of the skills life project view");
     PagedResult<SkillProgress> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
-    // Then
+    BddLogger.then("it should skip first page elements");
     assertEquals(1, result.content().size(), "Second page should contain only the last element");
     assertEquals(3, result.pageInfo().totalElements(), "Total elements should be 3");
     assertEquals(1, result.pageInfo().page(), "Current page should be 1");
@@ -669,7 +684,7 @@ public class StudentProgressServiceImplTest {
 
   @Test
   void shouldRespectPaginationLimit() {
-    // Given
+    BddLogger.given("a StudentProgressServiceImpl service");
     LocalDate now = LocalDate.now();
     SkillLevelProgress skill1 =
         SkillLevelProgressFixture.create(student)
@@ -699,18 +714,20 @@ public class StudentProgressServiceImplTest {
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
     PageCriteria pageCriteria = new PageCriteria(0, 2); // limit to 2 elements
 
-    // When
+    BddLogger.when("getting the skills life project view with a page size limit");
     PagedResult<SkillProgress> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
-    // Then
+    BddLogger.then(
+        "it should return paged skill progress with at most page size limit skill progresses");
     assertEquals(2, result.content().size(), "Only 2 elements should be returned");
     assertEquals(3, result.pageInfo().totalElements(), "Total elements should be 3");
   }
 
   @Test
   void shouldOrderCurrentProgressBeforeFinishedProgress() {
-    // Given
+    BddLogger.given(
+        "a StudentProgressServiceImpl service and a student with past and current progresses");
     LocalDate now = LocalDate.now();
     SkillLevelProgress currentSkill =
         SkillLevelProgressFixture.create(student)
@@ -741,11 +758,11 @@ public class StudentProgressServiceImplTest {
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
     PageCriteria pageCriteria = new PageCriteria(0, 10);
 
-    // When
+    BddLogger.when("getting the skills life project view with a desc date sorting criteria");
     PagedResult<SkillProgress> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
-    // Then
+    BddLogger.then("it should return current progresses before finished progresses");
     assertFalse(result.content().isEmpty(), "Result should not be empty");
     StudentProgress firstProgress = result.content().getFirst().studentProgress();
     assertEquals(currentProgress, firstProgress, "Current progress should appear first");
