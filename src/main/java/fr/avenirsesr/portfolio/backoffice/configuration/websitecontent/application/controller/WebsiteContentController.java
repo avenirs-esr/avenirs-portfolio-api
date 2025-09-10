@@ -25,7 +25,7 @@ public class WebsiteContentController {
       @RequestBody Map<ELanguage, BuildLifeProjectConfigDTO> configurations) {
     log.debug("Received request to post build life project config : {}", configurations);
 
-    service.postLiefProjectConfiguration(
+    service.postLifeProjectConfiguration(
         configurations.entrySet().stream()
             .collect(
                 Collectors.toMap(
@@ -41,7 +41,7 @@ public class WebsiteContentController {
     log.debug("Received request to get build life project config");
 
     Map<ELanguage, BuildLifeProjectConfiguration> config =
-        service.getLiefProjectConfigurationWithAllTranslations();
+        service.getLifeProjectConfigurationWithAllTranslations();
 
     return ResponseEntity.ok(
         config.entrySet().stream()
@@ -55,7 +55,7 @@ public class WebsiteContentController {
   public ResponseEntity<BuildLifeProjectConfigDTO> getBuildLifeProjectConfig(Principal principal) {
     log.debug("Received request from {} to get build life project config", principal.getName());
 
-    BuildLifeProjectConfiguration config = service.getLiefProjectConfiguration();
+    BuildLifeProjectConfiguration config = service.getLifeProjectConfiguration();
 
     return ResponseEntity.ok(new BuildLifeProjectConfigDTO(config.html()));
   }

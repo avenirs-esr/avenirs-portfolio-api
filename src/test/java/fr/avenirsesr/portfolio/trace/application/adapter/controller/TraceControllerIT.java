@@ -169,7 +169,7 @@ class TraceControllerIT {
   }
 
   @Test
-  void shouldReturn403IfTraceNotFoundWhenDeleting() throws Exception {
+  void shouldReturn404IfTraceNotFoundWhenDeleting() throws Exception {
     BddLogger.given("the " + BASE_PATH_WITH_ID + " endpoint");
     UUID traceIdNotOwned = UUID.randomUUID();
 

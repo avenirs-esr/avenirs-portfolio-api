@@ -1,12 +1,13 @@
 package fr.avenirsesr.portfolio.testutils;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public final class BddLogger {
 
   private static void log(String prefix, String message) {
     System.out.println(prefix + " " + message);
   }
-
-  private BddLogger() {}
 
   public static void given(String message) {
     log("🔵 GIVEN", message);

@@ -32,7 +32,7 @@ public class WebsiteContentConfigurationServiceImpl implements WebsiteContentCon
   }
 
   @Override
-  public BuildLifeProjectConfiguration getLiefProjectConfiguration() {
+  public BuildLifeProjectConfiguration getLifeProjectConfiguration() {
     List<Configuration> configurations =
         configurationRepository.inScope(EConfigurationScope.WEBSITE_CONTENT);
 
@@ -46,7 +46,7 @@ public class WebsiteContentConfigurationServiceImpl implements WebsiteContentCon
 
   @Override
   public Map<ELanguage, BuildLifeProjectConfiguration>
-      getLiefProjectConfigurationWithAllTranslations() {
+      getLifeProjectConfigurationWithAllTranslations() {
     Map<ELanguage, List<Configuration>> configurationsByLanguage =
         configurationTranslationService.findInScopeWithAllTranslations(
             EConfigurationScope.WEBSITE_CONTENT);
@@ -58,7 +58,7 @@ public class WebsiteContentConfigurationServiceImpl implements WebsiteContentCon
   }
 
   @Override
-  public void postLiefProjectConfiguration(
+  public void postLifeProjectConfiguration(
       Map<ELanguage, BuildLifeProjectConfiguration> configurations) {
     Map<ELanguage, List<Configuration>> savedConfigurations =
         configurationTranslationService.findInScopeWithAllTranslations(

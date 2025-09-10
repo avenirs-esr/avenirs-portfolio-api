@@ -69,7 +69,7 @@ public class WebsiteContentConfigurationSeeder {
                         + "-- the construction of a coherent life project aligned with your path,"
                         + " skills, and inclinations.\n"
                         + "@@\n"));
-    service.postLiefProjectConfiguration(config);
+    service.postLifeProjectConfiguration(config);
     log.info("✔ additional skills configuration saved : {}", config);
   }
 }
