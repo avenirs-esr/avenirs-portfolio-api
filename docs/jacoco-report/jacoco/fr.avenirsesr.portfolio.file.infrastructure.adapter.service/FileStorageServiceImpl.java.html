@@ -55,7 +55,7 @@ import org.springframework.stereotype.Component;
 
 <span class="nc" id="L56">    File[] matchingFiles = dir.listFiles((d, name) -&gt; name.startsWith(id.toString() + &quot;.&quot;));</span>
 <span class="nc bnc" id="L57" title="All 4 branches missed.">    if (matchingFiles == null || matchingFiles.length == 0) {</span>
-<span class="nc" id="L58">      log.error(&quot;No file found with id {} found&quot;, id);</span>
+<span class="nc" id="L58">      log.error(&quot;No file with id {} found&quot;, id);</span>
 <span class="nc" id="L59">      throw new FileNotFoundException();</span>
     }
 
