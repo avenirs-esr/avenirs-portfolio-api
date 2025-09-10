@@ -44,7 +44,8 @@ public class StudentProgressServiceImplTest {
   @Test
   void shouldReturnTrueWhenStudentIsFollowingProgramWithLearningMethod() {
     BddLogger.given(
-        "a StudentProgressServiceImpl service and a student following at least one program with learning method");
+        "a StudentProgressServiceImpl service and a student following at least one program with"
+            + " learning method");
     var progressAPC = TrainingPathFixture.createWithAPC().toModel();
     StudentProgress progressAPCModel =
         StudentProgressFixture.create()
@@ -66,7 +67,8 @@ public class StudentProgressServiceImplTest {
   @Test
   void shouldReturnFalseWhenStudentIsNotFollowingAnyProgramWithLearningMethod() {
     BddLogger.given(
-        "a StudentProgressServiceImpl service and a student not following any program with learning method");
+        "a StudentProgressServiceImpl service and a student not following any program with learning"
+            + " method");
     when(studentProgressRepository.findAllAPCByStudent(student)).thenReturn(List.of());
 
     BddLogger.when("checking if the student is following an APC program");
@@ -147,7 +149,8 @@ public class StudentProgressServiceImplTest {
   @Test
   void shouldReturnOnlyCurrentStudentProgressOnOverview() {
     BddLogger.given(
-        "a StudentProgressServiceImpl service and a student with current, past and future progresses");
+        "a StudentProgressServiceImpl service and a student with current, past and future"
+            + " progresses");
     var skillLevelsProgress = new ArrayList<SkillLevelProgress>();
     for (int i = 0; i < 6; i++) {
       skillLevelsProgress.add(
@@ -224,7 +227,8 @@ public class StudentProgressServiceImplTest {
   @Test
   void shouldReturnOnlyCurrentStudentProgressOnView() {
     BddLogger.given(
-        "a StudentProgressServiceImpl service and a student with current, past and future progresses");
+        "a StudentProgressServiceImpl service and a student with current, past and future"
+            + " progresses");
     var skillLevelsProgress = new ArrayList<SkillLevelProgress>();
     for (int i = 0; i < 6; i++) {
       skillLevelsProgress.add(
@@ -280,7 +284,8 @@ public class StudentProgressServiceImplTest {
   @Test
   void shouldReturnSkillsViewWithoutLimitedSkills() {
     BddLogger.given(
-        "a StudentProgressServiceImpl service and a student with a large amount of skill level progress");
+        "a StudentProgressServiceImpl service and a student with a large amount of skill level"
+            + " progress");
     var skillLevelsProgress = new ArrayList<SkillLevelProgress>();
     for (int i = 0; i < 8; i++) {
       skillLevelsProgress.add(

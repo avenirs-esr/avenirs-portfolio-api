@@ -5,9 +5,9 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import java.util.Map;
 
 public interface WebsiteContentConfigurationService {
-  BuildLifeProjectConfiguration getLiefProjectConfiguration();
+  BuildLifeProjectConfiguration getLifeProjectConfiguration();
 
-  Map<ELanguage, BuildLifeProjectConfiguration> getLiefProjectConfigurationWithAllTranslations();
+  Map<ELanguage, BuildLifeProjectConfiguration> getLifeProjectConfigurationWithAllTranslations();
 
-  void postLiefProjectConfiguration(Map<ELanguage, BuildLifeProjectConfiguration> configuration);
+  void postLifeProjectConfiguration(Map<ELanguage, BuildLifeProjectConfiguration> configuration);
 }

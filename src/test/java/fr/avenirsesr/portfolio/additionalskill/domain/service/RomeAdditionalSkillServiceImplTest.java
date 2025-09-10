@@ -139,7 +139,8 @@ class RomeAdditionalSkillServiceImplTest {
     when(rome4VersionRepository.findFirstByOrderByVersionDesc()).thenReturn(Optional.empty());
 
     BddLogger.when(
-        "calling the method from the RomeAdditionalSkillServiceImpl service with no existing version");
+        "calling the method from the RomeAdditionalSkillServiceImpl service with no existing"
+            + " version");
     boolean result = service.checkRomeVersionUpdated();
 
     BddLogger.then("it should save the new version");
@@ -177,7 +178,8 @@ class RomeAdditionalSkillServiceImplTest {
         .thenReturn(Optional.of(oldVersion));
 
     BddLogger.when(
-        "calling the method from the RomeAdditionalSkillServiceImpl service with up-to-date version");
+        "calling the method from the RomeAdditionalSkillServiceImpl service with up-to-date"
+            + " version");
     boolean result = service.checkRomeVersionUpdated();
 
     BddLogger.then("it should not save the new version");

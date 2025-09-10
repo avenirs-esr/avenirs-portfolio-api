@@ -54,7 +54,7 @@ class WebsiteContentConfigurationServiceImplTest {
 
     BddLogger.when("getting life project configuration with all translations");
     Map<ELanguage, BuildLifeProjectConfiguration> result =
-        service.getLiefProjectConfigurationWithAllTranslations();
+        service.getLifeProjectConfigurationWithAllTranslations();
 
     BddLogger.then("it should return configuration by language");
     assertNotNull(result);
@@ -75,7 +75,7 @@ class WebsiteContentConfigurationServiceImplTest {
         .thenReturn(Map.of(ELanguage.FRENCH, List.of()));
 
     BddLogger.when("posting life project configuration");
-    service.postLiefProjectConfiguration(Map.of(ELanguage.FRENCH, config));
+    service.postLifeProjectConfiguration(Map.of(ELanguage.FRENCH, config));
 
     BddLogger.then("it should save new configurations");
     verify(configurationTranslationService)
@@ -100,7 +100,7 @@ class WebsiteContentConfigurationServiceImplTest {
         .thenReturn(Map.of(ELanguage.FRENCH, List.of(existing)));
 
     BddLogger.when("posting existing life project configuration with new values");
-    service.postLiefProjectConfiguration(Map.of(ELanguage.FRENCH, updated));
+    service.postLifeProjectConfiguration(Map.of(ELanguage.FRENCH, updated));
 
     BddLogger.then("it should update the existing configuration");
     verify(configurationTranslationService)

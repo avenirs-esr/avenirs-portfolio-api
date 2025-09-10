@@ -49,7 +49,7 @@ class TraceControllerTest {
   }
 
   @Test
-  void shouldReturnTRACEOverviewForUser() {
+  void shouldReturnTraceOverviewForUser() {
     BddLogger.given("a TraceController");
     when(traceService.lastTracesOf(user)).thenReturn(List.of(trace));
     when(traceService.programNameOfTrace(trace)).thenReturn("Program Name");

@@ -156,7 +156,8 @@ class TraceAttachmentServiceImplTest {
     when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
 
     BddLogger.when(
-        "uploading a trace attachment and the file size is too big and the trace has no attachments");
+        "uploading a trace attachment and the file size is too big and the trace has no"
+            + " attachments");
     FileSizeTooBigException thrown =
         catchThrowableOfType(
             () ->
@@ -190,7 +191,8 @@ class TraceAttachmentServiceImplTest {
         .thenThrow(new FileTypeNotSupportedException("File type not supported"));
 
     BddLogger.when(
-        "uploading a trace attachment and the file type is not supported and the trace has no attachments");
+        "uploading a trace attachment and the file type is not supported and the trace has no"
+            + " attachments");
     FileTypeNotSupportedException thrown =
         catchThrowableOfType(
             () ->
@@ -223,7 +225,8 @@ class TraceAttachmentServiceImplTest {
         .thenThrow(new IOException("Disk write error"));
 
     BddLogger.when(
-        "uploading a trace attachment and a disk write error occurs and the trace has no attachments");
+        "uploading a trace attachment and a disk write error occurs and the trace has no"
+            + " attachments");
     IOException thrown =
         catchThrowableOfType(
             () ->
