@@ -2,7 +2,6 @@
 
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.RomeAdditionalSkillService;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
@@ -14,10 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-<span class="fc" id="L17">@Slf4j</span>
+<span class="fc" id="L16">@Slf4j</span>
 @Configuration
 public class AdditionalSkillServiceConfig {
-  private final AdditionalSkillCache additionalSkillCache;
   private final AdditionalSkillDatabaseProgressRepository additionalSkillProgressRepository;
   private final AdditionalSkillRepository additionalSkillRepository;
   private final Rome4VersionRepository rome4VersionRepository;
@@ -25,28 +23,27 @@ public class AdditionalSkillServiceConfig {
   private final OpenSearchIndex openSearchIndex;
 
   public AdditionalSkillServiceConfig(
-      AdditionalSkillCache additionalSkillCache,
       AdditionalSkillDatabaseProgressRepository additionalSkillProgressRepository,
       AdditionalSkillRepository additionalSkillRepository,
       Rome4VersionRepository rome4VersionRepository,
       RomeAdditionalSkillApi romeAdditionalSkillApi,
-<span class="fc" id="L33">      OpenSearchIndex openSearchIndex) {</span>
-<span class="fc" id="L34">    this.additionalSkillCache = additionalSkillCache;</span>
-<span class="fc" id="L35">    this.additionalSkillProgressRepository = additionalSkillProgressRepository;</span>
-<span class="fc" id="L36">    this.additionalSkillRepository = additionalSkillRepository;</span>
-<span class="fc" id="L37">    this.rome4VersionRepository = rome4VersionRepository;</span>
-<span class="fc" id="L38">    this.romeAdditionalSkillApi = romeAdditionalSkillApi;</span>
-<span class="fc" id="L39">    this.openSearchIndex = openSearchIndex;</span>
-<span class="fc" id="L40">  }</span>
+<span class="fc" id="L30">      OpenSearchIndex openSearchIndex) {</span>
+<span class="fc" id="L31">    this.additionalSkillProgressRepository = additionalSkillProgressRepository;</span>
+<span class="fc" id="L32">    this.additionalSkillRepository = additionalSkillRepository;</span>
+<span class="fc" id="L33">    this.rome4VersionRepository = rome4VersionRepository;</span>
+<span class="fc" id="L34">    this.romeAdditionalSkillApi = romeAdditionalSkillApi;</span>
+<span class="fc" id="L35">    this.openSearchIndex = openSearchIndex;</span>
+<span class="fc" id="L36">  }</span>
 
   @Bean
   public AdditionalSkillService additionalSkillService() {
-<span class="fc" id="L44">    return new AdditionalSkillServiceImpl(additionalSkillCache, additionalSkillProgressRepository);</span>
+<span class="fc" id="L40">    return new AdditionalSkillServiceImpl(</span>
+        additionalSkillRepository, additionalSkillProgressRepository);
   }
 
   @Bean
   public RomeAdditionalSkillService romeAdditionalSkillService() {
-<span class="fc" id="L49">    return new RomeAdditionalSkillServiceImpl(</span>
+<span class="fc" id="L46">    return new RomeAdditionalSkillServiceImpl(</span>
         additionalSkillRepository, rome4VersionRepository, romeAdditionalSkillApi, openSearchIndex);
   }
 }

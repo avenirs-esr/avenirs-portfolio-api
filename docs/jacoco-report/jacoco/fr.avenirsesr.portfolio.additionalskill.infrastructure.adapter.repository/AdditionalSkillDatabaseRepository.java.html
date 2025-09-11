@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.Add
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,19 +16,24 @@ public class AdditionalSkillDatabaseRepository
   private final AdditionalSkillJpaRepository jpaRepository;
 
   public AdditionalSkillDatabaseRepository(AdditionalSkillJpaRepository jpaRepository) {
-<span class="fc" id="L18">    super(</span>
+<span class="fc" id="L19">    super(</span>
         jpaRepository,
         jpaRepository,
         AdditionalSkillMapper::fromDomain,
         AdditionalSkillMapper::toDomain);
-<span class="fc" id="L23">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L24">  }</span>
+<span class="fc" id="L24">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L25">  }</span>
 
   @Override
   public List&lt;AdditionalSkill&gt; findByPathSegmentsSkillCodeIn(List&lt;String&gt; skillCodes) {
-<span class="nc" id="L28">    return jpaRepository.findByPathSegmentsSkillCodeIn(skillCodes).stream()</span>
-<span class="nc" id="L29">        .map(AdditionalSkillMapper::toDomain)</span>
-<span class="nc" id="L30">        .toList();</span>
+<span class="nc" id="L29">    return jpaRepository.findByPathSegmentsSkillCodeIn(skillCodes).stream()</span>
+<span class="nc" id="L30">        .map(AdditionalSkillMapper::toDomain)</span>
+<span class="nc" id="L31">        .toList();</span>
+  }
+
+  @Override
+  public List&lt;AdditionalSkill&gt; findAllByIds(List&lt;UUID&gt; ids) {
+<span class="fc" id="L36">    return jpaRepository.findAllById(ids).stream().map(AdditionalSkillMapper::toDomain).toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

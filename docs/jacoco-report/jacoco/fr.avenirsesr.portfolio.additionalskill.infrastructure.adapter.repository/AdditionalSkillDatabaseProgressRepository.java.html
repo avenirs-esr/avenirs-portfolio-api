@@ -3,8 +3,8 @@
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.specification.AdditionalSkillProgressSpecification;
@@ -24,18 +24,18 @@ public class AdditionalSkillDatabaseProgressRepository
     extends GenericJpaRepositoryAdapter&lt;AdditionalSkillProgress, AdditionalSkillProgressEntity&gt;
     implements AdditionalSkillProgressRepository {
   private final AdditionalSkillProgressJpaRepository jpaRepository;
-  private final AdditionalSkillCache additionalSkillCache;
+  private final AdditionalSkillRepository additionalSkillRepository;
 
   public AdditionalSkillDatabaseProgressRepository(
       AdditionalSkillProgressJpaRepository jpaRepository,
-      AdditionalSkillCache additionalSkillCache) {
+      AdditionalSkillRepository additionalSkillRepository) {
 <span class="fc" id="L32">    super(</span>
         jpaRepository,
         jpaRepository,
         AdditionalSkillProgressMapper::fromDomain,
         AdditionalSkillProgressMapper::toDomain);
 <span class="fc" id="L37">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L38">    this.additionalSkillCache = additionalSkillCache;</span>
+<span class="fc" id="L38">    this.additionalSkillRepository = additionalSkillRepository;</span>
 <span class="fc" id="L39">  }</span>
 
   public void saveAllEntities(List&lt;AdditionalSkillProgressEntity&gt; entities) {
@@ -62,7 +62,7 @@ public class AdditionalSkillDatabaseProgressRepository
 <span class="fc" id="L62">            PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
 
 <span class="fc" id="L64">    List&lt;AdditionalSkill&gt; additionalSkills =</span>
-<span class="fc" id="L65">        additionalSkillCache.findAllByIds(</span>
+<span class="fc" id="L65">        additionalSkillRepository.findAllByIds(</span>
 <span class="fc" id="L66">            entities.stream().map(AdditionalSkillProgressEntity::getAdditionalSkillId).toList());</span>
 
 <span class="fc" id="L68">    List&lt;AdditionalSkillProgress&gt; progresses =</span>
