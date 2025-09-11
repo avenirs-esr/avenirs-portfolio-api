@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.additionalskill.domain.port.input;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
@@ -12,8 +11,6 @@ import java.util.UUID;
 public interface AdditionalSkillService {
   PagedResult<AdditionalSkillProgress> getAdditionalSkillsProgresses(
       Student student, PageCriteria criteria);
-
-  PagedResult<AdditionalSkill> searchAdditionalSkills(String keyword, PageCriteria criteria);
 
   void createAdditionalSkillProgress(
       Student student,

@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
@@ -41,6 +42,7 @@ public class SeederRunner implements CommandLineRunner {
   private final StudentProgressSeeder studentProgressSeeder;
   private final SkillSeeder skillSeeder;
   private final AdditionalSkillSeeder additionalSkillSeeder;
+  private final AdditionalSkillProgressSeeder additionalSkillProgressSeeder;
 
   @Value("${seeder.enabled:false}")
   private boolean seedEnabled;
@@ -61,7 +63,8 @@ public class SeederRunner implements CommandLineRunner {
       TrainingPathSeeder trainingPathSeeder,
       StudentProgressSeeder studentProgressSeeder,
       SkillSeeder skillSeeder,
-      AdditionalSkillSeeder additionalSkillSeeder) {
+      AdditionalSkillSeeder additionalSkillSeeder,
+      AdditionalSkillProgressSeeder additionalSkillProgressSeeder) {
     this.additionalSkillConfigSeeder = additionalSkillConfigSeeder;
     this.traceConfigSeeder = traceConfigSeeder;
     this.websiteContentConfigurationSeeder = websiteContentConfigurationSeeder;
@@ -78,6 +81,7 @@ public class SeederRunner implements CommandLineRunner {
     this.studentProgressSeeder = studentProgressSeeder;
     this.skillSeeder = skillSeeder;
     this.additionalSkillSeeder = additionalSkillSeeder;
+    this.additionalSkillProgressSeeder = additionalSkillProgressSeeder;
   }
 
   @Override
@@ -109,7 +113,9 @@ public class SeederRunner implements CommandLineRunner {
       var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
       var savedAmses =
           amsSeeder.seed(savedUsers, savedSkillLevelProgresses, savedTraces, savedCohorts);
-      var savedStudentAdditionalSkills = additionalSkillSeeder.seed(savedStudents);
+      var savedAdditionalSkills = additionalSkillSeeder.seed();
+      var savedStudentAdditionalSkills =
+          additionalSkillProgressSeeder.seed(savedStudents, savedAdditionalSkills);
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
