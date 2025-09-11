@@ -11,12 +11,13 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AdditionalSkillServiceImplTest {
 
-  @Mock private AdditionalSkillCache additionalSkillCache;
+  @Mock private AdditionalSkillRepository additionalSkillRepository;
   @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
 
   @InjectMocks private AdditionalSkillServiceImpl service;
@@ -50,25 +51,6 @@ class AdditionalSkillServiceImplTest {
         "it should return the expected paged additional skill progress and delegate to repository");
     assertThat(result).isSameAs(expected);
     verify(additionalSkillProgressRepository).findAllByStudent(student, criteria);
-    verifyNoInteractions(additionalSkillCache);
-  }
-
-  @Test
-  void searchAdditionalSkills_shouldDelegateToCacheAndReturnResult() {
-    BddLogger.given("the method searchAdditionalSkills");
-    String keyword = "java";
-    PageCriteria criteria = new PageCriteria(1, 8);
-    PagedResult<AdditionalSkill> expected = mock(PagedResult.class);
-
-    BddLogger.when("calling the method with a given keyword");
-    when(additionalSkillCache.findBySkillTitle(keyword, criteria)).thenReturn(expected);
-
-    PagedResult<AdditionalSkill> result = service.searchAdditionalSkills(keyword, criteria);
-
-    BddLogger.then("it should return the expected paged additional skill and delegate to cache");
-    assertThat(result).isSameAs(expected);
-    verify(additionalSkillCache).findBySkillTitle(keyword, criteria);
-    verifyNoInteractions(additionalSkillProgressRepository);
   }
 
   @Test
@@ -81,14 +63,14 @@ class AdditionalSkillServiceImplTest {
     AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
 
     BddLogger.when("calling the method with an available and not duplicate skill");
-    when(additionalSkillCache.findById(skillId)).thenReturn(additionalSkill);
+    when(additionalSkillRepository.findById(skillId)).thenReturn(Optional.of(additionalSkill));
     when(additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(any()))
         .thenReturn(false);
 
     service.createAdditionalSkillProgress(student, skillId, type, level);
 
     BddLogger.then("it should save the additional skill");
-    verify(additionalSkillCache).findById(skillId);
+    verify(additionalSkillRepository).findById(skillId);
     verify(additionalSkillProgressRepository).additionalSkillProgressAlreadyExists(any());
     verify(additionalSkillProgressRepository).save(any(AdditionalSkillProgress.class));
   }
@@ -103,7 +85,7 @@ class AdditionalSkillServiceImplTest {
     AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
 
     BddLogger.when("calling the method with a duplicate skill");
-    when(additionalSkillCache.findById(skillId)).thenReturn(additionalSkill);
+    when(additionalSkillRepository.findById(skillId)).thenReturn(Optional.of(additionalSkill));
     when(additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(any()))
         .thenReturn(true);
 
@@ -112,7 +94,7 @@ class AdditionalSkillServiceImplTest {
         DuplicateAdditionalSkillException.class,
         () -> service.createAdditionalSkillProgress(student, skillId, type, level));
 
-    verify(additionalSkillCache).findById(skillId);
+    verify(additionalSkillRepository).findById(skillId);
     verify(additionalSkillProgressRepository).additionalSkillProgressAlreadyExists(any());
     verify(additionalSkillProgressRepository, never()).save(any());
   }
@@ -126,14 +108,15 @@ class AdditionalSkillServiceImplTest {
     EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
 
     BddLogger.when("calling the method with an unknown skill");
-    when(additionalSkillCache.findById(skillId)).thenThrow(new AdditionalSkillNotFoundException());
+    when(additionalSkillRepository.findById(skillId))
+        .thenThrow(new AdditionalSkillNotFoundException());
 
     BddLogger.then("it should throw a AdditionalSkillNotFoundException");
     assertThrows(
         AdditionalSkillNotFoundException.class,
         () -> service.createAdditionalSkillProgress(student, skillId, type, level));
 
-    verify(additionalSkillCache).findById(skillId);
+    verify(additionalSkillRepository).findById(skillId);
     verifyNoInteractions(additionalSkillProgressRepository);
   }
 }

@@ -107,6 +107,17 @@ public class AdditionalSkillControllerIT {
     BddLogger.when("performing a POST with and already existing additional skill progress");
     BddLogger.then(
         "it should return a conflict status and not create the additional skill progress");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH)
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payloadJson))
+        .andExpect(status().isCreated());
+
     mockMvc
         .perform(
             post(BASE_PATH)

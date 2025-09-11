@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.RomeAdditionalSkillService;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
@@ -17,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 @Configuration
 public class AdditionalSkillServiceConfig {
-  private final AdditionalSkillCache additionalSkillCache;
   private final AdditionalSkillDatabaseProgressRepository additionalSkillProgressRepository;
   private final AdditionalSkillRepository additionalSkillRepository;
   private final Rome4VersionRepository rome4VersionRepository;
@@ -25,13 +23,11 @@ public class AdditionalSkillServiceConfig {
   private final OpenSearchIndex openSearchIndex;
 
   public AdditionalSkillServiceConfig(
-      AdditionalSkillCache additionalSkillCache,
       AdditionalSkillDatabaseProgressRepository additionalSkillProgressRepository,
       AdditionalSkillRepository additionalSkillRepository,
       Rome4VersionRepository rome4VersionRepository,
       RomeAdditionalSkillApi romeAdditionalSkillApi,
       OpenSearchIndex openSearchIndex) {
-    this.additionalSkillCache = additionalSkillCache;
     this.additionalSkillProgressRepository = additionalSkillProgressRepository;
     this.additionalSkillRepository = additionalSkillRepository;
     this.rome4VersionRepository = rome4VersionRepository;
@@ -41,7 +37,8 @@ public class AdditionalSkillServiceConfig {
 
   @Bean
   public AdditionalSkillService additionalSkillService() {
-    return new AdditionalSkillServiceImpl(additionalSkillCache, additionalSkillProgressRepository);
+    return new AdditionalSkillServiceImpl(
+        additionalSkillRepository, additionalSkillProgressRepository);
   }
 
   @Bean

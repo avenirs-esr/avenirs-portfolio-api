@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.Add
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,5 +29,10 @@ public class AdditionalSkillDatabaseRepository
     return jpaRepository.findByPathSegmentsSkillCodeIn(skillCodes).stream()
         .map(AdditionalSkillMapper::toDomain)
         .toList();
+  }
+
+  @Override
+  public List<AdditionalSkill> findAllByIds(List<UUID> ids) {
+    return jpaRepository.findAllById(ids).stream().map(AdditionalSkillMapper::toDomain).toList();
   }
 }

@@ -7,11 +7,12 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgr
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.AdditionalSkillCache;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class AdditionalSkillServiceImpl implements AdditionalSkillService {
-  private final AdditionalSkillCache additionalSkillCache;
+  private final AdditionalSkillRepository additionalSkillRepository;
   private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
 
   @Override
@@ -29,21 +30,17 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
   }
 
   @Override
-  public PagedResult<AdditionalSkill> searchAdditionalSkills(
-      String keyword, PageCriteria pageCriteria) {
-    return additionalSkillCache.findBySkillTitle(keyword, pageCriteria);
-  }
-
-  @Override
   public void createAdditionalSkillProgress(
       Student student,
       UUID additionalSkillId,
       EAdditionalSkillType type,
       EAdditionalSkillLevel level) {
     try {
-      AdditionalSkill additionalSkill = additionalSkillCache.findById(additionalSkillId);
+      Optional<AdditionalSkill> additionalSkill =
+          additionalSkillRepository.findById(additionalSkillId);
       AdditionalSkillProgress additionalSkillProgress =
-          AdditionalSkillProgress.create(student, additionalSkill, level);
+          AdditionalSkillProgress.create(
+              student, additionalSkill.orElseThrow(AdditionalSkillNotFoundException::new), level);
       if (additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(
           additionalSkillProgress)) {
         log.error(
