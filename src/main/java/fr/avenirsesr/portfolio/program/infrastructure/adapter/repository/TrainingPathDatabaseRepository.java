@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.program.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.program.domain.port.output.TrainingPathRepository;
+import fr.avenirsesr.portfolio.program.domain.port.output.repository.TrainingPathRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.TrainingPathMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;

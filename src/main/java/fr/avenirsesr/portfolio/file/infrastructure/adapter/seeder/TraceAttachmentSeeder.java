@@ -5,8 +5,10 @@ import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmen
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.TraceAttachmentMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeTraceAttachment;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class TraceAttachmentSeeder {
-  private static final FakerProvider faker = new FakerProvider().init(TraceAttachmentSeeder.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(TraceAttachmentSeeder.class, SharedDataGenerator.class);
 
   private final TraceAttachmentRepository attachmentRepository;
 
@@ -32,7 +36,7 @@ public class TraceAttachmentSeeder {
     List<TraceAttachmentEntity> attachmentEntities = new ArrayList<>();
     for (TraceEntity trace : traces) {
       var nbOfVersions =
-          faker.call("number").random().nextInt(1, SeederConfig.MAX_ATTACHMENT_PER_TRACE);
+          dataGenerator.with("number").number(1, SeederConfig.MAX_ATTACHMENT_PER_TRACE);
       for (int j = 1; j <= nbOfVersions; j++) {
         attachmentEntities.add(
             FakeTraceAttachment.of(trace)

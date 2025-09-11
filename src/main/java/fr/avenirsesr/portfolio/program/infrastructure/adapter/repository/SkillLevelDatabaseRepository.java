@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.program.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.program.domain.port.output.SkillLevelRepository;
+import fr.avenirsesr.portfolio.program.domain.port.output.repository.SkillLevelRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;

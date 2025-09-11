@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.program.domain.port.output.TrainingPathRepository;
+import fr.avenirsesr.portfolio.program.domain.port.output.repository.TrainingPathRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.ProgramFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;

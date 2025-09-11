@@ -1,16 +1,22 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.Teacher;
+import fr.avenirsesr.portfolio.user.domain.port.output.seeder.UserDataGenerator;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
-import java.util.UUID;
 import lombok.Getter;
 
 public class FakeUser {
-  private static final FakerProvider faker = new FakerProvider().init(FakeUser.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(FakeUser.class, SharedDataGenerator.class);
+
+  private static final DataGeneratorProvider<UserDataGenerator> userDataGenerator =
+      new DataGeneratorProvider<UserDataGenerator>().init(FakeUser.class, UserDataGenerator.class);
   private final UserEntity user;
   @Getter private Student student;
   @Getter private Teacher teacher;
@@ -22,26 +28,28 @@ public class FakeUser {
   public static FakeUser create() {
     return new FakeUser(
         UserEntity.of(
-            UUID.fromString(faker.call("id").internet().uuid()),
-            faker.call("firstName").name().firstName(),
-            faker.call("lastName").name().lastName(),
+            dataGenerator.with("id").uuid(),
+            userDataGenerator.with("firstName").firstName(),
+            userDataGenerator.with("lastName").lastName(),
             null,
             null,
             null));
   }
 
   public FakeUser withEmail() {
-    user.setEmail(faker.call("email").internet().emailAddress());
+    user.setEmail(userDataGenerator.with("email").email());
     return this;
   }
 
   public FakeUser withStudent() {
-    user.setStudent(StudentEntity.of(faker.call("student-bio").lorem().sentence(10), true));
+    user.setStudent(
+        StudentEntity.of(userDataGenerator.with("student-bio").studentDescription(), true));
     return this;
   }
 
   public FakeUser withTeacher() {
-    user.setTeacher(TeacherEntity.of(faker.call("teacher-bio").lorem().sentence(10), true));
+    user.setTeacher(
+        TeacherEntity.of(userDataGenerator.with("teacher-bio").teacherDescription(), true));
     return this;
   }
 

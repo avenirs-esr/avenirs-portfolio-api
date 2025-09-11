@@ -1,18 +1,15 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import java.util.UUID;
 
 public class SegmentDetailFixture {
-  private static final FakerProvider faker = new FakerProvider().init(SegmentDetailFixture.class);
-
   private String code;
   private String libelle;
 
   private SegmentDetailFixture() {
     this.code = UUID.randomUUID().toString();
-    this.libelle = faker.call("libelle").name().title();
+    this.libelle = "some segement detail libbelle";
   }
 
   public static SegmentDetailFixture create() {

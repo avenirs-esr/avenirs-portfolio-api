@@ -1,16 +1,23 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGenerator;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillTranslationEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 public class FakeSkill {
-  private static final FakerProvider faker = new FakerProvider().init(FakeSkill.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(FakeSkill.class, SharedDataGenerator.class);
+
+  private static final DataGeneratorProvider<ProgramDataGenerator> programDataGenerator =
+      new DataGeneratorProvider<ProgramDataGenerator>()
+          .init(FakeSkill.class, ProgramDataGenerator.class);
   private final SkillEntity skill;
 
   private FakeSkill(SkillEntity skill) {
@@ -18,17 +25,16 @@ public class FakeSkill {
   }
 
   public static FakeSkill of(List<SkillLevelEntity> skillLevels) {
-    var entity = SkillEntity.of(UUID.fromString(faker.call("id").internet().uuid()));
+    var entity = SkillEntity.of(dataGenerator.with("id").uuid());
 
     skillLevels.forEach(skillLevel -> skillLevel.setSkill(entity));
 
     entity.setTranslations(
         Set.of(
             SkillTranslationEntity.of(
-                UUID.fromString(faker.call("FALLBACK-translation-id").internet().uuid()),
+                dataGenerator.with("FALLBACK-translation-id", ELanguage.FALLBACK).uuid(),
                 ELanguage.FALLBACK,
-                "Skill %s - [%s]"
-                    .formatted(faker.call("word").lorem().word(), ELanguage.FALLBACK.getCode()),
+                programDataGenerator.with("word").skill(),
                 entity)));
     return new FakeSkill(entity);
   }
@@ -37,10 +43,9 @@ public class FakeSkill {
     var translations = new java.util.HashSet<>(Set.copyOf(skill.getTranslations()));
     translations.add(
         SkillTranslationEntity.of(
-            UUID.fromString(faker.call("translation-id").internet().uuid()),
+            dataGenerator.with("translation-id", language).uuid(),
             language,
-            "Skill %s - [%s]"
-                .formatted(faker.call("translation word").lorem().word(), language.getCode()),
+            programDataGenerator.with("translation word", language).skill(),
             skill));
 
     skill.setTranslations(translations);

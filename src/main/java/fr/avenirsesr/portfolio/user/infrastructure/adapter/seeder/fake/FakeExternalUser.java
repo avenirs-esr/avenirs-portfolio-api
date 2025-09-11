@@ -1,18 +1,23 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakeExternalSource;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.user.domain.port.output.seeder.UserDataGenerator;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.ExternalUserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
-import java.util.Arrays;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FakeExternalUser {
-  private static final FakerProvider faker = new FakerProvider().init(FakeExternalUser.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(FakeExternalUser.class, SharedDataGenerator.class);
+
+  private static final DataGeneratorProvider<UserDataGenerator> userDataGenerator =
+      new DataGeneratorProvider<UserDataGenerator>()
+          .init(FakeExternalUser.class, UserDataGenerator.class);
   private final ExternalUserEntity externalUser;
 
   private FakeExternalUser(ExternalUserEntity externalUser) {
@@ -31,18 +36,12 @@ public class FakeExternalUser {
 
     return new FakeExternalUser(
         ExternalUserEntity.of(
-            UUID.fromString(faker.call("id").internet().uuid()),
-            FakeExternalSource.generateExternalSourceId(),
-            Arrays.stream(EExternalSource.values())
-                .toList()
-                .get(
-                    faker
-                        .call("EExternalSource")
-                        .random()
-                        .nextInt(EExternalSource.values().length)),
+            dataGenerator.with("id").uuid(),
+            dataGenerator.with("external-id").externalId(),
+            dataGenerator.with("EExternalSource").pickIn(EExternalSource.class),
             user,
             category,
-            faker.call("email").internet().emailAddress(),
+            userDataGenerator.with("email").email(),
             user.getFirstName(),
             user.getLastName()));
   }

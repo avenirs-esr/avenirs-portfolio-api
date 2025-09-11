@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake.FakeTrace;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.FakeTrace;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;

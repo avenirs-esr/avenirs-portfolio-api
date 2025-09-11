@@ -3,20 +3,23 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class AdditionalSkillFixture {
-  private static final FakerProvider faker = new FakerProvider().init(AdditionalSkillFixture.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(AdditionalSkillFixture.class, SharedDataGenerator.class);
 
   private UUID id;
   private PathSegments pathSegments;
   private EAdditionalSkillType type;
 
   private AdditionalSkillFixture() {
-    this.id = UUID.fromString(faker.call("id").internet().uuid());
+    this.id = dataGenerator.with("id").uuid();
     this.pathSegments = PathSegmentsFixture.create().toModel();
     this.type = EAdditionalSkillType.ROME4;
   }

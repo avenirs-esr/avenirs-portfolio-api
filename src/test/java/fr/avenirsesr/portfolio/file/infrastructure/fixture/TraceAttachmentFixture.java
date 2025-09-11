@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeTraceAttachment;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake.FakeTrace;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.FakeTrace;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;

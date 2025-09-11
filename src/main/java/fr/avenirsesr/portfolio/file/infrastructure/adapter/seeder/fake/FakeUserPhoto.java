@@ -4,14 +4,17 @@ import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.List;
 
 public class FakeUserPhoto {
-  private static final FakerProvider faker = new FakerProvider().init(FakeUserPhoto.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(FakeUserPhoto.class, SharedDataGenerator.class);
   private final UserPhotoEntity userPhoto;
 
   private FakeUserPhoto(UserPhotoEntity userPhoto) {
@@ -19,8 +22,8 @@ public class FakeUserPhoto {
   }
 
   public static FakeUserPhoto of(UserEntity user) {
-    var fileType = faker.call("file-type").options().option(EFileType.PNG, EFileType.JPEG);
-    var id = UUID.fromString(faker.call("id").internet().uuid());
+    var fileType = dataGenerator.with("file-type").pickIn(List.of(EFileType.PNG, EFileType.JPEG));
+    var id = dataGenerator.with("id").uuid();
     return new FakeUserPhoto(
         UserPhotoEntity.of(
             id,
@@ -29,7 +32,7 @@ public class FakeUserPhoto {
             user.getStudent().isPresent() ? EUserCategory.STUDENT : EUserCategory.TEACHER,
             EUserPhotoType.PROFILE,
             fileType,
-            faker.call("size").random().nextLong(fileType.getSizeLimit().bytes()),
+            dataGenerator.with("size").number((int) fileType.getSizeLimit().bytes()),
             1,
             true,
             "/workspace/app%s/%s.%s"

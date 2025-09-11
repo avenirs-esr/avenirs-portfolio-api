@@ -3,14 +3,17 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.util.UUID;
 
 public class AdditionalSkillProgressFixture {
-  private static final FakerProvider faker = new FakerProvider().init(AdditionalSkillFixture.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(AdditionalSkillFixture.class, SharedDataGenerator.class);
 
   private UUID id;
   private Student student;
@@ -20,10 +23,10 @@ public class AdditionalSkillProgressFixture {
   private Instant updatedAt;
 
   private AdditionalSkillProgressFixture() {
-    this.id = UUID.fromString(faker.call("id").internet().uuid());
+    this.id = dataGenerator.with("id").uuid();
     this.student = UserFixture.create().toModel().toStudent();
     this.skill = AdditionalSkillFixture.create().toModel();
-    this.level = faker.call("level").options().option(EAdditionalSkillLevel.class);
+    this.level = dataGenerator.with("level").pickIn(EAdditionalSkillLevel.class);
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }

@@ -6,8 +6,10 @@ import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepos
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.UserPhotoMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeUserPhoto;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
@@ -21,13 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class UserPhotoSeeder {
-  private static final FakerProvider faker = new FakerProvider().init(UserPhotoSeeder.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(UserPhotoSeeder.class, SharedDataGenerator.class);
   private final UserPhotoRepository userPhotoRepository;
 
   private List<UserPhotoEntity> generatePhotosOf(
       UserEntity user, EUserPhotoType type, EUserCategory userCategory, int maxNumber) {
     List<UserPhotoEntity> photos = new ArrayList<>();
-    var nbOfProfileVersions = faker.call("random-number").random().nextInt(1, maxNumber);
+    var nbOfProfileVersions = dataGenerator.with("random-number").number(1, maxNumber);
     for (int j = 1; j <= nbOfProfileVersions; j++) {
       photos.add(
           FakeUserPhoto.of(user)
@@ -64,7 +68,7 @@ public class UserPhotoSeeder {
               SeederConfig.MAX_COVER_PHOTO_PER_USER));
 
       if (user.getStudent().isPresent() && user.getTeacher().isPresent()) {
-        if (faker.call("has-photo").random().nextBoolean()) {
+        if (dataGenerator.with("has-photo").bool()) {
           userPhotoEntities.addAll(
               generatePhotosOf(
                   user,

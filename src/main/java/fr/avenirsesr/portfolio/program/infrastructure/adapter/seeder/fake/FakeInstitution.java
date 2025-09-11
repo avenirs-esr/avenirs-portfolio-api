@@ -1,15 +1,21 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGenerator;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionTranslationEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import java.util.Set;
-import java.util.UUID;
 
 public class FakeInstitution {
-  private static final FakerProvider faker = new FakerProvider().init(FakeInstitution.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(FakeInstitution.class, SharedDataGenerator.class);
+
+  private static final DataGeneratorProvider<ProgramDataGenerator> programDataGenerator =
+      new DataGeneratorProvider<ProgramDataGenerator>()
+          .init(FakeInstitution.class, ProgramDataGenerator.class);
   private final InstitutionEntity institution;
 
   private FakeInstitution(InstitutionEntity institution) {
@@ -17,16 +23,15 @@ public class FakeInstitution {
   }
 
   public static FakeInstitution create() {
-    var entity =
-        InstitutionEntity.of(UUID.fromString(faker.call("id").internet().uuid()), Set.of());
+    var entity = InstitutionEntity.of(dataGenerator.with("id").uuid(), Set.of());
     var fakeInstitution = new FakeInstitution(entity);
 
     entity.setTranslations(
         Set.of(
             InstitutionTranslationEntity.of(
-                UUID.fromString(faker.call("fallback-translation-id").internet().uuid()),
+                dataGenerator.with("fallback-translation-id", ELanguage.FRENCH).uuid(),
                 ELanguage.FRENCH,
-                faker.call("university").university().name(),
+                programDataGenerator.with("university").university(),
                 entity)));
 
     return fakeInstitution;
@@ -37,9 +42,9 @@ public class FakeInstitution {
 
     translations.add(
         InstitutionTranslationEntity.of(
-            UUID.fromString(faker.call("translation-id").internet().uuid()),
+            dataGenerator.with("translation-id", language).uuid(),
             language,
-            faker.call("university-translation").university().name(),
+            programDataGenerator.with("university-translation", language).university(),
             institution));
 
     institution.setTranslations(translations);

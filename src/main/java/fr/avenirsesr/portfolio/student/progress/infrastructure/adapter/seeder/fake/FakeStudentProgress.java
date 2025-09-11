@@ -1,7 +1,8 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -10,10 +11,11 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.UUID;
 
 public class FakeStudentProgress {
-  private static final FakerProvider faker = new FakerProvider().init(FakeStudentProgress.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(FakeStudentProgress.class, SharedDataGenerator.class);
   private final StudentProgressEntity studentProgress;
   private static final Period DEFAULT_STUDENT_PROGRESS_DURATION = Period.ofYears(1);
 
@@ -28,19 +30,19 @@ public class FakeStudentProgress {
 
     var today = LocalDate.now();
 
-    var selectedYearTime = faker.call("selectedYearTime").options().option(0, -1, 1);
+    var selectedYearTime = dataGenerator.with("selectedYearTime").pickIn(List.of(0, -1, 1));
     var startDate = LocalDate.of(today.getYear() + selectedYearTime, today.getMonth(), 1);
 
     return new FakeStudentProgress(
         StudentProgressEntity.of(
-            UUID.fromString(faker.call("id").internet().uuid()),
+            dataGenerator.with("id").uuid(),
             student,
             trainingPath,
             startDate,
             startDate.plus(DEFAULT_STUDENT_PROGRESS_DURATION),
             skillLevels,
             today
-                .minusDays(faker.call("minus-day").number().numberBetween(5, 365))
+                .minusDays(dataGenerator.with("minus-day").number(5, 365))
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant(),
             Instant.now()));

@@ -1,12 +1,12 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.fake.FakeTrace;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class TraceSeeder {
-  private static final FakerProvider faker = new FakerProvider().init(TraceSeeder.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(TraceSeeder.class, SharedDataGenerator.class);
 
   private final TraceRepository traceRepository;
 
@@ -34,18 +36,16 @@ public class TraceSeeder {
     for (UserEntity user : users) {
       for (int i = 0;
           i
-              < faker
-                  .call("nb-traces")
-                  .random()
-                  .nextInt(SeederConfig.TRACES_NB_MIN, SeederConfig.TRACES_NB_MAX);
+              < dataGenerator
+                  .with("nb-traces")
+                  .number(SeederConfig.TRACES_NB_MIN, SeederConfig.TRACES_NB_MAX);
           i++) {
         var fakeTrace = FakeTrace.of(user);
 
-        if (faker.call("withAiUseJustification").random().nextBoolean())
+        if (dataGenerator.with("withAiUseJustification").bool())
           fakeTrace = fakeTrace.withAiUseJustification();
-        if (faker.call("withPersonalNote").random().nextBoolean())
-          fakeTrace = fakeTrace.withPersonalNote();
-        if (faker.call("isGroup").random().nextBoolean()) fakeTrace = fakeTrace.isGroup();
+        if (dataGenerator.with("withPersonalNote").bool()) fakeTrace = fakeTrace.withPersonalNote();
+        if (dataGenerator.with("isGroup").bool()) fakeTrace = fakeTrace.isGroup();
 
         var trace = fakeTrace.toEntity();
         traceList.add(trace);

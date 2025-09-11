@@ -1,15 +1,24 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.List;
 
 public class FakeTraceAttachment {
-  private static final FakerProvider faker = new FakerProvider().init(FakeTraceAttachment.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(FakeTraceAttachment.class, SharedDataGenerator.class);
+
+  private static final DataGeneratorProvider<FileDataGenerator> fileDataGenerator =
+      new DataGeneratorProvider<FileDataGenerator>()
+          .init(FakeTraceAttachment.class, FileDataGenerator.class);
+
   private final TraceAttachmentEntity attachment;
 
   private FakeTraceAttachment(TraceAttachmentEntity attachment) {
@@ -18,27 +27,27 @@ public class FakeTraceAttachment {
 
   public static FakeTraceAttachment of(TraceEntity trace) {
     var fileType =
-        faker
-            .call("file-type")
-            .options()
-            .option(
-                EFileType.PDF,
-                EFileType.PNG,
-                EFileType.JPEG,
-                EFileType.MP4,
-                EFileType.TXT,
-                EFileType.PPTX,
-                EFileType.CSV,
-                EFileType.DOC,
-                EFileType.XLS);
-    var id = UUID.fromString(faker.call("id").internet().uuid());
+        dataGenerator
+            .with("file-type")
+            .pickIn(
+                List.of(
+                    EFileType.PDF,
+                    EFileType.PNG,
+                    EFileType.JPEG,
+                    EFileType.MP4,
+                    EFileType.TXT,
+                    EFileType.PPTX,
+                    EFileType.CSV,
+                    EFileType.DOC,
+                    EFileType.XLS));
+    var id = dataGenerator.with("id").uuid();
     return new FakeTraceAttachment(
         TraceAttachmentEntity.of(
             id,
             trace,
-            faker.call("filename").file().fileName("", null, fileType.name().toLowerCase(), ""),
+            fileDataGenerator.with("filename").fileName(fileType),
             fileType,
-            faker.call("size").random().nextLong(fileType.getSizeLimit().bytes()),
+            dataGenerator.with("size").number((int) fileType.getSizeLimit().bytes()),
             1,
             true,
             "/workspace/app%s/%s.%s"

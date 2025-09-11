@@ -1,0 +1,75 @@
+package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.data;
+
+import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGenerator;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.AbstractDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.CsvReader;
+import java.util.ArrayList;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class ProgramCSVDataGenerator extends AbstractDataGenerator implements ProgramDataGenerator {
+  private static final String PATH_FRENCH = "seeder/programs.fr.csv";
+  private static final String PATH_ENGLISH = "seeder/programs.en.csv";
+  private static final String PATH_SPANISH = "seeder/programs.es.csv";
+  private static final String DELIMITER = ",";
+  private static final Map<ELanguage, ArrayList<CsvProgramDto>> data =
+      Map.of(
+          ELanguage.FRENCH,
+          new CsvReader<CsvProgramDto>()
+              .readCSV(
+                  DELIMITER,
+                  ProgramCSVDataGenerator.class.getClassLoader().getResourceAsStream(PATH_FRENCH),
+                  values ->
+                      new CsvProgramDto(values[0], values[1], values[2], values[3], values[4])),
+          ELanguage.ENGLISH,
+          new CsvReader<CsvProgramDto>()
+              .readCSV(
+                  DELIMITER,
+                  ProgramCSVDataGenerator.class.getClassLoader().getResourceAsStream(PATH_ENGLISH),
+                  values ->
+                      new CsvProgramDto(values[0], values[1], values[2], values[3], values[4])),
+          ELanguage.SPANISH,
+          new CsvReader<CsvProgramDto>()
+              .readCSV(
+                  DELIMITER,
+                  ProgramCSVDataGenerator.class.getClassLoader().getResourceAsStream(PATH_SPANISH),
+                  values ->
+                      new CsvProgramDto(values[0], values[1], values[2], values[3], values[4])));
+
+  @Override
+  public String university() {
+    var element = data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
+    data.get(getLanguage()).remove(element);
+    return element.university();
+  }
+
+  @Override
+  public String program() {
+    var element = data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
+    data.get(getLanguage()).remove(element);
+    return element.program();
+  }
+
+  @Override
+  public String skill() {
+    var element = data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
+    data.get(getLanguage()).remove(element);
+    return element.skill();
+  }
+
+  @Override
+  public String skillLevelName() {
+    var element = data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
+    data.get(getLanguage()).remove(element);
+    return element.skillLevelName();
+  }
+
+  @Override
+  public String skillLevelDescription() {
+    var element = data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
+    data.get(getLanguage()).remove(element);
+    return element.SkillLevelDescription();
+  }
+}

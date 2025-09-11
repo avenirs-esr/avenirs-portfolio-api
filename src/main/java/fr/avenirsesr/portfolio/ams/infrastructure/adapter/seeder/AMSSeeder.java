@@ -4,11 +4,11 @@ import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.AMSDatabaseRepository;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeAMS;
-import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -30,17 +30,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Getter
 @Setter
 public class AMSSeeder {
-  private static final FakerProvider faker = new FakerProvider().init(AMSSeeder.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(AMSSeeder.class, SharedDataGenerator.class);
 
   private final AMSDatabaseRepository amsRepository;
 
   private Set<CohortEntity> getRandomCohorts(List<CohortEntity> savedCohorts) {
     int cohortCount =
-        faker
-            .call("cohortCount")
-            .number()
-            .numberBetween(
-                SeederConfig.NB_COHORTS_MIN_PER_AMS, SeederConfig.NB_COHORTS_MAX_PER_AMS + 1);
+        dataGenerator
+            .with("cohortCount")
+            .number(SeederConfig.NB_COHORTS_MIN_PER_AMS, SeederConfig.NB_COHORTS_MAX_PER_AMS + 1);
 
     List<CohortEntity> cohorts = new ArrayList<>(savedCohorts);
 
@@ -51,11 +51,9 @@ public class AMSSeeder {
 
   private List<TraceEntity> getRandomTraces(List<TraceEntity> savedTraces) {
     int tracesCount =
-        faker
-            .call("traceCount")
-            .number()
-            .numberBetween(
-                SeederConfig.NB_TRACES_MIN_PER_AMS, SeederConfig.NB_TRACES_MAX_PER_AMS + 1);
+        dataGenerator
+            .with("traceCount")
+            .number(SeederConfig.NB_TRACES_MIN_PER_AMS, SeederConfig.NB_TRACES_MAX_PER_AMS + 1);
 
     List<TraceEntity> traceList = new ArrayList<>(savedTraces);
 
@@ -67,12 +65,10 @@ public class AMSSeeder {
   private List<SkillLevelProgressEntity> getRandomSkillLevels(
       List<SkillLevelProgressEntity> savedSkillLevels) {
     int skillLevelCount =
-        faker
-            .call("skillLevelCount")
-            .number()
-            .numberBetween(
-                SeederConfig.NB_SKILL_LEVEL_MIN_PER_AMS,
-                SeederConfig.NB_SKILL_LEVEL_MAX_PER_AMS + 1);
+        dataGenerator
+            .with("skillLevelCount")
+            .number(
+                SeederConfig.NB_SKILL_LEVEL_MIN_PER_AMS, SeederConfig.NB_SKILL_LEVEL_MAX_PER_AMS);
 
     List<SkillLevelProgressEntity> skillLevelList = new ArrayList<>(savedSkillLevels);
 
@@ -82,13 +78,13 @@ public class AMSSeeder {
   }
 
   private UserEntity getRandomUser(List<UserEntity> savedUsers) {
-    int userIndex = faker.call("userIdx").number().numberBetween(0, savedUsers.size());
+    int userIndex = dataGenerator.with("userIdx").number(0, savedUsers.size() - 1);
     return savedUsers.get(userIndex);
   }
 
   private EAmsStatus getRandomStatus() {
     EAmsStatus[] statuses = EAmsStatus.values();
-    int statusIndex = faker.call("statusIdx").number().numberBetween(0, statuses.length);
+    int statusIndex = dataGenerator.with("statusIdx").number(0, statuses.length - 1);
     return statuses[statusIndex];
   }
 

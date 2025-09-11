@@ -3,15 +3,19 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fa
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.CompetenceComplementaireDetaillee;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.FakeExternalSource;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class FakeAdditionalSkillProgress {
-  private static final FakerProvider faker =
-      new FakerProvider().init(FakeAdditionalSkillProgress.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(FakeAdditionalSkillProgress.class, SharedDataGenerator.class);
   private final AdditionalSkillProgressEntity additionalSkillProgressEntity;
 
   private FakeAdditionalSkillProgress(AdditionalSkillProgressEntity additionalSkillProgressEntity) {
@@ -24,10 +28,10 @@ public class FakeAdditionalSkillProgress {
       List<UUID> bannedSkillsIds) {
     return new FakeAdditionalSkillProgress(
         AdditionalSkillProgressEntity.of(
-            UUID.fromString(faker.call("id").internet().uuid()),
+            dataGenerator.with("id").uuid(),
             student,
-            getRandomAdditionalSkillId(savedAdditionalSkills, bannedSkillsIds),
-            faker.call("EAdditionalSkillLevel").options().option(EAdditionalSkillLevel.class)));
+                getRandomAdditionalSkillId(savedAdditionalSkills, bannedSkillsIds),
+                dataGenerator.with("EAdditionalSkillLevel").pickIn(EAdditionalSkillLevel.class)));
   }
 
   public AdditionalSkillProgressEntity toEntity() {
@@ -52,6 +56,8 @@ public class FakeAdditionalSkillProgress {
       throw new IllegalStateException("No IDs available after excluding banned IDs.");
     }
 
-    return allowedIds.get(ThreadLocalRandom.current().nextInt(allowedIds.size()));
+    return allowedIds.get(
+            dataGenerator
+                    .with("CompetenceComplementaireDetaillee").random().nextInt(allowedIds.size()));
   }
 }

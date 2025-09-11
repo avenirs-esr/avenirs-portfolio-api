@@ -3,17 +3,20 @@ package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.f
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
-import java.util.UUID;
 
 public class FakeSkillLevelProgress {
-  private static final FakerProvider faker = new FakerProvider().init(FakeSkillLevelProgress.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(FakeSkillLevelProgress.class, SharedDataGenerator.class);
+
   private final SkillLevelProgressEntity skillLevelProgress;
 
   private FakeSkillLevelProgress(SkillLevelProgressEntity skillLevelProgress) {
@@ -25,7 +28,7 @@ public class FakeSkillLevelProgress {
     LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));
     return new FakeSkillLevelProgress(
         SkillLevelProgressEntity.of(
-            UUID.fromString(faker.call("id").internet().uuid()),
+            dataGenerator.with("id").uuid(),
             student,
             skillLevel,
             ESkillLevelStatus.NOT_STARTED,

@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.program.domain.port.input.TrainingPathService;
-import fr.avenirsesr.portfolio.program.domain.port.output.TrainingPathRepository;
+import fr.avenirsesr.portfolio.program.domain.port.output.repository.TrainingPathRepository;
 import fr.avenirsesr.portfolio.program.domain.service.TrainingPathServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

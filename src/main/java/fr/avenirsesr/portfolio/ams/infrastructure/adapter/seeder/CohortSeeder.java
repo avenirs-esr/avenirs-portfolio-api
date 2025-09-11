@@ -3,11 +3,11 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.CohortRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.CohortMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.fake.FakeCohort;
-import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,16 +28,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Setter
 public class CohortSeeder {
 
-  private static final FakerProvider faker = new FakerProvider().init(CohortSeeder.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(CohortSeeder.class, SharedDataGenerator.class);
 
   private final CohortRepository cohortRepository;
 
   private Set<UserEntity> getRandomUsers(List<UserEntity> savedUsers) {
     int userCount =
-        faker
-            .call("userCount")
-            .number()
-            .numberBetween(SeederConfig.COHORT_NB_USERS_MIN, SeederConfig.COHORT_NB_USERS_MAX + 1);
+        dataGenerator
+            .with("userCount")
+            .number(SeederConfig.COHORT_NB_USERS_MIN, SeederConfig.COHORT_NB_USERS_MAX + 1);
 
     List<UserEntity> userList = new ArrayList<>(savedUsers);
 
@@ -47,7 +48,7 @@ public class CohortSeeder {
   }
 
   private TrainingPathEntity getRandomTrainingPath(List<TrainingPathEntity> savedTrainingPath) {
-    int randomIndex = faker.call("randomIdx").number().numberBetween(0, savedTrainingPath.size());
+    int randomIndex = dataGenerator.with("randomIdx").number(0, savedTrainingPath.size() - 1);
     return savedTrainingPath.get(randomIndex);
   }
 

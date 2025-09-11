@@ -4,7 +4,9 @@ import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.Va
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake.FakeSkillLevelProgress;
@@ -22,14 +24,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class StudentProgressSeeder {
-  private static final FakerProvider faker = new FakerProvider().init(StudentProgressSeeder.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(StudentProgressSeeder.class, SharedDataGenerator.class);
 
   private final StudentProgressDatabaseRepository studentProgressRepository;
 
   private static StudentProgressEntity buildStudentProgressEntity(
       UserEntity student, LocalDate startDate, List<TrainingPathEntity> savedTrainingPaths) {
     TrainingPathEntity selectedTrainingPath =
-        faker.call("selectedTrainingPath").options().nextElement(savedTrainingPaths);
+        dataGenerator.with("selectedTrainingPath").pickIn(savedTrainingPaths);
 
     var skillLevelProgressEntities =
         selectedTrainingPath.getSkillLevels().stream()
@@ -37,10 +41,7 @@ public class StudentProgressSeeder {
                 level ->
                     FakeSkillLevelProgress.create(student, level)
                         .withStatus(
-                            faker
-                                .call("ESkillLevelStatus")
-                                .options()
-                                .option(ESkillLevelStatus.class))
+                            dataGenerator.with("ESkillLevelStatus").pickIn(ESkillLevelStatus.class))
                         .toEntity())
             .toList();
 
