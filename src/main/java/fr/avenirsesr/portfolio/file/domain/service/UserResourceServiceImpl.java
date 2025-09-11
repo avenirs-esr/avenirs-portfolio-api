@@ -126,8 +126,8 @@ public class UserResourceServiceImpl implements UserResourceService {
     }
 
     try {
-      fileStorageService.delete(fileResource.getId());
       userPhotoRepository.removeFromDatabase(fileResource);
+      fileStorageService.delete(fileResource.getId());
       log.info("User photo deleted: {}", fileResource);
     } catch (IOException e) {
       throw new RuntimeException(e);

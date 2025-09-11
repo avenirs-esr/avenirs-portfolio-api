@@ -225,6 +225,6 @@ public class UserResourceServiceImplTest {
     BddLogger.then("it should wrap an IOException in RuntimeException");
     org.junit.jupiter.api.Assertions.assertThrows(
         RuntimeException.class, () -> service.deletePhoto(photoId, user));
-    verify(userPhotoRepository, never()).removeFromDatabase(photo);
+    verify(userPhotoRepository).removeFromDatabase(photo);
   }
 }
