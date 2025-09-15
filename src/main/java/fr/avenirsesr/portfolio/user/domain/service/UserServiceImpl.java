@@ -72,6 +72,7 @@ public class UserServiceImpl implements UserService {
             student.setBio(bio);
           }
           userRepository.save(student);
+          break;
         }
       case TEACHER:
         {
@@ -80,6 +81,7 @@ public class UserServiceImpl implements UserService {
             teacher.setBio(bio);
           }
           userRepository.save(teacher);
+          break;
         }
     }
   }
