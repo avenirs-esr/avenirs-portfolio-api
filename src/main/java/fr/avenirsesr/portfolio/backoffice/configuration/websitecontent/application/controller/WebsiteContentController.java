@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.applicat
 import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.application.dto.BuildLifeProjectConfigDTO;
 import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.domain.model.BuildLifeProjectConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.domain.port.input.WebsiteContentConfigurationService;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import java.security.Principal;
 import java.util.Map;
 import java.util.stream.Collectors;

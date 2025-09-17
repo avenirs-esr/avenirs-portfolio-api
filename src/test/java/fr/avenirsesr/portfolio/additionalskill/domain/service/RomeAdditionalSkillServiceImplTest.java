@@ -18,7 +18,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchInde
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rome4VersionRepository;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;

@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.program.domain.model.Institution;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionTranslationEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 
 public interface InstitutionMapper {
   static InstitutionEntity fromDomain(Institution institution) {

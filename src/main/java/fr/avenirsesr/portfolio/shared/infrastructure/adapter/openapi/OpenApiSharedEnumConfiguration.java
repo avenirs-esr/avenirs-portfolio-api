@@ -1,22 +1,18 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.openapi;
 
+import fr.avenirsesr.portfolio.common.openapi.infrastructure.adapter.BaseOpenApiConfiguration;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class OpenApiSharedEnumConfiguration {
+public class OpenApiSharedEnumConfiguration extends BaseOpenApiConfiguration {
+
   @Bean
-  public OpenApiCustomizer sharedEnumCustomizer() {
+  public OpenApiCustomizer portfolioEnumCustomizer() {
     return openApi -> {
-      openApi
-          .getComponents()
-          .addSchemas("EDurationUnit", SwaggerSchema.sharedDurationUnitSchema)
-          .addSchemas("EErrorCode", SwaggerSchema.sharedErrorCodeSchema)
-          .addSchemas("ELanguage", SwaggerSchema.sharedLanguageSchema)
-          .addSchemas("EPortfolioType", SwaggerSchema.sharedPortfolioTypeSchema)
-          .addSchemas("ESortField", SwaggerSchema.sharedSortFieldSchema)
-          .addSchemas("ESortOrder", SwaggerSchema.sharedSortOrderSchema);
+      baseCustomization(openApi);
+      openApi.getComponents().addSchemas("EPortfolioType", SwaggerSchema.portfolioTypeSchema);
     };
   }
 }

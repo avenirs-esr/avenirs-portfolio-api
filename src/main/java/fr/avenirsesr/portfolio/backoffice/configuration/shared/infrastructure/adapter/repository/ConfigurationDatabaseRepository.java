@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.outpu
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.mapper.ConfigurationMapper;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.specification.ConfigurationSpecification;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
 import org.springframework.stereotype.Component;
 

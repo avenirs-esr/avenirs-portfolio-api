@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.student.progress.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
-import fr.avenirsesr.portfolio.shared.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
-import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillProgress;

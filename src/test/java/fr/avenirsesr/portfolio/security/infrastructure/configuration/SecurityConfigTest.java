@@ -6,8 +6,8 @@ import static org.mockito.Mockito.spy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.security.infrastructure.filter.HmacAuthenticationFilter;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

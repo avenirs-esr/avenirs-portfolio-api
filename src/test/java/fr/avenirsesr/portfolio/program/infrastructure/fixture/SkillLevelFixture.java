@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.program.infrastructure.fixture;
 
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeSkill;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeSkillLevel;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;

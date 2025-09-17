@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.user.domain.port.output.repository;
 
-import fr.avenirsesr.portfolio.shared.domain.port.output.repository.GenericRepositoryPort;
+import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.Teacher;
 import fr.avenirsesr.portfolio.user.domain.model.User;

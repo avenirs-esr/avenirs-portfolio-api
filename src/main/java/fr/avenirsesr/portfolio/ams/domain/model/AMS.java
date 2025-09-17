@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.ams.domain.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
-import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.User;

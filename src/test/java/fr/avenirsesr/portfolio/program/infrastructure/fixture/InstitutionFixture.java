@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.program.infrastructure.fixture;
 
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.program.domain.model.Institution;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import java.time.Instant;
 import java.util.Set;

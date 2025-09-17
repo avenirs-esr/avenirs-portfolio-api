@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.additionalskill.domain.model;
 
-import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;

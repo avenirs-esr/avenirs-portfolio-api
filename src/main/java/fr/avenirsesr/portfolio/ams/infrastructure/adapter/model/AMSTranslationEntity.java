@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.TranslationEntity;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.model.TranslationEntity;
 import jakarta.persistence.*;
 import java.util.UUID;
 import lombok.Getter;

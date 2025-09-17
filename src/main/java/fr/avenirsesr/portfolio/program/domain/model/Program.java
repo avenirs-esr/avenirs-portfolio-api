@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.program.domain.model;
 
-import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EDurationUnit;
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.temporal.domain.model.enums.EDurationUnit;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
