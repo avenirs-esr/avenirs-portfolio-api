@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.security.infrastructure.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.avenirsesr.portfolio.shared.application.adapter.response.ErrorResponse;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
+import fr.avenirsesr.portfolio.common.error.application.adapter.response.ErrorResponse;
+import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;

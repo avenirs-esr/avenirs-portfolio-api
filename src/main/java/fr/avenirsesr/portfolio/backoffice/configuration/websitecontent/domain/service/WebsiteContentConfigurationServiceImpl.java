@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.outpu
 import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.domain.model.BuildLifeProjectConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.domain.model.EWebsiteContentConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.domain.port.input.WebsiteContentConfigurationService;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;

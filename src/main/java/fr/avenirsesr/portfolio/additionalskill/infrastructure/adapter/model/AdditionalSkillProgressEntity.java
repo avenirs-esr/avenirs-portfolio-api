@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import java.util.UUID;

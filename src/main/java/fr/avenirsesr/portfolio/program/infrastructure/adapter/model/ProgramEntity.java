@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EDurationUnit;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.temporal.domain.model.enums.EDurationUnit;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;

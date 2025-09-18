@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.infrast
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.model.AdditionalSkillConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.model.AdditionalSkillLevel;
 import fr.avenirsesr.portfolio.backoffice.configuration.additionalskill.domain.port.input.AdditionalSkillConfigurationService;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

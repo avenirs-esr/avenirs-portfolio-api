@@ -2,10 +2,10 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;

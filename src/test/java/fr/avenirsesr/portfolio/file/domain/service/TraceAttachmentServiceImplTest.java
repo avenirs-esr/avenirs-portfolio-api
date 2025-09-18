@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
@@ -13,7 +14,6 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;

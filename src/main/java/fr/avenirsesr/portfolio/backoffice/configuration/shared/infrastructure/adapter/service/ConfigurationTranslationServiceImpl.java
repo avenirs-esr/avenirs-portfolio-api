@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.ad
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationTranslationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.repository.ConfigurationDatabaseRepository;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;

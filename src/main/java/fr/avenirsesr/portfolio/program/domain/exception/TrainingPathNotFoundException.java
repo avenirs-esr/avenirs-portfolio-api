@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.program.domain.exception;
 
-import fr.avenirsesr.portfolio.shared.domain.exception.BusinessException;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
+import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
+import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 
 public class TrainingPathNotFoundException extends BusinessException {
   public TrainingPathNotFoundException() {

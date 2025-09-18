@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.program.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EDurationUnit;
+import fr.avenirsesr.portfolio.common.temporal.domain.model.enums.EDurationUnit;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 

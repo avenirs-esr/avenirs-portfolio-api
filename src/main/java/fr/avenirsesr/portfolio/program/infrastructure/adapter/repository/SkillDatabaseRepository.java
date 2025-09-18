@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.port.output.SkillRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
 import org.springframework.stereotype.Component;
 

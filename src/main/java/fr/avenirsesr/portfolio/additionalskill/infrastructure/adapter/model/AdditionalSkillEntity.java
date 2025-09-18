@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

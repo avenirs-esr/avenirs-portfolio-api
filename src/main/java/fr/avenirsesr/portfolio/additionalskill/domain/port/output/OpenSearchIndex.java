@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.additionalskill.domain.port.output;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillPagedResult;
-import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import java.util.List;
 
 public interface OpenSearchIndex {

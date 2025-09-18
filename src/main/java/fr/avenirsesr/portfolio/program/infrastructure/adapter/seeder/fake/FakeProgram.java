@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake;
 
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.temporal.domain.model.enums.EDurationUnit;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramTranslationEntity;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EDurationUnit;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
 import java.util.Set;
 import java.util.UUID;

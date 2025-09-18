@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.domain.exception;
 
-import fr.avenirsesr.portfolio.shared.domain.exception.BusinessException;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EErrorCode;
+import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
+import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 
 public class DuplicateAdditionalSkillException extends BusinessException {
   public DuplicateAdditionalSkillException() {

@@ -3,13 +3,13 @@ package fr.avenirsesr.portfolio.program.domain.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.List;

@@ -12,11 +12,11 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEn
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.CohortFixture;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;

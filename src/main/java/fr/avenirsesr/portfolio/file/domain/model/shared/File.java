@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.file.domain.model.shared;
 
-import fr.avenirsesr.portfolio.shared.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
 import java.util.UUID;

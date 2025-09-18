@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.UserPhotoMapper;
@@ -7,7 +8,6 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeUserPhoto;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;

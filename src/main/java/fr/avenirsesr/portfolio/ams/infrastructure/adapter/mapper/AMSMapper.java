@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
+import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;

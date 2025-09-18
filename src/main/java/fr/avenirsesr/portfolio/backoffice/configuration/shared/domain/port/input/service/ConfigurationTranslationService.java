@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.port.inpu
 
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.Configuration;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.EConfigurationScope;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import java.util.List;
 import java.util.Map;
 

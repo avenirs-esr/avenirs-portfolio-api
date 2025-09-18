@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
@@ -11,7 +12,6 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;

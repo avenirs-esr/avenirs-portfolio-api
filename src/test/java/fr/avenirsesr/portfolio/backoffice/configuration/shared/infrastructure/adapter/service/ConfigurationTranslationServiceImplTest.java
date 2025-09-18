@@ -11,8 +11,8 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.ad
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationTranslationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.repository.ConfigurationDatabaseRepository;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

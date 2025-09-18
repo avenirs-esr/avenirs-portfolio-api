@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.repository;
 
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.Teacher;
 import fr.avenirsesr.portfolio.user.domain.model.User;

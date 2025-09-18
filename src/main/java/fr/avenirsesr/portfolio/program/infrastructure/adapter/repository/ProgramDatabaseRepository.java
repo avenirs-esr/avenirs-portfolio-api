@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.program.domain.port.output.ProgramRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.ProgramMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
 import org.springframework.stereotype.Component;
 

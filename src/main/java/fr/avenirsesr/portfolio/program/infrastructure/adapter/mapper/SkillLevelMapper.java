@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelTranslationEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
 
 public interface SkillLevelMapper {
   static SkillLevelEntity fromDomain(SkillLevel skillLevel) {

@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
@@ -8,7 +9,6 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.SkillLe
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.TrainingPathDatabaseRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeTrainingPath;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.ValidationUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;

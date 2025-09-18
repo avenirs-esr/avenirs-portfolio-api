@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
+import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.Column;

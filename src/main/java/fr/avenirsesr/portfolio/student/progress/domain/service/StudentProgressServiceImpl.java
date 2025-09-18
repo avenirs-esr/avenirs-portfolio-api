@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.domain.service;
 
-import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.shared.domain.model.PageInfo;
-import fr.avenirsesr.portfolio.shared.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;

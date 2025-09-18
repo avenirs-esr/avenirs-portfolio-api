@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import java.time.Instant;

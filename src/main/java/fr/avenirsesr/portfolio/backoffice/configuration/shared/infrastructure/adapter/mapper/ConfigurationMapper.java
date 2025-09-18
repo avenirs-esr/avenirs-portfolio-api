@@ -5,8 +5,8 @@ import fr.avenirsesr.portfolio.backoffice.configuration.shared.domain.model.Conf
 import fr.avenirsesr.portfolio.backoffice.configuration.shared.infrastructure.adapter.model.ConfigurationEntity;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.ETraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.websitecontent.domain.model.EWebsiteContentConfiguration;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.utils.TranslationUtil;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 
 public interface ConfigurationMapper {
   static ConfigurationEntity fromDomain(Configuration configuration) {

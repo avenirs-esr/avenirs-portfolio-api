@@ -12,8 +12,8 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.security.infrastructure.model.enums.ESecurityKeys;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserPayload;
 import jakarta.servlet.FilterChain;

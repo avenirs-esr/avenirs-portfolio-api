@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import java.time.Instant;

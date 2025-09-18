@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;

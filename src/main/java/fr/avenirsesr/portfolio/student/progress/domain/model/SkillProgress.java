@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.domain.model;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
-import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import java.util.Comparator;
 
 public record SkillProgress(

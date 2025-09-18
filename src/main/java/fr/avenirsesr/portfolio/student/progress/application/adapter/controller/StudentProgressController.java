@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
-import fr.avenirsesr.portfolio.shared.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.StudentProgressOverviewDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.StudentProgressViewDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.StudentProgressOverviewMapper;

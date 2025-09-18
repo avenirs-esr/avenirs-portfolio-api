@@ -3,8 +3,8 @@ package fr.avenirsesr.portfolio.security.infrastructure.filter;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.security.infrastructure.model.HmacAuthenticationToken;
-import fr.avenirsesr.portfolio.testutils.BddLogger;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

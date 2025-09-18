@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import jakarta.persistence.Column;
