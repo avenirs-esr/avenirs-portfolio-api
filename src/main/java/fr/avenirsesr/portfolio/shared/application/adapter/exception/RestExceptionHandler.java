@@ -90,5 +90,4 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }
-
 }
