@@ -24,13 +24,14 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class UserResourceServiceImplTest {
   @InjectMocks private UserResourceServiceImpl service;
   @Mock private UserPhotoRepository userPhotoRepository;
@@ -135,7 +136,7 @@ public class UserResourceServiceImplTest {
   void deletePhoto_shouldDeletePhotoSuccessfully() throws IOException {
     BddLogger.given("a UserResourceServiceImpl service");
     var user = student.getUser();
-    var photoId = UUID.randomUUID();
+    var photoId = UUID.fromString("3f102b67-acec-4328-ba4e-d7f1f0c42cbc");
     var photo =
         UserPhoto.create(
             photoId,

@@ -1,12 +1,12 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data;
 
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.AbstractDataGenerator;
 import java.util.Locale;
 import net.datafaker.Faker;
 
-public class FileFakerDataGenerator extends AbstractDataGenerator implements FileDataGenerator {
+public class FileFakerDataGenerator extends DataGenerator implements FileDataGenerator {
   private Faker faker() {
     return new Faker(
         switch (getLanguage()) {

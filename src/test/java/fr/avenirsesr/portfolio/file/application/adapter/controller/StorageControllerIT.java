@@ -5,12 +5,12 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederRunner;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.domain.service.UserResourceServiceImpl;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.UserPhotoDatabaseRepository;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;

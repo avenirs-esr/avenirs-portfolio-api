@@ -1,11 +1,12 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake;
 
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
@@ -15,6 +16,9 @@ public class FakeUserPhoto {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
       new DataGeneratorProvider<SharedDataGenerator>()
           .init(FakeUserPhoto.class, SharedDataGenerator.class);
+  private static final DataGeneratorProvider<FileDataGenerator> fileDataGenerator =
+      new DataGeneratorProvider<FileDataGenerator>()
+          .init(FakeUserPhoto.class, FileDataGenerator.class);
   private final UserPhotoEntity userPhoto;
 
   private FakeUserPhoto(UserPhotoEntity userPhoto) {
@@ -27,7 +31,7 @@ public class FakeUserPhoto {
     return new FakeUserPhoto(
         UserPhotoEntity.of(
             id,
-            faker.call("file-name").lorem().word() + "." + fileType.name().toLowerCase(),
+            fileDataGenerator.with("file-name").fileName(EFileType.PNG),
             user,
             user.getStudent().isPresent() ? EUserCategory.STUDENT : EUserCategory.TEACHER,
             EUserPhotoType.PROFILE,

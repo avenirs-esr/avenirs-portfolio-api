@@ -25,10 +25,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
+@SpringBootTest
+@ActiveProfiles("test")
 class TraceAttachmentServiceImplTest {
 
   @Mock private TraceAttachmentRepository traceAttachmentRepository;
@@ -37,11 +40,6 @@ class TraceAttachmentServiceImplTest {
   @Mock private TraceService traceService;
 
   @InjectMocks private TraceAttachmentServiceImpl service;
-
-  @BeforeEach
-  void setup() {
-    MockitoAnnotations.openMocks(this);
-  }
 
   @Test
   void uploadTraceAttachment_shouldSaveNewAttachmentAndReturnIt() throws IOException {

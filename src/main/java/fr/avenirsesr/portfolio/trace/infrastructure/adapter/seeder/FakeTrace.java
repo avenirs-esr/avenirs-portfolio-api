@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.domain.port.output.seeder.TraceDataGenerator;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;

@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data;
 
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.AbstractDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.CsvReader;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.CsvReader;
 import fr.avenirsesr.portfolio.trace.domain.port.output.seeder.TraceDataGenerator;
 import java.util.ArrayList;
 
-public class TraceCSVDataGenerator extends AbstractDataGenerator implements TraceDataGenerator {
+public class TraceCSVDataGenerator extends DataGenerator implements TraceDataGenerator {
   private static final String PATH = "seeder/traces.csv";
   private static final String DELIMITER = ",";
   private static final ArrayList<CsvTraceDto> data =

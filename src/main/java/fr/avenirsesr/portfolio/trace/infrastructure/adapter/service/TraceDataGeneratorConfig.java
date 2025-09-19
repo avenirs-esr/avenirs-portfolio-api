@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.service;
 
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.ESeederSource;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.trace.domain.port.output.seeder.TraceDataGenerator;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceCSVDataGenerator;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceFakerDataGenerator;

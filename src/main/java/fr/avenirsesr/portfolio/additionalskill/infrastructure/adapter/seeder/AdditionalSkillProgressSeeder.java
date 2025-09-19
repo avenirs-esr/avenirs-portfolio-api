@@ -1,13 +1,14 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder;
 
-import static fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig.MAX_ADDITIONAL_SKILLS_PER_STUDENT;
-import static fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig.MIN_ADDITIONAL_SKILLS_PER_STUDENT;
+import static fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig.MAX_ADDITIONAL_SKILLS_PER_STUDENT;
+import static fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig.MIN_ADDITIONAL_SKILLS_PER_STUDENT;
 
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.AdditionalSkillDatabaseProgressRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fake.FakeAdditionalSkillProgress;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakerProvider;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class AdditionalSkillProgressSeeder {
-  private static final FakerProvider faker =
-      new FakerProvider().init(AdditionalSkillProgressSeeder.class);
+  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
+      new DataGeneratorProvider<SharedDataGenerator>()
+          .init(AdditionalSkillSeeder.class, SharedDataGenerator.class);
 
   private final AdditionalSkillDatabaseProgressRepository studentAdditionalSkillDatabaseRepository;
 
@@ -34,10 +36,9 @@ public class AdditionalSkillProgressSeeder {
     savedStudents.forEach(
         student -> {
           int additionalSkillsCount =
-              faker
-                  .call("ADDITIONAL_SKILLS_PER_STUDENT")
-                  .random()
-                  .nextInt(MIN_ADDITIONAL_SKILLS_PER_STUDENT, MAX_ADDITIONAL_SKILLS_PER_STUDENT);
+              dataGenerator
+                  .with("ADDITIONAL_SKILLS_PER_STUDENT")
+                  .number(MIN_ADDITIONAL_SKILLS_PER_STUDENT, MAX_ADDITIONAL_SKILLS_PER_STUDENT);
           List<UUID> bannedSkillsIds = new ArrayList<>();
           for (int i = 0; i < additionalSkillsCount; i++) {
             AdditionalSkillProgressEntity fakeStudentAdditionalSkillProgress =

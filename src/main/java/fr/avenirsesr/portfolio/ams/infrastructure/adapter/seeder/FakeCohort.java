@@ -2,9 +2,9 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.ams.domain.port.output.seeder.CohortDataGenerator;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.Set;
 

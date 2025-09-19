@@ -1,11 +1,12 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake;
 
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGenerator;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionTranslationEntity;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import java.util.Set;
 
 public class FakeInstitution {

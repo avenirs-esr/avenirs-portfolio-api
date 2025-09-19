@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data;
 
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.AbstractDataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
 import fr.avenirsesr.portfolio.trace.domain.port.output.seeder.TraceDataGenerator;
 import java.util.Locale;
 import net.datafaker.Faker;
 
-public class TraceFakerDataGenerator extends AbstractDataGenerator implements TraceDataGenerator {
+public class TraceFakerDataGenerator extends DataGenerator implements TraceDataGenerator {
   private Faker faker() {
     return new Faker(
         switch (getLanguage()) {

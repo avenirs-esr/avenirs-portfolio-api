@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.data;
 
 import fr.avenirsesr.portfolio.ams.domain.port.output.seeder.CohortDataGenerator;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.AbstractDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.CsvReader;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.CsvReader;
 import java.util.ArrayList;
 
-public class CohortCSVDataGenerator extends AbstractDataGenerator implements CohortDataGenerator {
+public class CohortCSVDataGenerator extends DataGenerator implements CohortDataGenerator {
   private static final String PATH = "seeder/cohorts.csv";
   private static final String DELIMITER = ",";
   private static final ArrayList<CsvCohortDto> data =

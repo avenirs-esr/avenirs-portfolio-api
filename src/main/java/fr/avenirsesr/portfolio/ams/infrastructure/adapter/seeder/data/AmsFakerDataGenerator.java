@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.data;
 
 import fr.avenirsesr.portfolio.ams.domain.port.output.seeder.AmsDataGenerator;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.AbstractDataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
 import java.util.Locale;
 import net.datafaker.Faker;
 
-public class AmsFakerDataGenerator extends AbstractDataGenerator implements AmsDataGenerator {
+public class AmsFakerDataGenerator extends DataGenerator implements AmsDataGenerator {
   private Faker faker() {
     return new Faker(
         switch (getLanguage()) {

@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.file.infrastructure.service;
 
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data.FileCSVDataGenerator;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data.FileFakerDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.ESeederSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

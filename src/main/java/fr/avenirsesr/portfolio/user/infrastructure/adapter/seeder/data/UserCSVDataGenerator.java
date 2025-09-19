@@ -1,13 +1,13 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.data;
 
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.AbstractDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.CsvReader;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.CsvReader;
 import fr.avenirsesr.portfolio.user.domain.port.output.seeder.UserDataGenerator;
 import java.util.ArrayList;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class UserCSVDataGenerator extends AbstractDataGenerator implements UserDataGenerator {
+public class UserCSVDataGenerator extends DataGenerator implements UserDataGenerator {
   private static final String PATH = "seeder/users.csv";
   private static final String DELIMITER = ";";
   private static final ArrayList<CsvUserDto> data =

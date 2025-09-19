@@ -3,14 +3,11 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fa
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.CompetenceComplementaireDetaillee;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.FakeExternalSource;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class FakeAdditionalSkillProgress {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
@@ -30,8 +27,8 @@ public class FakeAdditionalSkillProgress {
         AdditionalSkillProgressEntity.of(
             dataGenerator.with("id").uuid(),
             student,
-                getRandomAdditionalSkillId(savedAdditionalSkills, bannedSkillsIds),
-                dataGenerator.with("EAdditionalSkillLevel").pickIn(EAdditionalSkillLevel.class)));
+            getRandomAdditionalSkillId(savedAdditionalSkills, bannedSkillsIds),
+            dataGenerator.with("EAdditionalSkillLevel").pickIn(EAdditionalSkillLevel.class)));
   }
 
   public AdditionalSkillProgressEntity toEntity() {
@@ -57,7 +54,6 @@ public class FakeAdditionalSkillProgress {
     }
 
     return allowedIds.get(
-            dataGenerator
-                    .with("CompetenceComplementaireDetaillee").random().nextInt(allowedIds.size()));
+        dataGenerator.with("CompetenceComplementaireDetaillee").number(allowedIds.size()));
   }
 }

@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake;
 
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.SharedDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.time.Instant;
 import java.util.List;

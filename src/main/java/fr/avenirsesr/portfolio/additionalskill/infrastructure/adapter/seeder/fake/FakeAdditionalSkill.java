@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.CompetenceComplementaireDetaillee;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.fake.FakeExternalSource;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.FakeExternalSource;
 import java.io.InputStream;
 import java.util.List;
 

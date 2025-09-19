@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.program.domain.port.output.seeder;
 
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.DataGeneratorInterface;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGeneratorInterface;
 
 public interface ProgramDataGenerator extends DataGeneratorInterface {
   String university();

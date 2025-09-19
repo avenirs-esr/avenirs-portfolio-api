@@ -1,12 +1,11 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.data;
 
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
 import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGenerator;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.AbstractDataGenerator;
 import java.util.Locale;
 import net.datafaker.Faker;
 
-public class ProgramFakerDataGenerator extends AbstractDataGenerator
-    implements ProgramDataGenerator {
+public class ProgramFakerDataGenerator extends DataGenerator implements ProgramDataGenerator {
   private Faker faker() {
     return new Faker(
         switch (getLanguage()) {

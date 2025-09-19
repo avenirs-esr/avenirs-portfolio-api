@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.ExternalUserRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;

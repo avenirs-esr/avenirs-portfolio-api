@@ -1,15 +1,15 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.data;
 
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.CsvReader;
 import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGenerator;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.shared.domain.port.output.seeder.AbstractDataGenerator;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.data.CsvReader;
 import java.util.ArrayList;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ProgramCSVDataGenerator extends AbstractDataGenerator implements ProgramDataGenerator {
+public class ProgramCSVDataGenerator extends DataGenerator implements ProgramDataGenerator {
   private static final String PATH_FRENCH = "seeder/programs.fr.csv";
   private static final String PATH_ENGLISH = "seeder/programs.en.csv";
   private static final String PATH_SPANISH = "seeder/programs.es.csv";
