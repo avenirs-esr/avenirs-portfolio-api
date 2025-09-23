@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1758632988561-3">
+        <dropForeignKeyConstraint baseTableName="cohort_ams" constraintName="FK4lmrm16tqgdeg2tdewrve3wvf"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1758632988561-4">
+        <dropForeignKeyConstraint baseTableName="cohort_ams" constraintName="FKdn2yha86h6sbigxsawao9tlj2"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1758632988561-1">
+        <addForeignKeyConstraint baseColumnNames="ams_id" baseTableName="cohort_ams" constraintName="FKjly3gf1r4geb3d95qqbwhtglb" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="cohort" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1758632988561-2">
+        <addForeignKeyConstraint baseColumnNames="cohort_id" baseTableName="cohort_ams" constraintName="FKoec68tvtlki8634y92qymypvc" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="ams" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

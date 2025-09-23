@@ -2,6 +2,9 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
@@ -25,6 +28,8 @@ class TraceAttachmentSeederTest {
   @Autowired private TraceSeeder traceSeeder;
 
   @Autowired private UserSeeder userSeeder;
+  @Autowired private AdditionalSkillProgressSeeder additionalSkillProgressSeeder;
+  @Autowired private AdditionalSkillSeeder additionalSkillSeeder;
 
   private List<TraceEntity> traces;
 
@@ -32,8 +37,12 @@ class TraceAttachmentSeederTest {
   void setUp() {
     // Seed des utilisateurs
     var users = userSeeder.seed();
+    var students = users.stream().filter(u -> u.getStudent().isPresent()).toList();
+    var additionalSkills = additionalSkillSeeder.seed();
+    List<AdditionalSkillProgressEntity> additionalSkillProgresses =
+        additionalSkillProgressSeeder.seed(students, additionalSkills);
     // Seed des traces pour les utilisateurs
-    this.traces = traceSeeder.seed(users);
+    this.traces = traceSeeder.seed(users, additionalSkillProgresses);
   }
 
   @Test

@@ -68,6 +68,7 @@ public class TraceServiceImpl implements TraceService {
 
     trace.setAmses(List.of());
     trace.setSkillLevels(List.of());
+    trace.setAdditionalSkillProgresses(List.of());
     trace.setDeletedAt(Instant.now());
 
     traceRepository.save(trace);

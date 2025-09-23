@@ -1,0 +1,19 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1758634953077-1">
+        <createTable tableName="trace_additional_skill_progress">
+            <column name="trace_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="additional_skill_progress_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1758634953077-2">
+        <addForeignKeyConstraint baseColumnNames="additional_skill_progress_id" baseTableName="trace_additional_skill_progress" constraintName="FKey16i3km01tsn9ckurewqumxx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="additional_skill_progress" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1758634953077-3">
+        <addForeignKeyConstraint baseColumnNames="trace_id" baseTableName="trace_additional_skill_progress" constraintName="FKsm8ws5m10yfb3rbj2365rc57j" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="trace" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

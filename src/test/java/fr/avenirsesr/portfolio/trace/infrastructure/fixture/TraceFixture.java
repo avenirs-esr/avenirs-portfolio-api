@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.fixture;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
@@ -21,6 +22,7 @@ public class TraceFixture {
   private User user;
   private String title;
   private List<SkillLevelProgress> skillLevels;
+  private List<AdditionalSkillProgress> additionalSkillProgresses;
   private List<AMS> amses;
   private Instant createdAt;
   private Instant updatedAt;
@@ -123,6 +125,7 @@ public class TraceFixture {
         user,
         title,
         skillLevels,
+        additionalSkillProgresses,
         amses,
         isGroup,
         aiUseJustification,

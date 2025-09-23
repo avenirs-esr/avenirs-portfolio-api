@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -15,6 +16,9 @@ public interface TraceMapper {
         trace.getTitle(),
         trace.getLanguage(),
         trace.getSkillLevels().stream().map(SkillLevelProgressMapper::fromDomain).toList(),
+        trace.getAdditionalSkillProgresses().stream()
+            .map(AdditionalSkillProgressMapper::fromDomain)
+            .toList(),
         trace.getAmses().stream().map(AMSMapper::fromDomain).toList(),
         trace.isGroup(),
         trace.getAiUseJustification().orElse(null),
@@ -31,6 +35,9 @@ public interface TraceMapper {
             UserMapper.toDomain(traceEntity.getUser()),
             traceEntity.getTitle(),
             List.of(),
+            traceEntity.getAdditionalSkillsProgresses().stream()
+                .map(AdditionalSkillProgressMapper::toDomain)
+                .toList(),
             traceEntity.getAmses().stream().map(AMSMapper::toDomain).toList(),
             traceEntity.isGroup(),
             traceEntity.getAiUseJustification(),

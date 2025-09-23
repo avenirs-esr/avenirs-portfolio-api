@@ -23,10 +23,11 @@ public class TraceSeeder {
       new DataGeneratorProvider<SharedDataGenerator>()
           .init(TraceSeeder.class, SharedDataGenerator.class);
 
-  private final TraceRepository traceRepository;
+  private final TraceDatabaseRepository traceRepository;
 
   @Transactional
-  public List<TraceEntity> seed(List<UserEntity> users) {
+  public List<TraceEntity> seed(
+      List<UserEntity> users, List<AdditionalSkillProgressEntity> additionalSkillsProgresses) {
     ValidationUtils.requireNonEmpty(users, "users cannot be empty");
 
     log.info("Seeding Traces...");
@@ -47,11 +48,22 @@ public class TraceSeeder {
         if (dataGenerator.with("withPersonalNote").bool()) fakeTrace = fakeTrace.withPersonalNote();
         if (dataGenerator.with("isGroup").bool()) fakeTrace = fakeTrace.isGroup();
 
+        fakeTrace =
+            fakeTrace.withAdditionalSkillsProgress(
+                additionalSkillsProgresses.subList(
+                    0,
+                    faker
+                        .call("nb-additional-skills")
+                        .random()
+                        .nextInt(
+                            SeederConfig.MIN_TRACES_ADDITIONAL_SKILL_PROGRESS,
+                            SeederConfig.MAX_TRACES_ADDITIONAL_SKILL_PROGRESS)));
+
         var trace = fakeTrace.toEntity();
         traceList.add(trace);
       }
     }
-    traceRepository.saveAll(traceList.stream().map(TraceMapper::toDomain).toList());
+    traceRepository.saveAllEntities(traceList);
 
     log.info("✔ {} traces created", traceList.size());
 

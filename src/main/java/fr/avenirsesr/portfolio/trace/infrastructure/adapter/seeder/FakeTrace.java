@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
@@ -34,6 +35,7 @@ public class FakeTrace {
             ELanguage.FALLBACK,
             List.of(),
             List.of(),
+            List.of(),
             false,
             null,
             null,
@@ -44,6 +46,12 @@ public class FakeTrace {
 
   public FakeTrace withSkillLevel(List<SkillLevelProgressEntity> skillLevels) {
     trace.setSkillLevels(skillLevels);
+    return this;
+  }
+
+  public FakeTrace withAdditionalSkillsProgress(
+      List<AdditionalSkillProgressEntity> additionalSkillsProgress) {
+    trace.setAdditionalSkillsProgresses(additionalSkillsProgress);
     return this;
   }
 

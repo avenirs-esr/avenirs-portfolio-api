@@ -3,6 +3,9 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.AMSDatabaseRepository;
@@ -53,6 +56,8 @@ class AMSSeederTest {
   @Autowired StudentProgressSeeder studentProgressSeeder;
 
   @Autowired InstitutionSeeder institutionSeeder;
+  @Autowired private AdditionalSkillProgressSeeder additionalSkillProgressSeeder;
+  @Autowired private AdditionalSkillSeeder additionalSkillSeeder;
 
   @Mock private AMSDatabaseRepository amsRepository;
   @Mock private SkillLevelProgressDatabaseRepository skillLevelProgressRepository;
@@ -71,9 +76,13 @@ class AMSSeederTest {
 
     // Seed les données comme dans SeederRunner
     var savedUsers = userSeeder.seed();
+    var students = savedUsers.stream().filter(u -> u.getStudent().isPresent()).toList();
+    var additionalSkills = additionalSkillSeeder.seed();
+    List<AdditionalSkillProgressEntity> additionalSkillProgresses =
+        additionalSkillProgressSeeder.seed(students, additionalSkills);
     var savedInstitutions = institutionSeeder.seed();
     var savedPrograms = programSeeder.seed(savedInstitutions);
-    var savedTraces = traceSeeder.seed(savedUsers);
+    var savedTraces = traceSeeder.seed(savedUsers, additionalSkillProgresses);
     var savedSkillLevels = skillSeeder.seed(savedPrograms);
     var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
     var savedStudents = savedUsers.stream().filter(u -> u.getStudent().isPresent()).toList();

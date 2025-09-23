@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.domain.model;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.DeletableAvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
@@ -19,6 +20,7 @@ public class Trace extends DeletableAvenirsBaseModel {
   private final User user;
   private String title;
   private List<SkillLevelProgress> skillLevels;
+  private List<AdditionalSkillProgress> additionalSkillProgresses;
   private List<AMS> amses;
   private boolean isGroup;
   private ELanguage language;
@@ -38,6 +40,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       String aiUseJustification,
       String personalNote,
       List<SkillLevelProgress> skillLevels,
+      List<AdditionalSkillProgress> additionalSkillProgresses,
       List<AMS> amses,
       Instant createdAt,
       Instant updatedAt,
@@ -47,6 +50,7 @@ public class Trace extends DeletableAvenirsBaseModel {
     this.title = title;
     this.language = language;
     this.skillLevels = skillLevels;
+    this.additionalSkillProgresses = additionalSkillProgresses;
     this.amses = amses;
     this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
@@ -72,6 +76,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         personalNote,
         List.of(),
         List.of(),
+        List.of(),
         Instant.now(),
         Instant.now(),
         null);
@@ -82,6 +87,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       User user,
       String title,
       List<SkillLevelProgress> skillLevels,
+      List<AdditionalSkillProgress> additionalSkillProgresses,
       List<AMS> amses,
       boolean group,
       String aiUseJustification,
@@ -99,6 +105,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         aiUseJustification,
         personalNote,
         skillLevels,
+        additionalSkillProgresses,
         amses,
         createdAt,
         updatedAt,
@@ -114,6 +121,6 @@ public class Trace extends DeletableAvenirsBaseModel {
   }
 
   public boolean isUnassociated() {
-    return amses.isEmpty() && skillLevels.isEmpty();
+    return amses.isEmpty() && skillLevels.isEmpty() && additionalSkillProgresses.isEmpty();
   }
 }

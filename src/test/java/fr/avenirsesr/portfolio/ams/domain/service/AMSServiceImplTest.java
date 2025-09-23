@@ -24,9 +24,7 @@ import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceReposito
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
-
 import java.util.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
