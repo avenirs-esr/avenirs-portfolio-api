@@ -53,14 +53,20 @@ public class TraceDatabaseRepository
       case null -> {}
     }
 
+    Sort sort =
+        switch (status) {
+          case UNASSOCIATED -> Sort.by(Sort.Direction.ASC, "createdAt");
+          case ASSOCIATED ->
+              Sort.by(Sort.Direction.DESC, "updatedAt")
+                  .and(Sort.by(Sort.Direction.DESC, "createdAt"));
+          case null ->
+              Sort.by(Sort.Direction.DESC, "updatedAt")
+                  .and(Sort.by(Sort.Direction.DESC, "createdAt"));
+        };
+
     var results =
         jpaSpecificationExecutor.findAll(
-            specification,
-            PageRequest.of(
-                pageCriteria.page(),
-                pageCriteria.pageSize(),
-                Sort.by(Sort.Direction.DESC, "updatedAt")
-                    .and(Sort.by(Sort.Direction.DESC, "createdAt"))));
+            specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));
 
     var content = results.getContent().stream().map(TraceMapper::toDomain).toList();
 
