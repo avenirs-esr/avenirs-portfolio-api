@@ -8,6 +8,7 @@ public interface AdditionalSkillProgressMapper {
   static AdditionalSkillProgressEntity fromDomain(AdditionalSkillProgress additionalSkillProgress) {
 
     return AdditionalSkillProgressEntity.create(
+        additionalSkillProgress.getId(),
         UserMapper.fromDomain(additionalSkillProgress.getStudent()),
         AdditionalSkillMapper.fromDomain(additionalSkillProgress.getSkill()),
         additionalSkillProgress.getLevel());

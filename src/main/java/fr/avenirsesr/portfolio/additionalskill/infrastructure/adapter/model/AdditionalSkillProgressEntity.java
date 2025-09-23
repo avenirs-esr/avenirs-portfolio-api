@@ -51,7 +51,10 @@ public class AdditionalSkillProgressEntity extends AvenirsBaseEntity {
   }
 
   public static AdditionalSkillProgressEntity create(
-      UserEntity student, AdditionalSkillEntity additionalSkill, EAdditionalSkillLevel level) {
-    return new AdditionalSkillProgressEntity(UUID.randomUUID(), student, additionalSkill, level);
+      UUID id,
+      UserEntity student,
+      AdditionalSkillEntity additionalSkill,
+      EAdditionalSkillLevel level) {
+    return new AdditionalSkillProgressEntity(id, student, additionalSkill, level);
   }
 }
