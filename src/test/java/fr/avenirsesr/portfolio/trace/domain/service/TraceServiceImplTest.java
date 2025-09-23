@@ -28,7 +28,7 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentPr
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
+import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
@@ -246,7 +246,7 @@ public class TraceServiceImplTest {
   }
 
   @Test
-  void givenUnassociatedTraces_shouldReturnSummary() {
+  void givenTraces_shouldReturnSummary() {
     BddLogger.given("a TraceServiceImpl service and unassociated traces");
     TraceConfiguration traceConfiguration = new TraceConfiguration(90, 30, 5);
     List<Trace> unassociatedTraces =
@@ -268,14 +268,28 @@ public class TraceServiceImplTest {
                 .withCreatedAt(Instant.now().minus(85, ChronoUnit.DAYS))
                 .toModel());
 
-    BddLogger.when("getting the unassociated traces summary");
-    when(traceRepository.findAllUnassociated(student.getUser())).thenReturn(unassociatedTraces);
-    when(traceConfigurationService.getTraceConfiguration()).thenReturn(traceConfiguration);
-    UnassociatedTracesSummary summary =
-        traceService.getUnassociatedTracesSummary(student.getUser());
+    List<Trace> associatedTraces =
+        List.of(
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(12, ChronoUnit.DAYS))
+                .toModel(),
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withCreatedAt(Instant.now().minus(72, ChronoUnit.DAYS))
+                .toModel());
 
-    BddLogger.then("it should return the unassociated traces summary");
-    assertEquals(4, summary.total());
+    BddLogger.when("getting the traces summary");
+    when(traceRepository.findAll(student.getUser(), ETraceStatus.UNASSOCIATED))
+        .thenReturn(unassociatedTraces);
+    when(traceRepository.findAll(student.getUser(), ETraceStatus.ASSOCIATED))
+        .thenReturn(associatedTraces);
+    when(traceConfigurationService.getTraceConfiguration()).thenReturn(traceConfiguration);
+    TracesSummary summary = traceService.getTracesSummary(student.getUser());
+
+    BddLogger.then("it should return the traces summary");
+    assertEquals(4, summary.unassociated());
+    assertEquals(2, summary.associated());
     assertEquals(3, summary.totalWarnings());
     assertEquals(1, summary.totalCriticals());
   }

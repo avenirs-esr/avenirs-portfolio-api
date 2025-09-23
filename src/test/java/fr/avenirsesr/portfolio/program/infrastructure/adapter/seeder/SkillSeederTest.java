@@ -61,7 +61,8 @@ class SkillSeederTest {
     assertNotNull(skillLevels);
     assertFalse(skillLevels.isEmpty());
 
-    // Vérifie que le nombre total correspond à programs * SKILL_BY_PROGRAM * SKILL_LEVEL_BY_SKILL
+    // Vérifie que le nombre unassociated correspond à programs * SKILL_BY_PROGRAM *
+    // SKILL_LEVEL_BY_SKILL
     int expectedTotal =
         programs.size() * SeederConfig.SKILL_BY_PROGRAM * SeederConfig.SKILL_LEVEL_BY_SKILL;
     assertEquals(expectedTotal, skillLevels.size());

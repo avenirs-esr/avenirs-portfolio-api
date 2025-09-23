@@ -11,7 +11,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.St
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
+import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
@@ -75,8 +75,9 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public UnassociatedTracesSummary getUnassociatedTracesSummary(User user) {
-    List<Trace> unassociatedTraces = traceRepository.findAllUnassociated(user);
+  public TracesSummary getTracesSummary(User user) {
+    List<Trace> associatedTraces = traceRepository.findAll(user, ETraceStatus.ASSOCIATED);
+    List<Trace> unassociatedTraces = traceRepository.findAll(user, ETraceStatus.UNASSOCIATED);
     TraceConfiguration traceConfiguration = traceConfigurationService.getTraceConfiguration();
 
     int criticalCount =
@@ -101,7 +102,8 @@ public class TraceServiceImpl implements TraceService {
             .toList()
             .size();
 
-    return new UnassociatedTracesSummary(unassociatedTraces.size(), warningCount, criticalCount);
+    return new TracesSummary(
+        associatedTraces.size(), unassociatedTraces.size(), warningCount, criticalCount);
   }
 
   @Override

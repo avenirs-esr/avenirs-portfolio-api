@@ -70,7 +70,7 @@ public class TrainingPathSeeder {
     if ((long) savedPrograms.size() * SeederConfig.SKILL_BY_PROGRAM
         != savedSkillLevels.stream().map(SkillLevelEntity::getSkill).distinct().count()) {
       throw new IllegalArgumentException(
-          "should have saved %s skill by program so %s skills in total"
+          "should have saved %s skill by program so %s skills in unassociated"
               .formatted(
                   SeederConfig.SKILL_BY_PROGRAM,
                   SeederConfig.SKILL_BY_PROGRAM * savedPrograms.size()));

@@ -30,7 +30,7 @@ class TraceControllerIT {
   private static final String BASE_PATH_WITH_ID = BASE_PATH + "/{traceId}";
   private static final String OVERVIEW_BASE_PATH = BASE_PATH + "/overview";
   private static final String VIEW_BASE_PATH = BASE_PATH + "/view";
-  private static final String UNASSOCIATED_SUMMARY_BASE_PATH = BASE_PATH + "/unassociated/summary";
+  private static final String SUMMARY_BASE_PATH = BASE_PATH + "/summary";
 
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
@@ -115,18 +115,19 @@ class TraceControllerIT {
   }
 
   @Test
-  void shouldReturnUnassociatedSummary() throws Exception {
-    BddLogger.given("the " + UNASSOCIATED_SUMMARY_BASE_PATH + " endpoint");
+  void shouldReturnTraceSummary() throws Exception {
+    BddLogger.given("the " + SUMMARY_BASE_PATH + " endpoint");
     BddLogger.when("performing a GET");
-    BddLogger.then("it should return the unassociated summary");
+    BddLogger.then("it should return the trace summary");
     mockMvc
         .perform(
-            get(UNASSOCIATED_SUMMARY_BASE_PATH)
+            get(SUMMARY_BASE_PATH)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.total").isNumber())
+        .andExpect(jsonPath("$.associated").isNumber())
+        .andExpect(jsonPath("$.unassociated").isNumber())
         .andExpect(jsonPath("$.totalWarnings").isNumber())
         .andExpect(jsonPath("$.totalCriticals").isNumber());
   }

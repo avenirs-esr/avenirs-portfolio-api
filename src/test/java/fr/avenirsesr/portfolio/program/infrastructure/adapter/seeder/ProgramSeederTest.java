@@ -56,7 +56,7 @@ class ProgramSeederTest {
     assertNotNull(programs);
     assertFalse(programs.isEmpty());
 
-    // Vérifie que le nombre total correspond à institutions * PROGRAM_BY_INSTITUTION
+    // Vérifie que le nombre unassociated correspond à institutions * PROGRAM_BY_INSTITUTION
     int expectedTotal = institutions.size() * SeederConfig.PROGRAM_BY_INSTITUTION;
     assertEquals(expectedTotal, programs.size());
 

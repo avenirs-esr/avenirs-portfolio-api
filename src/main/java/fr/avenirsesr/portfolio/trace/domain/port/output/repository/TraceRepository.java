@@ -13,5 +13,5 @@ public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {
 
   PagedResult<Trace> findAll(User user, PageCriteria pageCriteria, ETraceStatus status);
 
-  List<Trace> findAllUnassociated(User user);
+  List<Trace> findAll(User user, ETraceStatus status);
 }

@@ -77,13 +77,16 @@ public class TraceDatabaseRepository
   }
 
   @Override
-  public List<Trace> findAllUnassociated(User user) {
-    return jpaSpecificationExecutor
-        .findAll(
-            TraceSpecification.ofUser(UserMapper.fromDomain(user))
-                .and(TraceSpecification.notDeleted())
-                .and(TraceSpecification.unassociated()))
-        .stream()
+  public List<Trace> findAll(User user, ETraceStatus status) {
+    Specification<TraceEntity> specification =
+        TraceSpecification.ofUser(UserMapper.fromDomain(user)).and(TraceSpecification.notDeleted());
+
+    switch (status) {
+      case UNASSOCIATED -> specification = specification.and(TraceSpecification.unassociated());
+      case ASSOCIATED -> specification = specification.and(TraceSpecification.associated());
+    }
+
+    return jpaSpecificationExecutor.findAll(specification).stream()
         .map(TraceMapper::toDomain)
         .toList();
   }

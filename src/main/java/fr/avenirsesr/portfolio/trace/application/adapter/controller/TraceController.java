@@ -8,14 +8,14 @@ import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceViewDTO;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.UnassociatedTracesSummaryDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.TracesSummaryDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceViewMapper;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.UnassociatedTracesSummaryMapper;
+import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TracesSummaryMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
+import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import jakarta.validation.Valid;
@@ -89,16 +89,14 @@ public class TraceController {
     return ResponseEntity.ok("Resource successfully deleted.");
   }
 
-  @GetMapping("/unassociated/summary")
-  public ResponseEntity<UnassociatedTracesSummaryDTO> getTracesUnassociatedSummary(
-      Principal principal) {
-    log.debug(
-        "Received request to get unassociated trace summary of user [{}]", principal.getName());
+  @GetMapping("/summary")
+  public ResponseEntity<TracesSummaryDTO> getTracesSummary(Principal principal) {
+    log.debug("Received request to get trace summary of user [{}]", principal.getName());
     User user = userUtil.getUser(principal);
 
-    UnassociatedTracesSummary summary = traceService.getUnassociatedTracesSummary(user);
+    TracesSummary summary = traceService.getTracesSummary(user);
 
-    return ResponseEntity.ok(UnassociatedTracesSummaryMapper.toDTO(summary));
+    return ResponseEntity.ok(TracesSummaryMapper.toDTO(summary));
   }
 
   @PostMapping

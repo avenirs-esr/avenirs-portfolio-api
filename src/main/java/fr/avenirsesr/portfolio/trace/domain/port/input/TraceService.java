@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.UnassociatedTracesSummary;
+import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.LocalDate;
 import java.util.List;
@@ -21,7 +21,7 @@ public interface TraceService {
 
   void deleteById(User user, UUID id);
 
-  UnassociatedTracesSummary getUnassociatedTracesSummary(User user);
+  TracesSummary getTracesSummary(User user);
 
   Trace createTrace(
       User user,
