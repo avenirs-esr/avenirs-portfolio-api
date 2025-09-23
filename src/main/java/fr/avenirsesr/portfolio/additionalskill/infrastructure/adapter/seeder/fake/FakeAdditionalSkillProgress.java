@@ -27,7 +27,7 @@ public class FakeAdditionalSkillProgress {
         AdditionalSkillProgressEntity.of(
             dataGenerator.with("id").uuid(),
             student,
-            getRandomAdditionalSkillId(savedAdditionalSkills, bannedSkillsIds),
+            getRandomAdditionalSkill(savedAdditionalSkills, bannedSkillsIds),
             dataGenerator.with("EAdditionalSkillLevel").pickIn(EAdditionalSkillLevel.class)));
   }
 
@@ -35,18 +35,17 @@ public class FakeAdditionalSkillProgress {
     return additionalSkillProgressEntity;
   }
 
-  private static UUID getRandomAdditionalSkillId(
+  private static AdditionalSkillEntity getRandomAdditionalSkill(
       List<AdditionalSkillEntity> savedAdditionalSkills, List<UUID> bannedIds) {
 
     if (savedAdditionalSkills.size() <= 2) {
       throw new IllegalStateException("The list must contain more than 2 items.");
     }
 
-    List<UUID> allowedIds =
+    List<AdditionalSkillEntity> allowedIds =
         savedAdditionalSkills.stream()
             .skip(2) // Do not attribute the first two elements for integration tests.
-            .map(AdditionalSkillEntity::getId)
-            .filter(id -> !bannedIds.contains(id))
+            .filter(additionalSkill -> !bannedIds.contains(additionalSkill.getId()))
             .toList();
 
     if (allowedIds.isEmpty()) {

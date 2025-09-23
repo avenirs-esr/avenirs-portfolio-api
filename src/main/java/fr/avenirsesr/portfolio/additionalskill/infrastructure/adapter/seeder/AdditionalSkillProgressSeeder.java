@@ -44,7 +44,7 @@ public class AdditionalSkillProgressSeeder {
             AdditionalSkillProgressEntity fakeStudentAdditionalSkillProgress =
                 FakeAdditionalSkillProgress.of(student, savedAdditionalSkills, bannedSkillsIds)
                     .toEntity();
-            bannedSkillsIds.add(fakeStudentAdditionalSkillProgress.getAdditionalSkillId());
+            bannedSkillsIds.add(fakeStudentAdditionalSkillProgress.getAdditionalSkill().getId());
             studentAdditionalSkillEntities.add(fakeStudentAdditionalSkillProgress);
           }
         });

@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -10,7 +9,7 @@ public interface AdditionalSkillProgressMapper {
 
     return AdditionalSkillProgressEntity.create(
         UserMapper.fromDomain(additionalSkillProgress.getStudent()),
-        additionalSkillProgress.getSkill().getId(),
+        AdditionalSkillMapper.fromDomain(additionalSkillProgress.getSkill()),
         additionalSkillProgress.getLevel());
   }
 
@@ -18,19 +17,7 @@ public interface AdditionalSkillProgressMapper {
     return AdditionalSkillProgress.toDomain(
         entity.getId(),
         UserMapper.toDomain(entity.getStudent()).toStudent(),
-        null,
-        entity.getLevel(),
-        entity.getCreatedAt(),
-        entity.getUpdatedAt());
-  }
-
-  static AdditionalSkillProgress toDomain(
-      AdditionalSkillProgressEntity entity, AdditionalSkill skill) {
-
-    return AdditionalSkillProgress.toDomain(
-        entity.getId(),
-        UserMapper.toDomain(entity.getStudent()).toStudent(),
-        skill,
+        AdditionalSkillMapper.toDomain(entity.getAdditionalSkill()),
         entity.getLevel(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());

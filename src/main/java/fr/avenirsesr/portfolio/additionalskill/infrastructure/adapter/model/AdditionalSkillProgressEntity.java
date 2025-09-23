@@ -23,28 +23,35 @@ public class AdditionalSkillProgressEntity extends AvenirsBaseEntity {
   @JoinColumn(name = "student_id")
   private UserEntity student;
 
-  @Column(name = "additional_skill_id")
-  private UUID additionalSkillId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "additional_skill_id")
+  private AdditionalSkillEntity additionalSkill;
 
   @Column(name = "level")
   @Enumerated(EnumType.STRING)
   private EAdditionalSkillLevel level;
 
   private AdditionalSkillProgressEntity(
-      UUID id, UserEntity student, UUID additionalSkillId, EAdditionalSkillLevel level) {
+      UUID id,
+      UserEntity student,
+      AdditionalSkillEntity additionalSkill,
+      EAdditionalSkillLevel level) {
     setId(id);
     this.student = student;
-    this.additionalSkillId = additionalSkillId;
+    this.additionalSkill = additionalSkill;
     this.level = level;
   }
 
   public static AdditionalSkillProgressEntity of(
-      UUID id, UserEntity student, UUID additionalSkillId, EAdditionalSkillLevel level) {
-    return new AdditionalSkillProgressEntity(id, student, additionalSkillId, level);
+      UUID id,
+      UserEntity student,
+      AdditionalSkillEntity additionalSkill,
+      EAdditionalSkillLevel level) {
+    return new AdditionalSkillProgressEntity(id, student, additionalSkill, level);
   }
 
   public static AdditionalSkillProgressEntity create(
-      UserEntity student, UUID additionalSkillId, EAdditionalSkillLevel level) {
-    return new AdditionalSkillProgressEntity(UUID.randomUUID(), student, additionalSkillId, level);
+      UserEntity student, AdditionalSkillEntity additionalSkill, EAdditionalSkillLevel level) {
+    return new AdditionalSkillProgressEntity(UUID.randomUUID(), student, additionalSkill, level);
   }
 }
