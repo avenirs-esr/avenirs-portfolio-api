@@ -72,4 +72,8 @@ public class TraceSpecification {
   public static Specification<TraceEntity> notDeleted() {
     return (root, query, cb) -> cb.isNull(root.get("deletedAt"));
   }
+
+  public static Specification<TraceEntity> ofAms(AMSEntity ams) {
+    return (root, query, criteriaBuilder) -> criteriaBuilder.isMember(ams, root.get("amses"));
+  }
 }

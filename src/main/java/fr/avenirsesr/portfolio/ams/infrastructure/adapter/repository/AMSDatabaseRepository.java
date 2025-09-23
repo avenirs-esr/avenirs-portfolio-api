@@ -9,14 +9,11 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
+import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -30,22 +27,10 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
   }
 
   @Override
-  public PagedResult<AMS> findByUserIdViaCohortsAndSkillLevelProgresses(
-      UUID userId, List<SkillLevelProgress> skillLevelProgresses, PageCriteria pageCriteria) {
-    Specification<AMSEntity> spec = AMSSpecification.belongsToUserViaCohorts(userId);
-
-    if (!skillLevelProgresses.isEmpty()) {
-      spec =
-          spec.and(
-              AMSSpecification.hasSkillLevelProgress(
-                  skillLevelProgresses.stream()
-                      .map(SkillLevelProgressMapper::fromDomain)
-                      .toList()));
-    }
-
+  public PagedResult<AMS> findByUserId(User user, PageCriteria pageCriteria) {
     Page<AMSEntity> pageResult =
         jpaSpecificationExecutor.findAll(
-            spec,
+            AMSSpecification.belongsToUser(user),
             PageRequest.of(
                 pageCriteria.page(),
                 pageCriteria.pageSize(),

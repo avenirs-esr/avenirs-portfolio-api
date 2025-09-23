@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.ams.domain.dto.AmsView;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
@@ -16,14 +17,16 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
+import java.util.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +39,8 @@ class AMSServiceImplTest {
 
   @Mock private AMSRepository amsRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
+  @Mock private SkillLevelProgressRepository skillLevelProgressRepository;
+  @Mock private TraceRepository traceRepository;
 
   @InjectMocks private AMSServiceImpl amsService;
 
@@ -63,14 +68,15 @@ class AMSServiceImplTest {
     PagedResult<AMS> expectedResult =
         new PagedResult<>(amsList, new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 3));
 
-    when(amsRepository.findByUserIdViaCohortsAndSkillLevelProgresses(
-            any(UUID.class), any(), eq(DEFAULT_PAGE_CRITERIA)))
+    when(amsRepository.findByUserId(any(User.class), eq(DEFAULT_PAGE_CRITERIA)))
         .thenReturn(expectedResult);
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
+    when(skillLevelProgressRepository.linkedWith(any())).thenReturn(Collections.emptyList());
+    when(traceRepository.linkedWith(any())).thenReturn(Collections.emptyList());
 
     BddLogger.when("calling the method with an user with AMS");
-    PagedResult<AMS> result =
+    PagedResult<AmsView> result =
         amsService.findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA);
 
     BddLogger.then("it should return paged AMS");
@@ -79,9 +85,7 @@ class AMSServiceImplTest {
     assertEquals(3, result.content().size());
     assertEquals(DEFAULT_PAGE, result.pageInfo().page());
     assertEquals(DEFAULT_SIZE, result.pageInfo().pageSize());
-    verify(amsRepository)
-        .findByUserIdViaCohortsAndSkillLevelProgresses(
-            any(UUID.class), any(), eq(DEFAULT_PAGE_CRITERIA));
+    verify(amsRepository).findByUserId(any(User.class), eq(DEFAULT_PAGE_CRITERIA));
   }
 
   @Test
@@ -90,14 +94,13 @@ class AMSServiceImplTest {
     PagedResult<AMS> expectedResult =
         new PagedResult<>(new ArrayList<>(), new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 0));
 
-    when(amsRepository.findByUserIdViaCohortsAndSkillLevelProgresses(
-            any(UUID.class), any(), eq(DEFAULT_PAGE_CRITERIA)))
+    when(amsRepository.findByUserId(any(User.class), eq(DEFAULT_PAGE_CRITERIA)))
         .thenReturn(expectedResult);
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
 
     BddLogger.when("calling the method with an user without AMS");
-    PagedResult<AMS> result =
+    PagedResult<AmsView> result =
         amsService.findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA);
 
     BddLogger.then("it should return an empty paged result");
@@ -106,9 +109,7 @@ class AMSServiceImplTest {
     assertTrue(result.content().isEmpty());
     assertEquals(DEFAULT_PAGE, result.pageInfo().page());
     assertEquals(DEFAULT_SIZE, result.pageInfo().pageSize());
-    verify(amsRepository)
-        .findByUserIdViaCohortsAndSkillLevelProgresses(
-            any(UUID.class), any(), eq(DEFAULT_PAGE_CRITERIA));
+    verify(amsRepository).findByUserId(any(User.class), eq(DEFAULT_PAGE_CRITERIA));
   }
 
   @Test
@@ -119,14 +120,15 @@ class AMSServiceImplTest {
     List<AMS> amsList = AMSFixture.create().withCount(5);
     PagedResult<AMS> expectedResult = new PagedResult<>(amsList, new PageInfo(page, size, 15));
 
-    when(amsRepository.findByUserIdViaCohortsAndSkillLevelProgresses(
-            any(UUID.class), any(), eq(new PageCriteria(page, size))))
+    when(amsRepository.findByUserId(any(User.class), eq(new PageCriteria(page, size))))
         .thenReturn(expectedResult);
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
+    when(skillLevelProgressRepository.linkedWith(any())).thenReturn(Collections.emptyList());
+    when(traceRepository.linkedWith(any())).thenReturn(Collections.emptyList());
 
     BddLogger.when("calling the method with an user with a large amount of AMS");
-    PagedResult<AMS> result =
+    PagedResult<AmsView> result =
         amsService.findUserAmsByStudentProgress(
             student, studentProgressId, new PageCriteria(page, size));
 
@@ -136,9 +138,7 @@ class AMSServiceImplTest {
     assertEquals(5, result.content().size());
     assertEquals(page, result.pageInfo().page());
     assertEquals(size, result.pageInfo().pageSize());
-    verify(amsRepository)
-        .findByUserIdViaCohortsAndSkillLevelProgresses(
-            any(UUID.class), any(), eq(new PageCriteria(page, size)));
+    verify(amsRepository).findByUserId(any(User.class), eq(new PageCriteria(page, size)));
   }
 
   @Test
@@ -147,14 +147,15 @@ class AMSServiceImplTest {
     List<AMS> amsList = AMSFixture.create().withCount(3);
     PagedResult<AMS> expectedResult = new PagedResult<>(amsList, new PageInfo(0, 8, 3));
 
-    when(amsRepository.findByUserIdViaCohortsAndSkillLevelProgresses(
-            any(UUID.class), any(), eq(new PageCriteria(0, 8))))
+    when(amsRepository.findByUserId(any(User.class), eq(new PageCriteria(0, 8))))
         .thenReturn(expectedResult);
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
+    when(skillLevelProgressRepository.linkedWith(any())).thenReturn(Collections.emptyList());
+    when(traceRepository.linkedWith(any())).thenReturn(Collections.emptyList());
 
     BddLogger.when("calling the method with null pagination parameters");
-    PagedResult<AMS> result =
+    PagedResult<AmsView> result =
         amsService.findUserAmsByStudentProgress(
             student, studentProgressId, new PageCriteria(null, null));
 
@@ -164,8 +165,6 @@ class AMSServiceImplTest {
     assertEquals(3, result.content().size());
     assertEquals(0, result.pageInfo().page());
     assertEquals(8, result.pageInfo().pageSize());
-    verify(amsRepository)
-        .findByUserIdViaCohortsAndSkillLevelProgresses(
-            any(UUID.class), any(), eq(new PageCriteria(0, 8)));
+    verify(amsRepository).findByUserId(any(User.class), eq(new PageCriteria(0, 8)));
   }
 }

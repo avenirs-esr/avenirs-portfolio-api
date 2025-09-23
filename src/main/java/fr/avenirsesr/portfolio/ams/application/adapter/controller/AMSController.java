@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.ams.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.ams.application.adapter.dto.AmsViewDTO;
 import fr.avenirsesr.portfolio.ams.application.adapter.mapper.AmsViewMapper;
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.ams.domain.dto.AmsView;
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
@@ -45,7 +45,7 @@ public class AMSController {
         pageCriteria.pageSize());
     Student student = userUtil.getStudent(principal);
 
-    PagedResult<AMS> pagedResult =
+    PagedResult<AmsView> pagedResult =
         amsService.findUserAmsByStudentProgress(student, studentProgressId, pageCriteria);
 
     List<AmsViewDTO> amsViewDTOs =

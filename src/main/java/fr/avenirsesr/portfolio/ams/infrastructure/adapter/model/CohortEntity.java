@@ -40,7 +40,11 @@ public class CohortEntity extends AvenirsBaseEntity {
   @JoinColumn(name = "training_path_id")
   private TrainingPathEntity trainingPath;
 
-  @ManyToMany(mappedBy = "cohorts")
+  @ManyToMany
+  @JoinTable(
+      name = "cohort_ams",
+      joinColumns = @JoinColumn(name = "ams_id"),
+      inverseJoinColumns = @JoinColumn(name = "cohort_id"))
   private Set<AMSEntity> amsEntities;
 
   private CohortEntity(

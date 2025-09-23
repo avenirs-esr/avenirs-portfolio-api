@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.domain.port.output.repository;
 
+import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericDeletableRepositoryPort;
@@ -14,4 +15,6 @@ public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {
   PagedResult<Trace> findAll(User user, PageCriteria pageCriteria, ETraceStatus status);
 
   List<Trace> findAll(User user, ETraceStatus status);
+
+  List<Trace> linkedWith(AMS ams);
 }

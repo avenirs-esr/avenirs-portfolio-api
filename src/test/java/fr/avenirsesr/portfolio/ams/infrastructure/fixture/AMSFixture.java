@@ -1,17 +1,14 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.FakeAMS;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +17,6 @@ public class AMSFixture {
   private UUID id;
   private User user;
   private String title;
-  private List<SkillLevelProgress> skillLevels;
   private ELanguage language = ELanguage.FRENCH;
   private Instant startDate;
   private Instant endDate;
@@ -33,7 +29,6 @@ public class AMSFixture {
     this.id = base.getId();
     this.user = fakeUser;
     this.title = "fake ams title";
-    this.skillLevels = List.of();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
   }
@@ -49,11 +44,6 @@ public class AMSFixture {
 
   public AMSFixture withUser(User user) {
     this.user = user;
-    return this;
-  }
-
-  public AMSFixture withSkillLevels(List<SkillLevelProgress> skillLevels) {
-    this.skillLevels = skillLevels;
     return this;
   }
 
@@ -97,16 +87,6 @@ public class AMSFixture {
 
   public AMS toModel() {
     return AMS.toDomain(
-        id,
-        user,
-        title,
-        startDate,
-        endDate,
-        skillLevels,
-        List.of(),
-        new HashSet<Cohort>(),
-        EAmsStatus.NOT_STARTED,
-        createdAt,
-        updatedAt);
+        id, user, title, startDate, endDate, EAmsStatus.NOT_STARTED, createdAt, updatedAt);
   }
 }

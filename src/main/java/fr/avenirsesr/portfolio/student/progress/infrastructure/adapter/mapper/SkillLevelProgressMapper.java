@@ -59,7 +59,7 @@ public interface SkillLevelProgressMapper {
         entity.getStatus(),
         entity.getStartDate(),
         entity.getEndDate(),
-        entity.getTraces().stream().map(TraceMapper::toDomainWithoutRecursion).toList(),
+        entity.getTraces().stream().map(TraceMapper::toDomain).toList(),
         ameses,
         entity.getCreatedAt(),
         entity.getUpdatedAt());

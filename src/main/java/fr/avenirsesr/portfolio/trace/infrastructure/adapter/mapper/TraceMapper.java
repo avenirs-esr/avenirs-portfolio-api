@@ -25,9 +25,20 @@ public interface TraceMapper {
   }
 
   static Trace toDomain(TraceEntity traceEntity) {
-    Trace trace = toDomainWithoutRecursion(traceEntity);
-    trace.setAmses(
-        traceEntity.getAmses().stream().map(AMSMapper::toDomainWithoutRecursion).toList());
+    Trace trace =
+        Trace.toDomain(
+            traceEntity.getId(),
+            UserMapper.toDomain(traceEntity.getUser()),
+            traceEntity.getTitle(),
+            List.of(),
+            traceEntity.getAmses().stream().map(AMSMapper::toDomain).toList(),
+            traceEntity.isGroup(),
+            traceEntity.getAiUseJustification(),
+            traceEntity.getPersonalNote(),
+            traceEntity.getCreatedAt(),
+            traceEntity.getUpdatedAt(),
+            traceEntity.getDeletedAt(),
+            traceEntity.getLanguage());
     trace.setSkillLevels(
         traceEntity.getSkillLevels().stream()
             .map(
@@ -36,21 +47,5 @@ public interface TraceMapper {
                         skillLevelProgressEntity, trace.getAmses()))
             .toList());
     return trace;
-  }
-
-  static Trace toDomainWithoutRecursion(TraceEntity traceEntity) {
-    return Trace.toDomain(
-        traceEntity.getId(),
-        UserMapper.toDomain(traceEntity.getUser()),
-        traceEntity.getTitle(),
-        List.of(),
-        List.of(),
-        traceEntity.isGroup(),
-        traceEntity.getAiUseJustification(),
-        traceEntity.getPersonalNote(),
-        traceEntity.getCreatedAt(),
-        traceEntity.getUpdatedAt(),
-        traceEntity.getDeletedAt(),
-        traceEntity.getLanguage());
   }
 }

@@ -38,7 +38,7 @@ public class TraceFixture {
     this.title = base.getTitle();
     this.skillLevels =
         base.getSkillLevels().stream().map(SkillLevelProgressMapper::toDomain).toList();
-    this.amses = base.getAmses().stream().map(AMSMapper::toDomainWithoutRecursion).toList();
+    this.amses = base.getAmses().stream().map(AMSMapper::toDomain).toList();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
     this.deletedAt = base.getDeletedAt();

@@ -6,15 +6,7 @@ import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -45,7 +37,11 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
   @ManyToMany(mappedBy = "skillLevels")
   private List<TraceEntity> traces;
 
-  @ManyToMany(mappedBy = "skillLevels")
+  @ManyToMany
+  @JoinTable(
+      name = "ams_skill_level_progress",
+      joinColumns = @JoinColumn(name = "skill_level_progress_id"),
+      inverseJoinColumns = @JoinColumn(name = "ams_id"))
   private List<AMSEntity> amses;
 
   private SkillLevelProgressEntity(

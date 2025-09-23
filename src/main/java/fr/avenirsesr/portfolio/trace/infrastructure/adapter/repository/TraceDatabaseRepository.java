@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -93,6 +95,15 @@ public class TraceDatabaseRepository
     }
 
     return jpaSpecificationExecutor.findAll(specification).stream()
+        .map(TraceMapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<Trace> linkedWith(AMS ams) {
+    return jpaSpecificationExecutor
+        .findAll(TraceSpecification.ofAms(AMSMapper.fromDomain(ams)))
+        .stream()
         .map(TraceMapper::toDomain)
         .toList();
   }

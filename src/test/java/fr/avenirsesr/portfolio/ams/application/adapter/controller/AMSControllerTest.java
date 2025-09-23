@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.ams.application.adapter.dto.AmsViewDTO;
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.ams.domain.dto.AmsView;
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
@@ -63,8 +63,9 @@ class AMSControllerTest {
   @Test
   void shouldReturnAmsViewForUser() {
     BddLogger.given("an user with AMS");
-    List<AMS> amsList = AMSFixture.create().withCount(3);
-    PagedResult<AMS> pagedResult =
+    List<AmsView> amsList =
+        AMSFixture.create().withCount(3).stream().map(ams -> new AmsView(ams, 1, 2)).toList();
+    PagedResult<AmsView> pagedResult =
         new PagedResult<>(amsList, new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 3));
 
     when(userUtil.getStudent(principal)).thenReturn(student);
@@ -88,11 +89,11 @@ class AMSControllerTest {
 
     // Verify DTO conversion
     AmsViewDTO firstDto = body.data().getFirst();
-    assertEquals(amsList.getFirst().getId(), firstDto.id());
-    assertEquals(amsList.getFirst().getTitle(), firstDto.title());
-    assertEquals(amsList.getFirst().getSkillLevels().size(), firstDto.countSkills());
-    assertEquals(amsList.getFirst().getTraces().size(), firstDto.countTraces());
-    assertEquals(amsList.getFirst().getStatus(), firstDto.status());
+    assertEquals(amsList.getFirst().ams().getId(), firstDto.id());
+    assertEquals(amsList.getFirst().ams().getTitle(), firstDto.title());
+    assertEquals(amsList.getFirst().skillLevelCount(), firstDto.countSkills());
+    assertEquals(amsList.getFirst().traceCount(), firstDto.countTraces());
+    assertEquals(amsList.getFirst().ams().getStatus(), firstDto.status());
 
     verify(userUtil).getStudent(principal);
     verify(amsService)
@@ -102,7 +103,7 @@ class AMSControllerTest {
   @Test
   void shouldReturnEmptyListWhenUserHasNoAMS() {
     BddLogger.given("an user without AMS");
-    PagedResult<AMS> emptyPagedResult =
+    PagedResult<AmsView> emptyPagedResult =
         new PagedResult<>(new ArrayList<>(), new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 0));
 
     when(userUtil.getStudent(principal)).thenReturn(student);
@@ -134,8 +135,9 @@ class AMSControllerTest {
     BddLogger.given("an user with a large amount of AMS");
     Integer page = 1;
     Integer size = 5;
-    List<AMS> amsList = AMSFixture.create().withCount(5);
-    PagedResult<AMS> pagedResult = new PagedResult<>(amsList, new PageInfo(page, size, 15));
+    List<AmsView> amsList =
+        AMSFixture.create().withCount(5).stream().map(ams -> new AmsView(ams, 1, 2)).toList();
+    PagedResult<AmsView> pagedResult = new PagedResult<>(amsList, new PageInfo(page, size, 15));
 
     when(userUtil.getStudent(principal)).thenReturn(student);
     when(amsService.findUserAmsByStudentProgress(

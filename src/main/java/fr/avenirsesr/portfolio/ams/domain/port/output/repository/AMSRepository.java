@@ -4,11 +4,8 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
-import java.util.List;
-import java.util.UUID;
+import fr.avenirsesr.portfolio.user.domain.model.User;
 
 public interface AMSRepository extends GenericRepositoryPort<AMS> {
-  PagedResult<AMS> findByUserIdViaCohortsAndSkillLevelProgresses(
-      UUID userId, List<SkillLevelProgress> skillLevelProgresses, PageCriteria pageCriteria);
+  PagedResult<AMS> findByUserId(User user, PageCriteria pageCriteria);
 }

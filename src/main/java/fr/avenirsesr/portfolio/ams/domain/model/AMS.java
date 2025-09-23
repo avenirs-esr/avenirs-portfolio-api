@@ -2,12 +2,8 @@ package fr.avenirsesr.portfolio.ams.domain.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,11 +15,7 @@ public class AMS extends AvenirsBaseModel {
   private final String title;
   private final Instant startDate;
   private final Instant endDate;
-
   private EAmsStatus status;
-  private List<SkillLevelProgress> skillLevels;
-  private List<Trace> traces;
-  private Set<Cohort> cohorts;
 
   private AMS(
       UUID id,
@@ -42,11 +34,7 @@ public class AMS extends AvenirsBaseModel {
 
   public static AMS create(UUID id, User user, String title, Instant startDate, Instant endDate) {
     var ams = new AMS(id, user, title, startDate, endDate, Instant.now(), Instant.now());
-    ams.setSkillLevels(List.of());
-    ams.setTraces(List.of());
-    ams.setCohorts(Set.of());
     ams.setStatus(EAmsStatus.NOT_STARTED);
-
     return ams;
   }
 
@@ -56,16 +44,10 @@ public class AMS extends AvenirsBaseModel {
       String title,
       Instant startDate,
       Instant endDate,
-      List<SkillLevelProgress> skillLevels,
-      List<Trace> traces,
-      Set<Cohort> cohorts,
       EAmsStatus status,
       Instant createdAt,
       Instant updatedAt) {
     var ams = new AMS(id, user, title, startDate, endDate, createdAt, updatedAt);
-    ams.setSkillLevels(skillLevels);
-    ams.setTraces(traces);
-    ams.setCohorts(cohorts);
     ams.setStatus(status);
     return ams;
   }

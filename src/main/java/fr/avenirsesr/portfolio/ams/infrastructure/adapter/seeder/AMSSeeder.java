@@ -4,19 +4,24 @@ import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.AMSDatabaseRepository;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.CohortDatabaseRepository;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.SkillLevelProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -35,6 +40,9 @@ public class AMSSeeder {
           .init(AMSSeeder.class, SharedDataGenerator.class);
 
   private final AMSDatabaseRepository amsRepository;
+  private final CohortDatabaseRepository cohortRepository;
+  private final SkillLevelProgressDatabaseRepository skillLevelProgressRepository;
+  private final TraceDatabaseRepository traceRepository;
 
   private Set<CohortEntity> getRandomCohorts(List<CohortEntity> savedCohorts) {
     int cohortCount =
@@ -102,22 +110,45 @@ public class AMSSeeder {
     log.info("Seeding AMS...");
 
     List<AMSEntity> amsList = new ArrayList<>();
+    List<CohortEntity> cohortList = new ArrayList<>();
+    List<SkillLevelProgressEntity> skillLevelProgressList = new ArrayList<>();
+    List<TraceEntity> traceList = new ArrayList<>();
 
     for (int i = 0; i < SeederConfig.AMS_NB; i++) {
       AMSEntity ams =
           FakeAMS.of(getRandomUser(savedUsers))
-              .withCohorts(getRandomCohorts(savedCohorts))
-              .withSkillLevel(getRandomSkillLevels(savedSkillLevels))
-              .withTraces(getRandomTraces(savedTraces))
               .withStatus(getRandomStatus())
               .addTranslation(ELanguage.ENGLISH)
               .addTranslation(ELanguage.SPANISH)
               .toEntity();
 
+      var cohorts = getRandomCohorts(savedCohorts);
+      cohortList.addAll(cohorts);
+      cohortList.forEach(
+          cohort ->
+              cohort.setAmsEntities(
+                  Stream.concat(cohort.getAmsEntities().stream(), Stream.of(ams))
+                      .collect(Collectors.toSet())));
+
+      var skillLevels = getRandomSkillLevels(savedSkillLevels);
+      skillLevels.forEach(
+          level ->
+              level.setAmses(Stream.concat(level.getAmses().stream(), Stream.of(ams)).toList()));
+      skillLevelProgressList.addAll(skillLevels);
+
+      var traces = getRandomTraces(savedTraces);
+      traces.forEach(
+          trace ->
+              trace.setAmses(Stream.concat(trace.getAmses().stream(), Stream.of(ams)).toList()));
+      traceList.addAll(traces);
+
       amsList.add(ams);
     }
 
     amsRepository.saveAllEntities(amsList);
+    cohortRepository.saveAllEntities(cohortList);
+    skillLevelProgressRepository.saveAllEntities(skillLevelProgressList);
+    traceRepository.saveAllEntities(traceList);
     log.info("✔ {} ams created", amsList.size());
 
     return amsList;

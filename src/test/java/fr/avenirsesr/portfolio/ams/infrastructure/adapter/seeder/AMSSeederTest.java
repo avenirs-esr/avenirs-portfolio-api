@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.AMSDatabaseRepository;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.CohortDatabaseRepository;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
@@ -13,8 +14,10 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeed
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.SkillLevelProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
@@ -52,6 +55,9 @@ class AMSSeederTest {
   @Autowired InstitutionSeeder institutionSeeder;
 
   @Mock private AMSDatabaseRepository amsRepository;
+  @Mock private SkillLevelProgressDatabaseRepository skillLevelProgressRepository;
+  @Mock private TraceDatabaseRepository traceRepository;
+  @Mock private CohortDatabaseRepository cohortRepository;
 
   @InjectMocks private AMSSeeder amsSeeder;
 
@@ -110,12 +116,6 @@ class AMSSeederTest {
 
     for (AMSEntity ams : result) {
       assertNotNull(ams.getUser());
-      assertNotNull(ams.getSkillLevels());
-      assertNotNull(ams.getTraces());
-      assertNotNull(ams.getCohorts());
-      assertFalse(ams.getSkillLevels().isEmpty());
-      if (SeederConfig.NB_TRACES_MIN_PER_AMS > 0) assertFalse(ams.getTraces().isEmpty());
-      if (SeederConfig.NB_COHORTS_MIN_PER_AMS > 0) assertFalse(ams.getCohorts().isEmpty());
       assertNotNull(ams.getStatus());
       assertNotNull(ams.getTranslations());
       assertTrue(ams.getTranslations().stream().anyMatch(t -> t.getLanguage() != null));
