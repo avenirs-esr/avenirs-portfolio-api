@@ -12,7 +12,7 @@ import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
-import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.*;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import java.io.IOException;

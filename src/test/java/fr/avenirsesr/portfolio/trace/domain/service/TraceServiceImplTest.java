@@ -36,7 +36,7 @@ import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
-import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;

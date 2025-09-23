@@ -11,7 +11,7 @@ import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
-import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.io.IOException;
 import java.util.List;

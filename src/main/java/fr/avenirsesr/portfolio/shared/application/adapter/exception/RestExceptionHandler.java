@@ -12,7 +12,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.exception.StudentProgress
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserCategoryNotRecognizedException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
-import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
