@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.ams.domain.model.Cohort;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.CohortRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.CohortMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
 import org.springframework.stereotype.Component;
 

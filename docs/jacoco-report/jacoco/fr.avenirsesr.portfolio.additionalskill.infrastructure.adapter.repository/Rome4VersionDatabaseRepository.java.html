@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.Rome4Version;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rome4VersionRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.Rome4VersionMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.Rome4VersionEntity;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 

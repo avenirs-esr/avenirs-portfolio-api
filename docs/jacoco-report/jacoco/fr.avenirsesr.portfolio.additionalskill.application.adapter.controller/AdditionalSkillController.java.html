@@ -7,10 +7,10 @@ import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.Additi
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.request.AddAdditionalSkillDTO;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.PageInfoDTO;
-import fr.avenirsesr.portfolio.shared.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
-import fr.avenirsesr.portfolio.shared.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.net.URI;
 import java.security.Principal;
