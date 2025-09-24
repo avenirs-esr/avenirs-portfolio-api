@@ -1,51 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMSSpecification.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.ams.infrastructure.adapter.specification</a> &gt; <span class="el_source">AMSSpecification.java</span></div><h1>AMSSpecification.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.ams.infrastructure.adapter.specification;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
-import java.util.List;
-import java.util.UUID;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L15">public class AMSSpecification {</span>
+<span class="nc" id="L8">public class AMSSpecification {</span>
 
-  public static Specification&lt;AMSEntity&gt; belongsToUserViaCohorts(UUID userId) {
-<span class="fc" id="L18">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L19" title="1 of 2 branches missed.">      if (query != null) {</span>
-<span class="fc" id="L20">        query.distinct(true);</span>
-      }
-
-<span class="fc" id="L23">      Join&lt;AMSEntity, CohortEntity&gt; cohortJoin = root.join(&quot;cohorts&quot;, JoinType.INNER);</span>
-<span class="fc" id="L24">      Join&lt;CohortEntity, UserEntity&gt; userJoin = cohortJoin.join(&quot;users&quot;, JoinType.INNER);</span>
-
-<span class="fc" id="L26">      return criteriaBuilder.equal(userJoin.get(&quot;id&quot;), userId);</span>
-    };
-  }
-
-  public static Specification&lt;AMSEntity&gt; hasSkillLevelProgress(
-      List&lt;SkillLevelProgressEntity&gt; skillLevelProgresses) {
-<span class="fc" id="L32">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L33" title="2 of 4 branches missed.">      if (skillLevelProgresses == null || skillLevelProgresses.isEmpty()) {</span>
-<span class="nc" id="L34">        return criteriaBuilder.conjunction();</span>
-      }
-
-<span class="pc bpc" id="L37" title="1 of 2 branches missed.">      if (query != null) {</span>
-<span class="fc" id="L38">        query.distinct(true);</span>
-      }
-
-<span class="fc" id="L41">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
-<span class="fc" id="L42">      Root&lt;AMSEntity&gt; amsRoot = subquery.from(AMSEntity.class);</span>
-<span class="fc" id="L43">      Join&lt;AMSEntity, SkillLevelProgressEntity&gt; skillJoin = amsRoot.join(&quot;skillLevels&quot;);</span>
-
-<span class="fc" id="L45">      subquery.select(amsRoot.get(&quot;id&quot;)).where(skillJoin.in(skillLevelProgresses));</span>
-
-<span class="fc" id="L47">      return criteriaBuilder.in(root.get(&quot;id&quot;)).value(subquery);</span>
-    };
+  public static Specification&lt;AMSEntity&gt; belongsTo(Student student) {
+<span class="fc" id="L11">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="fc" id="L12">        criteriaBuilder.equal(root.get(&quot;user&quot;), UserMapper.fromDomain(student));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

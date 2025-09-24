@@ -3,26 +3,36 @@
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.ams.domain.service.AMSServiceImpl;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-<span class="fc" id="L11">@Slf4j</span>
+<span class="fc" id="L13">@Slf4j</span>
 @Configuration
 public class AMSServiceConfig {
   private final AMSRepository amsRepository;
   private final StudentProgressRepository studentProgressRepository;
+  private final TraceRepository traceRepository;
+  private final SkillLevelProgressRepository skillLevelProgressRepository;
 
   public AMSServiceConfig(
-<span class="fc" id="L18">      AMSRepository amsRepository, StudentProgressRepository studentProgressRepository) {</span>
-<span class="fc" id="L19">    this.amsRepository = amsRepository;</span>
-<span class="fc" id="L20">    this.studentProgressRepository = studentProgressRepository;</span>
-<span class="fc" id="L21">  }</span>
+      AMSRepository amsRepository,
+      StudentProgressRepository studentProgressRepository,
+      TraceRepository traceRepository,
+<span class="fc" id="L25">      SkillLevelProgressRepository skillLevelProgressRepository) {</span>
+<span class="fc" id="L26">    this.amsRepository = amsRepository;</span>
+<span class="fc" id="L27">    this.studentProgressRepository = studentProgressRepository;</span>
+<span class="fc" id="L28">    this.traceRepository = traceRepository;</span>
+<span class="fc" id="L29">    this.skillLevelProgressRepository = skillLevelProgressRepository;</span>
+<span class="fc" id="L30">  }</span>
 
   @Bean
   public AMSService amsService() {
-<span class="fc" id="L25">    return new AMSServiceImpl(amsRepository, studentProgressRepository);</span>
+<span class="fc" id="L34">    return new AMSServiceImpl(</span>
+        amsRepository, studentProgressRepository, traceRepository, skillLevelProgressRepository);
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

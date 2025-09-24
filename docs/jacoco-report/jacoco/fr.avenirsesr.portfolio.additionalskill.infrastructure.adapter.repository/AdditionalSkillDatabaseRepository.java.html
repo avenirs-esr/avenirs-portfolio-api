@@ -33,7 +33,7 @@ public class AdditionalSkillDatabaseRepository
 
   @Override
   public List&lt;AdditionalSkill&gt; findAllByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L36">    return jpaRepository.findAllById(ids).stream().map(AdditionalSkillMapper::toDomain).toList();</span>
+<span class="nc" id="L36">    return jpaRepository.findAllById(ids).stream().map(AdditionalSkillMapper::toDomain).toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

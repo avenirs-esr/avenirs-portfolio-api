@@ -2,6 +2,7 @@
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.criteria.Join;
@@ -10,67 +11,77 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L13">public class TraceSpecification {</span>
+<span class="nc" id="L14">public class TraceSpecification {</span>
   public static Specification&lt;TraceEntity&gt; ofUser(UserEntity user) {
-<span class="fc" id="L15">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;user&quot;), user);</span>
+<span class="fc" id="L16">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;user&quot;), user);</span>
   }
 
   public static Specification&lt;TraceEntity&gt; unassociated() {
-<span class="fc" id="L19">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc" id="L20">      Subquery&lt;SkillLevelEntity&gt; skillLevelSubquery = query.subquery(SkillLevelEntity.class);</span>
-<span class="fc" id="L21">      Root&lt;TraceEntity&gt; skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);</span>
-<span class="fc" id="L22">      Join&lt;TraceEntity, SkillLevelEntity&gt; skillLevelJoin = skillLevelSubRoot.join(&quot;skillLevels&quot;);</span>
+<span class="fc" id="L20">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc" id="L21">      Subquery&lt;SkillLevelEntity&gt; skillLevelSubquery = query.subquery(SkillLevelEntity.class);</span>
+<span class="fc" id="L22">      Root&lt;TraceEntity&gt; skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);</span>
+<span class="fc" id="L23">      Join&lt;TraceEntity, SkillLevelEntity&gt; skillLevelJoin = skillLevelSubRoot.join(&quot;skillLevels&quot;);</span>
 
-<span class="fc" id="L24">      skillLevelSubquery</span>
-<span class="fc" id="L25">          .select(skillLevelJoin)</span>
-<span class="fc" id="L26">          .where(criteriaBuilder.equal(skillLevelSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
+<span class="fc" id="L25">      skillLevelSubquery</span>
+<span class="fc" id="L26">          .select(skillLevelJoin)</span>
+<span class="fc" id="L27">          .where(criteriaBuilder.equal(skillLevelSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
 
-<span class="fc" id="L28">      Subquery&lt;AMSEntity&gt; amsSubquery = query.subquery(AMSEntity.class);</span>
-<span class="fc" id="L29">      Root&lt;TraceEntity&gt; amsSubRoot = amsSubquery.from(TraceEntity.class);</span>
-<span class="fc" id="L30">      Join&lt;TraceEntity, AMSEntity&gt; amsJoin = amsSubRoot.join(&quot;amses&quot;);</span>
+<span class="fc" id="L29">      Subquery&lt;AMSEntity&gt; amsSubquery = query.subquery(AMSEntity.class);</span>
+<span class="fc" id="L30">      Root&lt;TraceEntity&gt; amsSubRoot = amsSubquery.from(TraceEntity.class);</span>
+<span class="fc" id="L31">      Join&lt;TraceEntity, AMSEntity&gt; amsJoin = amsSubRoot.join(&quot;amses&quot;);</span>
 
-<span class="fc" id="L32">      amsSubquery</span>
-<span class="fc" id="L33">          .select(amsJoin)</span>
-<span class="fc" id="L34">          .where(criteriaBuilder.equal(amsSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
+<span class="fc" id="L33">      amsSubquery</span>
+<span class="fc" id="L34">          .select(amsJoin)</span>
+<span class="fc" id="L35">          .where(criteriaBuilder.equal(amsSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
 
-<span class="fc" id="L36">      Predicate noSkillLevels = criteriaBuilder.not(criteriaBuilder.exists(skillLevelSubquery));</span>
-<span class="fc" id="L37">      Predicate noAmses = criteriaBuilder.not(criteriaBuilder.exists(amsSubquery));</span>
+<span class="fc" id="L37">      Predicate noSkillLevels = criteriaBuilder.not(criteriaBuilder.exists(skillLevelSubquery));</span>
+<span class="fc" id="L38">      Predicate noAmses = criteriaBuilder.not(criteriaBuilder.exists(amsSubquery));</span>
 
-<span class="fc" id="L39">      query.distinct(true);</span>
+<span class="fc" id="L40">      query.distinct(true);</span>
 
-<span class="fc" id="L41">      return criteriaBuilder.and(noSkillLevels, noAmses);</span>
+<span class="fc" id="L42">      return criteriaBuilder.and(noSkillLevels, noAmses);</span>
     };
   }
 
   public static Specification&lt;TraceEntity&gt; associated() {
-<span class="fc" id="L46">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc" id="L47">      Subquery&lt;SkillLevelEntity&gt; skillLevelSubquery = query.subquery(SkillLevelEntity.class);</span>
-<span class="fc" id="L48">      Root&lt;TraceEntity&gt; skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);</span>
-<span class="fc" id="L49">      Join&lt;TraceEntity, SkillLevelEntity&gt; skillLevelJoin = skillLevelSubRoot.join(&quot;skillLevels&quot;);</span>
+<span class="fc" id="L47">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc" id="L48">      Subquery&lt;SkillLevelEntity&gt; skillLevelSubquery = query.subquery(SkillLevelEntity.class);</span>
+<span class="fc" id="L49">      Root&lt;TraceEntity&gt; skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);</span>
+<span class="fc" id="L50">      Join&lt;TraceEntity, SkillLevelEntity&gt; skillLevelJoin = skillLevelSubRoot.join(&quot;skillLevels&quot;);</span>
 
-<span class="fc" id="L51">      skillLevelSubquery</span>
-<span class="fc" id="L52">          .select(skillLevelJoin)</span>
-<span class="fc" id="L53">          .where(criteriaBuilder.equal(skillLevelSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
+<span class="fc" id="L52">      skillLevelSubquery</span>
+<span class="fc" id="L53">          .select(skillLevelJoin)</span>
+<span class="fc" id="L54">          .where(criteriaBuilder.equal(skillLevelSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
 
-<span class="fc" id="L55">      Subquery&lt;AMSEntity&gt; amsSubquery = query.subquery(AMSEntity.class);</span>
-<span class="fc" id="L56">      Root&lt;TraceEntity&gt; amsSubRoot = amsSubquery.from(TraceEntity.class);</span>
-<span class="fc" id="L57">      Join&lt;TraceEntity, AMSEntity&gt; amsJoin = amsSubRoot.join(&quot;amses&quot;);</span>
+<span class="fc" id="L56">      Subquery&lt;AMSEntity&gt; amsSubquery = query.subquery(AMSEntity.class);</span>
+<span class="fc" id="L57">      Root&lt;TraceEntity&gt; amsSubRoot = amsSubquery.from(TraceEntity.class);</span>
+<span class="fc" id="L58">      Join&lt;TraceEntity, AMSEntity&gt; amsJoin = amsSubRoot.join(&quot;amses&quot;);</span>
 
-<span class="fc" id="L59">      amsSubquery</span>
-<span class="fc" id="L60">          .select(amsJoin)</span>
-<span class="fc" id="L61">          .where(criteriaBuilder.equal(amsSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
+<span class="fc" id="L60">      amsSubquery</span>
+<span class="fc" id="L61">          .select(amsJoin)</span>
+<span class="fc" id="L62">          .where(criteriaBuilder.equal(amsSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
 
-<span class="fc" id="L63">      Predicate hasSkillLevels = criteriaBuilder.exists(skillLevelSubquery);</span>
-<span class="fc" id="L64">      Predicate hasAmses = criteriaBuilder.exists(amsSubquery);</span>
+<span class="fc" id="L64">      Predicate hasSkillLevels = criteriaBuilder.exists(skillLevelSubquery);</span>
+<span class="fc" id="L65">      Predicate hasAmses = criteriaBuilder.exists(amsSubquery);</span>
 
-<span class="fc" id="L66">      query.distinct(true);</span>
+<span class="fc" id="L67">      query.distinct(true);</span>
 
-<span class="fc" id="L68">      return criteriaBuilder.or(hasSkillLevels, hasAmses);</span>
+<span class="fc" id="L69">      return criteriaBuilder.or(hasSkillLevels, hasAmses);</span>
     };
   }
 
   public static Specification&lt;TraceEntity&gt; notDeleted() {
-<span class="fc" id="L73">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;deletedAt&quot;));</span>
+<span class="fc" id="L74">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;deletedAt&quot;));</span>
+  }
+
+  public static Specification&lt;TraceEntity&gt; ofAms(AMSEntity ams) {
+<span class="fc" id="L78">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.isMember(ams, root.get(&quot;amses&quot;));</span>
+  }
+
+  public static Specification&lt;TraceEntity&gt; ofSkillLevelProgress(
+      SkillLevelProgressEntity skillLevelProgress) {
+<span class="fc" id="L83">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="fc" id="L84">        criteriaBuilder.isMember(skillLevelProgress, root.get(&quot;skillLevels&quot;));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -3,23 +3,28 @@
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.domain.service.StudentProgressServiceImpl;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
+import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-<span class="fc" id="L10">@Slf4j</span>
+<span class="fc" id="L11">@Slf4j</span>
 @Configuration
 public class StudentProgressServiceConfig {
 
   private final StudentProgressDatabaseRepository studentProgressRepository;
+  private final TraceRepository traceRepository;
 
-<span class="fc" id="L16">  public StudentProgressServiceConfig(StudentProgressDatabaseRepository studentProgressRepository) {</span>
-<span class="fc" id="L17">    this.studentProgressRepository = studentProgressRepository;</span>
-<span class="fc" id="L18">  }</span>
+  public StudentProgressServiceConfig(
+      StudentProgressDatabaseRepository studentProgressRepository,
+<span class="fc" id="L20">      TraceRepository traceRepository) {</span>
+<span class="fc" id="L21">    this.studentProgressRepository = studentProgressRepository;</span>
+<span class="fc" id="L22">    this.traceRepository = traceRepository;</span>
+<span class="fc" id="L23">  }</span>
 
   @Bean
   public StudentProgressService studentProgressService() {
-<span class="fc" id="L22">    return new StudentProgressServiceImpl(studentProgressRepository);</span>
+<span class="fc" id="L27">    return new StudentProgressServiceImpl(studentProgressRepository, traceRepository);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
