@@ -36,7 +36,7 @@ public class AMSEntity extends PeriodEntity<Instant> {
       orphanRemoval = true,
       fetch = FetchType.LAZY)
   private Set<AMSTranslationEntity> translations =
-      new HashSet<>(); // TODO: Remove this SET and get it in queries
+      new HashSet<>();
 
   private AMSEntity(
       UUID id, UserEntity user, EAmsStatus status, Instant startDate, Instant endDate) {

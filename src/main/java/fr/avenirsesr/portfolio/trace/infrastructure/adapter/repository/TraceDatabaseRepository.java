@@ -6,6 +6,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericDeletableJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -103,6 +105,17 @@ public class TraceDatabaseRepository
   public List<Trace> linkedWith(AMS ams) {
     return jpaSpecificationExecutor
         .findAll(TraceSpecification.ofAms(AMSMapper.fromDomain(ams)))
+        .stream()
+        .map(TraceMapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<Trace> linkedWith(SkillLevelProgress skillLevelProgress) {
+    return jpaSpecificationExecutor
+        .findAll(
+            TraceSpecification.ofSkillLevelProgress(
+                SkillLevelProgressMapper.fromDomain(skillLevelProgress)))
         .stream()
         .map(TraceMapper::toDomain)
         .toList();

@@ -73,7 +73,7 @@ class AMSServiceImplTest {
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
     when(skillLevelProgressRepository.linkedWith(any())).thenReturn(Collections.emptyList());
-    when(traceRepository.linkedWith(any())).thenReturn(Collections.emptyList());
+    when(traceRepository.linkedWith(any(AMS.class))).thenReturn(Collections.emptyList());
 
     BddLogger.when("calling the method with an user with AMS");
     PagedResult<AmsView> result =
@@ -125,7 +125,7 @@ class AMSServiceImplTest {
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
     when(skillLevelProgressRepository.linkedWith(any())).thenReturn(Collections.emptyList());
-    when(traceRepository.linkedWith(any())).thenReturn(Collections.emptyList());
+    when(traceRepository.linkedWith(any(AMS.class))).thenReturn(Collections.emptyList());
 
     BddLogger.when("calling the method with an user with a large amount of AMS");
     PagedResult<AmsView> result =
@@ -152,7 +152,7 @@ class AMSServiceImplTest {
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
     when(skillLevelProgressRepository.linkedWith(any())).thenReturn(Collections.emptyList());
-    when(traceRepository.linkedWith(any())).thenReturn(Collections.emptyList());
+    when(traceRepository.linkedWith(any(AMS.class))).thenReturn(Collections.emptyList());
 
     BddLogger.when("calling the method with null pagination parameters");
     PagedResult<AmsView> result =

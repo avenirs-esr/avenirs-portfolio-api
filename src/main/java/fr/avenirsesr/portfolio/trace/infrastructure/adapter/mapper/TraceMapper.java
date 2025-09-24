@@ -40,12 +40,7 @@ public interface TraceMapper {
             traceEntity.getDeletedAt(),
             traceEntity.getLanguage());
     trace.setSkillLevels(
-        traceEntity.getSkillLevels().stream()
-            .map(
-                skillLevelProgressEntity ->
-                    SkillLevelProgressMapper.toDomainWithoutRecursion(
-                        skillLevelProgressEntity, trace.getAmses()))
-            .toList());
+        traceEntity.getSkillLevels().stream().map(SkillLevelProgressMapper::toDomain).toList());
     return trace;
   }
 }

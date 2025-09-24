@@ -1,13 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
-import java.util.List;
 
 public interface SkillLevelProgressMapper {
   static SkillLevelProgressEntity fromDomain(SkillLevelProgress skillLevelProgress) {
@@ -18,7 +15,6 @@ public interface SkillLevelProgressMapper {
         skillLevelProgress.getStatus(),
         skillLevelProgress.getStartDate(),
         skillLevelProgress.getEndDate(),
-        skillLevelProgress.getTraces().stream().map(TraceMapper::fromDomain).toList(),
         skillLevelProgress.getAmses().stream().map(AMSMapper::fromDomain).toList());
   }
 
@@ -30,37 +26,7 @@ public interface SkillLevelProgressMapper {
         entity.getStatus(),
         entity.getStartDate(),
         entity.getEndDate(),
-        entity.getTraces().stream().map(TraceMapper::toDomain).toList(),
         entity.getAmses().stream().map(AMSMapper::toDomain).toList(),
-        entity.getCreatedAt(),
-        entity.getUpdatedAt());
-  }
-
-  static SkillLevelProgress toDomain(SkillLevelProgressEntity entity, List<AMS> ameses) {
-    return SkillLevelProgress.toDomain(
-        entity.getId(),
-        UserMapper.toDomain(entity.getStudent()).toStudent(),
-        SkillLevelMapper.toDomain(entity.getSkillLevel()),
-        entity.getStatus(),
-        entity.getStartDate(),
-        entity.getEndDate(),
-        entity.getTraces().stream().map(TraceMapper::toDomain).toList(),
-        ameses,
-        entity.getCreatedAt(),
-        entity.getUpdatedAt());
-  }
-
-  static SkillLevelProgress toDomainWithoutRecursion(
-      SkillLevelProgressEntity entity, List<AMS> ameses) {
-    return SkillLevelProgress.toDomain(
-        entity.getId(),
-        UserMapper.toDomain(entity.getStudent()).toStudent(),
-        SkillLevelMapper.toDomain(entity.getSkillLevel()),
-        entity.getStatus(),
-        entity.getStartDate(),
-        entity.getEndDate(),
-        entity.getTraces().stream().map(TraceMapper::toDomain).toList(),
-        ameses,
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }

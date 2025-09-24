@@ -13,9 +13,13 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
+import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.*;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.*;
+import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.LocalDate;
@@ -33,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class StudentProgressServiceImplTest {
   @Mock private StudentProgressRepository studentProgressRepository;
+  @Mock private TraceRepository traceRepository;
   @InjectMocks private StudentProgressServiceImpl studentProgressService;
   private Student student;
 
@@ -114,9 +119,10 @@ public class StudentProgressServiceImplTest {
 
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(progress1, progress2));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     BddLogger.when("getting the student progress overview");
-    Map<StudentProgress, List<SkillLevelProgress>> result =
+    Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result =
         studentProgressService.getStudentProgressOverview(student);
 
     BddLogger.then(
@@ -138,7 +144,7 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of());
 
     BddLogger.when("getting the student progress overview");
-    Map<StudentProgress, List<SkillLevelProgress>> result =
+    Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result =
         studentProgressService.getStudentProgressOverview(student);
 
     BddLogger.then("it should return empty student progress");
@@ -188,9 +194,10 @@ public class StudentProgressServiceImplTest {
     // Mock repository to return all progress
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     BddLogger.when("getting the student progress overview");
-    Map<StudentProgress, List<SkillLevelProgress>> result =
+    Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result =
         studentProgressService.getStudentProgressOverview(student);
 
     BddLogger.then("it should only return current progress");
@@ -215,7 +222,7 @@ public class StudentProgressServiceImplTest {
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
 
     BddLogger.when("getting the student progress view");
-    Map<StudentProgress, List<SkillLevelProgress>> result =
+    Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result =
         studentProgressService.getStudentProgressView(student, customSort);
 
     BddLogger.then("it should return skills view sorted by the criteria");
@@ -266,9 +273,10 @@ public class StudentProgressServiceImplTest {
     // Mock repository to return all progress
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     BddLogger.when("getting the student progress view");
-    Map<StudentProgress, List<SkillLevelProgress>> result =
+    Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result =
         studentProgressService.getStudentProgressView(
             student, new SortCriteria(ESortField.DATE, ESortOrder.ASC));
 
@@ -317,9 +325,10 @@ public class StudentProgressServiceImplTest {
 
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(progress1, progress2));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     BddLogger.when("getting the student progress view");
-    Map<StudentProgress, List<SkillLevelProgress>> result =
+    Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result =
         studentProgressService.getStudentProgressView(
             student, new SortCriteria(ESortField.DATE, ESortOrder.ASC));
 
@@ -394,6 +403,7 @@ public class StudentProgressServiceImplTest {
 
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(progressB, progressA));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     BddLogger.when("getting the student progress view with the ordered by name criteria");
     var result =
@@ -412,13 +422,17 @@ public class StudentProgressServiceImplTest {
     }
 
     // Vérifie que les skills de chaque progress sont triés par nom
-    List<SkillLevelProgress> skillsOfFirst = result.get(orderedKeys.get(0));
+    List<SkillLevelProgressWithTraceCountDTO> skillsOfFirst = result.get(orderedKeys.get(0));
     List<String> skillNamesOfFirst =
-        skillsOfFirst.stream().map(slp -> slp.getSkillLevel().getSkill().getName()).toList();
+        skillsOfFirst.stream()
+            .map(slp -> slp.skillLevelProgress().getSkillLevel().getSkill().getName())
+            .toList();
 
-    List<SkillLevelProgress> skillsOfSecond = result.get(orderedKeys.get(1));
+    List<SkillLevelProgressWithTraceCountDTO> skillsOfSecond = result.get(orderedKeys.get(1));
     List<String> skillNamesOfSecond =
-        skillsOfSecond.stream().map(slp -> slp.getSkillLevel().getSkill().getName()).toList();
+        skillsOfSecond.stream()
+            .map(slp -> slp.skillLevelProgress().getSkillLevel().getSkill().getName())
+            .toList();
 
     List<String> expectedOrder =
         (order == ESortOrder.ASC) ? List.of("Skill A", "Skill B") : List.of("Skill B", "Skill A");
@@ -469,6 +483,7 @@ public class StudentProgressServiceImplTest {
 
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(progressOld, progressNew));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     BddLogger.when("getting the student progress view with the ordered by date criteria");
     var result =
@@ -486,13 +501,13 @@ public class StudentProgressServiceImplTest {
       assertEquals(progressOld, orderedKeys.get(1));
     }
 
-    List<SkillLevelProgress> skillsFirst = result.get(orderedKeys.get(0));
+    List<SkillLevelProgressWithTraceCountDTO> skillsFirst = result.get(orderedKeys.get(0));
     List<LocalDate> datesFirst =
-        skillsFirst.stream().map(SkillLevelProgress::getStartDate).toList();
+        skillsFirst.stream().map(dto -> dto.skillLevelProgress().getStartDate()).toList();
 
-    List<SkillLevelProgress> skillsSecond = result.get(orderedKeys.get(1));
+    List<SkillLevelProgressWithTraceCountDTO> skillsSecond = result.get(orderedKeys.get(1));
     List<LocalDate> datesSecond =
-        skillsSecond.stream().map(SkillLevelProgress::getStartDate).toList();
+        skillsSecond.stream().map(dto -> dto.skillLevelProgress().getStartDate()).toList();
 
     List<LocalDate> expectedFirst =
         (order == ESortOrder.ASC)
@@ -530,12 +545,13 @@ public class StudentProgressServiceImplTest {
 
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(currentProgress));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
     PageCriteria pageCriteria = new PageCriteria(0, 1); // 1 élément par page
 
     BddLogger.when("getting the skills life project view");
-    PagedResult<SkillProgress> result =
+    PagedResult<SkillProgressDTO> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     BddLogger.then("it should return paged skill progress");
@@ -553,7 +569,7 @@ public class StudentProgressServiceImplTest {
     PageCriteria pageCriteria = new PageCriteria(0, 5);
 
     BddLogger.when("getting the skills life project view");
-    PagedResult<SkillProgress> result =
+    PagedResult<SkillProgressDTO> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     BddLogger.then("it should return an empty result");
@@ -592,12 +608,13 @@ public class StudentProgressServiceImplTest {
 
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(pastProgress, futureProgress));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
     PageCriteria pageCriteria = new PageCriteria(0, 10);
 
     BddLogger.when("getting the skills life project view");
-    PagedResult<SkillProgress> result =
+    PagedResult<SkillProgressDTO> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     BddLogger.then("it should only return past progress");
@@ -630,12 +647,13 @@ public class StudentProgressServiceImplTest {
             .toModel();
 
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
     PageCriteria pageCriteria = new PageCriteria(0, 5);
 
     BddLogger.when("getting the skills life project view with a sorting criteria");
-    PagedResult<SkillProgress> result =
+    PagedResult<SkillProgressDTO> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     BddLogger.then("it should return paged skill progress sorted by the criteria");
@@ -673,12 +691,13 @@ public class StudentProgressServiceImplTest {
             .toModel();
 
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
     PageCriteria pageCriteria = new PageCriteria(1, 2); // second page, 2 per page
 
     BddLogger.when("getting the second page of the skills life project view");
-    PagedResult<SkillProgress> result =
+    PagedResult<SkillProgressDTO> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     BddLogger.then("it should skip first page elements");
@@ -715,12 +734,13 @@ public class StudentProgressServiceImplTest {
             .toModel();
 
     when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
     PageCriteria pageCriteria = new PageCriteria(0, 2); // limit to 2 elements
 
     BddLogger.when("getting the skills life project view with a page size limit");
-    PagedResult<SkillProgress> result =
+    PagedResult<SkillProgressDTO> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     BddLogger.then(
@@ -759,12 +779,13 @@ public class StudentProgressServiceImplTest {
 
     when(studentProgressRepository.findAllByStudent(eq(student)))
         .thenReturn(List.of(finishedProgress, currentProgress));
+    when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
 
     SortCriteria sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
     PageCriteria pageCriteria = new PageCriteria(0, 10);
 
     BddLogger.when("getting the skills life project view with a desc date sorting criteria");
-    PagedResult<SkillProgress> result =
+    PagedResult<SkillProgressDTO> result =
         studentProgressService.getAllTimeSkillsView(student, sortCriteria, pageCriteria);
 
     BddLogger.then("it should return current progresses before finished progresses");

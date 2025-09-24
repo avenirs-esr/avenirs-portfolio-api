@@ -10,7 +10,6 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class FakeTrace {
   private static final DataGeneratorProvider<SharedDataGenerator> sharedDataGenerator =
@@ -45,10 +44,6 @@ public class FakeTrace {
 
   public FakeTrace withSkillLevel(List<SkillLevelProgressEntity> skillLevels) {
     trace.setSkillLevels(skillLevels);
-    skillLevels.forEach(
-        skillLevel ->
-            skillLevel.setTraces(
-                Stream.concat(skillLevel.getTraces().stream(), Stream.of(trace)).toList()));
     return this;
   }
 

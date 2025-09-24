@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -34,9 +33,6 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
 
-  @ManyToMany(mappedBy = "skillLevels")
-  private List<TraceEntity> traces;
-
   @ManyToMany
   @JoinTable(
       name = "ams_skill_level_progress",
@@ -51,13 +47,11 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
       ESkillLevelStatus status,
       LocalDate startDate,
       LocalDate endDate,
-      List<TraceEntity> traces,
       List<AMSEntity> amses) {
     setId(id);
     this.student = student;
     this.skillLevel = skillLevelEntity;
     this.status = status;
-    this.traces = traces;
     this.amses = amses;
     this.startDate = startDate;
     this.endDate = endDate;
@@ -70,10 +64,9 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
       ESkillLevelStatus status,
       LocalDate startDate,
       LocalDate endDate,
-      List<TraceEntity> traces,
       List<AMSEntity> amses) {
     return new SkillLevelProgressEntity(
-        id, student, skillLevelEntity, status, startDate, endDate, traces, amses);
+        id, student, skillLevelEntity, status, startDate, endDate, amses);
   }
 
   @Override

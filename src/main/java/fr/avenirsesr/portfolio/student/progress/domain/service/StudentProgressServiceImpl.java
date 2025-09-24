@@ -4,11 +4,13 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
 import java.util.*;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StudentProgressServiceImpl implements StudentProgressService {
   private static final int MAX_SKILLS = 6;
   private final StudentProgressRepository studentProgressRepository;
+  private final TraceRepository traceRepository;
 
   @Override
   public boolean isStudentFollowingAPCProgram(Student student) {
@@ -30,7 +33,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   @Override
-  public Map<StudentProgress, List<SkillLevelProgress>> getStudentProgressOverview(
+  public Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> getStudentProgressOverview(
       Student student) {
     var studentProgresses =
         studentProgressRepository.findAllByStudent(student).stream()
@@ -44,11 +47,16 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                 studentProgress ->
                     studentProgress.getCurrentSkillLevels().stream()
                         .limit(MAX_SKILLS / studentProgresses.size())
+                        .map(
+                            skillLevelProgress ->
+                                new SkillLevelProgressWithTraceCountDTO(
+                                    skillLevelProgress,
+                                    traceRepository.linkedWith(skillLevelProgress).size()))
                         .toList()));
   }
 
   @Override
-  public Map<StudentProgress, List<SkillLevelProgress>> getStudentProgressView(
+  public Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> getStudentProgressView(
       Student student, SortCriteria sortCriteria) {
     return studentProgressRepository.findAllByStudent(student).stream()
         .filter(StudentProgress::isCurrent)
@@ -59,13 +67,18 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                 studentProgress ->
                     studentProgress.getCurrentSkillLevels().stream()
                         .sorted(SkillLevelProgress.comparatorOf(sortCriteria))
+                        .map(
+                            skillLevelProgress ->
+                                new SkillLevelProgressWithTraceCountDTO(
+                                    skillLevelProgress,
+                                    traceRepository.linkedWith(skillLevelProgress).size()))
                         .toList(),
                 (v1, v2) -> v1,
                 LinkedHashMap::new));
   }
 
   @Override
-  public PagedResult<SkillProgress> getAllTimeSkillsView(
+  public PagedResult<SkillProgressDTO> getAllTimeSkillsView(
       Student student, SortCriteria sortCriteria, PageCriteria pageCriteria) {
 
     var studentProgresses = studentProgressRepository.findAllByStudent(student).stream().toList();
@@ -78,15 +91,17 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                     studentProgress.getCurrentSkillLevels().stream()
                         .map(
                             currentSkillLevel ->
-                                new SkillProgress(
+                                new SkillProgressDTO(
                                     currentSkillLevel.getSkillLevel().getSkill(),
                                     studentProgress,
-                                    currentSkillLevel)))
+                                    new SkillLevelProgressWithTraceCountDTO(
+                                        currentSkillLevel,
+                                        traceRepository.linkedWith(currentSkillLevel).size()))))
             .sorted(
                 Comparator.comparing(
-                        (SkillProgress skillProgress) ->
+                        (SkillProgressDTO skillProgress) ->
                             skillProgress.studentProgress().isCurrent() ? 0 : 1)
-                    .thenComparing(SkillProgress.comparatorOf(sortCriteria)))
+                    .thenComparing(SkillProgressDTO.comparatorOf(sortCriteria)))
             .toList();
 
     return new PagedResult<>(

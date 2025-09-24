@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,7 +19,6 @@ public class SkillLevelProgressFixture {
   private ESkillLevelStatus status;
   private LocalDate startDate;
   private LocalDate endDate;
-  private List<Trace> traces;
   private List<AMS> amses;
   private static final Period DEFAULT_SKILL_LEVEL_PERIOD = Period.ofMonths(3);
   private Instant createdAt;
@@ -33,7 +31,6 @@ public class SkillLevelProgressFixture {
     this.status = ESkillLevelStatus.NOT_STARTED;
     this.startDate = LocalDate.now().minusMonths(2);
     this.endDate = startDate.plus(DEFAULT_SKILL_LEVEL_PERIOD);
-    this.traces = List.of();
     this.amses = List.of();
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
@@ -76,11 +73,6 @@ public class SkillLevelProgressFixture {
   public SkillLevelProgressFixture withEndDate(LocalDate endDate, Period skillLevelPeriod) {
     this.startDate = endDate.minus(skillLevelPeriod);
     this.endDate = endDate;
-    return this;
-  }
-
-  public SkillLevelProgressFixture withTraces(List<Trace> traces) {
-    this.traces = traces;
     return this;
   }
 
@@ -129,6 +121,6 @@ public class SkillLevelProgressFixture {
 
   public SkillLevelProgress toModel() {
     return SkillLevelProgress.toDomain(
-        id, student, skillLevel, status, startDate, endDate, traces, amses, createdAt, updatedAt);
+        id, student, skillLevel, status, startDate, endDate, amses, createdAt, updatedAt);
   }
 }

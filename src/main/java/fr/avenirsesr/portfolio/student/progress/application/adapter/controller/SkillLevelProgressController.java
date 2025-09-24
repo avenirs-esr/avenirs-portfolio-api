@@ -8,7 +8,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.SkillMapper;
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillProgress;
+import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.security.Principal;
@@ -36,7 +36,7 @@ public class SkillLevelProgressController {
       @RequestParam(name = "sort", required = false) String sortRaw) {
     Student student = userUtil.getStudent(principal);
 
-    PagedResult<SkillProgress> pagedResult =
+    PagedResult<SkillProgressDTO> pagedResult =
         studentProgressService.getAllTimeSkillsView(
             student, SortCriteria.fromString(sortRaw), new PageCriteria(page, pageSize));
 

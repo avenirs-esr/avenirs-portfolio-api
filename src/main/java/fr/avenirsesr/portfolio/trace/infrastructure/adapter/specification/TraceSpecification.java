@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.criteria.Join;
@@ -75,5 +76,11 @@ public class TraceSpecification {
 
   public static Specification<TraceEntity> ofAms(AMSEntity ams) {
     return (root, query, criteriaBuilder) -> criteriaBuilder.isMember(ams, root.get("amses"));
+  }
+
+  public static Specification<TraceEntity> ofSkillLevelProgress(
+      SkillLevelProgressEntity skillLevelProgress) {
+    return (root, query, criteriaBuilder) ->
+        criteriaBuilder.isMember(skillLevelProgress, root.get("skillLevels"));
   }
 }

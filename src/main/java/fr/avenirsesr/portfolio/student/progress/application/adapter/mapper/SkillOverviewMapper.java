@@ -1,13 +1,13 @@
 package fr.avenirsesr.portfolio.student.progress.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillOverviewDTO;
-import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
 
 public interface SkillOverviewMapper {
-  static SkillOverviewDTO fromDomainToDto(SkillLevelProgress skillLevelProgress) {
+  static SkillOverviewDTO fromDomainToDto(SkillLevelProgressWithTraceCountDTO dto) {
     return new SkillOverviewDTO(
-        skillLevelProgress.getSkillLevel().getSkill().getId(),
-        skillLevelProgress.getSkillLevel().getSkill().getName(),
-        SkillLevelProgressOverviewMapper.fromDomainToDto(skillLevelProgress));
+        dto.skillLevelProgress().getSkillLevel().getSkill().getId(),
+        dto.skillLevelProgress().getSkillLevel().getSkill().getName(),
+        SkillLevelProgressOverviewMapper.fromDomainToDto(dto));
   }
 }
