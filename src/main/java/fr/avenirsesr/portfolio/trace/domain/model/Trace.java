@@ -7,9 +7,11 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -74,9 +76,9 @@ public class Trace extends DeletableAvenirsBaseModel {
         isGroup,
         aiUseJustification,
         personalNote,
-        List.of(),
-        List.of(),
-        List.of(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
         Instant.now(),
         Instant.now(),
         null);
@@ -122,5 +124,19 @@ public class Trace extends DeletableAvenirsBaseModel {
 
   public boolean isUnassociated() {
     return amses.isEmpty() && skillLevels.isEmpty() && additionalSkillProgresses.isEmpty();
+  }
+
+  public void add(AMS ams) {
+    setAmses(Stream.concat(amses.stream(), Stream.of(ams)).toList());
+  }
+
+  public void add(SkillLevelProgress skillLevelProgress) {
+    setSkillLevels(Stream.concat(skillLevels.stream(), Stream.of(skillLevelProgress)).toList());
+  }
+
+  public void add(AdditionalSkillProgress additionalSkillProgress) {
+    setAdditionalSkillProgresses(
+        Stream.concat(additionalSkillProgresses.stream(), Stream.of(additionalSkillProgress))
+            .toList());
   }
 }

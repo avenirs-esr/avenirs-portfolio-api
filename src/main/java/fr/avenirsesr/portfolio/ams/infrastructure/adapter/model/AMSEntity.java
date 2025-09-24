@@ -35,8 +35,7 @@ public class AMSEntity extends PeriodEntity<Instant> {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set<AMSTranslationEntity> translations =
-      new HashSet<>();
+  private Set<AMSTranslationEntity> translations = new HashSet<>();
 
   private AMSEntity(
       UUID id, UserEntity user, EAmsStatus status, Instant startDate, Instant endDate) {

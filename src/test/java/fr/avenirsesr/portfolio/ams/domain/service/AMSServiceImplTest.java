@@ -22,7 +22,6 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.St
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,7 +65,7 @@ class AMSServiceImplTest {
     PagedResult<AMS> expectedResult =
         new PagedResult<>(amsList, new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 3));
 
-    when(amsRepository.findByUserId(any(User.class), eq(DEFAULT_PAGE_CRITERIA)))
+    when(amsRepository.findByStudent(any(Student.class), eq(DEFAULT_PAGE_CRITERIA)))
         .thenReturn(expectedResult);
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
@@ -83,7 +82,7 @@ class AMSServiceImplTest {
     assertEquals(3, result.content().size());
     assertEquals(DEFAULT_PAGE, result.pageInfo().page());
     assertEquals(DEFAULT_SIZE, result.pageInfo().pageSize());
-    verify(amsRepository).findByUserId(any(User.class), eq(DEFAULT_PAGE_CRITERIA));
+    verify(amsRepository).findByStudent(any(Student.class), eq(DEFAULT_PAGE_CRITERIA));
   }
 
   @Test
@@ -92,7 +91,7 @@ class AMSServiceImplTest {
     PagedResult<AMS> expectedResult =
         new PagedResult<>(new ArrayList<>(), new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 0));
 
-    when(amsRepository.findByUserId(any(User.class), eq(DEFAULT_PAGE_CRITERIA)))
+    when(amsRepository.findByStudent(any(Student.class), eq(DEFAULT_PAGE_CRITERIA)))
         .thenReturn(expectedResult);
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
@@ -107,7 +106,7 @@ class AMSServiceImplTest {
     assertTrue(result.content().isEmpty());
     assertEquals(DEFAULT_PAGE, result.pageInfo().page());
     assertEquals(DEFAULT_SIZE, result.pageInfo().pageSize());
-    verify(amsRepository).findByUserId(any(User.class), eq(DEFAULT_PAGE_CRITERIA));
+    verify(amsRepository).findByStudent(any(Student.class), eq(DEFAULT_PAGE_CRITERIA));
   }
 
   @Test
@@ -118,7 +117,7 @@ class AMSServiceImplTest {
     List<AMS> amsList = AMSFixture.create().withCount(5);
     PagedResult<AMS> expectedResult = new PagedResult<>(amsList, new PageInfo(page, size, 15));
 
-    when(amsRepository.findByUserId(any(User.class), eq(new PageCriteria(page, size))))
+    when(amsRepository.findByStudent(any(Student.class), eq(new PageCriteria(page, size))))
         .thenReturn(expectedResult);
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
@@ -136,7 +135,7 @@ class AMSServiceImplTest {
     assertEquals(5, result.content().size());
     assertEquals(page, result.pageInfo().page());
     assertEquals(size, result.pageInfo().pageSize());
-    verify(amsRepository).findByUserId(any(User.class), eq(new PageCriteria(page, size)));
+    verify(amsRepository).findByStudent(any(Student.class), eq(new PageCriteria(page, size)));
   }
 
   @Test
@@ -145,7 +144,7 @@ class AMSServiceImplTest {
     List<AMS> amsList = AMSFixture.create().withCount(3);
     PagedResult<AMS> expectedResult = new PagedResult<>(amsList, new PageInfo(0, 8, 3));
 
-    when(amsRepository.findByUserId(any(User.class), eq(new PageCriteria(0, 8))))
+    when(amsRepository.findByStudent(any(Student.class), eq(new PageCriteria(0, 8))))
         .thenReturn(expectedResult);
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
@@ -163,6 +162,6 @@ class AMSServiceImplTest {
     assertEquals(3, result.content().size());
     assertEquals(0, result.pageInfo().page());
     assertEquals(8, result.pageInfo().pageSize());
-    verify(amsRepository).findByUserId(any(User.class), eq(new PageCriteria(0, 8)));
+    verify(amsRepository).findByStudent(any(Student.class), eq(new PageCriteria(0, 8)));
   }
 }

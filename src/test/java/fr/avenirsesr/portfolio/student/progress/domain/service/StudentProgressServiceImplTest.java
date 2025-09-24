@@ -16,7 +16,6 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.*;
-import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;

@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
@@ -41,6 +42,10 @@ public class TraceFixture {
     this.skillLevels =
         base.getSkillLevels().stream().map(SkillLevelProgressMapper::toDomain).toList();
     this.amses = base.getAmses().stream().map(AMSMapper::toDomain).toList();
+    this.additionalSkillProgresses =
+        base.getAdditionalSkillsProgresses().stream()
+            .map(AdditionalSkillProgressMapper::toDomain)
+            .toList();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
     this.deletedAt = base.getDeletedAt();

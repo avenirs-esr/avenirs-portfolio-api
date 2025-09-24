@@ -1,12 +1,12 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +52,9 @@ public class TraceSeeder {
             fakeTrace.withAdditionalSkillsProgress(
                 additionalSkillsProgresses.subList(
                     0,
-                    faker
-                        .call("nb-additional-skills")
-                        .random()
-                        .nextInt(
+                    dataGenerator
+                        .with("nb-additional-skills")
+                        .number(
                             SeederConfig.MIN_TRACES_ADDITIONAL_SKILL_PROGRESS,
                             SeederConfig.MAX_TRACES_ADDITIONAL_SKILL_PROGRESS)));
 

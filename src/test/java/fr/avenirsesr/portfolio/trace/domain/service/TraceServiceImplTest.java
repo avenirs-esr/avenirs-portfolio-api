@@ -6,7 +6,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.AdditionalSkillProgressFixture;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
@@ -23,6 +27,7 @@ import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
@@ -42,6 +47,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +60,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class TraceServiceImplTest {
   @Mock private TraceRepository traceRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
+  @Mock private AMSRepository amsRepository;
+  @Mock private SkillLevelProgressRepository skillLevelProgressRepository;
+  @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
 
   @Mock private TraceConfigurationService traceConfigurationService;
 
@@ -397,5 +406,106 @@ public class TraceServiceImplTest {
 
     BddLogger.then("it should return empty");
     assertTrue(willBeDeletedAt.isEmpty());
+  }
+
+  @Test
+  void givenValidTraceAndIds_shouldAssociateAllAndSave() {
+    BddLogger.given(
+        "a trace belonging to the student and valid AMS, skillLevels and additional skills");
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    AMS ams = AMSFixture.create().toModel();
+    SkillLevelProgress skillLevel =
+        SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel()).toModel();
+    AdditionalSkillProgress additional = AdditionalSkillProgressFixture.create().toModel();
+
+    when(amsRepository.findAllByStudent(any(Student.class))).thenReturn(List.of(ams));
+    when(skillLevelProgressRepository.findAllByStudent(any(Student.class)))
+        .thenReturn(List.of(skillLevel));
+    when(additionalSkillProgressRepository.findAllByStudent(any(Student.class)))
+        .thenReturn(List.of(additional));
+
+    BddLogger.when("associating AMS, SkillLevels and AdditionalSkills");
+    traceService.associateTrace(
+        student.getUser(),
+        trace.getId(),
+        List.of(ams.getId()),
+        List.of(skillLevel.getId()),
+        List.of(additional.getId()));
+
+    BddLogger.then("trace should be associated and saved");
+    verify(traceRepository).save(trace);
+    assertTrue(trace.getAmses().contains(ams));
+    assertTrue(trace.getSkillLevels().contains(skillLevel));
+    assertTrue(trace.getAdditionalSkillProgresses().contains(additional));
+  }
+
+  @Test
+  void givenNonExistentTrace_shouldThrowTraceNotFoundException() {
+    BddLogger.given("a non-existent trace");
+    UUID traceId = UUID.randomUUID();
+    when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+    BddLogger.when("associating");
+    TraceNotFoundException ex =
+        assertThrows(
+            TraceNotFoundException.class,
+            () ->
+                traceService.associateTrace(
+                    student.getUser(), traceId, List.of(), List.of(), List.of()));
+
+    BddLogger.then("TRACE_NOT_FOUND should be thrown");
+    assertEquals(EErrorCode.TRACE_NOT_FOUND, ex.getErrorCode());
+  }
+
+  @Test
+  void givenTraceOfAnotherUser_shouldThrowUserNotAuthorizedException() {
+    BddLogger.given("a trace belonging to another user");
+    User otherUser = UserFixture.createStudent().toModel();
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    BddLogger.when("associating with another user");
+    UserNotAuthorizedException ex =
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () ->
+                traceService.associateTrace(
+                    otherUser, trace.getId(), List.of(), List.of(), List.of()));
+
+    BddLogger.then("USER_NOT_AUTHORIZED should be thrown");
+    assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
+  }
+
+  @Test
+  void givenAlreadyAssociatedAMS_shouldThrowUserNotAuthorizedException() {
+    BddLogger.given("a trace already containing an AMS");
+    AMS ams = AMSFixture.create().toModel();
+    Trace trace =
+        TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    BddLogger.when("associating the same AMS again");
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () ->
+            traceService.associateTrace(
+                student.getUser(), trace.getId(), List.of(ams.getId()), List.of(), List.of()));
+  }
+
+  @Test
+  void givenSkillLevelNotOwnedByStudent_shouldThrowUserNotAuthorizedException() {
+    BddLogger.given("a trace and a skillLevel not owned by the student");
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    UUID fakeSkillLevelId = UUID.randomUUID();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    BddLogger.when("associating a skillLevel not owned by the student");
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () ->
+            traceService.associateTrace(
+                student.getUser(), trace.getId(), List.of(), List.of(fakeSkillLevelId), List.of()));
   }
 }

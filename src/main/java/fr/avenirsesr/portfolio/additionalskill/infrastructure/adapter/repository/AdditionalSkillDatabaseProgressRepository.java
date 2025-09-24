@@ -60,4 +60,13 @@ public class AdditionalSkillDatabaseProgressRepository
         progresses,
         new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), entities.getTotalElements()));
   }
+
+  @Override
+  public List<AdditionalSkillProgress> findAllByStudent(Student student) {
+    return jpaRepository
+        .findAll(AdditionalSkillProgressSpecification.hasStudent(UserMapper.fromDomain(student)))
+        .stream()
+        .map(AdditionalSkillProgressMapper::toDomain)
+        .toList();
+  }
 }

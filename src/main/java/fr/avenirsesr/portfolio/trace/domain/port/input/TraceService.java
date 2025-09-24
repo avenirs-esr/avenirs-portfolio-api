@@ -32,4 +32,11 @@ public interface TraceService {
       String aiJustification);
 
   Optional<LocalDate> getWillBeDeletedAt(Trace trace);
+
+  void associateTrace(
+      User user,
+      UUID traceId,
+      List<UUID> amsIds,
+      List<UUID> skillLevelIds,
+      List<UUID> additionalSkillProgressIds);
 }

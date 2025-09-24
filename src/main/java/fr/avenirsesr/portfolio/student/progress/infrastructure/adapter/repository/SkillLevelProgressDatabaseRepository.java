@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.Sk
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.SkillLevelProgressSpecification;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -29,8 +30,15 @@ public class SkillLevelProgressDatabaseRepository
   @Override
   public List<SkillLevelProgress> linkedWith(AMS ams) {
     return jpaSpecificationExecutor
-        .findAll(SkillLevelProgressSpecification.ofAms(AMSMapper.fromDomain(ams)))
+        .findAll(SkillLevelProgressSpecification.linkedTo(AMSMapper.fromDomain(ams)))
         .stream()
+        .map(SkillLevelProgressMapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<SkillLevelProgress> findAllByStudent(Student student) {
+    return jpaSpecificationExecutor.findAll(SkillLevelProgressSpecification.with(student)).stream()
         .map(SkillLevelProgressMapper::toDomain)
         .toList();
   }

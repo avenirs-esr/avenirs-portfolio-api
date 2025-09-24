@@ -47,7 +47,7 @@ public class AMSServiceImpl implements AMSService {
             .findById(studentProgressId)
             .orElseThrow(StudentProgressNotFoundException::new);
 
-    var amses = amsRepository.findByUserId(student.getUser(), pageCriteria);
+    var amses = amsRepository.findByStudent(student, pageCriteria);
 
     return new PagedResult<>(
         amses.content().stream()

@@ -5,10 +5,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceViewDTO;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.TracesSummaryDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceViewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TracesSummaryMapper;
@@ -97,6 +94,25 @@ public class TraceController {
     TracesSummary summary = traceService.getTracesSummary(user);
 
     return ResponseEntity.ok(TracesSummaryMapper.toDTO(summary));
+  }
+
+  @PostMapping("/associate/{traceId}")
+  public ResponseEntity<String> associate(
+      Principal principal,
+      @PathVariable UUID traceId,
+      @RequestBody AssociateTraceDTO associateTraceDTO) {
+    log.info("User [{}] request to associate trace [{}]", principal.getName(), traceId);
+
+    User user = userUtil.getUser(principal);
+
+    traceService.associateTrace(
+        user,
+        traceId,
+        associateTraceDTO.amsIds(),
+        associateTraceDTO.skillLevelIds(),
+        associateTraceDTO.additionalSkillProgressIds());
+
+    return ResponseEntity.ok("Trace successfully associated.");
   }
 
   @PostMapping

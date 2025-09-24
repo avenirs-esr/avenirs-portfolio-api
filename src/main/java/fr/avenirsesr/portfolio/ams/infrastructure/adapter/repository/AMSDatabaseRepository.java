@@ -9,7 +9,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
-import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,10 +27,10 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
   }
 
   @Override
-  public PagedResult<AMS> findByUserId(User user, PageCriteria pageCriteria) {
+  public PagedResult<AMS> findByStudent(Student student, PageCriteria pageCriteria) {
     Page<AMSEntity> pageResult =
         jpaSpecificationExecutor.findAll(
-            AMSSpecification.belongsToUser(user),
+            AMSSpecification.belongsTo(student),
             PageRequest.of(
                 pageCriteria.page(),
                 pageCriteria.pageSize(),
@@ -44,6 +44,13 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
             pageResult.getPageable().getPageNumber(),
             pageResult.getPageable().getPageSize(),
             pageResult.getTotalElements()));
+  }
+
+  @Override
+  public List<AMS> findAllByStudent(Student student) {
+    return jpaSpecificationExecutor.findAll(AMSSpecification.belongsTo(student)).stream()
+        .map(AMSMapper::toDomain)
+        .toList();
   }
 
   public void saveAllEntities(List<AMSEntity> entities) {
