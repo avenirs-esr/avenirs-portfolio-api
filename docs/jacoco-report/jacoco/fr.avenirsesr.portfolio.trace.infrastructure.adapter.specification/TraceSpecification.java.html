@@ -43,29 +43,29 @@ import org.springframework.data.jpa.domain.Specification;
   }
 
   public static Specification&lt;TraceEntity&gt; associated() {
-<span class="fc" id="L46">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc" id="L47">      Subquery&lt;SkillLevelEntity&gt; skillLevelSubquery = query.subquery(SkillLevelEntity.class);</span>
-<span class="fc" id="L48">      Root&lt;TraceEntity&gt; skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);</span>
-<span class="fc" id="L49">      Join&lt;TraceEntity, SkillLevelEntity&gt; skillLevelJoin = skillLevelSubRoot.join(&quot;skillLevels&quot;);</span>
+<span class="nc" id="L46">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc" id="L47">      Subquery&lt;SkillLevelEntity&gt; skillLevelSubquery = query.subquery(SkillLevelEntity.class);</span>
+<span class="nc" id="L48">      Root&lt;TraceEntity&gt; skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);</span>
+<span class="nc" id="L49">      Join&lt;TraceEntity, SkillLevelEntity&gt; skillLevelJoin = skillLevelSubRoot.join(&quot;skillLevels&quot;);</span>
 
-<span class="fc" id="L51">      skillLevelSubquery</span>
-<span class="fc" id="L52">          .select(skillLevelJoin)</span>
-<span class="fc" id="L53">          .where(criteriaBuilder.equal(skillLevelSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
+<span class="nc" id="L51">      skillLevelSubquery</span>
+<span class="nc" id="L52">          .select(skillLevelJoin)</span>
+<span class="nc" id="L53">          .where(criteriaBuilder.equal(skillLevelSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
 
-<span class="fc" id="L55">      Subquery&lt;AMSEntity&gt; amsSubquery = query.subquery(AMSEntity.class);</span>
-<span class="fc" id="L56">      Root&lt;TraceEntity&gt; amsSubRoot = amsSubquery.from(TraceEntity.class);</span>
-<span class="fc" id="L57">      Join&lt;TraceEntity, AMSEntity&gt; amsJoin = amsSubRoot.join(&quot;amses&quot;);</span>
+<span class="nc" id="L55">      Subquery&lt;AMSEntity&gt; amsSubquery = query.subquery(AMSEntity.class);</span>
+<span class="nc" id="L56">      Root&lt;TraceEntity&gt; amsSubRoot = amsSubquery.from(TraceEntity.class);</span>
+<span class="nc" id="L57">      Join&lt;TraceEntity, AMSEntity&gt; amsJoin = amsSubRoot.join(&quot;amses&quot;);</span>
 
-<span class="fc" id="L59">      amsSubquery</span>
-<span class="fc" id="L60">          .select(amsJoin)</span>
-<span class="fc" id="L61">          .where(criteriaBuilder.equal(amsSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
+<span class="nc" id="L59">      amsSubquery</span>
+<span class="nc" id="L60">          .select(amsJoin)</span>
+<span class="nc" id="L61">          .where(criteriaBuilder.equal(amsSubRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)));</span>
 
-<span class="fc" id="L63">      Predicate hasSkillLevels = criteriaBuilder.exists(skillLevelSubquery);</span>
-<span class="fc" id="L64">      Predicate hasAmses = criteriaBuilder.exists(amsSubquery);</span>
+<span class="nc" id="L63">      Predicate hasSkillLevels = criteriaBuilder.exists(skillLevelSubquery);</span>
+<span class="nc" id="L64">      Predicate hasAmses = criteriaBuilder.exists(amsSubquery);</span>
 
-<span class="fc" id="L66">      query.distinct(true);</span>
+<span class="nc" id="L66">      query.distinct(true);</span>
 
-<span class="fc" id="L68">      return criteriaBuilder.or(hasSkillLevels, hasAmses);</span>
+<span class="nc" id="L68">      return criteriaBuilder.or(hasSkillLevels, hasAmses);</span>
     };
   }
 
