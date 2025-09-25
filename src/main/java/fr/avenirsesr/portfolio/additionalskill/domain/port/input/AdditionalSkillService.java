@@ -17,4 +17,7 @@ public interface AdditionalSkillService {
       UUID additionalSkillId,
       EAdditionalSkillType type,
       EAdditionalSkillLevel level);
+
+  PagedResult<AdditionalSkillProgress> search(
+      Student student, String keyword, PageCriteria pageCriteria);
 }

@@ -20,4 +20,16 @@ public class AdditionalSkillProgressSpecification {
   public static Specification<AdditionalSkillProgressEntity> hasStudent(UserEntity student) {
     return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("student"), student);
   }
+
+  public static Specification<AdditionalSkillProgressEntity> search(String keyword) {
+    return (root, query, criteriaBuilder) -> {
+      if (keyword == null || keyword.trim().isEmpty()) {
+        return criteriaBuilder.conjunction();
+      }
+      return criteriaBuilder.like(
+          criteriaBuilder.lower(
+              root.get("additionalSkill").get("pathSegments").get("skill").get("libelle")),
+          "%" + keyword.toLowerCase() + "%");
+    };
+  }
 }

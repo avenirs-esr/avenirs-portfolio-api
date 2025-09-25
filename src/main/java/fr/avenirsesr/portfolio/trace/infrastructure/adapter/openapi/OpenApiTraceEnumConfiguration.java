@@ -9,7 +9,10 @@ public class OpenApiTraceEnumConfiguration {
   @Bean
   public OpenApiCustomizer traceEnumCustomizer() {
     return openApi -> {
-      openApi.getComponents().addSchemas("ETraceStatus", SwaggerSchema.traceStatusSchema);
+      openApi
+          .getComponents()
+          .addSchemas("ETraceStatus", SwaggerSchema.traceStatusSchema)
+          .addSchemas("ETraceAssociationType", SwaggerSchema.traceAssociationTypeSchema);
     };
   }
 }

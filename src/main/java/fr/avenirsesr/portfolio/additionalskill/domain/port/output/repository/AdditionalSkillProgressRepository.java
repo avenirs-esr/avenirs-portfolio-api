@@ -13,5 +13,8 @@ public interface AdditionalSkillProgressRepository
 
   PagedResult<AdditionalSkillProgress> findAllByStudent(Student student, PageCriteria pageCriteria);
 
+  PagedResult<AdditionalSkillProgress> findAllByStudent(
+      Student student, PageCriteria pageCriteria, String keyword);
+
   List<AdditionalSkillProgress> findAllByStudent(Student student);
 }

@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.ams.domain.service;
 
 import fr.avenirsesr.portfolio.ams.domain.dto.AmsView;
+import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -59,5 +60,10 @@ public class AMSServiceImpl implements AMSService {
                         traceRepository.linkedWith(ams).size()))
             .toList(),
         amses.pageInfo());
+  }
+
+  @Override
+  public PagedResult<AMS> search(Student student, String keyword, PageCriteria pageCriteria) {
+    return amsRepository.findByStudent(student, pageCriteria, keyword);
   }
 }

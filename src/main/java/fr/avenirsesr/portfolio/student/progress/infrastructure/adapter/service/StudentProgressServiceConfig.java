@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.service.StudentProgressServiceImpl;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -13,17 +14,21 @@ import org.springframework.context.annotation.Configuration;
 public class StudentProgressServiceConfig {
 
   private final StudentProgressDatabaseRepository studentProgressRepository;
+  private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceRepository traceRepository;
 
   public StudentProgressServiceConfig(
       StudentProgressDatabaseRepository studentProgressRepository,
+      SkillLevelProgressRepository skillLevelProgressRepository,
       TraceRepository traceRepository) {
     this.studentProgressRepository = studentProgressRepository;
+    this.skillLevelProgressRepository = skillLevelProgressRepository;
     this.traceRepository = traceRepository;
   }
 
   @Bean
   public StudentProgressService studentProgressService() {
-    return new StudentProgressServiceImpl(studentProgressRepository, traceRepository);
+    return new StudentProgressServiceImpl(
+        studentProgressRepository, skillLevelProgressRepository, traceRepository);
   }
 }

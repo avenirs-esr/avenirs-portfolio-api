@@ -55,4 +55,10 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
       throw e;
     }
   }
+
+  @Override
+  public PagedResult<AdditionalSkillProgress> search(
+      Student student, String keyword, PageCriteria pageCriteria) {
+    return additionalSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);
+  }
 }

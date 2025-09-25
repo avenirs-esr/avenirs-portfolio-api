@@ -10,5 +10,7 @@ import java.util.List;
 public interface AMSRepository extends GenericRepositoryPort<AMS> {
   PagedResult<AMS> findByStudent(Student student, PageCriteria pageCriteria);
 
+  PagedResult<AMS> findByStudent(Student student, PageCriteria pageCriteria, String keyword);
+
   List<AMS> findAllByStudent(Student student);
 }

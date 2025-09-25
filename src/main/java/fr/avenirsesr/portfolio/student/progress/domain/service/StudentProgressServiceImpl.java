@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StudentProgressServiceImpl implements StudentProgressService {
   private static final int MAX_SKILLS = 6;
   private final StudentProgressRepository studentProgressRepository;
+  private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceRepository traceRepository;
 
   @Override
@@ -110,5 +112,13 @@ public class StudentProgressServiceImpl implements StudentProgressService {
             .limit(pageCriteria.pageSize())
             .toList(),
         new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skillProgresses.size()));
+  }
+
+  @Override
+  public PagedResult<SkillLevelProgress> search(
+      Student student, String keyword, PageCriteria pageCriteria) {
+    log.debug("Searching SkillLevelProgress for {} with pagination {}", student, pageCriteria);
+
+    return skillLevelProgressRepository.findAllByStudent(student, pageCriteria, keyword);
   }
 }

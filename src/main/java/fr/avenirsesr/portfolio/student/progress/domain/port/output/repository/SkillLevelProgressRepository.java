@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.student.progress.domain.port.output.repository;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -10,4 +12,7 @@ public interface SkillLevelProgressRepository extends GenericRepositoryPort<Skil
   List<SkillLevelProgress> linkedWith(AMS ams);
 
   List<SkillLevelProgress> findAllByStudent(Student student);
+
+  PagedResult<SkillLevelProgress> findAllByStudent(
+      Student student, PageCriteria pageCriteria, String keyword);
 }

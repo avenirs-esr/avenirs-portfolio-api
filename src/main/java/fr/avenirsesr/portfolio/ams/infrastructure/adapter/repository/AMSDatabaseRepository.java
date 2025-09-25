@@ -9,11 +9,13 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -28,9 +30,23 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter<AMS, AMSE
 
   @Override
   public PagedResult<AMS> findByStudent(Student student, PageCriteria pageCriteria) {
+    return findAllBy(AMSSpecification.belongsTo(student), pageCriteria);
+  }
+
+  @Override
+  public PagedResult<AMS> findByStudent(
+      Student student, PageCriteria pageCriteria, String keyword) {
+    return findAllBy(
+        AMSSpecification.belongsTo(student)
+            .and(AMSSpecification.search(keyword, TranslationUtil.getRequestLanguage())),
+        pageCriteria);
+  }
+
+  private PagedResult<AMS> findAllBy(
+      Specification<AMSEntity> specification, PageCriteria pageCriteria) {
     Page<AMSEntity> pageResult =
         jpaSpecificationExecutor.findAll(
-            AMSSpecification.belongsTo(student),
+            specification,
             PageRequest.of(
                 pageCriteria.page(),
                 pageCriteria.pageSize(),
