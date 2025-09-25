@@ -17,7 +17,8 @@ public interface TraceService {
 
   List<Trace> lastTracesOf(User user);
 
-  PagedResult<Trace> getTracesView(User user, PageCriteria pageCriteria, ETraceStatus status);
+  PagedResult<Trace> getTracesView(
+      User user, PageCriteria pageCriteria, ETraceStatus status, String keyword);
 
   void deleteById(User user, UUID id);
 

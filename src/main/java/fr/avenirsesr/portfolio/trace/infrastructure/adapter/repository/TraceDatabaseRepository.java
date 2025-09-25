@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericDeletableJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
@@ -47,9 +48,16 @@ public class TraceDatabaseRepository
   }
 
   @Override
-  public PagedResult<Trace> findAll(User user, PageCriteria pageCriteria, ETraceStatus status) {
+  public PagedResult<Trace> findAll(
+      User user, PageCriteria pageCriteria, ETraceStatus status, String keyword) {
     Specification<TraceEntity> specification =
         TraceSpecification.ofUser(UserMapper.fromDomain(user)).and(TraceSpecification.notDeleted());
+
+    if (keyword != null) {
+      specification =
+          specification.and(
+              TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));
+    }
 
     switch (status) {
       case UNASSOCIATED -> specification = specification.and(TraceSpecification.unassociated());

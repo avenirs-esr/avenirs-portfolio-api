@@ -61,6 +61,7 @@ public class TraceController {
   public ResponseEntity<PagedResponse<TraceViewDTO>> getTracesView(
       Principal principal,
       @RequestParam(required = false) ETraceStatus status,
+      @RequestParam(required = false) String keyword,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
@@ -71,7 +72,8 @@ public class TraceController {
         pageCriteria.pageSize());
     User user = userUtil.getUser(principal);
 
-    PagedResult<Trace> tracesResult = traceService.getTracesView(user, pageCriteria, status);
+    PagedResult<Trace> tracesResult =
+        traceService.getTracesView(user, pageCriteria, status, keyword);
 
     var tracesViewResponse =
         new PagedResponse<>(

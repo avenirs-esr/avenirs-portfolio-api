@@ -13,7 +13,8 @@ import java.util.List;
 public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {
   List<Trace> findLastsOf(User user, int limit);
 
-  PagedResult<Trace> findAll(User user, PageCriteria pageCriteria, ETraceStatus status);
+  PagedResult<Trace> findAll(
+      User user, PageCriteria pageCriteria, ETraceStatus status, String keyword);
 
   List<Trace> findAll(User user, ETraceStatus status);
 

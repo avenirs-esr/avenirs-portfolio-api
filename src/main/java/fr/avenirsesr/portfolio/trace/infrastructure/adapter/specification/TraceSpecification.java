@@ -1,14 +1,13 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TraceSpecification {
@@ -82,5 +81,76 @@ public class TraceSpecification {
       SkillLevelProgressEntity skillLevelProgress) {
     return (root, query, criteriaBuilder) ->
         criteriaBuilder.isMember(skillLevelProgress, root.get("skillLevels"));
+  }
+
+  public static Specification<TraceEntity> search(String keyword, ELanguage language) {
+    return (root, query, criteriaBuilder) -> {
+      if (keyword == null || keyword.trim().isEmpty() || query == null) {
+        return criteriaBuilder.conjunction();
+      }
+
+      query.distinct(true);
+
+      String pattern = "%" + keyword.toLowerCase() + "%";
+
+      // Trace
+      var titlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), pattern);
+      var aiUsePredicate =
+          criteriaBuilder.like(criteriaBuilder.lower(root.get("aiUseJustification")), pattern);
+      var personalNotePredicate =
+          criteriaBuilder.like(criteriaBuilder.lower(root.get("personalNote")), pattern);
+
+      // Attachment
+      Subquery<TraceAttachmentEntity> attachSub = query.subquery(TraceAttachmentEntity.class);
+      Root<TraceAttachmentEntity> attachRoot = attachSub.from(TraceAttachmentEntity.class);
+      attachSub
+          .select(attachRoot)
+          .where(
+              criteriaBuilder.equal(attachRoot.get("trace").get("id"), root.get("id")),
+              criteriaBuilder.isTrue(attachRoot.get("isActiveVersion")),
+              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get("name")), pattern));
+      Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);
+
+      // Additional skills
+      var additionalSkillJoin =
+          root.join("additionalSkillsProgresses", JoinType.LEFT)
+              .join("additionalSkill", JoinType.LEFT);
+
+      var additionalSkillPredicate =
+          criteriaBuilder.like(
+              criteriaBuilder.lower(
+                  additionalSkillJoin.get("pathSegments").get("skill").get("libelle")),
+              pattern);
+
+      // Skill level
+      var slpJoin =
+          root.join("skillLevels", JoinType.LEFT)
+              .join("skillLevel", JoinType.LEFT)
+              .join("translations", JoinType.LEFT);
+      var slpLangPredicate = criteriaBuilder.equal(slpJoin.get("language"), language);
+      var slpNamePredicate =
+          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get("name")), pattern);
+      var slpDescPredicate =
+          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get("description")), pattern);
+      var skillLevelPredicate =
+          criteriaBuilder.and(
+              slpLangPredicate, criteriaBuilder.or(slpNamePredicate, slpDescPredicate));
+
+      // AMS
+      var amsJoin = root.join("amses", JoinType.LEFT).join("translations", JoinType.LEFT);
+      var amsLangPredicate = criteriaBuilder.equal(amsJoin.get("language"), language);
+      var amsTitlePredicate =
+          criteriaBuilder.like(criteriaBuilder.lower(amsJoin.get("title")), pattern);
+      var amsPredicate = criteriaBuilder.and(amsLangPredicate, amsTitlePredicate);
+
+      return criteriaBuilder.or(
+          titlePredicate,
+          aiUsePredicate,
+          personalNotePredicate,
+          attachmentPredicate,
+          additionalSkillPredicate,
+          skillLevelPredicate,
+          amsPredicate);
+    };
   }
 }

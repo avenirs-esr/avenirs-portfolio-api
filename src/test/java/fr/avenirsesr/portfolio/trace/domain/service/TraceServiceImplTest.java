@@ -186,11 +186,17 @@ public class TraceServiceImplTest {
 
     BddLogger.when("getting the traces view");
     when(traceRepository.findAll(
-            student.getUser(), new PageCriteria(pageNumber, pageSize), ETraceStatus.UNASSOCIATED))
+            student.getUser(),
+            new PageCriteria(pageNumber, pageSize),
+            ETraceStatus.UNASSOCIATED,
+            null))
         .thenReturn(new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
     PagedResult<Trace> traceView =
         traceService.getTracesView(
-            student.getUser(), new PageCriteria(pageNumber, pageSize), ETraceStatus.UNASSOCIATED);
+            student.getUser(),
+            new PageCriteria(pageNumber, pageSize),
+            ETraceStatus.UNASSOCIATED,
+            null);
 
     BddLogger.then("it should return the traces view");
     assertEquals(traces.size(), traceView.content().size());

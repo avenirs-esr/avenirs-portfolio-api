@@ -64,8 +64,8 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public PagedResult<Trace> getTracesView(
-      User user, PageCriteria pageCriteria, ETraceStatus status) {
-    PagedResult<Trace> pagedResult = traceRepository.findAll(user, pageCriteria, status);
+      User user, PageCriteria pageCriteria, ETraceStatus status, String keyword) {
+    PagedResult<Trace> pagedResult = traceRepository.findAll(user, pageCriteria, status, keyword);
     return new PagedResult<>(pagedResult.content(), pagedResult.pageInfo());
   }
 
