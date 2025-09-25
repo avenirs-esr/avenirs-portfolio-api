@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMSServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.ams.domain.service</a> &gt; <span class="el_source">AMSServiceImpl.java</span></div><h1>AMSServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.ams.domain.service;
 
 import fr.avenirsesr.portfolio.ams.domain.dto.AmsView;
+import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -14,7 +15,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L17">@Slf4j</span>
+<span class="fc" id="L18">@Slf4j</span>
 public class AMSServiceImpl implements AMSService {
 
   private final AMSRepository amsRepository;
@@ -26,39 +27,44 @@ public class AMSServiceImpl implements AMSService {
       AMSRepository amsRepository,
       StudentProgressRepository studentProgressRepository,
       TraceRepository traceRepository,
-<span class="fc" id="L29">      SkillLevelProgressRepository skillLevelProgressRepository) {</span>
-<span class="fc" id="L30">    this.amsRepository = amsRepository;</span>
-<span class="fc" id="L31">    this.studentProgressRepository = studentProgressRepository;</span>
-<span class="fc" id="L32">    this.traceRepository = traceRepository;</span>
-<span class="fc" id="L33">    this.skillLevelProgressRepository = skillLevelProgressRepository;</span>
-<span class="fc" id="L34">  }</span>
+<span class="fc" id="L30">      SkillLevelProgressRepository skillLevelProgressRepository) {</span>
+<span class="fc" id="L31">    this.amsRepository = amsRepository;</span>
+<span class="fc" id="L32">    this.studentProgressRepository = studentProgressRepository;</span>
+<span class="fc" id="L33">    this.traceRepository = traceRepository;</span>
+<span class="fc" id="L34">    this.skillLevelProgressRepository = skillLevelProgressRepository;</span>
+<span class="fc" id="L35">  }</span>
 
   @Override
   public PagedResult&lt;AmsView&gt; findUserAmsByStudentProgress(
       Student student, UUID studentProgressId, PageCriteria pageCriteria) {
-<span class="fc" id="L39">    log.debug(</span>
+<span class="fc" id="L40">    log.debug(</span>
         &quot;Fetching AMS for user with id [{}] with pagination (page={}, pageSize={})&quot;,
-<span class="fc" id="L41">        student.getId(),</span>
-<span class="fc" id="L42">        pageCriteria.page(),</span>
-<span class="fc" id="L43">        pageCriteria.pageSize());</span>
+<span class="fc" id="L42">        student.getId(),</span>
+<span class="fc" id="L43">        pageCriteria.page(),</span>
+<span class="fc" id="L44">        pageCriteria.pageSize());</span>
 
-<span class="fc" id="L45">    StudentProgress studentProgress =</span>
+<span class="fc" id="L46">    StudentProgress studentProgress =</span>
         studentProgressRepository
-<span class="fc" id="L47">            .findById(studentProgressId)</span>
-<span class="fc" id="L48">            .orElseThrow(StudentProgressNotFoundException::new);</span>
+<span class="fc" id="L48">            .findById(studentProgressId)</span>
+<span class="fc" id="L49">            .orElseThrow(StudentProgressNotFoundException::new);</span>
 
-<span class="fc" id="L50">    var amses = amsRepository.findByStudent(student, pageCriteria);</span>
+<span class="fc" id="L51">    var amses = amsRepository.findByStudent(student, pageCriteria);</span>
 
-<span class="fc" id="L52">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L53">        amses.content().stream()</span>
-<span class="fc" id="L54">            .map(</span>
+<span class="fc" id="L53">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L54">        amses.content().stream()</span>
+<span class="fc" id="L55">            .map(</span>
                 ams -&gt;
-<span class="fc" id="L56">                    new AmsView(</span>
+<span class="fc" id="L57">                    new AmsView(</span>
                         ams,
-<span class="fc" id="L58">                        skillLevelProgressRepository.linkedWith(ams).size(),</span>
-<span class="fc" id="L59">                        traceRepository.linkedWith(ams).size()))</span>
-<span class="fc" id="L60">            .toList(),</span>
-<span class="fc" id="L61">        amses.pageInfo());</span>
+<span class="fc" id="L59">                        skillLevelProgressRepository.linkedWith(ams).size(),</span>
+<span class="fc" id="L60">                        traceRepository.linkedWith(ams).size()))</span>
+<span class="fc" id="L61">            .toList(),</span>
+<span class="fc" id="L62">        amses.pageInfo());</span>
+  }
+
+  @Override
+  public PagedResult&lt;AMS&gt; search(Student student, String keyword, PageCriteria pageCriteria) {
+<span class="nc" id="L67">    return amsRepository.findByStudent(student, pageCriteria, keyword);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

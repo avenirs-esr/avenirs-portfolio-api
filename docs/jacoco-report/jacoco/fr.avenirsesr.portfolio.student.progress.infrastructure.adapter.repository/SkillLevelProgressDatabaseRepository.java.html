@@ -2,7 +2,11 @@
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
@@ -10,6 +14,9 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.Ski
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.SkillLevelProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -19,28 +26,52 @@ public class SkillLevelProgressDatabaseRepository
   private final SkillLevelProgressJpaRepository jpaRepository;
 
   public SkillLevelProgressDatabaseRepository(SkillLevelProgressJpaRepository jpaRepository) {
-<span class="fc" id="L22">    super(</span>
+<span class="fc" id="L29">    super(</span>
         jpaRepository,
         jpaRepository,
         SkillLevelProgressMapper::fromDomain,
         SkillLevelProgressMapper::toDomain);
-<span class="fc" id="L27">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L28">  }</span>
+<span class="fc" id="L34">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L35">  }</span>
 
   @Override
   public List&lt;SkillLevelProgress&gt; linkedWith(AMS ams) {
-<span class="fc" id="L32">    return jpaSpecificationExecutor</span>
-<span class="fc" id="L33">        .findAll(SkillLevelProgressSpecification.linkedTo(AMSMapper.fromDomain(ams)))</span>
-<span class="fc" id="L34">        .stream()</span>
-<span class="fc" id="L35">        .map(SkillLevelProgressMapper::toDomain)</span>
-<span class="fc" id="L36">        .toList();</span>
+<span class="fc" id="L39">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L40">        .findAll(SkillLevelProgressSpecification.linkedTo(AMSMapper.fromDomain(ams)))</span>
+<span class="fc" id="L41">        .stream()</span>
+<span class="fc" id="L42">        .map(SkillLevelProgressMapper::toDomain)</span>
+<span class="fc" id="L43">        .toList();</span>
   }
 
   @Override
   public List&lt;SkillLevelProgress&gt; findAllByStudent(Student student) {
-<span class="nc" id="L41">    return jpaSpecificationExecutor.findAll(SkillLevelProgressSpecification.with(student)).stream()</span>
-<span class="nc" id="L42">        .map(SkillLevelProgressMapper::toDomain)</span>
-<span class="nc" id="L43">        .toList();</span>
+<span class="nc" id="L48">    return jpaSpecificationExecutor.findAll(SkillLevelProgressSpecification.with(student)).stream()</span>
+<span class="nc" id="L49">        .map(SkillLevelProgressMapper::toDomain)</span>
+<span class="nc" id="L50">        .toList();</span>
+  }
+
+  @Override
+  public PagedResult&lt;SkillLevelProgress&gt; findAllByStudent(
+      Student student, PageCriteria pageCriteria, String keyword) {
+<span class="nc" id="L56">    var language = TranslationUtil.getRequestLanguage();</span>
+
+<span class="nc" id="L58">    Page&lt;SkillLevelProgressEntity&gt; pageResult =</span>
+<span class="nc" id="L59">        jpaSpecificationExecutor.findAll(</span>
+<span class="nc" id="L60">            SkillLevelProgressSpecification.with(student)</span>
+<span class="nc" id="L61">                .and(SkillLevelProgressSpecification.search(keyword, language)),</span>
+<span class="nc" id="L62">            PageRequest.of(</span>
+<span class="nc" id="L63">                pageCriteria.page(),</span>
+<span class="nc" id="L64">                pageCriteria.pageSize(),</span>
+<span class="nc" id="L65">                Sort.by(Sort.Direction.DESC, &quot;startDate&quot;)));</span>
+
+<span class="nc" id="L67">    var content = pageResult.stream().map(SkillLevelProgressMapper::toDomain).toList();</span>
+
+<span class="nc" id="L69">    return new PagedResult&lt;&gt;(</span>
+        content,
+        new PageInfo(
+<span class="nc" id="L72">            pageResult.getPageable().getPageNumber(),</span>
+<span class="nc" id="L73">            pageResult.getPageable().getPageSize(),</span>
+<span class="nc" id="L74">            pageResult.getTotalElements()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
