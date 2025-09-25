@@ -8,12 +8,14 @@ import fr.avenirsesr.portfolio.trace.application.adapter.response.TraceAssociati
 
 public interface TraceAssociationSearchResultMapper {
   static TraceAssociationSearchResult toDTO(AMS ams) {
-    return new TraceAssociationSearchResult(ETraceAssociationType.AMS, ams.getTitle(), null);
+    return new TraceAssociationSearchResult(
+        ETraceAssociationType.AMS, ams.getId(), ams.getTitle(), null);
   }
 
   static TraceAssociationSearchResult toDTO(SkillLevelProgress skillLevelProgress) {
     return new TraceAssociationSearchResult(
         ETraceAssociationType.SKILL_LEVEL,
+        skillLevelProgress.getId(),
         skillLevelProgress.getSkillLevel().getName(),
         skillLevelProgress.getSkillLevel().getDescription().orElse(null));
   }
@@ -21,6 +23,7 @@ public interface TraceAssociationSearchResultMapper {
   static TraceAssociationSearchResult toDTO(AdditionalSkillProgress additionalSkillProgress) {
     return new TraceAssociationSearchResult(
         ETraceAssociationType.ADDITIONAL_SKILL,
+        additionalSkillProgress.getId(),
         additionalSkillProgress.getSkill().getPathSegments().getSkill().getLibelle(),
         additionalSkillProgress.getSkill().getType().name());
   }
