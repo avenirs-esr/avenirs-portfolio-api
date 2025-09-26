@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.student.progress.domain.port.input;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
-import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDetailedDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
@@ -28,5 +27,5 @@ public interface StudentProgressService {
   PagedResult<SkillLevelProgress> search(
       Student student, String keyword, PageCriteria pageCriteria);
 
-  SkillDetailedDTO getSkillDetailedById(Student student, UUID skillId);
+  List<SkillLevelProgress> getSkillLevelsBySkillId(Student student, UUID skillId);
 }

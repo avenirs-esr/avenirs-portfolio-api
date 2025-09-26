@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
+import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
@@ -14,6 +15,8 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.Ski
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.SkillLevelProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -48,6 +51,21 @@ public class SkillLevelProgressDatabaseRepository
     return jpaSpecificationExecutor.findAll(SkillLevelProgressSpecification.with(student)).stream()
         .map(SkillLevelProgressMapper::toDomain)
         .toList();
+  }
+
+  @Override
+  public List<SkillLevelProgress> findAllByStudentAndSkillId(Student student, UUID skillId) {
+    List<SkillLevelProgress> skillLevelProgresses =
+        Optional.of(
+                jpaSpecificationExecutor.findAll(
+                    SkillLevelProgressSpecification.with(student, skillId)))
+            .filter(list -> !list.isEmpty())
+            .orElseThrow(() -> new SkillLevelNotFoundException(skillId.toString()))
+            .stream()
+            .map(SkillLevelProgressMapper::toDomain)
+            .toList();
+
+    return skillLevelProgresses;
   }
 
   @Override

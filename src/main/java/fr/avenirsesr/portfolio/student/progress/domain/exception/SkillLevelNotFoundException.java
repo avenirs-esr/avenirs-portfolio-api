@@ -3,12 +3,12 @@ package fr.avenirsesr.portfolio.student.progress.domain.exception;
 import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 
-public class SkillNotFoundException extends BusinessException {
-  public SkillNotFoundException() {
+public class SkillLevelNotFoundException extends BusinessException {
+  public SkillLevelNotFoundException() {
     super(EErrorCode.SKILL_NOT_FOUND);
   }
 
-  public SkillNotFoundException(String customMessage) {
+  public SkillLevelNotFoundException(String customMessage) {
     super(EErrorCode.SKILL_NOT_FOUND, customMessage);
   }
 }

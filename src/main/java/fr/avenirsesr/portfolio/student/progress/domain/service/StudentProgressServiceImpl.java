@@ -4,11 +4,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
-import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDetailedDTO;
-import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillLevelDetailedDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
-import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
@@ -126,40 +123,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   @Override
-  public SkillDetailedDTO getSkillDetailedById(Student student, UUID skillId) {
-
-    var studentProgresses = studentProgressRepository.findAllByStudent(student).stream().toList();
-
-    var matchingSkillLevelProgresses =
-        studentProgresses.stream()
-            .flatMap(
-                studentProgress ->
-                    studentProgress.getAllSkillLevels().stream()
-                        .filter(
-                            skillLevelProgress ->
-                                skillLevelProgress
-                                    .getSkillLevel()
-                                    .getSkill()
-                                    .getId()
-                                    .equals(skillId)))
-            .toList();
-
-    if (matchingSkillLevelProgresses.isEmpty()) {
-      throw new SkillNotFoundException(skillId.toString());
-    }
-
-    var skillLevelsDetailed =
-        matchingSkillLevelProgresses.stream()
-            .map(
-                skillLevelProgress ->
-                    new SkillLevelDetailedDTO(
-                        skillLevelProgress.getSkillLevel().getId(),
-                        skillLevelProgress.getSkillLevel().getName()))
-            .toList();
-
-    return new SkillDetailedDTO(
-        matchingSkillLevelProgresses.get(0).getSkillLevel().getSkill().getId(),
-        matchingSkillLevelProgresses.get(0).getSkillLevel().getSkill().getName(),
-        skillLevelsDetailed);
+  public List<SkillLevelProgress> getSkillLevelsBySkillId(Student student, UUID skillId) {
+    return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);
   }
 }
