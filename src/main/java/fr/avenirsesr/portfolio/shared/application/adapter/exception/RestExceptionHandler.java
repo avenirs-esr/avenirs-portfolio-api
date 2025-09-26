@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.error.application.adapter.response.ErrorRe
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
+import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.StudentProgressNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserCategoryNotRecognizedException;
@@ -87,6 +88,12 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   @ExceptionHandler(StudentProgressNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleStudentProgressNotFound(
       StudentProgressNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+  }
+
+  @ExceptionHandler(SkillLevelNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleSkillLevelNotFound(SkillLevelNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
   }

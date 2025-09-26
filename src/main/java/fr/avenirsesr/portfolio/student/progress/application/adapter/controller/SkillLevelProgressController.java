@@ -5,14 +5,20 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.program.domain.model.Skill;
+import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDetailedDTO;
+import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.SkillDetailedMapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,12 +66,23 @@ public class SkillLevelProgressController {
   public ResponseEntity<SkillDetailedDTO> getDetailedSkill(
       Principal principal, @PathVariable UUID skillId) {
     log.debug(
-        "Received request to detailed skilled [{}] of user [{}]",
+        "Received request to detailed skill [{}] of user [{}]",
         skillId.toString(),
         principal.getName());
     Student student = userUtil.getStudent(principal);
+    List<SkillLevelProgress> skillLevelProgresses =
+        studentProgressService.getSkillLevelsBySkillId(student, skillId);
+    List<SkillLevel> skillLevels =
+        skillLevelProgresses.stream()
+            .map(skillLevelProgress -> skillLevelProgress.getSkillLevel())
+            .toList();
+    Skill skill =
+        skillLevels.stream()
+            .findFirst()
+            .orElseThrow(() -> new SkillLevelNotFoundException(skillId.toString()))
+            .getSkill();
 
-    var response = studentProgressService.getSkillDetailedById(student, skillId);
+    var response = SkillDetailedMapper.fromDomainToDto(skill, skillLevels);
 
     return ResponseEntity.ok(response);
   }

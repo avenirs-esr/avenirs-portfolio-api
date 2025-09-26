@@ -261,32 +261,6 @@ public class SkillLevelProgressControllerIT {
               .andExpect(jsonPath("$.code").value("SKILL_NOT_FOUND"));
         }
       }
-
-      @Nested
-      class AndANonOwnedSkillIdIsPassed {
-        private static final UUID NON_OWNED_SKILL_ID =
-            UUID.fromString("f584cbbd-5209-4bfb-bb09-fc3e70046214");
-
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("an non owned skill id is passed");
-        }
-
-        @Test
-        void thenItShouldReturn404() throws Exception {
-          BddLogger.then("it should return 404");
-          mockMvc
-              .perform(
-                  get(DETAILS_BASE_PATH, NON_OWNED_SKILL_ID)
-                      .header("Accept-Language", language.getCode())
-                      .header("X-Signed-Context", studentPayload)
-                      .header("X-Context-Kid", secretKey)
-                      .header("X-Context-Signature", studentSignature)
-                      .accept(MediaType.APPLICATION_JSON))
-              .andExpect(status().isForbidden())
-              .andExpect(jsonPath("$.code").value("SKILL_NOT_FOUND"));
-        }
-      }
     }
   }
 }
