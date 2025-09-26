@@ -2,21 +2,31 @@ package fr.avenirsesr.portfolio.trace.domain.service;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
+import fr.avenirsesr.portfolio.ams.domain.dto.AmsView;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.trace.domain.model.AssociatesTrace;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
 import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -44,6 +54,7 @@ public class TraceServiceImpl implements TraceService {
   private final AMSRepository amsRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceConfigurationService traceConfigurationService;
+  private final TraceAttachmentRepository traceAttachmentRepository;
 
   @Override
   public String programNameOfTrace(Trace trace) {
@@ -116,6 +127,64 @@ public class TraceServiceImpl implements TraceService {
 
     return new TracesSummary(
         associatedTraces.size(), unassociatedTraces.size(), warningCount, criticalCount);
+  }
+
+  @Override
+  public TraceDetail getTraceDetail(User user, UUID id) {
+    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
+    List<TraceAttachment> traceAttachmentList = traceAttachmentRepository.findByTrace(trace);
+    return new TraceDetail(
+        trace.getId(),
+        trace.getTitle(),
+        trace.isUnassociated() ? ETraceStatus.UNASSOCIATED : ETraceStatus.ASSOCIATED,
+        programNameOfTrace(trace),
+        trace.isGroup(),
+        traceAttachmentList,
+        trace.getCreatedAt(),
+        trace.getUpdatedAt());
+  }
+
+  @Override
+  public AssociatesTrace getAssociatesTrace(User user, UUID id) {
+    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
+
+    List<UUID> traceSkillLevelProgressIds =
+        trace.getSkillLevels().stream().map(SkillLevelProgress::getId).toList();
+
+    List<StudentProgress> studentProgresses =
+        studentProgressRepository.findAllByStudent(user.toStudent()).stream().toList();
+
+    List<AmsView> amses =
+        trace.getAmses().stream()
+            .map(
+                ams ->
+                    new AmsView(
+                        ams,
+                        skillLevelProgressRepository.linkedWith(ams).size(),
+                        traceRepository.linkedWith(ams).size()))
+            .toList();
+
+    List<SkillProgressDTO> skillProgresses =
+        studentProgresses.stream()
+            .filter(studentProgress -> studentProgress.getStartDate().isBefore(LocalDate.now()))
+            .flatMap(
+                studentProgress ->
+                    studentProgress.getAllSkillLevels().stream()
+                        .filter(
+                            skillLevel -> traceSkillLevelProgressIds.contains(skillLevel.getId()))
+                        .map(
+                            skillLevel ->
+                                new SkillProgressDTO(
+                                    skillLevel.getSkillLevel().getSkill(),
+                                    studentProgress,
+                                    new SkillLevelProgressWithTraceCountDTO(
+                                        skillLevel,
+                                        traceRepository.linkedWith(skillLevel).size()))))
+            .sorted(
+                SkillProgressDTO.comparatorOf(new SortCriteria(ESortField.NAME, ESortOrder.ASC)))
+            .toList();
+
+    return new AssociatesTrace(amses, skillProgresses, trace.getAdditionalSkillProgresses());
   }
 
   @Override
