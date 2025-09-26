@@ -213,12 +213,5 @@ public class TraceController {
 
 <span class="fc" id="L214">    return ResponseEntity.status(201).body(new TracesCreationResponse(trace.getId()));</span>
   }
-
-  @PutMapping(&quot;/{traceId}/update&quot;)
-  public ResponseEntity&lt;TracesCreationResponse&gt; updateTrace(
-      Principal principal, @Valid @RequestBody CreateTraceDTO createTraceDTO) {
-<span class="nc" id="L220">    log.debug(&quot;Received request to create new trace for user [{}]&quot;, principal.getName());</span>
-<span class="nc" id="L221">    return ResponseEntity.status(201).body(new TracesCreationResponse(null));</span>
-  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

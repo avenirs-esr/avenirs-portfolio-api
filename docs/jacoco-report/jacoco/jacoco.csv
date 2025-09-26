@@ -17,7 +17,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.ada
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.application.adapter.controller,AMSController,0,64,0,0,0,14,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.openapi,SwaggerSchema,0,29,0,0,0,8,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.openapi,OpenApiAdditionalSkillEnumConfiguration,0,15,0,0,0,7,0,3,0,3
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,176,173,4,0,42,42,8,8,5,8
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,163,173,4,0,40,42,7,8,4,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.navigation.access.application.adapter.controller,NavigationAccessController,0,42,0,0,0,9,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.repository,TrainingPathDatabaseRepository,0,28,0,0,0,10,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.repository,InstitutionDatabaseRepository,0,21,2,2,0,6,2,2,0,2
