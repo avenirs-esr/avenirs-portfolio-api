@@ -2,21 +2,31 @@
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
+import fr.avenirsesr.portfolio.ams.domain.dto.AmsView;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.trace.domain.model.AssociatesTrace;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
 import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -34,7 +44,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L37">@Slf4j</span>
+<span class="fc" id="L47">@Slf4j</span>
 @AllArgsConstructor
 public class TraceServiceImpl implements TraceService {
   private static final int MAX_TRACES_OVERVIEW = 3;
@@ -44,78 +54,137 @@ public class TraceServiceImpl implements TraceService {
   private final AMSRepository amsRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceConfigurationService traceConfigurationService;
+  private final TraceAttachmentRepository traceAttachmentRepository;
 
   @Override
   public String programNameOfTrace(Trace trace) {
-<span class="fc" id="L50">    List&lt;StudentProgress&gt; studentProgresses =</span>
-<span class="fc" id="L51">        studentProgressRepository.findStudentProgressesBySkillLevelProgresses(</span>
-<span class="fc" id="L52">            trace.getSkillLevels());</span>
-<span class="fc" id="L53">    return studentProgresses.stream()</span>
-<span class="fc" id="L54">        .filter(sp -&gt; sp.getTrainingPath().getProgram().isAPC())</span>
-<span class="fc" id="L55">        .map(sp -&gt; sp.getTrainingPath().getProgram().getName())</span>
-<span class="fc" id="L56">        .findAny()</span>
-<span class="fc" id="L57">        .orElse(EPortfolioType.LIFE_PROJECT.name());</span>
+<span class="fc" id="L61">    List&lt;StudentProgress&gt; studentProgresses =</span>
+<span class="fc" id="L62">        studentProgressRepository.findStudentProgressesBySkillLevelProgresses(</span>
+<span class="fc" id="L63">            trace.getSkillLevels());</span>
+<span class="fc" id="L64">    return studentProgresses.stream()</span>
+<span class="fc" id="L65">        .filter(sp -&gt; sp.getTrainingPath().getProgram().isAPC())</span>
+<span class="fc" id="L66">        .map(sp -&gt; sp.getTrainingPath().getProgram().getName())</span>
+<span class="fc" id="L67">        .findAny()</span>
+<span class="fc" id="L68">        .orElse(EPortfolioType.LIFE_PROJECT.name());</span>
   }
 
   @Override
   public List&lt;Trace&gt; lastTracesOf(User user) {
-<span class="fc" id="L62">    return traceRepository.findLastsOf(user, MAX_TRACES_OVERVIEW);</span>
+<span class="fc" id="L73">    return traceRepository.findLastsOf(user, MAX_TRACES_OVERVIEW);</span>
   }
 
   @Override
   public PagedResult&lt;Trace&gt; getTracesView(
-      User user, PageCriteria pageCriteria, ETraceStatus status, String keyword) {
-<span class="fc" id="L68">    PagedResult&lt;Trace&gt; pagedResult = traceRepository.findAll(user, pageCriteria, status, keyword);</span>
-<span class="fc" id="L69">    return new PagedResult&lt;&gt;(pagedResult.content(), pagedResult.pageInfo());</span>
+      User user, PageCriteria pageCriteria, ETraceStatus status) {
+<span class="fc" id="L79">    PagedResult&lt;Trace&gt; pagedResult = traceRepository.findAll(user, pageCriteria, status);</span>
+<span class="fc" id="L80">    return new PagedResult&lt;&gt;(pagedResult.content(), pagedResult.pageInfo());</span>
   }
 
   @Override
   public void deleteById(User user, UUID id) {
-<span class="fc" id="L74">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L85">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
 
-<span class="fc bfc" id="L76" title="All 2 branches covered.">    if (!trace.getUser().getId().equals(user.getId())) {</span>
-<span class="fc" id="L77">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">    if (!trace.getUser().getId().equals(user.getId())) {</span>
+<span class="fc" id="L88">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L80">    trace.setAmses(new ArrayList&lt;&gt;());</span>
-<span class="fc" id="L81">    trace.setSkillLevels(new ArrayList&lt;&gt;());</span>
-<span class="fc" id="L82">    trace.setAdditionalSkillProgresses(new ArrayList&lt;&gt;());</span>
-<span class="fc" id="L83">    trace.setDeletedAt(Instant.now());</span>
+<span class="fc" id="L91">    trace.setAmses(new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L92">    trace.setSkillLevels(new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L93">    trace.setAdditionalSkillProgresses(new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L94">    trace.setDeletedAt(Instant.now());</span>
 
-<span class="fc" id="L85">    traceRepository.save(trace);</span>
-<span class="fc" id="L86">    log.info(&quot;Deleted trace {}&quot;, trace);</span>
-<span class="fc" id="L87">  }</span>
+<span class="fc" id="L96">    traceRepository.save(trace);</span>
+<span class="fc" id="L97">    log.info(&quot;Deleted trace {}&quot;, trace);</span>
+<span class="fc" id="L98">  }</span>
 
   @Override
   public TracesSummary getTracesSummary(User user) {
-<span class="fc" id="L91">    List&lt;Trace&gt; associatedTraces = traceRepository.findAll(user, ETraceStatus.ASSOCIATED);</span>
-<span class="fc" id="L92">    List&lt;Trace&gt; unassociatedTraces = traceRepository.findAll(user, ETraceStatus.UNASSOCIATED);</span>
-<span class="fc" id="L93">    TraceConfiguration traceConfiguration = traceConfigurationService.getTraceConfiguration();</span>
+<span class="fc" id="L102">    List&lt;Trace&gt; associatedTraces = traceRepository.findAll(user, ETraceStatus.ASSOCIATED);</span>
+<span class="fc" id="L103">    List&lt;Trace&gt; unassociatedTraces = traceRepository.findAll(user, ETraceStatus.UNASSOCIATED);</span>
+<span class="fc" id="L104">    TraceConfiguration traceConfiguration = traceConfigurationService.getTraceConfiguration();</span>
 
-<span class="fc" id="L95">    int criticalCount =</span>
-<span class="fc" id="L96">        unassociatedTraces.stream()</span>
-<span class="fc" id="L97">            .filter(</span>
-                t -&gt;
-<span class="fc" id="L99">                    Duration.between(t.getCreatedAt(), Instant.now())</span>
-<span class="fc" id="L100">                        .minus(Duration.ofDays(traceConfiguration.maxRemainingDays()))</span>
-<span class="fc" id="L101">                        .plus(Duration.ofDays(traceConfiguration.maxRemainingDaysBeforeCritical()))</span>
-<span class="fc" id="L102">                        .isPositive())</span>
-<span class="fc" id="L103">            .toList()</span>
-<span class="fc" id="L104">            .size();</span>
-
-<span class="fc" id="L106">    int warningCount =</span>
+<span class="fc" id="L106">    int criticalCount =</span>
 <span class="fc" id="L107">        unassociatedTraces.stream()</span>
 <span class="fc" id="L108">            .filter(</span>
                 t -&gt;
 <span class="fc" id="L110">                    Duration.between(t.getCreatedAt(), Instant.now())</span>
 <span class="fc" id="L111">                        .minus(Duration.ofDays(traceConfiguration.maxRemainingDays()))</span>
-<span class="fc" id="L112">                        .plus(Duration.ofDays(traceConfiguration.maxRemainingDaysBeforeWarning()))</span>
+<span class="fc" id="L112">                        .plus(Duration.ofDays(traceConfiguration.maxRemainingDaysBeforeCritical()))</span>
 <span class="fc" id="L113">                        .isPositive())</span>
 <span class="fc" id="L114">            .toList()</span>
 <span class="fc" id="L115">            .size();</span>
 
-<span class="fc" id="L117">    return new TracesSummary(</span>
-<span class="fc" id="L118">        associatedTraces.size(), unassociatedTraces.size(), warningCount, criticalCount);</span>
+<span class="fc" id="L117">    int warningCount =</span>
+<span class="fc" id="L118">        unassociatedTraces.stream()</span>
+<span class="fc" id="L119">            .filter(</span>
+                t -&gt;
+<span class="fc" id="L121">                    Duration.between(t.getCreatedAt(), Instant.now())</span>
+<span class="fc" id="L122">                        .minus(Duration.ofDays(traceConfiguration.maxRemainingDays()))</span>
+<span class="fc" id="L123">                        .plus(Duration.ofDays(traceConfiguration.maxRemainingDaysBeforeWarning()))</span>
+<span class="fc" id="L124">                        .isPositive())</span>
+<span class="fc" id="L125">            .toList()</span>
+<span class="fc" id="L126">            .size();</span>
+
+<span class="fc" id="L128">    return new TracesSummary(</span>
+<span class="fc" id="L129">        associatedTraces.size(), unassociatedTraces.size(), warningCount, criticalCount);</span>
+  }
+
+  @Override
+  public TraceDetail getTraceDetail(User user, UUID id) {
+<span class="nc" id="L134">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
+<span class="nc" id="L135">    List&lt;TraceAttachment&gt; traceAttachmentList = traceAttachmentRepository.findByTrace(trace);</span>
+<span class="nc" id="L136">    return new TraceDetail(</span>
+<span class="nc" id="L137">        trace.getId(),</span>
+<span class="nc" id="L138">        trace.getTitle(),</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        trace.isUnassociated() ? ETraceStatus.UNASSOCIATED : ETraceStatus.ASSOCIATED,</span>
+<span class="nc" id="L140">        programNameOfTrace(trace),</span>
+<span class="nc" id="L141">        trace.isGroup(),</span>
+        traceAttachmentList,
+<span class="nc" id="L143">        trace.getCreatedAt(),</span>
+<span class="nc" id="L144">        trace.getUpdatedAt());</span>
+  }
+
+  @Override
+  public AssociatesTrace getAssociatesTrace(User user, UUID id) {
+<span class="nc" id="L149">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
+
+<span class="nc" id="L151">    List&lt;UUID&gt; traceSkillLevelProgressIds =</span>
+<span class="nc" id="L152">        trace.getSkillLevels().stream().map(SkillLevelProgress::getId).toList();</span>
+
+<span class="nc" id="L154">    List&lt;StudentProgress&gt; studentProgresses =</span>
+<span class="nc" id="L155">        studentProgressRepository.findAllByStudent(user.toStudent()).stream().toList();</span>
+
+<span class="nc" id="L157">    List&lt;AmsView&gt; amses =</span>
+<span class="nc" id="L158">        trace.getAmses().stream()</span>
+<span class="nc" id="L159">            .map(</span>
+                ams -&gt;
+<span class="nc" id="L161">                    new AmsView(</span>
+                        ams,
+<span class="nc" id="L163">                        skillLevelProgressRepository.linkedWith(ams).size(),</span>
+<span class="nc" id="L164">                        traceRepository.linkedWith(ams).size()))</span>
+<span class="nc" id="L165">            .toList();</span>
+
+<span class="nc" id="L167">    List&lt;SkillProgressDTO&gt; skillProgresses =</span>
+<span class="nc" id="L168">        studentProgresses.stream()</span>
+<span class="nc" id="L169">            .filter(studentProgress -&gt; studentProgress.getStartDate().isBefore(LocalDate.now()))</span>
+<span class="nc" id="L170">            .flatMap(</span>
+                studentProgress -&gt;
+<span class="nc" id="L172">                    studentProgress.getAllSkillLevels().stream()</span>
+<span class="nc" id="L173">                        .filter(</span>
+<span class="nc" id="L174">                            skillLevel -&gt; traceSkillLevelProgressIds.contains(skillLevel.getId()))</span>
+<span class="nc" id="L175">                        .map(</span>
+                            skillLevel -&gt;
+<span class="nc" id="L177">                                new SkillProgressDTO(</span>
+<span class="nc" id="L178">                                    skillLevel.getSkillLevel().getSkill(),</span>
+                                    studentProgress,
+                                    new SkillLevelProgressWithTraceCountDTO(
+                                        skillLevel,
+<span class="nc" id="L182">                                        traceRepository.linkedWith(skillLevel).size()))))</span>
+<span class="nc" id="L183">            .sorted(</span>
+<span class="nc" id="L184">                SkillProgressDTO.comparatorOf(new SortCriteria(ESortField.NAME, ESortOrder.ASC)))</span>
+<span class="nc" id="L185">            .toList();</span>
+
+<span class="nc" id="L187">    return new AssociatesTrace(amses, skillProgresses, trace.getAdditionalSkillProgresses());</span>
   }
 
   @Override
@@ -127,25 +196,25 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification) {
     var trace =
-<span class="fc" id="L130">        Trace.create(</span>
-<span class="fc" id="L131">            UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);</span>
+<span class="fc" id="L199">        Trace.create(</span>
+<span class="fc" id="L200">            UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);</span>
 
-<span class="fc" id="L133">    traceRepository.save(trace);</span>
-<span class="fc" id="L134">    return trace;</span>
+<span class="fc" id="L202">    traceRepository.save(trace);</span>
+<span class="fc" id="L203">    return trace;</span>
   }
 
   @Override
   public Optional&lt;LocalDate&gt; getWillBeDeletedAt(Trace trace) {
-<span class="fc" id="L139">    var config = traceConfigurationService.getTraceConfiguration();</span>
+<span class="fc" id="L208">    var config = traceConfigurationService.getTraceConfiguration();</span>
 
-<span class="fc bfc" id="L141" title="All 2 branches covered.">    return trace.isUnassociated()</span>
-<span class="fc" id="L142">        ? Optional.of(</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">    return trace.isUnassociated()</span>
+<span class="fc" id="L211">        ? Optional.of(</span>
             trace
-<span class="fc" id="L144">                .getCreatedAt()</span>
-<span class="fc" id="L145">                .plus(Duration.ofDays(config.maxRemainingDays()))</span>
-<span class="fc" id="L146">                .atZone(ZoneId.systemDefault())</span>
-<span class="fc" id="L147">                .toLocalDate())</span>
-<span class="fc" id="L148">        : Optional.empty();</span>
+<span class="fc" id="L213">                .getCreatedAt()</span>
+<span class="fc" id="L214">                .plus(Duration.ofDays(config.maxRemainingDays()))</span>
+<span class="fc" id="L215">                .atZone(ZoneId.systemDefault())</span>
+<span class="fc" id="L216">                .toLocalDate())</span>
+<span class="fc" id="L217">        : Optional.empty();</span>
   }
 
   @Override
@@ -155,105 +224,105 @@ public class TraceServiceImpl implements TraceService {
       List&lt;UUID&gt; amsIds,
       List&lt;UUID&gt; skillLevelIds,
       List&lt;UUID&gt; additionalSkillProgressIds) {
-<span class="fc" id="L158">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L227">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
 
-<span class="fc bfc" id="L160" title="All 2 branches covered.">    if (!trace.getUser().getId().equals(user.getId())) {</span>
-<span class="fc" id="L161">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">    if (!trace.getUser().getId().equals(user.getId())) {</span>
+<span class="fc" id="L230">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L164">    var student = user.toStudent();</span>
-<span class="fc" id="L165">    associateAMS(student, trace, amsIds);</span>
-<span class="fc" id="L166">    associateSkillLevels(student, trace, skillLevelIds);</span>
-<span class="fc" id="L167">    associateAdditionalSkillProgress(student, trace, additionalSkillProgressIds);</span>
+<span class="fc" id="L233">    var student = user.toStudent();</span>
+<span class="fc" id="L234">    associateAMS(student, trace, amsIds);</span>
+<span class="fc" id="L235">    associateSkillLevels(student, trace, skillLevelIds);</span>
+<span class="fc" id="L236">    associateAdditionalSkillProgress(student, trace, additionalSkillProgressIds);</span>
 
-<span class="fc" id="L169">    traceRepository.save(trace);</span>
-<span class="fc" id="L170">    log.info(</span>
+<span class="fc" id="L238">    traceRepository.save(trace);</span>
+<span class="fc" id="L239">    log.info(</span>
         &quot;Trace {} successfully associated with amses : {} - skill level progress {} - additonal&quot;
             + &quot; skill progress {}&quot;,
         trace,
         amsIds,
         skillLevelIds,
         additionalSkillProgressIds);
-<span class="fc" id="L177">  }</span>
+<span class="fc" id="L246">  }</span>
 
   private void associateAMS(Student student, Trace trace, List&lt;UUID&gt; amsIds) {
-<span class="fc" id="L180">    if (amsIds.stream()</span>
-<span class="fc bfc" id="L181" title="All 2 branches covered.">        .anyMatch(id -&gt; trace.getAmses().stream().map(AMS::getId).toList().contains(id))) {</span>
-<span class="fc" id="L182">      log.error(</span>
+<span class="fc" id="L249">    if (amsIds.stream()</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">        .anyMatch(id -&gt; trace.getAmses().stream().map(AMS::getId).toList().contains(id))) {</span>
+<span class="fc" id="L251">      log.error(</span>
           &quot;{} tried to associate trace with an ams that is already associated. IDS : {}&quot;,
           student,
           amsIds);
-<span class="fc" id="L186">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L255">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L189">    var studentAmses = amsRepository.findAllByStudent(student);</span>
-<span class="fc" id="L190">    amsIds.forEach(</span>
+<span class="fc" id="L258">    var studentAmses = amsRepository.findAllByStudent(student);</span>
+<span class="fc" id="L259">    amsIds.forEach(</span>
         amsId -&gt; {
-<span class="fc" id="L192">          var ams =</span>
-<span class="fc" id="L193">              studentAmses.stream()</span>
-<span class="fc" id="L194">                  .filter(a -&gt; amsId.equals(a.getId()))</span>
-<span class="fc" id="L195">                  .findAny()</span>
-<span class="fc" id="L196">                  .orElseThrow(UserNotAuthorizedException::new);</span>
-<span class="fc" id="L197">          trace.add(ams);</span>
-<span class="fc" id="L198">        });</span>
-<span class="fc" id="L199">  }</span>
+<span class="fc" id="L261">          var ams =</span>
+<span class="fc" id="L262">              studentAmses.stream()</span>
+<span class="fc" id="L263">                  .filter(a -&gt; amsId.equals(a.getId()))</span>
+<span class="fc" id="L264">                  .findAny()</span>
+<span class="fc" id="L265">                  .orElseThrow(UserNotAuthorizedException::new);</span>
+<span class="fc" id="L266">          trace.add(ams);</span>
+<span class="fc" id="L267">        });</span>
+<span class="fc" id="L268">  }</span>
 
   private void associateSkillLevels(Student student, Trace trace, List&lt;UUID&gt; skillLevelIds) {
-<span class="fc" id="L202">    if (skillLevelIds.stream()</span>
-<span class="pc bpc" id="L203" title="1 of 2 branches missed.">        .anyMatch(</span>
+<span class="fc" id="L271">    if (skillLevelIds.stream()</span>
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">        .anyMatch(</span>
             id -&gt;
-<span class="fc" id="L205">                trace.getSkillLevels().stream()</span>
-<span class="fc" id="L206">                    .map(SkillLevelProgress::getId)</span>
-<span class="fc" id="L207">                    .toList()</span>
-<span class="fc" id="L208">                    .contains(id))) {</span>
-<span class="nc" id="L209">      log.error(</span>
+<span class="fc" id="L274">                trace.getSkillLevels().stream()</span>
+<span class="fc" id="L275">                    .map(SkillLevelProgress::getId)</span>
+<span class="fc" id="L276">                    .toList()</span>
+<span class="fc" id="L277">                    .contains(id))) {</span>
+<span class="nc" id="L278">      log.error(</span>
           &quot;{} tried to associate trace with a skill levels that is already associated. IDS : {}&quot;,
           student,
           skillLevelIds);
-<span class="nc" id="L213">      throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L282">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L216">    var studentSkillLevelProgresses = skillLevelProgressRepository.findAllByStudent(student);</span>
-<span class="fc" id="L217">    skillLevelIds.forEach(</span>
+<span class="fc" id="L285">    var studentSkillLevelProgresses = skillLevelProgressRepository.findAllByStudent(student);</span>
+<span class="fc" id="L286">    skillLevelIds.forEach(</span>
         skillLevelId -&gt; {
-<span class="fc" id="L219">          var skillLevelProgress =</span>
-<span class="fc" id="L220">              studentSkillLevelProgresses.stream()</span>
-<span class="fc" id="L221">                  .filter(s -&gt; skillLevelId.equals(s.getId()))</span>
-<span class="fc" id="L222">                  .findAny()</span>
-<span class="fc" id="L223">                  .orElseThrow(UserNotAuthorizedException::new);</span>
+<span class="fc" id="L288">          var skillLevelProgress =</span>
+<span class="fc" id="L289">              studentSkillLevelProgresses.stream()</span>
+<span class="fc" id="L290">                  .filter(s -&gt; skillLevelId.equals(s.getId()))</span>
+<span class="fc" id="L291">                  .findAny()</span>
+<span class="fc" id="L292">                  .orElseThrow(UserNotAuthorizedException::new);</span>
 
-<span class="fc" id="L225">          trace.add(skillLevelProgress);</span>
-<span class="fc" id="L226">        });</span>
-<span class="fc" id="L227">  }</span>
+<span class="fc" id="L294">          trace.add(skillLevelProgress);</span>
+<span class="fc" id="L295">        });</span>
+<span class="fc" id="L296">  }</span>
 
   private void associateAdditionalSkillProgress(
       Student student, Trace trace, List&lt;UUID&gt; additionalSkillProgressIds) {
-<span class="fc" id="L231">    if (additionalSkillProgressIds.stream()</span>
-<span class="pc bpc" id="L232" title="1 of 2 branches missed.">        .anyMatch(</span>
+<span class="fc" id="L300">    if (additionalSkillProgressIds.stream()</span>
+<span class="pc bpc" id="L301" title="1 of 2 branches missed.">        .anyMatch(</span>
             id -&gt;
-<span class="fc" id="L234">                trace.getAdditionalSkillProgresses().stream()</span>
-<span class="fc" id="L235">                    .map(AdditionalSkillProgress::getId)</span>
-<span class="fc" id="L236">                    .toList()</span>
-<span class="fc" id="L237">                    .contains(id))) {</span>
-<span class="nc" id="L238">      log.error(</span>
+<span class="fc" id="L303">                trace.getAdditionalSkillProgresses().stream()</span>
+<span class="fc" id="L304">                    .map(AdditionalSkillProgress::getId)</span>
+<span class="fc" id="L305">                    .toList()</span>
+<span class="fc" id="L306">                    .contains(id))) {</span>
+<span class="nc" id="L307">      log.error(</span>
           &quot;{} tried to associate trace with an additional skill that is already associated. IDS :&quot;
               + &quot; {}&quot;,
           student,
           additionalSkillProgressIds);
-<span class="nc" id="L243">      throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L312">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L246">    var studentAdditionalSkillProgress =</span>
-<span class="fc" id="L247">        additionalSkillProgressRepository.findAllByStudent(student);</span>
-<span class="fc" id="L248">    additionalSkillProgressIds.forEach(</span>
+<span class="fc" id="L315">    var studentAdditionalSkillProgress =</span>
+<span class="fc" id="L316">        additionalSkillProgressRepository.findAllByStudent(student);</span>
+<span class="fc" id="L317">    additionalSkillProgressIds.forEach(</span>
         additionalSkillProgressId -&gt; {
-<span class="fc" id="L250">          var additionalSkillProgress =</span>
-<span class="fc" id="L251">              studentAdditionalSkillProgress.stream()</span>
-<span class="fc" id="L252">                  .filter(s -&gt; additionalSkillProgressId.equals(s.getId()))</span>
-<span class="fc" id="L253">                  .findAny()</span>
-<span class="fc" id="L254">                  .orElseThrow(UserNotAuthorizedException::new);</span>
-<span class="fc" id="L255">          trace.add(additionalSkillProgress);</span>
-<span class="fc" id="L256">        });</span>
-<span class="fc" id="L257">  }</span>
+<span class="fc" id="L319">          var additionalSkillProgress =</span>
+<span class="fc" id="L320">              studentAdditionalSkillProgress.stream()</span>
+<span class="fc" id="L321">                  .filter(s -&gt; additionalSkillProgressId.equals(s.getId()))</span>
+<span class="fc" id="L322">                  .findAny()</span>
+<span class="fc" id="L323">                  .orElseThrow(UserNotAuthorizedException::new);</span>
+<span class="fc" id="L324">          trace.add(additionalSkillProgress);</span>
+<span class="fc" id="L325">        });</span>
+<span class="fc" id="L326">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
