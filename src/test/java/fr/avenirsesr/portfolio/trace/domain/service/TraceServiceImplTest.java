@@ -12,13 +12,13 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.Additional
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
-import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
-import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
+import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
@@ -35,8 +35,8 @@ import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
-import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
@@ -64,7 +64,7 @@ public class TraceServiceImplTest {
   @Mock private SkillLevelProgressRepository skillLevelProgressRepository;
   @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
 
-  @Mock private TraceConfigurationService traceConfigurationService;
+  @Mock private TraceConfigurationClient traceConfigurationClient;
 
   @InjectMocks private TraceServiceImpl traceService;
 
@@ -283,6 +283,7 @@ public class TraceServiceImplTest {
                 .withCreatedAt(Instant.now().minus(85, ChronoUnit.DAYS))
                 .toModel());
 
+<<<<<<< HEAD
     List<Trace> associatedTraces =
         List.of(
             TraceFixture.create()
@@ -293,6 +294,13 @@ public class TraceServiceImplTest {
                 .withUser(student.getUser())
                 .withCreatedAt(Instant.now().minus(72, ChronoUnit.DAYS))
                 .toModel());
+=======
+    BddLogger.when("getting the unassociated traces summary");
+    when(traceRepository.findAllUnassociated(student.getUser())).thenReturn(unassociatedTraces);
+    when(traceConfigurationClient.getTraceConfiguration()).thenReturn(traceConfiguration);
+    UnassociatedTracesSummary summary =
+        traceService.getUnassociatedTracesSummary(student.getUser());
+>>>>>>> cdc9b075 (refactor: back office feature moved in specific microservice)
 
     BddLogger.when("getting the traces summary");
     when(traceRepository.findAll(student.getUser(), ETraceStatus.UNASSOCIATED))
@@ -463,7 +471,7 @@ public class TraceServiceImplTest {
   void givenUnassociatedTrace_shouldReturnWillBeDeletedAt() {
     BddLogger.given("a TraceServiceImpl service and an unassociated trace");
     TraceConfiguration config = new TraceConfiguration(90, 30, 5);
-    when(traceConfigurationService.getTraceConfiguration()).thenReturn(config);
+    when(traceConfigurationClient.getTraceConfiguration()).thenReturn(config);
 
     Instant createdAt = Instant.now().minus(10, ChronoUnit.DAYS);
     Trace trace =
@@ -490,7 +498,7 @@ public class TraceServiceImplTest {
   void givenAssociatedTrace_shouldReturnEmpty() {
     BddLogger.given("a TraceServiceImpl service and an associated trace");
     TraceConfiguration config = new TraceConfiguration(90, 30, 5);
-    when(traceConfigurationService.getTraceConfiguration()).thenReturn(config);
+    when(traceConfigurationClient.getTraceConfiguration()).thenReturn(config);
 
     Instant createdAt = Instant.now();
     Trace trace =

@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
@@ -288,7 +289,6 @@ class TraceAttachmentServiceImplTest {
                     EFileType.TXT.getMimeType(),
                     1234L,
                     "data".getBytes()))
-        .isInstanceOf(
-            fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException.class);
+        .isInstanceOf(UserNotAuthorizedException.class);
   }
 }

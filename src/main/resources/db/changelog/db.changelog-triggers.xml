@@ -8,13 +8,17 @@
     <!-- Create the function to set updated_at -->
     <changeSet id="create-set-updated-at-function" author="bilelbanelhaq">
         <sql splitStatements="false" stripComments="true">
-            CREATE OR REPLACE FUNCTION set_updated_at()
-            RETURNS TRIGGER AS $BODY$
-        BEGIN
-              NEW.updated_at = now();
-        RETURN NEW;
-        END;
-        $BODY$ LANGUAGE plpgsql;
+            CREATE
+            OR REPLACE FUNCTION set_updated_at()
+            RETURNS TRIGGER AS
+            $BODY$
+            BEGIN
+              NEW.updated_at
+            = now();
+            RETURN NEW;
+            END;
+            $BODY$
+            LANGUAGE plpgsql;
         </sql>
     </changeSet>
 
@@ -41,16 +45,6 @@
         </sql>
     </changeSet>
 
-    <changeSet id="create-updated-at-trigger-configuration" author="bilelbanelhaq">
-        <sql>
-            DROP TRIGGER IF EXISTS trigger_set_updated_at_configuration ON configuration;
-            CREATE TRIGGER trigger_set_updated_at_configuration
-                BEFORE UPDATE
-                ON configuration
-                FOR EACH ROW
-                EXECUTE FUNCTION set_updated_at();
-        </sql>
-    </changeSet>
 
     <changeSet id="create-updated-at-trigger-external_user" author="bilelbanelhaq">
         <sql>

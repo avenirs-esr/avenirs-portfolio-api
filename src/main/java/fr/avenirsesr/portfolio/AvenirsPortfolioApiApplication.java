@@ -7,7 +7,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableJpaAuditing
 @EnableScheduling
-@SpringBootApplication
+@SpringBootApplication(
+    scanBasePackages = {"fr.avenirsesr.portfolio", "fr.avenirsesr.portfolio.common"})
 public class AvenirsPortfolioApiApplication {
 
   public static void main(String[] args) {
