@@ -6,7 +6,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederRunner;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class SkillLevelProgressControllerIT {
 
   private static final String BASE_PATH = "/me/skill-level-progress";
+  private static final String DETAILS_BASE_PATH = BASE_PATH + "/details/{skillId}";
 
   @Autowired private MockMvc mockMvc;
 
@@ -53,95 +57,236 @@ public class SkillLevelProgressControllerIT {
     seederRunner.run();
   }
 
-  @Test
-  void shouldReturnSkillLevelProgressForStudent() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " enpoint");
-    BddLogger.when("performing a GET with a student user");
-    BddLogger.then("it should return paged skill level progresses");
-    mockMvc
-        .perform(
-            get(BASE_PATH)
-                .param("page", "0")
-                .param("pageSize", "10")
-                .param("sort", "NAME")
-                .header("Accept-Language", language.getCode())
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.page").exists());
+  @Nested
+  class GivenSkillLevelProgressEndpoint {
+    @BeforeEach
+    void setupGiven() {
+      BddLogger.given("the " + BASE_PATH + " enpoint");
+    }
+
+    @Nested
+    class WhenPerformingGET {
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET");
+      }
+
+      @Nested
+      class AndAStudentUserIsPassed {
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("a student user is passed");
+        }
+
+        @Test
+        void thenItShouldReturnPagedSkillLevelProgress() throws Exception {
+          BddLogger.then("it should return paged skill level progresses");
+          mockMvc
+              .perform(
+                  get(BASE_PATH)
+                      .param("page", "0")
+                      .param("pageSize", "10")
+                      .param("sort", "NAME")
+                      .header("Accept-Language", language.getCode())
+                      .header("X-Signed-Context", studentPayload)
+                      .header("X-Context-Kid", secretKey)
+                      .header("X-Context-Signature", studentSignature)
+                      .accept(MediaType.APPLICATION_JSON))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.data").isArray())
+              .andExpect(jsonPath("$.page").exists());
+        }
+      }
+
+      @Nested
+      class AndNoPaginationParamsArePassed {
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("no pagination params are passed");
+        }
+
+        @Test
+        void thenItShouldReturnDefaultPagination() throws Exception {
+          BddLogger.then("it should return default pagination");
+          mockMvc
+              .perform(
+                  get(BASE_PATH)
+                      .header("Accept-Language", language.getCode())
+                      .header("X-Signed-Context", studentPayload)
+                      .header("X-Context-Kid", secretKey)
+                      .header("X-Context-Signature", studentSignature)
+                      .accept(MediaType.APPLICATION_JSON))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.data").isArray())
+              .andExpect(jsonPath("$.page").exists());
+        }
+      }
+
+      @Nested
+      class AndAnUnknownUserIsPassed {
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("an unknown user is passed");
+        }
+
+        @Test
+        void thenItShouldReturn404() throws Exception {
+          BddLogger.then("it should return 404");
+          mockMvc
+              .perform(
+                  get(BASE_PATH)
+                      .header("Accept-Language", language.getCode())
+                      .header("X-Signed-Context", unknownUserPayload)
+                      .header("X-Context-Kid", secretKey)
+                      .header("X-Context-Signature", unknownUserSignature)
+                      .accept(MediaType.APPLICATION_JSON))
+              .andExpect(status().isNotFound())
+              .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+        }
+      }
+
+      @Nested
+      class AndANonStudentUserIsPassed {
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("an non student user is passed");
+        }
+
+        @Test
+        void thenItShouldReturn403() throws Exception {
+          BddLogger.then("it should return 403");
+          mockMvc
+              .perform(
+                  get(BASE_PATH)
+                      .header("Accept-Language", language.getCode())
+                      .header("X-Signed-Context", teacherPayload)
+                      .header("X-Context-Kid", secretKey)
+                      .header("X-Context-Signature", teacherSignature)
+                      .accept(MediaType.APPLICATION_JSON))
+              .andExpect(status().isForbidden())
+              .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
+        }
+      }
+
+      @Nested
+      class AndADateParamIsPassed {
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("a date param is passed");
+        }
+
+        @Test
+        void thenItShouldSupportSortingByDate() throws Exception {
+          BddLogger.then("it should return paged skill level progresses sorted by date");
+          mockMvc
+              .perform(
+                  get(BASE_PATH)
+                      .param("sort", "DATE")
+                      .header("Accept-Language", language.getCode())
+                      .header("X-Signed-Context", studentPayload)
+                      .header("X-Context-Kid", secretKey)
+                      .header("X-Context-Signature", studentSignature)
+                      .accept(MediaType.APPLICATION_JSON))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.data").isArray())
+              .andExpect(jsonPath("$.page").exists());
+        }
+      }
+    }
   }
 
-  @Test
-  void shouldReturnDefaultPaginationWhenNoParamsProvided() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " enpoint");
-    BddLogger.when("performing a GET without pagination params");
-    BddLogger.then("it should return default pagination");
-    mockMvc
-        .perform(
-            get(BASE_PATH)
-                .header("Accept-Language", language.getCode())
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.page").exists());
-  }
+  @Nested
+  class GivenSkillLevelProgressDetailsEndpoint {
+    @BeforeEach
+    void setupGiven() {
+      BddLogger.given("the " + DETAILS_BASE_PATH + " enpoint");
+    }
 
-  @Test
-  void shouldReturn404WhenUserUnknown() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " enpoint");
-    BddLogger.when("performing a GET with an unknown user");
-    BddLogger.then("it should return 404");
-    mockMvc
-        .perform(
-            get(BASE_PATH)
-                .header("Accept-Language", language.getCode())
-                .header("X-Signed-Context", unknownUserPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", unknownUserSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
-  }
+    @Nested
+    class WhenPerformingGET {
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET");
+      }
 
-  @Test
-  void shouldReturn403WhenUserIsNotStudent() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " enpoint");
-    BddLogger.when("performing a GET with a non student user");
-    BddLogger.then("it should return 403");
-    mockMvc
-        .perform(
-            get(BASE_PATH)
-                .header("Accept-Language", language.getCode())
-                .header("X-Signed-Context", teacherPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", teacherSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
-  }
+      @Nested
+      class AndAValidSkillIdIsPassed {
+        private static final UUID EXISTING_SKILL_ID =
+            UUID.fromString("f5bbedeb-c0f4-4b3c-bcbe-9a96091719e6");
 
-  @Test
-  void shouldSupportSortingByDate() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " enpoint");
-    BddLogger.when("performing a GET with a sorting by date param");
-    BddLogger.then("it should return paged skill level progresses sorted by date");
-    mockMvc
-        .perform(
-            get(BASE_PATH)
-                .param("sort", "DATE")
-                .header("Accept-Language", language.getCode())
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.page").exists());
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("a valid skill id is passed");
+        }
+
+        @Test
+        void thenItShouldReturnTheDetailedSkill() throws Exception {
+          BddLogger.then("it should return the detailed skill");
+          mockMvc
+              .perform(
+                  get(DETAILS_BASE_PATH, EXISTING_SKILL_ID)
+                      .header("Accept-Language", language.getCode())
+                      .header("X-Signed-Context", studentPayload)
+                      .header("X-Context-Kid", secretKey)
+                      .header("X-Context-Signature", studentSignature)
+                      .accept(MediaType.APPLICATION_JSON))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.id").isString())
+              .andExpect(jsonPath("$.name").isString())
+              .andExpect(jsonPath("$.skillLevels").isArray());
+        }
+      }
+
+      @Nested
+      class AndAnUnknowSkillIdIsPassed {
+        private static final UUID UNKNOWN_SKILL_ID = UUID.randomUUID();
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("an unknown skill id is passed");
+        }
+
+        @Test
+        void thenItShouldReturn404() throws Exception {
+          BddLogger.then("it should return 404");
+          mockMvc
+              .perform(
+                  get(DETAILS_BASE_PATH, UNKNOWN_SKILL_ID)
+                      .header("Accept-Language", language.getCode())
+                      .header("X-Signed-Context", studentPayload)
+                      .header("X-Context-Kid", secretKey)
+                      .header("X-Context-Signature", studentSignature)
+                      .accept(MediaType.APPLICATION_JSON))
+              .andExpect(status().isNotFound())
+              .andExpect(jsonPath("$.code").value("SKILL_NOT_FOUND"));
+        }
+      }
+
+      @Nested
+      class AndANonOwnedSkillIdIsPassed {
+        private static final UUID NON_OWNED_SKILL_ID =
+            UUID.fromString("f584cbbd-5209-4bfb-bb09-fc3e70046214");
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("an non owned skill id is passed");
+        }
+
+        @Test
+        void thenItShouldReturn404() throws Exception {
+          BddLogger.then("it should return 404");
+          mockMvc
+              .perform(
+                  get(DETAILS_BASE_PATH, NON_OWNED_SKILL_ID)
+                      .header("Accept-Language", language.getCode())
+                      .header("X-Signed-Context", studentPayload)
+                      .header("X-Context-Kid", secretKey)
+                      .header("X-Context-Signature", studentSignature)
+                      .accept(MediaType.APPLICATION_JSON))
+              .andExpect(status().isForbidden())
+              .andExpect(jsonPath("$.code").value("SKILL_NOT_FOUND"));
+        }
+      }
+    }
   }
 }
