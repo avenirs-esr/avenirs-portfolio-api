@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.trace.domain.model;
 
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 public record TraceDetail(
@@ -11,6 +10,8 @@ public record TraceDetail(
     ETraceStatus status,
     String programName,
     boolean isGroup,
-    List<TraceAttachment> attachments,
+    String aiUseJustification,
+    String personalNote,
+    TraceAttachment attachment,
     Instant createdAt,
     Instant updatedAt) {}

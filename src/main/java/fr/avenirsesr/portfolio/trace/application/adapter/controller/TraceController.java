@@ -10,7 +10,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.AssociatesTraceMapper;
+import fr.avenirsesr.portfolio.trace.application.adapter.mapper.AssociationTraceMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceAssociationSearchResultMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceDetailMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
@@ -18,7 +18,7 @@ import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceViewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TracesSummaryMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TraceAssociationSearchResult;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
-import fr.avenirsesr.portfolio.trace.domain.model.AssociatesTrace;
+import fr.avenirsesr.portfolio.trace.domain.model.AssociationTrace;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
@@ -121,15 +121,16 @@ public class TraceController {
     return ResponseEntity.ok(TraceDetailMapper.toDTO(traceDetail));
   }
 
-  @GetMapping("/{traceId}/associates")
-  public ResponseEntity<AssociatesTraceDTO> getTraceAssociates(
+  @GetMapping("/{traceId}/associations")
+  public ResponseEntity<List<AssociationTraceDTO>> getTraceAssociations(
       Principal principal, @PathVariable UUID traceId) {
-    log.debug("Received request to get trace associates of user [{}]", principal.getName());
+    log.debug("Received request to get trace associations of user [{}]", principal.getName());
     User user = userUtil.getUser(principal);
 
-    AssociatesTrace associatesTrace = traceService.getAssociatesTrace(user, traceId);
+    List<AssociationTrace> associationTraceList = traceService.getAssociationsTrace(user, traceId);
 
-    return ResponseEntity.ok(AssociatesTraceMapper.toDTO(associatesTrace));
+    return ResponseEntity.ok(
+        associationTraceList.stream().map(AssociationTraceMapper::toDTO).toList());
   }
 
   @PostMapping("/associate/{traceId}")

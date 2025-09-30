@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Schema(
@@ -14,7 +13,9 @@ import java.util.UUID;
       "status",
       "programName",
       "isGroup",
-      "attachments",
+      "aiUseJustification",
+      "personalNote",
+      "attachment",
       "createdAt",
       "updatedAt"
     })
@@ -24,6 +25,8 @@ public record TraceDetailDTO(
     @Schema(ref = "#/components/schemas/ETraceStatus") ETraceStatus status,
     String programName,
     boolean isGroup,
-    List<AttachmentUploadDTO> attachments,
+    String aiUseJustification,
+    String personalNote,
+    AttachmentUploadDTO attachment,
     Instant createdAt,
     Instant updatedAt) {}

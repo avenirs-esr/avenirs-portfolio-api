@@ -12,7 +12,9 @@ public interface TraceDetailMapper {
         traceDetail.status(),
         traceDetail.programName(),
         traceDetail.isGroup(),
-        traceDetail.attachments().stream().map(AttachmentUploadDTOMapper::fromDomain).toList(),
+        traceDetail.aiUseJustification(),
+        traceDetail.personalNote(),
+        AttachmentUploadDTOMapper.fromDomain(traceDetail.attachment()),
         traceDetail.createdAt(),
         traceDetail.updatedAt());
   }
