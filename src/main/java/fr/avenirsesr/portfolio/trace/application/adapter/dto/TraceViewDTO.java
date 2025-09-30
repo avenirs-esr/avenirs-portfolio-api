@@ -1,16 +1,22 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"id", "title", "status", "createdAt", "updatedAt", "willBeDeletedAt"})
+@Schema(
+    requiredProperties = {
+      "id",
+      "title",
+      "isAssociated",
+      "createdAt",
+      "updatedAt",
+    })
 public record TraceViewDTO(
     UUID id,
     String title,
-    @Schema(ref = "#/components/schemas/ETraceStatus") ETraceStatus status,
+    boolean isAssociated,
     Instant createdAt,
     Instant updatedAt,
     LocalDate willBeDeletedAt) {}

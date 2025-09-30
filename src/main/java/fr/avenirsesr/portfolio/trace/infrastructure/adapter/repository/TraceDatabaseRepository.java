@@ -2,18 +2,22 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
+import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericDeletableJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.DateFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -49,9 +53,25 @@ public class TraceDatabaseRepository
 
   @Override
   public PagedResult<Trace> findAll(
-      User user, PageCriteria pageCriteria, ETraceStatus status, String keyword) {
+      User user,
+      ETraceStatus status,
+      String keyword,
+      TraceFilter filter,
+      DateFilter dateFilter,
+      PageCriteria pageCriteria) {
+    Specification<TraceEntity> filterSpecification =
+        new TraceFilterSpecificationBuilder().build(filter.toMap());
+
     Specification<TraceEntity> specification =
-        TraceSpecification.ofUser(UserMapper.fromDomain(user)).and(TraceSpecification.notDeleted());
+        TraceSpecification.ofUser(UserMapper.fromDomain(user))
+            .and(TraceSpecification.notDeleted())
+            .and(filterSpecification);
+
+    if (dateFilter != null) {
+      Specification<TraceEntity> dateFilterSpecification =
+          new DateFilterSpecificationBuilder<TraceEntity>().build(dateFilter.toMap());
+      specification = specification.and(dateFilterSpecification);
+    }
 
     if (keyword != null) {
       specification =

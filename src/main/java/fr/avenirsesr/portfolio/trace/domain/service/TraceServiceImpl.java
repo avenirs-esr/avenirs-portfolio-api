@@ -25,10 +25,10 @@ import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.AdditionalSkillAssociation;
 import fr.avenirsesr.portfolio.trace.domain.model.AmsAssociation;
 import fr.avenirsesr.portfolio.trace.domain.model.AssociationsTrace;
-import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.SkillLevelAssociation;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
+import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -77,8 +77,14 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public PagedResult<Trace> getTracesView(
-      User user, PageCriteria pageCriteria, ETraceStatus status, String keyword) {
-    PagedResult<Trace> pagedResult = traceRepository.findAll(user, pageCriteria, status, keyword);
+      User user,
+      ETraceStatus status,
+      String keyword,
+      TraceFilter filter,
+      DateFilter dateFilter,
+      PageCriteria pageCriteria) {
+    PagedResult<Trace> pagedResult =
+        traceRepository.findAll(user, status, keyword, filter, dateFilter, pageCriteria);
     return new PagedResult<>(pagedResult.content(), pagedResult.pageInfo());
   }
 
@@ -139,7 +145,7 @@ public class TraceServiceImpl implements TraceService {
     return new TraceDetail(
         trace.getId(),
         trace.getTitle(),
-        trace.isUnassociated() ? ETraceStatus.UNASSOCIATED : ETraceStatus.ASSOCIATED,
+        !trace.isUnassociated(),
         programNameOfTrace(trace),
         trace.isGroup(),
         trace.getAiUseJustification().orElse(null),

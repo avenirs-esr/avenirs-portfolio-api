@@ -33,8 +33,8 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.Sk
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
-import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
@@ -190,16 +190,18 @@ public class TraceServiceImplTest {
     BddLogger.when("getting the traces view");
     when(traceRepository.findAll(
             student.getUser(),
-            new PageCriteria(pageNumber, pageSize),
-            ETraceStatus.UNASSOCIATED,
-            null))
+            null,
+            new TraceFilter(false, null, null, null),
+            null,
+            new PageCriteria(pageNumber, pageSize)))
         .thenReturn(new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
     PagedResult<Trace> traceView =
         traceService.getTracesView(
             student.getUser(),
-            new PageCriteria(pageNumber, pageSize),
-            ETraceStatus.UNASSOCIATED,
-            null);
+            null,
+            new TraceFilter(false, null, null, null),
+            null,
+            new PageCriteria(pageNumber, pageSize));
 
     BddLogger.then("it should return the traces view");
     assertEquals(traces.size(), traceView.content().size());
@@ -298,11 +300,8 @@ public class TraceServiceImplTest {
                 .toModel());
 
     BddLogger.when("getting the traces summary");
-    when(traceRepository.findAll(student.getUser(), ETraceStatus.UNASSOCIATED))
-        .thenReturn(unassociatedTraces);
-    when(traceRepository.findAll(student.getUser(), ETraceStatus.ASSOCIATED))
-        .thenReturn(associatedTraces);
-    when(traceConfigurationClient.getTraceConfiguration()).thenReturn(traceConfiguration);
+    when(traceRepository.findAll(student.getUser(), false)).thenReturn(unassociatedTraces);
+    when(traceRepository.findAll(student.getUser(), true)).thenReturn(associatedTraces);
     TracesSummary summary = traceService.getTracesSummary(student.getUser());
 
     BddLogger.then("it should return the traces summary");

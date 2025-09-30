@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkill
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -20,6 +21,7 @@ import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreation
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
+import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -60,11 +62,13 @@ public class TraceController {
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("/view")
-  public ResponseEntity<PagedResponse<TraceViewDTO>> getTracesView(
+  @PostMapping("/view")
+  public ResponseEntity<PagedResponse<TraceViewDTO>> tracesView(
       Principal principal,
-      @RequestParam(required = false) ETraceStatus status,
+      @RequestBody TraceFilter traceFilter,
+      @RequestParam(required = false) DateFilter dateFilter,
       @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) ETraceStatus status,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
@@ -76,7 +80,7 @@ public class TraceController {
     User user = userUtil.getUser(principal);
 
     PagedResult<Trace> tracesResult =
-        traceService.getTracesView(user, pageCriteria, status, keyword);
+        traceService.getTracesView(user, status, keyword, traceFilter, dateFilter, pageCriteria);
 
     var tracesViewResponse =
         new PagedResponse<>(

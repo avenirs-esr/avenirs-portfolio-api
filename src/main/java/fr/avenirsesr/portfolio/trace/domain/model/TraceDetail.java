@@ -7,7 +7,7 @@ import java.util.UUID;
 public record TraceDetail(
     UUID id,
     String title,
-    ETraceStatus status,
+    boolean isAssociated,
     String programName,
     boolean isGroup,
     String aiUseJustification,

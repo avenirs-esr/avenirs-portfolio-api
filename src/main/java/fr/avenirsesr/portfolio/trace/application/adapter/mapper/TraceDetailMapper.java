@@ -9,7 +9,7 @@ public interface TraceDetailMapper {
     return new TraceDetailDTO(
         traceDetail.id(),
         traceDetail.title(),
-        traceDetail.status(),
+        traceDetail.isAssociated(),
         traceDetail.programName(),
         traceDetail.isGroup(),
         traceDetail.aiUseJustification(),

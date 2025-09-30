@@ -1,11 +1,13 @@
 package fr.avenirsesr.portfolio.trace.domain.port.input;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
+import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.LocalDate;
@@ -19,7 +21,12 @@ public interface TraceService {
   List<Trace> lastTracesOf(User user);
 
   PagedResult<Trace> getTracesView(
-      User user, PageCriteria pageCriteria, ETraceStatus status, String keyword);
+      User user,
+      ETraceStatus status,
+      String keyword,
+      TraceFilter filter,
+      DateFilter dateFilter,
+      PageCriteria pageCriteria);
 
   void deleteById(User user, UUID id);
 
