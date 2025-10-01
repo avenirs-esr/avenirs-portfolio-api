@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
 import fr.avenirsesr.portfolio.file.domain.model.shared.File;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
@@ -135,7 +136,7 @@ public class TraceServiceImpl implements TraceService {
         traceAttachmentRepository.findByTrace(trace).stream()
             .filter(File::isActiveVersion)
             .findFirst()
-            .orElse(null);
+            .orElseThrow(FileNotFoundException::new);
     return new TraceDetail(
         trace.getId(),
         trace.getTitle(),
