@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Add
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
+import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
@@ -22,14 +23,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
-import fr.avenirsesr.portfolio.trace.domain.model.AdditionalSkillAssociation;
-import fr.avenirsesr.portfolio.trace.domain.model.AmsAssociation;
-import fr.avenirsesr.portfolio.trace.domain.model.AssociationsTrace;
-import fr.avenirsesr.portfolio.trace.domain.model.SkillLevelAssociation;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
-import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
+import fr.avenirsesr.portfolio.trace.domain.model.*;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
@@ -78,13 +72,12 @@ public class TraceServiceImpl implements TraceService {
   @Override
   public PagedResult<Trace> getTracesView(
       User user,
-      ETraceStatus status,
       String keyword,
       TraceFilter filter,
       DateFilter dateFilter,
       PageCriteria pageCriteria) {
     PagedResult<Trace> pagedResult =
-        traceRepository.findAll(user, status, keyword, filter, dateFilter, pageCriteria);
+        traceRepository.findAll(user, keyword, filter, dateFilter, pageCriteria);
     return new PagedResult<>(pagedResult.content(), pagedResult.pageInfo());
   }
 
@@ -104,8 +97,8 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public TracesSummary getTracesSummary(User user) {
-    List<Trace> associatedTraces = traceRepository.findAll(user, ETraceStatus.ASSOCIATED);
-    List<Trace> unassociatedTraces = traceRepository.findAll(user, ETraceStatus.UNASSOCIATED);
+    List<Trace> associatedTraces = traceRepository.findAll(user, true);
+    List<Trace> unassociatedTraces = traceRepository.findAll(user, false);
     TraceConfiguration traceConfiguration = traceConfigurationClient.getTraceConfiguration();
 
     int criticalCount =
@@ -227,7 +220,7 @@ public class TraceServiceImpl implements TraceService {
     return new TraceDetail(
         savedTrace.getId(),
         savedTrace.getTitle(),
-        savedTrace.isUnassociated() ? ETraceStatus.UNASSOCIATED : ETraceStatus.ASSOCIATED,
+        !savedTrace.isUnassociated(),
         programNameOfTrace(savedTrace),
         savedTrace.isGroup(),
         savedTrace.getAiUseJustification().orElse(null),

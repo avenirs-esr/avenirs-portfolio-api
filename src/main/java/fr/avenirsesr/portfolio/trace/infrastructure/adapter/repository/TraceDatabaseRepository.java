@@ -11,7 +11,6 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
-import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -54,7 +53,6 @@ public class TraceDatabaseRepository
   @Override
   public PagedResult<Trace> findAll(
       User user,
-      ETraceStatus status,
       String keyword,
       TraceFilter filter,
       DateFilter dateFilter,
@@ -79,22 +77,11 @@ public class TraceDatabaseRepository
               TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));
     }
 
-    switch (status) {
-      case UNASSOCIATED -> specification = specification.and(TraceSpecification.unassociated());
-      case ASSOCIATED -> specification = specification.and(TraceSpecification.associated());
-      case null -> {}
-    }
-
     Sort sort =
-        switch (status) {
-          case UNASSOCIATED -> Sort.by(Sort.Direction.ASC, "createdAt");
-          case ASSOCIATED ->
-              Sort.by(Sort.Direction.DESC, "updatedAt")
-                  .and(Sort.by(Sort.Direction.DESC, "createdAt"));
-          case null ->
-              Sort.by(Sort.Direction.DESC, "updatedAt")
-                  .and(Sort.by(Sort.Direction.DESC, "createdAt"));
-        };
+        filter.isAssociated() != null && !filter.isAssociated()
+            ? Sort.by(Sort.Direction.ASC, "createdAt")
+            : Sort.by(Sort.Direction.DESC, "updatedAt")
+                .and(Sort.by(Sort.Direction.DESC, "createdAt"));
 
     var results =
         jpaSpecificationExecutor.findAll(
@@ -115,14 +102,13 @@ public class TraceDatabaseRepository
   }
 
   @Override
-  public List<Trace> findAll(User user, ETraceStatus status) {
+  public List<Trace> findAll(User user, boolean isAssociated) {
     Specification<TraceEntity> specification =
         TraceSpecification.ofUser(UserMapper.fromDomain(user)).and(TraceSpecification.notDeleted());
 
-    switch (status) {
-      case UNASSOCIATED -> specification = specification.and(TraceSpecification.unassociated());
-      case ASSOCIATED -> specification = specification.and(TraceSpecification.associated());
-    }
+    specification =
+        specification.and(
+            isAssociated ? TraceSpecification.associated() : TraceSpecification.unassociated());
 
     return jpaSpecificationExecutor.findAll(specification).stream()
         .map(TraceMapper::toDomain)

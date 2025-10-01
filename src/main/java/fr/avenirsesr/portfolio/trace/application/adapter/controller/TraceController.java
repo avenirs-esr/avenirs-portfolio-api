@@ -18,7 +18,6 @@ import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceViewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TracesSummaryMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TraceAssociationSearchResult;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
-import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
@@ -68,7 +67,6 @@ public class TraceController {
       @RequestBody TraceFilter traceFilter,
       @RequestParam(required = false) DateFilter dateFilter,
       @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) ETraceStatus status,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
@@ -80,7 +78,7 @@ public class TraceController {
     User user = userUtil.getUser(principal);
 
     PagedResult<Trace> tracesResult =
-        traceService.getTracesView(user, status, keyword, traceFilter, dateFilter, pageCriteria);
+        traceService.getTracesView(user, keyword, traceFilter, dateFilter, pageCriteria);
 
     var tracesViewResponse =
         new PagedResponse<>(

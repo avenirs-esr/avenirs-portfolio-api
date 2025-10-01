@@ -6,7 +6,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericDeletableRepositoryPort;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
 import fr.avenirsesr.portfolio.user.domain.model.User;
@@ -17,13 +16,12 @@ public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {
 
   PagedResult<Trace> findAll(
       User user,
-      ETraceStatus status,
       String keyword,
       TraceFilter filter,
       DateFilter dateFilter,
       PageCriteria pageCriteria);
 
-  List<Trace> findAll(User user, ETraceStatus status);
+  List<Trace> findAll(User user, boolean isAssociated);
 
   List<Trace> linkedWith(AMS ams);
 

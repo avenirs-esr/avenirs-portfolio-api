@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
 import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
@@ -22,7 +21,6 @@ public interface TraceService {
 
   PagedResult<Trace> getTracesView(
       User user,
-      ETraceStatus status,
       String keyword,
       TraceFilter filter,
       DateFilter dateFilter,

@@ -11,7 +11,6 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
-import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -120,12 +119,13 @@ class TraceControllerIT {
   @Test
   void shouldReturnTraceViewUnassociated() throws Exception {
     BddLogger.given("the " + VIEW_BASE_PATH + " endpoint");
-    BddLogger.when("performing a GET");
+    BddLogger.when("performing a POST");
     BddLogger.then("it should return the trace view unassociated");
     mockMvc
         .perform(
-            get(VIEW_BASE_PATH)
-                .param("status", ETraceStatus.UNASSOCIATED.name())
+            post(VIEW_BASE_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"isAssociated\": false}")
                 .param("page", "0")
                 .param("pageSize", "10")
                 .header("X-Signed-Context", studentPayload)
