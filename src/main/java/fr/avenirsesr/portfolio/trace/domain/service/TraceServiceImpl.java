@@ -23,7 +23,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.St
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.AdditionalSkillAssociation;
 import fr.avenirsesr.portfolio.trace.domain.model.AmsAssociation;
-import fr.avenirsesr.portfolio.trace.domain.model.AssociationTrace;
+import fr.avenirsesr.portfolio.trace.domain.model.AssociationsTrace;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.domain.model.SkillLevelAssociation;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -151,34 +151,33 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public List<AssociationTrace> getAssociationsTrace(User user, UUID id) {
+  public AssociationsTrace getAssociationsTrace(User user, UUID id) {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(user, trace);
 
-    List<AssociationTrace> result = new ArrayList<>();
+    List<SkillLevelAssociation> skillLevelAssociations = new ArrayList<>();
+    List<AdditionalSkillAssociation> additionalSkillAssociations = new ArrayList<>();
 
     for (SkillLevelProgress skillLevelProgress : trace.getSkillLevels()) {
       var skillLevel = skillLevelProgress.getSkillLevel();
       var skill = skillLevel.getSkill();
 
       if (skillLevelProgress.getAmses() == null || skillLevelProgress.getAmses().isEmpty()) {
-        result.add(
-            new AssociationTrace(
-                toSkillLevelAssociation(skillLevelProgress, skillLevel, skill, null), null));
+        skillLevelAssociations.add(
+            toSkillLevelAssociation(skillLevelProgress, skillLevel, skill, null));
       } else {
         for (AMS ams : skillLevelProgress.getAmses()) {
-          result.add(
-              new AssociationTrace(
-                  toSkillLevelAssociation(skillLevelProgress, skillLevel, skill, ams), null));
+          skillLevelAssociations.add(
+              toSkillLevelAssociation(skillLevelProgress, skillLevel, skill, ams));
         }
       }
     }
 
     for (AdditionalSkillProgress additionalSkillProgress : trace.getAdditionalSkillProgresses()) {
-      result.add(new AssociationTrace(null, toAdditionalSkillAssociation(additionalSkillProgress)));
+      additionalSkillAssociations.add(toAdditionalSkillAssociation(additionalSkillProgress));
     }
 
-    return result;
+    return new AssociationsTrace(skillLevelAssociations, additionalSkillAssociations);
   }
 
   @Override
