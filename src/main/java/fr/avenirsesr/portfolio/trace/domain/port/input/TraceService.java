@@ -38,6 +38,15 @@ public interface TraceService {
       String personalNote,
       String aiJustification);
 
+  Trace updateTrace(
+      User user,
+      UUID traceId,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String personalNote,
+      String aiJustification);
+
   Optional<LocalDate> getWillBeDeletedAt(Trace trace);
 
   void associateTrace(

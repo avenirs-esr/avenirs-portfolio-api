@@ -1,0 +1,14 @@
+package fr.avenirsesr.portfolio.trace.application.adapter.dto;
+
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+@Schema(requiredProperties = {"title", "language", "isGroup"})
+public record UpdateTraceDTO(
+    @NotBlank @Size(max = 70) String title,
+    @Schema(ref = "#/components/schemas/ELanguage") ELanguage language,
+    boolean isGroup,
+    String personalNote,
+    String iaJustification) {}
