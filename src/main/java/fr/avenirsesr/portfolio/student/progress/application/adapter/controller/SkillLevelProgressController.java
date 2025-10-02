@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDetailedDTO;
+import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.SkillDetailedMapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
@@ -73,9 +74,7 @@ public class SkillLevelProgressController {
     List<SkillLevelProgress> skillLevelProgresses =
         studentProgressService.getSkillLevelsBySkillId(student, skillId);
     List<SkillLevel> skillLevels =
-        skillLevelProgresses.stream()
-            .map(skillLevelProgress -> skillLevelProgress.getSkillLevel())
-            .toList();
+        skillLevelProgresses.stream().map(SkillLevelProgress::getSkillLevel).toList();
     Skill skill =
         skillLevels.stream()
             .findFirst()
@@ -83,6 +82,19 @@ public class SkillLevelProgressController {
             .getSkill();
 
     var response = SkillDetailedMapper.fromDomainToDto(skill, skillLevels);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/all-skill")
+  public ResponseEntity<List<SkillListItemDTO>> getAllSkills(Principal principal) {
+    Student student = userUtil.getStudent(principal);
+    log.debug("Received request to all skills of [{}]", student);
+
+    var response =
+        studentProgressService.getAllSkillList(student).stream()
+            .map(skill -> new SkillListItemDTO(skill.getId(), skill.getName()))
+            .toList();
 
     return ResponseEntity.ok(response);
   }

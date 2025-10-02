@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
@@ -758,6 +759,86 @@ public class StudentProgressServiceImplTest {
             assertEquals(currentProgress, firstProgress, "Current progress should appear first");
           }
         }
+      }
+    }
+
+    @Nested
+    class WhenGettingAllSkillList {
+      private Skill skillA;
+      private Skill skillB;
+      private SkillLevelProgress slpA1;
+      private SkillLevelProgress slpA2;
+      private SkillLevelProgress slpB;
+      private StudentProgress progress1;
+      private StudentProgress progress2;
+      private List<Skill> result;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("getting all skills list of a student");
+        skillA = SkillFixture.create().withName("Skill A").toModel();
+        skillB = SkillFixture.create().withName("Skill B").toModel();
+
+        slpA1 =
+            SkillLevelProgressFixture.create(student)
+                .withSkillLevel(SkillLevelFixture.create().withSkill(skillA).toModel())
+                .toModel();
+
+        // même skill pour tester le distinct()
+        slpA2 =
+            SkillLevelProgressFixture.create(student)
+                .withSkillLevel(SkillLevelFixture.create().withSkill(skillA).toModel())
+                .toModel();
+
+        slpB =
+            SkillLevelProgressFixture.create(student)
+                .withSkillLevel(SkillLevelFixture.create().withSkill(skillB).toModel())
+                .toModel();
+
+        progress1 =
+            StudentProgressFixture.create()
+                .withUser(student.getUser())
+                .withSkillLevels(List.of(slpA1, slpB))
+                .toModel();
+
+        progress2 =
+            StudentProgressFixture.create()
+                .withUser(student.getUser())
+                .withSkillLevels(List.of(slpA2))
+                .toModel();
+
+        when(studentProgressRepository.findAllByStudent(eq(student)))
+            .thenReturn(List.of(progress1, progress2));
+
+        result = studentProgressService.getAllSkillList(student);
+      }
+
+      @Test
+      void thenItShouldReturnDistinctSkills() {
+        BddLogger.then("it should return distinct skills from all student progresses");
+        assertEquals(2, result.size(), "Should contain 2 distinct skills");
+        assertTrue(result.contains(skillA), "Should contain Skill A");
+        assertTrue(result.contains(skillB), "Should contain Skill B");
+        verify(studentProgressRepository).findAllByStudent(eq(student));
+      }
+    }
+
+    @Nested
+    class WhenGettingAllSkillListWithNoProgress {
+      private List<Skill> result;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("getting all skills list with no student progress");
+        when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of());
+        result = studentProgressService.getAllSkillList(student);
+      }
+
+      @Test
+      void thenItShouldReturnEmptyList() {
+        BddLogger.then("it should return an empty list when no student progress is found");
+        assertTrue(result.isEmpty(), "Result should be empty");
+        verify(studentProgressRepository).findAllByStudent(eq(student));
       }
     }
   }

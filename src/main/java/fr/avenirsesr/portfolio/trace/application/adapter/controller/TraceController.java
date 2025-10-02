@@ -27,6 +27,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -65,10 +66,12 @@ public class TraceController {
   public ResponseEntity<PagedResponse<TraceViewDTO>> tracesView(
       Principal principal,
       @RequestBody TraceFilter traceFilter,
-      @RequestParam(required = false) DateFilter dateFilter,
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
+      @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) LocalDate fromDate,
+      @RequestParam(required = false) LocalDate toDate) {
+    var dateFilter = new DateFilter(fromDate, toDate);
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to trace view of user [{}] (page= {}, size= {})",

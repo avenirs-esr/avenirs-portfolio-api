@@ -302,6 +302,7 @@ public class TraceServiceImplTest {
     BddLogger.when("getting the traces summary");
     when(traceRepository.findAll(student.getUser(), false)).thenReturn(unassociatedTraces);
     when(traceRepository.findAll(student.getUser(), true)).thenReturn(associatedTraces);
+    when(traceConfigurationClient.getTraceConfiguration()).thenReturn(traceConfiguration);
     TracesSummary summary = traceService.getTracesSummary(student.getUser());
 
     BddLogger.then("it should return the traces summary");

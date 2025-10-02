@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
@@ -125,5 +126,16 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   @Override
   public List<SkillLevelProgress> getSkillLevelsBySkillId(Student student, UUID skillId) {
     return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);
+  }
+
+  @Override
+  public List<Skill> getAllSkillList(Student student) {
+    return studentProgressRepository.findAllByStudent(student).stream()
+        .flatMap(
+            studentProgress ->
+                studentProgress.getAllSkillLevels().stream()
+                    .map(skillLevelProgress -> skillLevelProgress.getSkillLevel().getSkill()))
+        .distinct()
+        .toList();
   }
 }
