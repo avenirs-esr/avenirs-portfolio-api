@@ -192,8 +192,28 @@ public class TraceServiceImpl implements TraceService {
         Trace.create(
             UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);
 
-    traceRepository.save(trace);
-    return trace;
+    return traceRepository.save(trace);
+  }
+
+  @Override
+  public Trace updateTrace(
+      User user,
+      UUID traceId,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String personalNote,
+      String aiJustification) {
+    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
+    checkIfUserIsAuthorizedOnTrace(user, trace);
+
+    trace.setTitle(title);
+    trace.setLanguage(language);
+    trace.setGroup(isGroup);
+    trace.setPersonalNote(personalNote);
+    trace.setAiUseJustification(aiJustification);
+
+    return traceRepository.save(trace);
   }
 
   @Override

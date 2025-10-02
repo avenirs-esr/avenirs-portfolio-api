@@ -115,7 +115,8 @@ public class TraceController {
   @GetMapping("/{traceId}/detail")
   public ResponseEntity<TraceDetailDTO> getTraceDetail(
       Principal principal, @PathVariable UUID traceId) {
-    log.debug("Received request to get trace detail of user [{}]", principal.getName());
+    log.debug(
+        "Received request to get trace [{}] detail of user [{}]", traceId, principal.getName());
     User user = userUtil.getUser(principal);
 
     TraceDetail traceDetail = traceService.getTraceDetail(user, traceId);
@@ -126,7 +127,10 @@ public class TraceController {
   @GetMapping("/{traceId}/associations")
   public ResponseEntity<AssociationsTraceDTO> getTraceAssociations(
       Principal principal, @PathVariable UUID traceId) {
-    log.debug("Received request to get trace associations of user [{}]", principal.getName());
+    log.debug(
+        "Received request to get trace [{}] associations of user [{}]",
+        traceId,
+        principal.getName());
     User user = userUtil.getUser(principal);
 
     AssociationsTrace associationsTrace = traceService.getAssociationsTrace(user, traceId);
@@ -214,5 +218,26 @@ public class TraceController {
             createTraceDTO.iaJustification());
 
     return ResponseEntity.status(201).body(new TracesCreationResponse(trace.getId()));
+  }
+
+  @PutMapping("/{traceId}")
+  public ResponseEntity<Trace> updateTrace(
+      Principal principal,
+      @PathVariable UUID traceId,
+      @Valid @RequestBody UpdateTraceDTO updateTraceDTO) {
+    log.debug("Received request to update trace [{}] for user [{}]", traceId, principal.getName());
+    User user = userUtil.getUser(principal);
+
+    var trace =
+        traceService.updateTrace(
+            user,
+            traceId,
+            updateTraceDTO.title(),
+            updateTraceDTO.language(),
+            updateTraceDTO.isGroup(),
+            updateTraceDTO.personalNote(),
+            updateTraceDTO.iaJustification());
+
+    return ResponseEntity.ok(trace);
   }
 }

@@ -364,6 +364,102 @@ public class TraceServiceImplTest {
   }
 
   @Test
+  void shouldUpdateAndSaveTrace() {
+    BddLogger.given("a TraceServiceImpl service and a valid trace");
+    User user = student.getUser();
+    String title = "Test Title";
+    String titleUpdated = "Test Title - Updated";
+    ELanguage language = ELanguage.ENGLISH;
+    ELanguage languageUpdated = ELanguage.FRENCH;
+    boolean isGroup = false;
+    boolean isGroupUpdated = true;
+    String personalNote = "Some personal note";
+    String personalNoteUpdated = "Some personal note - Updated";
+    String aiJustification = "Justified by AI";
+    String aiJustificationUpdated = "Justified by AI - Updated";
+
+    Trace trace =
+        TraceFixture.create()
+            .withUser(user)
+            .withTitle(title)
+            .withLanguage(language)
+            .withGroup(isGroup)
+            .withPersonalNote(personalNote)
+            .withAiUseJustification(aiJustification)
+            .toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    BddLogger.when("update trace");
+    traceService.updateTrace(
+        user,
+        trace.getId(),
+        titleUpdated,
+        languageUpdated,
+        isGroupUpdated,
+        personalNoteUpdated,
+        aiJustificationUpdated);
+
+    BddLogger.then("it should update and save the trace");
+    ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+    verify(traceRepository).save(captor.capture());
+
+    Trace captorTrace = captor.getValue();
+
+    assertEquals(user, captorTrace.getUser());
+    assertEquals(titleUpdated, captorTrace.getTitle());
+    assertEquals(languageUpdated, captorTrace.getLanguage());
+    assertEquals(isGroupUpdated, captorTrace.isGroup());
+
+    assertTrue(captorTrace.getPersonalNote().isPresent());
+    assertEquals(personalNoteUpdated, captorTrace.getPersonalNote().get());
+
+    assertTrue(captorTrace.getAiUseJustification().isPresent());
+    assertEquals(aiJustificationUpdated, captorTrace.getAiUseJustification().get());
+  }
+
+  @Test
+  void shouldUpdateTraceWithNullFields() {
+    BddLogger.given("a TraceServiceImpl service and a valid trace");
+    User user = student.getUser();
+    String title = "Test Title";
+    String titleUpdated = "Test Title with null fields";
+    ELanguage language = ELanguage.ENGLISH;
+    ELanguage languageUpdated = ELanguage.FRENCH;
+    boolean isGroup = false;
+    boolean isGroupUpdated = true;
+    String personalNote = "Some personal note";
+    String aiJustification = "Justified by AI";
+
+    Trace trace =
+        TraceFixture.create()
+            .withUser(user)
+            .withTitle(title)
+            .withLanguage(language)
+            .withGroup(isGroup)
+            .withPersonalNote(personalNote)
+            .withAiUseJustification(aiJustification)
+            .toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    BddLogger.when("update trace with null fields");
+    traceService.updateTrace(
+        user, trace.getId(), titleUpdated, languageUpdated, isGroupUpdated, null, null);
+
+    BddLogger.then("it should update and save the trace with null fields");
+    ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+    verify(traceRepository).save(captor.capture());
+
+    Trace captorTrace = captor.getValue();
+
+    assertEquals(user, captorTrace.getUser());
+    assertEquals(titleUpdated, captorTrace.getTitle());
+    assertEquals(languageUpdated, captorTrace.getLanguage());
+    assertEquals(isGroupUpdated, captorTrace.isGroup());
+    assertFalse(captorTrace.getPersonalNote().isPresent());
+    assertFalse(captorTrace.getAiUseJustification().isPresent());
+  }
+
+  @Test
   void givenUnassociatedTrace_shouldReturnWillBeDeletedAt() {
     BddLogger.given("a TraceServiceImpl service and an unassociated trace");
     TraceConfiguration config = new TraceConfiguration(90, 30, 5);
