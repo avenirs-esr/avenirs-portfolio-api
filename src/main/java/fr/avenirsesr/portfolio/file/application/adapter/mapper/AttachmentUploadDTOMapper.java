@@ -10,6 +10,7 @@ public interface AttachmentUploadDTOMapper {
         attachment.getName(),
         attachment.getFileType(),
         attachment.getSize(),
-        attachment.getVersion());
+        attachment.getVersion(),
+        attachment.getUploadedAt());
   }
 }

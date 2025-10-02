@@ -9,14 +9,25 @@ import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
+import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.domain.model.shared.File;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
+import fr.avenirsesr.portfolio.program.domain.model.Skill;
+import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.trace.domain.model.AdditionalSkillAssociation;
+import fr.avenirsesr.portfolio.trace.domain.model.AmsAssociation;
+import fr.avenirsesr.portfolio.trace.domain.model.AssociationsTrace;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
+import fr.avenirsesr.portfolio.trace.domain.model.SkillLevelAssociation;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
 import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -44,6 +55,7 @@ public class TraceServiceImpl implements TraceService {
   private final AMSRepository amsRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceConfigurationService traceConfigurationService;
+  private final TraceAttachmentRepository traceAttachmentRepository;
 
   @Override
   public String programNameOfTrace(Trace trace) {
@@ -72,10 +84,7 @@ public class TraceServiceImpl implements TraceService {
   @Override
   public void deleteById(User user, UUID id) {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
-
-    if (!trace.getUser().getId().equals(user.getId())) {
-      throw new UserNotAuthorizedException();
-    }
+    checkIfUserIsAuthorizedOnTrace(user, trace);
 
     trace.setAmses(new ArrayList<>());
     trace.setSkillLevels(new ArrayList<>());
@@ -119,6 +128,59 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
+  public TraceDetail getTraceDetail(User user, UUID id) {
+    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
+    checkIfUserIsAuthorizedOnTrace(user, trace);
+
+    TraceAttachment traceAttachment =
+        traceAttachmentRepository.findByTrace(trace).stream()
+            .filter(File::isActiveVersion)
+            .findFirst()
+            .orElseThrow(FileNotFoundException::new);
+    return new TraceDetail(
+        trace.getId(),
+        trace.getTitle(),
+        trace.isUnassociated() ? ETraceStatus.UNASSOCIATED : ETraceStatus.ASSOCIATED,
+        programNameOfTrace(trace),
+        trace.isGroup(),
+        trace.getAiUseJustification().orElse(null),
+        trace.getPersonalNote().orElse(null),
+        traceAttachment,
+        trace.getCreatedAt(),
+        trace.getUpdatedAt());
+  }
+
+  @Override
+  public AssociationsTrace getAssociationsTrace(User user, UUID id) {
+    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
+    checkIfUserIsAuthorizedOnTrace(user, trace);
+
+    List<SkillLevelAssociation> skillLevelAssociations = new ArrayList<>();
+    List<AdditionalSkillAssociation> additionalSkillAssociations = new ArrayList<>();
+
+    for (SkillLevelProgress skillLevelProgress : trace.getSkillLevels()) {
+      var skillLevel = skillLevelProgress.getSkillLevel();
+      var skill = skillLevel.getSkill();
+
+      if (skillLevelProgress.getAmses() == null || skillLevelProgress.getAmses().isEmpty()) {
+        skillLevelAssociations.add(
+            toSkillLevelAssociation(skillLevelProgress, skillLevel, skill, null));
+      } else {
+        for (AMS ams : skillLevelProgress.getAmses()) {
+          skillLevelAssociations.add(
+              toSkillLevelAssociation(skillLevelProgress, skillLevel, skill, ams));
+        }
+      }
+    }
+
+    for (AdditionalSkillProgress additionalSkillProgress : trace.getAdditionalSkillProgresses()) {
+      additionalSkillAssociations.add(toAdditionalSkillAssociation(additionalSkillProgress));
+    }
+
+    return new AssociationsTrace(skillLevelAssociations, additionalSkillAssociations);
+  }
+
+  @Override
   public Trace createTrace(
       User user,
       String title,
@@ -156,10 +218,7 @@ public class TraceServiceImpl implements TraceService {
       List<UUID> skillLevelIds,
       List<UUID> additionalSkillProgressIds) {
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-
-    if (!trace.getUser().getId().equals(user.getId())) {
-      throw new UserNotAuthorizedException();
-    }
+    checkIfUserIsAuthorizedOnTrace(user, trace);
 
     var student = user.toStudent();
     associateAMS(student, trace, amsIds);
@@ -254,5 +313,42 @@ public class TraceServiceImpl implements TraceService {
                   .orElseThrow(UserNotAuthorizedException::new);
           trace.add(additionalSkillProgress);
         });
+  }
+
+  private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
+    if (!trace.getUser().getId().equals(user.getId())) {
+      throw new UserNotAuthorizedException();
+    }
+  }
+
+  private SkillLevelAssociation toSkillLevelAssociation(
+      SkillLevelProgress skillLevelProgress, SkillLevel skillLevel, Skill skill, AMS ams) {
+    AmsAssociation amsAssociation =
+        (ams == null) ? null : new AmsAssociation(ams.getId(), ams.getTitle(), ams.getStatus());
+
+    return new SkillLevelAssociation(
+        skillLevelProgress.getId(),
+        skill.getName(),
+        skillLevel.getName(),
+        skillLevelProgress.getStatus(),
+        amsAssociation);
+  }
+
+  private AdditionalSkillAssociation toAdditionalSkillAssociation(
+      AdditionalSkillProgress additionalSkillProgress) {
+    var skill = additionalSkillProgress.getSkill();
+    var segments = skill.getPathSegments();
+    var pathSegments =
+        List.of(
+            segments.getIssue().getLibelle(),
+            segments.getTarget().getLibelle(),
+            segments.getMacroSkill().getLibelle());
+
+    return new AdditionalSkillAssociation(
+        additionalSkillProgress.getId(),
+        segments.getSkill().getLibelle(),
+        additionalSkillProgress.getLevel(),
+        pathSegments,
+        skill.getType());
   }
 }
