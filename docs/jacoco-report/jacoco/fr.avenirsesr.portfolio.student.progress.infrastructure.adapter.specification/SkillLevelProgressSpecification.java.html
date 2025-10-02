@@ -5,37 +5,50 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import jakarta.persistence.criteria.Join;
+import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L10">public class SkillLevelProgressSpecification {</span>
+<span class="nc" id="L12">public class SkillLevelProgressSpecification {</span>
   public static Specification&lt;SkillLevelProgressEntity&gt; linkedTo(AMSEntity ams) {
-<span class="fc" id="L12">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.isMember(ams, root.get(&quot;amses&quot;));</span>
+<span class="fc" id="L14">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.isMember(ams, root.get(&quot;amses&quot;));</span>
   }
 
   public static Specification&lt;SkillLevelProgressEntity&gt; with(Student student) {
-<span class="nc" id="L16">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="nc" id="L17">        criteriaBuilder.equal(root.get(&quot;student&quot;), UserMapper.fromDomain(student));</span>
+<span class="nc" id="L18">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="nc" id="L19">        criteriaBuilder.equal(root.get(&quot;student&quot;), UserMapper.fromDomain(student));</span>
+  }
+
+  public static Specification&lt;SkillLevelProgressEntity&gt; with(Student student, UUID skillId) {
+<span class="fc" id="L23">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc" id="L24">      var studentPredicate =</span>
+<span class="fc" id="L25">          criteriaBuilder.equal(root.get(&quot;student&quot;), UserMapper.fromDomain(student));</span>
+<span class="fc" id="L26">      Join&lt;Object, Object&gt; skillEntity = root.join(&quot;skillLevel&quot;).join(&quot;skill&quot;);</span>
+<span class="fc" id="L27">      var skillPredicate = criteriaBuilder.equal(skillEntity.get(&quot;id&quot;), skillId);</span>
+
+<span class="fc" id="L29">      return criteriaBuilder.and(studentPredicate, skillPredicate);</span>
+    };
   }
 
   public static Specification&lt;SkillLevelProgressEntity&gt; search(String keyword, ELanguage language) {
-<span class="nc" id="L21">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L22" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="nc" id="L23">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L34">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L35" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L36">        return criteriaBuilder.conjunction();</span>
       }
 
-<span class="nc" id="L26">      var skillLevelJoin = root.join(&quot;skillLevel&quot;);</span>
-<span class="nc" id="L27">      var translationJoin = skillLevelJoin.join(&quot;translations&quot;);</span>
+<span class="nc" id="L39">      var skillLevelJoin = root.join(&quot;skillLevel&quot;);</span>
+<span class="nc" id="L40">      var translationJoin = skillLevelJoin.join(&quot;translations&quot;);</span>
 
-<span class="nc" id="L29">      var languagePredicate = criteriaBuilder.equal(translationJoin.get(&quot;language&quot;), language);</span>
+<span class="nc" id="L42">      var languagePredicate = criteriaBuilder.equal(translationJoin.get(&quot;language&quot;), language);</span>
 
-<span class="nc" id="L31">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
-<span class="nc" id="L32">      var namePredicate =</span>
-<span class="nc" id="L33">          criteriaBuilder.like(criteriaBuilder.lower(translationJoin.get(&quot;name&quot;)), pattern);</span>
-<span class="nc" id="L34">      var descriptionPredicate =</span>
-<span class="nc" id="L35">          criteriaBuilder.like(criteriaBuilder.lower(translationJoin.get(&quot;description&quot;)), pattern);</span>
+<span class="nc" id="L44">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
+<span class="nc" id="L45">      var namePredicate =</span>
+<span class="nc" id="L46">          criteriaBuilder.like(criteriaBuilder.lower(translationJoin.get(&quot;name&quot;)), pattern);</span>
+<span class="nc" id="L47">      var descriptionPredicate =</span>
+<span class="nc" id="L48">          criteriaBuilder.like(criteriaBuilder.lower(translationJoin.get(&quot;description&quot;)), pattern);</span>
 
-<span class="nc" id="L37">      return criteriaBuilder.and(</span>
-<span class="nc" id="L38">          languagePredicate, criteriaBuilder.or(namePredicate, descriptionPredicate));</span>
+<span class="nc" id="L50">      return criteriaBuilder.and(</span>
+<span class="nc" id="L51">          languagePredicate, criteriaBuilder.or(namePredicate, descriptionPredicate));</span>
     };
   }
 }

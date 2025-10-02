@@ -121,5 +121,10 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
 <span class="nc" id="L122">    return skillLevelProgressRepository.findAllByStudent(student, pageCriteria, keyword);</span>
   }
+
+  @Override
+  public List&lt;SkillLevelProgress&gt; getSkillLevelsBySkillId(Student student, UUID skillId) {
+<span class="fc" id="L127">    return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
