@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.Additiona
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.request.AddAdditionalSkillDTO;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
@@ -63,16 +64,17 @@ public class AdditionalSkillController {
   }
 
   @PostMapping()
-  public ResponseEntity<Void> createAdditionalSkillProgress(
+  public ResponseEntity<AdditionalSkillProgress> createAdditionalSkillProgress(
       Principal principal, @RequestBody AddAdditionalSkillDTO additionalSkill) {
     Student student = userUtil.getStudent(principal);
     log.debug("Received request to create additional skill for student [{}]", student);
-    additionalSkillService.createAdditionalSkillProgress(
-        student,
-        UUID.fromString(additionalSkill.getId()),
-        additionalSkill.getType(),
-        additionalSkill.getLevel());
+    var additionalSkillProgress =
+        additionalSkillService.createAdditionalSkillProgress(
+            student,
+            UUID.fromString(additionalSkill.getId()),
+            additionalSkill.getType(),
+            additionalSkill.getLevel());
     return ResponseEntity.created(URI.create("/me/additional-skills/" + additionalSkill.getId()))
-        .build();
+        .body(additionalSkillProgress);
   }
 }

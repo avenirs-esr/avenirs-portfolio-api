@@ -11,6 +11,7 @@ import java.security.Principal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +46,7 @@ public class TraceAttachmentController {
             file.getSize(),
             file.getBytes());
 
-    return ResponseEntity.status(201).body(AttachmentUploadDTOMapper.fromDomain(attachment));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(AttachmentUploadDTOMapper.fromDomain(attachment));
   }
 }

@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -217,7 +218,8 @@ public class TraceController {
             createTraceDTO.personalNote(),
             createTraceDTO.iaJustification());
 
-    return ResponseEntity.status(201).body(new TracesCreationResponse(trace.getId()));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(new TracesCreationResponse(trace.getId()));
   }
 
   @PutMapping("/{traceId}")
