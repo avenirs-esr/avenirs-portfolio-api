@@ -283,7 +283,6 @@ public class TraceServiceImplTest {
                 .withCreatedAt(Instant.now().minus(85, ChronoUnit.DAYS))
                 .toModel());
 
-<<<<<<< HEAD
     List<Trace> associatedTraces =
         List.of(
             TraceFixture.create()
@@ -294,20 +293,13 @@ public class TraceServiceImplTest {
                 .withUser(student.getUser())
                 .withCreatedAt(Instant.now().minus(72, ChronoUnit.DAYS))
                 .toModel());
-=======
-    BddLogger.when("getting the unassociated traces summary");
-    when(traceRepository.findAllUnassociated(student.getUser())).thenReturn(unassociatedTraces);
-    when(traceConfigurationClient.getTraceConfiguration()).thenReturn(traceConfiguration);
-    UnassociatedTracesSummary summary =
-        traceService.getUnassociatedTracesSummary(student.getUser());
->>>>>>> cdc9b075 (refactor: back office feature moved in specific microservice)
 
     BddLogger.when("getting the traces summary");
     when(traceRepository.findAll(student.getUser(), ETraceStatus.UNASSOCIATED))
         .thenReturn(unassociatedTraces);
     when(traceRepository.findAll(student.getUser(), ETraceStatus.ASSOCIATED))
         .thenReturn(associatedTraces);
-    when(traceConfigurationService.getTraceConfiguration()).thenReturn(traceConfiguration);
+    when(traceConfigurationClient.getTraceConfiguration()).thenReturn(traceConfiguration);
     TracesSummary summary = traceService.getTracesSummary(student.getUser());
 
     BddLogger.then("it should return the traces summary");
