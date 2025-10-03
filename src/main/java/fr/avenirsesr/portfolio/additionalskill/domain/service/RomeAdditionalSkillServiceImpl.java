@@ -57,21 +57,26 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
 
   @Override
   public boolean checkRomeVersionUpdated() {
-    Rome4Version newVersion = romeAdditionalSkillApi.fetchRomeVersion();
+    try {
+      Rome4Version newVersion = romeAdditionalSkillApi.fetchRomeVersion();
 
-    boolean shouldSave =
-        rome4VersionRepository
-            .findFirstByOrderByVersionDesc()
-            .map(oldVersion -> newVersion.getVersion() > oldVersion.getVersion())
-            .orElse(true);
+      boolean shouldSave =
+          rome4VersionRepository
+              .findFirstByOrderByVersionDesc()
+              .map(oldVersion -> newVersion.getVersion() > oldVersion.getVersion())
+              .orElse(true);
 
-    if (shouldSave) {
-      var rome4Version =
-          Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate());
-      rome4VersionRepository.save(rome4Version);
+      if (shouldSave) {
+        var rome4Version =
+            Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate());
+        rome4VersionRepository.save(rome4Version);
+      }
+
+      return shouldSave;
+    } catch (Exception e) {
+      log.error("An error occurred while fetching ROME 4.0 version.", e);
+      return false;
     }
-
-    return shouldSave;
   }
 
   private List<AdditionalSkill> getAdditionalSkillsToSave(
