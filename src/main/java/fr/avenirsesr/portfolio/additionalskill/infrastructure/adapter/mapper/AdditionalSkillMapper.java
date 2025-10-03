@@ -1,14 +1,12 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.additionalskill.Category;
+import fr.avenirsesr.portfolio.additionalskill.domain.EAdditionalSkillCategoryType;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.Competence;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.CompetenceComplementaireDetaillee;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.PathSegmentsEmbeddable;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.SegmentDetailEmbeddable;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.*;
 
 public interface AdditionalSkillMapper {
   static AdditionalSkill toDomain(CompetenceComplementaireDetaillee entity) {
@@ -70,7 +68,26 @@ public interface AdditionalSkillMapper {
 
   static AdditionalSkillEntity fromDomain(AdditionalSkill domain) {
     return AdditionalSkillEntity.of(
-        domain.getId(), toEmbeddable(domain.getPathSegments()), domain.getType());
+        domain.getId(),
+        toEmbeddable(domain.getPathSegments()),
+        domain.getType(),
+        toCategory(domain.getPathSegments()));
+  }
+
+  static AdditionalSkillCategoryEntity toCategory(PathSegments pathSegment) {
+    // todo : calling create instead of .of() method is temporally.
+    var domain =
+        AdditionalSkillCategoryEntity.create(
+            pathSegment.getDomain().getLibelle(), EAdditionalSkillCategoryType.MACRO_SKILL, null);
+    var issue =
+        AdditionalSkillCategoryEntity.create(
+            pathSegment.getIssue().getLibelle(), EAdditionalSkillCategoryType.ISSUE, domain);
+    var target =
+        AdditionalSkillCategoryEntity.create(
+            pathSegment.getTarget().getLibelle(), EAdditionalSkillCategoryType.TARGET, issue);
+
+    return AdditionalSkillCategoryEntity.create(
+        pathSegment.getMacroSkill().getLibelle(), EAdditionalSkillCategoryType.MACRO_SKILL, target);
   }
 
   static PathSegmentsEmbeddable toEmbeddable(PathSegments domain) {
