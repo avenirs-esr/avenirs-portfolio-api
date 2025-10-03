@@ -20,6 +20,7 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
@@ -55,17 +56,15 @@ public class AdditionalSkillBatchLoader {
   }
 
   @Bean
-  public Flow importROME4SkillFlow(
-      Step checkROME4VersionUpdateStep, Step cleanROME4SkillStep, Step importROME4SkillStep) {
+  public Flow importROME4SkillFlow(Step checkROME4VersionUpdateStep, Step importROME4SkillStep) {
     return new FlowBuilder<SimpleFlow>("importROME4SkillFlow")
         .start(checkROME4VersionUpdateStep)
         .on("NOOP")
         .end()
         .from(checkROME4VersionUpdateStep)
         .on("*")
-        .to(cleanROME4SkillStep)
-        .next(importROME4SkillStep)
-        .build();
+        .to(importROME4SkillStep)
+        .end();
   }
 
   @Bean
@@ -93,19 +92,6 @@ public class AdditionalSkillBatchLoader {
   }
 
   @Bean
-  public Step cleanROME4SkillStep(
-      JobRepository jobRepository, PlatformTransactionManager transactionManager) {
-    return new StepBuilder("cleanROME4SkillStep", jobRepository)
-        .tasklet(
-            (contribution, chunkContext) -> {
-              romeAdditionalSkillService.cleanAndCreateAdditionalSkillIndex();
-              return RepeatStatus.FINISHED;
-            },
-            transactionManager)
-        .build();
-  }
-
-  @Bean
   public Step importROME4SkillStep(
       JobRepository jobRepository, PlatformTransactionManager transactionManager) {
     return new StepBuilder("importROME4SkillStep", jobRepository)
@@ -124,6 +110,7 @@ public class AdditionalSkillBatchLoader {
   }
 
   @Bean
+  @StepScope
   public ItemReader<Competence> itemReader() {
     return new ItemReader<>() {
       private Iterator<Competence> iterator;
@@ -133,6 +120,7 @@ public class AdditionalSkillBatchLoader {
         if (iterator == null) {
           try {
             List<Competence> data = romeAdditionalSkillApi.fetchAdditionalSkills();
+            romeAdditionalSkillService.cleanAndCreateAdditionalSkillIndex();
             iterator = data.iterator();
           } catch (Exception e) {
             log.error("Error ROME4.0 API : {}", e.getMessage());
