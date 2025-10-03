@@ -30,7 +30,7 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
   }
 
   @Override
-  public AdditionalSkillProgress createAdditionalSkillProgress(
+  public void createAdditionalSkillProgress(
       Student student,
       UUID additionalSkillId,
       EAdditionalSkillType type,
@@ -49,12 +49,12 @@ public class AdditionalSkillServiceImpl implements AdditionalSkillService {
             student);
 <span class="fc" id="L50">        throw new DuplicateAdditionalSkillException();</span>
       }
-<span class="fc" id="L52">      return additionalSkillProgressRepository.save(additionalSkillProgress);</span>
+<span class="fc" id="L52">      additionalSkillProgressRepository.save(additionalSkillProgress);</span>
 <span class="fc" id="L53">    } catch (AdditionalSkillNotFoundException e) {</span>
 <span class="fc" id="L54">      log.error(&quot;Failed to add additional skill for student [{}]: {}&quot;, student, e.getMessage());</span>
 <span class="fc" id="L55">      throw e;</span>
-    }
-  }
+<span class="fc" id="L56">    }</span>
+<span class="fc" id="L57">  }</span>
 
   @Override
   public PagedResult&lt;AdditionalSkillProgress&gt; search(
