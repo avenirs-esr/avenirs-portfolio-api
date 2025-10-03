@@ -4,8 +4,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgr
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
-import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.model.TraceConfiguration;
-import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
+import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
@@ -15,6 +14,7 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.File;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
@@ -31,8 +31,8 @@ import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
 import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
-import fr.avenirsesr.portfolio.user.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Duration;
 import java.time.Instant;
@@ -54,8 +54,8 @@ public class TraceServiceImpl implements TraceService {
   private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
   private final AMSRepository amsRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
-  private final TraceConfigurationService traceConfigurationService;
   private final TraceAttachmentRepository traceAttachmentRepository;
+  private final TraceConfigurationClient traceConfigurationClient;
 
   @Override
   public String programNameOfTrace(Trace trace) {
@@ -99,7 +99,7 @@ public class TraceServiceImpl implements TraceService {
   public TracesSummary getTracesSummary(User user) {
     List<Trace> associatedTraces = traceRepository.findAll(user, ETraceStatus.ASSOCIATED);
     List<Trace> unassociatedTraces = traceRepository.findAll(user, ETraceStatus.UNASSOCIATED);
-    TraceConfiguration traceConfiguration = traceConfigurationService.getTraceConfiguration();
+    TraceConfiguration traceConfiguration = traceConfigurationClient.getTraceConfiguration();
 
     int criticalCount =
         unassociatedTraces.stream()
@@ -218,7 +218,7 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public Optional<LocalDate> getWillBeDeletedAt(Trace trace) {
-    var config = traceConfigurationService.getTraceConfiguration();
+    var config = traceConfigurationClient.getTraceConfiguration();
 
     return trace.isUnassociated()
         ? Optional.of(

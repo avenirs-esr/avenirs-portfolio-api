@@ -6,6 +6,11 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [v1.4.6] - 2025-10-01
+
+- **Refactor**
+- Back office moved to dedicated microservice.
+
 ## [v1.4.5] - 2025-09-18
 
 - 🔄 **Refactor**

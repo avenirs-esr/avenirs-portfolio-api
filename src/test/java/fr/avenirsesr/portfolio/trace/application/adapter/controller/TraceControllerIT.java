@@ -1,15 +1,18 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederRunner;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -17,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -53,6 +59,24 @@ class TraceControllerIT {
   @BeforeAll
   static void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
+  }
+
+  @TestConfiguration
+  static class TestConfig {
+
+    @Bean
+    @Primary
+    public TraceConfigurationClient traceConfigurationClient() {
+      TraceConfigurationClient mock = org.mockito.Mockito.mock(TraceConfigurationClient.class);
+      TraceConfiguration mockConfig =
+          new TraceConfiguration(
+              30, // maxRemainingDays
+              7, // maxRemainingDaysBeforeWarning
+              3 // maxRemainingDaysBeforeCritical
+              );
+      when(mock.getTraceConfiguration()).thenReturn(mockConfig);
+      return mock;
+    }
   }
 
   @Test
