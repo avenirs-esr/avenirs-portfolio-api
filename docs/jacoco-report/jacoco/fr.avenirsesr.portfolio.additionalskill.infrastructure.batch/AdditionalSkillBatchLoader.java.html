@@ -20,6 +20,7 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
@@ -36,7 +37,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.PlatformTransactionManager;
 
-<span class="nc" id="L39">@Slf4j</span>
+<span class="nc" id="L40">@Slf4j</span>
 @Configuration
 @Profile(&quot;!test&quot;)
 @RequiredArgsConstructor
@@ -46,165 +47,152 @@ public class AdditionalSkillBatchLoader {
 
   @Bean
   public Job importROME4SkillJob(JobRepository jobRepository, Flow importROME4SkillFlow) {
-<span class="nc" id="L49">    return new JobBuilder(&quot;importROME4SkillJob&quot;, jobRepository)</span>
-<span class="nc" id="L50">        .incrementer(new RunIdIncrementer())</span>
-<span class="nc" id="L51">        .start(importROME4SkillFlow)</span>
-<span class="nc" id="L52">        .end()</span>
-<span class="nc" id="L53">        .listener(jobResultListener())</span>
-<span class="nc" id="L54">        .build();</span>
+<span class="nc" id="L50">    return new JobBuilder(&quot;importROME4SkillJob&quot;, jobRepository)</span>
+<span class="nc" id="L51">        .incrementer(new RunIdIncrementer())</span>
+<span class="nc" id="L52">        .start(importROME4SkillFlow)</span>
+<span class="nc" id="L53">        .end()</span>
+<span class="nc" id="L54">        .listener(jobResultListener())</span>
+<span class="nc" id="L55">        .build();</span>
   }
 
   @Bean
-  public Flow importROME4SkillFlow(
-      Step checkROME4VersionUpdateStep, Step cleanROME4SkillStep, Step importROME4SkillStep) {
+  public Flow importROME4SkillFlow(Step checkROME4VersionUpdateStep, Step importROME4SkillStep) {
 <span class="nc" id="L60">    return new FlowBuilder&lt;SimpleFlow&gt;(&quot;importROME4SkillFlow&quot;)</span>
 <span class="nc" id="L61">        .start(checkROME4VersionUpdateStep)</span>
 <span class="nc" id="L62">        .on(&quot;NOOP&quot;)</span>
 <span class="nc" id="L63">        .end()</span>
 <span class="nc" id="L64">        .from(checkROME4VersionUpdateStep)</span>
 <span class="nc" id="L65">        .on(&quot;*&quot;)</span>
-<span class="nc" id="L66">        .to(cleanROME4SkillStep)</span>
-<span class="nc" id="L67">        .next(importROME4SkillStep)</span>
-<span class="nc" id="L68">        .build();</span>
+<span class="nc" id="L66">        .to(importROME4SkillStep)</span>
+<span class="nc" id="L67">        .end();</span>
   }
 
   @Bean
   public Step checkROME4VersionUpdateStep(
       JobRepository jobRepository, PlatformTransactionManager transactionManager) {
-<span class="nc" id="L74">    return new StepBuilder(&quot;checkROME4VersionUpdateStep&quot;, jobRepository)</span>
-<span class="nc" id="L75">        .tasklet(</span>
+<span class="nc" id="L73">    return new StepBuilder(&quot;checkROME4VersionUpdateStep&quot;, jobRepository)</span>
+<span class="nc" id="L74">        .tasklet(</span>
             (contribution, chunkContext) -&gt; {
-<span class="nc" id="L77">              boolean isNewVersion = romeAdditionalSkillService.checkRomeVersionUpdated();</span>
+<span class="nc" id="L76">              boolean isNewVersion = romeAdditionalSkillService.checkRomeVersionUpdated();</span>
 
-<span class="nc bnc" id="L79" title="All 2 branches missed.">              if (!isNewVersion) {</span>
-<span class="nc" id="L80">                log.info(</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">              if (!isNewVersion) {</span>
+<span class="nc" id="L79">                log.info(</span>
                     &quot;checkROME4VersionUpdateStep (NOOP) because there are no updates to ROME 4.0&quot;);
-<span class="nc" id="L82">                contribution.setExitStatus(ExitStatus.NOOP);</span>
+<span class="nc" id="L81">                contribution.setExitStatus(ExitStatus.NOOP);</span>
               } else {
-<span class="nc" id="L84">                log.info(</span>
+<span class="nc" id="L83">                log.info(</span>
                     &quot;checkROME4VersionUpdateStep (COMPLETED) because there are updates to ROME&quot;
                         + &quot; 4.0&quot;);
               }
 
-<span class="nc" id="L89">              return RepeatStatus.FINISHED;</span>
+<span class="nc" id="L88">              return RepeatStatus.FINISHED;</span>
             },
             transactionManager)
-<span class="nc" id="L92">        .build();</span>
-  }
-
-  @Bean
-  public Step cleanROME4SkillStep(
-      JobRepository jobRepository, PlatformTransactionManager transactionManager) {
-<span class="nc" id="L98">    return new StepBuilder(&quot;cleanROME4SkillStep&quot;, jobRepository)</span>
-<span class="nc" id="L99">        .tasklet(</span>
-            (contribution, chunkContext) -&gt; {
-<span class="nc" id="L101">              romeAdditionalSkillService.cleanAndCreateAdditionalSkillIndex();</span>
-<span class="nc" id="L102">              return RepeatStatus.FINISHED;</span>
-            },
-            transactionManager)
-<span class="nc" id="L105">        .build();</span>
+<span class="nc" id="L91">        .build();</span>
   }
 
   @Bean
   public Step importROME4SkillStep(
       JobRepository jobRepository, PlatformTransactionManager transactionManager) {
-<span class="nc" id="L111">    return new StepBuilder(&quot;importROME4SkillStep&quot;, jobRepository)</span>
-<span class="nc" id="L112">        .&lt;Competence, AdditionalSkill&gt;chunk(100, transactionManager)</span>
-<span class="nc" id="L113">        .reader(itemReader())</span>
-<span class="nc" id="L114">        .processor(itemProcessor())</span>
-<span class="nc" id="L115">        .writer(itemWriter())</span>
-<span class="nc" id="L116">        .faultTolerant()</span>
-<span class="nc" id="L117">        .skipPolicy(</span>
+<span class="nc" id="L97">    return new StepBuilder(&quot;importROME4SkillStep&quot;, jobRepository)</span>
+<span class="nc" id="L98">        .&lt;Competence, AdditionalSkill&gt;chunk(100, transactionManager)</span>
+<span class="nc" id="L99">        .reader(itemReader())</span>
+<span class="nc" id="L100">        .processor(itemProcessor())</span>
+<span class="nc" id="L101">        .writer(itemWriter())</span>
+<span class="nc" id="L102">        .faultTolerant()</span>
+<span class="nc" id="L103">        .skipPolicy(</span>
             (throwable, skipCount) -&gt; {
-<span class="nc" id="L119">              log.error(&quot;Error while importing skills&quot;, throwable);</span>
-<span class="nc" id="L120">              return throwable instanceof RuntimeException;</span>
+<span class="nc" id="L105">              log.error(&quot;Error while importing skills&quot;, throwable);</span>
+<span class="nc" id="L106">              return throwable instanceof RuntimeException;</span>
             })
-<span class="nc" id="L122">        .listener(skipListener())</span>
-<span class="nc" id="L123">        .build();</span>
+<span class="nc" id="L108">        .listener(skipListener())</span>
+<span class="nc" id="L109">        .build();</span>
   }
 
   @Bean
+  @StepScope
   public ItemReader&lt;Competence&gt; itemReader() {
-<span class="nc" id="L128">    return new ItemReader&lt;&gt;() {</span>
+<span class="nc" id="L115">    return new ItemReader&lt;&gt;() {</span>
       private Iterator&lt;Competence&gt; iterator;
 
       @Override
       public Competence read() {
-<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (iterator == null) {</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (iterator == null) {</span>
           try {
-<span class="nc" id="L135">            List&lt;Competence&gt; data = romeAdditionalSkillApi.fetchAdditionalSkills();</span>
-<span class="nc" id="L136">            iterator = data.iterator();</span>
-<span class="nc" id="L137">          } catch (Exception e) {</span>
-<span class="nc" id="L138">            log.error(&quot;Error ROME4.0 API : {}&quot;, e.getMessage());</span>
-<span class="nc" id="L139">            iterator = Collections.emptyIterator();</span>
-<span class="nc" id="L140">          }</span>
+<span class="nc" id="L122">            List&lt;Competence&gt; data = romeAdditionalSkillApi.fetchAdditionalSkills();</span>
+<span class="nc" id="L123">            romeAdditionalSkillService.cleanAndCreateAdditionalSkillIndex();</span>
+<span class="nc" id="L124">            iterator = data.iterator();</span>
+<span class="nc" id="L125">          } catch (Exception e) {</span>
+<span class="nc" id="L126">            log.error(&quot;Error ROME4.0 API : {}&quot;, e.getMessage());</span>
+<span class="nc" id="L127">            iterator = Collections.emptyIterator();</span>
+<span class="nc" id="L128">          }</span>
         }
-<span class="nc bnc" id="L142" title="All 2 branches missed.">        return iterator.hasNext() ? iterator.next() : null;</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        return iterator.hasNext() ? iterator.next() : null;</span>
       }
     };
   }
 
   @Bean
   public ItemProcessor&lt;Competence, AdditionalSkill&gt; itemProcessor() {
-<span class="nc" id="L149">    return AdditionalSkillMapper::createToDomain;</span>
+<span class="nc" id="L137">    return AdditionalSkillMapper::createToDomain;</span>
   }
 
   @Bean
   public ItemWriter&lt;AdditionalSkill&gt; itemWriter() {
-<span class="nc" id="L154">    return additionalSkills -&gt; {</span>
-<span class="nc" id="L155">      List&lt;AdditionalSkill&gt; additionalSkillList = new ArrayList&lt;&gt;(additionalSkills.getItems());</span>
-<span class="nc" id="L156">      romeAdditionalSkillService.synchronizeAndIndexAdditionalSkills(additionalSkillList);</span>
-<span class="nc" id="L157">    };</span>
+<span class="nc" id="L142">    return additionalSkills -&gt; {</span>
+<span class="nc" id="L143">      List&lt;AdditionalSkill&gt; additionalSkillList = new ArrayList&lt;&gt;(additionalSkills.getItems());</span>
+<span class="nc" id="L144">      romeAdditionalSkillService.synchronizeAndIndexAdditionalSkills(additionalSkillList);</span>
+<span class="nc" id="L145">    };</span>
   }
 
   @Bean
   public SkipListener&lt;Competence, AdditionalSkill&gt; skipListener() {
-<span class="nc" id="L162">    return new SkipListener&lt;&gt;() {</span>
+<span class="nc" id="L150">    return new SkipListener&lt;&gt;() {</span>
       @Override
       public void onSkipInRead(Throwable t) {
-<span class="nc" id="L165">        log.error(&quot;Skip in reading (API) : {}&quot;, t.getMessage());</span>
-<span class="nc" id="L166">      }</span>
+<span class="nc" id="L153">        log.error(&quot;Skip in reading (API) : {}&quot;, t.getMessage());</span>
+<span class="nc" id="L154">      }</span>
 
       @Override
       public void onSkipInProcess(Competence item, Throwable t) {
-<span class="nc" id="L170">        log.error(&quot;Skip in processing for {} : {}&quot;, item, t.getMessage());</span>
-<span class="nc" id="L171">      }</span>
+<span class="nc" id="L158">        log.error(&quot;Skip in processing for {} : {}&quot;, item, t.getMessage());</span>
+<span class="nc" id="L159">      }</span>
 
       @Override
       public void onSkipInWrite(AdditionalSkill item, Throwable t) {
-<span class="nc" id="L175">        log.error(&quot;Skip in writing for {} : {}&quot;, item, t.getMessage());</span>
-<span class="nc" id="L176">      }</span>
+<span class="nc" id="L163">        log.error(&quot;Skip in writing for {} : {}&quot;, item, t.getMessage());</span>
+<span class="nc" id="L164">      }</span>
     };
   }
 
   @Bean
   public JobExecutionListener jobResultListener() {
-<span class="nc" id="L182">    return new JobExecutionListener() {</span>
+<span class="nc" id="L170">    return new JobExecutionListener() {</span>
       @Override
       public void afterJob(JobExecution jobExecution) {
-<span class="nc" id="L185">        Predicate&lt;StepExecution&gt; condition =</span>
+<span class="nc" id="L173">        Predicate&lt;StepExecution&gt; condition =</span>
             stepExec -&gt;
-<span class="nc bnc" id="L187" title="All 2 branches missed.">                stepExec.getReadCount() == 0</span>
-<span class="nc bnc" id="L188" title="All 2 branches missed.">                    &amp;&amp; stepExec.getWriteCount() == 0</span>
-<span class="nc bnc" id="L189" title="All 2 branches missed.">                    &amp;&amp; stepExec.getSkipCount() &gt;= 0;</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">                stepExec.getReadCount() == 0</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                    &amp;&amp; stepExec.getWriteCount() == 0</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">                    &amp;&amp; stepExec.getSkipCount() &gt;= 0;</span>
 
-<span class="nc" id="L191">        List&lt;StepExecution&gt; filtered =</span>
-<span class="nc" id="L192">            jobExecution.getStepExecutions().stream()</span>
-<span class="nc" id="L193">                .filter(</span>
+<span class="nc" id="L179">        List&lt;StepExecution&gt; filtered =</span>
+<span class="nc" id="L180">            jobExecution.getStepExecutions().stream()</span>
+<span class="nc" id="L181">                .filter(</span>
                     stepExec -&gt;
-<span class="nc bnc" id="L195" title="All 2 branches missed.">                        !&quot;checkROME4VersionUpdateStep&quot;.equals(stepExec.getStepName())</span>
-<span class="nc bnc" id="L196" title="All 2 branches missed.">                            || stepExec.getExitStatus().compareTo(ExitStatus.NOOP) != 0)</span>
-<span class="nc" id="L197">                .toList();</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">                        !&quot;checkROME4VersionUpdateStep&quot;.equals(stepExec.getStepName())</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">                            || stepExec.getExitStatus().compareTo(ExitStatus.NOOP) != 0)</span>
+<span class="nc" id="L185">                .toList();</span>
 
-<span class="nc bnc" id="L199" title="All 4 branches missed.">        boolean allSkippedOrEmpty = !filtered.isEmpty() &amp;&amp; filtered.stream().allMatch(condition);</span>
+<span class="nc bnc" id="L187" title="All 4 branches missed.">        boolean allSkippedOrEmpty = !filtered.isEmpty() &amp;&amp; filtered.stream().allMatch(condition);</span>
 
-<span class="nc bnc" id="L201" title="All 2 branches missed.">        if (allSkippedOrEmpty) {</span>
-<span class="nc" id="L202">          jobExecution.setStatus(BatchStatus.FAILED);</span>
-<span class="nc" id="L203">          jobExecution.setExitStatus(</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">        if (allSkippedOrEmpty) {</span>
+<span class="nc" id="L190">          jobExecution.setStatus(BatchStatus.FAILED);</span>
+<span class="nc" id="L191">          jobExecution.setExitStatus(</span>
               new ExitStatus(&quot;FAILED&quot;, &quot;All steps skipped, no data processed&quot;));
-<span class="nc" id="L205">          log.error(&quot;Job completed as FAILED because all steps were skipped/empty.&quot;);</span>
+<span class="nc" id="L193">          log.error(&quot;Job completed as FAILED because all steps were skipped/empty.&quot;);</span>
         }
-<span class="nc" id="L207">      }</span>
+<span class="nc" id="L195">      }</span>
     };
   }
 }

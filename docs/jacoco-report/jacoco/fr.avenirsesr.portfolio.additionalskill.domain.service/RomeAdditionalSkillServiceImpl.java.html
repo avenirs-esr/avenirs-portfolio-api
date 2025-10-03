@@ -57,40 +57,45 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
 
   @Override
   public boolean checkRomeVersionUpdated() {
-<span class="fc" id="L60">    Rome4Version newVersion = romeAdditionalSkillApi.fetchRomeVersion();</span>
+    try {
+<span class="fc" id="L61">      Rome4Version newVersion = romeAdditionalSkillApi.fetchRomeVersion();</span>
 
-<span class="fc" id="L62">    boolean shouldSave =</span>
-        rome4VersionRepository
-<span class="fc" id="L64">            .findFirstByOrderByVersionDesc()</span>
-<span class="fc bfc" id="L65" title="All 2 branches covered.">            .map(oldVersion -&gt; newVersion.getVersion() &gt; oldVersion.getVersion())</span>
-<span class="fc" id="L66">            .orElse(true);</span>
+<span class="fc" id="L63">      boolean shouldSave =</span>
+          rome4VersionRepository
+<span class="fc" id="L65">              .findFirstByOrderByVersionDesc()</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">              .map(oldVersion -&gt; newVersion.getVersion() &gt; oldVersion.getVersion())</span>
+<span class="fc" id="L67">              .orElse(true);</span>
 
-<span class="fc bfc" id="L68" title="All 2 branches covered.">    if (shouldSave) {</span>
-<span class="fc" id="L69">      var rome4Version =</span>
-<span class="fc" id="L70">          Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate());</span>
-<span class="fc" id="L71">      rome4VersionRepository.save(rome4Version);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">      if (shouldSave) {</span>
+<span class="fc" id="L70">        var rome4Version =</span>
+<span class="fc" id="L71">            Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate());</span>
+<span class="fc" id="L72">        rome4VersionRepository.save(rome4Version);</span>
+      }
+
+<span class="fc" id="L75">      return shouldSave;</span>
+<span class="nc" id="L76">    } catch (Exception e) {</span>
+<span class="nc" id="L77">      log.error(&quot;An error occurred while fetching ROME 4.0 version.&quot;, e);</span>
+<span class="nc" id="L78">      return false;</span>
     }
-
-<span class="fc" id="L74">    return shouldSave;</span>
   }
 
   private List&lt;AdditionalSkill&gt; getAdditionalSkillsToSave(
       List&lt;AdditionalSkill&gt; additionalSkillList, Map&lt;String, AdditionalSkill&gt; existingSkillByCode) {
-<span class="fc" id="L79">    List&lt;AdditionalSkill&gt; toSave = new ArrayList&lt;&gt;(additionalSkillList.size());</span>
+<span class="fc" id="L84">    List&lt;AdditionalSkill&gt; toSave = new ArrayList&lt;&gt;(additionalSkillList.size());</span>
 
-<span class="fc bfc" id="L81" title="All 2 branches covered.">    for (AdditionalSkill additionalSkill : additionalSkillList) {</span>
-<span class="fc" id="L82">      String skillCode = additionalSkill.getPathSegments().getSkill().getCode();</span>
-<span class="fc" id="L83">      AdditionalSkill existingSkill = existingSkillByCode.get(skillCode);</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">    for (AdditionalSkill additionalSkill : additionalSkillList) {</span>
+<span class="fc" id="L87">      String skillCode = additionalSkill.getPathSegments().getSkill().getCode();</span>
+<span class="fc" id="L88">      AdditionalSkill existingSkill = existingSkillByCode.get(skillCode);</span>
 
-<span class="fc bfc" id="L85" title="All 2 branches covered.">      if (existingSkill != null) {</span>
-<span class="fc" id="L86">        existingSkill.setPathSegments(additionalSkill.getPathSegments());</span>
-<span class="fc" id="L87">        existingSkill.setType(additionalSkill.getType());</span>
-<span class="fc" id="L88">        toSave.add(existingSkill);</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">      if (existingSkill != null) {</span>
+<span class="fc" id="L91">        existingSkill.setPathSegments(additionalSkill.getPathSegments());</span>
+<span class="fc" id="L92">        existingSkill.setType(additionalSkill.getType());</span>
+<span class="fc" id="L93">        toSave.add(existingSkill);</span>
       } else {
-<span class="fc" id="L90">        toSave.add(additionalSkill);</span>
+<span class="fc" id="L95">        toSave.add(additionalSkill);</span>
       }
-<span class="fc" id="L92">    }</span>
-<span class="fc" id="L93">    return toSave;</span>
+<span class="fc" id="L97">    }</span>
+<span class="fc" id="L98">    return toSave;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
