@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder;
 
-import static fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig.MAX_ADDITIONAL_SKILLS_PER_STUDENT;
-import static fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig.MIN_ADDITIONAL_SKILLS_PER_STUDENT;
+import static fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig.MAX_ADDITIONAL_SKILLS_PER_STUDENT;
+import static fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig.MIN_ADDITIONAL_SKILLS_PER_STUDENT;
 
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
