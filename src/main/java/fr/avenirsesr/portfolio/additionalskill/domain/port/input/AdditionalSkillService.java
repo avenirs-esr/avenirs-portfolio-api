@@ -12,7 +12,7 @@ public interface AdditionalSkillService {
   PagedResult<AdditionalSkillProgress> getAdditionalSkillsProgresses(
       Student student, PageCriteria criteria);
 
-  void createAdditionalSkillProgress(
+  AdditionalSkillProgress createAdditionalSkillProgress(
       Student student,
       UUID additionalSkillId,
       EAdditionalSkillType type,
