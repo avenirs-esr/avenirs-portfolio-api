@@ -10,6 +10,7 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 - Fixes remaining conflict in file
 - Seeder moved from avenris-portfolio-common to this repository (uses specific objects)
+- Removed SeederRunner and SeederConfig from program feature.
 
 ## [v1.4.6] - 2025-10-01
 

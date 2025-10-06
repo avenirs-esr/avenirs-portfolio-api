@@ -29,8 +29,8 @@ public class TraceServiceConfig {
       AdditionalSkillProgressRepository additionalSkillProgressRepository,
       AMSRepository amsRepository,
       SkillLevelProgressRepository skillLevelProgressRepository,
-      TraceConfigurationClient traceConfigurationClient,
-      TraceAttachmentRepository traceAttachmentRepository) {
+      TraceAttachmentRepository traceAttachmentRepository,
+      TraceConfigurationClient traceConfigurationClient) {
     this.traceRepository = traceRepository;
     this.studentProgressRepository = studentProgressRepository;
     this.additionalSkillProgressRepository = additionalSkillProgressRepository;
