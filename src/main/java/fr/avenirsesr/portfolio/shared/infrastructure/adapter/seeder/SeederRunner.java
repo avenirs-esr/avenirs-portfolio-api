@@ -56,6 +56,7 @@ public class SeederRunner implements CommandLineRunner {
       SkillSeeder skillSeeder,
       AdditionalSkillSeeder additionalSkillSeeder,
       AdditionalSkillProgressSeeder additionalSkillProgressSeeder) {
+
     this.userRepository = userRepository;
     this.userPhotoSeeder = userPhotoSeeder;
     this.cohortSeeder = cohortSeeder;
@@ -81,25 +82,25 @@ public class SeederRunner implements CommandLineRunner {
 
       var savedUsers = userSeeder.seed();
       var savedUserPhotos = userPhotoSeeder.seed(savedUsers);
+      var savedStudents = savedUsers.stream().filter(u -> u.getStudent().isPresent()).toList();
+      var savedAdditionalSkills = additionalSkillSeeder.seed();
+      var savedStudentAdditionalSkills =
+          additionalSkillProgressSeeder.seed(savedStudents, savedAdditionalSkills);
       var savedInstitutions = institutionSeeder.seed();
       var savedPrograms = programSeeder.seed(savedInstitutions);
-      var savedTraces = traceSeeder.seed(savedUsers);
-      var savedTracesAttachment = traceAttachmentSeeder.seed(savedTraces);
       var savedSkillLevels = skillSeeder.seed(savedPrograms);
       var savedSkills =
           savedSkillLevels.stream().map(SkillLevelEntity::getSkill).distinct().toList();
-      var savedStudents = savedUsers.stream().filter(u -> u.getStudent().isPresent()).toList();
       var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
       var savedStudentProgresses =
           studentProgressSeeder.seed(savedTrainingPaths, savedStudents, savedSkillLevels);
       var savedSkillLevelProgresses =
           savedStudentProgresses.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
       var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
+      var savedTraces = traceSeeder.seed(savedUsers, savedStudentAdditionalSkills);
+      var savedTracesAttachment = traceAttachmentSeeder.seed(savedTraces);
       var savedAmses =
           amsSeeder.seed(savedUsers, savedSkillLevelProgresses, savedTraces, savedCohorts);
-      var savedAdditionalSkills = additionalSkillSeeder.seed();
-      var savedStudentAdditionalSkills =
-          additionalSkillProgressSeeder.seed(savedStudents, savedAdditionalSkills);
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);

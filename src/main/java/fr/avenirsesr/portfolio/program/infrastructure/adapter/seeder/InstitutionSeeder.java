@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.InstitutionDatabaseRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeInstitution;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

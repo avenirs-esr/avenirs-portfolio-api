@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.ExternalUserRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;

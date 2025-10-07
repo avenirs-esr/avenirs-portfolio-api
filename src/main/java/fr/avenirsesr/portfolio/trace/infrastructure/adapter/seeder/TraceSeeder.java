@@ -2,9 +2,9 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
-import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.SeederConfig;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
+import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
