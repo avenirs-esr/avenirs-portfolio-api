@@ -1,0 +1,76 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-1">
+        <createTable tableName="additional_skill_category">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="additional_skill_categoryPK"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="libelle" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="parent_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-2">
+        <addColumn tableName="additional_skill">
+            <column name="additional_skill_category_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-3">
+        <addColumn tableName="additional_skill">
+            <column name="external_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-4">
+        <addColumn tableName="additional_skill">
+            <column name="libelle" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-5">
+        <addForeignKeyConstraint baseColumnNames="parent_id" baseTableName="additional_skill_category" constraintName="FK97sea1mytpehijoersmq0r564" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="additional_skill_category" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-6">
+        <addForeignKeyConstraint baseColumnNames="additional_skill_category_id" baseTableName="additional_skill" constraintName="FK9uosyssnq3dpvs2700r44tidw" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="additional_skill_category" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-7">
+        <dropColumn columnName="domain_code" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-8">
+        <dropColumn columnName="domain_libelle" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-9">
+        <dropColumn columnName="issue_code" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-10">
+        <dropColumn columnName="issue_libelle" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-11">
+        <dropColumn columnName="macro_skill_code" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-12">
+        <dropColumn columnName="macro_skill_libelle" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-13">
+        <dropColumn columnName="skill_code" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-14">
+        <dropColumn columnName="skill_libelle" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-15">
+        <dropColumn columnName="target_code" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1759847069215-16">
+        <dropColumn columnName="target_libelle" tableName="additional_skill"/>
+    </changeSet>
+</databaseChangeLog>

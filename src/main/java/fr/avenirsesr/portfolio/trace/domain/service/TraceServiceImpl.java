@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.domain.service;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillCategory;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
@@ -357,18 +358,12 @@ public class TraceServiceImpl implements TraceService {
   private AdditionalSkillAssociation toAdditionalSkillAssociation(
       AdditionalSkillProgress additionalSkillProgress) {
     var skill = additionalSkillProgress.getSkill();
-    var segments = skill.getPathSegments();
-    var pathSegments =
-        List.of(
-            segments.getIssue().getLibelle(),
-            segments.getTarget().getLibelle(),
-            segments.getMacroSkill().getLibelle());
 
     return new AdditionalSkillAssociation(
         additionalSkillProgress.getId(),
-        segments.getSkill().getLibelle(),
+        skill.getLibelle(),
         additionalSkillProgress.getLevel(),
-        pathSegments,
+        skill.getCategoryPath().stream().map(AdditionalSkillCategory::getLibelle).toList(),
         skill.getType());
   }
 }

@@ -24,7 +24,7 @@ public interface TraceAssociationSearchResultMapper {
     return new TraceAssociationSearchResult(
         ETraceAssociationType.ADDITIONAL_SKILL,
         additionalSkillProgress.getId(),
-        additionalSkillProgress.getSkill().getPathSegments().getSkill().getLibelle(),
+        additionalSkillProgress.getSkill().getLibelle(),
         additionalSkillProgress.getSkill().getType().name());
   }
 }

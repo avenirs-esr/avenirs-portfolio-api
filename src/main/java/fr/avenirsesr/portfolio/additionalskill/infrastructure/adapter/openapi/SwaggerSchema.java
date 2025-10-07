@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.openapi;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillCategoryType;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import io.swagger.v3.oas.models.media.Schema;
@@ -18,4 +19,10 @@ public interface SwaggerSchema {
           .name("EAdditionalSkillType")
           ._enum(Arrays.stream(EAdditionalSkillType.values()).map(Enum::name).toList())
           .description("Enum for additional skill type");
+
+  Schema<String> additionalSkillCategoryTypeSchema =
+      new StringSchema()
+          .name("EAdditionalSkillCategoryType")
+          ._enum(Arrays.stream(EAdditionalSkillCategoryType.values()).map(Enum::name).toList())
+          .description("Enum for additional skill category type");
 }

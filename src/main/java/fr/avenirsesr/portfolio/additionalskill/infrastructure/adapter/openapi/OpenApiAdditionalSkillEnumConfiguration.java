@@ -11,6 +11,8 @@ public class OpenApiAdditionalSkillEnumConfiguration {
     return openApi -> {
       openApi
           .getComponents()
+          .addSchemas(
+              "EAdditionalSkillCategoryType", SwaggerSchema.additionalSkillCategoryTypeSchema)
           .addSchemas("EAdditionalSkillLevel", SwaggerSchema.additionalSkillLevelSchema)
           .addSchemas("EAdditionalSkillType", SwaggerSchema.additionalSkillTypeSchema);
     };

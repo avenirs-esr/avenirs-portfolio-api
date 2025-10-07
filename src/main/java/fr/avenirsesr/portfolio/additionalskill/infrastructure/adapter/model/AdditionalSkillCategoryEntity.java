@@ -1,13 +1,14 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.EAdditionalSkillCategoryType;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillCategoryType;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.*;
+import java.util.Optional;
+import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
 
 @NoArgsConstructor
 @Getter
@@ -22,7 +23,10 @@ public class AdditionalSkillCategoryEntity extends AvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private EAdditionalSkillCategoryType type;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @Getter(AccessLevel.NONE)
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   private AdditionalSkillCategoryEntity parent;
 
   private AdditionalSkillCategoryEntity(
@@ -47,5 +51,9 @@ public class AdditionalSkillCategoryEntity extends AvenirsBaseEntity {
   public static AdditionalSkillCategoryEntity create(
       String libelle, EAdditionalSkillCategoryType type, AdditionalSkillCategoryEntity parent) {
     return new AdditionalSkillCategoryEntity(UUID.randomUUID(), libelle, type, parent);
+  }
+
+  public Optional<AdditionalSkillCategoryEntity> getParent() {
+    return Optional.ofNullable(parent);
   }
 }

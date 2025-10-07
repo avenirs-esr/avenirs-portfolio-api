@@ -5,7 +5,7 @@ import static fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.Seede
 
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.AdditionalSkillDatabaseProgressRepository;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.AdditionalSkillProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fake.FakeAdditionalSkillProgress;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
@@ -26,7 +26,7 @@ public class AdditionalSkillProgressSeeder {
       new DataGeneratorProvider<SharedDataGenerator>()
           .init(AdditionalSkillSeeder.class, SharedDataGenerator.class);
 
-  private final AdditionalSkillDatabaseProgressRepository studentAdditionalSkillDatabaseRepository;
+  private final AdditionalSkillProgressDatabaseRepository studentAdditionalSkillDatabaseRepository;
 
   @Transactional
   public List<AdditionalSkillProgressEntity> seed(

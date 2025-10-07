@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.additionalskill.Category;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.*;
-
+import java.util.Optional;
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,38 +17,53 @@ import lombok.Setter;
 @Setter
 public class AdditionalSkillEntity extends AvenirsBaseEntity {
 
-  @Embedded private PathSegmentsEmbeddable pathSegments;
+  @Column(nullable = false, name = "external_id")
+  private String externalId;
+
+  @Column(nullable = false)
+  private String libelle;
 
   @Enumerated(EnumType.STRING)
   private EAdditionalSkillType type;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "category_id")
-  private AdditionalSkillCategoryEntity category;
+  @Getter(AccessLevel.NONE)
+  @ManyToOne(
+      fetch = FetchType.LAZY,
+      cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  private AdditionalSkillCategoryEntity additionalSkillCategory;
 
   private AdditionalSkillEntity(
       UUID id,
-      PathSegmentsEmbeddable pathSegments,
+      String externalId,
+      String libelle,
       EAdditionalSkillType type,
-      AdditionalSkillCategoryEntity category) {
+      AdditionalSkillCategoryEntity additionalSkillCategory) {
     setId(id);
-    this.pathSegments = pathSegments;
     this.type = type;
-    this.category = category;
+    this.additionalSkillCategory = additionalSkillCategory;
+    this.externalId = externalId;
+    this.libelle = libelle;
   }
 
   public static AdditionalSkillEntity of(
       UUID id,
-      PathSegmentsEmbeddable pathSegments,
+      String externalId,
+      String libelle,
       EAdditionalSkillType type,
-      AdditionalSkillCategoryEntity category) {
-    return new AdditionalSkillEntity(id, pathSegments, type, category);
+      AdditionalSkillCategoryEntity additionalSkillCategory) {
+    return new AdditionalSkillEntity(id, externalId, libelle, type, additionalSkillCategory);
   }
 
   public static AdditionalSkillEntity create(
-      PathSegmentsEmbeddable pathSegments,
+      String externalId,
+      String libelle,
       EAdditionalSkillType type,
-      AdditionalSkillCategoryEntity category) {
-    return new AdditionalSkillEntity(UUID.randomUUID(), pathSegments, type, category);
+      AdditionalSkillCategoryEntity additionalSkillCategory) {
+    return new AdditionalSkillEntity(
+        UUID.randomUUID(), externalId, libelle, type, additionalSkillCategory);
+  }
+
+  public Optional<AdditionalSkillCategoryEntity> getAdditionalSkillCategory() {
+    return Optional.ofNullable(additionalSkillCategory);
   }
 }

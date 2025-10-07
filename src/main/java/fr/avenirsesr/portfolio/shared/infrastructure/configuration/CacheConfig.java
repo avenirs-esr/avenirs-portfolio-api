@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.shared.infrastructure.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillPagedResult;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.utils.AdditionalSkillConstants;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.opensearch.AdditionalSkillConstants;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;

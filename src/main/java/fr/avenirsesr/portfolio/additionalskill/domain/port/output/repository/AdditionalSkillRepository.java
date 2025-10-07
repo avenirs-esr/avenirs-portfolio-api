@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AdditionalSkillRepository extends GenericRepositoryPort<AdditionalSkill> {
-  List<AdditionalSkill> findByPathSegmentsSkillCodeIn(List<String> skillCodes);
+  List<AdditionalSkill> findAllByExternalId(List<String> skillCodes);
 
   List<AdditionalSkill> findAllByIds(List<UUID> ids);
 }

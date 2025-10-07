@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.AdditionalSkillDatabaseRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fake.FakeAdditionalSkill;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdditionalSkillSeeder {
 
   private final AdditionalSkillDatabaseRepository additionalSkillDatabaseRepository;
+  private final OpenSearchIndex openSearchIndex;
 
   @Transactional
   public List<AdditionalSkillEntity> seed() {
@@ -24,6 +27,9 @@ public class AdditionalSkillSeeder {
         fakeAdditionalSkillList.stream().map(FakeAdditionalSkill::toEntity).toList();
 
     additionalSkillDatabaseRepository.saveAllEntities(additionalSkillEntities);
+    openSearchIndex.indexAll(
+        additionalSkillEntities.stream().map(AdditionalSkillMapper::toDomain).toList());
+
     log.info("✔ {} additionalSkills created", additionalSkillEntities.size());
     return additionalSkillEntities;
   }

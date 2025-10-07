@@ -47,12 +47,12 @@ class TraceConfigurationClientTest {
         "a TraceConfigurationClient with a mock back-office server responding successfully");
     String responseBody =
         """
-            {
-                "maxRemainingDays": 45,
-                "maxRemainingDaysBeforeWarning": 10,
-                "maxRemainingDaysBeforeCritical": 5
-            }
-            """;
+        {
+            "maxRemainingDays": 45,
+            "maxRemainingDaysBeforeWarning": 10,
+            "maxRemainingDaysBeforeCritical": 5
+        }
+        """;
     mockWebServer.enqueue(
         new MockResponse().setBody(responseBody).addHeader("Content-Type", "application/json"));
 

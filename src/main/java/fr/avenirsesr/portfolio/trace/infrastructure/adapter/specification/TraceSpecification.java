@@ -117,10 +117,7 @@ public class TraceSpecification {
               .join("additionalSkill", JoinType.LEFT);
 
       var additionalSkillPredicate =
-          criteriaBuilder.like(
-              criteriaBuilder.lower(
-                  additionalSkillJoin.get("pathSegments").get("skill").get("libelle")),
-              pattern);
+          criteriaBuilder.like(criteriaBuilder.lower(additionalSkillJoin.get("libelle")), pattern);
 
       // Skill level
       var slpJoin =

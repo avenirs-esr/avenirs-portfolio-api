@@ -1,19 +1,16 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.opensearch;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillCategory;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillPagedResult;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillCategoryType;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.utils.AdditionalSkillConstants;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opensearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -30,11 +27,13 @@ import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.search.builder.SearchSourceBuilder;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Profile("!test")
 public class OpenSearchIndexImpl implements OpenSearchIndex {
   private final RestHighLevelClient client;
 
@@ -80,11 +79,11 @@ public class OpenSearchIndexImpl implements OpenSearchIndex {
       BulkResponse response = client.bulk(bulkRequest, RequestOptions.DEFAULT);
       if (response.hasFailures()) {
         log.error("Bulk indexing errors: {}", response.buildFailureMessage());
-      } else {
-        log.info("Bulk indexing succeeded for {} documents", additionalSkillList.size());
       }
     } catch (IOException e) {
       throw new RuntimeException("OpenSearchIndex bulk indexing failed", e);
+    } finally {
+      log.info("Bulk indexing succeeded for {} documents", additionalSkillList.size());
     }
   }
 
@@ -128,39 +127,15 @@ public class OpenSearchIndexImpl implements OpenSearchIndex {
   }
 
   private Map<String, Object> getAdditionalSkillSourceMap(AdditionalSkill additionalSkill) {
-    return Map.ofEntries(
-        Map.entry(AdditionalSkillConstants.FIELD_ID, additionalSkill.getId().toString()),
-        Map.entry(
-            AdditionalSkillConstants.FIELD_SKILL_CODE,
-            additionalSkill.getPathSegments().getSkill().getCode()),
-        Map.entry(
-            AdditionalSkillConstants.FIELD_SKILL_LIBELLE,
-            additionalSkill.getPathSegments().getSkill().getLibelle()),
-        Map.entry(
-            AdditionalSkillConstants.FIELD_MACRO_SKILL_CODE,
-            additionalSkill.getPathSegments().getMacroSkill().getCode()),
-        Map.entry(
-            AdditionalSkillConstants.FIELD_MACRO_SKILL_LIBELLE,
-            additionalSkill.getPathSegments().getMacroSkill().getLibelle()),
-        Map.entry(
-            AdditionalSkillConstants.FIELD_TARGET_CODE,
-            additionalSkill.getPathSegments().getTarget().getCode()),
-        Map.entry(
-            AdditionalSkillConstants.FIELD_TARGET_LIBELLE,
-            additionalSkill.getPathSegments().getTarget().getLibelle()),
-        Map.entry(
-            AdditionalSkillConstants.FIELD_ISSUE_CODE,
-            additionalSkill.getPathSegments().getIssue().getCode()),
-        Map.entry(
-            AdditionalSkillConstants.FIELD_ISSUE_LIBELLE,
-            additionalSkill.getPathSegments().getIssue().getLibelle()),
-        Map.entry(
-            AdditionalSkillConstants.FIELD_DOMAIN_CODE,
-            additionalSkill.getPathSegments().getDomain().getCode()),
-        Map.entry(
-            AdditionalSkillConstants.FIELD_DOMAIN_LIBELLE,
-            additionalSkill.getPathSegments().getDomain().getLibelle()),
-        Map.entry(AdditionalSkillConstants.FIELD_TYPE, additionalSkill.getType()));
+    var map = new HashMap<String, Object>();
+    map.put(AdditionalSkillConstants.FIELD_ID, additionalSkill.getId().toString());
+    map.put(AdditionalSkillConstants.FIELD_SKILL_LIBELLE, additionalSkill.getLibelle());
+    map.put(AdditionalSkillConstants.FIELD_TYPE, additionalSkill.getType());
+    map.put(
+        AdditionalSkillConstants.FIELD_SKILL_CATEGORIES,
+        additionalSkill.getAdditionalSkillCategory().map(this::getCategorySource).orElse(null));
+
+    return map;
   }
 
   private List<AdditionalSkill> getAdditionalSkillList(SearchResponse response) {
@@ -170,25 +145,45 @@ public class OpenSearchIndexImpl implements OpenSearchIndex {
               Map<String, Object> src = hit.getSourceAsMap();
               return AdditionalSkill.toDomain(
                   UUID.fromString((String) src.get(AdditionalSkillConstants.FIELD_ID)),
-                  PathSegments.toDomain(
-                      SegmentDetail.toDomain(
-                          (String) src.get(AdditionalSkillConstants.FIELD_SKILL_CODE),
-                          (String) src.get(AdditionalSkillConstants.FIELD_SKILL_LIBELLE)),
-                      SegmentDetail.toDomain(
-                          (String) src.get(AdditionalSkillConstants.FIELD_MACRO_SKILL_CODE),
-                          (String) src.get(AdditionalSkillConstants.FIELD_MACRO_SKILL_LIBELLE)),
-                      SegmentDetail.toDomain(
-                          (String) src.get(AdditionalSkillConstants.FIELD_TARGET_CODE),
-                          (String) src.get(AdditionalSkillConstants.FIELD_TARGET_LIBELLE)),
-                      SegmentDetail.toDomain(
-                          (String) src.get(AdditionalSkillConstants.FIELD_ISSUE_CODE),
-                          (String) src.get(AdditionalSkillConstants.FIELD_ISSUE_LIBELLE)),
-                      SegmentDetail.toDomain(
-                          (String) src.get(AdditionalSkillConstants.FIELD_DOMAIN_CODE),
-                          (String) src.get(AdditionalSkillConstants.FIELD_DOMAIN_LIBELLE))),
+                  (String) src.get(AdditionalSkillConstants.FIELD_SKILL_LIBELLE),
+                  (String) src.get(AdditionalSkillConstants.FIELD_SKILL_CODE),
+                  getCategoryFromSource(src.get(AdditionalSkillConstants.FIELD_SKILL_CATEGORIES)),
                   EAdditionalSkillType.valueOf(
-                      (String) src.get(AdditionalSkillConstants.FIELD_TYPE)));
+                      (String) src.get(AdditionalSkillConstants.FIELD_TYPE)),
+                  Instant.now(),
+                  Instant.now());
             })
         .toList();
+  }
+
+  private Map<String, Object> getCategorySource(AdditionalSkillCategory additionalSkillCategory) {
+    if (additionalSkillCategory == null) return null;
+
+    Map<String, Object> map = new HashMap<>();
+    map.put("id", additionalSkillCategory.getId().toString());
+    map.put("libelle", additionalSkillCategory.getLibelle());
+    map.put("type", additionalSkillCategory.getType());
+    if (additionalSkillCategory.getParent().isPresent()) {
+      map.put("parent", getCategorySource(additionalSkillCategory.getParent().get()));
+    }
+    return map;
+  }
+
+  @SuppressWarnings("unchecked")
+  private AdditionalSkillCategory getCategoryFromSource(Object source) {
+    if (source == null) return null;
+
+    Map<String, Object> map = (Map<String, Object>) source;
+    UUID id = map.containsKey("id") ? UUID.fromString((String) map.get("id")) : null;
+    String libelle = (String) map.get("libelle");
+    EAdditionalSkillCategoryType type =
+        EAdditionalSkillCategoryType.valueOf(map.get("type").toString());
+
+    AdditionalSkillCategory parent = null;
+    if (map.containsKey("parent")) {
+      parent = getCategoryFromSource(map.get("parent"));
+    }
+
+    return AdditionalSkillCategory.toDomain(id, libelle, parent, type, null, null);
   }
 }

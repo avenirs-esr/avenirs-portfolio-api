@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.specification.AdditionalSkillSpecification;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
 import java.util.UUID;
@@ -25,8 +26,8 @@ public class AdditionalSkillDatabaseRepository
   }
 
   @Override
-  public List<AdditionalSkill> findByPathSegmentsSkillCodeIn(List<String> skillCodes) {
-    return jpaRepository.findByPathSegmentsSkillCodeIn(skillCodes).stream()
+  public List<AdditionalSkill> findAllByExternalId(List<String> skillCodes) {
+    return jpaRepository.findAll(AdditionalSkillSpecification.hasExternalId(skillCodes)).stream()
         .map(AdditionalSkillMapper::toDomain)
         .toList();
   }

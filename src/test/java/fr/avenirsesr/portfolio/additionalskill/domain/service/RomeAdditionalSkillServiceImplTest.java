@@ -10,15 +10,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.Rome4Version;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillCategory;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillCategoryType;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.RomeAdditionalSkillApi;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.Rome4VersionRepository;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.model.Rome4Version;
+import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.port.output.RomeAdditionalSkillApi;
+import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.port.output.repository.Rome4VersionRepository;
+import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.service.RomeAdditionalSkillServiceImpl;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -47,25 +48,31 @@ class RomeAdditionalSkillServiceImplTest {
 
   @BeforeEach
   void setUp() {
+    var domain1 =
+        AdditionalSkillCategory.of("domainLibelle1", null, EAdditionalSkillCategoryType.DOMAIN);
+    var issue1 =
+        AdditionalSkillCategory.of("issueLibelle1", domain1, EAdditionalSkillCategoryType.ISSUE);
+    var target1 =
+        AdditionalSkillCategory.of("targetLibelle1", issue1, EAdditionalSkillCategoryType.TARGET);
+    var macro1 =
+        AdditionalSkillCategory.of(
+            "macroSkillLibelle1", target1, EAdditionalSkillCategoryType.MACRO_SKILL);
+
     additionalSkill1 =
-        AdditionalSkill.create(
-            PathSegments.create(
-                SegmentDetail.create("skillCode1", "skillLibelle1"),
-                SegmentDetail.create("macroSkillCode1", "macroSkillLibelle1"),
-                SegmentDetail.create("targetCode1", "targetLibelle1"),
-                SegmentDetail.create("issueCode1", "issueLibelle1"),
-                SegmentDetail.create("domainCode1", "domainLibelle1")),
-            EAdditionalSkillType.ROME4);
+        AdditionalSkill.create("skillLibelle1", "skillCode1", macro1, EAdditionalSkillType.ROME4);
+
+    var domain2 =
+        AdditionalSkillCategory.of("domainLibelle2", null, EAdditionalSkillCategoryType.DOMAIN);
+    var issue2 =
+        AdditionalSkillCategory.of("issueLibelle2", domain2, EAdditionalSkillCategoryType.ISSUE);
+    var targe2 =
+        AdditionalSkillCategory.of("targetLibelle2", issue2, EAdditionalSkillCategoryType.TARGET);
+    var macro2 =
+        AdditionalSkillCategory.of(
+            "macroSkillLibelle2", targe2, EAdditionalSkillCategoryType.MACRO_SKILL);
 
     additionalSkill2 =
-        AdditionalSkill.create(
-            PathSegments.create(
-                SegmentDetail.create("skillCode2", "skillLibelle2"),
-                SegmentDetail.create("macroSkillCode2", "macroSkillLibelle2"),
-                SegmentDetail.create("targetCode2", "targetLibelle2"),
-                SegmentDetail.create("issueCode2", "issueLibelle2"),
-                SegmentDetail.create("domainCode2", "domainLibelle2")),
-            EAdditionalSkillType.ROME4);
+        AdditionalSkill.create("skillLibelle2", "skillCode2", macro2, EAdditionalSkillType.ROME4);
   }
 
   // --- cleanAndCreateAdditionalSkillIndex ---
@@ -85,7 +92,7 @@ class RomeAdditionalSkillServiceImplTest {
   void shouldSaveAndIndexAdditionalSkills_WhenNewSkills() {
     BddLogger.given("the method synchronizeAndIndexAdditionalSkills");
     List<AdditionalSkill> inputSkills = List.of(additionalSkill1, additionalSkill2);
-    when(additionalSkillRepository.findByPathSegmentsSkillCodeIn(anyList())).thenReturn(List.of());
+    when(additionalSkillRepository.findAllByExternalId(anyList())).thenReturn(List.of());
     when(additionalSkillRepository.saveAll(anyList()))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -95,8 +102,7 @@ class RomeAdditionalSkillServiceImplTest {
 
     BddLogger.then("it should save and index additional skills");
     assertThat(result).hasSize(2);
-    verify(additionalSkillRepository)
-        .findByPathSegmentsSkillCodeIn(List.of("skillCode1", "skillCode2"));
+    verify(additionalSkillRepository).findAllByExternalId(List.of("skillCode1", "skillCode2"));
     verify(additionalSkillRepository).saveAll(anyList());
     verify(openSearchIndex).indexAll(result);
   }
@@ -104,17 +110,19 @@ class RomeAdditionalSkillServiceImplTest {
   @Test
   void shouldUpdateExistingSkillAndIndex() {
     BddLogger.given("the method synchronizeAndIndexAdditionalSkills");
+    var domain1 =
+        AdditionalSkillCategory.of("domainLibelle1", null, EAdditionalSkillCategoryType.DOMAIN);
+    var issue1 =
+        AdditionalSkillCategory.of("issueLibelle1", domain1, EAdditionalSkillCategoryType.ISSUE);
+    var target1 =
+        AdditionalSkillCategory.of("targetLibelle1", issue1, EAdditionalSkillCategoryType.TARGET);
+    var macro1 =
+        AdditionalSkillCategory.of(
+            "macroSkillLibelle1", target1, EAdditionalSkillCategoryType.MACRO_SKILL);
     AdditionalSkill existingSkill =
-        AdditionalSkill.create(
-            PathSegments.create(
-                SegmentDetail.create("skillCode1", "newSkillLibelle1"),
-                SegmentDetail.create("macroSkillCode1", "macroSkillLibelle1"),
-                SegmentDetail.create("targetCode1", "targetLibelle1"),
-                SegmentDetail.create("issueCode1", "issueLibelle1"),
-                SegmentDetail.create("domainCode1", "domainLibelle1")),
-            EAdditionalSkillType.ROME4);
+        AdditionalSkill.create("skillLibelle1", "skillCode1", macro1, EAdditionalSkillType.ROME4);
 
-    when(additionalSkillRepository.findByPathSegmentsSkillCodeIn(anyList()))
+    when(additionalSkillRepository.findAllByExternalId(anyList()))
         .thenReturn(List.of(existingSkill));
     when(additionalSkillRepository.saveAll(anyList()))
         .thenAnswer(invocation -> invocation.getArgument(0));

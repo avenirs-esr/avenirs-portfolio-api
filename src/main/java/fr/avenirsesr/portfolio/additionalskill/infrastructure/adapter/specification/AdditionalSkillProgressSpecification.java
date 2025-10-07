@@ -27,8 +27,7 @@ public class AdditionalSkillProgressSpecification {
         return criteriaBuilder.conjunction();
       }
       return criteriaBuilder.like(
-          criteriaBuilder.lower(
-              root.get("additionalSkill").get("pathSegments").get("skill").get("libelle")),
+          criteriaBuilder.lower(root.get("additionalSkill").get("libelle")),
           "%" + keyword.toLowerCase() + "%");
     };
   }
