@@ -135,6 +135,7 @@ public class TraceServiceImpl implements TraceService {
 
     TraceAttachment traceAttachment = getTraceAttachment(trace);
 
+    AssociationsTrace associationsTrace = getAssociationsTrace(user, id);
     return new TraceDetail(
         trace.getId(),
         trace.getTitle(),
@@ -144,12 +145,12 @@ public class TraceServiceImpl implements TraceService {
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
         traceAttachment,
+        associationsTrace,
         trace.getCreatedAt(),
         trace.getUpdatedAt());
   }
 
-  @Override
-  public AssociationsTrace getAssociationsTrace(User user, UUID id) {
+  protected AssociationsTrace getAssociationsTrace(User user, UUID id) {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(user, trace);
 
@@ -215,6 +216,8 @@ public class TraceServiceImpl implements TraceService {
 
     TraceAttachment traceAttachment = getTraceAttachment(savedTrace);
 
+    AssociationsTrace associationsTrace = getAssociationsTrace(user, traceId);
+
     return new TraceDetail(
         savedTrace.getId(),
         savedTrace.getTitle(),
@@ -224,6 +227,7 @@ public class TraceServiceImpl implements TraceService {
         savedTrace.getAiUseJustification().orElse(null),
         savedTrace.getPersonalNote().orElse(null),
         traceAttachment,
+        associationsTrace,
         savedTrace.getCreatedAt(),
         savedTrace.getUpdatedAt());
   }
