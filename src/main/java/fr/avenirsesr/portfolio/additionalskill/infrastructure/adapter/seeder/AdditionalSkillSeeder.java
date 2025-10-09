@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.Add
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.AdditionalSkillDatabaseRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fake.FakeAdditionalSkill;
+import fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.domain.port.input.CasocService;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.xxi.domain.port.input.XXIService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class AdditionalSkillSeeder {
   private final AdditionalSkillDatabaseRepository additionalSkillDatabaseRepository;
   private final OpenSearchIndex openSearchIndex;
   private final XXIService xxiService;
+  private final CasocService casocService;
 
   @Transactional
   public List<AdditionalSkillEntity> seed() {
@@ -33,6 +35,7 @@ public class AdditionalSkillSeeder {
         additionalSkillEntities.stream().map(AdditionalSkillMapper::toDomain).toList());
 
     xxiService.syncSkills();
+    casocService.syncSkills();
 
     log.info("✔ {} additionalSkills created", additionalSkillEntities.size());
     return additionalSkillEntities;
