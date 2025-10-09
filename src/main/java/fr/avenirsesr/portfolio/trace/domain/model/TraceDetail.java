@@ -13,5 +13,6 @@ public record TraceDetail(
     String aiUseJustification,
     String personalNote,
     TraceAttachment attachment,
+    AssociationsTrace associationsTrace,
     Instant createdAt,
     Instant updatedAt) {}
