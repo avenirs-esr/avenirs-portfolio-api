@@ -1,4 +1,4 @@
-Sorbonne Université,Master Informatique - Intelligence Artificielle,Développer des algorithmes d apprentissage automatique,Niveau 1,Concevoir des algorithmes de base en apprentissage supervisé
+Sorbonne Université,Master Droit Pénal,Développer des algorithmes d apprentissage automatique,Niveau 1,Concevoir des algorithmes de base en apprentissage supervisé
 Université de Lyon,Master Psychologie - Études sur l enfance,Analyser les spécificités développementales,Niveau 2,Évaluer les troubles et retards développementaux complexes
 Université Toulouse III - Paul Sabatier,Licence Biologie Cellulaire,Maîtriser les concepts fondamentaux biologiques,Niveau 3,Intégrer les connaissances multi-échelles du vivant
 Université d Angers,Master Didactique des Langues FLE,Concevoir des séquences pédagogiques,Niveau 1,Planifier une séance avec objectifs et activités
@@ -20,13 +20,13 @@ Université de Pau,Licence Langues Étrangères Appliquées,Traduire des textes 
 Université de Perpignan,Master Énergies Renouvelables,Dimensionner des installations solaires,Niveau 2,Optimiser le rendement selon les contraintes terrain
 Université de Reims,Licence Histoire Contemporaine,Analyser des sources historiques primaires,Niveau 3,Établir de nouvelles chronologies historiques
 Université de Tours,Master Aménagement du Territoire,Concevoir des plans d urbanisme,Niveau 1,Respecter la réglementation d urbanisme en vigueur
-Université d Orléans,DUT Informatique,Développer des applications web,Niveau 2,Intégrer des APIs tierces et des bases de données
+Université d Orléans,DUT Informatique,Gérer les réseaux sociaux d entreprise,Niveau 2,Intégrer des APIs tierces et des bases de données
 Université du Maine,Master Acoustique Musicale,Analyser les propriétés acoustiques instruments,Niveau 3,Concevoir de nouveaux instruments acoustiques
 Université de Versailles Saint-Quentin,Licence Géographie Physique,Cartographier les risques naturels,Niveau 1,Utiliser les systèmes d information géographique
 Université d Évry,Master Intelligence Économique,Analyser la veille concurrentielle,Niveau 2,Synthétiser l information stratégique pour la direction
 Université de Cergy-Pontoise,Licence Économie Gestion,Modéliser les marchés financiers,Niveau 3,Prédire les tendances macroéconomiques
 Université Paris-Est Marne-la-Vallée,Master Génie Civil,Calculer la résistance des structures,Niveau 1,Appliquer les règles de calcul aux matériaux
-Université Paris 13,Master Communication Digitale,Gérer les réseaux sociaux d entreprise,Niveau 2,Développer une stratégie de contenu multicanal
+Université Paris 13,Master Communication Digitale,Développer des applications web,Niveau 2,Développer une stratégie de contenu multicanal
 Université Paris 8,Licence Cinéma Audiovisuel,Réaliser des courts métrages,Niveau 3,Innover dans l écriture cinématographique
 CNAM Paris,Master Cybersécurité,Auditer la sécurité des systèmes,Niveau 1,Identifier les vulnérabilités techniques courantes
 Université de Bourgogne,Master Œnologie,Analyser la qualité des vins,Niveau 2,Optimiser les processus de vinification
@@ -57,16 +57,16 @@ Rennes School of Business,Master Immobilier,Évaluer la rentabilité des projets
 Burgundy School of Business,Master Vins et Spiritueux,Développer des marques de vins premium,Niveau 3,Créer de nouveaux concepts de distribution
 La Rochelle Business School,Master Commerce International,Négocier à l international,Niveau 1,Maîtriser les Incoterms et réglementation
 Université Catholique de Lyon,Master Éthique Médicale,Analyser les dilemmes bioéthiques,Niveau 2,Conseiller les comités d éthique hospitaliers
-Institut Catholique Paris,Master Patrimoine Religieux,Restaurer les œuvres d art sacré,Niveau 3,Innover dans les techniques de conservation
+Institut Catholique Paris,Master Patrimoine Religieux,Apprendre la programmation orientée objet,Niveau 3,Innover dans les techniques de conservation
 Université Sorbonne Nouvelle,Master Traduction Littéraire,Traduire la poésie contemporaine,Niveau 1,Respecter la métrique et les sonorités
 Université Paris Nanterre,Master Anthropologie Visuelle,Réaliser des documentaires ethnographiques,Niveau 2,Capter les rites et traditions orales
 Sciences Po Paris,Master Affaires Publiques,Analyser les politiques publiques,Niveau 3,Proposer des réformes institutionnelles
-Sciences Po Lyon,Master Coopération Internationale,Gérer des projets de développement,Niveau 1,Respecter les procédures des bailleurs internationaux
+Sciences Po Lyon,Master Coopération Internationale,Étudier les politiques monétaires,Niveau 1,Respecter les procédures des bailleurs internationaux
 Sciences Po Bordeaux,Master Journalisme,Enquêter sur des sujets d investigation,Niveau 2,Recouper les sources et vérifier l information
 Sciences Po Lille,Master Sécurité Internationale,Analyser les conflits géopolitiques,Niveau 3,Anticiper les crises internationales
 Sciences Po Rennes,Master Communication Politique,Gérer les campagnes électorales,Niveau 1,Maîtriser les techniques de communication de base
 Sciences Po Strasbourg,Master Relations Franco-Allemandes,Faciliter les échanges transfrontaliers,Niveau 2,Négocier des accords de coopération bilatérale
-Sciences Po Toulouse,Master Aménagement Territorial,Concilier développement et environnement,Niveau 3,Innover dans la gouvernance territoriale
+Sciences Po Toulouse,Master Aménagement Territorial,Auditer la sécurité des systèmes,Niveau 3,Innover dans la gouvernance territoriale
 École Normale Supérieure Lyon,Master Littérature Comparée,Analyser les influences littéraires transculturelles,Niveau 1,Identifier les références intertextuelles
 École Normale Supérieure Cachan,Master Économie Quantitative,Modéliser les comportements économiques,Niveau 2,Tester économétriquement les théories
 École Normale Supérieure Rennes,Master Informatique Théorique,Démontrer la complexité algorithmique,Niveau 3,Établir de nouvelles bornes de complexité
@@ -83,7 +83,7 @@ ESTP Paris,Master BTP Innovation,Concevoir des bâtiments biosourcés,Niveau 1,U
 ENTPE Lyon,Master Infrastructures Durables,Évaluer l impact environnemental des projets,Niveau 2,Optimiser l analyse de cycle de vie
 ENSAM Cluny,Master Patrimoine Industriel,Restaurer les machines historiques,Niveau 3,Innover dans la muséographie technique
 ENSAM Metz,Master Usinage Grande Vitesse,Programmer les centres d usinage CNC,Niveau 1,Maîtriser la FAO et trajectoires d outils
-ENSAM Bordeaux,Master Aérodynamique Automobile,Optimiser les formes par CFD,Niveau 2,Réduire la traînée et améliorer l efficience
+ENSAM Bordeaux,Master Aérodynamique Automobile,Développer des applications web,Niveau 2,Réduire la traînée et améliorer l efficience
 ENSAM Lille,Master Vibro-Acoustique,Réduire les nuisances sonores industrielles,Niveau 3,Concevoir des matériaux acoustiques innovants
 Université de Technologie Belfort-Montbéliard,Master Énergie Hydrogène,Concevoir des piles à combustible,Niveau 1,Assembler les stacks et systèmes auxiliaires
 Université de Technologie Compiègne,Master Biomécanique,Modéliser le mouvement humain,Niveau 2,Simuler les pathologies articulaires
@@ -97,10 +97,10 @@ EPITECH,Master Innovation Technologique,Créer des startups tech disruptives,Niv
 SUPINFO,Master Architecture Cloud,Migrer vers les infrastructures cloud,Niveau 1,Déployer des applications sur AWS/Azure
 École 42,Master Développement Blockchain,Créer des smart contracts Ethereum,Niveau 2,Optimiser les coûts de transaction gas
 WebTech Institute,Master Data Science,Analyser les données non-structurées,Niveau 3,Innover dans les architectures big data
-HETIC,Master UX/UI Design,Concevoir des interfaces utilisateur intuitives,Niveau 1,Appliquer les principes d ergonomie web
+HETIC,Master UX/UI Design,Concevoir des interfaces utilisateur intuitives,Niveau 1,Programmer en Java et Python
 Supinfocom Rubika,Master Animation 3D,Créer des effets visuels cinématographiques,Niveau 2,Maîtriser les logiciels d animation avancés
 ENJMIN,Master Game Design,Concevoir des mécaniques de jeu innovantes,Niveau 3,Révolutionner l expérience utilisateur gaming
-ESRA,Master Production Audiovisuelle,Gérer des tournages de long métrage,Niveau 1,Coordonner les équipes techniques
+ESRA,Master Production Audiovisuelle,Gérer des tournages de long métrage,Niveau 1,Intégrer des APIs tierces et des bases de données
 FEMIS,Master Réalisation Cinématographique,Diriger des acteurs professionnels,Niveau 2,Développer sa signature artistique
 École Louis-Lumière,Master Image et Son,Maîtriser l étalonnage numérique,Niveau 3,Innover dans les technologies d image
 CNSMD Lyon,Master Composition Musicale Contemporaine,Composer pour orchestre symphonique,Niveau 1,Maîtriser l écriture instrumentale classique
@@ -122,10 +122,10 @@ ISD Rubika,Master Design Numérique,Créer des expériences immersives VR/AR,Niv
 École Supérieure d Art et Design Orléans,Master Design Social,Concevoir pour les populations fragiles,Niveau 2,Co-créer avec les usagers concernés
 École Supérieure d Art Annecy Alpes,Master Animation,Réaliser des films d animation d auteur,Niveau 3,Développer des techniques d animation originales
 ENSA Paris-Belleville,Master Architecture Durable,Concevoir des bâtiments passifs,Niveau 1,Respecter la RT2012 et futures réglementations
-ENSA Versailles,Master Patrimoine Architectural,Restaurer les monuments historiques,Niveau 2,Concilier conservation et mise aux normes
+ENSA Versailles,Master Patrimoine Architectural,Restaurer les monuments historiques,Niveau 2,Concevoir des algorithmes de base en apprentissage supervisé
 ENSA Lyon,Master Architecture Numérique,Modéliser en BIM les projets complexes,Niveau 3,Innover dans la conception paramétrique
 ENSA Marseille,Master Urbanisme Méditerranéen,Planifier les villes du climat chaud,Niveau 1,Adapter l urbanisme aux contraintes climatiques
-ENSA Toulouse,Master Architecture Aéroportuaire,Concevoir les aérogares du futur,Niveau 2,Optimiser les flux et l expérience voyageur
+ENSA Toulouse,Master Architecture Aéroportuaire,Concevoir les aérogares du futur,Niveau 2,Identifier les vulnérabilités techniques courantes
 ENSA Nantes,Master Paysage Urbain,Concevoir des espaces verts en ville,Niveau 3,Révolutionner la biodiversité urbaine
 École Spéciale d Architecture,Master Architecture d Intérieur,Aménager des espaces de travail collaboratifs,Niveau 1,Appliquer l ergonomie aux open spaces
 École La Cambre Belgique,Master Photographie Documentaire,Réaliser des reportages sociaux engagés,Niveau 2,Développer un regard photographique personnel
@@ -158,7 +158,7 @@ Institut Supérieur des Arts Appliqués,Master Scénographie,Concevoir des espac
 École Intuit Lab,Master Design UX/UI,Optimiser l expérience utilisateur mobile,Niveau 2,Tester et itérer les interfaces
 École de Condé,Master Illustration,Développer un style graphique personnel,Niveau 3,Se positionner sur le marché de l illustration
 MJM Graphic Design,Master Webdesign,Créer des sites web responsive design,Niveau 1,Maîtriser les frameworks CSS modernes
-ECV École de Communication Visuelle,Master Motion Design,Animer des logos et identités visuelles,Niveau 2,Synchroniser animation et bande sonore
+ECV École de Communication Visuelle,Master Motion Design,Animer des logos et identités visuelles,Niveau 2,Analyser les logs et corréler les événements
 École Supérieure de Design Troyes,Master Packaging,Concevoir des emballages éco-responsables,Niveau 3,Innover dans les matériaux biodégradables
 LISAA École de Design,Master Architecture d Intérieur Commercial,Aménager des espaces de vente expérientiels,Niveau 1,Optimiser les parcours clients en magasin
 École Supérieure d Arts Appliqués Bourgogne,Master Bijouterie Contemporaine,Créer des bijoux avec impression 3D,Niveau 2,Allier tradition orfèvre et technologies
@@ -201,10 +201,10 @@ Université de Savoie,Licence Sciences Sociales,Étudier les comportements colle
 Université de Corse,Master Énergies Durables,Développer des systèmes photovoltaïques,Niveau 1,Dimensionner des installations solaires
 Université d Évry,Master Robotique,Programmer des systèmes autonomes,Niveau 2,Optimiser les algorithmes de navigation
 Université Paris 1 Panthéon-Sorbonne,Master Histoire Médiévale,Analyser les sources manuscrites,Niveau 3,Établir des éditions critiques de textes anciens
-Université Paris 2 Panthéon-Assas,Master Droit Pénal,Étudier la responsabilité pénale,Niveau 1,Rédiger des analyses de cas juridiques
+Université Paris 2 Panthéon-Assas,Master Informatique - Intelligence Artificielle,Étudier la responsabilité pénale,Niveau 1,Rédiger des analyses de cas juridiques
 Université Paris 3 Sorbonne Nouvelle,Licence Lettres Modernes,Analyser des textes littéraires,Niveau 2,Développer des commentaires composés argumentés
-Université Paris 4 Sorbonne,Master Philosophie Politique,Étudier les doctrines modernes,Niveau 3,Produire des essais philosophiques originaux
-Université Paris 5 Descartes,Master Psychologie Clinique,Observer les comportements pathologiques,Niveau 1,Administrer des tests psychométriques
+Université Paris 4 Sorbonne,Master Philosophie Politique,Étudier les doctrines modernes,Niveau 3,Programmer en Java et Python
+Université Paris 5 Descartes,Master Psychologie Clinique,Observer les comportements pathologiques,Niveau 1,Déployer des services sur le cloud
 Université Paris 6 Pierre et Marie Curie,Licence Physique Chimie,Étudier la matière et ses interactions,Niveau 2,Appliquer les lois de la thermodynamique
 Université Paris 7 Diderot,Master Littérature Comparée,Comparer les traditions littéraires,Niveau 3,Analyser les correspondances entre auteurs
 Université Paris 10 Nanterre,Licence Droit Privé,Connaître les bases du droit civil,Niveau 1,Appliquer le code civil à des situations concrètes
@@ -232,12 +232,12 @@ Université de Luxembourg,Master Informatique,Concevoir des systèmes distribué
 Université de Montréal,Licence Économie,Analyser les politiques économiques,Niveau 2,Évaluer les impacts budgétaires
 Université de Laval,Master Éducation,Concevoir des dispositifs pédagogiques,Niveau 3,Développer des formations numériques
 Université d Ottawa,Licence Génie Civil,Étudier la résistance des matériaux,Niveau 1,Appliquer les normes de construction
-Université de Toronto,Master Sciences Cognitives,Étudier les processus mentaux,Niveau 2,Mettre en place des expériences cognitives
+Université de Toronto,Master Sciences Cognitives,Analyser les big data,Niveau 2,Mettre en place des expériences cognitives
 Université de Québec,Licence Communication,Analyser les médias de masse,Niveau 3,Produire des contenus audiovisuels innovants
 Université McGill,Master Médecine,Étudier les systèmes organiques,Niveau 1,Appliquer les techniques d anatomie
 Université Harvard,Master Business Administration,Analyser la stratégie d entreprise,Niveau 2,Développer des business plans complexes
 Université MIT,Licence Ingénierie,Maîtriser les bases de l électronique,Niveau 3,Concevoir des circuits intégrés avancés
-Université Stanford,Master Data Science,Analyser les big data,Niveau 1,Appliquer des algorithmes de classification
+Université Stanford,Master Data Science,Étudier les processus mentaux,Niveau 1,Appliquer des algorithmes de classification
 Université Berkeley,Licence Écologie,Étudier les écosystèmes forestiers,Niveau 2,Modéliser les dynamiques de populations
 Université Yale,Master Droit,Étudier les systèmes juridiques comparés,Niveau 3,Défendre des causes internationales
 Université Princeton,Licence Philosophie,Étudier les concepts fondamentaux,Niveau 1,Rédiger des dissertations argumentées
@@ -247,7 +247,7 @@ Université Cambridge,Master Histoire de l Art,Analyser les œuvres picturales,N
 Université Oxford,Licence Littérature Anglaise,Étudier les auteurs classiques,Niveau 2,Comparer les courants littéraires
 Université Melbourne,Master Ingénierie Biomédicale,Concevoir des dispositifs médicaux,Niveau 3,Innover dans les prothèses intelligentes
 Université Sydney,Licence Physique,Étudier les lois fondamentales,Niveau 1,Appliquer la mécanique classique
-Université Tokyo,Master Intelligence Artificielle,Concevoir des systèmes experts,Niveau 2,Développer des modèles d apprentissage profond
+Université Tokyo,Master Intelligence Artificielle,Développer des algorithmes d apprentissage automatique,Niveau 2,Développer des modèles d apprentissage profond
 Université Kyoto,Licence Biologie,Étudier la génétique animale,Niveau 3,Expérimenter sur les organismes modèles
 Université Pékin,Master Énergies Renouvelables,Développer des technologies solaires,Niveau 1,Installer des panneaux photovoltaïques
 Université Tsinghua,Licence Chimie,Étudier les réactions chimiques,Niveau 2,Analyser les cinétiques réactionnelles
@@ -267,7 +267,7 @@ Université Lomé,Master Droit International,Analyser les conventions africaines
 Université Kinshasa,Licence Physique,Étudier l électricité et le magnétisme,Niveau 1,Appliquer les lois de l électromagnétisme
 Université Addis-Abeba,Master Santé Publique,Étudier les systèmes de soins,Niveau 2,Élaborer des politiques de prévention
 Université Johannesburg,Licence Chimie,Étudier la chimie minérale,Niveau 3,Développer de nouveaux alliages
-Université Sao Paulo,Master Architecture,Concevoir des bâtiments durables,Niveau 1,Appliquer les normes environnementales
+Université Sao Paulo,Master Architecture,Étudier les algorithmes,Niveau 1,Appliquer les normes environnementales
 Université Rio de Janeiro,Licence Géographie,Étudier les paysages brésiliens,Niveau 2,Analyser les dynamiques urbaines
 Université Buenos Aires,Master Sociologie,Étudier les inégalités sociales,Niveau 3,Proposer des réformes sociales
 Université Santiago du Chili,Licence Histoire,Étudier les révolutions sud-américaines,Niveau 1,Analyser les archives nationales
@@ -276,15 +276,15 @@ Université Bogota,Licence Littérature,Étudier la poésie hispanique,Niveau 3,
 Université Lima,Master Médecine Tropicale,Étudier les maladies endémiques,Niveau 1,Appliquer les traitements préventifs
 Université Caracas,Licence Droit Pénal,Étudier la criminalité,Niveau 2,Analyser les systèmes judiciaires
 Université Quito,Master Biologie Tropicale,Étudier les écosystèmes amazoniens,Niveau 3,Développer des programmes de conservation
-Université Madrid,Licence Informatique,Étudier les algorithmes,Niveau 1,Programmer en Java et Python
+Université Madrid,Licence Informatique,Concevoir des bâtiments durables,Niveau 1,Programmer en Java et Python
 Université Barcelone,Master Marketing,Analyser les comportements de consommation,Niveau 2,Développer des stratégies publicitaires
-Université Séville,Licence Musique,Étudier la théorie musicale,Niveau 3,Composer des œuvres originales
+Université Séville,Licence Musique,Étudier la théorie musicale,Niveau 3,Intégrer des APIs tierces et des bases de données
 Université Rome,Master Droit Européen,Analyser les institutions de l UE,Niveau 1,Rédiger des dossiers juridiques
-Université Milan,Licence Design,Étudier la conception visuelle,Niveau 2,Créer des projets de communication graphique
+Université Milan,Master Informatique - Intelligence Artificielle,Étudier la conception visuelle,Niveau 2,Créer des projets de communication graphique
 Université Berlin,Master Physique,Étudier les particules élémentaires,Niveau 3,Conduire des expériences en accélérateur
 Université Munich,Licence Informatique,Étudier les bases de données,Niveau 1,Concevoir des schémas relationnels
 Université Hambourg,Master Psychologie,Étudier les comportements humains,Niveau 2,Mettre en place des thérapies cognitives
-Université Vienne,Licence Histoire,Étudier la période moderne,Niveau 3,Analyser les archives européennes
+Université Vienne,Licence Histoire,Étudier la période moderne,Niveau 3,Concevoir des algorithmes de base en apprentissage supervisé
 Université Prague,Master Ingénierie,Étudier la mécanique appliquée,Niveau 1,Appliquer les lois de Newton
 Université Varsovie,Licence Économie,Étudier les marchés financiers,Niveau 2,Prévoir les évolutions boursières
 Université Budapest,Master Musique,Étudier la composition,Niveau 3,Créer des symphonies originales
@@ -306,7 +306,7 @@ Université de Savoie,Master Tourisme Durable,Développer des circuits écologiq
 Université de Corse,Licence Histoire de l Art,Analyser les œuvres picturales,Niveau 1,Établir des comparaisons stylistiques
 Université d Évry,Master Big Data,Analyser les données massives,Niveau 2,Mettre en place des pipelines de traitement
 Université Paris-Saclay,Licence Sciences Sociales,Étudier les comportements collectifs,Niveau 3,Élaborer des enquêtes quantitatives
-Université Grenoble Alpes,Master Physique des Matériaux,Analyser les propriétés cristallines,Niveau 1,Utiliser la diffraction des rayons X
+Université Grenoble Alpes,Master Physique des Matériaux,Analyser les propriétés cristallines,Niveau 1,Développer des applications performantes
 Université de Nice,Licence Psychologie Sociale,Étudier les relations interpersonnelles,Niveau 2,Mettre en place des expériences en laboratoire
 Université de Pau,Master Génie Mécanique,Concevoir des prototypes,Niveau 3,Optimiser la performance des systèmes mécaniques
 Université de Perpignan,Licence Sciences Politiques,Comprendre les institutions contemporaines,Niveau 1,Analyser les discours politiques
@@ -341,7 +341,7 @@ Université Chicago,Licence Économie,Analyser les marchés mondiaux,Niveau 2,Co
 Université Cambridge,Master Chimie Organique,Développer des réactions de synthèse,Niveau 3,Concevoir des molécules complexes
 Université Oxford,Licence Informatique,Étudier les langages de programmation,Niveau 1,Programmer en Python et C++
 Université Melbourne,Master Éducation,Développer des dispositifs pédagogiques,Niveau 2,Mettre en œuvre des approches innovantes
-Université Sydney,Licence Biologie,Étudier l évolution,Niveau 3,Analyser les fossiles et génomes
+Université Sydney,Licence Biologie,Étudier l évolution,Niveau 3,Concevoir des schémas relationnels
 Université Tokyo,Master Droit,Étudier le droit des affaires,Niveau 1,Rédiger des contrats commerciaux
 Université Kyoto,Licence Informatique,Apprendre la programmation web,Niveau 2,Développer des sites dynamiques
 Université Pékin,Master Génie Civil,Concevoir des structures,Niveau 3,Optimiser la résistance des matériaux
@@ -349,10 +349,10 @@ Université Tsinghua,Licence Physique,Étudier les champs électromagnétiques,N
 Université Hong Kong,Master Communication,Étudier les médias,Niveau 2,Analyser les réseaux sociaux
 Université Singapour,Licence Chimie,Apprendre les réactions chimiques,Niveau 3,Conduire des analyses spectroscopiques
 Université Séoul,Master Informatique,Programmer des applications mobiles,Niveau 1,Utiliser des frameworks cross-platform
-Université Delhi,Licence Droit,Étudier le droit constitutionnel,Niveau 2,Rédiger des études de cas
+Université Delhi,Licence Droit,Étudier le droit constitutionnel,Niveau 2,Développer des applications Java simples
 Université Le Caire,Master Archéologie,Étudier les vestiges antiques,Niveau 3,Analyser les sites archéologiques
-Université Casablanca,Licence Économie,Étudier les politiques monétaires,Niveau 1,Analyser l inflation et la croissance
-Université Rabat,Master Gestion,Analyser la stratégie d entreprise,Niveau 2,Mettre en place des business plans
+Université Casablanca,Licence Économie,Analyser la stratégie d entreprise,Niveau 1,Mettre en place des business plans
+Université Rabat,Master Gestion,Gérer des projets de développement,Niveau 2,Analyser l inflation et la croissance
 Université Tunis,Licence Histoire,Étudier les empires antiques,Niveau 3,Constituer des dossiers thématiques
 Université Alger,Master Informatique,Concevoir des logiciels,Niveau 1,Programmer en langage objet
 Université Dakar,Licence Sciences Sociales,Étudier les dynamiques familiales,Niveau 2,Conduire des enquêtes qualitatives
@@ -386,7 +386,7 @@ Université Budapest,Master Physique,Analyser les particules subatomiques,Niveau
 Université Athènes,Licence Archéologie,Étudier les sites antiques,Niveau 3,Conduire des fouilles archéologiques
 Université Istanbul,Master Relations Internationales,Analyser les relations régionales,Niveau 1,Étudier les traités contemporains
 Université Moscou,Licence Mathématiques,Étudier l analyse réelle,Niveau 2,Établir des démonstrations avancées
-Université Saint-Pétersbourg,Master Biologie,Étudier la génétique,Niveau 3,Conduire des expérimentations en laboratoire
+Université Saint-Pétersbourg,Master Biologie,Développer l intelligence artificielle embarquée,Niveau 3,Conduire des expérimentations en laboratoire
 Université Oslo,Licence Économie,Étudier les systèmes financiers,Niveau 1,Analyser les flux de capitaux
 Université Stockholm,Master Informatique,Étudier la cybersécurité,Niveau 2,Mettre en place des audits de sécurité
 Université Helsinki,Licence Sciences Politiques,Étudier les institutions,Niveau 3,Comparer les systèmes démocratiques
@@ -402,5 +402,5 @@ Université Bristol,Master Biologie,Étudier la biodiversité marine,Niveau 3,É
 Université Liverpool,Licence Sociologie,Étudier les communautés,Niveau 1,Analyser les interactions sociales
 Université Sheffield,Master Génie Civil,Étudier les infrastructures,Niveau 2,Optimiser la durabilité des constructions
 Université Newcastle,Licence Informatique,Étudier les systèmes d exploitation,Niveau 3,Développer des noyaux allégés
-Université Cambridge Anglia Ruskin,Master Éducation,Développer la pédagogie,Niveau 1,Mettre en place des méthodes actives
+Université Cambridge Anglia Ruskin,Master Éducation,Développer la pédagogie,Niveau 1,Développer des modèles d apprentissage profond
 Université Oxford Brookes,Licence Économie,Analyser les marchés locaux,Niveau 2,Construire des modèles microéconomiques

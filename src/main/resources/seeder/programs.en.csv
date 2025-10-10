@@ -1,4 +1,4 @@
-Sorbonne University,Master's in Computer Science - Artificial Intelligence,Develop machine learning algorithms,Level 1,Design basic algorithms in supervised learning
+Sorbonne University,Master's in Cybersecurity,Develop machine learning algorithms,Level 1,Design basic algorithms in supervised learning
 University of Lyon,Master's in Psychology - Childhood Studies,Analyze developmental specificities,Level 2,Assess complex developmental disorders and delays
 University Toulouse III - Paul Sabatier,Bachelor's in Cell Biology,Master basic biological concepts,Level 3,Integrate multiscale knowledge of living systems
 University of Angers,Master's in Language Didactics (FLE),Design pedagogical sequences,Level 1,Plan a session with objectives and activities
@@ -26,9 +26,9 @@ University of Versailles Saint-Quentin,Bachelor's in Physical Geography,Map natu
 University of Évry,Master's in Economic Intelligence,Analyze competitive intelligence,Level 2,Summarize strategic information for the board
 University of Cergy-Pontoise,Bachelor's in Economic Management,Model financial markets,Level 3,Forecast macroeconomic trends
 Paris-Est Marne-la-Vallée University,Master's in Civil Engineering,Calculate structural resistance,Level 1,Apply calculation rules to materials
-University Paris 13,Master's in Digital Communication,Manage corporate social media,Level 2,Develop a multichannel content strategy
+University of Paris 13,Master’s in Digital Communication,Develop web applications,Level 2,Develop a multichannel content strategy
 University Paris 8,Bachelor's in Cinema and Audiovisual,Produce short films,Level 3,Innovate in cinematic writing
-CNAM Paris,Master's in Cybersecurity,Audit system security,Level 1,Identify common technical vulnerabilities
+CNAM Paris,Master's in Computer Science - Artificial Intelligence,Audit system security,Level 1,Identify common technical vulnerabilities
 University of Burgundy,Master's in Oenology,Analyze wine quality,Level 2,Optimize winemaking processes
 University of Franche-Comté,Bachelor's in Mechanics,Design mechanical parts,Level 3,Innovate in composite materials
 University of Savoie,Master's in Mountain Sports,Lead high-mountain activities,Level 1,Ensure safety of beginner participants
@@ -53,20 +53,20 @@ Skema Business School,Master's in Supply Chain,Optimize international logistics,
 Audencia,Master's in Corporate Social Responsibility,Integrate sustainability into strategy,Level 2,Measure environmental impact of activities
 Neoma Business School,Master's in Business Analytics,Analyze massive customer data,Level 3,Predict behaviors through machine learning
 TBS Toulouse Business School,Master's in Aeronautical Business,Negotiate with aircraft equipment suppliers,Level 1,Understand the specifics of the aeronautical sector
-Rennes School of Business,Master's in Real Estate,Assess the profitability of real estate projects,Level 2,Model cash flows over life cycles
+Rennes School of Business,Master’s in Computer Science - Artificial Intelligence,Assess the profitability of real estate projects,Level 2,Model cash flows over life cycles
 Burgundy School of Business,Master's in Wine and Spirits,Develop premium wine brands,Level 3,Create new distribution concepts
 La Rochelle Business School,Master's in International Trade,Negotiate internationally,Level 1,Master Incoterms and regulations
 Catholic University of Lyon,Master's in Medical Ethics,Analyze bioethical dilemmas,Level 2,Advise hospital ethics committees
-Institut Catholique de Paris,Master's in Religious Heritage,Restore sacred artworks,Level 3,Innovate in conservation techniques
+Catholic Institute of Paris,Master’s in Religious Heritage,Learn object-oriented programming,Level 3,Innovate in conservation techniques
 Sorbonne Nouvelle University,Master's in Literary Translation,Translate contemporary poetry,Level 1,Respect metrics and sound patterns
 Paris Nanterre University,Master's in Visual Anthropology,Produce ethnographic documentaries,Level 2,Capture oral rites and traditions
 Sciences Po Paris,Master's in Public Affairs,Analyze public policies,Level 3,Propose institutional reforms
-Sciences Po Lyon,Master's in International Cooperation,Manage development projects,Level 1,Follow procedures of international donors
+Sciences Po Lyon,Master’s in International Cooperation,Study monetary policies,Level 1,Comply with international donors procedures
 Sciences Po Bordeaux,Master's in Journalism,Investigate on sensitive topics,Level 2,Cross-check sources and verify information
 Sciences Po Lille,Master's in International Security,Analyze geopolitical conflicts,Level 3,Anticipate international crises
 Sciences Po Rennes,Master's in Political Communication,Manage election campaigns,Level 1,Master basic communication techniques
 Sciences Po Strasbourg,Master's in Franco-German Relations,Facilitate cross-border exchanges,Level 2,Negotiate bilateral cooperation agreements
-Sciences Po Toulouse,Master's in Land Planning,Balance development and environment,Level 3,Innovate in territorial governance
+Sciences Po Toulouse,Master’s in Territorial Planning,Audit system security,Level 3,Innovate in territorial governance
 ENS Lyon,Master's in Comparative Literature,Analyze transcultural literary influences,Level 1,Identify intertextual references
 ENS Cachan,Master's in Quantitative Economics,Model economic behavior,Level 2,Econometrically test theories
 ENS Rennes,Master's in Theoretical Computer Science,Prove algorithmic complexity,Level 3,Establish new complexity bounds
@@ -83,7 +83,7 @@ ESTP Paris,Master's in BTP Innovation,Design bio-sourced buildings,Level 1,Use s
 ENTPE Lyon,Master's in Sustainable Infrastructure,Evaluate environmental impact of projects,Level 2,Optimize life cycle assessment
 ENSAM Cluny,Master's in Industrial Heritage,Restore historical machines,Level 3,Innovate in technical museography
 ENSAM Metz,Master's in High-Speed Machining,Program CNC machining centers,Level 1,Master CAM and tool paths
-ENSAM Bordeaux,Master's in Automotive Aerodynamics,Optimize shapes using CFD,Level 2,Reduce drag and improve efficiency
+ENSAM Bordeaux,Master’s in Automotive Aerodynamics,Develop web applications,Level 2,Reduce drag and improve efficiency
 ENSAM Lille,Master's in Vibro-Acoustics,Reduce industrial noise nuisances,Level 3,Design innovative acoustic materials
 University of Technology of Belfort-Montbéliard,Master's in Hydrogen Energy,Design fuel cells,Level 1,Assemble stacks and auxiliary systems
 University of Technology of Compiègne,Master's in Biomechanics,Model human motion,Level 2,Simulate joint pathologies
@@ -97,10 +97,10 @@ EPITECH,Master's in Technological Innovation,Create disruptive tech startups,Lev
 SUPINFO,Master's in Cloud Architecture,Migrate to cloud infrastructures,Level 1,Deploy applications on AWS/Azure
 École 42,Master's in Blockchain Development,Create Ethereum smart contracts,Level 2,Optimize gas transaction costs
 WebTech Institute,Master's in Data Science,Analyze unstructured data,Level 3,Innovate in big data architectures
-HETIC,Master's in UX/UI Design,Design intuitive user interfaces,Level 1,Apply web ergonomic principles
+HETIC,Master’s in UX/UI Design,Design intuitive user interfaces,Level 1,Program in Java and Python
 Supinfocom Rubika,Master's in 3D Animation,Create cinematic visual effects,Level 2,Master advanced animation software
 ENJMIN,Master's in Game Design,Design innovative game mechanics,Level 3,Revolutionize the gaming user experience
-ESRA,Master's in Audiovisual Production,Manage feature film shoots,Level 1,Coordinate technical teams
+ESRA,Master’s in Audiovisual Production,Manage feature film shoots,Level 1,Integrate third-party APIs and databases
 FEMIS,Master's in Film Directing,Direct professional actors,Level 2,Develop a personal artistic signature
 École Louis-Lumière,Master's in Image and Sound,Master digital color grading,Level 3,Innovate in image technologies
 CNSMD Lyon,Master's in Contemporary Music Composition,Compose for symphonic orchestra,Level 1,Master classical instrumental writing
@@ -122,10 +122,10 @@ ISD Rubika,Master's in Digital Design,Create immersive VR/AR experiences,Level 3
 École Supérieure d Art et Design Orléans,Master's in Social Design,Design for vulnerable populations,Level 2,Co-create with target users
 École Supérieure d Art Annecy Alpes,Master's in Animation,Produce auteur animated films,Level 3,Develop original animation techniques
 ENSA Paris-Belleville,Master's in Sustainable Architecture,Design passive buildings,Level 1,Comply with RT2012 and future regulations
-ENSA Versailles,Master's in Architectural Heritage,Restore historic monuments,Level 2,Balance conservation and compliance
+ENSA Versailles,Master’s in Architectural Heritage,Restore historical monuments,Level 2,Design basic algorithms in supervised learning
 ENSA Lyon,Master's in Digital Architecture,Model complex projects in BIM,Level 3,Innovate in parametric design
 ENSA Marseille,Master's in Mediterranean Urbanism,Plan cities in hot climates,Level 1,Adapt urbanism to climate constraints
-ENSA Toulouse,Master's in Airport Architecture,Design future terminals,Level 2,Optimize flows and traveler experience
+ENSA Toulouse,Master’s in Airport Architecture,Design the terminals of the future,Level 2,Identify common technical vulnerabilities
 ENSA Nantes,Master's in Urban Landscape,Design urban green spaces,Level 3,Revolutionize urban biodiversity
 École Spéciale d Architecture,Master's in Interior Architecture,Design collaborative workspaces,Level 1,Apply ergonomics to open offices
 École La Cambre Belgium,Master's in Documentary Photography,Create socially engaged reports,Level 2,Develop a personal photographic viewpoint
@@ -158,7 +158,7 @@ Institut Supérieur des Arts Appliqués,Master's in Scenography,Design immersive
 École Intuit Lab,Master's in UX/UI Design,Optimize mobile user experience,Level 2,Test and iterate interfaces
 École de Condé,Master's in Illustration,Develop a personal visual style,Level 3,Position oneself in the illustration market
 MJM Graphic Design,Master's in Web Design,Create responsive websites,Level 1,Master modern CSS frameworks
-ECV École de Communication Visuelle,Master's in Motion Design,Animate branding and logos,Level 2,Synchronize visuals and sound
+ECV School of Visual Communication,Master’s in Motion Design,Animate logos and visual identities,Level 2,Analyze logs and correlate events
 École Supérieure de Design Troyes,Master's in Packaging,Design eco-friendly packaging,Level 3,Innovate in biodegradable materials
 LISAA School of Design,Master's in Commercial Interior Architecture,Design experiential retail spaces,Level 1,Enhance customer journeys in-store
 École Supérieure des Arts Appliqués Bourgogne,Master's in Contemporary Jewelry,Create 3D-printed jewelry,Level 2,Combine craft with digital tech
@@ -201,10 +201,10 @@ Université de Savoie,Bachelor's in Social Sciences,Study collective behaviors,L
 Université de Corse,Master's in Sustainable Energies,Develop photovoltaic systems,Level 1,Size solar installations
 Université d’Évry,Master's in Robotics,Program autonomous systems,Level 2,Optimize navigation algorithms
 Université Paris 1 Panthéon-Sorbonne,Master's in Medieval History,Analyze manuscript sources,Level 3,Create critical editions of ancient texts
-Université Paris 2 Panthéon-Assas,Master's in Criminal Law,Study criminal liability,Level 1,Draft legal case analyses
+University of Paris 2 Panthéon-Assas,Master’s in Computer Science - Artificial Intelligence,Study criminal liability,Level 1,Write legal case analyses
 Université Paris 3 Sorbonne Nouvelle,Bachelor's in Modern Literature,Analyze literary texts,Level 2,Write structured text commentaries
-Université Paris 4 Sorbonne,Master's in Political Philosophy,Study modern doctrines,Level 3,Produce original philosophical essays
-Université Paris 5 Descartes,Master's in Clinical Psychology,Observe pathological behaviors,Level 1,Administer psychometric tests
+University of Paris 4 Sorbonne,Master’s in Political Philosophy,Study modern doctrines,Level 3,Program in Java and Python
+University of Paris 5 Descartes,Master’s in Clinical Psychology,Observe pathological behaviors,Level 1,Deploy services on the cloud
 Université Paris 6 Pierre et Marie Curie,Bachelor's in Physics and Chemistry,Study matter and its interactions,Level 2,Apply laws of thermodynamics
 Université Paris 7 Diderot,Master's in Comparative Literature,Compare literary traditions,Level 3,Analyze correspondences between authors
 Université Paris 10 Nanterre,Bachelor's in Private Law,Understand civil law fundamentals,Level 1,Apply the civil code to real-life cases
@@ -232,12 +232,12 @@ Université de Luxembourg,Master's in Computer Science,Design distributed system
 Université de Montréal,Bachelor's in Economics,Analyze economic policies,Level 2,Assess budgetary impacts
 Université de Laval,Master's in Education,Design educational systems,Level 3,Develop digital training programs
 Université d’Ottawa,Bachelor's in Civil Engineering,Study material resistance,Level 1,Apply construction standards
-Université de Toronto,Master's in Cognitive Science,Study mental processes,Level 2,Conduct cognitive experiments
+University of Toronto,Master’s in Cognitive Sciences,Analyze big data,Level 2,Set up cognitive experiments
 Université du Québec,Bachelor's in Communication,Analyze mass media,Level 3,Produce innovative audiovisual content
 Université McGill,Master's in Medicine,Study organic systems,Level 1,Apply anatomy techniques
 Université Harvard,Master's in Business Administration,Analyze business strategy,Level 2,Develop complex business plans
 Université MIT,Bachelor's in Engineering,Master electronics fundamentals,Level 3,Design advanced integrated circuits
-Université Stanford,Master's in Data Science,Analyze big data,Level 1,Apply classification algorithms
+Stanford University,Master’s in Data Science,Study mental processes,Level 1,Apply classification algorithms
 Université Berkeley,Bachelor's in Ecology,Study forest ecosystems,Level 2,Model population dynamics
 Université Yale,Master's in Law,Study comparative legal systems,Level 3,Defend international legal cases
 Université Princeton,Bachelor's in Philosophy,Study fundamental concepts,Level 1,Write argumentative essays
@@ -247,7 +247,7 @@ Université de Cambridge,Master's in Art History,Analyze pictorial works,Level 1
 Université d’Oxford,Bachelor's in English Literature,Study classic authors,Level 2,Compare literary movements
 Université de Melbourne,Master's in Biomedical Engineering,Design medical devices,Level 3,Innovate in smart prosthetics
 Université de Sydney,Bachelor's in Physics,Study fundamental laws,Level 1,Apply classical mechanics
-Université de Tokyo,Master's in Artificial Intelligence,Design expert systems,Level 2,Develop deep learning models
+University of Tokyo,Master’s in Artificial Intelligence,Develop machine learning algorithms,Level 2,Develop deep learning models
 Université de Kyoto,Bachelor's in Biology,Study animal genetics,Level 3,Experiment with model organisms
 Université de Pékin,Master's in Renewable Energies,Develop solar technologies,Level 1,Install photovoltaic panels
 Université Tsinghua,Bachelor's in Chemistry,Study chemical reactions,Level 2,Analyze reaction kinetics
@@ -267,7 +267,7 @@ Université de Lomé,Master's in International Law,Analyze African conventions,L
 Université de Kinshasa,Bachelor's in Physics,Study electricity and magnetism,Level 1,Apply electromagnetism laws
 Université d'Addis-Abeba,Master's in Public Health,Study health systems,Level 2,Develop prevention policies
 Université de Johannesburg,Bachelor's in Chemistry,Study inorganic chemistry,Level 3,Develop new alloys
-Université de São Paulo,Master's in Architecture,Design sustainable buildings,Level 1,Apply environmental standards
+University of Sao Paulo,Master’s in Architecture,Study algorithms,Level 1,Apply environmental standards
 Université de Rio de Janeiro,Bachelor's in Geography,Study Brazilian landscapes,Level 2,Analyze urban dynamics
 Université de Buenos Aires,Master's in Sociology,Study social inequalities,Level 3,Propose social reforms
 Université de Santiago du Chili,Bachelor's in History,Study South American revolutions,Level 1,Analyze national archives
