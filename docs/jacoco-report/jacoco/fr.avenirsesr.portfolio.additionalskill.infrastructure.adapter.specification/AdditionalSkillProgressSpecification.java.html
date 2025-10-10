@@ -27,9 +27,8 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="nc" id="L27">        return criteriaBuilder.conjunction();</span>
       }
 <span class="nc" id="L29">      return criteriaBuilder.like(</span>
-<span class="nc" id="L30">          criteriaBuilder.lower(</span>
-<span class="nc" id="L31">              root.get(&quot;additionalSkill&quot;).get(&quot;pathSegments&quot;).get(&quot;skill&quot;).get(&quot;libelle&quot;)),</span>
-<span class="nc" id="L32">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
+<span class="nc" id="L30">          criteriaBuilder.lower(root.get(&quot;additionalSkill&quot;).get(&quot;libelle&quot;)),</span>
+<span class="nc" id="L31">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
     };
   }
 }

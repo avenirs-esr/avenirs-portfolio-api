@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.specification.AdditionalSkillSpecification;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
 import java.util.UUID;
@@ -16,24 +17,24 @@ public class AdditionalSkillDatabaseRepository
   private final AdditionalSkillJpaRepository jpaRepository;
 
   public AdditionalSkillDatabaseRepository(AdditionalSkillJpaRepository jpaRepository) {
-<span class="fc" id="L19">    super(</span>
+<span class="fc" id="L20">    super(</span>
         jpaRepository,
         jpaRepository,
         AdditionalSkillMapper::fromDomain,
         AdditionalSkillMapper::toDomain);
-<span class="fc" id="L24">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L25">  }</span>
+<span class="fc" id="L25">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L26">  }</span>
 
   @Override
-  public List&lt;AdditionalSkill&gt; findByPathSegmentsSkillCodeIn(List&lt;String&gt; skillCodes) {
-<span class="nc" id="L29">    return jpaRepository.findByPathSegmentsSkillCodeIn(skillCodes).stream()</span>
-<span class="nc" id="L30">        .map(AdditionalSkillMapper::toDomain)</span>
-<span class="nc" id="L31">        .toList();</span>
+  public List&lt;AdditionalSkill&gt; findAllByExternalId(List&lt;String&gt; skillCodes) {
+<span class="nc" id="L30">    return jpaRepository.findAll(AdditionalSkillSpecification.hasExternalId(skillCodes)).stream()</span>
+<span class="nc" id="L31">        .map(AdditionalSkillMapper::toDomain)</span>
+<span class="nc" id="L32">        .toList();</span>
   }
 
   @Override
   public List&lt;AdditionalSkill&gt; findAllByIds(List&lt;UUID&gt; ids) {
-<span class="nc" id="L36">    return jpaRepository.findAllById(ids).stream().map(AdditionalSkillMapper::toDomain).toList();</span>
+<span class="nc" id="L37">    return jpaRepository.findAllById(ids).stream().map(AdditionalSkillMapper::toDomain).toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -7,11 +7,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableJpaAuditing
 @EnableScheduling
-@SpringBootApplication
-<span class="fc" id="L11">public class AvenirsPortfolioApiApplication {</span>
+@SpringBootApplication(
+    scanBasePackages = {&quot;fr.avenirsesr.portfolio&quot;, &quot;fr.avenirsesr.portfolio.common&quot;})
+<span class="fc" id="L12">public class AvenirsPortfolioApiApplication {</span>
 
   public static void main(String[] args) {
-<span class="nc" id="L14">    SpringApplication.run(AvenirsPortfolioApiApplication.class, args);</span>
-<span class="nc" id="L15">  }</span>
+<span class="nc" id="L15">    SpringApplication.run(AvenirsPortfolioApiApplication.class, args);</span>
+<span class="nc" id="L16">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

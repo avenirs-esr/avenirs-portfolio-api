@@ -2,12 +2,12 @@
 
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
-import fr.avenirsesr.portfolio.backoffice.configuration.trace.domain.port.input.TraceConfigurationService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.service.TraceServiceImpl;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,10 +16,11 @@ import org.springframework.context.annotation.Configuration;
 public class TraceServiceConfig {
   private final TraceDatabaseRepository traceRepository;
   private final StudentProgressDatabaseRepository studentProgressRepository;
+
   private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
   private final AMSRepository amsRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
-  private final TraceConfigurationService traceConfigurationService;
+  private final TraceConfigurationClient traceConfigurationClient;
   private final TraceAttachmentRepository traceAttachmentRepository;
 
   public TraceServiceConfig(
@@ -28,27 +29,27 @@ public class TraceServiceConfig {
       AdditionalSkillProgressRepository additionalSkillProgressRepository,
       AMSRepository amsRepository,
       SkillLevelProgressRepository skillLevelProgressRepository,
-      TraceConfigurationService traceConfigurationService,
-<span class="fc" id="L32">      TraceAttachmentRepository traceAttachmentRepository) {</span>
-<span class="fc" id="L33">    this.traceRepository = traceRepository;</span>
-<span class="fc" id="L34">    this.studentProgressRepository = studentProgressRepository;</span>
-<span class="fc" id="L35">    this.additionalSkillProgressRepository = additionalSkillProgressRepository;</span>
-<span class="fc" id="L36">    this.amsRepository = amsRepository;</span>
-<span class="fc" id="L37">    this.skillLevelProgressRepository = skillLevelProgressRepository;</span>
-<span class="fc" id="L38">    this.traceConfigurationService = traceConfigurationService;</span>
-<span class="fc" id="L39">    this.traceAttachmentRepository = traceAttachmentRepository;</span>
-<span class="fc" id="L40">  }</span>
+      TraceAttachmentRepository traceAttachmentRepository,
+<span class="fc" id="L33">      TraceConfigurationClient traceConfigurationClient) {</span>
+<span class="fc" id="L34">    this.traceRepository = traceRepository;</span>
+<span class="fc" id="L35">    this.studentProgressRepository = studentProgressRepository;</span>
+<span class="fc" id="L36">    this.additionalSkillProgressRepository = additionalSkillProgressRepository;</span>
+<span class="fc" id="L37">    this.amsRepository = amsRepository;</span>
+<span class="fc" id="L38">    this.skillLevelProgressRepository = skillLevelProgressRepository;</span>
+<span class="fc" id="L39">    this.traceConfigurationClient = traceConfigurationClient;</span>
+<span class="fc" id="L40">    this.traceAttachmentRepository = traceAttachmentRepository;</span>
+<span class="fc" id="L41">  }</span>
 
   @Bean
   public TraceService traceService() {
-<span class="fc" id="L44">    return new TraceServiceImpl(</span>
+<span class="fc" id="L45">    return new TraceServiceImpl(</span>
         traceRepository,
         studentProgressRepository,
         additionalSkillProgressRepository,
         amsRepository,
         skillLevelProgressRepository,
-        traceConfigurationService,
-        traceAttachmentRepository);
+        traceAttachmentRepository,
+        traceConfigurationClient);
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

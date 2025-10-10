@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Configuration;
   @Bean
   public OpenApiCustomizer portfolioEnumCustomizer() {
 <span class="fc" id="L13">    return openApi -&gt; {</span>
-<span class="fc" id="L14">      baseCustomization(openApi);</span>
-<span class="fc" id="L15">      openApi.getComponents().addSchemas(&quot;EPortfolioType&quot;, SwaggerSchema.portfolioTypeSchema);</span>
-<span class="fc" id="L16">    };</span>
+<span class="nc" id="L14">      baseCustomization(openApi);</span>
+<span class="nc" id="L15">      openApi.getComponents().addSchemas(&quot;EPortfolioType&quot;, SwaggerSchema.portfolioTypeSchema);</span>
+<span class="nc" id="L16">    };</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

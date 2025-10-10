@@ -7,15 +7,15 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
 
 public interface SwaggerSchema {
-<span class="fc" id="L10">  Schema&lt;String&gt; traceStatusSchema =</span>
+<span class="nc" id="L10">  Schema&lt;String&gt; traceStatusSchema =</span>
       new StringSchema()
-<span class="fc" id="L12">          .name(&quot;ETraceStatus&quot;)</span>
-<span class="fc" id="L13">          ._enum(Arrays.stream(ETraceStatus.values()).map(Enum::name).toList())</span>
-<span class="fc" id="L14">          .description(&quot;Enum for trace status&quot;);</span>
-<span class="fc" id="L15">  Schema&lt;String&gt; traceAssociationTypeSchema =</span>
+<span class="nc" id="L12">          .name(&quot;ETraceStatus&quot;)</span>
+<span class="nc" id="L13">          ._enum(Arrays.stream(ETraceStatus.values()).map(Enum::name).toList())</span>
+<span class="nc" id="L14">          .description(&quot;Enum for trace status&quot;);</span>
+<span class="nc" id="L15">  Schema&lt;String&gt; traceAssociationTypeSchema =</span>
       new StringSchema()
-<span class="fc" id="L17">          .name(&quot;ETraceAssociationType&quot;)</span>
-<span class="fc" id="L18">          ._enum(Arrays.stream(ETraceAssociationType.values()).map(Enum::name).toList())</span>
-<span class="fc" id="L19">          .description(&quot;Enum for trace association type&quot;);</span>
+<span class="nc" id="L17">          .name(&quot;ETraceAssociationType&quot;)</span>
+<span class="nc" id="L18">          ._enum(Arrays.stream(ETraceAssociationType.values()).map(Enum::name).toList())</span>
+<span class="nc" id="L19">          .description(&quot;Enum for trace association type&quot;);</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OpenSearchIndexImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.opensearch</a> &gt; <span class="el_source">OpenSearchIndexImpl.java</span></div><h1>OpenSearchIndexImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.opensearch;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillCategory;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillPagedResult;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.PathSegments;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.SegmentDetail;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillCategoryType;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.utils.AdditionalSkillConstants;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.opensearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -30,11 +27,13 @@ import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.search.builder.SearchSourceBuilder;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-<span class="fc" id="L35">@Slf4j</span>
+<span class="nc" id="L33">@Slf4j</span>
 @RequiredArgsConstructor
 @Component
+@Profile(&quot;!test&quot;)
 public class OpenSearchIndexImpl implements OpenSearchIndex {
   private final RestHighLevelClient client;
 
@@ -42,154 +41,150 @@ public class OpenSearchIndexImpl implements OpenSearchIndex {
   @CacheEvict(value = AdditionalSkillConstants.INDEX)
   public void cleanAndCreateAdditionalSkillIndex() {
     try {
-<span class="nc" id="L45">      if (client</span>
-<span class="nc" id="L46">          .indices()</span>
-<span class="nc bnc" id="L47" title="All 2 branches missed.">          .exists(new GetIndexRequest(AdditionalSkillConstants.INDEX), RequestOptions.DEFAULT)) {</span>
-<span class="nc" id="L48">        client</span>
-<span class="nc" id="L49">            .indices()</span>
-<span class="nc" id="L50">            .delete(new DeleteIndexRequest(AdditionalSkillConstants.INDEX), RequestOptions.DEFAULT);</span>
-<span class="nc" id="L51">        log.info(&quot;Index '{}' deleted.&quot;, AdditionalSkillConstants.INDEX);</span>
+<span class="nc" id="L44">      if (client</span>
+<span class="nc" id="L45">          .indices()</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">          .exists(new GetIndexRequest(AdditionalSkillConstants.INDEX), RequestOptions.DEFAULT)) {</span>
+<span class="nc" id="L47">        client</span>
+<span class="nc" id="L48">            .indices()</span>
+<span class="nc" id="L49">            .delete(new DeleteIndexRequest(AdditionalSkillConstants.INDEX), RequestOptions.DEFAULT);</span>
+<span class="nc" id="L50">        log.info(&quot;Index '{}' deleted.&quot;, AdditionalSkillConstants.INDEX);</span>
       }
 
-<span class="nc" id="L54">      client</span>
-<span class="nc" id="L55">          .indices()</span>
-<span class="nc" id="L56">          .create(new CreateIndexRequest(AdditionalSkillConstants.INDEX), RequestOptions.DEFAULT);</span>
-<span class="nc" id="L57">      log.info(&quot;Index '{}' created.&quot;, AdditionalSkillConstants.INDEX);</span>
-<span class="nc" id="L58">    } catch (IOException e) {</span>
-<span class="nc" id="L59">      throw new RuntimeException(&quot;Failed to recreate index: &quot; + AdditionalSkillConstants.INDEX, e);</span>
-<span class="nc" id="L60">    }</span>
-<span class="nc" id="L61">  }</span>
+<span class="nc" id="L53">      client</span>
+<span class="nc" id="L54">          .indices()</span>
+<span class="nc" id="L55">          .create(new CreateIndexRequest(AdditionalSkillConstants.INDEX), RequestOptions.DEFAULT);</span>
+<span class="nc" id="L56">      log.info(&quot;Index '{}' created.&quot;, AdditionalSkillConstants.INDEX);</span>
+<span class="nc" id="L57">    } catch (IOException e) {</span>
+<span class="nc" id="L58">      throw new RuntimeException(&quot;Failed to recreate index: &quot; + AdditionalSkillConstants.INDEX, e);</span>
+<span class="nc" id="L59">    }</span>
+<span class="nc" id="L60">  }</span>
 
   @Override
   public void indexAll(List&lt;AdditionalSkill&gt; additionalSkillList) {
-<span class="nc" id="L65">    BulkRequest bulkRequest = new BulkRequest();</span>
+<span class="nc" id="L64">    BulkRequest bulkRequest = new BulkRequest();</span>
 
-<span class="nc bnc" id="L67" title="All 2 branches missed.">    for (AdditionalSkill additionalSkill : additionalSkillList) {</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">    for (AdditionalSkill additionalSkill : additionalSkillList) {</span>
       try {
-<span class="nc" id="L69">        Map&lt;String, Object&gt; source = getAdditionalSkillSourceMap(additionalSkill);</span>
-<span class="nc" id="L70">        bulkRequest.add(</span>
+<span class="nc" id="L68">        Map&lt;String, Object&gt; source = getAdditionalSkillSourceMap(additionalSkill);</span>
+<span class="nc" id="L69">        bulkRequest.add(</span>
             new IndexRequest(AdditionalSkillConstants.INDEX)
-<span class="nc" id="L72">                .id(additionalSkill.getId().toString())</span>
-<span class="nc" id="L73">                .source(source));</span>
-<span class="nc" id="L74">      } catch (Exception e) {</span>
-<span class="nc" id="L75">        throw new RuntimeException(&quot;Failed additionalSkill: &quot; + additionalSkill.getId(), e);</span>
-<span class="nc" id="L76">      }</span>
-<span class="nc" id="L77">    }</span>
+<span class="nc" id="L71">                .id(additionalSkill.getId().toString())</span>
+<span class="nc" id="L72">                .source(source));</span>
+<span class="nc" id="L73">      } catch (Exception e) {</span>
+<span class="nc" id="L74">        throw new RuntimeException(&quot;Failed additionalSkill: &quot; + additionalSkill.getId(), e);</span>
+<span class="nc" id="L75">      }</span>
+<span class="nc" id="L76">    }</span>
 
     try {
-<span class="nc" id="L80">      BulkResponse response = client.bulk(bulkRequest, RequestOptions.DEFAULT);</span>
-<span class="nc bnc" id="L81" title="All 2 branches missed.">      if (response.hasFailures()) {</span>
-<span class="nc" id="L82">        log.error(&quot;Bulk indexing errors: {}&quot;, response.buildFailureMessage());</span>
-      } else {
-<span class="nc" id="L84">        log.info(&quot;Bulk indexing succeeded for {} documents&quot;, additionalSkillList.size());</span>
+<span class="nc" id="L79">      BulkResponse response = client.bulk(bulkRequest, RequestOptions.DEFAULT);</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">      if (response.hasFailures()) {</span>
+<span class="nc" id="L81">        log.error(&quot;Bulk indexing errors: {}&quot;, response.buildFailureMessage());</span>
       }
-<span class="nc" id="L86">    } catch (IOException e) {</span>
-<span class="nc" id="L87">      throw new RuntimeException(&quot;OpenSearchIndex bulk indexing failed&quot;, e);</span>
-<span class="nc" id="L88">    }</span>
-<span class="nc" id="L89">  }</span>
+<span class="nc" id="L83">    } catch (IOException e) {</span>
+<span class="nc" id="L84">      throw new RuntimeException(&quot;OpenSearchIndex bulk indexing failed&quot;, e);</span>
+    } finally {
+<span class="nc" id="L86">      log.info(&quot;Bulk indexing succeeded for {} documents&quot;, additionalSkillList.size());</span>
+    }
+<span class="nc" id="L88">  }</span>
 
   @Override
   @Cacheable(
       value = AdditionalSkillConstants.INDEX,
       key = &quot;#keyword + '_' + #pageCriteria.page() + '_' + #pageCriteria.pageSize()&quot;)
   public AdditionalSkillPagedResult search(String keyword, PageCriteria pageCriteria) {
-<span class="nc" id="L96">    SearchRequest searchRequest = new SearchRequest(AdditionalSkillConstants.INDEX);</span>
+<span class="nc" id="L95">    SearchRequest searchRequest = new SearchRequest(AdditionalSkillConstants.INDEX);</span>
 
-<span class="nc" id="L98">    SearchSourceBuilder sourceBuilder =</span>
+<span class="nc" id="L97">    SearchSourceBuilder sourceBuilder =</span>
         new SearchSourceBuilder()
-<span class="nc" id="L100">            .query(</span>
-<span class="nc" id="L101">                QueryBuilders.matchPhrasePrefixQuery(</span>
+<span class="nc" id="L99">            .query(</span>
+<span class="nc" id="L100">                QueryBuilders.matchPhrasePrefixQuery(</span>
                     AdditionalSkillConstants.FIELD_SKILL_LIBELLE, keyword))
-<span class="nc" id="L103">            .from(pageCriteria.page() * pageCriteria.pageSize())</span>
-<span class="nc" id="L104">            .size(pageCriteria.pageSize())</span>
-<span class="nc" id="L105">            .trackTotalHits(true);</span>
+<span class="nc" id="L102">            .from(pageCriteria.page() * pageCriteria.pageSize())</span>
+<span class="nc" id="L103">            .size(pageCriteria.pageSize())</span>
+<span class="nc" id="L104">            .trackTotalHits(true);</span>
 
-<span class="nc" id="L107">    searchRequest.source(sourceBuilder);</span>
+<span class="nc" id="L106">    searchRequest.source(sourceBuilder);</span>
 
     try {
-<span class="nc" id="L110">      SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);</span>
-<span class="nc" id="L111">      long totalHits = response.getHits().getTotalHits().value;</span>
+<span class="nc" id="L109">      SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);</span>
+<span class="nc" id="L110">      long totalHits = response.getHits().getTotalHits().value;</span>
 
-<span class="nc" id="L113">      List&lt;AdditionalSkill&gt; additionalSkillList = getAdditionalSkillList(response);</span>
+<span class="nc" id="L112">      List&lt;AdditionalSkill&gt; additionalSkillList = getAdditionalSkillList(response);</span>
 
-<span class="nc" id="L115">      return new AdditionalSkillPagedResult(</span>
+<span class="nc" id="L114">      return new AdditionalSkillPagedResult(</span>
           additionalSkillList,
-<span class="nc" id="L117">          new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), totalHits));</span>
-<span class="nc" id="L118">    } catch (IOException e) {</span>
-<span class="nc" id="L119">      throw new RuntimeException(</span>
+<span class="nc" id="L116">          new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), totalHits));</span>
+<span class="nc" id="L117">    } catch (IOException e) {</span>
+<span class="nc" id="L118">      throw new RuntimeException(</span>
           &quot;OpenSearchIndex search failed with param keyword=&quot;
               + keyword
               + &quot;, page=&quot;
-<span class="nc" id="L123">              + pageCriteria.page()</span>
+<span class="nc" id="L122">              + pageCriteria.page()</span>
               + &quot;, size=&quot;
-<span class="nc" id="L125">              + pageCriteria.pageSize(),</span>
+<span class="nc" id="L124">              + pageCriteria.pageSize(),</span>
           e);
     }
   }
 
   private Map&lt;String, Object&gt; getAdditionalSkillSourceMap(AdditionalSkill additionalSkill) {
-<span class="nc" id="L131">    return Map.ofEntries(</span>
-<span class="nc" id="L132">        Map.entry(AdditionalSkillConstants.FIELD_ID, additionalSkill.getId().toString()),</span>
-<span class="nc" id="L133">        Map.entry(</span>
-            AdditionalSkillConstants.FIELD_SKILL_CODE,
-<span class="nc" id="L135">            additionalSkill.getPathSegments().getSkill().getCode()),</span>
-<span class="nc" id="L136">        Map.entry(</span>
-            AdditionalSkillConstants.FIELD_SKILL_LIBELLE,
-<span class="nc" id="L138">            additionalSkill.getPathSegments().getSkill().getLibelle()),</span>
-<span class="nc" id="L139">        Map.entry(</span>
-            AdditionalSkillConstants.FIELD_MACRO_SKILL_CODE,
-<span class="nc" id="L141">            additionalSkill.getPathSegments().getMacroSkill().getCode()),</span>
-<span class="nc" id="L142">        Map.entry(</span>
-            AdditionalSkillConstants.FIELD_MACRO_SKILL_LIBELLE,
-<span class="nc" id="L144">            additionalSkill.getPathSegments().getMacroSkill().getLibelle()),</span>
-<span class="nc" id="L145">        Map.entry(</span>
-            AdditionalSkillConstants.FIELD_TARGET_CODE,
-<span class="nc" id="L147">            additionalSkill.getPathSegments().getTarget().getCode()),</span>
-<span class="nc" id="L148">        Map.entry(</span>
-            AdditionalSkillConstants.FIELD_TARGET_LIBELLE,
-<span class="nc" id="L150">            additionalSkill.getPathSegments().getTarget().getLibelle()),</span>
-<span class="nc" id="L151">        Map.entry(</span>
-            AdditionalSkillConstants.FIELD_ISSUE_CODE,
-<span class="nc" id="L153">            additionalSkill.getPathSegments().getIssue().getCode()),</span>
-<span class="nc" id="L154">        Map.entry(</span>
-            AdditionalSkillConstants.FIELD_ISSUE_LIBELLE,
-<span class="nc" id="L156">            additionalSkill.getPathSegments().getIssue().getLibelle()),</span>
-<span class="nc" id="L157">        Map.entry(</span>
-            AdditionalSkillConstants.FIELD_DOMAIN_CODE,
-<span class="nc" id="L159">            additionalSkill.getPathSegments().getDomain().getCode()),</span>
-<span class="nc" id="L160">        Map.entry(</span>
-            AdditionalSkillConstants.FIELD_DOMAIN_LIBELLE,
-<span class="nc" id="L162">            additionalSkill.getPathSegments().getDomain().getLibelle()),</span>
-<span class="nc" id="L163">        Map.entry(AdditionalSkillConstants.FIELD_TYPE, additionalSkill.getType()));</span>
+<span class="nc" id="L130">    var map = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L131">    map.put(AdditionalSkillConstants.FIELD_ID, additionalSkill.getId().toString());</span>
+<span class="nc" id="L132">    map.put(AdditionalSkillConstants.FIELD_SKILL_LIBELLE, additionalSkill.getLibelle());</span>
+<span class="nc" id="L133">    map.put(AdditionalSkillConstants.FIELD_TYPE, additionalSkill.getType());</span>
+<span class="nc" id="L134">    map.put(</span>
+        AdditionalSkillConstants.FIELD_SKILL_CATEGORIES,
+<span class="nc" id="L136">        additionalSkill.getAdditionalSkillCategory().map(this::getCategorySource).orElse(null));</span>
+
+<span class="nc" id="L138">    return map;</span>
   }
 
   private List&lt;AdditionalSkill&gt; getAdditionalSkillList(SearchResponse response) {
-<span class="nc" id="L167">    return Arrays.stream(response.getHits().getHits())</span>
-<span class="nc" id="L168">        .map(</span>
+<span class="nc" id="L142">    return Arrays.stream(response.getHits().getHits())</span>
+<span class="nc" id="L143">        .map(</span>
             hit -&gt; {
-<span class="nc" id="L170">              Map&lt;String, Object&gt; src = hit.getSourceAsMap();</span>
-<span class="nc" id="L171">              return AdditionalSkill.toDomain(</span>
-<span class="nc" id="L172">                  UUID.fromString((String) src.get(AdditionalSkillConstants.FIELD_ID)),</span>
-<span class="nc" id="L173">                  PathSegments.toDomain(</span>
-<span class="nc" id="L174">                      SegmentDetail.toDomain(</span>
-<span class="nc" id="L175">                          (String) src.get(AdditionalSkillConstants.FIELD_SKILL_CODE),</span>
-<span class="nc" id="L176">                          (String) src.get(AdditionalSkillConstants.FIELD_SKILL_LIBELLE)),</span>
-<span class="nc" id="L177">                      SegmentDetail.toDomain(</span>
-<span class="nc" id="L178">                          (String) src.get(AdditionalSkillConstants.FIELD_MACRO_SKILL_CODE),</span>
-<span class="nc" id="L179">                          (String) src.get(AdditionalSkillConstants.FIELD_MACRO_SKILL_LIBELLE)),</span>
-<span class="nc" id="L180">                      SegmentDetail.toDomain(</span>
-<span class="nc" id="L181">                          (String) src.get(AdditionalSkillConstants.FIELD_TARGET_CODE),</span>
-<span class="nc" id="L182">                          (String) src.get(AdditionalSkillConstants.FIELD_TARGET_LIBELLE)),</span>
-<span class="nc" id="L183">                      SegmentDetail.toDomain(</span>
-<span class="nc" id="L184">                          (String) src.get(AdditionalSkillConstants.FIELD_ISSUE_CODE),</span>
-<span class="nc" id="L185">                          (String) src.get(AdditionalSkillConstants.FIELD_ISSUE_LIBELLE)),</span>
-<span class="nc" id="L186">                      SegmentDetail.toDomain(</span>
-<span class="nc" id="L187">                          (String) src.get(AdditionalSkillConstants.FIELD_DOMAIN_CODE),</span>
-<span class="nc" id="L188">                          (String) src.get(AdditionalSkillConstants.FIELD_DOMAIN_LIBELLE))),</span>
-<span class="nc" id="L189">                  EAdditionalSkillType.valueOf(</span>
-<span class="nc" id="L190">                      (String) src.get(AdditionalSkillConstants.FIELD_TYPE)));</span>
+<span class="nc" id="L145">              Map&lt;String, Object&gt; src = hit.getSourceAsMap();</span>
+<span class="nc" id="L146">              return AdditionalSkill.toDomain(</span>
+<span class="nc" id="L147">                  UUID.fromString((String) src.get(AdditionalSkillConstants.FIELD_ID)),</span>
+<span class="nc" id="L148">                  (String) src.get(AdditionalSkillConstants.FIELD_SKILL_LIBELLE),</span>
+<span class="nc" id="L149">                  (String) src.get(AdditionalSkillConstants.FIELD_SKILL_CODE),</span>
+<span class="nc" id="L150">                  getCategoryFromSource(src.get(AdditionalSkillConstants.FIELD_SKILL_CATEGORIES)),</span>
+<span class="nc" id="L151">                  EAdditionalSkillType.valueOf(</span>
+<span class="nc" id="L152">                      (String) src.get(AdditionalSkillConstants.FIELD_TYPE)),</span>
+<span class="nc" id="L153">                  Instant.now(),</span>
+<span class="nc" id="L154">                  Instant.now());</span>
             })
-<span class="nc" id="L192">        .toList();</span>
+<span class="nc" id="L156">        .toList();</span>
+  }
+
+  private Map&lt;String, Object&gt; getCategorySource(AdditionalSkillCategory additionalSkillCategory) {
+<span class="nc bnc" id="L160" title="All 2 branches missed.">    if (additionalSkillCategory == null) return null;</span>
+
+<span class="nc" id="L162">    Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L163">    map.put(&quot;id&quot;, additionalSkillCategory.getId().toString());</span>
+<span class="nc" id="L164">    map.put(&quot;libelle&quot;, additionalSkillCategory.getLibelle());</span>
+<span class="nc" id="L165">    map.put(&quot;type&quot;, additionalSkillCategory.getType());</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">    if (additionalSkillCategory.getParent().isPresent()) {</span>
+<span class="nc" id="L167">      map.put(&quot;parent&quot;, getCategorySource(additionalSkillCategory.getParent().get()));</span>
+    }
+<span class="nc" id="L169">    return map;</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private AdditionalSkillCategory getCategoryFromSource(Object source) {
+<span class="nc bnc" id="L174" title="All 2 branches missed.">    if (source == null) return null;</span>
+
+<span class="nc" id="L176">    Map&lt;String, Object&gt; map = (Map&lt;String, Object&gt;) source;</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">    UUID id = map.containsKey(&quot;id&quot;) ? UUID.fromString((String) map.get(&quot;id&quot;)) : null;</span>
+<span class="nc" id="L178">    String libelle = (String) map.get(&quot;libelle&quot;);</span>
+<span class="nc" id="L179">    EAdditionalSkillCategoryType type =</span>
+<span class="nc" id="L180">        EAdditionalSkillCategoryType.valueOf(map.get(&quot;type&quot;).toString());</span>
+
+<span class="nc" id="L182">    AdditionalSkillCategory parent = null;</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">    if (map.containsKey(&quot;parent&quot;)) {</span>
+<span class="nc" id="L184">      parent = getCategoryFromSource(map.get(&quot;parent&quot;));</span>
+    }
+
+<span class="nc" id="L187">    return AdditionalSkillCategory.toDomain(id, libelle, parent, type, null, null);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

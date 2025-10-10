@@ -117,33 +117,30 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="nc" id="L117">              .join(&quot;additionalSkill&quot;, JoinType.LEFT);</span>
 
 <span class="nc" id="L119">      var additionalSkillPredicate =</span>
-<span class="nc" id="L120">          criteriaBuilder.like(</span>
-<span class="nc" id="L121">              criteriaBuilder.lower(</span>
-<span class="nc" id="L122">                  additionalSkillJoin.get(&quot;pathSegments&quot;).get(&quot;skill&quot;).get(&quot;libelle&quot;)),</span>
-              pattern);
+<span class="nc" id="L120">          criteriaBuilder.like(criteriaBuilder.lower(additionalSkillJoin.get(&quot;libelle&quot;)), pattern);</span>
 
       // Skill level
-<span class="nc" id="L126">      var slpJoin =</span>
-<span class="nc" id="L127">          root.join(&quot;skillLevels&quot;, JoinType.LEFT)</span>
-<span class="nc" id="L128">              .join(&quot;skillLevel&quot;, JoinType.LEFT)</span>
-<span class="nc" id="L129">              .join(&quot;translations&quot;, JoinType.LEFT);</span>
-<span class="nc" id="L130">      var slpLangPredicate = criteriaBuilder.equal(slpJoin.get(&quot;language&quot;), language);</span>
-<span class="nc" id="L131">      var slpNamePredicate =</span>
-<span class="nc" id="L132">          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get(&quot;name&quot;)), pattern);</span>
-<span class="nc" id="L133">      var slpDescPredicate =</span>
-<span class="nc" id="L134">          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get(&quot;description&quot;)), pattern);</span>
-<span class="nc" id="L135">      var skillLevelPredicate =</span>
-<span class="nc" id="L136">          criteriaBuilder.and(</span>
-<span class="nc" id="L137">              slpLangPredicate, criteriaBuilder.or(slpNamePredicate, slpDescPredicate));</span>
+<span class="nc" id="L123">      var slpJoin =</span>
+<span class="nc" id="L124">          root.join(&quot;skillLevels&quot;, JoinType.LEFT)</span>
+<span class="nc" id="L125">              .join(&quot;skillLevel&quot;, JoinType.LEFT)</span>
+<span class="nc" id="L126">              .join(&quot;translations&quot;, JoinType.LEFT);</span>
+<span class="nc" id="L127">      var slpLangPredicate = criteriaBuilder.equal(slpJoin.get(&quot;language&quot;), language);</span>
+<span class="nc" id="L128">      var slpNamePredicate =</span>
+<span class="nc" id="L129">          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get(&quot;name&quot;)), pattern);</span>
+<span class="nc" id="L130">      var slpDescPredicate =</span>
+<span class="nc" id="L131">          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get(&quot;description&quot;)), pattern);</span>
+<span class="nc" id="L132">      var skillLevelPredicate =</span>
+<span class="nc" id="L133">          criteriaBuilder.and(</span>
+<span class="nc" id="L134">              slpLangPredicate, criteriaBuilder.or(slpNamePredicate, slpDescPredicate));</span>
 
       // AMS
-<span class="nc" id="L140">      var amsJoin = root.join(&quot;amses&quot;, JoinType.LEFT).join(&quot;translations&quot;, JoinType.LEFT);</span>
-<span class="nc" id="L141">      var amsLangPredicate = criteriaBuilder.equal(amsJoin.get(&quot;language&quot;), language);</span>
-<span class="nc" id="L142">      var amsTitlePredicate =</span>
-<span class="nc" id="L143">          criteriaBuilder.like(criteriaBuilder.lower(amsJoin.get(&quot;title&quot;)), pattern);</span>
-<span class="nc" id="L144">      var amsPredicate = criteriaBuilder.and(amsLangPredicate, amsTitlePredicate);</span>
+<span class="nc" id="L137">      var amsJoin = root.join(&quot;amses&quot;, JoinType.LEFT).join(&quot;translations&quot;, JoinType.LEFT);</span>
+<span class="nc" id="L138">      var amsLangPredicate = criteriaBuilder.equal(amsJoin.get(&quot;language&quot;), language);</span>
+<span class="nc" id="L139">      var amsTitlePredicate =</span>
+<span class="nc" id="L140">          criteriaBuilder.like(criteriaBuilder.lower(amsJoin.get(&quot;title&quot;)), pattern);</span>
+<span class="nc" id="L141">      var amsPredicate = criteriaBuilder.and(amsLangPredicate, amsTitlePredicate);</span>
 
-<span class="nc" id="L146">      return criteriaBuilder.or(</span>
+<span class="nc" id="L143">      return criteriaBuilder.or(</span>
           titlePredicate,
           aiUsePredicate,
           personalNotePredicate,
