@@ -223,7 +223,7 @@ public class TraceController {
   }
 
   @PutMapping("/{traceId}")
-  public ResponseEntity<Trace> updateTrace(
+  public ResponseEntity<TraceDetailDTO> updateTrace(
       Principal principal,
       @PathVariable UUID traceId,
       @Valid @RequestBody UpdateTraceDTO updateTraceDTO) {
@@ -240,6 +240,6 @@ public class TraceController {
             updateTraceDTO.personalNote(),
             updateTraceDTO.iaJustification());
 
-    return ResponseEntity.ok(trace);
+    return ResponseEntity.ok(TraceDetailMapper.toDTO(trace));
   }
 }

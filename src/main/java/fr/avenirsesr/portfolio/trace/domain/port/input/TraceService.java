@@ -38,7 +38,7 @@ public interface TraceService {
       String personalNote,
       String aiJustification);
 
-  Trace updateTrace(
+  TraceDetail updateTrace(
       User user,
       UUID traceId,
       String title,

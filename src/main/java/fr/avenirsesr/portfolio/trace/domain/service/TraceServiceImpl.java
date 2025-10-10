@@ -133,11 +133,8 @@ public class TraceServiceImpl implements TraceService {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(user, trace);
 
-    TraceAttachment traceAttachment =
-        traceAttachmentRepository.findByTrace(trace).stream()
-            .filter(File::isActiveVersion)
-            .findFirst()
-            .orElseThrow(FileNotFoundException::new);
+    TraceAttachment traceAttachment = getTraceAttachment(trace);
+
     return new TraceDetail(
         trace.getId(),
         trace.getTitle(),
@@ -197,7 +194,7 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public Trace updateTrace(
+  public TraceDetail updateTrace(
       User user,
       UUID traceId,
       String title,
@@ -214,7 +211,28 @@ public class TraceServiceImpl implements TraceService {
     trace.setPersonalNote(personalNote);
     trace.setAiUseJustification(aiJustification);
 
-    return traceRepository.save(trace);
+    var savedTrace = traceRepository.save(trace);
+
+    TraceAttachment traceAttachment = getTraceAttachment(savedTrace);
+
+    return new TraceDetail(
+        savedTrace.getId(),
+        savedTrace.getTitle(),
+        savedTrace.isUnassociated() ? ETraceStatus.UNASSOCIATED : ETraceStatus.ASSOCIATED,
+        programNameOfTrace(savedTrace),
+        savedTrace.isGroup(),
+        savedTrace.getAiUseJustification().orElse(null),
+        savedTrace.getPersonalNote().orElse(null),
+        traceAttachment,
+        savedTrace.getCreatedAt(),
+        savedTrace.getUpdatedAt());
+  }
+
+  private TraceAttachment getTraceAttachment(Trace trace) {
+    return traceAttachmentRepository.findByTrace(trace).stream()
+        .filter(File::isActiveVersion)
+        .findFirst()
+        .orElseThrow(FileNotFoundException::new);
   }
 
   @Override

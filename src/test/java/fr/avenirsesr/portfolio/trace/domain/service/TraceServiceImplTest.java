@@ -20,6 +20,8 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
+import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
@@ -59,6 +61,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class TraceServiceImplTest {
   @Mock private TraceRepository traceRepository;
+  @Mock private TraceAttachmentRepository traceAttachmentRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
   @Mock private AMSRepository amsRepository;
   @Mock private SkillLevelProgressRepository skillLevelProgressRepository;
@@ -388,6 +391,9 @@ public class TraceServiceImplTest {
             .withAiUseJustification(aiJustification)
             .toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+    when(traceRepository.save(trace)).thenReturn(trace);
+    when(traceAttachmentRepository.findByTrace(any()))
+        .thenReturn(List.of(TraceAttachmentFixture.create().toModel()));
 
     BddLogger.when("update trace");
     traceService.updateTrace(
@@ -440,6 +446,9 @@ public class TraceServiceImplTest {
             .withAiUseJustification(aiJustification)
             .toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+    when(traceRepository.save(trace)).thenReturn(trace);
+    when(traceAttachmentRepository.findByTrace(any()))
+        .thenReturn(List.of(TraceAttachmentFixture.create().toModel()));
 
     BddLogger.when("update trace with null fields");
     traceService.updateTrace(
