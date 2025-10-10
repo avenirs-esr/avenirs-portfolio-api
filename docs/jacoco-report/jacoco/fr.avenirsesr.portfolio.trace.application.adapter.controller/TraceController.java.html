@@ -223,7 +223,7 @@ public class TraceController {
   }
 
   @PutMapping(&quot;/{traceId}&quot;)
-  public ResponseEntity&lt;TraceDetailDTO&gt; updateTrace(
+  public ResponseEntity&lt;Trace&gt; updateTrace(
       Principal principal,
       @PathVariable UUID traceId,
       @Valid @RequestBody UpdateTraceDTO updateTraceDTO) {
@@ -240,7 +240,7 @@ public class TraceController {
 <span class="nc" id="L240">            updateTraceDTO.personalNote(),</span>
 <span class="nc" id="L241">            updateTraceDTO.iaJustification());</span>
 
-<span class="nc" id="L243">    return ResponseEntity.ok(TraceDetailMapper.toDTO(trace));</span>
+<span class="nc" id="L243">    return ResponseEntity.ok(trace);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
