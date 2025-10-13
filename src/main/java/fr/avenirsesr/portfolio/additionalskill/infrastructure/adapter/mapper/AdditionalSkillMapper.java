@@ -43,8 +43,8 @@ public interface AdditionalSkillMapper {
 
   static AdditionalSkill createToDomain(Competence competence) {
     return AdditionalSkill.create(
-        competence.getCode(),
         competence.getLibelle(),
+        competence.getCode(),
         AdditionalSkillCategoryMapper.toDomain(competence),
         EAdditionalSkillType.ROME4);
   }
