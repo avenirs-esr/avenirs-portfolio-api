@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchInde
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.xxi.domain.model.Category;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.xxi.domain.port.input.XXIService;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ public class XXIServiceImpl implements XXIService {
   private final AdditionalSkillRepository additionalSkillRepository;
 
   @Override
-  public void syncSkills() {
+  public List<AdditionalSkill> syncSkills() {
     var competences = competenceReader.readCompetences();
 
     var additionalSkills =
@@ -36,6 +37,7 @@ public class XXIServiceImpl implements XXIService {
     additionalSkillRepository.saveAll(additionalSkills);
     openSearchIndex.indexAll(additionalSkills);
     log.info("{} Additional skills from XXI saved and indexed", additionalSkills.size());
+    return additionalSkills;
   }
 
   private AdditionalSkillCategory buildCategory(Category category) {

@@ -1,8 +1,10 @@
 package fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastructure.batch;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.model.Competence;
+import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.model.mapper.CompetenceMapper;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.port.input.RomeAdditionalSkillService;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.port.output.RomeAdditionalSkillApi;
 import java.util.ArrayList;
@@ -134,7 +136,12 @@ public class AdditionalSkillBatchLoader {
 
   @Bean
   public ItemProcessor<Competence, AdditionalSkill> itemProcessor() {
-    return AdditionalSkillMapper::createToDomain;
+    return (Competence competence) ->
+        AdditionalSkill.create(
+            competence.getLibelle(),
+            competence.getCode(),
+            CompetenceMapper.toCategoryDomain(competence),
+            EAdditionalSkillType.ROME4);
   }
 
   @Bean

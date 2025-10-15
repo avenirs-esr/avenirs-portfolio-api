@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.utils;
 
-import fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.infrastructure.service.CsvCompetenceReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,7 +10,7 @@ import java.util.stream.Collectors;
 
 public interface FileReader {
   static <T> List<T> readCSV(String fileName, String separator, Function<String[], T> mapper) {
-    try (var inputStream = CsvCompetenceReader.class.getResourceAsStream(fileName);
+    try (var inputStream = FileReader.class.getResourceAsStream(fileName);
         var reader =
             new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 

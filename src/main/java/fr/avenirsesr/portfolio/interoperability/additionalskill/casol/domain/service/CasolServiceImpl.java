@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSki
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.casol.domain.port.input.CasolService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,7 +19,7 @@ public class CasolServiceImpl implements CasolService {
   private final AdditionalSkillRepository additionalSkillRepository;
 
   @Override
-  public void syncSkills() {
+  public List<AdditionalSkill> syncSkills() {
     var competences = competenceReader.readCompetences();
 
     var additionalSkills =
@@ -38,5 +39,6 @@ public class CasolServiceImpl implements CasolService {
     additionalSkillRepository.saveAll(additionalSkills);
     openSearchIndex.indexAll(additionalSkills);
     log.info("{} Additional skills from CASOL saved and indexed", additionalSkills.size());
+    return additionalSkills;
   }
 }

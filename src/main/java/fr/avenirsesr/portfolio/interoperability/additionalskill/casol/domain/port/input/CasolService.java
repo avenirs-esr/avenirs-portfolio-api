@@ -1,5 +1,8 @@
 package fr.avenirsesr.portfolio.interoperability.additionalskill.casol.domain.port.input;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
+import java.util.List;
+
 public interface CasolService {
-  void syncSkills();
+  List<AdditionalSkill> syncSkills();
 }

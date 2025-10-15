@@ -1,14 +1,14 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.AdditionalSkillDatabaseRepository;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fake.FakeAdditionalSkill;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.domain.port.input.CasocService;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.casol.domain.port.input.CasolService;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.xxi.domain.port.input.XXIService;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,9 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class AdditionalSkillSeeder {
-
-  private final AdditionalSkillDatabaseRepository additionalSkillDatabaseRepository;
-  private final OpenSearchIndex openSearchIndex;
   private final XXIService xxiService;
   private final CasocService casocService;
   private final CasolService casolService;
@@ -28,19 +25,19 @@ public class AdditionalSkillSeeder {
   @Transactional
   public List<AdditionalSkillEntity> seed() {
     log.info("Seeding additional skill...");
-    List<FakeAdditionalSkill> fakeAdditionalSkillList = FakeAdditionalSkill.of();
-    List<AdditionalSkillEntity> additionalSkillEntities =
-        fakeAdditionalSkillList.stream().map(FakeAdditionalSkill::toEntity).toList();
 
-    additionalSkillDatabaseRepository.saveAllEntities(additionalSkillEntities);
-    openSearchIndex.indexAll(
-        additionalSkillEntities.stream().map(AdditionalSkillMapper::toDomain).toList());
+    var xxi = xxiService.syncSkills();
+    var casoc = casocService.syncSkills();
+    var casol = casolService.syncSkills();
 
-    xxiService.syncSkills();
-    casocService.syncSkills();
-    casolService.syncSkills();
+    var additionalSkills =
+        Stream.of(xxi, casoc, casol)
+            .flatMap(Collection::stream)
+            .map(AdditionalSkillMapper::fromDomain)
+            .collect(Collectors.toList());
 
-    log.info("✔ {} additionalSkills created", additionalSkillEntities.size());
-    return additionalSkillEntities;
+    log.info("✔ {} additionalSkills synced", additionalSkills.size());
+
+    return additionalSkills;
   }
 }
