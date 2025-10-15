@@ -62,3 +62,4 @@ build/
 
 /logs/
 /src/main/resources/env.properties
+.DS_Store
