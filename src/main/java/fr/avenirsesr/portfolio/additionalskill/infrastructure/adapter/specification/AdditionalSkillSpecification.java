@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,5 +13,9 @@ public class AdditionalSkillSpecification {
       }
       return root.get("externalId").in(externalIds);
     };
+  }
+
+  public static Specification<AdditionalSkillEntity> hasType(EAdditionalSkillType type) {
+    return (root, query, builder) -> builder.equal(root.get("type"), type);
   }
 }

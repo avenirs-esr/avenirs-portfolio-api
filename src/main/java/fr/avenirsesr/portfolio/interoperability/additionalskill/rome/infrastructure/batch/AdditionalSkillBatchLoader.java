@@ -2,11 +2,13 @@ package fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastruc
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.model.Competence;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.model.mapper.CompetenceMapper;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.port.input.RomeAdditionalSkillService;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.port.output.RomeAdditionalSkillApi;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -37,6 +39,9 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Slf4j
@@ -46,6 +51,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class AdditionalSkillBatchLoader {
   private final RomeAdditionalSkillApi romeAdditionalSkillApi;
   private final RomeAdditionalSkillService romeAdditionalSkillService;
+  private final AdditionalSkillRepository additionalSkillRepository;
+  private final JdbcTemplate jdbcTemplate;
 
   @Bean
   public Job importROME4SkillJob(JobRepository jobRepository, Flow importROME4SkillFlow) {
@@ -58,15 +65,46 @@ public class AdditionalSkillBatchLoader {
   }
 
   @Bean
-  public Flow importROME4SkillFlow(Step checkROME4VersionUpdateStep, Step importROME4SkillStep) {
+  public Flow importROME4SkillFlow(
+      Step checkAdditionalSkillCountStep,
+      Step checkROME4VersionUpdateStep,
+      Step importROME4SkillStep) {
     return new FlowBuilder<SimpleFlow>("importROME4SkillFlow")
-        .start(checkROME4VersionUpdateStep)
+        .start(checkAdditionalSkillCountStep)
+        .on("NOOP")
+        .end()
+        .from(checkAdditionalSkillCountStep)
+        .on("*")
+        .to(checkROME4VersionUpdateStep)
+        .from(checkROME4VersionUpdateStep)
         .on("NOOP")
         .end()
         .from(checkROME4VersionUpdateStep)
         .on("*")
         .to(importROME4SkillStep)
         .end();
+  }
+
+  @Bean
+  public Step checkAdditionalSkillCountStep(
+      JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+    return new StepBuilder("checkAdditionalSkillCountStep", jobRepository)
+        .tasklet(
+            (contribution, chunkContext) -> {
+              int count = additionalSkillRepository.countAll(EAdditionalSkillType.ROME4);
+
+              if (count == 0) {
+                log.info(
+                    "No additional skills found, bootstrapping from SQL dump and skipping the rest of the job.");
+                bootstrapAdditionalSkillsFromSqlDump();
+              } else {
+                log.info("{} Additional skills found, continuing with sync job.", count);
+              }
+
+              return RepeatStatus.FINISHED;
+            },
+            transactionManager)
+        .build();
   }
 
   @Bean
@@ -201,5 +239,35 @@ public class AdditionalSkillBatchLoader {
         }
       }
     };
+  }
+
+  public void bootstrapAdditionalSkillsFromSqlDump() {
+    Resource additionalSkillsCategoriesResource =
+        new ClassPathResource("/additional-skill/rome/rome_4_additional_skill_category.sql");
+    Resource additionalSkillsResource =
+        new ClassPathResource("/additional-skill/rome/rome_4_additional_skill.sql");
+    Resource rome4versionResource =
+        new ClassPathResource("/additional-skill/rome/rome_4_version.sql");
+
+    try {
+      String additionalSkillsCategoriesSql =
+          new String(
+              additionalSkillsCategoriesResource.getInputStream().readAllBytes(),
+              StandardCharsets.UTF_8);
+      String additionalSkillsSql =
+          new String(
+              additionalSkillsResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+      String rome4versionSql =
+          new String(rome4versionResource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+      jdbcTemplate.execute(additionalSkillsCategoriesSql);
+      jdbcTemplate.execute(additionalSkillsSql);
+      jdbcTemplate.execute(rome4versionSql);
+
+      log.info("additional skills bootstrap successfully executed.");
+    } catch (IOException e) {
+      log.error("An error occurred while bootstrapping ROME 4.0 version.", e);
+      throw new RuntimeException(e);
+    }
   }
 }

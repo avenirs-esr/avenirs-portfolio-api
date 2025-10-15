@@ -1,0 +1,2 @@
+insert into dev.rome_4_version (id, version, last_modified_date, created_at, updated_at)
+values  ('4ad97e2c-753c-4dc7-b771-8a60f9ee6c54', 60, '2025-09-18 16:37:26.726488', '2025-10-24 14:34:41.869891 +00:00', '2025-10-24 14:34:41.869891 +00:00');
