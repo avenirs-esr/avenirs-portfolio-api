@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.client;
 
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
+import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.trace.domain.port.output.TraceConfigurationPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,9 @@ import org.springframework.web.server.ResponseStatusException;
 public class TraceConfigurationClient implements TraceConfigurationPort {
 
   private final WebClient webClient;
+
+  @Value("${avenirs.back-office.api-key}")
+  private String apiKey;
 
   @Value("${avenirs.back-office.trace.config.endpoint}")
   private String traceConfigBackOfficeEndPoint;
@@ -29,6 +33,7 @@ public class TraceConfigurationClient implements TraceConfigurationPort {
       return webClient
           .get()
           .uri(traceConfigBackOfficeEndPoint)
+          .header(AvenirsSecurityHeaders.API_KEY, apiKey)
           .retrieve()
           .bodyToMono(TraceConfiguration.class)
           .block();

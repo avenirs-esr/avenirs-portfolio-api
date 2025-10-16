@@ -6,10 +6,14 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [v1.4.8] - 2025-10-16
+
+- Use an API key for back office microservice.
+
 ## [v1.4.7] - 2025-10-03
 
 - Fixes remaining conflict in file
-- Seeder moved from avenris-portfolio-common to this repository (uses specific objects)
+- Seeder moved from avenirs-portfolio-common to this repository (uses specific objects)
 - Removed SeederRunner and SeederConfig from program feature.
 
 ## [v1.4.6] - 2025-10-01

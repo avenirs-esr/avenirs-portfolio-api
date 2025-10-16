@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
@@ -22,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -86,10 +88,10 @@ class TraceControllerIT {
     mockMvc
         .perform(
             get(OVERVIEW_BASE_PATH)
-                .header("Accept-Language", ELanguage.FRENCH.getCode())
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
+                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -107,10 +109,10 @@ class TraceControllerIT {
     mockMvc
         .perform(
             get(OVERVIEW_BASE_PATH)
-                .header("Accept-Language", ELanguage.FRENCH.getCode())
-                .header("X-Signed-Context", unknownUserPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", unknownUserSignature))
+                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
@@ -128,9 +130,9 @@ class TraceControllerIT {
                 .content("{\"isAssociated\": false}")
                 .param("page", "0")
                 .param("pageSize", "10")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.data").exists())
@@ -146,9 +148,9 @@ class TraceControllerIT {
     mockMvc
         .perform(
             get(SUMMARY_BASE_PATH)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.associated").isNumber())
         .andExpect(jsonPath("$.unassociated").isNumber())
@@ -170,9 +172,9 @@ class TraceControllerIT {
             post(BASE_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
         .andExpect(status().isCreated());
   }
 
@@ -186,9 +188,9 @@ class TraceControllerIT {
     mockMvc
         .perform(
             delete(BASE_PATH_WITH_ID, existingTraceId)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
         .andExpect(status().isOk())
         .andExpect(content().string("Resource successfully deleted."));
   }
@@ -203,9 +205,9 @@ class TraceControllerIT {
     mockMvc
         .perform(
             delete(BASE_PATH_WITH_ID, traceIdNotOwned)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
   }
