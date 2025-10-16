@@ -2,21 +2,21 @@ package fr.avenirsesr.portfolio.trace.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.AdditionalSkillAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.AmsAssociationDTO;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.AssociationsTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.SkillLevelAssociationDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceAssociationsDTO;
 import fr.avenirsesr.portfolio.trace.domain.model.AdditionalSkillAssociation;
 import fr.avenirsesr.portfolio.trace.domain.model.AmsAssociation;
-import fr.avenirsesr.portfolio.trace.domain.model.AssociationsTrace;
 import fr.avenirsesr.portfolio.trace.domain.model.SkillLevelAssociation;
+import fr.avenirsesr.portfolio.trace.domain.model.TraceAssociations;
 
-public interface AssociationsTraceMapper {
-  static AssociationsTraceDTO toDTO(AssociationsTrace associationsTrace) {
-    return new AssociationsTraceDTO(
-        associationsTrace.skillLevelAssociations().stream()
-            .map(AssociationsTraceMapper::toDTO)
+public interface TraceAssociationsMapper {
+  static TraceAssociationsDTO toDTO(TraceAssociations traceAssociations) {
+    return new TraceAssociationsDTO(
+        traceAssociations.skillLevelAssociations().stream()
+            .map(TraceAssociationsMapper::toDTO)
             .toList(),
-        associationsTrace.additionalSkillAssociations().stream()
-            .map(AssociationsTraceMapper::toDTO)
+        traceAssociations.additionalSkillAssociations().stream()
+            .map(TraceAssociationsMapper::toDTO)
             .toList());
   }
 

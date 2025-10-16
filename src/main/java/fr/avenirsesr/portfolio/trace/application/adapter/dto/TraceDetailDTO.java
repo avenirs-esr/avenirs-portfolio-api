@@ -27,6 +27,6 @@ public record TraceDetailDTO(
     String aiUseJustification,
     String personalNote,
     AttachmentUploadDTO attachment,
-    AssociationsTraceDTO associationsTrace,
+    TraceAssociationsDTO traceAssociations,
     Instant createdAt,
     Instant updatedAt) {}
