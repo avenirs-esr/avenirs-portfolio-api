@@ -15,7 +15,7 @@ public interface TraceDetailMapper {
         traceDetail.aiUseJustification(),
         traceDetail.personalNote(),
         AttachmentUploadDTOMapper.fromDomain(traceDetail.attachment()),
-        AssociationsTraceMapper.toDTO(traceDetail.associationsTrace()),
+        TraceAssociationsMapper.toDTO(traceDetail.traceAssociations()),
         traceDetail.createdAt(),
         traceDetail.updatedAt());
   }

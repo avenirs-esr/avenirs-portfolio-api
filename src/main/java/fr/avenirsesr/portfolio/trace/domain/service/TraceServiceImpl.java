@@ -134,7 +134,7 @@ public class TraceServiceImpl implements TraceService {
 
     TraceAttachment traceAttachment = getTraceAttachment(trace);
 
-    AssociationsTrace associationsTrace = getAssociationsTrace(user, id);
+    TraceAssociations traceAssociations = getTraceAssociations(user, id);
     return new TraceDetail(
         trace.getId(),
         trace.getTitle(),
@@ -144,12 +144,12 @@ public class TraceServiceImpl implements TraceService {
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
         traceAttachment,
-        associationsTrace,
+        traceAssociations,
         trace.getCreatedAt(),
         trace.getUpdatedAt());
   }
 
-  protected AssociationsTrace getAssociationsTrace(User user, UUID id) {
+  protected TraceAssociations getTraceAssociations(User user, UUID id) {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(user, trace);
 
@@ -175,7 +175,7 @@ public class TraceServiceImpl implements TraceService {
       additionalSkillAssociations.add(toAdditionalSkillAssociation(additionalSkillProgress));
     }
 
-    return new AssociationsTrace(skillLevelAssociations, additionalSkillAssociations);
+    return new TraceAssociations(skillLevelAssociations, additionalSkillAssociations);
   }
 
   @Override
@@ -215,7 +215,7 @@ public class TraceServiceImpl implements TraceService {
 
     TraceAttachment traceAttachment = getTraceAttachment(savedTrace);
 
-    AssociationsTrace associationsTrace = getAssociationsTrace(user, traceId);
+    TraceAssociations traceAssociations = getTraceAssociations(user, traceId);
 
     return new TraceDetail(
         savedTrace.getId(),
@@ -226,7 +226,7 @@ public class TraceServiceImpl implements TraceService {
         savedTrace.getAiUseJustification().orElse(null),
         savedTrace.getPersonalNote().orElse(null),
         traceAttachment,
-        associationsTrace,
+        traceAssociations,
         savedTrace.getCreatedAt(),
         savedTrace.getUpdatedAt());
   }
