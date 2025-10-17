@@ -7,3 +7,4 @@ on:
 jobs:
   call-main-ci:
     uses: avenirs-esr/avenirs-workflows/.github/workflows/only-develop-to-main-workflow.yaml@main
+    secrets: inherit

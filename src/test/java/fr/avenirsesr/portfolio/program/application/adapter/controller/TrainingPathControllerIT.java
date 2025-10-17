@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -61,10 +63,10 @@ public class TrainingPathControllerIT {
     mockMvc
         .perform(
             get(BASE_PATH)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .header("Accept-Language", language.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .header(HttpHeaders.ACCEPT_LANGUAGE, language.getCode())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -83,10 +85,10 @@ public class TrainingPathControllerIT {
     mockMvc
         .perform(
             get(BASE_PATH)
-                .header("X-Signed-Context", unknownUserPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", unknownUserSignature)
-                .header("Accept-Language", language.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
+                .header(HttpHeaders.ACCEPT_LANGUAGE, language.getCode())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -102,10 +104,10 @@ public class TrainingPathControllerIT {
     mockMvc
         .perform(
             get(BASE_PATH)
-                .header("X-Signed-Context", teacherPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", teacherSignature)
-                .header("Accept-Language", language.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, teacherPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, teacherSignature)
+                .header(HttpHeaders.ACCEPT_LANGUAGE, language.getCode())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isForbidden())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -122,10 +124,10 @@ public class TrainingPathControllerIT {
     mockMvc
         .perform(
             get(BASE_PATH)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .header("Accept-Language", "invalid_language_code")
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .header(HttpHeaders.ACCEPT_LANGUAGE, "invalid_language_code")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))

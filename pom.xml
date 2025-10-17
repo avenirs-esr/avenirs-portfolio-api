@@ -147,6 +147,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.github.ulisesbocchio</groupId>
+            <artifactId>jasypt-spring-boot-starter</artifactId>
+            <version>3.0.5</version>
+        </dependency>
+        <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>mockwebserver</artifactId>
             <version>4.12.0</version>
@@ -313,7 +318,9 @@
                 <version>4.23.1</version>
                 <configuration>
                     <propertyFile>src/main/resources/liquibase.properties</propertyFile>
-                    <diffChangeLogFile>src/main/resources/db/changelog/generated/changelog_${maven.build.timestamp}.xml</diffChangeLogFile>
+                    <diffChangeLogFile>
+                        src/main/resources/db/changelog/generated/changelog_${maven.build.timestamp}.xml
+                    </diffChangeLogFile>
                 </configuration>
                 <dependencies>
                     <dependency>
