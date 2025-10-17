@@ -22,7 +22,9 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.St
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
@@ -42,6 +44,8 @@ import org.springframework.test.context.ActiveProfiles;
 class AMSSeederTest {
 
   @Autowired UserSeeder userSeeder;
+
+  @Autowired StudentSeeder studentSeeder;
 
   @Autowired TraceSeeder traceSeeder;
 
@@ -67,6 +71,7 @@ class AMSSeederTest {
   @InjectMocks private AMSSeeder amsSeeder;
 
   private static List<UserEntity> users;
+  private static List<StudentEntity> students;
   private static List<SkillLevelProgressEntity> skillLevels;
   private static List<TraceEntity> traces;
   private static List<CohortEntity> cohorts;
@@ -76,16 +81,15 @@ class AMSSeederTest {
 
     // Seed les données comme dans SeederRunner
     var savedUsers = userSeeder.seed();
-    var students = savedUsers.stream().filter(u -> u.getStudent().isPresent()).toList();
+    var savedStudents = studentSeeder.seed(savedUsers);
     var additionalSkills = additionalSkillSeeder.seed();
     List<AdditionalSkillProgressEntity> additionalSkillProgresses =
-        additionalSkillProgressSeeder.seed(students, additionalSkills);
+        additionalSkillProgressSeeder.seed(savedStudents, additionalSkills);
     var savedInstitutions = institutionSeeder.seed();
     var savedPrograms = programSeeder.seed(savedInstitutions);
     var savedTraces = traceSeeder.seed(savedUsers, additionalSkillProgresses);
     var savedSkillLevels = skillSeeder.seed(savedPrograms);
     var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
-    var savedStudents = savedUsers.stream().filter(u -> u.getStudent().isPresent()).toList();
     var savedStudentProgresses =
         studentProgressSeeder.seed(savedTrainingPaths, savedStudents, savedSkillLevels);
     var savedSkillLevelProgresses =
@@ -93,6 +97,7 @@ class AMSSeederTest {
     var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
 
     users = savedUsers;
+    students = savedStudents;
     traces = savedTraces;
     skillLevels = savedSkillLevelProgresses;
     cohorts = savedCohorts;
@@ -102,21 +107,21 @@ class AMSSeederTest {
   void seed_shouldThrowException_whenUsersEmpty() {
     BddLogger.given("an AMS seeder");
     BddLogger.when("users list is empty");
-    List<UserEntity> emptyUsers = List.of();
+    List<StudentEntity> emptyUsers = List.of();
 
     BddLogger.then("it should throw IllegalArgumentException");
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
             () -> amsSeeder.seed(emptyUsers, skillLevels, traces, cohorts));
-    assertTrue(exception.getMessage().contains("users cannot be empty"));
+    assertTrue(exception.getMessage().contains("students cannot be empty"));
   }
 
   @Test
   void seed_shouldReturnAMSList_withCorrectSizeAndFields() {
     BddLogger.given("an AMS seeder");
     BddLogger.when("the seeder is called with correct arguments");
-    List<AMSEntity> result = amsSeeder.seed(users, skillLevels, traces, cohorts);
+    List<AMSEntity> result = amsSeeder.seed(students, skillLevels, traces, cohorts);
 
     BddLogger.then(
         "it should return an AMS list with correct size and fields and call the amsRepository");
@@ -124,7 +129,7 @@ class AMSSeederTest {
     assertEquals(SeederConfig.AMS_NB, result.size());
 
     for (AMSEntity ams : result) {
-      assertNotNull(ams.getUser());
+      assertNotNull(ams.getStudent());
       assertNotNull(ams.getStatus());
       assertNotNull(ams.getTranslations());
       assertTrue(ams.getTranslations().stream().anyMatch(t -> t.getLanguage() != null));
@@ -138,7 +143,7 @@ class AMSSeederTest {
   void seed_shouldIncludeAllTranslations() {
     BddLogger.given("an AMS seeder");
     BddLogger.when("the seeder is called with correct arguments");
-    List<AMSEntity> result = amsSeeder.seed(users, skillLevels, traces, cohorts);
+    List<AMSEntity> result = amsSeeder.seed(students, skillLevels, traces, cohorts);
 
     BddLogger.then("it should return an AMS list with all translations");
     for (AMSEntity ams : result) {

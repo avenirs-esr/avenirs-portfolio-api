@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.Addi
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +20,7 @@ public class FakeAdditionalSkillProgress {
   }
 
   public static FakeAdditionalSkillProgress of(
-      UserEntity student,
+      StudentEntity student,
       List<AdditionalSkillEntity> savedAdditionalSkills,
       List<UUID> bannedSkillsIds) {
     return new FakeAdditionalSkillProgress(

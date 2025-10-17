@@ -4,9 +4,9 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.FakeAMS;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.user.domain.model.User;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.UUID;
 public class AMSFixture {
 
   private UUID id;
-  private User user;
+  private Student student;
   private String title;
   private ELanguage language = ELanguage.FRENCH;
   private Instant startDate;
@@ -24,10 +24,10 @@ public class AMSFixture {
   private Instant updatedAt;
 
   private AMSFixture() {
-    var fakeUser = UserFixture.create().toModel();
-    var base = FakeAMS.of(UserMapper.fromDomain(fakeUser)).toEntity();
+    var fakeStudent = StudentFixture.create().toModel();
+    var base = FakeAMS.of(StudentMapper.fromDomain(fakeStudent)).toEntity();
     this.id = base.getId();
-    this.user = fakeUser;
+    this.student = fakeStudent;
     this.title = "fake ams title";
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
@@ -42,8 +42,8 @@ public class AMSFixture {
     return this;
   }
 
-  public AMSFixture withUser(User user) {
-    this.user = user;
+  public AMSFixture withStudent(Student student) {
+    this.student = student;
     return this;
   }
 
@@ -87,6 +87,6 @@ public class AMSFixture {
 
   public AMS toModel() {
     return AMS.toDomain(
-        id, user, title, startDate, endDate, EAmsStatus.NOT_STARTED, createdAt, updatedAt);
+        id, student, title, startDate, endDate, EAmsStatus.NOT_STARTED, createdAt, updatedAt);
   }
 }

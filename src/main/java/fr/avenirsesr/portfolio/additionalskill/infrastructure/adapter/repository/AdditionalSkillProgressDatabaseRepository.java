@@ -10,7 +10,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,7 +50,7 @@ public class AdditionalSkillProgressDatabaseRepository
   @Override
   public List<AdditionalSkillProgress> findAllByStudent(Student student) {
     return jpaRepository
-        .findAll(AdditionalSkillProgressSpecification.hasStudent(UserMapper.fromDomain(student)))
+        .findAll(AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student)))
         .stream()
         .map(AdditionalSkillProgressMapper::toDomain)
         .toList();
@@ -60,7 +60,7 @@ public class AdditionalSkillProgressDatabaseRepository
   public PagedResult<AdditionalSkillProgress> findAllByStudent(
       Student student, PageCriteria pageCriteria) {
     var specification =
-        AdditionalSkillProgressSpecification.hasStudent(UserMapper.fromDomain(student));
+        AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student));
     return findAllByStudent(specification, pageCriteria);
   }
 
@@ -68,7 +68,7 @@ public class AdditionalSkillProgressDatabaseRepository
   public PagedResult<AdditionalSkillProgress> findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword) {
     var specification =
-        AdditionalSkillProgressSpecification.hasStudent(UserMapper.fromDomain(student))
+        AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student))
             .and(AdditionalSkillProgressSpecification.search(keyword));
     return findAllByStudent(specification, pageCriteria);
   }

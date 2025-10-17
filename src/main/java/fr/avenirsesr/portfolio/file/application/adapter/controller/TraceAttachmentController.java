@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.AttachmentUploadDTOMapper;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
-import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
@@ -35,11 +35,11 @@ public class TraceAttachmentController {
         "Received attachment upload request from user [{}] for trace [{}]",
         principal.getName(),
         traceId);
-    User user = userUtil.getUser(principal);
+    Student student = userUtil.getStudent(principal);
 
     var attachment =
         service.uploadTraceAttachment(
-            user.toStudent(),
+            student,
             traceId,
             file.getOriginalFilename(),
             file.getContentType(),

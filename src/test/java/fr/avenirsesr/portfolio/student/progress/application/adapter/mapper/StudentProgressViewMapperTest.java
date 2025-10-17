@@ -13,7 +13,7 @@ import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.StudentP
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ public class StudentProgressViewMapperTest {
   @Test
   void shouldMapStudentProgressToDTO() {
     BddLogger.given("a student progress view mapper");
-    var student = UserFixture.createStudent().toModel().toStudent();
+    var student = StudentFixture.create().toModel();
     var javaSkill = SkillFixture.create().toModel();
     var pythonSkill = SkillFixture.create().toModel();
 
@@ -75,7 +75,7 @@ public class StudentProgressViewMapperTest {
 
     StudentProgress studentProgress =
         StudentProgressFixture.create()
-            .withUser(student.getUser())
+            .withStudent(student)
             .withSkillLevels(
                 skillLevelProgresses.stream()
                     .map(SkillLevelProgressWithTraceCountDTO::skillLevelProgress)

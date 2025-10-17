@@ -12,7 +12,7 @@ import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO
 import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
@@ -24,7 +24,7 @@ class SkillMapperTest {
   @Test
   void shouldMapSkillLevelProgressToDTO() {
     BddLogger.given("a skill mapper");
-    var student = UserFixture.createStudent().toModel().toStudent();
+    var student = StudentFixture.create().toModel();
     var javaSkill = SkillFixture.create().toModel();
 
     var javaSkillLevel1 = SkillLevelFixture.create().withSkill(javaSkill).toModel();
@@ -47,7 +47,7 @@ class SkillMapperTest {
 
     StudentProgress studentProgress =
         StudentProgressFixture.create()
-            .withUser(student.getUser())
+            .withStudent(student)
             .withSkillLevels(
                 List.of(progress1.skillLevelProgress(), progress2.skillLevelProgress()))
             .toModel();
@@ -78,7 +78,7 @@ class SkillMapperTest {
   @Test
   void shouldHandleNoLastAchievedSkillLevel() {
     BddLogger.given("a skill mapper");
-    var student = UserFixture.createStudent().toModel().toStudent();
+    var student = StudentFixture.create().toModel();
     var pythonSkill = SkillFixture.create().toModel();
 
     var pythonSkillLevel = SkillLevelFixture.create().withSkill(pythonSkill).toModel();
@@ -91,7 +91,7 @@ class SkillMapperTest {
 
     StudentProgress studentProgress =
         StudentProgressFixture.create()
-            .withUser(student.getUser())
+            .withStudent(student)
             .withSkillLevels(List.of(pythonProgress.skillLevelProgress()))
             .toModel();
 
@@ -108,7 +108,7 @@ class SkillMapperTest {
   @Test
   void shouldSetIsProgramFinishedBasedOnEndDate() {
     BddLogger.given("a skill mapper");
-    var student = UserFixture.createStudent().toModel().toStudent();
+    var student = StudentFixture.create().toModel();
     var skill = SkillFixture.create().toModel();
     var skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
     var progress =
@@ -120,13 +120,13 @@ class SkillMapperTest {
 
     StudentProgress finishedProgress =
         StudentProgressFixture.create()
-            .withUser(student.getUser())
+            .withStudent(student)
             .withSkillLevels(List.of(progress.skillLevelProgress()))
             .withStartDate(LocalDate.now().minusMonths(2), Period.ofMonths(1))
             .toModel();
     StudentProgress ongoingProgress =
         StudentProgressFixture.create()
-            .withUser(student.getUser())
+            .withStudent(student)
             .withSkillLevels(List.of(progress.skillLevelProgress()))
             .withStartDate(LocalDate.now().minusMonths(2), Period.ofMonths(3))
             .toModel();

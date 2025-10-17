@@ -3,11 +3,10 @@ package fr.avenirsesr.portfolio.user.domain.service;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.model.Teacher;
-import fr.avenirsesr.portfolio.user.domain.model.User;
-import fr.avenirsesr.portfolio.user.domain.model.UserPhotos;
+import fr.avenirsesr.portfolio.user.domain.model.*;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
+import fr.avenirsesr.portfolio.user.domain.port.input.TeacherService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import java.util.UUID;
@@ -19,17 +18,18 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final UserResourceService userResourceService;
+  private final TeacherService teacherService;
+  private final StudentService studentService;
 
   @Override
   public User getUser(UUID id) {
-    var user = userRepository.findById(id);
-
-    if (user.isEmpty()) {
-      log.error("User {} not found", id);
-      throw new UserNotFoundException();
-    }
-
-    return user.get();
+    return userRepository
+        .findById(id)
+        .orElseThrow(
+            () -> {
+              log.error("User {} not found", id);
+              return new UserNotFoundException();
+            });
   }
 
   @Override
@@ -40,6 +40,19 @@ public class UserServiceImpl implements UserService {
 
     return new UserPhotos(
         profile.id(), profile.name(), profile.url(), cover.id(), cover.name(), cover.url());
+  }
+
+  @Override
+  public UserProfileOverviewDTO getUserProfileOverviewDTO(UUID userId, EUserCategory userCategory) {
+    var user = getUser(userId);
+    var bio =
+        switch (userCategory) {
+          case STUDENT -> studentService.getBio(user);
+          case TEACHER -> teacherService.getBio(user);
+        };
+
+    return new UserProfileOverviewDTO(
+        user.getFirstName(), user.getLastName(), user.getEmail(), bio);
   }
 
   @Override
@@ -56,7 +69,7 @@ public class UserServiceImpl implements UserService {
       throw new IllegalArgumentException("Firstname is null");
     }
     if (lastname == null) {
-      throw new IllegalArgumentException("Firstname is null");
+      throw new IllegalArgumentException("Lastname is null");
     }
 
     if (email != null) {
@@ -66,23 +79,9 @@ public class UserServiceImpl implements UserService {
 
     switch (userCategory) {
       case STUDENT:
-        {
-          Student student = user.toStudent();
-          if (bio != null) {
-            student.setBio(bio);
-          }
-          userRepository.save(student);
-          break;
-        }
+        studentService.updateProfile(user, bio);
       case TEACHER:
-        {
-          Teacher teacher = user.toTeacher();
-          if (bio != null) {
-            teacher.setBio(bio);
-          }
-          userRepository.save(teacher);
-          break;
-        }
+        teacherService.updateProfile(user, bio);
     }
   }
 }

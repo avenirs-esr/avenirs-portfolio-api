@@ -34,8 +34,7 @@ public class ProgramEntity extends AvenirsBaseEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set<ProgramTranslationEntity> translations =
-      new HashSet<>(); // TODO: Remove this SET and get it in queries
+  private Set<ProgramTranslationEntity> translations = new HashSet<>();
 
   private ProgramEntity(
       UUID id,

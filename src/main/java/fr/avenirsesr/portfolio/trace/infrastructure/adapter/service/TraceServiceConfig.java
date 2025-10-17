@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.service.TraceServiceImpl;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,6 +23,7 @@ public class TraceServiceConfig {
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceConfigurationClient traceConfigurationClient;
   private final TraceAttachmentRepository traceAttachmentRepository;
+  private final StudentService studentService;
 
   public TraceServiceConfig(
       TraceDatabaseRepository traceRepository,
@@ -30,7 +32,8 @@ public class TraceServiceConfig {
       AMSRepository amsRepository,
       SkillLevelProgressRepository skillLevelProgressRepository,
       TraceAttachmentRepository traceAttachmentRepository,
-      TraceConfigurationClient traceConfigurationClient) {
+      TraceConfigurationClient traceConfigurationClient,
+      StudentService studentService) {
     this.traceRepository = traceRepository;
     this.studentProgressRepository = studentProgressRepository;
     this.additionalSkillProgressRepository = additionalSkillProgressRepository;
@@ -38,6 +41,7 @@ public class TraceServiceConfig {
     this.skillLevelProgressRepository = skillLevelProgressRepository;
     this.traceConfigurationClient = traceConfigurationClient;
     this.traceAttachmentRepository = traceAttachmentRepository;
+    this.studentService = studentService;
   }
 
   @Bean
@@ -49,6 +53,7 @@ public class TraceServiceConfig {
         amsRepository,
         skillLevelProgressRepository,
         traceAttachmentRepository,
+        studentService,
         traceConfigurationClient);
   }
 }

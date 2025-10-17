@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepos
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.io.IOException;
 import java.util.List;
@@ -41,7 +42,7 @@ public class UserResourceServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    student = UserFixture.createStudent().toModel().toStudent();
+    student = StudentFixture.create().toModel();
   }
 
   @Test
@@ -177,7 +178,7 @@ public class UserResourceServiceImplTest {
   void deletePhoto_shouldThrowUserNotAuthorizedException_whenPhotoBelongsToAnotherUser() {
     BddLogger.given("a UserResourceServiceImpl service");
     var user = student.getUser();
-    var otherUser = UserFixture.createStudent().toModel().toStudent().getUser();
+    var otherUser = UserFixture.create().toModel();
     var photoId = UUID.randomUUID();
     var photo =
         UserPhoto.create(

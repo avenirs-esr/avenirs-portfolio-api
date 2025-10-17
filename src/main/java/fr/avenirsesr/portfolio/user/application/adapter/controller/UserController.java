@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMa
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
 import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.model.UserPhotos;
+import fr.avenirsesr.portfolio.user.domain.model.UserProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -47,14 +49,15 @@ public class UserController {
               schema = @Schema(ref = "#/components/schemas/EUserCategory"))
           @PathVariable
           EUserCategory userCategory) {
-    User user = userUtil.getUser(principal);
-    var userPhotos = userService.getUserPhotos(user.getId(), userCategory);
+    UUID userId = UUID.fromString(principal.getName());
+
+    UserProfileOverviewDTO overview = userService.getUserProfileOverviewDTO(userId, userCategory);
+    var userPhotos = userService.getUserPhotos(userId, userCategory);
     String baseUrl = extractOrigin(request);
 
     return ResponseEntity.ok(
         ProfileOverviewMapper.userDomainToDto(
-            user,
-            userCategory,
+            overview,
             new UserPhotos(
                 userPhotos.profileFileId(),
                 userPhotos.profileFileName(),

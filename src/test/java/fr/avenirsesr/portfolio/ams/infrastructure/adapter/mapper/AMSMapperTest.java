@@ -10,9 +10,9 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEn
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.user.domain.model.User;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AMSMapperTest {
 
   private AMS ams;
-  private User user;
+  private Student student;
   private final String title = "Test AMS Title";
   private final ELanguage language = ELanguage.FRENCH;
   private final Instant startDate = Instant.parse("2023-01-01T00:00:00Z");
@@ -36,12 +36,12 @@ class AMSMapperTest {
 
   @BeforeEach
   void setUp() {
-    user = UserFixture.create().toModel();
+    student = StudentFixture.create().toModel();
 
     ams =
         AMSFixture.create()
             .withId(id)
-            .withUser(user)
+            .withStudent(student)
             .withTitle(title)
             .withLanguage(language)
             .withStartDate(startDate)
@@ -60,7 +60,7 @@ class AMSMapperTest {
     BddLogger.then("it should return a correct AMSEntity");
     assertNotNull(entity);
     assertEquals(id, entity.getId());
-    assertEquals(user.getId(), entity.getUser().getId());
+    assertEquals(student.getId(), entity.getStudent().getId());
     assertEquals(status, entity.getStatus());
     assertEquals(startDate, entity.getStartDate());
     assertEquals(endDate, entity.getEndDate());
@@ -71,7 +71,7 @@ class AMSMapperTest {
     BddLogger.given("an AMS mapper");
     AMSEntity entity = new AMSEntity();
     entity.setId(id);
-    entity.setUser(UserMapper.fromDomain(user));
+    entity.setStudent(StudentMapper.fromDomain(student));
     entity.setStatus(status);
     entity.setStartDate(startDate);
     entity.setEndDate(endDate);
@@ -91,7 +91,7 @@ class AMSMapperTest {
     BddLogger.then("it should return a correct domain AMS");
     assertNotNull(mappedAms);
     assertEquals(id, mappedAms.getId());
-    assertEquals(user.getId(), mappedAms.getUser().getId());
+    assertEquals(student.getId(), mappedAms.getStudent().getId());
     assertEquals(title, mappedAms.getTitle());
     assertEquals(status, mappedAms.getStatus());
   }
@@ -101,7 +101,7 @@ class AMSMapperTest {
     BddLogger.given("an AMS mapper");
     AMSEntity entity = new AMSEntity();
     entity.setId(id);
-    entity.setUser(UserMapper.fromDomain(user));
+    entity.setStudent(StudentMapper.fromDomain(student));
     entity.setStatus(status);
     entity.setStartDate(startDate);
     entity.setEndDate(endDate);

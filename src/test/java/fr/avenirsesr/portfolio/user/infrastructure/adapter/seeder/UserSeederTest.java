@@ -42,23 +42,8 @@ class UserSeederTest {
     assertNotNull(users);
     assertFalse(users.isEmpty());
 
-    int expectedTotal =
-        SeederConfig.USERS_NB_OF_STUDENT
-            + SeederConfig.USERS_NB_OF_TEACHER
-            + SeederConfig.USERS_NB_OF_BOTH;
+    int expectedTotal = SeederConfig.USERS_NB;
     assertEquals(expectedTotal, users.size());
-  }
-
-  @Test
-  void seed_shouldHaveStudentsAndTeachers() {
-    BddLogger.given("a user seeder");
-    BddLogger.when("seeding users");
-    long studentCount = users.stream().filter(u -> u.getStudent() != null).count();
-    long teacherCount = users.stream().filter(u -> u.getTeacher() != null).count();
-
-    BddLogger.then("it should return student and teacher users");
-    assertTrue(studentCount >= SeederConfig.USERS_NB_OF_STUDENT);
-    assertTrue(teacherCount >= SeederConfig.USERS_NB_OF_TEACHER);
   }
 
   @Test
@@ -75,7 +60,5 @@ class UserSeederTest {
     BddLogger.then("it should call repositories");
     verify(mockUserRepo, atLeastOnce()).saveAll(any());
     verify(mockExternalRepo, atLeastOnce()).saveAll(any());
-    verify(mockUserRepo, atLeastOnce()).saveAllStudents(any());
-    verify(mockUserRepo, atLeastOnce()).saveAllTeachers(any());
   }
 }

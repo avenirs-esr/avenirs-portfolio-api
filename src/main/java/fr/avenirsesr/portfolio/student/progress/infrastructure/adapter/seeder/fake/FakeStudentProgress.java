@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGen
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
@@ -24,7 +24,7 @@ public class FakeStudentProgress {
   }
 
   public static FakeStudentProgress of(
-      UserEntity student,
+      StudentEntity student,
       TrainingPathEntity trainingPath,
       List<SkillLevelProgressEntity> skillLevels) {
 

@@ -14,8 +14,6 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.*;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.*;
 import fr.avenirsesr.portfolio.user.domain.model.User;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.HashSet;
@@ -38,7 +36,7 @@ class CohortMapperTest {
   void shouldMapFromDomainToEntity() {
     BddLogger.given("a Cohort mapper");
     TrainingPath trainingPath = TrainingPathFixture.create().toModel();
-    User user = UserFixture.createStudent().toModel();
+    User user = UserFixture.create().toModel();
     Set<User> users = new HashSet<>();
     users.add(user);
 
@@ -80,14 +78,6 @@ class CohortMapperTest {
     studentEntity.setLastName("Doe");
     studentEntity.setEmail("john.doe@example.com");
 
-    StudentEntity student = new StudentEntity();
-    student.setActive(true);
-    student.setBio("Student bio");
-    studentEntity.setStudent(student);
-
-    TeacherEntity teacher = TeacherEntity.of("Teacher bio", false);
-    studentEntity.setTeacher(teacher);
-
     InstitutionEntity institutionEntity = new InstitutionEntity();
     institutionEntity.setId(UUID.randomUUID());
     institutionEntity.setEnabledFields(new HashSet<>());
@@ -122,7 +112,6 @@ class CohortMapperTest {
 
     StudentProgressEntity studentProgressEntity = new StudentProgressEntity();
     studentProgressEntity.setId(UUID.randomUUID());
-    studentProgressEntity.setStudent(studentEntity);
     studentProgressEntity.setTrainingPath(trainingPathEntity);
     studentProgressEntity.setSkillLevels(List.of(new SkillLevelProgressEntity()));
 
@@ -131,14 +120,6 @@ class CohortMapperTest {
     userEntity.setFirstName("Jane");
     userEntity.setLastName("Smith");
     userEntity.setEmail("jane.smith@example.com");
-
-    StudentEntity userStudent = new StudentEntity();
-    userStudent.setActive(true);
-    userStudent.setBio("User student bio");
-    userEntity.setStudent(userStudent);
-
-    TeacherEntity userTeacher = TeacherEntity.of("User teacher bio", false);
-    userEntity.setTeacher(userTeacher);
 
     Set<UserEntity> userEntities = new HashSet<>();
     userEntities.add(userEntity);
@@ -174,14 +155,6 @@ class CohortMapperTest {
     studentEntity.setLastName("Doe");
     studentEntity.setEmail("john.doe@example.com");
 
-    StudentEntity student = new StudentEntity();
-    student.setActive(true);
-    student.setBio("Student bio");
-    studentEntity.setStudent(student);
-
-    TeacherEntity teacher = TeacherEntity.of("Teacher bio", false);
-    studentEntity.setTeacher(teacher);
-
     InstitutionEntity institutionEntity = new InstitutionEntity();
     institutionEntity.setId(UUID.randomUUID());
     institutionEntity.setEnabledFields(new HashSet<>());
@@ -216,7 +189,6 @@ class CohortMapperTest {
 
     StudentProgressEntity studentProgressEntity = new StudentProgressEntity();
     studentProgressEntity.setId(UUID.randomUUID());
-    studentProgressEntity.setStudent(studentEntity);
     studentProgressEntity.setTrainingPath(trainingPathEntity);
     studentProgressEntity.setSkillLevels(List.of(new SkillLevelProgressEntity()));
 

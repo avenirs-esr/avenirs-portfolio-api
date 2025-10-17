@@ -11,7 +11,7 @@ import fr.avenirsesr.portfolio.program.domain.port.output.repository.TrainingPat
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.ProgramFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -32,7 +32,7 @@ public class TrainingPathServiceImplTest {
   @BeforeEach
   void setUp() {
     closeable = MockitoAnnotations.openMocks(this);
-    student = UserFixture.createStudent().toModel().toStudent();
+    student = StudentFixture.create().toModel();
   }
 
   @AfterEach

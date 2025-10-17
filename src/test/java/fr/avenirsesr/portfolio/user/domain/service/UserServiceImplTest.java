@@ -2,15 +2,18 @@ package fr.avenirsesr.portfolio.user.domain.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,14 +28,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class UserServiceImplTest {
 
   @Mock private UserRepository userRepository;
+  @Mock private StudentRepository studentRepository;
 
+  @Mock private StudentServiceImpl studentService;
+  @Mock private TeacherServiceImpl teacherService;
   @InjectMocks private UserServiceImpl userService;
 
   private Student student;
 
   @BeforeEach
   void setUp() {
-    student = UserFixture.createStudent().toModel().toStudent();
+    student = StudentFixture.create().toModel();
   }
 
   @Test
@@ -48,35 +54,38 @@ public class UserServiceImplTest {
         "RandomBio");
 
     BddLogger.when("it should update firstname, lastname, email and bio");
-    ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
-    verify(userRepository).save(captor.capture());
+    ArgumentCaptor<User> captorUser = ArgumentCaptor.forClass(User.class);
+    verify(userRepository).save(captorUser.capture());
+    ArgumentCaptor<Student> captorStudent = ArgumentCaptor.forClass(Student.class);
 
-    Student savedStudent = captor.getValue();
-    assertEquals("RandomFirstname", savedStudent.getUser().getFirstName());
-    assertEquals("RandomLastname", savedStudent.getUser().getLastName());
-    assertEquals("RandomEmail", savedStudent.getUser().getEmail());
-    assertEquals("RandomBio", savedStudent.getBio());
+    User savedUser = captorUser.getValue();
+    assertEquals("RandomFirstname", savedUser.getFirstName());
+    assertEquals("RandomLastname", savedUser.getLastName());
+    assertEquals("RandomEmail", savedUser.getEmail());
+
+    verify(studentService).updateProfile(any(User.class), anyString());
   }
 
   @Test
   void shouldUpdateUserFirstNameLastNameProfileAndCoverOnly() {
     BddLogger.given("a UserServiceImpl service");
     String saveEmail = student.getUser().getEmail();
-    String saveBio = student.getUser().toStudent().getBio();
+    String saveBio = student.getBio();
 
     BddLogger.when("only updating firstname and lastname");
     userService.updateProfile(
-        EUserCategory.STUDENT, student.getUser(), "RandomEmail", "RandomEmail", null, null);
+        EUserCategory.STUDENT, student.getUser(), "RandomFirstname", "RandomLastname", null, null);
 
     BddLogger.then("it should only update firstname and lastname");
-    ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
-    verify(userRepository).save(captor.capture());
+    ArgumentCaptor<User> captorUser = ArgumentCaptor.forClass(User.class);
+    verify(userRepository).save(captorUser.capture());
 
-    Student savedStudent = captor.getValue();
-    assertEquals("RandomEmail", savedStudent.getUser().getFirstName());
-    assertEquals("RandomEmail", savedStudent.getUser().getLastName());
-    assertEquals(saveEmail, savedStudent.getUser().getEmail());
-    assertEquals(saveBio, savedStudent.getBio());
+    User savedUser = captorUser.getValue();
+    assertEquals("RandomFirstname", savedUser.getFirstName());
+    assertEquals("RandomLastname", savedUser.getLastName());
+    assertEquals(saveEmail, savedUser.getEmail());
+
+    verify(studentService).updateProfile(any(User.class), isNull());
   }
 
   @Test

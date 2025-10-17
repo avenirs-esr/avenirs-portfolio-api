@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,7 @@ import lombok.Setter;
 public class AdditionalSkillProgressEntity extends AvenirsBaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "student_id")
-  private UserEntity student;
+  private StudentEntity student;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "additional_skill_id")
@@ -33,7 +33,7 @@ public class AdditionalSkillProgressEntity extends AvenirsBaseEntity {
 
   private AdditionalSkillProgressEntity(
       UUID id,
-      UserEntity student,
+      StudentEntity student,
       AdditionalSkillEntity additionalSkill,
       EAdditionalSkillLevel level) {
     setId(id);
@@ -44,7 +44,7 @@ public class AdditionalSkillProgressEntity extends AvenirsBaseEntity {
 
   public static AdditionalSkillProgressEntity of(
       UUID id,
-      UserEntity student,
+      StudentEntity student,
       AdditionalSkillEntity additionalSkill,
       EAdditionalSkillLevel level) {
     return new AdditionalSkillProgressEntity(id, student, additionalSkill, level);
@@ -52,7 +52,7 @@ public class AdditionalSkillProgressEntity extends AvenirsBaseEntity {
 
   public static AdditionalSkillProgressEntity create(
       UUID id,
-      UserEntity student,
+      StudentEntity student,
       AdditionalSkillEntity additionalSkill,
       EAdditionalSkillLevel level) {
     return new AdditionalSkillProgressEntity(id, student, additionalSkill, level);

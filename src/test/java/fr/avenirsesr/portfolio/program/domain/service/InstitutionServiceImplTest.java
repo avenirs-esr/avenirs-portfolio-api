@@ -11,7 +11,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +29,7 @@ class InstitutionServiceImplTest {
   @BeforeEach
   void setUp() {
     closeable = MockitoAnnotations.openMocks(this);
-    student = UserFixture.createStudent().toModel().toStudent();
+    student = StudentFixture.create().toModel();
   }
 
   @AfterEach
@@ -46,12 +46,12 @@ class InstitutionServiceImplTest {
     StudentProgress studentProgressAPC =
         StudentProgressFixture.create()
             .withTrainingPath(apcTrainingPath)
-            .withUser(student.getUser())
+            .withStudent(student)
             .toModel();
     StudentProgress studentProgressLifeProject =
         StudentProgressFixture.create()
             .withTrainingPath(lifeProjectTrainingPath)
-            .withUser(student.getUser())
+            .withStudent(student)
             .toModel();
 
     when(studentProgressRepository.findAllByStudent(student))
@@ -74,12 +74,12 @@ class InstitutionServiceImplTest {
     StudentProgress studentProgressAPC =
         StudentProgressFixture.create()
             .withTrainingPath(apcTrainingPath)
-            .withUser(student.getUser())
+            .withStudent(student)
             .toModel();
     StudentProgress studentProgress2 =
         StudentProgressFixture.create()
             .withTrainingPath(apcTrainingPath2)
-            .withUser(student.getUser())
+            .withStudent(student)
             .toModel();
 
     when(studentProgressRepository.findAllByStudent(student))

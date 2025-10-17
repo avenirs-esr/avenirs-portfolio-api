@@ -4,13 +4,13 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 
 public interface SkillLevelProgressMapper {
   static SkillLevelProgressEntity fromDomain(SkillLevelProgress skillLevelProgress) {
     return SkillLevelProgressEntity.of(
         skillLevelProgress.getId(),
-        UserMapper.fromDomain(skillLevelProgress.getStudent()),
+        StudentMapper.fromDomain(skillLevelProgress.getStudent()),
         SkillLevelMapper.fromDomain(skillLevelProgress.getSkillLevel()),
         skillLevelProgress.getStatus(),
         skillLevelProgress.getStartDate(),
@@ -21,7 +21,7 @@ public interface SkillLevelProgressMapper {
   static SkillLevelProgress toDomain(SkillLevelProgressEntity entity) {
     return SkillLevelProgress.toDomain(
         entity.getId(),
-        UserMapper.toDomain(entity.getStudent()).toStudent(),
+        StudentMapper.toDomain(entity.getStudent()),
         SkillLevelMapper.toDomain(entity.getSkillLevel()),
         entity.getStatus(),
         entity.getStartDate(),

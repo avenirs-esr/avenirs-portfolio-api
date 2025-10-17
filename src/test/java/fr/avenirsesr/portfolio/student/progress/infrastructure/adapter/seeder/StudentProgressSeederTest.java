@@ -12,7 +12,8 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,12 +31,13 @@ class StudentProgressSeederTest {
   @Autowired private StudentProgressSeeder studentProgressSeeder;
   @Autowired private StudentProgressDatabaseRepository studentProgressRepository;
   @Autowired private UserSeeder userSeeder;
+  @Autowired private StudentSeeder studentSeeder;
   @Autowired private InstitutionSeeder institutionSeeder;
   @Autowired private ProgramSeeder programSeeder;
   @Autowired private SkillSeeder skillSeeder;
   @Autowired private TrainingPathSeeder trainingPathSeeder;
 
-  private static List<UserEntity> users;
+  private static List<StudentEntity> students;
   private static List<SkillLevelEntity> skillLevels;
   private static List<TrainingPathEntity> trainingPaths;
 
@@ -44,6 +46,9 @@ class StudentProgressSeederTest {
 
     // Seed des utilisateurs
     var savedUsers = userSeeder.seed();
+
+    // Seed des students
+    students = studentSeeder.seed(savedUsers);
 
     // Seed des institutions
     var savedInstitutions = institutionSeeder.seed();
@@ -58,7 +63,6 @@ class StudentProgressSeederTest {
     var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
 
     // Filtre les utilisateurs qui ont des students
-    users = savedUsers.stream().filter(u -> u.getStudent().isPresent()).toList();
     skillLevels = savedSkillLevels;
     trainingPaths = savedTrainingPaths;
   }
@@ -71,7 +75,7 @@ class StudentProgressSeederTest {
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
-            () -> studentProgressSeeder.seed(List.of(), users, skillLevels));
+            () -> studentProgressSeeder.seed(List.of(), students, skillLevels));
     assertTrue(exception.getMessage().contains("training paths cannot be empty"));
   }
 
@@ -95,7 +99,7 @@ class StudentProgressSeederTest {
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
-            () -> studentProgressSeeder.seed(trainingPaths, users, List.of()));
+            () -> studentProgressSeeder.seed(trainingPaths, students, List.of()));
     assertTrue(exception.getMessage().contains("skill levels cannot be empty"));
   }
 
@@ -104,7 +108,7 @@ class StudentProgressSeederTest {
     BddLogger.given("a student progress seeder");
     BddLogger.when("seeding student progress");
     List<StudentProgressEntity> result =
-        studentProgressSeeder.seed(trainingPaths, users, skillLevels);
+        studentProgressSeeder.seed(trainingPaths, students, skillLevels);
 
     BddLogger.then("it should return student progresses");
     assertNotNull(result);
@@ -126,7 +130,7 @@ class StudentProgressSeederTest {
     StudentProgressSeeder seederWithMock = new StudentProgressSeeder(mockRepo);
 
     BddLogger.when("seeding student progress");
-    List<StudentProgressEntity> result = seederWithMock.seed(trainingPaths, users, skillLevels);
+    List<StudentProgressEntity> result = seederWithMock.seed(trainingPaths, students, skillLevels);
 
     BddLogger.then("it should call repository and save all entities");
     verify(mockRepo, times(1)).saveAllEntities(result);

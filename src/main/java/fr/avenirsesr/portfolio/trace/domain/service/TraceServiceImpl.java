@@ -29,6 +29,7 @@ import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceReposito
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -50,6 +51,7 @@ public class TraceServiceImpl implements TraceService {
   private final AMSRepository amsRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceAttachmentRepository traceAttachmentRepository;
+  private final StudentService studentService;
   private final TraceConfigurationClient traceConfigurationClient;
 
   @Override
@@ -262,7 +264,7 @@ public class TraceServiceImpl implements TraceService {
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(user, trace);
 
-    var student = user.toStudent();
+    var student = studentService.getStudentById(user.getId());
     associateAMS(student, trace, amsIds);
     associateSkillLevels(student, trace, skillLevelIds);
     associateAdditionalSkillProgress(student, trace, additionalSkillProgressIds);

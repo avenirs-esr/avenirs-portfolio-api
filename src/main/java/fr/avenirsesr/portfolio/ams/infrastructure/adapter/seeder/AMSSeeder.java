@@ -14,7 +14,7 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.Ski
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.SkillLevelProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -85,9 +85,9 @@ public class AMSSeeder {
     return new ArrayList<>(skillLevelList.subList(0, skillLevelCount));
   }
 
-  private UserEntity getRandomUser(List<UserEntity> savedUsers) {
-    int userIndex = dataGenerator.with("userIdx").number(0, savedUsers.size() - 1);
-    return savedUsers.get(userIndex);
+  private StudentEntity getRandomStudent(List<StudentEntity> savedStudents) {
+    int userIndex = dataGenerator.with("userIdx").number(0, savedStudents.size() - 1);
+    return savedStudents.get(userIndex);
   }
 
   private EAmsStatus getRandomStatus() {
@@ -98,11 +98,11 @@ public class AMSSeeder {
 
   @Transactional
   public List<AMSEntity> seed(
-      List<UserEntity> savedUsers,
+      List<StudentEntity> savedStudents,
       List<SkillLevelProgressEntity> savedSkillLevels,
       List<TraceEntity> savedTraces,
       List<CohortEntity> savedCohorts) {
-    ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");
+    ValidationUtils.requireNonEmpty(savedStudents, "students cannot be empty");
     ValidationUtils.requireNonEmpty(savedSkillLevels, "skillLevels cannot be empty");
     ValidationUtils.requireNonEmpty(savedTraces, "traces cannot be empty");
     ValidationUtils.requireNonEmpty(savedCohorts, "cohorts cannot be empty");
@@ -116,7 +116,7 @@ public class AMSSeeder {
 
     for (int i = 0; i < SeederConfig.AMS_NB; i++) {
       AMSEntity ams =
-          FakeAMS.of(getRandomUser(savedUsers))
+          FakeAMS.of(getRandomStudent(savedStudents))
               .withStatus(getRandomStatus())
               .addTranslation(ELanguage.ENGLISH)
               .addTranslation(ELanguage.SPANISH)

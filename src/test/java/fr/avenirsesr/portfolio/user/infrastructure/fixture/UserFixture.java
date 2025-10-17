@@ -11,10 +11,6 @@ public class UserFixture {
   private String firstName;
   private String lastName;
   private String email;
-  private boolean isStudent;
-  private String studentBio;
-  private boolean isTeacher;
-  private String teacherBio;
   private Instant createdAt;
   private Instant updatedAt;
 
@@ -24,24 +20,12 @@ public class UserFixture {
     this.firstName = base.getFirstName();
     this.lastName = base.getLastName();
     this.email = base.getEmail();
-    this.isStudent = false;
-    this.studentBio = null;
-    this.isTeacher = false;
-    this.teacherBio = null;
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
   }
 
   public static UserFixture create() {
     return new UserFixture();
-  }
-
-  public static UserFixture createStudent() {
-    return new UserFixture().asStudent("Student Bio");
-  }
-
-  public static UserFixture createTeacher() {
-    return new UserFixture().asTeacher("Teacher Bio");
   }
 
   public UserFixture withId(UUID id) {
@@ -64,18 +48,6 @@ public class UserFixture {
     return this;
   }
 
-  public UserFixture asStudent(String studentBio) {
-    this.isStudent = true;
-    this.studentBio = studentBio;
-    return this;
-  }
-
-  public UserFixture asTeacher(String teacherBio) {
-    this.isTeacher = true;
-    this.teacherBio = teacherBio;
-    return this;
-  }
-
   public UserFixture withCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
     return this;
@@ -87,16 +59,6 @@ public class UserFixture {
   }
 
   public User toModel() {
-    return User.toDomain(
-        id,
-        firstName,
-        lastName,
-        email,
-        isStudent,
-        studentBio,
-        isTeacher,
-        teacherBio,
-        createdAt,
-        updatedAt);
+    return User.toDomain(id, firstName, lastName, email, createdAt, updatedAt);
   }
 }

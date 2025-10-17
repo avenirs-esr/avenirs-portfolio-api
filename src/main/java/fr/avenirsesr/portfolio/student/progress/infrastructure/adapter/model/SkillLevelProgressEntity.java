@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
@@ -23,7 +23,7 @@ import lombok.Setter;
 public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "student_id")
-  private UserEntity student;
+  private StudentEntity student;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "skill_level_id")
@@ -42,7 +42,7 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
 
   private SkillLevelProgressEntity(
       UUID id,
-      UserEntity student,
+      StudentEntity student,
       SkillLevelEntity skillLevelEntity,
       ESkillLevelStatus status,
       LocalDate startDate,
@@ -59,7 +59,7 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
 
   public static SkillLevelProgressEntity of(
       UUID id,
-      UserEntity student,
+      StudentEntity student,
       SkillLevelEntity skillLevelEntity,
       ESkillLevelStatus status,
       LocalDate startDate,

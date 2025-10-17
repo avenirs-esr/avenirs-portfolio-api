@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGen
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
@@ -22,7 +22,7 @@ public class FakeSkillLevelProgress {
     this.skillLevelProgress = skillLevelProgress;
   }
 
-  public static FakeSkillLevelProgress create(UserEntity student, SkillLevelEntity skillLevel) {
+  public static FakeSkillLevelProgress create(StudentEntity student, SkillLevelEntity skillLevel) {
     LocalDate futureStartDate = LocalDate.now().plus(Period.ofYears(1));
     LocalDate futureEndDate = LocalDate.now().plus(Period.ofYears(2));
     return new FakeSkillLevelProgress(

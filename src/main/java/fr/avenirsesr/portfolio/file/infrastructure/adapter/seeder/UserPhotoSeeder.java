@@ -10,6 +10,8 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeUserPhoto;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,11 +35,10 @@ public class UserPhotoSeeder {
     var nbOfProfileVersions = dataGenerator.with("random-number").number(1, maxNumber);
     for (int j = 1; j <= nbOfProfileVersions; j++) {
       photos.add(
-          FakeUserPhoto.of(user)
+          FakeUserPhoto.of(user, userCategory)
               .withVersion(j)
               .withIsActiveVersion(j == nbOfProfileVersions)
               .withUserPhotoType(type)
-              .withUserCategory(userCategory)
               .toEntity());
     }
 
@@ -45,43 +46,44 @@ public class UserPhotoSeeder {
   }
 
   @Transactional
-  public List<UserPhotoEntity> seed(List<UserEntity> users) {
-    ValidationUtils.requireNonEmpty(users, "users cannot be empty");
+  public List<UserPhotoEntity> seed(List<StudentEntity> students, List<TeacherEntity> teachers) {
+    ValidationUtils.requireNonEmpty(students, "students cannot be empty");
+    ValidationUtils.requireNonEmpty(teachers, "teachers cannot be empty");
 
     log.info("Seeding user photos...");
 
     List<UserPhotoEntity> userPhotoEntities = new ArrayList<>();
-    for (UserEntity user : users) {
+    for (StudentEntity student : students) {
       userPhotoEntities.addAll(
           generatePhotosOf(
-              user,
+              student.getUser(),
               EUserPhotoType.PROFILE,
-              user.getStudent().isPresent() ? EUserCategory.STUDENT : EUserCategory.TEACHER,
+              EUserCategory.STUDENT,
               SeederConfig.MAX_PROFILE_PHOTO_PER_USER));
 
       userPhotoEntities.addAll(
           generatePhotosOf(
-              user,
+              student.getUser(),
               EUserPhotoType.COVER,
-              user.getStudent().isPresent() ? EUserCategory.STUDENT : EUserCategory.TEACHER,
+              EUserCategory.STUDENT,
               SeederConfig.MAX_COVER_PHOTO_PER_USER));
+    }
 
-      if (user.getStudent().isPresent() && user.getTeacher().isPresent()) {
-        if (dataGenerator.with("has-photo").bool()) {
-          userPhotoEntities.addAll(
-              generatePhotosOf(
-                  user,
-                  EUserPhotoType.PROFILE,
-                  EUserCategory.TEACHER,
-                  SeederConfig.MAX_PROFILE_PHOTO_PER_USER));
+    for (TeacherEntity teacher : teachers) {
+      if (dataGenerator.with("has-photo").bool()) {
+        userPhotoEntities.addAll(
+            generatePhotosOf(
+                teacher.getUser(),
+                EUserPhotoType.PROFILE,
+                EUserCategory.TEACHER,
+                SeederConfig.MAX_PROFILE_PHOTO_PER_USER));
 
-          userPhotoEntities.addAll(
-              generatePhotosOf(
-                  user,
-                  EUserPhotoType.COVER,
-                  EUserCategory.TEACHER,
-                  SeederConfig.MAX_COVER_PHOTO_PER_USER));
-        }
+        userPhotoEntities.addAll(
+            generatePhotosOf(
+                teacher.getUser(),
+                EUserPhotoType.COVER,
+                EUserCategory.TEACHER,
+                SeederConfig.MAX_COVER_PHOTO_PER_USER));
       }
     }
 

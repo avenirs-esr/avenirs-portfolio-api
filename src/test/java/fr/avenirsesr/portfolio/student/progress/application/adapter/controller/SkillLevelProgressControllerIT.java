@@ -126,12 +126,12 @@ public class SkillLevelProgressControllerIT {
       class AndAnUnknownUserIsPassed {
         @BeforeEach
         void setupAnd() {
-          BddLogger.and("an unknown user is passed");
+          BddLogger.and("an unknown user or an non student user is passed");
         }
 
         @Test
         void thenItShouldReturn404() throws Exception {
-          BddLogger.then("it should return 404");
+          BddLogger.then("it should return 403");
           mockMvc
               .perform(
                   get(BASE_PATH)
@@ -139,29 +139,6 @@ public class SkillLevelProgressControllerIT {
                       .header("X-Signed-Context", unknownUserPayload)
                       .header("X-Context-Kid", secretKey)
                       .header("X-Context-Signature", unknownUserSignature)
-                      .accept(MediaType.APPLICATION_JSON))
-              .andExpect(status().isNotFound())
-              .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
-        }
-      }
-
-      @Nested
-      class AndANonStudentUserIsPassed {
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("an non student user is passed");
-        }
-
-        @Test
-        void thenItShouldReturn403() throws Exception {
-          BddLogger.then("it should return 403");
-          mockMvc
-              .perform(
-                  get(BASE_PATH)
-                      .header("Accept-Language", language.getCode())
-                      .header("X-Signed-Context", teacherPayload)
-                      .header("X-Context-Kid", secretKey)
-                      .header("X-Context-Signature", teacherSignature)
                       .accept(MediaType.APPLICATION_JSON))
               .andExpect(status().isForbidden())
               .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));

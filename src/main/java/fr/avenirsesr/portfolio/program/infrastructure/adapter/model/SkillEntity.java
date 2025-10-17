@@ -20,8 +20,7 @@ public class SkillEntity extends AvenirsBaseEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  private Set<SkillTranslationEntity> translations =
-      new HashSet<>(); // TODO: Remove this SET and get it in queries
+  private Set<SkillTranslationEntity> translations = new HashSet<>();
 
   public SkillEntity(UUID id) {
     this.setId(id);

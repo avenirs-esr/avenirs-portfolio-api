@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +24,7 @@ import lombok.Setter;
 public class AMSEntity extends PeriodEntity<Instant> {
 
   @ManyToOne(optional = false)
-  private UserEntity user;
+  private StudentEntity student;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -38,16 +38,16 @@ public class AMSEntity extends PeriodEntity<Instant> {
   private Set<AMSTranslationEntity> translations = new HashSet<>();
 
   private AMSEntity(
-      UUID id, UserEntity user, EAmsStatus status, Instant startDate, Instant endDate) {
+      UUID id, StudentEntity student, EAmsStatus status, Instant startDate, Instant endDate) {
     setId(id);
-    this.user = user;
+    this.student = student;
     setStartDate(startDate);
     setEndDate(endDate);
     this.status = status;
   }
 
   public static AMSEntity of(
-      UUID id, UserEntity user, EAmsStatus status, Instant startDate, Instant endDate) {
-    return new AMSEntity(id, user, status, startDate, endDate);
+      UUID id, StudentEntity student, EAmsStatus status, Instant startDate, Instant endDate) {
+    return new AMSEntity(id, student, status, startDate, endDate);
   }
 }

@@ -7,8 +7,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixtur
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.model.User;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
@@ -54,7 +53,7 @@ public class StudentProgressFixture {
             SkillLevelFixture.create().toModel());
     var trainingPath =
         TrainingPathFixture.create().withSkillLevels(trainingPathSkillLevels).toModel();
-    var student = UserFixture.createStudent().toModel().toStudent();
+    var student = StudentFixture.create().toModel();
     var skillLevelsProgress =
         trainingPathSkillLevels.stream()
             .map(skillLevel -> SkillLevelProgressFixture.create(student, skillLevel).toModel())
@@ -74,8 +73,8 @@ public class StudentProgressFixture {
     return this;
   }
 
-  public StudentProgressFixture withUser(User user) {
-    this.student = user.toStudent();
+  public StudentProgressFixture withStudent(Student student) {
+    this.student = student;
     return this;
   }
 

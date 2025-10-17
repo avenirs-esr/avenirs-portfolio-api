@@ -9,7 +9,7 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fake.FakeAdditionalSkillProgress;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +30,7 @@ public class AdditionalSkillProgressSeeder {
 
   @Transactional
   public List<AdditionalSkillProgressEntity> seed(
-      List<UserEntity> savedStudents, List<AdditionalSkillEntity> savedAdditionalSkills) {
+      List<StudentEntity> savedStudents, List<AdditionalSkillEntity> savedAdditionalSkills) {
     log.info("Seeding student progress...");
     List<AdditionalSkillProgressEntity> studentAdditionalSkillEntities = new ArrayList<>();
     savedStudents.forEach(

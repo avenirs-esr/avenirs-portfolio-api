@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -21,7 +21,7 @@ import lombok.Setter;
 @Setter
 public class StudentProgressEntity extends PeriodEntity<LocalDate> {
   @ManyToOne(optional = false)
-  private UserEntity student;
+  private StudentEntity student;
 
   @ManyToOne(optional = false)
   @JoinColumn(name = "training_path_id")
@@ -33,7 +33,7 @@ public class StudentProgressEntity extends PeriodEntity<LocalDate> {
 
   private StudentProgressEntity(
       UUID id,
-      UserEntity student,
+      StudentEntity student,
       TrainingPathEntity trainingPath,
       LocalDate startDate,
       LocalDate endDate,
@@ -52,7 +52,7 @@ public class StudentProgressEntity extends PeriodEntity<LocalDate> {
 
   public static StudentProgressEntity of(
       UUID id,
-      UserEntity student,
+      StudentEntity student,
       TrainingPathEntity trainingPath,
       LocalDate startDate,
       LocalDate endDate,

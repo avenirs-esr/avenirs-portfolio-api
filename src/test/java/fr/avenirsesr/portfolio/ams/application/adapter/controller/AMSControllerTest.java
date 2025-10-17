@@ -20,8 +20,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.model.User;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +54,7 @@ class AMSControllerTest {
   void setUp() {
     userId = UUID.randomUUID();
     studentProgressId = UUID.randomUUID();
-    User user = UserFixture.createStudent().withId(userId).toModel();
-    student = user.toStudent();
+    student = StudentFixture.create().withId(userId).toModel();
     principal = () -> userId.toString();
   }
 

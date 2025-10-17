@@ -1,25 +1,31 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Embeddable
+@Entity
+@Table(name = "teacher")
 @NoArgsConstructor
 @Getter
 @Setter
-public class TeacherEntity {
+public class TeacherEntity extends AvenirsBaseEntity {
+  @OneToOne private UserEntity user;
   @Column private String bio;
-  @Column private boolean isActive;
 
-  private TeacherEntity(String bio, boolean isActive) {
+  private TeacherEntity(UUID id, UserEntity user, String bio) {
+    setId(id);
+    this.user = user;
     this.bio = bio;
-    this.isActive = isActive;
   }
 
-  public static TeacherEntity of(String bio, boolean isActive) {
-    return new TeacherEntity(bio, isActive);
+  public static TeacherEntity of(UserEntity user, String bio) {
+    return new TeacherEntity(user.getId(), user, bio);
   }
 }

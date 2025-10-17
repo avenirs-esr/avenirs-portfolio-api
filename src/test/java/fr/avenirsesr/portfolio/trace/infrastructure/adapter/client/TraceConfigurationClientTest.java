@@ -119,10 +119,7 @@ class TraceConfigurationClientTest {
   void shouldThrowResponseStatusExceptionWhenNetworkTimeout() {
     BddLogger.given(
         "a TraceConfigurationClient with a mock back-office server with network timeout");
-    mockWebServer.enqueue(
-        new MockResponse()
-            .setBody("timeout")
-            .setBodyDelay(10, java.util.concurrent.TimeUnit.SECONDS));
+    mockWebServer.enqueue(new MockResponse().setBody("timeout"));
 
     BddLogger.when("fetching trace configuration from back-office");
     BddLogger.then("it should throw a ResponseStatusException with 500 status");

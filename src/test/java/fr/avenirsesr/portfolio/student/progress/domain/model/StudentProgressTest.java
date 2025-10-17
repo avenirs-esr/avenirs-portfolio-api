@@ -8,7 +8,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ public class StudentProgressTest {
   @Test
   void testSelectLatestStartDateForSkill() {
     BddLogger.given("a student progress with some skill level progresses");
-    var student = UserFixture.createStudent().toModel().toStudent();
+    var student = StudentFixture.create().toModel();
     var skill = SkillFixture.create().toModel();
     var skillLevels =
         List.of(
@@ -68,7 +68,7 @@ public class StudentProgressTest {
 
     StudentProgress studentProgress =
         StudentProgressFixture.create()
-            .withUser(student.getUser())
+            .withStudent(student)
             .withSkillLevels(skillLevelProgress)
             .toModel();
 
@@ -83,7 +83,7 @@ public class StudentProgressTest {
   @Test
   void testMultipleSkills() {
     BddLogger.given("a student progress with some skill level progresses");
-    var student = UserFixture.createStudent().toModel().toStudent();
+    var student = StudentFixture.create().toModel();
     var javaSkill = SkillFixture.create().toModel();
     var pythonSkill = SkillFixture.create().toModel();
     var skillLevels =
@@ -111,7 +111,7 @@ public class StudentProgressTest {
     BddLogger.when("getting current skill levels");
     StudentProgress studentProgress =
         StudentProgressFixture.create()
-            .withUser(student.getUser())
+            .withStudent(student)
             .withSkillLevels(skillLevelProgress)
             .toModel();
     List<SkillLevelProgress> result = studentProgress.getCurrentSkillLevels();
@@ -125,7 +125,7 @@ public class StudentProgressTest {
   @Test
   void testMixedStatuses() {
     BddLogger.given("a student progress with some skill level progresses");
-    var student = UserFixture.createStudent().toModel().toStudent();
+    var student = StudentFixture.create().toModel();
     var javaSkill = SkillFixture.create().toModel();
     var skillLevels =
         List.of(
@@ -145,7 +145,7 @@ public class StudentProgressTest {
     skillLevelProgress.get(1).setStartDate(LocalDate.of(2023, 1, 1));
     StudentProgress studentProgress =
         StudentProgressFixture.create()
-            .withUser(student.getUser())
+            .withStudent(student)
             .withSkillLevels(skillLevelProgress)
             .toModel();
 

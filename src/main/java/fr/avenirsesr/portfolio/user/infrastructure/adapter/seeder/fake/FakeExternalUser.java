@@ -25,15 +25,6 @@ public class FakeExternalUser {
   }
 
   public static FakeExternalUser of(UserEntity user, EUserCategory category) {
-    if (category == EUserCategory.STUDENT
-        && (user.getStudent().isEmpty() || !user.getStudent().get().isActive())) {
-      throw new IllegalArgumentException("Student cannot be null");
-    }
-    if (category == EUserCategory.TEACHER
-        && (user.getTeacher().isEmpty() || !user.getTeacher().get().isActive())) {
-      throw new IllegalArgumentException("Student cannot be null");
-    }
-
     return new FakeExternalUser(
         ExternalUserEntity.of(
             dataGenerator.with("id").uuid(),

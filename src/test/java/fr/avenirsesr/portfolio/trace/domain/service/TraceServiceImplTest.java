@@ -41,6 +41,10 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigur
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.service.StudentServiceImpl;
+import fr.avenirsesr.portfolio.user.domain.service.TeacherServiceImpl;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Duration;
 import java.time.Instant;
@@ -61,6 +65,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class TraceServiceImplTest {
   @Mock private TraceRepository traceRepository;
+  @Mock private StudentRepository studentRepository;
   @Mock private TraceAttachmentRepository traceAttachmentRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
   @Mock private AMSRepository amsRepository;
@@ -69,13 +74,15 @@ public class TraceServiceImplTest {
 
   @Mock private TraceConfigurationClient traceConfigurationClient;
 
+  @Mock private StudentServiceImpl studentService;
+  @Mock private TeacherServiceImpl teacherService;
   @InjectMocks private TraceServiceImpl traceService;
 
   private Student student;
 
   @BeforeEach
   void setUp() {
-    student = UserFixture.createStudent().toModel().toStudent();
+    student = StudentFixture.create().toModel();
   }
 
   @Test
@@ -106,7 +113,7 @@ public class TraceServiceImplTest {
         StudentProgressFixture.create()
             .withTrainingPath(progress)
             .withSkillLevels(List.of(skillLevelProgress))
-            .withUser(student.getUser())
+            .withStudent(student)
             .toModel();
     Trace trace =
         TraceFixture.create()
@@ -138,7 +145,7 @@ public class TraceServiceImplTest {
         StudentProgressFixture.create()
             .withTrainingPath(progress)
             .withSkillLevels(List.of(skillLevelProgress))
-            .withUser(student.getUser())
+            .withStudent(student)
             .toModel();
     Trace trace =
         TraceFixture.create()
@@ -248,7 +255,7 @@ public class TraceServiceImplTest {
   @Test
   void givenTraceWithAmsAndSkillLevels_shouldThrowUserNotAuthorizedException() {
     BddLogger.given("a TraceServiceImpl service and a trace with AMS and skill levels");
-    User otherUser = UserFixture.createStudent().toModel();
+    User otherUser = UserFixture.create().toModel();
     AMS ams = AMSFixture.create().toModel();
     Trace trace =
         TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
@@ -536,6 +543,7 @@ public class TraceServiceImplTest {
         .thenReturn(List.of(skillLevel));
     when(additionalSkillProgressRepository.findAllByStudent(any(Student.class)))
         .thenReturn(List.of(additional));
+    when(studentService.getStudentById(any(UUID.class))).thenReturn(student);
 
     BddLogger.when("associating AMS, SkillLevels and AdditionalSkills");
     traceService.associateTrace(
@@ -573,7 +581,7 @@ public class TraceServiceImplTest {
   @Test
   void givenTraceOfAnotherUser_shouldThrowUserNotAuthorizedException() {
     BddLogger.given("a trace belonging to another user");
-    User otherUser = UserFixture.createStudent().toModel();
+    User otherUser = UserFixture.create().toModel();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
 

@@ -14,6 +14,8 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPat
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.*;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.TeacherSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,8 @@ import org.springframework.stereotype.Service;
 public class SeederRunner implements CommandLineRunner {
   private final UserRepository userRepository;
   private final UserSeeder userSeeder;
+  private final StudentSeeder studentSeeder;
+  private final TeacherSeeder teacherSeeder;
   private final UserPhotoSeeder userPhotoSeeder;
   private final CohortSeeder cohortSeeder;
   private final AMSSeeder amsSeeder;
@@ -44,6 +48,8 @@ public class SeederRunner implements CommandLineRunner {
   public SeederRunner(
       UserRepository userRepository,
       UserSeeder userSeeder,
+      StudentSeeder studentSeeder,
+      TeacherSeeder teacherSeeder,
       UserPhotoSeeder userPhotoSeeder,
       CohortSeeder cohortSeeder,
       AMSSeeder amsSeeder,
@@ -59,6 +65,8 @@ public class SeederRunner implements CommandLineRunner {
 
     this.userRepository = userRepository;
     this.userPhotoSeeder = userPhotoSeeder;
+    this.studentSeeder = studentSeeder;
+    this.teacherSeeder = teacherSeeder;
     this.cohortSeeder = cohortSeeder;
     this.amsSeeder = amsSeeder;
     this.traceSeeder = traceSeeder;
@@ -81,8 +89,9 @@ public class SeederRunner implements CommandLineRunner {
       log.info("Seeding enabled and starting...");
 
       var savedUsers = userSeeder.seed();
-      var savedUserPhotos = userPhotoSeeder.seed(savedUsers);
-      var savedStudents = savedUsers.stream().filter(u -> u.getStudent().isPresent()).toList();
+      var savedTeachers = teacherSeeder.seed(savedUsers);
+      var savedStudents = studentSeeder.seed(savedUsers);
+      var savedUserPhotos = userPhotoSeeder.seed(savedStudents, savedTeachers);
       var savedAdditionalSkills = additionalSkillSeeder.seed();
       var savedStudentAdditionalSkills =
           additionalSkillProgressSeeder.seed(savedStudents, savedAdditionalSkills);
@@ -100,7 +109,7 @@ public class SeederRunner implements CommandLineRunner {
       var savedTraces = traceSeeder.seed(savedUsers, savedStudentAdditionalSkills);
       var savedTracesAttachment = traceAttachmentSeeder.seed(savedTraces);
       var savedAmses =
-          amsSeeder.seed(savedUsers, savedSkillLevelProgresses, savedTraces, savedCohorts);
+          amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);

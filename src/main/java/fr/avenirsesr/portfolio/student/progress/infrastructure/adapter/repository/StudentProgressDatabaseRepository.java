@@ -10,8 +10,8 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.St
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.StudentProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Repository;
@@ -35,14 +35,14 @@ public class StudentProgressDatabaseRepository
   public List<StudentProgress> findAllByStudent(Student student) {
     return entityListToDomainList(
         jpaSpecificationExecutor.findAll(
-            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))));
+            StudentProgressSpecification.hasStudent(StudentMapper.fromDomain(student))));
   }
 
   @Override
   public List<StudentProgress> findAllAPCByStudent(Student student) {
     return jpaSpecificationExecutor
         .findAll(
-            StudentProgressSpecification.hasStudent(UserMapper.fromDomain(student))
+            StudentProgressSpecification.hasStudent(StudentMapper.fromDomain(student))
                 .and(StudentProgressSpecification.isAPC()))
         .stream()
         .map(StudentProgressMapper::toDomain)
@@ -59,7 +59,7 @@ public class StudentProgressDatabaseRepository
     if (skillLevelProgresses.isEmpty()) {
       return List.of();
     }
-    UserEntity student = UserMapper.fromDomain(skillLevelProgresses.getFirst().getStudent());
+    StudentEntity student = StudentMapper.fromDomain(skillLevelProgresses.getFirst().getStudent());
     return jpaSpecificationExecutor
         .findAll(
             StudentProgressSpecification.hasStudent(student)

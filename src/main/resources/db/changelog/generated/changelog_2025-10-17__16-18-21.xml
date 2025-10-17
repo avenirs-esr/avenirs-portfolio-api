@@ -1,0 +1,94 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-14">
+        <dropForeignKeyConstraint baseTableName="skill_level_progress" constraintName="FK6dx8chcqb8go06e4l5lpf7jwi"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-15">
+        <dropForeignKeyConstraint baseTableName="student_progress" constraintName="FK739vikxivy83rik5edf4se7kn"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-16">
+        <dropForeignKeyConstraint baseTableName="ams" constraintName="FK9byulnw3u0cog0fpjfa4bpfoy"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-17">
+        <dropForeignKeyConstraint baseTableName="additional_skill" constraintName="FK9uosyssnq3dpvs2700r44tidw"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-18">
+        <dropForeignKeyConstraint baseTableName="additional_skill_progress" constraintName="FKfim1q8ibr8yo4epoi1q001bpy"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-1">
+        <createTable tableName="student">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="studentPK"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bio" type="VARCHAR(255)"/>
+            <column name="user_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-2">
+        <createTable tableName="teacher">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="teacherPK"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bio" type="VARCHAR(255)"/>
+            <column name="user_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-4">
+        <addColumn tableName="ams">
+            <column name="student_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-5">
+        <addUniqueConstraint columnNames="user_id" constraintName="UC_STUDENTUSER_ID_COL" tableName="student"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-6">
+        <addUniqueConstraint columnNames="user_id" constraintName="UC_TEACHERUSER_ID_COL" tableName="teacher"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-7">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="ams" constraintName="FK29yky9jptfmqhqn4l6cersqy" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="student" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-8">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="additional_skill_progress" constraintName="FK83n4vwxybet4q7kv0hmpgnlei" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="student" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-10">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="skill_level_progress" constraintName="FKedbx4lwc4vqlweeuky0s9mehd" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="student" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-11">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="teacher" constraintName="FKf3nb30ggdsojitnha20fcd0jv" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-12">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="student" constraintName="FKhl0igmb8xve6vd1rc42ldf4p9" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-13">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="student_progress" constraintName="FKl0cwsyxx6m6x6ooi0wmg07w5r" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="student" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-21">
+        <dropColumn columnName="student_bio" tableName="user"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-22">
+        <dropColumn columnName="student_is_active" tableName="user"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-23">
+        <dropColumn columnName="teacher_bio" tableName="user"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-24">
+        <dropColumn columnName="teacher_is_active" tableName="user"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-25">
+        <dropColumn columnName="user_id" tableName="ams"/>
+    </changeSet>
+</databaseChangeLog>

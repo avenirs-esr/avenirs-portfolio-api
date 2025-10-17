@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSki
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -24,7 +24,7 @@ public class AdditionalSkillProgressFixture {
 
   private AdditionalSkillProgressFixture() {
     this.id = dataGenerator.with("id").uuid();
-    this.student = UserFixture.create().toModel().toStudent();
+    this.student = StudentFixture.create().toModel();
     this.skill = AdditionalSkillFixture.create().toModel();
     this.level = dataGenerator.with("level").pickIn(EAdditionalSkillLevel.class);
     this.createdAt = Instant.now();

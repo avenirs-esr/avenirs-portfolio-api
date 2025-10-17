@@ -108,8 +108,8 @@ public class AMSControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
   }
 
   @Test

@@ -72,10 +72,10 @@ class StudentProgressControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("96c16cc8-4ae8-4ffe-bb37-d55d0832c36b"))
-        .andExpect(jsonPath("$[0].programTitle").value("Program Post-doctoral Institute"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("f5bbedeb-c0f4-4b3c-bcbe-9a96091719e6"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Skill est"))
+        .andExpect(jsonPath("$[0].id").value("c1206b40-7a05-4488-8496-86cb2acf40ec"))
+        .andExpect(jsonPath("$[0].programTitle").value("Program Master Institute"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("9cf0d6e7-4736-44c7-bd0a-60e6520ca584"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill omnis"))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
   }
 
@@ -92,10 +92,10 @@ class StudentProgressControllerIT {
                 .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
                 .header(HttpHeaders.ACCEPT_LANGUAGE, language.getCode())
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
+        .andExpect(status().isForbidden())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("User not found"))
-        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+        .andExpect(jsonPath("$.message").value("User is not student"))
+        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
   }
 
   @Test
@@ -134,10 +134,10 @@ class StudentProgressControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("96c16cc8-4ae8-4ffe-bb37-d55d0832c36b"))
-        .andExpect(jsonPath("$[0].programTitle").value("Program Post-doctoral Institute"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("f5bbedeb-c0f4-4b3c-bcbe-9a96091719e6"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Skill est"))
+        .andExpect(jsonPath("$[0].id").value("c1206b40-7a05-4488-8496-86cb2acf40ec"))
+        .andExpect(jsonPath("$[0].programTitle").value("Program Master Institute"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("9cf0d6e7-4736-44c7-bd0a-60e6520ca584"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill omnis"))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
   }
 
@@ -157,10 +157,10 @@ class StudentProgressControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("96c16cc8-4ae8-4ffe-bb37-d55d0832c36b"))
-        .andExpect(jsonPath("$[0].name").value("Program Post-doctoral Institute"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("f5bbedeb-c0f4-4b3c-bcbe-9a96091719e6"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Skill est"))
+        .andExpect(jsonPath("$[0].id").value("c1206b40-7a05-4488-8496-86cb2acf40ec"))
+        .andExpect(jsonPath("$[0].name").value("Program Master Institute"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("4f178261-b7cc-41a0-a1c2-fed8ed234dc3"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill culpa"))
         .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists())
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.traceCount").value(0))
@@ -180,10 +180,10 @@ class StudentProgressControllerIT {
                 .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
                 .header(HttpHeaders.ACCEPT_LANGUAGE, language.getCode())
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
+        .andExpect(status().isForbidden())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("User not found"))
-        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+        .andExpect(jsonPath("$.message").value("User is not student"))
+        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
   }
 
   @Test
@@ -221,10 +221,10 @@ class StudentProgressControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("96c16cc8-4ae8-4ffe-bb37-d55d0832c36b"))
-        .andExpect(jsonPath("$[0].name").value("Program Post-doctoral Institute"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("f5bbedeb-c0f4-4b3c-bcbe-9a96091719e6"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Skill est"))
+        .andExpect(jsonPath("$[0].id").value("c1206b40-7a05-4488-8496-86cb2acf40ec"))
+        .andExpect(jsonPath("$[0].name").value("Program Master Institute"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("4f178261-b7cc-41a0-a1c2-fed8ed234dc3"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Skill culpa"))
         .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists())
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.traceCount").value(0))

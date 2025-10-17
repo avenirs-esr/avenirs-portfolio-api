@@ -22,7 +22,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.St
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,6 @@ class AMSServiceImplTest {
   @InjectMocks private AMSServiceImpl amsService;
 
   private Student student;
-  private UUID studentId;
   private UUID studentProgressId;
   private static final Integer DEFAULT_PAGE = 1;
   private static final Integer DEFAULT_SIZE = 10;
@@ -52,8 +51,7 @@ class AMSServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    student = UserFixture.createStudent().toModel().toStudent();
-    studentId = student.getId();
+    student = StudentFixture.create().toModel();
     studentProgressId = UUID.randomUUID();
     studentProgress = StudentProgressFixture.create().toModel();
   }

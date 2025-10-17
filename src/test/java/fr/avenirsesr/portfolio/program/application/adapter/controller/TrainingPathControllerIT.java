@@ -71,10 +71,10 @@ public class TrainingPathControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("cefa8c78-5d38-4f19-ba36-2a99ef6b61b1"))
-        .andExpect(jsonPath("$[0].name").value("Program Doctoral University"))
-        .andExpect(jsonPath("$[0].durationUnit").value("MONTH"))
-        .andExpect(jsonPath("$[0].durationCount").value(1));
+        .andExpect(jsonPath("$[0].id").value("430f3ed4-6b38-4602-8bf3-7cccb65ebeac"))
+        .andExpect(jsonPath("$[0].name").value("Program Master Institute"))
+        .andExpect(jsonPath("$[0].durationUnit").value("TRIMESTER"))
+        .andExpect(jsonPath("$[0].durationCount").value(4));
   }
 
   @Test
@@ -90,10 +90,10 @@ public class TrainingPathControllerIT {
                 .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
                 .header(HttpHeaders.ACCEPT_LANGUAGE, language.getCode())
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
+        .andExpect(status().isForbidden())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("User not found"))
-        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+        .andExpect(jsonPath("$.message").value("User is not student"))
+        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
   }
 
   @Test
@@ -132,9 +132,9 @@ public class TrainingPathControllerIT {
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].id").value("cefa8c78-5d38-4f19-ba36-2a99ef6b61b1"))
-        .andExpect(jsonPath("$[0].name").value("Program Doctoral University"))
-        .andExpect(jsonPath("$[0].durationUnit").value("MONTH"))
-        .andExpect(jsonPath("$[0].durationCount").value(1));
+        .andExpect(jsonPath("$[0].id").value("430f3ed4-6b38-4602-8bf3-7cccb65ebeac"))
+        .andExpect(jsonPath("$[0].name").value("Program Master Institute"))
+        .andExpect(jsonPath("$[0].durationUnit").value("TRIMESTER"))
+        .andExpect(jsonPath("$[0].durationCount").value(4));
   }
 }

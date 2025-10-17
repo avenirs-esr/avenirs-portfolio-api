@@ -8,7 +8,7 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.FakePeriod;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.Instant;
 import java.util.Set;
 
@@ -24,12 +24,12 @@ public class FakeAMS {
     this.ams = ams;
   }
 
-  public static FakeAMS of(UserEntity user) {
+  public static FakeAMS of(StudentEntity student) {
     FakePeriod<Instant> period = FakePeriod.createMin24hoursInstantPeriodInAcademicPeriod();
     var entity =
         AMSEntity.of(
             dataGenerator.with("id").uuid(),
-            user,
+            student,
             EAmsStatus.NOT_STARTED,
             period.getStartDate(),
             period.getEndDate());

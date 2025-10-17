@@ -22,7 +22,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.St
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
@@ -45,7 +45,7 @@ public class StudentProgressServiceImplTest {
 
   @BeforeEach
   void setUp() {
-    student = UserFixture.createStudent().toModel().toStudent();
+    student = StudentFixture.create().toModel();
   }
 
   @Nested
@@ -73,7 +73,7 @@ public class StudentProgressServiceImplTest {
         progressAPCModel =
             StudentProgressFixture.create()
                 .withTrainingPath(progressAPC)
-                .withUser(student.getUser())
+                .withStudent(student)
                 .toModel();
 
         when(studentProgressRepository.findAllAPCByStudent(student))
@@ -143,7 +143,7 @@ public class StudentProgressServiceImplTest {
 
         progress =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withSkillLevels(
                     List.of(
                         skillLevelsProgress.get(0),
@@ -154,7 +154,7 @@ public class StudentProgressServiceImplTest {
 
         progress2 =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withSkillLevels(
                     List.of(
                         skillLevelsProgress.get(4),
@@ -292,7 +292,7 @@ public class StudentProgressServiceImplTest {
         // Progress "current" : now between startDate and endDate
         currentProgress =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withSkillLevels(List.of(skillLevelsProgress.get(0), skillLevelsProgress.get(1)))
                 .withStartDate(now.minusDays(5))
                 .toModel();
@@ -300,7 +300,7 @@ public class StudentProgressServiceImplTest {
         // Progress "past" : endDate before now
         pastProgress =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withSkillLevels(List.of(skillLevelsProgress.get(2), skillLevelsProgress.get(3)))
                 .withStartDate(now.minusYears(10))
                 .toModel();
@@ -308,7 +308,7 @@ public class StudentProgressServiceImplTest {
         // Progress "future" : startDate after now
         futureProgress =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withSkillLevels(List.of(skillLevelsProgress.get(4), skillLevelsProgress.get(5)))
                 .withStartDate(now.plusYears(1))
                 .toModel();
@@ -405,7 +405,7 @@ public class StudentProgressServiceImplTest {
       void setupAnd() {
         BddLogger.and("a sorting criteria");
         customSort = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
-        progress = StudentProgressFixture.create().withUser(student.getUser()).toModel();
+        progress = StudentProgressFixture.create().withStudent(student).toModel();
 
         when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of(progress));
       }
@@ -460,7 +460,7 @@ public class StudentProgressServiceImplTest {
                 .toModel();
         progressAOld =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withTrainingPath(
                     TrainingPathFixture.create()
                         .withProgram(ProgramFixture.create().withName("Program A").toModel())
@@ -489,7 +489,7 @@ public class StudentProgressServiceImplTest {
                 .toModel();
         progressBNew =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withTrainingPath(
                     TrainingPathFixture.create()
                         .withProgram(ProgramFixture.create().withName("Program B").toModel())
@@ -714,14 +714,14 @@ public class StudentProgressServiceImplTest {
 
         currentProgress =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withSkillLevels(List.of(currentSkill))
                 .withStartDate(now.minusDays(5))
                 .toModel();
 
         finishedProgress =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withSkillLevels(List.of(pastSkill))
                 .withStartDate(now.minusMonths(2), Period.ofMonths(1))
                 .toModel();
@@ -797,13 +797,13 @@ public class StudentProgressServiceImplTest {
 
         progress1 =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withSkillLevels(List.of(slpA1, slpB))
                 .toModel();
 
         progress2 =
             StudentProgressFixture.create()
-                .withUser(student.getUser())
+                .withStudent(student)
                 .withSkillLevels(List.of(slpA2))
                 .toModel();
 

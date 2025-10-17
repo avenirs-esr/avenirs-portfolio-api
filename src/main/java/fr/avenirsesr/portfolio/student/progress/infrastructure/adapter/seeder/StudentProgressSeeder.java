@@ -10,7 +10,7 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.Stu
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake.FakeSkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake.FakeStudentProgress;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class StudentProgressSeeder {
   private final StudentProgressDatabaseRepository studentProgressRepository;
 
   private static StudentProgressEntity buildStudentProgressEntity(
-      UserEntity student, LocalDate startDate, List<TrainingPathEntity> savedTrainingPaths) {
+      StudentEntity student, LocalDate startDate, List<TrainingPathEntity> savedTrainingPaths) {
     TrainingPathEntity selectedTrainingPath =
         dataGenerator.with("selectedTrainingPath").pickIn(savedTrainingPaths);
 
@@ -52,7 +52,7 @@ public class StudentProgressSeeder {
   @Transactional
   public List<StudentProgressEntity> seed(
       List<TrainingPathEntity> savedTrainingPaths,
-      List<UserEntity> savedStudents,
+      List<StudentEntity> savedStudents,
       List<SkillLevelEntity> savedSkillLevels) {
     ValidationUtils.requireNonEmpty(savedTrainingPaths, "training paths cannot be empty");
     ValidationUtils.requireNonEmpty(savedStudents, "users cannot be empty");

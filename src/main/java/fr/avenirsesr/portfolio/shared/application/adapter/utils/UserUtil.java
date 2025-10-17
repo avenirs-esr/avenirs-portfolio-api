@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.shared.application.adapter.utils;
 
-import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import java.security.Principal;
 import java.util.UUID;
@@ -16,16 +16,10 @@ import org.springframework.stereotype.Component;
 public class UserUtil {
 
   private final UserService userService;
+  private final StudentService studentService;
 
   public Student getStudent(Principal principal) {
-    User user = userService.getUser(UUID.fromString(principal.getName()));
-
-    if (!user.isStudent()) {
-      log.error("User {} is not a student", principal.getName());
-      throw new UserIsNotStudentException();
-    }
-
-    return user.toStudent();
+    return studentService.getStudentById(UUID.fromString(principal.getName()));
   }
 
   public User getUser(Principal principal) {

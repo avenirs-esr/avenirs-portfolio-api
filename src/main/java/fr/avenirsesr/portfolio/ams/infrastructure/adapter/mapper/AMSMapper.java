@@ -4,13 +4,13 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEntity;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 
 public interface AMSMapper {
   static AMSEntity fromDomain(AMS ams) {
     return AMSEntity.of(
         ams.getId(),
-        UserMapper.fromDomain(ams.getUser()),
+        StudentMapper.fromDomain(ams.getStudent()),
         ams.getStatus(),
         ams.getStartDate(),
         ams.getEndDate());
@@ -21,7 +21,7 @@ public interface AMSMapper {
         TranslationUtil.getTranslation(entity.getTranslations());
     return AMS.toDomain(
         entity.getId(),
-        UserMapper.toDomain(entity.getUser()),
+        StudentMapper.toDomain(entity.getStudent()),
         translationEntity.getTitle(),
         entity.getStartDate(),
         entity.getEndDate(),
