@@ -12,7 +12,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.r
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,184,545,15,11,43,146,13,32,3,29
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.service,FileStorageServiceImpl,78,66,10,2,17,11,8,4,3,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastructure.adapter.repository,Rome4VersionDatabaseRepository,4,10,0,0,1,3,1,1,1,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.client,TraceConfigurationClient,0,48,0,0,0,16,0,3,0,3
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.client,TraceConfigurationClient,0,57,0,0,0,17,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.infrastructure.service,CsvCompetenceReader,0,63,0,2,0,12,0,7,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.infrastructure.service,CasocServiceConfig,0,10,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.infrastructure.service,CasocCsvReaderConfig,0,7,0,0,0,2,0,2,0,2
@@ -42,8 +42,8 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.utils,FileRe
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,10,110,4,11,2,30,4,8,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.openapi,OpenApiFileEnumConfiguration,10,5,0,0,5,2,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.openapi,SwaggerSchema,29,0,0,0,8,0,1,0,1,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.common.security.infrastructure.filter,ApiKeyAuthenticationFilter,131,0,22,0,32,0,16,0,5,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.common.security.infrastructure.filter,HmacAuthenticationFilter,45,144,9,11,8,37,9,8,0,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.common.security.infrastructure.filter,ApiKeyAuthenticationFilter,177,0,32,0,43,0,22,0,6,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.common.security.infrastructure.filter,HmacAuthenticationFilter,47,147,10,12,9,39,10,8,0,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.security.infrastructure.filter,DisabledAuthenticationFilter,45,0,8,0,10,0,8,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.security.infrastructure.filter,DevAuthenticationFilter,64,0,12,0,14,0,10,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification,DateFilterSpecificationBuilder,47,3,6,0,7,1,8,1,5,1

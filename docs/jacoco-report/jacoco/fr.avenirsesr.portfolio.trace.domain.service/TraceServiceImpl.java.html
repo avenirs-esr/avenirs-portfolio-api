@@ -134,7 +134,7 @@ public class TraceServiceImpl implements TraceService {
 
 <span class="nc" id="L135">    TraceAttachment traceAttachment = getTraceAttachment(trace);</span>
 
-<span class="nc" id="L137">    TraceAssociations traceAssociations = getTraceAssociations(user, id);</span>
+<span class="nc" id="L137">    AssociationsTrace associationsTrace = getAssociationsTrace(user, id);</span>
 <span class="nc" id="L138">    return new TraceDetail(</span>
 <span class="nc" id="L139">        trace.getId(),</span>
 <span class="nc" id="L140">        trace.getTitle(),</span>
@@ -144,12 +144,12 @@ public class TraceServiceImpl implements TraceService {
 <span class="nc" id="L144">        trace.getAiUseJustification().orElse(null),</span>
 <span class="nc" id="L145">        trace.getPersonalNote().orElse(null),</span>
         traceAttachment,
-        traceAssociations,
+        associationsTrace,
 <span class="nc" id="L148">        trace.getCreatedAt(),</span>
 <span class="nc" id="L149">        trace.getUpdatedAt());</span>
   }
 
-  protected TraceAssociations getTraceAssociations(User user, UUID id) {
+  protected AssociationsTrace getAssociationsTrace(User user, UUID id) {
 <span class="fc" id="L153">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
 <span class="fc" id="L154">    checkIfUserIsAuthorizedOnTrace(user, trace);</span>
 
@@ -175,7 +175,7 @@ public class TraceServiceImpl implements TraceService {
 <span class="nc" id="L175">      additionalSkillAssociations.add(toAdditionalSkillAssociation(additionalSkillProgress));</span>
 <span class="nc" id="L176">    }</span>
 
-<span class="fc" id="L178">    return new TraceAssociations(skillLevelAssociations, additionalSkillAssociations);</span>
+<span class="fc" id="L178">    return new AssociationsTrace(skillLevelAssociations, additionalSkillAssociations);</span>
   }
 
   @Override
@@ -215,7 +215,7 @@ public class TraceServiceImpl implements TraceService {
 
 <span class="fc" id="L216">    TraceAttachment traceAttachment = getTraceAttachment(savedTrace);</span>
 
-<span class="fc" id="L218">    TraceAssociations traceAssociations = getTraceAssociations(user, traceId);</span>
+<span class="fc" id="L218">    AssociationsTrace associationsTrace = getAssociationsTrace(user, traceId);</span>
 
 <span class="fc" id="L220">    return new TraceDetail(</span>
 <span class="fc" id="L221">        savedTrace.getId(),</span>
@@ -226,7 +226,7 @@ public class TraceServiceImpl implements TraceService {
 <span class="fc" id="L226">        savedTrace.getAiUseJustification().orElse(null),</span>
 <span class="fc" id="L227">        savedTrace.getPersonalNote().orElse(null),</span>
         traceAttachment,
-        traceAssociations,
+        associationsTrace,
 <span class="fc" id="L230">        savedTrace.getCreatedAt(),</span>
 <span class="fc" id="L231">        savedTrace.getUpdatedAt());</span>
   }
