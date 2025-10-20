@@ -10,7 +10,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,7 +50,7 @@ public class AdditionalSkillProgressDatabaseRepository
   @Override
   public List&lt;AdditionalSkillProgress&gt; findAllByStudent(Student student) {
 <span class="nc" id="L52">    return jpaRepository</span>
-<span class="nc" id="L53">        .findAll(AdditionalSkillProgressSpecification.hasStudent(UserMapper.fromDomain(student)))</span>
+<span class="nc" id="L53">        .findAll(AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student)))</span>
 <span class="nc" id="L54">        .stream()</span>
 <span class="nc" id="L55">        .map(AdditionalSkillProgressMapper::toDomain)</span>
 <span class="nc" id="L56">        .toList();</span>
@@ -60,7 +60,7 @@ public class AdditionalSkillProgressDatabaseRepository
   public PagedResult&lt;AdditionalSkillProgress&gt; findAllByStudent(
       Student student, PageCriteria pageCriteria) {
 <span class="fc" id="L62">    var specification =</span>
-<span class="fc" id="L63">        AdditionalSkillProgressSpecification.hasStudent(UserMapper.fromDomain(student));</span>
+<span class="fc" id="L63">        AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student));</span>
 <span class="fc" id="L64">    return findAllByStudent(specification, pageCriteria);</span>
   }
 
@@ -68,7 +68,7 @@ public class AdditionalSkillProgressDatabaseRepository
   public PagedResult&lt;AdditionalSkillProgress&gt; findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword) {
 <span class="nc" id="L70">    var specification =</span>
-<span class="nc" id="L71">        AdditionalSkillProgressSpecification.hasStudent(UserMapper.fromDomain(student))</span>
+<span class="nc" id="L71">        AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student))</span>
 <span class="nc" id="L72">            .and(AdditionalSkillProgressSpecification.search(keyword));</span>
 <span class="nc" id="L73">    return findAllByStudent(specification, pageCriteria);</span>
   }

@@ -2,13 +2,13 @@
 
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.criteria.Join;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 <span class="nc" id="L10">public class StudentProgressSpecification {</span>
-  public static Specification&lt;StudentProgressEntity&gt; hasStudent(UserEntity student) {
+  public static Specification&lt;StudentProgressEntity&gt; hasStudent(StudentEntity student) {
 <span class="fc" id="L12">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;student&quot;), student);</span>
   }
 

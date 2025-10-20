@@ -3,7 +3,7 @@
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -17,7 +17,7 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="fc" id="L17">            criteriaBuilder.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId));</span>
   }
 
-  public static Specification&lt;AdditionalSkillProgressEntity&gt; hasStudent(UserEntity student) {
+  public static Specification&lt;AdditionalSkillProgressEntity&gt; hasStudent(StudentEntity student) {
 <span class="fc" id="L21">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;student&quot;), student);</span>
   }
 

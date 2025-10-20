@@ -3,33 +3,33 @@
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.model.Teacher;
-import fr.avenirsesr.portfolio.user.domain.model.User;
-import fr.avenirsesr.portfolio.user.domain.model.UserPhotos;
+import fr.avenirsesr.portfolio.user.domain.model.*;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
+import fr.avenirsesr.portfolio.user.domain.port.input.TeacherService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L17">@Slf4j</span>
+<span class="fc" id="L16">@Slf4j</span>
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final UserResourceService userResourceService;
+  private final TeacherService teacherService;
+  private final StudentService studentService;
 
   @Override
   public User getUser(UUID id) {
-<span class="fc" id="L25">    var user = userRepository.findById(id);</span>
-
-<span class="fc bfc" id="L27" title="All 2 branches covered.">    if (user.isEmpty()) {</span>
-<span class="fc" id="L28">      log.error(&quot;User {} not found&quot;, id);</span>
-<span class="fc" id="L29">      throw new UserNotFoundException();</span>
-    }
-
-<span class="fc" id="L32">    return user.get();</span>
+<span class="fc" id="L26">    return userRepository</span>
+<span class="fc" id="L27">        .findById(id)</span>
+<span class="fc" id="L28">        .orElseThrow(</span>
+            () -&gt; {
+<span class="fc" id="L30">              log.error(&quot;User {} not found&quot;, id);</span>
+<span class="fc" id="L31">              return new UserNotFoundException();</span>
+            });
   }
 
   @Override
@@ -43,6 +43,19 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public UserProfileOverviewDTO getUserProfileOverviewDTO(UUID userId, EUserCategory userCategory) {
+<span class="fc" id="L47">    var user = getUser(userId);</span>
+<span class="fc" id="L48">    var bio =</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        switch (userCategory) {</span>
+<span class="fc" id="L50">          case STUDENT -&gt; studentService.getBio(user);</span>
+<span class="pc" id="L51">          case TEACHER -&gt; teacherService.getBio(user);</span>
+        };
+
+<span class="fc" id="L54">    return new UserProfileOverviewDTO(</span>
+<span class="fc" id="L55">        user.getFirstName(), user.getLastName(), user.getEmail(), bio);</span>
+  }
+
+  @Override
   public void updateProfile(
       EUserCategory userCategory,
       User user,
@@ -50,40 +63,26 @@ public class UserServiceImpl implements UserService {
       String lastname,
       String email,
       String bio) {
-<span class="fc" id="L53">    user.setFirstName(firstname);</span>
-<span class="fc" id="L54">    user.setLastName(lastname);</span>
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">    if (firstname == null) {</span>
-<span class="nc" id="L56">      throw new IllegalArgumentException(&quot;Firstname is null&quot;);</span>
+<span class="fc" id="L66">    user.setFirstName(firstname);</span>
+<span class="fc" id="L67">    user.setLastName(lastname);</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">    if (firstname == null) {</span>
+<span class="nc" id="L69">      throw new IllegalArgumentException(&quot;Firstname is null&quot;);</span>
     }
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">    if (lastname == null) {</span>
-<span class="nc" id="L59">      throw new IllegalArgumentException(&quot;Firstname is null&quot;);</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">    if (lastname == null) {</span>
+<span class="nc" id="L72">      throw new IllegalArgumentException(&quot;Lastname is null&quot;);</span>
     }
 
-<span class="fc bfc" id="L62" title="All 2 branches covered.">    if (email != null) {</span>
-<span class="fc" id="L63">      user.setEmail(email);</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">    if (email != null) {</span>
+<span class="fc" id="L76">      user.setEmail(email);</span>
     }
-<span class="fc" id="L65">    userRepository.save(user);</span>
+<span class="fc" id="L78">    userRepository.save(user);</span>
 
-<span class="pc bpc" id="L67" title="1 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="pc bpc" id="L80" title="1 of 3 branches missed.">    switch (userCategory) {</span>
       case STUDENT:
-        {
-<span class="fc" id="L70">          Student student = user.toStudent();</span>
-<span class="fc bfc" id="L71" title="All 2 branches covered.">          if (bio != null) {</span>
-<span class="fc" id="L72">            student.setBio(bio);</span>
-          }
-<span class="fc" id="L74">          userRepository.save(student);</span>
-<span class="fc" id="L75">          break;</span>
-        }
+<span class="fc" id="L82">        studentService.updateProfile(user, bio);</span>
       case TEACHER:
-        {
-<span class="fc" id="L79">          Teacher teacher = user.toTeacher();</span>
-<span class="pc bpc" id="L80" title="1 of 2 branches missed.">          if (bio != null) {</span>
-<span class="fc" id="L81">            teacher.setBio(bio);</span>
-          }
-<span class="fc" id="L83">          userRepository.save(teacher);</span>
-<span class="fc" id="L84">          break;</span>
-        }
+<span class="fc" id="L84">        teacherService.updateProfile(user, bio);</span>
     }
-<span class="fc" id="L87">  }</span>
+<span class="fc" id="L86">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

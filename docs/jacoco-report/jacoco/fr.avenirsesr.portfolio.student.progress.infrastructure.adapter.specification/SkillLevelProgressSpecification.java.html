@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import jakarta.persistence.criteria.Join;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,13 +16,13 @@ import org.springframework.data.jpa.domain.Specification;
 
   public static Specification&lt;SkillLevelProgressEntity&gt; with(Student student) {
 <span class="nc" id="L18">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="nc" id="L19">        criteriaBuilder.equal(root.get(&quot;student&quot;), UserMapper.fromDomain(student));</span>
+<span class="nc" id="L19">        criteriaBuilder.equal(root.get(&quot;student&quot;), StudentMapper.fromDomain(student));</span>
   }
 
   public static Specification&lt;SkillLevelProgressEntity&gt; with(Student student, UUID skillId) {
 <span class="fc" id="L23">    return (root, query, criteriaBuilder) -&gt; {</span>
 <span class="fc" id="L24">      var studentPredicate =</span>
-<span class="fc" id="L25">          criteriaBuilder.equal(root.get(&quot;student&quot;), UserMapper.fromDomain(student));</span>
+<span class="fc" id="L25">          criteriaBuilder.equal(root.get(&quot;student&quot;), StudentMapper.fromDomain(student));</span>
 <span class="fc" id="L26">      Join&lt;Object, Object&gt; skillEntity = root.join(&quot;skillLevel&quot;).join(&quot;skill&quot;);</span>
 <span class="fc" id="L27">      var skillPredicate = criteriaBuilder.equal(skillEntity.get(&quot;id&quot;), skillId);</span>
 

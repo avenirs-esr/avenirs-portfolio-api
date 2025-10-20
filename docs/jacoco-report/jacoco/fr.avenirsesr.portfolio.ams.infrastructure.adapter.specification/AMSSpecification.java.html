@@ -3,14 +3,14 @@
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import org.springframework.data.jpa.domain.Specification;
 
 <span class="nc" id="L9">public class AMSSpecification {</span>
 
   public static Specification&lt;AMSEntity&gt; belongsTo(Student student) {
 <span class="fc" id="L12">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L13">        criteriaBuilder.equal(root.get(&quot;user&quot;), UserMapper.fromDomain(student));</span>
+<span class="fc" id="L13">        criteriaBuilder.equal(root.get(&quot;student&quot;), StudentMapper.fromDomain(student));</span>
   }
 
   public static Specification&lt;AMSEntity&gt; search(String keyword, ELanguage language) {
