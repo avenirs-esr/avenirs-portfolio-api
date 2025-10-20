@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.user.domain.port.input;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.util.UUID;
 
 public interface StudentService {

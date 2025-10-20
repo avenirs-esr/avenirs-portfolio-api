@@ -1,8 +1,9 @@
 package fr.avenirsesr.portfolio.user.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
-import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;

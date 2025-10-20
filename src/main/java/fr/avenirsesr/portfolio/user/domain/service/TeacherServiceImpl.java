@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.user.domain.service;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotTeacherException;
-import fr.avenirsesr.portfolio.user.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.port.input.TeacherService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.TeacherRepository;
 import lombok.AllArgsConstructor;

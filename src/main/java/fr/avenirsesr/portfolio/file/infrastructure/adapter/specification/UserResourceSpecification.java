@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
-import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import org.springframework.data.jpa.domain.Specification;
 

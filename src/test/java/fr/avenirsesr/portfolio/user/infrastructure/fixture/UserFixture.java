@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.user.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.user.domain.model.User;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeUser;
 import java.time.Instant;
 import java.util.UUID;

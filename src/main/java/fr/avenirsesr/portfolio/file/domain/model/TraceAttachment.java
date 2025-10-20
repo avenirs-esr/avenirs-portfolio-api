@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.file.domain.model;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.shared.File;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.user.domain.model.User;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;

@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.openapi;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EContextType;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
-import fr.avenirsesr.portfolio.user.domain.model.enums.EUserCategory;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;

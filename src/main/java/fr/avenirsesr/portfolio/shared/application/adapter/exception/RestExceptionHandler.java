@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillN
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
 import fr.avenirsesr.portfolio.common.error.application.adapter.exception.BaseRestExceptionHandler;
 import fr.avenirsesr.portfolio.common.error.application.adapter.response.ErrorResponse;
+import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
@@ -13,7 +14,6 @@ import fr.avenirsesr.portfolio.student.progress.domain.exception.StudentProgress
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserCategoryNotRecognizedException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
-import fr.avenirsesr.portfolio.user.domain.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
