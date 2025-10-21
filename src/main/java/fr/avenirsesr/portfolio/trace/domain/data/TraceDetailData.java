@@ -1,10 +1,10 @@
-package fr.avenirsesr.portfolio.trace.domain.model;
+package fr.avenirsesr.portfolio.trace.domain.data;
 
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
 import java.time.Instant;
 import java.util.UUID;
 
-public record TraceDetail(
+public record TraceDetailData(
     UUID id,
     String title,
     boolean isAssociated,
@@ -13,6 +13,6 @@ public record TraceDetail(
     String aiUseJustification,
     String personalNote,
     TraceAttachment attachment,
-    TraceAssociations traceAssociations,
+    TraceAssociationsData traceAssociations,
     Instant createdAt,
     Instant updatedAt) {}

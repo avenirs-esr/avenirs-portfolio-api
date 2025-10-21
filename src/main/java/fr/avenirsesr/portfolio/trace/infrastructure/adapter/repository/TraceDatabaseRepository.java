@@ -12,8 +12,8 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
+import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;

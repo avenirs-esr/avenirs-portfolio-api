@@ -1,12 +1,12 @@
 package fr.avenirsesr.portfolio.user.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
-import fr.avenirsesr.portfolio.user.domain.model.UserPhotos;
-import fr.avenirsesr.portfolio.user.domain.model.UserProfileOverviewDTO;
+import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
+import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 
 public interface ProfileOverviewMapper {
   static ProfileOverviewDTO userDomainToDto(
-      UserProfileOverviewDTO overview, UserPhotos userPhotos) {
+      UserProfileOverviewData overview, UserPhotosData userPhotos) {
     return new ProfileOverviewDTO(
         overview.firstName(),
         overview.lastName(),

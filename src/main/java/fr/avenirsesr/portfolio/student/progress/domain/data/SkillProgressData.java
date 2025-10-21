@@ -1,17 +1,17 @@
-package fr.avenirsesr.portfolio.student.progress.domain.dto;
+package fr.avenirsesr.portfolio.student.progress.domain.data;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import java.util.Comparator;
 
-public record SkillProgressDTO(
+public record SkillProgressData(
     Skill skill,
     StudentProgress studentProgress,
-    SkillLevelProgressWithTraceCountDTO currentSkillLevelProgress) {
+    SkillLevelProgressWithTraceCountData currentSkillLevelProgress) {
 
-  public static Comparator<SkillProgressDTO> comparatorOf(SortCriteria sortCriteria) {
-    Comparator<SkillProgressDTO> comparator =
+  public static Comparator<SkillProgressData> comparatorOf(SortCriteria sortCriteria) {
+    Comparator<SkillProgressData> comparator =
         switch (sortCriteria.field()) {
           case NAME -> Comparator.comparing(slp -> slp.skill().getName());
           case DATE ->

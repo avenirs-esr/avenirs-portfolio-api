@@ -4,8 +4,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
-import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
-import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.data.SkillLevelProgressWithTraceCountData;
+import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -16,13 +16,13 @@ import java.util.UUID;
 public interface StudentProgressService {
   boolean isStudentFollowingAPCProgram(Student student);
 
-  Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> getStudentProgressOverview(
+  Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> getStudentProgressOverview(
       Student student);
 
-  Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> getStudentProgressView(
+  Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> getStudentProgressView(
       Student student, SortCriteria sortCriteria);
 
-  PagedResult<SkillProgressDTO> getAllTimeSkillsView(
+  PagedResult<SkillProgressData> getAllTimeSkillsView(
       Student student, SortCriteria sortCriteria, PageCriteria pageCriteria);
 
   PagedResult<SkillLevelProgress> search(

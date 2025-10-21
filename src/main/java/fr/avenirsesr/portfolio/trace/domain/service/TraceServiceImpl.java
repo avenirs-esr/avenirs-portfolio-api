@@ -23,7 +23,9 @@ import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.*;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -98,7 +100,7 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public TracesSummary getTracesSummary(User user) {
+  public TracesSummaryData getTracesSummary(User user) {
     List<Trace> associatedTraces = traceRepository.findAll(user, true);
     List<Trace> unassociatedTraces = traceRepository.findAll(user, false);
     TraceConfiguration traceConfiguration = traceConfigurationClient.getTraceConfiguration();
@@ -125,19 +127,19 @@ public class TraceServiceImpl implements TraceService {
             .toList()
             .size();
 
-    return new TracesSummary(
+    return new TracesSummaryData(
         associatedTraces.size(), unassociatedTraces.size(), warningCount, criticalCount);
   }
 
   @Override
-  public TraceDetail getTraceDetail(User user, UUID id) {
+  public TraceDetailData getTraceDetail(User user, UUID id) {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(user, trace);
 
     TraceAttachment traceAttachment = getTraceAttachment(trace);
 
-    TraceAssociations traceAssociations = getTraceAssociations(user, id);
-    return new TraceDetail(
+    TraceAssociationsData traceAssociations = getTraceAssociations(user, id);
+    return new TraceDetailData(
         trace.getId(),
         trace.getTitle(),
         !trace.isUnassociated(),
@@ -151,12 +153,12 @@ public class TraceServiceImpl implements TraceService {
         trace.getUpdatedAt());
   }
 
-  protected TraceAssociations getTraceAssociations(User user, UUID id) {
+  protected TraceAssociationsData getTraceAssociations(User user, UUID id) {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(user, trace);
 
-    List<SkillLevelAssociation> skillLevelAssociations = new ArrayList<>();
-    List<AdditionalSkillAssociation> additionalSkillAssociations = new ArrayList<>();
+    List<SkillLevelAssociationData> skillLevelAssociations = new ArrayList<>();
+    List<AdditionalSkillAssociationData> additionalSkillAssociations = new ArrayList<>();
 
     for (SkillLevelProgress skillLevelProgress : trace.getSkillLevels()) {
       var skillLevel = skillLevelProgress.getSkillLevel();
@@ -177,7 +179,7 @@ public class TraceServiceImpl implements TraceService {
       additionalSkillAssociations.add(toAdditionalSkillAssociation(additionalSkillProgress));
     }
 
-    return new TraceAssociations(skillLevelAssociations, additionalSkillAssociations);
+    return new TraceAssociationsData(skillLevelAssociations, additionalSkillAssociations);
   }
 
   @Override
@@ -196,7 +198,7 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public TraceDetail updateTrace(
+  public TraceDetailData updateTrace(
       User user,
       UUID traceId,
       String title,
@@ -217,9 +219,9 @@ public class TraceServiceImpl implements TraceService {
 
     TraceAttachment traceAttachment = getTraceAttachment(savedTrace);
 
-    TraceAssociations traceAssociations = getTraceAssociations(user, traceId);
+    TraceAssociationsData traceAssociations = getTraceAssociations(user, traceId);
 
-    return new TraceDetail(
+    return new TraceDetailData(
         savedTrace.getId(),
         savedTrace.getTitle(),
         !savedTrace.isUnassociated(),
@@ -365,12 +367,12 @@ public class TraceServiceImpl implements TraceService {
     }
   }
 
-  private SkillLevelAssociation toSkillLevelAssociation(
+  private SkillLevelAssociationData toSkillLevelAssociation(
       SkillLevelProgress skillLevelProgress, SkillLevel skillLevel, Skill skill, AMS ams) {
-    AmsAssociation amsAssociation =
-        (ams == null) ? null : new AmsAssociation(ams.getId(), ams.getTitle(), ams.getStatus());
+    AmsAssociationData amsAssociation =
+        (ams == null) ? null : new AmsAssociationData(ams.getId(), ams.getTitle(), ams.getStatus());
 
-    return new SkillLevelAssociation(
+    return new SkillLevelAssociationData(
         skillLevelProgress.getId(),
         skill.getName(),
         skillLevel.getName(),
@@ -378,11 +380,11 @@ public class TraceServiceImpl implements TraceService {
         amsAssociation);
   }
 
-  private AdditionalSkillAssociation toAdditionalSkillAssociation(
+  private AdditionalSkillAssociationData toAdditionalSkillAssociation(
       AdditionalSkillProgress additionalSkillProgress) {
     var skill = additionalSkillProgress.getSkill();
 
-    return new AdditionalSkillAssociation(
+    return new AdditionalSkillAssociationData(
         additionalSkillProgress.getId(),
         skill.getLibelle(),
         additionalSkillProgress.getLevel(),

@@ -19,10 +19,10 @@ import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceViewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TracesSummaryMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TraceAssociationSearchResult;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
+import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
+import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
-import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import jakarta.validation.Valid;
@@ -111,7 +111,7 @@ public class TraceController {
     log.debug("Received request to get trace summary of user [{}]", principal.getName());
     User user = userUtil.getUser(principal);
 
-    TracesSummary summary = traceService.getTracesSummary(user);
+    TracesSummaryData summary = traceService.getTracesSummary(user);
 
     return ResponseEntity.ok(TracesSummaryMapper.toDTO(summary));
   }
@@ -123,7 +123,7 @@ public class TraceController {
         "Received request to get trace [{}] detail of user [{}]", traceId, principal.getName());
     User user = userUtil.getUser(principal);
 
-    TraceDetail traceDetail = traceService.getTraceDetail(user, traceId);
+    TraceDetailData traceDetail = traceService.getTraceDetail(user, traceId);
 
     return ResponseEntity.ok(TraceDetailMapper.toDTO(traceDetail));
   }

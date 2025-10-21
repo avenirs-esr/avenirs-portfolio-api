@@ -7,8 +7,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericDeletableRepositoryPort;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
 import java.util.List;
 
 public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {

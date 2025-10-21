@@ -2,14 +2,14 @@ package fr.avenirsesr.portfolio.file.domain.port.input;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.file.domain.data.UserPhotoData;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.model.UserPhoto;
-import fr.avenirsesr.portfolio.file.domain.model.UserPhotoUrlAndId;
 import java.io.IOException;
 import java.util.UUID;
 
 public interface UserResourceService {
-  UserPhotoUrlAndId getUserPhotoUrl(User user, EUserCategory userCategory, EUserPhotoType type);
+  UserPhotoData getUserPhotoUrl(User user, EUserCategory userCategory, EUserPhotoType type);
 
   UserPhoto getUserPhotoById(UUID fileId);
 

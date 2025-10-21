@@ -15,8 +15,8 @@ import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
-import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
-import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.data.SkillLevelProgressWithTraceCountData;
+import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.domain.model.*;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.*;
@@ -170,7 +170,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheStudentProgressOverview {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result;
+        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -196,7 +196,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheStudentProgressView {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result;
+        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -232,7 +232,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheStudentProgressOverview {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result;
+        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -250,7 +250,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheSkillsLifePojectView {
-        private PagedResult<SkillProgressDTO> result;
+        private PagedResult<SkillProgressData> result;
 
         @BeforeEach
         void setupWhen() {
@@ -321,7 +321,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheStudentProgressOverview {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result;
+        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -346,7 +346,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheStudentProgressView {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result;
+        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -370,7 +370,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheSkillsLifePojectView {
-        private PagedResult<SkillProgressDTO> result;
+        private PagedResult<SkillProgressData> result;
 
         @BeforeEach
         void setupWhen() {
@@ -412,7 +412,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheStudentProgressView {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result;
+        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -507,7 +507,7 @@ public class StudentProgressServiceImplTest {
       class WhenGettingTheStudentProgressView {
         private ESortField sortField;
         private List<StudentProgress> orderedKeys;
-        private List<SkillLevelProgressWithTraceCountDTO> skillsOfFirst, skillsOfSecond;
+        private List<SkillLevelProgressWithTraceCountData> skillsOfFirst, skillsOfSecond;
 
         @BeforeEach
         void setupWhen() {
@@ -516,7 +516,7 @@ public class StudentProgressServiceImplTest {
 
         @Nested
         class AndASortByNameCriteriaIsPassed {
-          private Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result;
+          private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
 
           @BeforeEach
           void setupAnd() {
@@ -567,7 +567,7 @@ public class StudentProgressServiceImplTest {
 
         @Nested
         class AndASortByDateCriteriaIsPassed {
-          private Map<StudentProgress, List<SkillLevelProgressWithTraceCountDTO>> result;
+          private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
 
           @BeforeEach
           void setupAnd() {
@@ -627,7 +627,7 @@ public class StudentProgressServiceImplTest {
 
         @Nested
         class AndASortByDateCriteriaIsPassed {
-          private PagedResult<SkillProgressDTO> result;
+          private PagedResult<SkillProgressData> result;
 
           @BeforeEach
           void setupAnd() {
@@ -648,7 +648,7 @@ public class StudentProgressServiceImplTest {
 
         @Nested
         class AndAPageSizeCriteriaIsPassed {
-          private PagedResult<SkillProgressDTO> result;
+          private PagedResult<SkillProgressData> result;
 
           @BeforeEach
           void setupAnd() {
@@ -671,7 +671,7 @@ public class StudentProgressServiceImplTest {
 
         @Nested
         class AndAPageIndexCriteriaIsPassed {
-          private PagedResult<SkillProgressDTO> result;
+          private PagedResult<SkillProgressData> result;
 
           @BeforeEach
           void setupAnd() {
@@ -733,7 +733,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheSkillsLifePojectView {
-        private PagedResult<SkillProgressDTO> result;
+        private PagedResult<SkillProgressData> result;
 
         @BeforeEach
         void setupWhen() {

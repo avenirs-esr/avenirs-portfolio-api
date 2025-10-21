@@ -3,12 +3,12 @@ package fr.avenirsesr.portfolio.file.domain.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.file.domain.data.UserPhotoData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.model.UserPhoto;
-import fr.avenirsesr.portfolio.file.domain.model.UserPhotoUrlAndId;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
@@ -33,13 +33,12 @@ public class UserResourceServiceImpl implements UserResourceService {
   private final UserPhotoRepository userPhotoRepository;
 
   @Override
-  public UserPhotoUrlAndId getUserPhotoUrl(
-      User user, EUserCategory userCategory, EUserPhotoType type) {
+  public UserPhotoData getUserPhotoUrl(User user, EUserCategory userCategory, EUserPhotoType type) {
 
     Optional<UserPhoto> userPhoto =
         userPhotoRepository.findActiveByUser(user, userCategory, type).stream().findFirst();
 
-    return new UserPhotoUrlAndId(
+    return new UserPhotoData(
         userPhoto.map(UserPhoto::getId),
         userPhoto.map(UserPhoto::getName),
         userPhoto

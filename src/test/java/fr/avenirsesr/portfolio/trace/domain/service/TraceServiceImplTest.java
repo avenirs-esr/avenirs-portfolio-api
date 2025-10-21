@@ -33,10 +33,10 @@ import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
-import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
@@ -310,7 +310,7 @@ public class TraceServiceImplTest {
     when(traceRepository.findAll(student.getUser(), false)).thenReturn(unassociatedTraces);
     when(traceRepository.findAll(student.getUser(), true)).thenReturn(associatedTraces);
     when(traceConfigurationClient.getTraceConfiguration()).thenReturn(traceConfiguration);
-    TracesSummary summary = traceService.getTracesSummary(student.getUser());
+    TracesSummaryData summary = traceService.getTracesSummary(student.getUser());
 
     BddLogger.then("it should return the traces summary");
     assertEquals(4, summary.unassociated());

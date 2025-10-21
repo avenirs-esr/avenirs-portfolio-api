@@ -5,6 +5,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
+import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
+import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.model.*;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.TeacherService;
@@ -34,17 +36,18 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserPhotos getUserPhotos(UUID userId, EUserCategory userCategory) {
+  public UserPhotosData getUserPhotos(UUID userId, EUserCategory userCategory) {
     var user = getUser(userId);
     var profile = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.PROFILE);
     var cover = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.COVER);
 
-    return new UserPhotos(
+    return new UserPhotosData(
         profile.id(), profile.name(), profile.url(), cover.id(), cover.name(), cover.url());
   }
 
   @Override
-  public UserProfileOverviewDTO getUserProfileOverviewDTO(UUID userId, EUserCategory userCategory) {
+  public UserProfileOverviewData getUserProfileOverviewDTO(
+      UUID userId, EUserCategory userCategory) {
     var user = getUser(userId);
     var bio =
         switch (userCategory) {
@@ -52,7 +55,7 @@ public class UserServiceImpl implements UserService {
           case TEACHER -> teacherService.getBio(user);
         };
 
-    return new UserProfileOverviewDTO(
+    return new UserProfileOverviewData(
         user.getFirstName(), user.getLastName(), user.getEmail(), bio);
   }
 

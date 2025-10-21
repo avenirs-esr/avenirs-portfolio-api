@@ -5,10 +5,10 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
+import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
+import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceDetail;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceFilter;
-import fr.avenirsesr.portfolio.trace.domain.model.TracesSummary;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -28,9 +28,9 @@ public interface TraceService {
 
   void deleteById(User user, UUID id);
 
-  TracesSummary getTracesSummary(User user);
+  TracesSummaryData getTracesSummary(User user);
 
-  TraceDetail getTraceDetail(User user, UUID id);
+  TraceDetailData getTraceDetail(User user, UUID id);
 
   Trace createTrace(
       User user,
@@ -40,7 +40,7 @@ public interface TraceService {
       String personalNote,
       String aiJustification);
 
-  TraceDetail updateTrace(
+  TraceDetailData updateTrace(
       User user,
       UUID traceId,
       String title,

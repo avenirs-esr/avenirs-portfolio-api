@@ -4,13 +4,13 @@ import fr.avenirsesr.portfolio.trace.application.adapter.dto.AdditionalSkillAsso
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.AmsAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.SkillLevelAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceAssociationsDTO;
-import fr.avenirsesr.portfolio.trace.domain.model.AdditionalSkillAssociation;
-import fr.avenirsesr.portfolio.trace.domain.model.AmsAssociation;
-import fr.avenirsesr.portfolio.trace.domain.model.SkillLevelAssociation;
-import fr.avenirsesr.portfolio.trace.domain.model.TraceAssociations;
+import fr.avenirsesr.portfolio.trace.domain.data.AdditionalSkillAssociationData;
+import fr.avenirsesr.portfolio.trace.domain.data.AmsAssociationData;
+import fr.avenirsesr.portfolio.trace.domain.data.SkillLevelAssociationData;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
 
 public interface TraceAssociationsMapper {
-  static TraceAssociationsDTO toDTO(TraceAssociations traceAssociations) {
+  static TraceAssociationsDTO toDTO(TraceAssociationsData traceAssociations) {
     return new TraceAssociationsDTO(
         traceAssociations.skillLevelAssociations().stream()
             .map(TraceAssociationsMapper::toDTO)
@@ -20,7 +20,7 @@ public interface TraceAssociationsMapper {
             .toList());
   }
 
-  static SkillLevelAssociationDTO toDTO(SkillLevelAssociation skillLevelAssociation) {
+  static SkillLevelAssociationDTO toDTO(SkillLevelAssociationData skillLevelAssociation) {
     return skillLevelAssociation != null
         ? new SkillLevelAssociationDTO(
             skillLevelAssociation.id(),
@@ -32,7 +32,7 @@ public interface TraceAssociationsMapper {
   }
 
   static AdditionalSkillAssociationDTO toDTO(
-      AdditionalSkillAssociation additionalSkillAssociation) {
+      AdditionalSkillAssociationData additionalSkillAssociation) {
     return additionalSkillAssociation != null
         ? new AdditionalSkillAssociationDTO(
             additionalSkillAssociation.id(),
@@ -43,7 +43,7 @@ public interface TraceAssociationsMapper {
         : null;
   }
 
-  static AmsAssociationDTO toDTO(AmsAssociation amsAssociation) {
+  static AmsAssociationDTO toDTO(AmsAssociationData amsAssociation) {
     return amsAssociation != null
         ? new AmsAssociationDTO(
             amsAssociation.id(), amsAssociation.title(), amsAssociation.status())

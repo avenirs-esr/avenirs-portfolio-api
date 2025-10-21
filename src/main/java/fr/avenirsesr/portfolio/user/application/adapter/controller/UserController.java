@@ -6,8 +6,8 @@ import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
-import fr.avenirsesr.portfolio.user.domain.model.UserPhotos;
-import fr.avenirsesr.portfolio.user.domain.model.UserProfileOverviewDTO;
+import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
+import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -51,14 +51,14 @@ public class UserController {
           EUserCategory userCategory) {
     UUID userId = UUID.fromString(principal.getName());
 
-    UserProfileOverviewDTO overview = userService.getUserProfileOverviewDTO(userId, userCategory);
+    UserProfileOverviewData overview = userService.getUserProfileOverviewDTO(userId, userCategory);
     var userPhotos = userService.getUserPhotos(userId, userCategory);
     String baseUrl = extractOrigin(request);
 
     return ResponseEntity.ok(
         ProfileOverviewMapper.userDomainToDto(
             overview,
-            new UserPhotos(
+            new UserPhotosData(
                 userPhotos.profileFileId(),
                 userPhotos.profileFileName(),
                 baseUrl + userPhotos.profileFileUrl(),

@@ -13,7 +13,7 @@ import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDet
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.SkillDetailedMapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.SkillMapper;
-import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
@@ -46,7 +46,7 @@ public class SkillLevelProgressController {
       @RequestParam(name = "sort", required = false) String sortRaw) {
     Student student = userUtil.getStudent(principal);
 
-    PagedResult<SkillProgressDTO> pagedResult =
+    PagedResult<SkillProgressData> pagedResult =
         studentProgressService.getAllTimeSkillsView(
             student, SortCriteria.fromString(sortRaw), new PageCriteria(page, pageSize));
 

@@ -1,11 +1,11 @@
-package fr.avenirsesr.portfolio.trace.domain.model;
+package fr.avenirsesr.portfolio.trace.domain.data;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import java.util.List;
 import java.util.UUID;
 
-public record AdditionalSkillAssociation(
+public record AdditionalSkillAssociationData(
     UUID id,
     String title,
     EAdditionalSkillLevel level,

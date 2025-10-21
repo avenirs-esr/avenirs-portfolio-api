@@ -9,7 +9,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO;
-import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -31,14 +31,14 @@ class SkillMapperTest {
     var javaSkillLevel2 = SkillLevelFixture.create().withSkill(javaSkill).toModel();
 
     var progress1 =
-        new SkillLevelProgressWithTraceCountDTO(
+        new SkillLevelProgressWithTraceCountData(
             SkillLevelProgressFixture.create(student, javaSkillLevel1)
                 .withStatus(ESkillLevelStatus.VALIDATED)
                 .withEndDate(LocalDate.now().minusMonths(2))
                 .toModel(),
             2);
     var progress2 =
-        new SkillLevelProgressWithTraceCountDTO(
+        new SkillLevelProgressWithTraceCountData(
             SkillLevelProgressFixture.create(student, javaSkillLevel2)
                 .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
                 .withEndDate(LocalDate.now().plusMonths(1))
@@ -83,7 +83,7 @@ class SkillMapperTest {
 
     var pythonSkillLevel = SkillLevelFixture.create().withSkill(pythonSkill).toModel();
     var pythonProgress =
-        new SkillLevelProgressWithTraceCountDTO(
+        new SkillLevelProgressWithTraceCountData(
             SkillLevelProgressFixture.create(student, pythonSkillLevel)
                 .withStatus(ESkillLevelStatus.NOT_STARTED)
                 .toModel(),
@@ -112,7 +112,7 @@ class SkillMapperTest {
     var skill = SkillFixture.create().toModel();
     var skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
     var progress =
-        new SkillLevelProgressWithTraceCountDTO(
+        new SkillLevelProgressWithTraceCountData(
             SkillLevelProgressFixture.create(student, skillLevel)
                 .withStatus(ESkillLevelStatus.VALIDATED)
                 .toModel(),

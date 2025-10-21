@@ -1,6 +1,7 @@
-package fr.avenirsesr.portfolio.trace.domain.model;
+package fr.avenirsesr.portfolio.trace.domain.filter;
 
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

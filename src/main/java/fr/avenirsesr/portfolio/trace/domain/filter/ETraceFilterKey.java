@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.trace.domain.model;
+package fr.avenirsesr.portfolio.trace.domain.filter;
 
 public enum ETraceFilterKey {
   IS_ASSOCIATED,
