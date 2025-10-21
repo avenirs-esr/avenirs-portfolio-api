@@ -16,8 +16,8 @@ public interface TraceAssociationSearchResultMapper {
     return new TraceAssociationSearchResult(
         ETraceAssociationType.SKILL_LEVEL,
         skillLevelProgress.getId(),
-        skillLevelProgress.getSkillLevel().getName(),
-        skillLevelProgress.getSkillLevel().getDescription().orElse(null));
+        skillLevelProgress.getSkillLevel().getSkill().getName(),
+        skillLevelProgress.getSkillLevel().getName());
   }
 
   static TraceAssociationSearchResult toDTO(AdditionalSkillProgress additionalSkillProgress) {
