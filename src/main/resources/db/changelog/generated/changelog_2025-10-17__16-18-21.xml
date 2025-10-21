@@ -9,9 +9,6 @@
     <changeSet author="bilelbanelhaq (generated)" id="1760717905973-16">
         <dropForeignKeyConstraint baseTableName="ams" constraintName="FK9byulnw3u0cog0fpjfa4bpfoy"/>
     </changeSet>
-    <changeSet author="bilelbanelhaq (generated)" id="1760717905973-17">
-        <dropForeignKeyConstraint baseTableName="additional_skill" constraintName="FK9uosyssnq3dpvs2700r44tidw"/>
-    </changeSet>
     <changeSet author="bilelbanelhaq (generated)" id="1760717905973-18">
         <dropForeignKeyConstraint baseTableName="additional_skill_progress" constraintName="FKfim1q8ibr8yo4epoi1q001bpy"/>
     </changeSet>

@@ -30,6 +30,7 @@ public class AdditionalSkillEntity extends AvenirsBaseEntity {
   @ManyToOne(
       fetch = FetchType.LAZY,
       cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinColumn(name = "additional_skill_category_id")
   private AdditionalSkillCategoryEntity additionalSkillCategory;
 
   private AdditionalSkillEntity(
