@@ -37,18 +37,22 @@ public class SkillLevelProgressSpecification {
       }
 
       var skillLevelJoin = root.join("skillLevel");
-      var translationJoin = skillLevelJoin.join("translations");
+      var skillLevelTranslationJoin = skillLevelJoin.join("translations");
+      var skillJoin = skillLevelJoin.join("skill");
+      var skillTranslationJoin = skillJoin.join("translations");
 
-      var languagePredicate = criteriaBuilder.equal(translationJoin.get("language"), language);
+      var languagePredicate =
+          criteriaBuilder.equal(skillLevelTranslationJoin.get("language"), language);
 
       String pattern = "%" + keyword.toLowerCase() + "%";
-      var namePredicate =
-          criteriaBuilder.like(criteriaBuilder.lower(translationJoin.get("name")), pattern);
-      var descriptionPredicate =
-          criteriaBuilder.like(criteriaBuilder.lower(translationJoin.get("description")), pattern);
+      var skillNamePredicate =
+          criteriaBuilder.like(criteriaBuilder.lower(skillTranslationJoin.get("name")), pattern);
+      var skillLevelNamePredicate =
+          criteriaBuilder.like(
+              criteriaBuilder.lower(skillLevelTranslationJoin.get("name")), pattern);
 
       return criteriaBuilder.and(
-          languagePredicate, criteriaBuilder.or(namePredicate, descriptionPredicate));
+          languagePredicate, criteriaBuilder.or(skillNamePredicate, skillLevelNamePredicate));
     };
   }
 }
