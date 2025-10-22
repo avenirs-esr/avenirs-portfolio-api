@@ -55,7 +55,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.common.data.infrastructure.adapter
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification,FilterSpecificationBuilder,0,34,1,3,0,8,1,3,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.domain.service,AdditionalSkillServiceImpl,7,52,0,2,1,14,1,4,1,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.service,AMSServiceImpl,7,81,0,0,1,23,1,4,1,4
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification,SkillLevelProgressSpecification,72,40,4,0,16,7,7,4,5,4
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification,SkillLevelProgressSpecification,80,40,4,0,20,7,7,4,5,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification,StudentProgressSpecification,14,26,0,0,5,4,3,4,3,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.service,InstitutionServiceConfig,0,16,0,0,0,5,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.service,TrainingPathServiceConfig,0,12,0,0,0,4,0,2,0,2

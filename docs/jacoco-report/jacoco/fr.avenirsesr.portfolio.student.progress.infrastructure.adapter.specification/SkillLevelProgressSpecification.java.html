@@ -37,18 +37,22 @@ import org.springframework.data.jpa.domain.Specification;
       }
 
 <span class="nc" id="L39">      var skillLevelJoin = root.join(&quot;skillLevel&quot;);</span>
-<span class="nc" id="L40">      var translationJoin = skillLevelJoin.join(&quot;translations&quot;);</span>
+<span class="nc" id="L40">      var skillLevelTranslationJoin = skillLevelJoin.join(&quot;translations&quot;);</span>
+<span class="nc" id="L41">      var skillJoin = skillLevelJoin.join(&quot;skill&quot;);</span>
+<span class="nc" id="L42">      var skillTranslationJoin = skillJoin.join(&quot;translations&quot;);</span>
 
-<span class="nc" id="L42">      var languagePredicate = criteriaBuilder.equal(translationJoin.get(&quot;language&quot;), language);</span>
+<span class="nc" id="L44">      var languagePredicate =</span>
+<span class="nc" id="L45">          criteriaBuilder.equal(skillLevelTranslationJoin.get(&quot;language&quot;), language);</span>
 
-<span class="nc" id="L44">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
-<span class="nc" id="L45">      var namePredicate =</span>
-<span class="nc" id="L46">          criteriaBuilder.like(criteriaBuilder.lower(translationJoin.get(&quot;name&quot;)), pattern);</span>
-<span class="nc" id="L47">      var descriptionPredicate =</span>
-<span class="nc" id="L48">          criteriaBuilder.like(criteriaBuilder.lower(translationJoin.get(&quot;description&quot;)), pattern);</span>
+<span class="nc" id="L47">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
+<span class="nc" id="L48">      var skillNamePredicate =</span>
+<span class="nc" id="L49">          criteriaBuilder.like(criteriaBuilder.lower(skillTranslationJoin.get(&quot;name&quot;)), pattern);</span>
+<span class="nc" id="L50">      var skillLevelNamePredicate =</span>
+<span class="nc" id="L51">          criteriaBuilder.like(</span>
+<span class="nc" id="L52">              criteriaBuilder.lower(skillLevelTranslationJoin.get(&quot;name&quot;)), pattern);</span>
 
-<span class="nc" id="L50">      return criteriaBuilder.and(</span>
-<span class="nc" id="L51">          languagePredicate, criteriaBuilder.or(namePredicate, descriptionPredicate));</span>
+<span class="nc" id="L54">      return criteriaBuilder.and(</span>
+<span class="nc" id="L55">          languagePredicate, criteriaBuilder.or(skillNamePredicate, skillLevelNamePredicate));</span>
     };
   }
 }
