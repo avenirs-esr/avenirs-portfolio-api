@@ -6,8 +6,8 @@ import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
-import fr.avenirsesr.portfolio.user.domain.model.UserPhotos;
-import fr.avenirsesr.portfolio.user.domain.model.UserProfileOverviewDTO;
+import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
+import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -51,14 +51,14 @@ public class UserController {
           EUserCategory userCategory) {
 <span class="fc" id="L52">    UUID userId = UUID.fromString(principal.getName());</span>
 
-<span class="fc" id="L54">    UserProfileOverviewDTO overview = userService.getUserProfileOverviewDTO(userId, userCategory);</span>
+<span class="fc" id="L54">    UserProfileOverviewData overview = userService.getUserProfileOverviewDTO(userId, userCategory);</span>
 <span class="fc" id="L55">    var userPhotos = userService.getUserPhotos(userId, userCategory);</span>
 <span class="fc" id="L56">    String baseUrl = extractOrigin(request);</span>
 
 <span class="fc" id="L58">    return ResponseEntity.ok(</span>
 <span class="fc" id="L59">        ProfileOverviewMapper.userDomainToDto(</span>
             overview,
-            new UserPhotos(
+            new UserPhotosData(
 <span class="fc" id="L62">                userPhotos.profileFileId(),</span>
 <span class="fc" id="L63">                userPhotos.profileFileName(),</span>
 <span class="fc" id="L64">                baseUrl + userPhotos.profileFileUrl(),</span>

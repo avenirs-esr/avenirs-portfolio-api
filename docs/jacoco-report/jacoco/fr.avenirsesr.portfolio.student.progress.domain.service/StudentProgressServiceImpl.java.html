@@ -5,8 +5,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
-import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillLevelProgressWithTraceCountDTO;
-import fr.avenirsesr.portfolio.student.progress.domain.dto.SkillProgressDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.data.SkillLevelProgressWithTraceCountData;
+import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
@@ -36,8 +36,8 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   @Override
-  public Map&lt;StudentProgress, List&lt;SkillLevelProgressWithTraceCountDTO&gt;&gt; getStudentProgressOverview(
-      Student student) {
+  public Map&lt;StudentProgress, List&lt;SkillLevelProgressWithTraceCountData&gt;&gt;
+      getStudentProgressOverview(Student student) {
 <span class="fc" id="L41">    var studentProgresses =</span>
 <span class="fc" id="L42">        studentProgressRepository.findAllByStudent(student).stream()</span>
 <span class="fc" id="L43">            .filter(StudentProgress::isCurrent)</span>
@@ -52,14 +52,14 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 <span class="fc" id="L52">                        .limit(MAX_SKILLS / studentProgresses.size())</span>
 <span class="fc" id="L53">                        .map(</span>
                             skillLevelProgress -&gt;
-<span class="fc" id="L55">                                new SkillLevelProgressWithTraceCountDTO(</span>
+<span class="fc" id="L55">                                new SkillLevelProgressWithTraceCountData(</span>
                                     skillLevelProgress,
 <span class="fc" id="L57">                                    traceRepository.linkedWith(skillLevelProgress).size()))</span>
 <span class="fc" id="L58">                        .toList()));</span>
   }
 
   @Override
-  public Map&lt;StudentProgress, List&lt;SkillLevelProgressWithTraceCountDTO&gt;&gt; getStudentProgressView(
+  public Map&lt;StudentProgress, List&lt;SkillLevelProgressWithTraceCountData&gt;&gt; getStudentProgressView(
       Student student, SortCriteria sortCriteria) {
 <span class="fc" id="L64">    return studentProgressRepository.findAllByStudent(student).stream()</span>
 <span class="fc" id="L65">        .filter(StudentProgress::isCurrent)</span>
@@ -72,7 +72,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 <span class="fc" id="L72">                        .sorted(SkillLevelProgress.comparatorOf(sortCriteria))</span>
 <span class="fc" id="L73">                        .map(</span>
                             skillLevelProgress -&gt;
-<span class="fc" id="L75">                                new SkillLevelProgressWithTraceCountDTO(</span>
+<span class="fc" id="L75">                                new SkillLevelProgressWithTraceCountData(</span>
                                     skillLevelProgress,
 <span class="fc" id="L77">                                    traceRepository.linkedWith(skillLevelProgress).size()))</span>
 <span class="fc" id="L78">                        .toList(),</span>
@@ -81,7 +81,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   @Override
-  public PagedResult&lt;SkillProgressDTO&gt; getAllTimeSkillsView(
+  public PagedResult&lt;SkillProgressData&gt; getAllTimeSkillsView(
       Student student, SortCriteria sortCriteria, PageCriteria pageCriteria) {
 
 <span class="fc" id="L87">    var studentProgresses = studentProgressRepository.findAllByStudent(student).stream().toList();</span>
@@ -94,17 +94,17 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 <span class="fc" id="L94">                    studentProgress.getCurrentSkillLevels().stream()</span>
 <span class="fc" id="L95">                        .map(</span>
                             currentSkillLevel -&gt;
-<span class="fc" id="L97">                                new SkillProgressDTO(</span>
+<span class="fc" id="L97">                                new SkillProgressData(</span>
 <span class="fc" id="L98">                                    currentSkillLevel.getSkillLevel().getSkill(),</span>
                                     studentProgress,
-                                    new SkillLevelProgressWithTraceCountDTO(
+                                    new SkillLevelProgressWithTraceCountData(
                                         currentSkillLevel,
 <span class="fc" id="L102">                                        traceRepository.linkedWith(currentSkillLevel).size()))))</span>
 <span class="fc" id="L103">            .sorted(</span>
 <span class="fc" id="L104">                Comparator.comparing(</span>
-                        (SkillProgressDTO skillProgress) -&gt;
+                        (SkillProgressData skillProgress) -&gt;
 <span class="fc bfc" id="L106" title="All 2 branches covered.">                            skillProgress.studentProgress().isCurrent() ? 0 : 1)</span>
-<span class="fc" id="L107">                    .thenComparing(SkillProgressDTO.comparatorOf(sortCriteria)))</span>
+<span class="fc" id="L107">                    .thenComparing(SkillProgressData.comparatorOf(sortCriteria)))</span>
 <span class="fc" id="L108">            .toList();</span>
 
 <span class="fc" id="L110">    return new PagedResult&lt;&gt;(</span>
