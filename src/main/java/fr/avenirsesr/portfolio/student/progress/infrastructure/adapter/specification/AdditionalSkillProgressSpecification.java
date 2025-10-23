@@ -1,8 +1,8 @@
-package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.specification;
+package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;

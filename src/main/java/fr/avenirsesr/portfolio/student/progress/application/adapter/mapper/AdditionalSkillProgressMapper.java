@@ -1,8 +1,8 @@
-package fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper;
+package fr.avenirsesr.portfolio.student.progress.application.adapter.mapper;
 
-import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillProgressDTO;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillCategory;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 
 public interface AdditionalSkillProgressMapper {
   static AdditionalSkillProgressDTO toAdditionalSkillProgressDTO(

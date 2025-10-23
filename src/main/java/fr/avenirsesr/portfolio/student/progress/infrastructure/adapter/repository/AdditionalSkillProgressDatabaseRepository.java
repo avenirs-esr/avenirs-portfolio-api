@@ -1,14 +1,14 @@
-package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository;
+package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillProgressRepository;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.specification.AdditionalSkillProgressSpecification;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.AdditionalSkillProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.AdditionalSkillProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import java.util.List;

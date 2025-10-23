@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
@@ -12,6 +11,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeed
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.*;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;

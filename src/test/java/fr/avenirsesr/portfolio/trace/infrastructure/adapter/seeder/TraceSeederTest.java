@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;

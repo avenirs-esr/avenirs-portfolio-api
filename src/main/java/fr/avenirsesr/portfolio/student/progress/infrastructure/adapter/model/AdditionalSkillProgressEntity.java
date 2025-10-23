@@ -1,6 +1,7 @@
-package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
+package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;

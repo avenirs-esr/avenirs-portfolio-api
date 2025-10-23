@@ -1,14 +1,15 @@
-package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder;
+package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder;
 
 import static fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig.MAX_ADDITIONAL_SKILLS_PER_STUDENT;
 import static fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig.MIN_ADDITIONAL_SKILLS_PER_STUDENT;
 
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository.AdditionalSkillProgressDatabaseRepository;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.fake.FakeAdditionalSkillProgress;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.AdditionalSkillProgressDatabaseRepository;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake.FakeAdditionalSkillProgress;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.ArrayList;
 import java.util.List;
