@@ -2,6 +2,8 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.seeder.AdditionalSkillProgressDataGenerator;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.FakeCohort;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
@@ -15,10 +17,16 @@ public class AdditionalSkillProgressFixture {
       new DataGeneratorProvider<SharedDataGenerator>()
           .init(AdditionalSkillFixture.class, SharedDataGenerator.class);
 
+  private static final DataGeneratorProvider<AdditionalSkillProgressDataGenerator>
+      additionalSkillProgressGenerator =
+          new DataGeneratorProvider<AdditionalSkillProgressDataGenerator>()
+              .init(FakeCohort.class, AdditionalSkillProgressDataGenerator.class);
+
   private UUID id;
   private Student student;
   private AdditionalSkill skill;
   private EAdditionalSkillLevel level;
+  private String description;
   private Instant createdAt;
   private Instant updatedAt;
 
@@ -27,6 +35,7 @@ public class AdditionalSkillProgressFixture {
     this.student = StudentFixture.create().toModel();
     this.skill = AdditionalSkillFixture.create().toModel();
     this.level = dataGenerator.with("level").pickIn(EAdditionalSkillLevel.class);
+    this.description = additionalSkillProgressGenerator.with("sentence").description();
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }
@@ -55,6 +64,11 @@ public class AdditionalSkillProgressFixture {
     return this;
   }
 
+  public AdditionalSkillProgressFixture withDescritption(String description) {
+    this.description = description;
+    return this;
+  }
+
   public AdditionalSkillProgressFixture withCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
     return this;
@@ -66,6 +80,7 @@ public class AdditionalSkillProgressFixture {
   }
 
   public AdditionalSkillProgress toModel() {
-    return AdditionalSkillProgress.toDomain(id, student, skill, level, createdAt, updatedAt);
+    return AdditionalSkillProgress.toDomain(
+        id, student, skill, level, description, createdAt, updatedAt);
   }
 }

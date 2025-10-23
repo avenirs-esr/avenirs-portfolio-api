@@ -16,4 +16,6 @@ public class AddAdditionalSkillDTO {
 
   @Schema(ref = "#/components/schemas/EAdditionalSkillLevel")
   EAdditionalSkillLevel level;
+
+  String description;
 }

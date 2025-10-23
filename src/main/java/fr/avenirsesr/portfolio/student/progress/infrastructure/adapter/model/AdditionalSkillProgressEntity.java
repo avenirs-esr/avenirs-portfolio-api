@@ -32,30 +32,37 @@ public class AdditionalSkillProgressEntity extends AvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private EAdditionalSkillLevel level;
 
+  @Column(length = 400)
+  private String description;
+
   private AdditionalSkillProgressEntity(
       UUID id,
       StudentEntity student,
       AdditionalSkillEntity additionalSkill,
-      EAdditionalSkillLevel level) {
+      EAdditionalSkillLevel level,
+      String description) {
     setId(id);
     this.student = student;
     this.additionalSkill = additionalSkill;
     this.level = level;
+    this.description = description;
   }
 
   public static AdditionalSkillProgressEntity of(
       UUID id,
       StudentEntity student,
       AdditionalSkillEntity additionalSkill,
-      EAdditionalSkillLevel level) {
-    return new AdditionalSkillProgressEntity(id, student, additionalSkill, level);
+      EAdditionalSkillLevel level,
+      String description) {
+    return new AdditionalSkillProgressEntity(id, student, additionalSkill, level, description);
   }
 
   public static AdditionalSkillProgressEntity create(
       UUID id,
       StudentEntity student,
       AdditionalSkillEntity additionalSkill,
-      EAdditionalSkillLevel level) {
-    return new AdditionalSkillProgressEntity(id, student, additionalSkill, level);
+      EAdditionalSkillLevel level,
+      String description) {
+    return new AdditionalSkillProgressEntity(id, student, additionalSkill, level, description);
   }
 }
