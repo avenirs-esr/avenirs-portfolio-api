@@ -1,7 +1,8 @@
-package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper;
+package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
+import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 
 public interface AdditionalSkillProgressMapper {

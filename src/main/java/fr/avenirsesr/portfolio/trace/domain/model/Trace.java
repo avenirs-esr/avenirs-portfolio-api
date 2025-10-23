@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.trace.domain.model;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.DeletableAvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import java.time.Instant;
 import java.util.ArrayList;

@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillService;
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
@@ -44,7 +43,6 @@ public class TraceController {
   private final TraceService traceService;
   private final AMSService amsService;
   private final StudentProgressService studentProgressService;
-  private final AdditionalSkillService additionalSkillService;
   private final UserUtil userUtil;
 
   @GetMapping("/overview")
@@ -169,7 +167,8 @@ public class TraceController {
                 amses.pageInfo());
       }
       case SKILL_LEVEL -> {
-        var skillLevelProgresses = studentProgressService.search(student, keyword, pageCriteria);
+        var skillLevelProgresses =
+            studentProgressService.searchSkillLevel(student, keyword, pageCriteria);
         results =
             new PagedResult<>(
                 skillLevelProgresses.content().stream()
@@ -178,7 +177,8 @@ public class TraceController {
                 skillLevelProgresses.pageInfo());
       }
       case ADDITIONAL_SKILL -> {
-        var additionalSkills = additionalSkillService.search(student, keyword, pageCriteria);
+        var additionalSkills =
+            studentProgressService.searchAdditionalSkill(student, keyword, pageCriteria);
         results =
             new PagedResult<>(
                 additionalSkills.content().stream()

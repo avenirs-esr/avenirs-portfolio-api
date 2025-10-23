@@ -25,6 +25,7 @@ public class OpenSearchIndexStub implements OpenSearchIndex {
 
   @Override
   public AdditionalSkillPagedResult search(String keyword, PageCriteria pageCriteria) {
-    return new AdditionalSkillPagedResult(List.of(), new PageInfo(0, 8, 0));
+    return new AdditionalSkillPagedResult(
+        List.of(), new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), 0));
   }
 }

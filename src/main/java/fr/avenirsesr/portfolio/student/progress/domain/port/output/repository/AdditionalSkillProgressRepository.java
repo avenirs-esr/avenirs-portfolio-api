@@ -1,9 +1,9 @@
-package fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository;
+package fr.avenirsesr.portfolio.student.progress.domain.port.output.repository;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
+import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 

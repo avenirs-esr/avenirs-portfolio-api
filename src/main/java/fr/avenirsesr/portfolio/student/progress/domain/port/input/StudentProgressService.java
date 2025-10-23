@@ -1,11 +1,14 @@
 package fr.avenirsesr.portfolio.student.progress.domain.port.input;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
+import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -25,10 +28,22 @@ public interface StudentProgressService {
   PagedResult<SkillProgressData> getAllTimeSkillsView(
       Student student, SortCriteria sortCriteria, PageCriteria pageCriteria);
 
-  PagedResult<SkillLevelProgress> search(
+  PagedResult<SkillLevelProgress> searchSkillLevel(
       Student student, String keyword, PageCriteria pageCriteria);
 
   List<SkillLevelProgress> getSkillLevelsBySkillId(Student student, UUID skillId);
 
   List<Skill> getAllSkillList(Student student);
+
+  PagedResult<AdditionalSkillProgress> getAdditionalSkillsProgresses(
+      Student student, PageCriteria criteria);
+
+  AdditionalSkillProgress createAdditionalSkillProgress(
+      Student student,
+      UUID additionalSkillId,
+      EAdditionalSkillType type,
+      EAdditionalSkillLevel level);
+
+  PagedResult<AdditionalSkillProgress> searchAdditionalSkill(
+      Student student, String keyword, PageCriteria pageCriteria);
 }

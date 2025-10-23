@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.additionalskill.application.adapter.request;
+package fr.avenirsesr.portfolio.student.progress.application.adapter.request;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
