@@ -139,4 +139,22 @@ public class Trace extends DeletableAvenirsBaseModel {
         Stream.concat(additionalSkillProgresses.stream(), Stream.of(additionalSkillProgress))
             .toList());
   }
+
+  public void remove(AdditionalSkillProgress additionalSkillProgress) {
+    var newAdditionalSkillProgresses = new ArrayList<>(additionalSkillProgresses);
+    newAdditionalSkillProgresses.remove(additionalSkillProgress);
+    setAdditionalSkillProgresses(newAdditionalSkillProgresses);
+  }
+
+  public void remove(SkillLevelProgress skillLevelProgress) {
+    var newSkillLevel = new ArrayList<>(skillLevels);
+    newSkillLevel.remove(skillLevelProgress);
+    setSkillLevels(newSkillLevel);
+  }
+
+  public void remove(AMS ams) {
+    var newAmses = new ArrayList<>(amses);
+    newAmses.remove(ams);
+    setAmses(newAmses);
+  }
 }

@@ -56,13 +56,14 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class TraceServiceImplTest {
   @Mock private TraceRepository traceRepository;
   @Mock private StudentRepository studentRepository;
@@ -626,5 +627,140 @@ public class TraceServiceImplTest {
         () ->
             traceService.associateTrace(
                 student.getUser(), trace.getId(), List.of(), List.of(fakeSkillLevelId), List.of()));
+  }
+
+  @Test
+  void givenValidTraceAndIds_shouldUnassociateAllAndSave() {
+    BddLogger.given(
+        "a trace belonging to the student with AMS, SkillLevels and AdditionalSkills associated");
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+
+    AMS ams = AMSFixture.create().toModel();
+    SkillLevelProgress skillLevel =
+        SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel()).toModel();
+    AdditionalSkillProgress additional = AdditionalSkillProgressFixture.create().toModel();
+
+    trace.add(ams);
+    trace.add(skillLevel);
+    trace.add(additional);
+
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+    when(amsRepository.findAllByStudent(any(Student.class))).thenReturn(List.of(ams));
+    when(skillLevelProgressRepository.findAllByStudent(any(Student.class)))
+        .thenReturn(List.of(skillLevel));
+    when(additionalSkillProgressRepository.findAllByStudent(any(Student.class)))
+        .thenReturn(List.of(additional));
+    when(studentService.getStudentById(any(UUID.class))).thenReturn(student);
+
+    BddLogger.when("unassociating AMS, SkillLevels and AdditionalSkills");
+    traceService.unassociateTrace(
+        student.getUser(),
+        trace.getId(),
+        List.of(ams.getId()),
+        List.of(skillLevel.getId()),
+        List.of(additional.getId()));
+
+    BddLogger.then("trace should be unassociated and saved");
+    verify(traceRepository).save(trace);
+    assertFalse(trace.getAmses().contains(ams));
+    assertFalse(trace.getSkillLevels().contains(skillLevel));
+    assertFalse(trace.getAdditionalSkillProgresses().contains(additional));
+  }
+
+  @Test
+  void givenNonExistentTrace_shouldThrowTraceNotFoundException_whenUnassociating() {
+    BddLogger.given("a non-existent trace for unassociation");
+    UUID traceId = UUID.randomUUID();
+    when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+    BddLogger.when("unassociating a trace that does not exist");
+    TraceNotFoundException ex =
+        assertThrows(
+            TraceNotFoundException.class,
+            () ->
+                traceService.unassociateTrace(
+                    student.getUser(), traceId, List.of(), List.of(), List.of()));
+
+    BddLogger.then("TRACE_NOT_FOUND should be thrown");
+    assertEquals(EErrorCode.TRACE_NOT_FOUND, ex.getErrorCode());
+  }
+
+  @Test
+  void givenTraceOfAnotherUser_shouldThrowUserNotAuthorizedException_whenUnassociating() {
+    BddLogger.given("a trace belonging to another user");
+    User otherUser = UserFixture.create().toModel();
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    BddLogger.when("unassociating with another user");
+    UserNotAuthorizedException ex =
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () ->
+                traceService.unassociateTrace(
+                    otherUser, trace.getId(), List.of(), List.of(), List.of()));
+
+    BddLogger.then("USER_NOT_AUTHORIZED should be thrown");
+    assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
+  }
+
+  @Test
+  void givenTraceWithoutMatchingAms_shouldThrowUserNotAuthorizedException() {
+    BddLogger.given("a trace that does not have the given AMS associated");
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+    when(studentService.getStudentById(any(UUID.class))).thenReturn(student);
+
+    UUID fakeAmsId = UUID.randomUUID();
+    when(amsRepository.findAllByStudent(any(Student.class)))
+        .thenReturn(List.of(AMSFixture.create().toModel()));
+
+    BddLogger.when("unassociating a non-associated AMS");
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () ->
+            traceService.unassociateTrace(
+                student.getUser(), trace.getId(), List.of(fakeAmsId), List.of(), List.of()));
+  }
+
+  @Test
+  void givenTraceWithoutMatchingSkillLevel_shouldThrowUserNotAuthorizedException() {
+    BddLogger.given("a trace that does not have the given SkillLevel associated");
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+    when(studentService.getStudentById(any(UUID.class))).thenReturn(student);
+
+    UUID fakeSkillLevelId = UUID.randomUUID();
+    when(skillLevelProgressRepository.findAllByStudent(any(Student.class)))
+        .thenReturn(
+            List.of(
+                SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel())
+                    .toModel()));
+
+    BddLogger.when("unassociating a non-associated SkillLevel");
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () ->
+            traceService.unassociateTrace(
+                student.getUser(), trace.getId(), List.of(), List.of(fakeSkillLevelId), List.of()));
+  }
+
+  @Test
+  void givenTraceWithoutMatchingAdditionalSkill_shouldThrowUserNotAuthorizedException() {
+    BddLogger.given("a trace that does not have the given AdditionalSkill associated");
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+    when(studentService.getStudentById(any(UUID.class))).thenReturn(student);
+
+    UUID fakeAdditionalId = UUID.randomUUID();
+    when(additionalSkillProgressRepository.findAllByStudent(any(Student.class)))
+        .thenReturn(List.of(AdditionalSkillProgressFixture.create().toModel()));
+
+    BddLogger.when("unassociating a non-associated AdditionalSkill");
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () ->
+            traceService.unassociateTrace(
+                student.getUser(), trace.getId(), List.of(), List.of(), List.of(fakeAdditionalId)));
   }
 }

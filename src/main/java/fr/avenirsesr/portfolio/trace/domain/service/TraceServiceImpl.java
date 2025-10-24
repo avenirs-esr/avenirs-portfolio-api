@@ -36,10 +36,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -273,7 +270,7 @@ public class TraceServiceImpl implements TraceService {
 
     traceRepository.save(trace);
     log.info(
-        "Trace {} successfully associated with amses : {} - skill level progress {} - additonal"
+        "Trace {} successfully associated with amses : {} - skill level progress {} - additional"
             + " skill progress {}",
         trace,
         amsIds,
@@ -358,6 +355,99 @@ public class TraceServiceImpl implements TraceService {
                   .findAny()
                   .orElseThrow(UserNotAuthorizedException::new);
           trace.add(additionalSkillProgress);
+        });
+  }
+
+  @Override
+  public void unassociateTrace(
+      User user,
+      UUID traceId,
+      List<UUID> amsIds,
+      List<UUID> skillLevelIds,
+      List<UUID> additionalSkillProgressIds) {
+    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
+    checkIfUserIsAuthorizedOnTrace(user, trace);
+
+    var student = studentService.getStudentById(user.getId());
+    unassociateAdditionalSkillProgress(student, trace, additionalSkillProgressIds);
+    unassociateAms(student, trace, amsIds);
+    unassociateSkillLevel(student, trace, skillLevelIds);
+
+    traceRepository.save(trace);
+    log.info(
+        "Trace {} successfully unassociated with amses : {} - skill level progress {} - additional"
+            + " skill progress {}",
+        trace,
+        amsIds,
+        skillLevelIds,
+        additionalSkillProgressIds);
+  }
+
+  private void unassociateAdditionalSkillProgress(
+      Student student, Trace trace, List<UUID> additionalSkillProgressIds) {
+    if (!new HashSet<>(
+            trace.getAdditionalSkillProgresses().stream()
+                .map(AdditionalSkillProgress::getId)
+                .toList())
+        .containsAll(additionalSkillProgressIds)) {
+      log.error(
+          "{} tried to unassociate trace with an additional skill that is not associated. ids : "
+              + " {}",
+          student,
+          additionalSkillProgressIds);
+      throw new UserNotAuthorizedException();
+    }
+    var studentAdditionalSkillProgress =
+        additionalSkillProgressRepository.findAllByStudent(student);
+    additionalSkillProgressIds.forEach(
+        id -> {
+          var progress =
+              studentAdditionalSkillProgress.stream()
+                  .filter(s -> id.equals(s.getId()))
+                  .findAny()
+                  .orElseThrow(UserNotAuthorizedException::new);
+          trace.remove(progress);
+        });
+  }
+
+  private void unassociateSkillLevel(Student student, Trace trace, List<UUID> skillLevelIds) {
+    if (!new HashSet<>(trace.getSkillLevels().stream().map(SkillLevelProgress::getId).toList())
+        .containsAll(skillLevelIds)) {
+      log.error(
+          "{} tried to unassociate trace with a skill level that is not associated. ids :  {}",
+          student,
+          skillLevelIds);
+      throw new UserNotAuthorizedException();
+    }
+    var studentSkillLevelProgress = skillLevelProgressRepository.findAllByStudent(student);
+    skillLevelIds.forEach(
+        id -> {
+          var progress =
+              studentSkillLevelProgress.stream()
+                  .filter(s -> id.equals(s.getId()))
+                  .findAny()
+                  .orElseThrow(UserNotAuthorizedException::new);
+          trace.remove(progress);
+        });
+  }
+
+  private void unassociateAms(Student student, Trace trace, List<UUID> amsIds) {
+    if (!new HashSet<>(trace.getAmses().stream().map(AMS::getId).toList()).containsAll(amsIds)) {
+      log.error(
+          "{} tried to unassociate trace with an ams that is not associated. ids :  {}",
+          student,
+          amsIds);
+      throw new UserNotAuthorizedException();
+    }
+    var studentAmses = amsRepository.findAllByStudent(student);
+    amsIds.forEach(
+        id -> {
+          var ams =
+              studentAmses.stream()
+                  .filter(s -> id.equals(s.getId()))
+                  .findAny()
+                  .orElseThrow(UserNotAuthorizedException::new);
+          trace.remove(ams);
         });
   }
 
