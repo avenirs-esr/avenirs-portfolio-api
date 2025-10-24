@@ -6,14 +6,11 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSki
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
-import fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.domain.model.Competence;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.domain.port.input.CasocService;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L16">@Slf4j</span>
+<span class="fc" id="L13">@Slf4j</span>
 @RequiredArgsConstructor
 public class CasocServiceImpl implements CasocService {
   private final CompetenceReader competenceReader;
@@ -21,42 +18,26 @@ public class CasocServiceImpl implements CasocService {
   private final AdditionalSkillRepository additionalSkillRepository;
 
   @Override
-  public List&lt;AdditionalSkill&gt; syncSkills() {
-<span class="fc" id="L25">    var competences = competenceReader.readCompetences();</span>
-<span class="fc" id="L26">    var categories = new ArrayList&lt;AdditionalSkillCategory&gt;();</span>
-<span class="fc" id="L27">    var additionalSkills =</span>
-<span class="fc" id="L28">        competences.stream()</span>
-<span class="fc" id="L29">            .map(</span>
+  public void syncSkills() {
+<span class="fc" id="L22">    var competences = competenceReader.readCompetences();</span>
+
+<span class="fc" id="L24">    var additionalSkills =</span>
+<span class="fc" id="L25">        competences.stream()</span>
+<span class="fc" id="L26">            .map(</span>
                 competence -&gt;
-<span class="fc" id="L31">                    AdditionalSkill.create(</span>
-<span class="fc" id="L32">                        competence.libelle(),</span>
-<span class="fc" id="L33">                        String.valueOf(competence.id()),</span>
-<span class="fc" id="L34">                        buildCategory(competence, categories),</span>
+<span class="fc" id="L28">                    AdditionalSkill.create(</span>
+<span class="fc" id="L29">                        competence.libelle(),</span>
+<span class="fc" id="L30">                        String.valueOf(competence.id()),</span>
+<span class="fc" id="L31">                        AdditionalSkillCategory.of(</span>
+<span class="fc" id="L32">                            competence.category().libelle(),</span>
+                            null,
+                            EAdditionalSkillCategoryType.DOMAIN),
                         EAdditionalSkillType.CASOC))
 <span class="fc" id="L36">            .toList();</span>
 
 <span class="fc" id="L38">    additionalSkillRepository.saveAll(additionalSkills);</span>
 <span class="fc" id="L39">    openSearchIndex.indexAll(additionalSkills);</span>
 <span class="fc" id="L40">    log.info(&quot;{} Additional skills from CASOC saved and indexed&quot;, additionalSkills.size());</span>
-<span class="fc" id="L41">    return additionalSkills;</span>
-  }
-
-  private AdditionalSkillCategory buildCategory(
-      Competence competence, ArrayList&lt;AdditionalSkillCategory&gt; categories) {
-<span class="fc" id="L46">    var additionalSkillCategory =</span>
-<span class="fc" id="L47">        AdditionalSkillCategory.of(</span>
-<span class="fc" id="L48">            competence.category().libelle(), null, EAdditionalSkillCategoryType.DOMAIN);</span>
-
-<span class="fc" id="L50">    var categoryToSave =</span>
-<span class="fc" id="L51">        categories.stream()</span>
-<span class="fc bfc" id="L52" title="All 2 branches covered.">            .filter(c -&gt; c.uniqHash() == additionalSkillCategory.uniqHash())</span>
-<span class="fc" id="L53">            .findFirst()</span>
-<span class="fc" id="L54">            .orElse(additionalSkillCategory);</span>
-
-<span class="fc bfc" id="L56" title="All 2 branches covered.">    if (categoryToSave.equals(additionalSkillCategory)) {</span>
-<span class="fc" id="L57">      categories.add(additionalSkillCategory);</span>
-    }
-<span class="fc" id="L59">    return categoryToSave;</span>
-  }
+<span class="fc" id="L41">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

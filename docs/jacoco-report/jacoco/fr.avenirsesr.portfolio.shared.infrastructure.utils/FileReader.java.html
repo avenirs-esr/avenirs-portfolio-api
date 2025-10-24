@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FileReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.shared.infrastructure.utils</a> &gt; <span class="el_source">FileReader.java</span></div><h1>FileReader.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.shared.infrastructure.utils;
 
+import fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.infrastructure.service.CsvCompetenceReader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,19 +11,19 @@ import java.util.stream.Collectors;
 
 public interface FileReader {
   static &lt;T&gt; List&lt;T&gt; readCSV(String fileName, String separator, Function&lt;String[], T&gt; mapper) {
-<span class="fc" id="L13">    try (var inputStream = FileReader.class.getResourceAsStream(fileName);</span>
-<span class="fc" id="L14">        var reader =</span>
+<span class="fc" id="L14">    try (var inputStream = CsvCompetenceReader.class.getResourceAsStream(fileName);</span>
+<span class="fc" id="L15">        var reader =</span>
             new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-<span class="fc" id="L17">      return reader</span>
-<span class="fc" id="L18">          .lines()</span>
-<span class="fc" id="L19">          .skip(1)</span>
-<span class="fc" id="L20">          .map(line -&gt; line.split(separator))</span>
-<span class="fc" id="L21">          .map(mapper)</span>
-<span class="fc" id="L22">          .collect(Collectors.toList());</span>
+<span class="fc" id="L18">      return reader</span>
+<span class="fc" id="L19">          .lines()</span>
+<span class="fc" id="L20">          .skip(1)</span>
+<span class="fc" id="L21">          .map(line -&gt; line.split(separator))</span>
+<span class="fc" id="L22">          .map(mapper)</span>
+<span class="fc" id="L23">          .collect(Collectors.toList());</span>
 
-<span class="nc" id="L24">    } catch (IOException | NullPointerException e) {</span>
-<span class="nc" id="L25">      throw new RuntimeException(&quot;Erreur de lecture du fichier CSV&quot;, e);</span>
+<span class="nc" id="L25">    } catch (IOException | NullPointerException e) {</span>
+<span class="nc" id="L26">      throw new RuntimeException(&quot;Erreur de lecture du fichier CSV&quot;, e);</span>
     }
   }
 }

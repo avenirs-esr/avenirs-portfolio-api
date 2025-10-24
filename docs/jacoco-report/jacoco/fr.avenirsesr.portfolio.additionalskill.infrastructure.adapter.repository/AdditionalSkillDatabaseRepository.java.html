@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdditionalSkillDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository</a> &gt; <span class="el_source">AdditionalSkillDatabaseRepository.java</span></div><h1>AdditionalSkillDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.specification.AdditionalSkillSpecification;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,14 +27,14 @@ public class AdditionalSkillDatabaseRepository
 
   @Override
   public List&lt;AdditionalSkill&gt; findAllByExternalId(List&lt;String&gt; skillCodes) {
-<span class="fc" id="L30">    return jpaRepository.findAll(AdditionalSkillSpecification.hasExternalId(skillCodes)).stream()</span>
-<span class="fc" id="L31">        .map(AdditionalSkillMapper::toDomain)</span>
-<span class="fc" id="L32">        .toList();</span>
+<span class="nc" id="L30">    return jpaRepository.findAll(AdditionalSkillSpecification.hasExternalId(skillCodes)).stream()</span>
+<span class="nc" id="L31">        .map(AdditionalSkillMapper::toDomain)</span>
+<span class="nc" id="L32">        .toList();</span>
   }
 
   @Override
-  public int countAll(EAdditionalSkillType type) {
-<span class="nc" id="L37">    return jpaRepository.findAll(AdditionalSkillSpecification.hasType(type)).size();</span>
+  public List&lt;AdditionalSkill&gt; findAllByIds(List&lt;UUID&gt; ids) {
+<span class="nc" id="L37">    return jpaRepository.findAllById(ids).stream().map(AdditionalSkillMapper::toDomain).toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
