@@ -44,4 +44,8 @@ public class AdditionalSkillCategory extends AvenirsBaseModel {
   public Optional<AdditionalSkillCategory> getParent() {
     return Optional.ofNullable(parent);
   }
+
+  public long uniqHash() {
+    return libelle.hashCode() + type.hashCode() + (parent == null ? 0 : parent.hashCode());
+  }
 }

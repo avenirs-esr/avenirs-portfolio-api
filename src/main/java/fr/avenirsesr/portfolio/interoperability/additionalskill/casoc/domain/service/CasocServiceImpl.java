@@ -6,7 +6,9 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSki
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
+import fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.domain.model.Competence;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.domain.port.input.CasocService;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +23,7 @@ public class CasocServiceImpl implements CasocService {
   @Override
   public List<AdditionalSkill> syncSkills() {
     var competences = competenceReader.readCompetences();
-
+    var categories = new ArrayList<AdditionalSkillCategory>();
     var additionalSkills =
         competences.stream()
             .map(
@@ -29,10 +31,7 @@ public class CasocServiceImpl implements CasocService {
                     AdditionalSkill.create(
                         competence.libelle(),
                         String.valueOf(competence.id()),
-                        AdditionalSkillCategory.of(
-                            competence.category().libelle(),
-                            null,
-                            EAdditionalSkillCategoryType.DOMAIN),
+                        buildCategory(competence, categories),
                         EAdditionalSkillType.CASOC))
             .toList();
 
@@ -40,5 +39,23 @@ public class CasocServiceImpl implements CasocService {
     openSearchIndex.indexAll(additionalSkills);
     log.info("{} Additional skills from CASOC saved and indexed", additionalSkills.size());
     return additionalSkills;
+  }
+
+  private AdditionalSkillCategory buildCategory(
+      Competence competence, ArrayList<AdditionalSkillCategory> categories) {
+    var additionalSkillCategory =
+        AdditionalSkillCategory.of(
+            competence.category().libelle(), null, EAdditionalSkillCategoryType.DOMAIN);
+
+    var categoryToSave =
+        categories.stream()
+            .filter(c -> c.uniqHash() == additionalSkillCategory.uniqHash())
+            .findFirst()
+            .orElse(additionalSkillCategory);
+
+    if (categoryToSave.equals(additionalSkillCategory)) {
+      categories.add(additionalSkillCategory);
+    }
+    return categoryToSave;
   }
 }

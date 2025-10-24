@@ -1,12 +1,14 @@
 package fr.avenirsesr.portfolio.student.progress.application.adapter.controller;
 
-import static fr.avenirsesr.portfolio.common.testutils.infrastructure.adapter.util.TestResourceUtils.loadJson;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -25,6 +28,8 @@ public class AdditionalSkillProgressControllerIT {
   private static final String BASE_PATH = "/me/additional-skill-progress";
 
   @Autowired private MockMvc mockMvc;
+
+  @Autowired private AdditionalSkillRepository additionalSkillRepository;
 
   @Value("${hmac.secret-key}")
   private String secretKey;
@@ -60,9 +65,22 @@ public class AdditionalSkillProgressControllerIT {
         .andExpect(jsonPath("$.page.pageSize").value(5));
   }
 
+  private String buildAdditionalSkillsJson(UUID id) {
+    return ("{\n"
+            + "  \"id\": \"%s\",\n"
+            + "  \"level\": \"BEGINNER\",\n"
+            + "  \"type\": \"ROME4\"\n"
+            + "}\n")
+        .formatted(id);
+  }
+
+  @Transactional
   @Test
   void shouldCreateAdditionalSkillProgress() throws Exception {
-    String payloadJson = loadJson("additionalskill/mock-new-additional-skill-progress.json");
+    var additionalSkill =
+        additionalSkillRepository.findAllByExternalId(List.of("1")).stream()
+            .findFirst()
+            .orElseThrow();
 
     BddLogger.given("the " + BASE_PATH + " enpoint");
     BddLogger.when("performing a POST with a non already existing additional skill progress");
@@ -74,14 +92,17 @@ public class AdditionalSkillProgressControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(payloadJson))
+                .content(buildAdditionalSkillsJson(additionalSkill.getId())))
         .andExpect(status().isCreated());
   }
 
+  @Transactional
   @Test
   void shouldReturnConflictWhenAdditionalSkillAlreadyExists() throws Exception {
-    String payloadJson =
-        loadJson("additionalskill/mock-new-additional-skill-progress-to-duplicate.json");
+    var additionalSkill =
+        additionalSkillRepository.findAllByExternalId(List.of("1")).stream()
+            .findFirst()
+            .orElseThrow();
 
     BddLogger.given("the " + BASE_PATH + " enpoint");
     BddLogger.when("performing a POST with and already existing additional skill progress");
@@ -95,7 +116,7 @@ public class AdditionalSkillProgressControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(payloadJson))
+                .content(buildAdditionalSkillsJson(additionalSkill.getId())))
         .andExpect(status().isCreated());
 
     mockMvc
@@ -105,13 +126,12 @@ public class AdditionalSkillProgressControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(payloadJson))
+                .content(buildAdditionalSkillsJson(additionalSkill.getId())))
         .andExpect(status().isConflict());
   }
 
   @Test
   void shouldReturnNotFoundWhenSkillDoesNotExist() throws Exception {
-    String payloadJson = loadJson("additionalskill/mock-unknown-additional-skill.json");
 
     BddLogger.given("the " + BASE_PATH + " enpoint");
     BddLogger.when("performing a POST with an unknown additionnal skill progress");
@@ -124,7 +144,9 @@ public class AdditionalSkillProgressControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(payloadJson))
+                .content(
+                    buildAdditionalSkillsJson(
+                        UUID.fromString("2f024a1c-5429-43f6-bb2e-ac5a3ca662e7"))))
         .andExpect(status().isNotFound());
   }
 }

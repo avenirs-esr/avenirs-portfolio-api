@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastructure.batch;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillCategory;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.model.Competence;
@@ -95,7 +96,8 @@ public class AdditionalSkillBatchLoader {
 
               if (count == 0) {
                 log.info(
-                    "No additional skills found, bootstrapping from SQL dump and skipping the rest of the job.");
+                    "No additional skills found, bootstrapping from SQL dump and skipping the rest"
+                        + " of the job.");
                 bootstrapAdditionalSkillsFromSqlDump();
               } else {
                 log.info("{} Additional skills found, continuing with sync job.", count);
@@ -134,10 +136,11 @@ public class AdditionalSkillBatchLoader {
   @Bean
   public Step importROME4SkillStep(
       JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+    var categories = new ArrayList<AdditionalSkillCategory>();
     return new StepBuilder("importROME4SkillStep", jobRepository)
         .<Competence, AdditionalSkill>chunk(100, transactionManager)
         .reader(itemReader())
-        .processor(itemProcessor())
+        .processor(itemProcessor(categories))
         .writer(itemWriter())
         .faultTolerant()
         .skipPolicy(
@@ -173,13 +176,15 @@ public class AdditionalSkillBatchLoader {
   }
 
   @Bean
-  public ItemProcessor<Competence, AdditionalSkill> itemProcessor() {
-    return (Competence competence) ->
-        AdditionalSkill.create(
-            competence.getLibelle(),
-            competence.getCode(),
-            CompetenceMapper.toCategoryDomain(competence),
-            EAdditionalSkillType.ROME4);
+  public ItemProcessor<Competence, AdditionalSkill> itemProcessor(
+      ArrayList<AdditionalSkillCategory> categories) {
+    return (Competence competence) -> {
+      return AdditionalSkill.create(
+          competence.getLibelle(),
+          competence.getCode(),
+          CompetenceMapper.toCategoryDomain(competence, categories),
+          EAdditionalSkillType.ROME4);
+    };
   }
 
   @Bean
