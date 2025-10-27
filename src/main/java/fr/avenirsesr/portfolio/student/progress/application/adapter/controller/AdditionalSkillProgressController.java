@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.request.AddAdditionalSkillDTO;
-import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.net.URI;
@@ -48,7 +47,7 @@ public class AdditionalSkillProgressController {
   }
 
   @PostMapping()
-  public ResponseEntity<AdditionalSkillProgress> createAdditionalSkillProgress(
+  public ResponseEntity<AdditionalSkillProgressDTO> createAdditionalSkillProgress(
       Principal principal, @RequestBody AddAdditionalSkillDTO additionalSkill) {
     Student student = userUtil.getStudent(principal);
     log.debug("Received request to create additional skill for student [{}]", student);
@@ -60,6 +59,6 @@ public class AdditionalSkillProgressController {
             additionalSkill.getLevel(),
             additionalSkill.getDescription());
     return ResponseEntity.created(URI.create("/me/additional-skills/" + additionalSkill.getId()))
-        .body(additionalSkillProgress);
+        .body(AdditionalSkillProgressMapper.toAdditionalSkillProgressDTO(additionalSkillProgress));
   }
 }
