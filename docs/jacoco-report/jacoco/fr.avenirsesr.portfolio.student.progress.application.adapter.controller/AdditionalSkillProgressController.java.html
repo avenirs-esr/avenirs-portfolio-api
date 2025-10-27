@@ -57,9 +57,10 @@ public class AdditionalSkillProgressController {
             student,
 <span class="fc" id="L58">            UUID.fromString(additionalSkill.getId()),</span>
 <span class="fc" id="L59">            additionalSkill.getType(),</span>
-<span class="fc" id="L60">            additionalSkill.getLevel());</span>
-<span class="fc" id="L61">    return ResponseEntity.created(URI.create(&quot;/me/additional-skills/&quot; + additionalSkill.getId()))</span>
-<span class="fc" id="L62">        .body(additionalSkillProgress);</span>
+<span class="fc" id="L60">            additionalSkill.getLevel(),</span>
+<span class="fc" id="L61">            additionalSkill.getDescription());</span>
+<span class="fc" id="L62">    return ResponseEntity.created(URI.create(&quot;/me/additional-skills/&quot; + additionalSkill.getId()))</span>
+<span class="fc" id="L63">        .body(additionalSkillProgress);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
