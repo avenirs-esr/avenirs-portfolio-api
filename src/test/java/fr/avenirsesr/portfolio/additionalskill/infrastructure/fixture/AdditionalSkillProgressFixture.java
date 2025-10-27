@@ -64,7 +64,7 @@ public class AdditionalSkillProgressFixture {
     return this;
   }
 
-  public AdditionalSkillProgressFixture withDescritption(String description) {
+  public AdditionalSkillProgressFixture withDescription(String description) {
     this.description = description;
     return this;
   }

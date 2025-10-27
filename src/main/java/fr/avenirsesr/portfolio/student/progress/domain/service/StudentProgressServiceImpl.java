@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.domain.service;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
@@ -160,13 +161,23 @@ public class StudentProgressServiceImpl implements StudentProgressService {
       Student student,
       UUID additionalSkillId,
       EAdditionalSkillType type,
-      EAdditionalSkillLevel level) {
+      EAdditionalSkillLevel level,
+      String description) {
     try {
+      if (description != null && description.length() > 400) {
+        log.error("Description too long: {} characters (max = 400)", description.length());
+        throw new InvalidDescriptionException(
+            "Description exceeds 400 characters (actual: " + description.length() + ")");
+      }
+
       Optional<AdditionalSkill> additionalSkill =
           additionalSkillRepository.findById(additionalSkillId);
       AdditionalSkillProgress additionalSkillProgress =
           AdditionalSkillProgress.create(
-              student, additionalSkill.orElseThrow(AdditionalSkillNotFoundException::new), level);
+              student,
+              additionalSkill.orElseThrow(AdditionalSkillNotFoundException::new),
+              level,
+              description);
       if (additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(
           additionalSkillProgress)) {
         log.error(

@@ -1,11 +1,8 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.output.seeder.AdditionalSkillProgressDataGenerator;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
-<<<<<<< HEAD:src/main/java/fr/avenirsesr/portfolio/student/progress/infrastructure/adapter/seeder/fake/FakeAdditionalSkillProgress.java
-=======
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillProgressEntity;
->>>>>>> 224d802f (feat(AdditionalSkill): check length of description field):src/main/java/fr/avenirsesr/portfolio/additionalskill/infrastructure/adapter/seeder/fake/FakeAdditionalSkillProgress.java
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
@@ -17,15 +14,10 @@ public class FakeAdditionalSkillProgress {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
       new DataGeneratorProvider<SharedDataGenerator>()
           .init(FakeAdditionalSkillProgress.class, SharedDataGenerator.class);
-<<<<<<< HEAD:src/main/java/fr/avenirsesr/portfolio/student/progress/infrastructure/adapter/seeder/fake/FakeAdditionalSkillProgress.java
-=======
-
   private static final DataGeneratorProvider<AdditionalSkillProgressDataGenerator>
       additionalSkillProgressGenerator =
           new DataGeneratorProvider<AdditionalSkillProgressDataGenerator>()
               .init(FakeAdditionalSkillProgress.class, AdditionalSkillProgressDataGenerator.class);
-
->>>>>>> 224d802f (feat(AdditionalSkill): check length of description field):src/main/java/fr/avenirsesr/portfolio/additionalskill/infrastructure/adapter/seeder/fake/FakeAdditionalSkillProgress.java
   private final AdditionalSkillProgressEntity additionalSkillProgressEntity;
 
   private FakeAdditionalSkillProgress(AdditionalSkillProgressEntity additionalSkillProgressEntity) {
@@ -41,7 +33,8 @@ public class FakeAdditionalSkillProgress {
             dataGenerator.with("id").uuid(),
             student,
             getRandomAdditionalSkill(savedAdditionalSkills, bannedSkillsIds),
-            dataGenerator.with("EAdditionalSkillLevel").pickIn(EAdditionalSkillLevel.class)));
+            dataGenerator.with("EAdditionalSkillLevel").pickIn(EAdditionalSkillLevel.class),
+            additionalSkillProgressGenerator.with("sentence").description()));
   }
 
   public AdditionalSkillProgressEntity toEntity() {
