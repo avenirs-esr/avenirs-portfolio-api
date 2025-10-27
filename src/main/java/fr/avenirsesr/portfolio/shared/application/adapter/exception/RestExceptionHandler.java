@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.shared.application.adapter.exception;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.common.error.application.adapter.exception.BaseRestExceptionHandler;
 import fr.avenirsesr.portfolio.common.error.application.adapter.response.ErrorResponse;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
@@ -25,76 +26,82 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<ErrorResponse> handle(UserNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(FileTypeNotSupportedException.class)
   public ResponseEntity<ErrorResponse> handle(FileTypeNotSupportedException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(FileNotFoundException.class)
   public ResponseEntity<ErrorResponse> handle(FileNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(FileSizeTooBigException.class)
   public ResponseEntity<ErrorResponse> handle(FileSizeTooBigException ex) {
     return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(UserCategoryNotRecognizedException.class)
   public ResponseEntity<ErrorResponse> handleUserCategoryNotRecognized(
       UserCategoryNotRecognizedException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(UserIsNotStudentException.class)
   public ResponseEntity<ErrorResponse> handleUserIsNotStudent(UserIsNotStudentException ex) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(DuplicateAdditionalSkillException.class)
   public ResponseEntity<ErrorResponse> handleStudentAdditionalSkillConflict(
       DuplicateAdditionalSkillException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(AdditionalSkillNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleStudentAdditionalSkillNotFound(
       AdditionalSkillNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(TraceNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleTraceNotFound(TraceNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(UserNotAuthorizedException.class)
   public ResponseEntity<ErrorResponse> handleTraceNotFound(UserNotAuthorizedException ex) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(StudentProgressNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleStudentProgressNotFound(
       StudentProgressNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
   @ExceptionHandler(SkillLevelNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleSkillLevelNotFound(SkillLevelNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getErrorCode().getMessage()));
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(InvalidDescriptionException.class)
+  public ResponseEntity<ErrorResponse> handleInvalidDescription(InvalidDescriptionException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 }

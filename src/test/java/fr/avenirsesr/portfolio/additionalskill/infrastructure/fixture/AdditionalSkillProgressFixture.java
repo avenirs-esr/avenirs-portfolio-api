@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.seeder.AdditionalSkillProgressDataGenerator;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.FakeCohort;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
@@ -20,7 +19,8 @@ public class AdditionalSkillProgressFixture {
   private static final DataGeneratorProvider<AdditionalSkillProgressDataGenerator>
       additionalSkillProgressGenerator =
           new DataGeneratorProvider<AdditionalSkillProgressDataGenerator>()
-              .init(FakeCohort.class, AdditionalSkillProgressDataGenerator.class);
+              .init(
+                  AdditionalSkillProgressFixture.class, AdditionalSkillProgressDataGenerator.class);
 
   private UUID id;
   private Student student;
