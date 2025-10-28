@@ -5,10 +5,10 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 
 public class InvalidDescriptionException extends BusinessException {
   public InvalidDescriptionException() {
-    super(EErrorCode.ARGUMENT_TOO_LONG);
+    super(EErrorCode.DESCRIPTION_TOO_LONG);
   }
 
   public InvalidDescriptionException(String customMessage) {
-    super(EErrorCode.ARGUMENT_TOO_LONG, customMessage);
+    super(EErrorCode.DESCRIPTION_TOO_LONG, customMessage);
   }
 }
