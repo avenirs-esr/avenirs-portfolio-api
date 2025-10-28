@@ -15,24 +15,27 @@ public class AdditionalSkillProgress extends AvenirsBaseModel {
   private final Student student;
   private final AdditionalSkill skill;
   private final EAdditionalSkillLevel level;
+  private final String description;
 
   private AdditionalSkillProgress(
       UUID id,
       Student student,
       AdditionalSkill skill,
       EAdditionalSkillLevel level,
+      String description,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
     this.student = student;
     this.skill = skill;
     this.level = level;
+    this.description = description;
   }
 
   public static AdditionalSkillProgress create(
-      Student student, AdditionalSkill skill, EAdditionalSkillLevel level) {
+      Student student, AdditionalSkill skill, EAdditionalSkillLevel level, String description) {
     return new AdditionalSkillProgress(
-        UUID.randomUUID(), student, skill, level, Instant.now(), Instant.now());
+        UUID.randomUUID(), student, skill, level, description, Instant.now(), Instant.now());
   }
 
   public static AdditionalSkillProgress toDomain(
@@ -40,8 +43,10 @@ public class AdditionalSkillProgress extends AvenirsBaseModel {
       Student student,
       AdditionalSkill skill,
       EAdditionalSkillLevel level,
+      String description,
       Instant createdAt,
       Instant updatedAt) {
-    return new AdditionalSkillProgress(id, student, skill, level, createdAt, updatedAt);
+    return new AdditionalSkillProgress(
+        id, student, skill, level, description, createdAt, updatedAt);
   }
 }

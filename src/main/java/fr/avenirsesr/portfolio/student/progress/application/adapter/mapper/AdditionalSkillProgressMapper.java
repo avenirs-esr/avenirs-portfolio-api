@@ -14,6 +14,7 @@ public interface AdditionalSkillProgressMapper {
             .map(AdditionalSkillCategory::getLibelle)
             .toList(),
         additionalSkillProgress.getSkill().getType(),
-        additionalSkillProgress.getLevel());
+        additionalSkillProgress.getLevel(),
+        additionalSkillProgress.getDescription());
   }
 }

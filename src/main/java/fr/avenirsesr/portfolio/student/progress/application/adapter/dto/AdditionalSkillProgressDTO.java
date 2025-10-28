@@ -12,4 +12,5 @@ public record AdditionalSkillProgressDTO(
     String title,
     List<String> pathSegments,
     @Schema(ref = "#/components/schemas/EAdditionalSkillType") EAdditionalSkillType type,
-    @Schema(ref = "#/components/schemas/EAdditionalSkillLevel") EAdditionalSkillLevel level) {}
+    @Schema(ref = "#/components/schemas/EAdditionalSkillLevel") EAdditionalSkillLevel level,
+    String description) {}

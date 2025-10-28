@@ -885,6 +885,7 @@ public class StudentProgressServiceImplTest {
         UUID skillId = randomUUID();
         EAdditionalSkillType type = EAdditionalSkillType.ROME4;
         EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
+        String description = "Description for additional skill progress test";
         AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
 
         BddLogger.when("calling the method with an available and not duplicate skill");
@@ -892,7 +893,8 @@ public class StudentProgressServiceImplTest {
         when(additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(any()))
             .thenReturn(false);
 
-        studentProgressService.createAdditionalSkillProgress(localStudent, skillId, type, level);
+        studentProgressService.createAdditionalSkillProgress(
+            localStudent, skillId, type, level, description);
 
         BddLogger.then("it should save the additional skill progress");
         verify(additionalSkillRepository).findById(skillId);
@@ -907,6 +909,7 @@ public class StudentProgressServiceImplTest {
         UUID skillId = randomUUID();
         EAdditionalSkillType type = EAdditionalSkillType.ROME4;
         EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
+        String description = "Description for additional skill progress test";
         AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
 
         BddLogger.when("calling the method with a duplicate skill");
@@ -920,7 +923,7 @@ public class StudentProgressServiceImplTest {
             DuplicateAdditionalSkillException.class,
             () ->
                 studentProgressService.createAdditionalSkillProgress(
-                    localStudent, skillId, type, level));
+                    localStudent, skillId, type, level, description));
 
         verify(additionalSkillRepository).findById(skillId);
         verify(additionalSkillProgressRepository).additionalSkillProgressAlreadyExists(any());
@@ -934,6 +937,7 @@ public class StudentProgressServiceImplTest {
         UUID skillId = randomUUID();
         EAdditionalSkillType type = EAdditionalSkillType.ROME4;
         EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
+        String description = "Description for additional skill progress test";
 
         BddLogger.when("calling the method with an unknown skill");
         when(additionalSkillRepository.findById(skillId))
@@ -944,7 +948,7 @@ public class StudentProgressServiceImplTest {
             AdditionalSkillNotFoundException.class,
             () ->
                 studentProgressService.createAdditionalSkillProgress(
-                    localStudent, skillId, type, level));
+                    localStudent, skillId, type, level, description));
 
         verify(additionalSkillRepository).findById(skillId);
         verifyNoInteractions(additionalSkillProgressRepository);

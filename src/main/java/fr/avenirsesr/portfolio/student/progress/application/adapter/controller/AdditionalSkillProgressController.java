@@ -57,7 +57,8 @@ public class AdditionalSkillProgressController {
             student,
             UUID.fromString(additionalSkill.getId()),
             additionalSkill.getType(),
-            additionalSkill.getLevel());
+            additionalSkill.getLevel(),
+            additionalSkill.getDescription());
     return ResponseEntity.created(URI.create("/me/additional-skills/" + additionalSkill.getId()))
         .body(additionalSkillProgress);
   }
