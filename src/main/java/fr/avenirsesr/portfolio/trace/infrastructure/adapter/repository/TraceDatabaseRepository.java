@@ -21,6 +21,7 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceF
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceSpecification;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Where;
 import org.springframework.data.domain.PageRequest;
@@ -33,8 +34,11 @@ import org.springframework.stereotype.Repository;
 @Where(clause = "deleted_at IS NULL")
 public class TraceDatabaseRepository
     extends GenericDeletableJpaRepositoryAdapter<Trace, TraceEntity> implements TraceRepository {
+  private final TraceJpaRepository jpaRepository;
+
   public TraceDatabaseRepository(TraceJpaRepository jpaRepository) {
     super(jpaRepository, jpaRepository, TraceMapper::fromDomain, TraceMapper::toDomain);
+    this.jpaRepository = jpaRepository;
   }
 
   @Override
@@ -46,6 +50,13 @@ public class TraceDatabaseRepository
             PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt")))
         .getContent()
         .stream()
+        .map(TraceMapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<Trace> findByAdditionalSkillsProgressesId(UUID additionalSkillProgressId) {
+    return jpaRepository.findByAdditionalSkillsProgresses_Id(additionalSkillProgressId).stream()
         .map(TraceMapper::toDomain)
         .toList();
   }

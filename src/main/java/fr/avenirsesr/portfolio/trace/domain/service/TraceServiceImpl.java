@@ -71,6 +71,11 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
+  public List<Trace> getTracesByAdditionalSkillProgressId(UUID additionalSkillProgressId) {
+    return traceRepository.findByAdditionalSkillsProgressesId(additionalSkillProgressId);
+  }
+
+  @Override
   public PagedResult<Trace> getTracesView(
       User user,
       String keyword,

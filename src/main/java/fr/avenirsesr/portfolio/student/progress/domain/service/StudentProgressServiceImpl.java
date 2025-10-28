@@ -198,4 +198,12 @@ public class StudentProgressServiceImpl implements StudentProgressService {
       Student student, String keyword, PageCriteria pageCriteria) {
     return additionalSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);
   }
+
+  @Override
+  public AdditionalSkillProgress getAdditionalSkillProgressDetails(
+      Student student, UUID additionalSkillId) {
+    return additionalSkillProgressRepository
+        .findByStudentAndAdditionalSkillId(student.getId(), additionalSkillId)
+        .orElseThrow(AdditionalSkillNotFoundException::new);
+  }
 }

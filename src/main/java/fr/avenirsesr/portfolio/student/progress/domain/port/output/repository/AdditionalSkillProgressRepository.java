@@ -6,6 +6,8 @@ import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.Generic
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public interface AdditionalSkillProgressRepository
     extends GenericRepositoryPort<AdditionalSkillProgress> {
@@ -17,4 +19,7 @@ public interface AdditionalSkillProgressRepository
       Student student, PageCriteria pageCriteria, String keyword);
 
   List<AdditionalSkillProgress> findAllByStudent(Student student);
+
+  Optional<AdditionalSkillProgress> findByStudentAndAdditionalSkillId(
+      UUID studentId, UUID additionalSkillId);
 }

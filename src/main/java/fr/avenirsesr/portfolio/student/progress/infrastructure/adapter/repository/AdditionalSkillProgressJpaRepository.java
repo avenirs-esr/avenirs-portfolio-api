@@ -1,10 +1,14 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface AdditionalSkillProgressJpaRepository
     extends JpaRepository<AdditionalSkillProgressEntity, UUID>,
-        JpaSpecificationExecutor<AdditionalSkillProgressEntity> {}
+        JpaSpecificationExecutor<AdditionalSkillProgressEntity> {
+  Optional<AdditionalSkillProgressEntity> findByStudent_IdAndAdditionalSkill_Id(
+      UUID studentId, UUID additionalSkillId);
+}

@@ -47,4 +47,7 @@ public interface StudentProgressService {
 
   PagedResult<AdditionalSkillProgress> searchAdditionalSkill(
       Student student, String keyword, PageCriteria pageCriteria);
+
+  AdditionalSkillProgress getAdditionalSkillProgressDetails(
+      Student student, UUID additionalSkillId);
 }

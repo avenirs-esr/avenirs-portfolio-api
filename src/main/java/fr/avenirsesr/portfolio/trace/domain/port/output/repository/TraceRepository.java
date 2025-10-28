@@ -10,9 +10,12 @@ import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.util.List;
+import java.util.UUID;
 
 public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {
   List<Trace> findLastsOf(User user, int limit);
+
+  List<Trace> findByAdditionalSkillsProgressesId(UUID additionalSkillProgressId);
 
   PagedResult<Trace> findAll(
       User user,

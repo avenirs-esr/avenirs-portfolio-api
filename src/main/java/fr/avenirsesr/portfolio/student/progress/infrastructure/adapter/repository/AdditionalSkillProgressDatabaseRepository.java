@@ -12,6 +12,8 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specifica
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -54,6 +56,18 @@ public class AdditionalSkillProgressDatabaseRepository
         .stream()
         .map(AdditionalSkillProgressMapper::toDomain)
         .toList();
+  }
+
+  @Override
+  public Optional<AdditionalSkillProgress> findByStudentAndAdditionalSkillId(
+      UUID studentId, UUID additionalSkillId) {
+    AdditionalSkillProgressEntity additionalSkillProgressEntity =
+        jpaRepository
+            .findByStudent_IdAndAdditionalSkill_Id(studentId, additionalSkillId)
+            .orElse(null);
+    return additionalSkillProgressEntity == null
+        ? Optional.empty()
+        : Optional.of(AdditionalSkillProgressMapper.toDomain(additionalSkillProgressEntity));
   }
 
   @Override

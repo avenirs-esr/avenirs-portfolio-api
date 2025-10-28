@@ -19,6 +19,8 @@ public interface TraceService {
 
   List<Trace> lastTracesOf(User user);
 
+  List<Trace> getTracesByAdditionalSkillProgressId(UUID additionalSkillProgressId);
+
   PagedResult<Trace> getTracesView(
       User user,
       String keyword,
