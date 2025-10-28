@@ -5,25 +5,32 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDTO;
+import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.request.AddAdditionalSkillDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.net.URI;
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-<span class="fc" id="L21">@Slf4j</span>
+<span class="fc" id="L27">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/additional-skill-progress&quot;)
 public class AdditionalSkillProgressController {
   private final StudentProgressService studentProgressService;
+  private final TraceService traceService;
   private final UserUtil userUtil;
 
   @GetMapping()
@@ -31,36 +38,58 @@ public class AdditionalSkillProgressController {
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L34">    Student student = userUtil.getStudent(principal);</span>
-<span class="fc" id="L35">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L36">    log.debug(</span>
+<span class="fc" id="L41">    Student student = userUtil.getStudent(principal);</span>
+<span class="fc" id="L42">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L43">    log.debug(</span>
         &quot;Received request to trace overview of user [{}] (page= {}, size= {})&quot;,
         student,
-<span class="fc" id="L39">        pageCriteria.page(),</span>
-<span class="fc" id="L40">        pageCriteria.pageSize());</span>
-<span class="fc" id="L41">    var result = studentProgressService.getAdditionalSkillsProgresses(student, pageCriteria);</span>
-<span class="fc" id="L42">    return ResponseEntity.ok(</span>
+<span class="fc" id="L46">        pageCriteria.page(),</span>
+<span class="fc" id="L47">        pageCriteria.pageSize());</span>
+<span class="fc" id="L48">    var result = studentProgressService.getAdditionalSkillsProgresses(student, pageCriteria);</span>
+<span class="fc" id="L49">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L44">            result.content().stream()</span>
-<span class="fc" id="L45">                .map(AdditionalSkillProgressMapper::toAdditionalSkillProgressDTO)</span>
-<span class="fc" id="L46">                .toList(),</span>
-<span class="fc" id="L47">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
+<span class="fc" id="L51">            result.content().stream()</span>
+<span class="fc" id="L52">                .map(AdditionalSkillProgressMapper::toAdditionalSkillProgressDTO)</span>
+<span class="fc" id="L53">                .toList(),</span>
+<span class="fc" id="L54">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
   }
 
   @PostMapping()
   public ResponseEntity&lt;AdditionalSkillProgress&gt; createAdditionalSkillProgress(
       Principal principal, @RequestBody AddAdditionalSkillDTO additionalSkill) {
-<span class="fc" id="L53">    Student student = userUtil.getStudent(principal);</span>
-<span class="fc" id="L54">    log.debug(&quot;Received request to create additional skill for student [{}]&quot;, student);</span>
-<span class="fc" id="L55">    var additionalSkillProgress =</span>
-<span class="fc" id="L56">        studentProgressService.createAdditionalSkillProgress(</span>
+<span class="fc" id="L60">    Student student = userUtil.getStudent(principal);</span>
+<span class="fc" id="L61">    log.debug(&quot;Received request to create additional skill for student [{}]&quot;, student);</span>
+<span class="fc" id="L62">    var additionalSkillProgress =</span>
+<span class="fc" id="L63">        studentProgressService.createAdditionalSkillProgress(</span>
             student,
-<span class="fc" id="L58">            UUID.fromString(additionalSkill.getId()),</span>
-<span class="fc" id="L59">            additionalSkill.getType(),</span>
-<span class="fc" id="L60">            additionalSkill.getLevel(),</span>
-<span class="fc" id="L61">            additionalSkill.getDescription());</span>
-<span class="fc" id="L62">    return ResponseEntity.created(URI.create(&quot;/me/additional-skills/&quot; + additionalSkill.getId()))</span>
-<span class="fc" id="L63">        .body(additionalSkillProgress);</span>
+<span class="fc" id="L65">            UUID.fromString(additionalSkill.getId()),</span>
+<span class="fc" id="L66">            additionalSkill.getType(),</span>
+<span class="fc" id="L67">            additionalSkill.getLevel(),</span>
+<span class="fc" id="L68">            additionalSkill.getDescription());</span>
+<span class="fc" id="L69">    return ResponseEntity.created(URI.create(&quot;/me/additional-skills/&quot; + additionalSkill.getId()))</span>
+<span class="fc" id="L70">        .body(additionalSkillProgress);</span>
+  }
+
+  @GetMapping(&quot;/{additionalSkillId}&quot;)
+  public ResponseEntity&lt;AdditionalSkillProgressDetailsDTO&gt; getAdditionalSkillProgressDetails(
+      Principal principal, @PathVariable UUID additionalSkillId) {
+<span class="nc" id="L76">    Student student = userUtil.getStudent(principal);</span>
+<span class="nc" id="L77">    log.debug(</span>
+        &quot;Received request to detailed additional skill [{}] for student [{}]&quot;,
+        additionalSkillId,
+        student);
+<span class="nc" id="L81">    AdditionalSkillProgress additionalSkillProgress =</span>
+<span class="nc" id="L82">        studentProgressService.getAdditionalSkillProgressDetails(student, additionalSkillId);</span>
+<span class="nc" id="L83">    List&lt;Trace&gt; traces =</span>
+<span class="nc" id="L84">        traceService.getTracesByAdditionalSkillProgressId(additionalSkillProgress.getId());</span>
+<span class="nc" id="L85">    List&lt;TraceOverviewDTO&gt; traceOverviewDTOs =</span>
+<span class="nc" id="L86">        traces.stream()</span>
+<span class="nc" id="L87">            .map(trace -&gt; TraceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))</span>
+<span class="nc" id="L88">            .toList();</span>
+
+<span class="nc" id="L90">    return ResponseEntity.ok(</span>
+<span class="nc" id="L91">        AdditionalSkillProgressMapper.toAdditionalSkillProgressDetailsDTO(</span>
+            additionalSkillProgress, traceOverviewDTOs));
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
