@@ -64,6 +64,19 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   @Override
+  public List<StudentProgress> getAllCurrentStudentProgress() {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
+    log.debug("{} fetched his student progresses", student);
+    return studentProgressRepository.findAllByStudent(student).stream()
+        .filter(StudentProgress::isCurrent)
+        .toList();
+  }
+
+  @Override
   public Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>>
       getStudentProgressOverview() {
     var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);

@@ -19,6 +19,8 @@ import java.util.UUID;
 public interface StudentProgressService {
   boolean isStudentFollowingAPCProgram();
 
+  List<StudentProgress> getAllCurrentStudentProgress();
+
   Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> getStudentProgressOverview();
 
   Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> getStudentProgressView(
