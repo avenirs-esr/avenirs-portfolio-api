@@ -1,43 +1,60 @@
 package fr.avenirsesr.portfolio.program.domain.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.port.output.repository.TrainingPathRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.ProgramFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.MockedStatic;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
+@SpringBootTest
+@ActiveProfiles("test")
 public class TrainingPathServiceImplTest {
-  private AutoCloseable closeable;
-  private Student student;
 
+  @Mock private StudentRepository studentRepository;
   @Mock private TrainingPathRepository trainingPathRepository;
 
   @InjectMocks private TrainingPathServiceImpl trainingPathServiceImpl;
 
+  private Student student;
+  private MockedStatic<RequestContext> mockedRequestContext;
+
   @BeforeEach
   void setUp() {
-    closeable = MockitoAnnotations.openMocks(this);
     student = StudentFixture.create().toModel();
+    mockedRequestContext = mockStatic(RequestContext.class);
+    mockedRequestContext
+        .when(RequestContext::get)
+        .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
+
+    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
   }
 
   @AfterEach
   void tearDown() throws Exception {
-    closeable.close();
+    mockedRequestContext.close();
   }
 
   @Test
@@ -51,11 +68,11 @@ public class TrainingPathServiceImplTest {
     allTrainingPaths.add(trainingPath1);
     allTrainingPaths.add(trainingPath2);
 
-    when(trainingPathRepository.findAllTrainingPathsByStudents(any(Student.class)))
+    when(trainingPathRepository.findAllTrainingPathsByStudents(student))
         .thenReturn(allTrainingPaths);
 
     BddLogger.when("getting training paths for a student");
-    List<TrainingPath> result = trainingPathServiceImpl.getTrainingPathsByStudent(student);
+    List<TrainingPath> result = trainingPathServiceImpl.getTrainingPathsByStudent();
 
     BddLogger.then("it should return all program progresses for this student");
     assertEquals(2, result.size());

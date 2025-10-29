@@ -3,7 +3,10 @@ package fr.avenirsesr.portfolio.program.domain.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
@@ -11,30 +14,42 @@ import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
+@SpringBootTest
+@ActiveProfiles("test")
 class InstitutionServiceImplTest {
-  private AutoCloseable closeable;
-  private Student student;
-
+  @Mock private StudentRepository studentRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
 
   @InjectMocks private InstitutionServiceImpl institutionService;
 
+  private Student student;
+  private MockedStatic<RequestContext> mockedRequestContext;
+
   @BeforeEach
   void setUp() {
-    closeable = MockitoAnnotations.openMocks(this);
     student = StudentFixture.create().toModel();
+    mockedRequestContext = mockStatic(RequestContext.class);
+    mockedRequestContext
+        .when(RequestContext::get)
+        .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
+
+    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
   }
 
   @AfterEach
-  void tearDown() throws Exception {
-    closeable.close();
+  void tearDown() {
+    mockedRequestContext.close();
   }
 
   @Test
@@ -58,7 +73,7 @@ class InstitutionServiceImplTest {
         .thenReturn(List.of(studentProgressAPC, studentProgressLifeProject));
 
     BddLogger.when("at least one institution has enabled navigation field");
-    boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
+    boolean result = institutionService.isNavigationEnabledFor(EPortfolioType.APC);
 
     BddLogger.when("it should return true");
     assertTrue(result);
@@ -86,8 +101,7 @@ class InstitutionServiceImplTest {
         .thenReturn(List.of(studentProgressAPC, studentProgress2));
 
     BddLogger.when("no institutions has enabled navigation field");
-    boolean result =
-        institutionService.isNavigationEnabledFor(student, EPortfolioType.LIFE_PROJECT);
+    boolean result = institutionService.isNavigationEnabledFor(EPortfolioType.LIFE_PROJECT);
 
     BddLogger.when("it should return false");
     assertFalse(result);
@@ -100,7 +114,7 @@ class InstitutionServiceImplTest {
     when(studentProgressRepository.findAllByStudent(student)).thenReturn(List.of());
 
     BddLogger.when("student has no program progresses");
-    boolean result = institutionService.isNavigationEnabledFor(student, EPortfolioType.APC);
+    boolean result = institutionService.isNavigationEnabledFor(EPortfolioType.APC);
 
     BddLogger.when("it should return false");
     assertFalse(result);

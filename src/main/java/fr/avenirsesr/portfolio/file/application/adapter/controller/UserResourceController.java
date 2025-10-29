@@ -1,12 +1,10 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.UserPhotoUploadDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.UserPhotoUploadDTOMapper;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/me/storage/users")
 public class UserResourceController {
-  private final UserUtil userUtil;
   private final UserResourceService userResourceService;
 
   @PutMapping(value = "/{userCategory}/{photoType}", consumes = "multipart/form-data")
@@ -50,11 +47,8 @@ public class UserResourceController {
       @RequestParam("file") MultipartFile file)
       throws IOException {
     log.debug("Received request to upload profile picture of user [{}]", principal.getName());
-    User user = userUtil.getUser(principal);
-
     var userPhoto =
         userResourceService.uploadPhoto(
-            user,
             userCategory,
             photoType,
             file.getOriginalFilename(),
@@ -69,9 +63,8 @@ public class UserResourceController {
       Principal principal, @Valid @PathVariable UUID fileId) {
     log.debug(
         "Received request to delete user picture [{}] of user [{}]", fileId, principal.getName());
-    User user = userUtil.getUser(principal);
 
-    userResourceService.deletePhoto(fileId, user);
+    userResourceService.deletePhoto(fileId);
 
     return ResponseEntity.ok("Resource successfully deleted");
   }

@@ -18,26 +18,21 @@ import java.util.UUID;
 public interface TraceService {
   String programNameOfTrace(Trace trace);
 
-  List<Trace> lastTracesOf(User user);
+  List<Trace> lastTracesOf();
 
   List<Trace> getTracesLinkedWithAdditionalSkillProgress(
       User user, AdditionalSkillProgress additionalSkillProgress);
 
   PagedResult<Trace> getTracesView(
-      User user,
-      String keyword,
-      TraceFilter filter,
-      DateFilter dateFilter,
-      PageCriteria pageCriteria);
+      String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria);
 
-  void deleteById(User user, UUID id);
+  void deleteById(UUID id);
 
-  TracesSummaryData getTracesSummary(User user);
+  TracesSummaryData getTracesSummary();
 
-  TraceDetailData getTraceDetail(User user, UUID id);
+  TraceDetailData getTraceDetail(UUID id);
 
   Trace createTrace(
-      User user,
       String title,
       ELanguage language,
       boolean isGroup,
@@ -45,7 +40,6 @@ public interface TraceService {
       String aiJustification);
 
   TraceDetailData updateTrace(
-      User user,
       UUID traceId,
       String title,
       ELanguage language,
@@ -56,14 +50,12 @@ public interface TraceService {
   Optional<LocalDate> getWillBeDeletedAt(Trace trace);
 
   void associateTrace(
-      User user,
       UUID traceId,
       List<UUID> amsIds,
       List<UUID> skillLevelIds,
       List<UUID> additionalSkillProgressIds);
 
   void unassociateTrace(
-      User user,
       UUID traceId,
       List<UUID> amsIds,
       List<UUID> skillLevelIds,

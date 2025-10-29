@@ -11,7 +11,9 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillLevelProgressWithTraceCountData;
@@ -28,7 +30,8 @@ import fr.avenirsesr.portfolio.trace.domain.data.TraceWithProjectNameData;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
@@ -41,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 public class StudentProgressServiceImpl implements StudentProgressService {
   public static final int DESCRIPTION_LENGTH_MAX = 400;
   private static final int MAX_SKILLS = 6;
+  private final StudentRepository studentRepository;
   private final StudentProgressRepository studentProgressRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceService traceService;
@@ -49,14 +53,24 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
 
   @Override
-  public boolean isStudentFollowingAPCProgram(Student student) {
+  public boolean isStudentFollowingAPCProgram() {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     var studentProgress = studentProgressRepository.findAllAPCByStudent(student);
     return !studentProgress.isEmpty();
   }
 
   @Override
   public Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>>
-      getStudentProgressOverview(Student student) {
+      getStudentProgressOverview() {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     var studentProgresses =
         studentProgressRepository.findAllByStudent(student).stream()
             .filter(StudentProgress::isCurrent)
@@ -79,7 +93,12 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> getStudentProgressView(
-      Student student, SortCriteria sortCriteria) {
+      SortCriteria sortCriteria) {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     return studentProgressRepository.findAllByStudent(student).stream()
         .filter(StudentProgress::isCurrent)
         .sorted(StudentProgress.comparatorOf(sortCriteria))
@@ -101,8 +120,12 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public PagedResult<SkillProgressData> getAllTimeSkillsView(
-      Student student, SortCriteria sortCriteria, PageCriteria pageCriteria) {
-
+      SortCriteria sortCriteria, PageCriteria pageCriteria) {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     var studentProgresses = studentProgressRepository.findAllByStudent(student).stream().toList();
 
     var skillProgresses =
@@ -136,19 +159,34 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public PagedResult<SkillLevelProgress> searchSkillLevel(
-      Student student, String keyword, PageCriteria pageCriteria) {
+      String keyword, PageCriteria pageCriteria) {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     log.debug("Searching SkillLevelProgress for {} with pagination {}", student, pageCriteria);
 
     return skillLevelProgressRepository.findAllByStudent(student, pageCriteria, keyword);
   }
 
   @Override
-  public List<SkillLevelProgress> getSkillLevelsBySkillId(Student student, UUID skillId) {
+  public List<SkillLevelProgress> getSkillLevelsBySkillId(UUID skillId) {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);
   }
 
   @Override
-  public List<Skill> getAllSkillList(Student student) {
+  public List<Skill> getAllSkillList() {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     return studentProgressRepository.findAllByStudent(student).stream()
         .flatMap(
             studentProgress ->
@@ -160,17 +198,26 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public PagedResult<AdditionalSkillProgress> getAdditionalSkillsProgresses(
-      Student student, PageCriteria pageCriteria) {
+      PageCriteria pageCriteria) {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     return additionalSkillProgressRepository.findAllByStudent(student, pageCriteria);
   }
 
   @Override
   public AdditionalSkillProgress createAdditionalSkillProgress(
-      Student student,
       UUID additionalSkillId,
       EAdditionalSkillType type,
       EAdditionalSkillLevel level,
       String description) {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     try {
       checkDescriptionField(description);
       Optional<AdditionalSkill> additionalSkill =
@@ -198,11 +245,13 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public AdditionalSkillProgress updateAdditionalSkillProgress(
-      Student student,
-      UUID additionalSkillProgressId,
-      EAdditionalSkillLevel level,
-      String description) {
+      UUID additionalSkillProgressId, EAdditionalSkillLevel level, String description) {
     checkDescriptionField(description);
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
 
     AdditionalSkillProgress additionalSkillProgress =
         additionalSkillProgressRepository
@@ -221,13 +270,24 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public PagedResult<AdditionalSkillProgress> searchAdditionalSkill(
-      Student student, String keyword, PageCriteria pageCriteria) {
+      String keyword, PageCriteria pageCriteria) {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     return additionalSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);
   }
 
   @Override
   public AdditionalSkillProgressDetails getAdditionalSkillProgressDetails(
-      Student student, UUID additionalSkillProgressId) {
+      UUID additionalSkillProgressId) {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
+
     AdditionalSkillProgress additionalSkillProgress =
         additionalSkillProgressRepository
             .findById(additionalSkillProgressId)

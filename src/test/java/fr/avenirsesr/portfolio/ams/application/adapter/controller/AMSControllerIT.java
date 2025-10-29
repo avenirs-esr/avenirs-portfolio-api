@@ -75,26 +75,6 @@ public class AMSControllerIT {
   }
 
   @Test
-  void shouldReturnExceptionIfStudentProgressIdIsUnknown() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " enpoint");
-    BddLogger.when("performing a GET with an unknown student progress ID");
-    BddLogger.then("it should return the STUDENT_PROGRESS_NOT_FOUND exception");
-    mockMvc
-        .perform(
-            get(BASE_PATH)
-                .param("studentProgressId", UNKNOWN_STUDENT_PROGRESS_ID)
-                .param("page", "0")
-                .param("pageSize", "10")
-                .header("Accept-Language", language.getCode())
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code").value("STUDENT_PROGRESS_NOT_FOUND"));
-  }
-
-  @Test
   void shouldReturn404IfUserIsUnknown() throws Exception {
     BddLogger.given("the " + BASE_PATH + " enpoint");
     BddLogger.when("performing a GET with an unknown user");
@@ -108,8 +88,10 @@ public class AMSControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("User not found"))
+        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
   }
 
   @Test

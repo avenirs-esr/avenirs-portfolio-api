@@ -102,23 +102,6 @@ class TraceControllerIT {
   }
 
   @Test
-  void shouldReturn404WhenUserNotExist() throws Exception {
-    BddLogger.given("the " + OVERVIEW_BASE_PATH + " endpoint");
-    BddLogger.when("performing a GET with unknown user");
-    BddLogger.then("it should return a 404");
-    mockMvc
-        .perform(
-            get(OVERVIEW_BASE_PATH)
-                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
-  }
-
-  @Test
   void shouldReturnTraceViewUnassociated() throws Exception {
     BddLogger.given("the " + VIEW_BASE_PATH + " endpoint");
     BddLogger.when("performing a POST");

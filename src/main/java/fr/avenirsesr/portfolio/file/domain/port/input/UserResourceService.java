@@ -16,7 +16,6 @@ public interface UserResourceService {
   byte[] fetchContent(UserPhoto userPhoto) throws IOException;
 
   UserPhoto uploadPhoto(
-      User user,
       EUserCategory category,
       EUserPhotoType type,
       String fileName,
@@ -25,5 +24,5 @@ public interface UserResourceService {
       byte[] content)
       throws IOException;
 
-  void deletePhoto(UUID fileId, User user);
+  void deletePhoto(UUID fileId);
 }

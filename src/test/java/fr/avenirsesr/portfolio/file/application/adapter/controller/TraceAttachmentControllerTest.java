@@ -11,7 +11,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.io.IOException;
 import java.security.Principal;
@@ -25,7 +24,6 @@ import org.springframework.mock.web.MockMultipartFile;
 
 public class TraceAttachmentControllerTest {
 
-  @Mock private UserUtil userUtil;
   @Mock private TraceAttachmentService service;
   @Mock private Principal principal;
 
@@ -44,7 +42,6 @@ public class TraceAttachmentControllerTest {
     traceId = UUID.randomUUID();
 
     when(principal.getName()).thenReturn("user123");
-    when(userUtil.getUser(principal)).thenReturn(user);
   }
 
   @Test
@@ -55,7 +52,7 @@ public class TraceAttachmentControllerTest {
 
     var returnedAttachment = mock(fr.avenirsesr.portfolio.file.domain.model.TraceAttachment.class);
     when(service.uploadTraceAttachment(
-            any(), eq(traceId), anyString(), anyString(), anyLong(), any(byte[].class)))
+            eq(traceId), anyString(), anyString(), anyLong(), any(byte[].class)))
         .thenReturn(returnedAttachment);
 
     BddLogger.when("the attachment upload success");
@@ -67,7 +64,6 @@ public class TraceAttachmentControllerTest {
     assertThat(response.getBody()).isNotNull();
 
     verify(service)
-        .uploadTraceAttachment(
-            any(), eq(traceId), anyString(), anyString(), anyLong(), any(byte[].class));
+        .uploadTraceAttachment(eq(traceId), anyString(), anyString(), anyLong(), any(byte[].class));
   }
 }

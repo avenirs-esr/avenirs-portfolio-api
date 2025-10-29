@@ -1,14 +1,11 @@
 package fr.avenirsesr.portfolio.student.progress.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.StudentProgressOverviewDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.StudentProgressViewDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.StudentProgressOverviewMapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.StudentProgressViewMapper;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
-import java.security.Principal;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/me/student-progress")
 public class StudentProgressController {
   private final StudentProgressService studentProgressService;
-  private final UserUtil userUtil;
 
   @GetMapping("/overview")
-  public List<StudentProgressOverviewDTO> getStudentProgressOverview(Principal principal) {
-    Student student = userUtil.getStudent(principal);
-    return studentProgressService.getStudentProgressOverview(student).entrySet().stream()
+  public List<StudentProgressOverviewDTO> getStudentProgressOverview() {
+    return studentProgressService.getStudentProgressOverview().entrySet().stream()
         .map(
             entry ->
                 StudentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
@@ -37,11 +32,9 @@ public class StudentProgressController {
 
   @GetMapping("/view")
   public List<StudentProgressViewDTO> getStudentProgressView(
-      Principal principal, @RequestParam(name = "sort", required = false) String sortRaw) {
-    Student student = userUtil.getStudent(principal);
-
+      @RequestParam(name = "sort", required = false) String sortRaw) {
     return studentProgressService
-        .getStudentProgressView(student, SortCriteria.fromString(sortRaw))
+        .getStudentProgressView(SortCriteria.fromString(sortRaw))
         .entrySet()
         .stream()
         .map(entry -> StudentProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))

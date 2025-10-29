@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.student.progress.application.adapter.controller;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressRequest;
@@ -11,7 +10,6 @@ import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.Addit
 import fr.avenirsesr.portfolio.student.progress.application.adapter.request.AddAdditionalSkillDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
@@ -27,21 +25,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/additional-skill-progress")
 public class AdditionalSkillProgressController {
   private final StudentProgressService studentProgressService;
-  private final UserUtil userUtil;
 
   @GetMapping()
   public ResponseEntity<PagedResponse<AdditionalSkillProgressDTO>> getAdditionalSkillsProgresses(
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-    Student student = userUtil.getStudent(principal);
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to trace overview of user [{}] (page= {}, size= {})",
-        student,
+        principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());
-    var result = studentProgressService.getAdditionalSkillsProgresses(student, pageCriteria);
+    var result = studentProgressService.getAdditionalSkillsProgresses(pageCriteria);
     return ResponseEntity.ok(
         new PagedResponse<>(
             result.content().stream()
@@ -53,11 +49,9 @@ public class AdditionalSkillProgressController {
   @PostMapping()
   public ResponseEntity<AdditionalSkillProgressDTO> createAdditionalSkillProgress(
       Principal principal, @RequestBody AddAdditionalSkillDTO additionalSkill) {
-    Student student = userUtil.getStudent(principal);
-    log.debug("Received request to create additional skill for student [{}]", student);
+    log.debug("Received request to create additional skill for student [{}]", principal.getName());
     var additionalSkillProgress =
         studentProgressService.createAdditionalSkillProgress(
-            student,
             UUID.fromString(additionalSkill.getId()),
             additionalSkill.getType(),
             additionalSkill.getLevel(),
@@ -71,11 +65,11 @@ public class AdditionalSkillProgressController {
       Principal principal,
       @PathVariable UUID additionalSkillProgressId,
       @Valid @RequestBody AdditionalSkillProgressRequest additionalSkillProgressRequest) {
-    Student student = userUtil.getStudent(principal);
-    log.debug("Received request to update additional skill progress for student [{}]", student);
+    log.debug(
+        "Received request to update additional skill progress for student [{}]",
+        principal.getName());
     var additionalSkillProgress =
         studentProgressService.updateAdditionalSkillProgress(
-            student,
             additionalSkillProgressId,
             additionalSkillProgressRequest.level(),
             additionalSkillProgressRequest.description());
@@ -86,14 +80,12 @@ public class AdditionalSkillProgressController {
   @GetMapping("/{additionalSkillProgressId}")
   public ResponseEntity<AdditionalSkillProgressDetailsDTO> getAdditionalSkillProgressDetails(
       Principal principal, @PathVariable UUID additionalSkillProgressId) {
-    Student student = userUtil.getStudent(principal);
     log.debug(
         "Received request to detailed additional skill progress [{}] for student [{}]",
         additionalSkillProgressId,
-        student);
+        principal.getName());
     AdditionalSkillProgressDetails additionalSkillProgressDetails =
-        studentProgressService.getAdditionalSkillProgressDetails(
-            student, additionalSkillProgressId);
+        studentProgressService.getAdditionalSkillProgressDetails(additionalSkillProgressId);
 
     return ResponseEntity.ok(
         AdditionalSkillProgressMapper.toAdditionalSkillProgressDetailsDTO(

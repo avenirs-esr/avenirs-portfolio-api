@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.file.domain.service;
 
+import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
@@ -12,7 +14,9 @@ import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class TraceAttachmentServiceImpl implements TraceAttachmentService {
+  private final StudentRepository studentRepository;
   private final TraceAttachmentRepository traceAttachmentRepository;
   private final TraceRepository traceRepository;
   private final FileStorageService fileStorageService;
@@ -30,8 +35,13 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
 
   @Override
   public TraceAttachment uploadTraceAttachment(
-      Student student, UUID traceId, String fileName, String mimeType, long size, byte[] content)
+      UUID traceId, String fileName, String mimeType, long size, byte[] content)
       throws IOException {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     var allTraceAttachments = traceAttachmentRepository.findByTrace(trace);
 
@@ -57,7 +67,7 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
     } catch (Exception e) {
       log.error("Failed to upload trace attachment for trace {}", trace, e);
       if (allTraceAttachments.isEmpty()) {
-        traceService.deleteById(student.getUser(), trace.getId());
+        traceService.deleteById(trace.getId());
       }
       throw e;
     }

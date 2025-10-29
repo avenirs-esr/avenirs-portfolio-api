@@ -87,10 +87,10 @@ class NavigationAccessControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature)
                 .header("Accept-Language", language.getCode()))
-        .andExpect(status().isForbidden())
+        .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("User is not student"))
-        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
+        .andExpect(jsonPath("$.message").value("User not found"))
+        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
   }
 
   @Test

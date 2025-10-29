@@ -2,7 +2,9 @@ package fr.avenirsesr.portfolio.file.domain.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.file.domain.data.UserPhotoData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
@@ -62,7 +64,6 @@ public class UserResourceServiceImpl implements UserResourceService {
 
   @Override
   public UserPhoto uploadPhoto(
-      User user,
       EUserCategory category,
       EUserPhotoType photoType,
       String fileName,
@@ -70,6 +71,7 @@ public class UserResourceServiceImpl implements UserResourceService {
       long size,
       byte[] content)
       throws IOException {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
 
     var fileResource =
         new FileResource(
@@ -84,7 +86,7 @@ public class UserResourceServiceImpl implements UserResourceService {
 
     var uri = fileStorageService.upload(fileResource);
 
-    var allPhotos = userPhotoRepository.findAllByUser(user, category, photoType);
+    var allPhotos = userPhotoRepository.findAllByUser(loggedInUser, category, photoType);
     var version =
         allPhotos.stream().map(UserPhoto::getVersion).max(Integer::compareTo).orElse(0) + 1;
     allPhotos.forEach(a -> a.setActiveVersion(false));
@@ -98,8 +100,8 @@ public class UserResourceServiceImpl implements UserResourceService {
             version,
             true,
             uri,
-            user,
-            user,
+            loggedInUser,
+            loggedInUser,
             category,
             photoType);
 
@@ -110,7 +112,7 @@ public class UserResourceServiceImpl implements UserResourceService {
   }
 
   @Override
-  public void deletePhoto(UUID fileId, User user) {
+  public void deletePhoto(UUID fileId) {
     var fileResource =
         userPhotoRepository
             .findById(fileId)
@@ -119,8 +121,8 @@ public class UserResourceServiceImpl implements UserResourceService {
                   log.error("No user photo with id {} found", fileId);
                   return new FileNotFoundException();
                 });
-
-    if (!fileResource.getUser().equals(user)) {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    if (!fileResource.getUser().equals(loggedInUser)) {
       throw new UserNotAuthorizedException();
     }
 

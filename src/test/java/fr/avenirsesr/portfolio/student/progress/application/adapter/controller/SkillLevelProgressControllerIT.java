@@ -140,8 +140,10 @@ public class SkillLevelProgressControllerIT {
                       .header("X-Context-Kid", secretKey)
                       .header("X-Context-Signature", unknownUserSignature)
                       .accept(MediaType.APPLICATION_JSON))
-              .andExpect(status().isForbidden())
-              .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
+              .andExpect(status().isNotFound())
+              .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+              .andExpect(jsonPath("$.message").value("User not found"))
+              .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
         }
       }
 

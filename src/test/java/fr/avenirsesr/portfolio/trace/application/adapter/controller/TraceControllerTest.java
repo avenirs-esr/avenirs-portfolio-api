@@ -10,7 +10,6 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
@@ -22,16 +21,16 @@ import java.security.Principal;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@ActiveProfiles("test")
 class TraceControllerTest {
 
   @Mock private TraceService traceService;
-  @Mock private UserUtil userUtil;
 
   @InjectMocks private TraceController controller;
 
@@ -51,9 +50,8 @@ class TraceControllerTest {
   @Test
   void shouldReturnTraceOverviewForUser() {
     BddLogger.given("a TraceController");
-    when(traceService.lastTracesOf(user)).thenReturn(List.of(trace));
+    when(traceService.lastTracesOf()).thenReturn(List.of(trace));
     when(traceService.programNameOfTrace(trace)).thenReturn("Program Name");
-    when(userUtil.getUser(any())).thenReturn(user);
 
     BddLogger.when("getting the trace overview");
     ResponseEntity<List<TraceOverviewDTO>> response = controller.getTraceOverview(principal);
@@ -70,22 +68,15 @@ class TraceControllerTest {
     assertEquals(trace.getTitle(), dto.title());
     assertEquals("Program Name", dto.programName());
 
-    verify(userUtil).getUser(principal);
-    verify(traceService).lastTracesOf(user);
+    verify(traceService).lastTracesOf();
     verify(traceService).programNameOfTrace(trace);
   }
 
   @Test
   void shouldCreateTraceSuccessfully() {
     BddLogger.given("a TraceController");
-    when(userUtil.getUser(any())).thenReturn(user);
     when(traceService.createTrace(
-            any(User.class),
-            anyString(),
-            any(ELanguage.class),
-            anyBoolean(),
-            anyString(),
-            anyString()))
+            anyString(), any(ELanguage.class), anyBoolean(), anyString(), anyString()))
         .thenReturn(trace);
 
     CreateTraceDTO dto =
@@ -99,10 +90,8 @@ class TraceControllerTest {
     assertNotNull(response.getBody());
     assertEquals(trace.getId(), response.getBody().traceId());
 
-    verify(userUtil).getUser(principal);
     verify(traceService)
         .createTrace(
-            eq(user),
             eq("My Trace"),
             eq(ELanguage.FRENCH),
             eq(true),
@@ -113,9 +102,7 @@ class TraceControllerTest {
   @Test
   void shouldCreateTraceWithNullFields() {
     BddLogger.given("a TraceController");
-
-    when(userUtil.getUser(any())).thenReturn(user);
-    when(traceService.createTrace(user, "Trace sans IA", ELanguage.FRENCH, false, null, null))
+    when(traceService.createTrace("Trace sans IA", ELanguage.FRENCH, false, null, null))
         .thenReturn(trace);
 
     CreateTraceDTO dto = new CreateTraceDTO("Trace sans IA", ELanguage.FRENCH, false, null, null);
@@ -126,6 +113,6 @@ class TraceControllerTest {
     BddLogger.then("it should create the trace with null fields successfully");
     assertEquals(201, response.getStatusCode().value());
 
-    verify(traceService).createTrace(user, "Trace sans IA", ELanguage.FRENCH, false, null, null);
+    verify(traceService).createTrace("Trace sans IA", ELanguage.FRENCH, false, null, null);
   }
 }

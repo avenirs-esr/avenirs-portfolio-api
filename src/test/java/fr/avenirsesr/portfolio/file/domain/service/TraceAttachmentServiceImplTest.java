@@ -5,8 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
@@ -21,11 +24,14 @@ import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,6 +41,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class TraceAttachmentServiceImplTest {
 
+  @Mock private StudentRepository studentRepository;
   @Mock private TraceAttachmentRepository traceAttachmentRepository;
   @Mock private FileStorageService fileStorageService;
   @Mock private TraceRepository traceRepository;
@@ -42,10 +49,28 @@ class TraceAttachmentServiceImplTest {
 
   @InjectMocks private TraceAttachmentServiceImpl service;
 
+  private MockedStatic<RequestContext> mockedRequestContext;
+
+  private Student student;
+
+  @BeforeEach
+  void setUp() {
+    student = StudentFixture.create().toModel();
+    mockedRequestContext = mockStatic(RequestContext.class);
+    mockedRequestContext
+        .when(RequestContext::get)
+        .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
+    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
+  }
+
+  @AfterEach
+  void tearDown() {
+    mockedRequestContext.close();
+  }
+
   @Test
   void uploadTraceAttachment_shouldSaveNewAttachmentAndReturnIt() throws IOException {
     BddLogger.given("a TraceAttachmentServiceImpl service");
-    Student student = StudentFixture.create().toModel();
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
@@ -66,7 +91,7 @@ class TraceAttachmentServiceImplTest {
     BddLogger.when("uploading a trace attachment");
     TraceAttachment result =
         service.uploadTraceAttachment(
-            student, traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes());
+            traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes());
 
     BddLogger.then("it should save the new trace attachment and return it");
     verify(traceAttachmentRepository).findByTrace(trace);
@@ -90,7 +115,6 @@ class TraceAttachmentServiceImplTest {
   @Test
   void uploadTraceAttachment_noExistingAttachments_shouldVersionOne() throws IOException {
     BddLogger.given("a TraceAttachmentServiceImpl service");
-    Student student = StudentFixture.create().toModel();
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
@@ -103,7 +127,7 @@ class TraceAttachmentServiceImplTest {
     BddLogger.when("uploading a trace attachment and there is no existing attachments");
     TraceAttachment result =
         service.uploadTraceAttachment(
-            student, traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes());
+            traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes());
 
     BddLogger.then("it should version one");
     assertThat(result.getVersion()).isEqualTo(1);
@@ -115,7 +139,6 @@ class TraceAttachmentServiceImplTest {
   @Test
   void uploadTraceAttachment_shouldPropagateIOException() throws IOException {
     BddLogger.given("a TraceAttachmentServiceImpl service");
-    Student student = StudentFixture.create().toModel();
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
@@ -130,12 +153,7 @@ class TraceAttachmentServiceImplTest {
         catchThrowableOfType(
             () ->
                 service.uploadTraceAttachment(
-                    student,
-                    traceId,
-                    "file.txt",
-                    EFileType.TXT.getMimeType(),
-                    1234L,
-                    "data".getBytes()),
+                    traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes()),
             IOException.class);
 
     assertThat(thrown).isNotNull();
@@ -147,7 +165,6 @@ class TraceAttachmentServiceImplTest {
   @Test
   void uploadTraceAttachment_shouldThrowFileSizeTooBigException_andDeleteTraceWhenNoAttachments() {
     BddLogger.given("a TraceAttachmentServiceImpl service");
-    Student student = StudentFixture.create().toModel();
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
 
@@ -161,7 +178,6 @@ class TraceAttachmentServiceImplTest {
         catchThrowableOfType(
             () ->
                 service.uploadTraceAttachment(
-                    student,
                     traceId,
                     "bigfile.txt",
                     EFileType.TXT.getMimeType(),
@@ -171,7 +187,7 @@ class TraceAttachmentServiceImplTest {
 
     BddLogger.then("it should throw FileSizeTooBigException and delete the trace");
     assertThat(thrown).isNotNull();
-    verify(traceService).deleteById(student.getUser(), traceId);
+    verify(traceService).deleteById(traceId);
   }
 
   @Test
@@ -179,7 +195,6 @@ class TraceAttachmentServiceImplTest {
       uploadTraceAttachment_shouldThrowFileTypeNotSupportedException_andDeleteTraceWhenNoAttachments()
           throws IOException {
     BddLogger.given("a TraceAttachmentServiceImpl service");
-    Student student = StudentFixture.create().toModel();
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
 
@@ -196,24 +211,18 @@ class TraceAttachmentServiceImplTest {
         catchThrowableOfType(
             () ->
                 service.uploadTraceAttachment(
-                    student,
-                    traceId,
-                    "file.unsupported",
-                    "unsupported-mimetype",
-                    1234L,
-                    "data".getBytes()),
+                    traceId, "file.unsupported", "unsupported-mimetype", 1234L, "data".getBytes()),
             FileTypeNotSupportedException.class);
 
     BddLogger.then("it should throw FileTypeNotSupportedException and delete the trace");
     assertThat(thrown).isNotNull();
-    verify(traceService).deleteById(student.getUser(), traceId);
+    verify(traceService).deleteById(traceId);
   }
 
   @Test
   void uploadTraceAttachment_shouldPropagateIOException_andDeleteTraceWhenNoAttachments()
       throws IOException {
     BddLogger.given("a TraceAttachmentServiceImpl service");
-    Student student = StudentFixture.create().toModel();
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
 
@@ -230,26 +239,20 @@ class TraceAttachmentServiceImplTest {
         catchThrowableOfType(
             () ->
                 service.uploadTraceAttachment(
-                    student,
-                    traceId,
-                    "file.txt",
-                    EFileType.TXT.getMimeType(),
-                    1234L,
-                    "data".getBytes()),
+                    traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes()),
             IOException.class);
 
     BddLogger.then("it should throw IOException and propagate it and delete the trace");
     assertThat(thrown).isNotNull();
     assertThat(thrown).hasMessageContaining("Disk write error");
 
-    verify(traceService).deleteById(student.getUser(), traceId);
+    verify(traceService).deleteById(traceId);
     verify(traceAttachmentRepository, never()).saveAll(any());
   }
 
   @Test
   void uploadTraceAttachment_shouldThrowTraceNotFoundException() {
     BddLogger.given("a TraceAttachmentServiceImpl service");
-    Student student = StudentFixture.create().toModel();
     UUID traceId = UUID.randomUUID();
 
     BddLogger.when("uploading a trace attachment with a trace that is not found");
@@ -259,19 +262,13 @@ class TraceAttachmentServiceImplTest {
     assertThatThrownBy(
             () ->
                 service.uploadTraceAttachment(
-                    student,
-                    traceId,
-                    "file.txt",
-                    EFileType.TXT.getMimeType(),
-                    1234L,
-                    "data".getBytes()))
+                    traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes()))
         .isInstanceOf(TraceNotFoundException.class);
   }
 
   @Test
   void uploadTraceAttachment_shouldThrowUserNotAuthorizedException() {
     BddLogger.given("a TraceAttachmentServiceImpl service");
-    Student student = StudentFixture.create().toModel();
     UUID traceId = UUID.randomUUID();
     // Trace owned by a different user
     Trace trace = TraceFixture.create().toModel();
@@ -283,12 +280,7 @@ class TraceAttachmentServiceImplTest {
     assertThatThrownBy(
             () ->
                 service.uploadTraceAttachment(
-                    student,
-                    traceId,
-                    "file.txt",
-                    EFileType.TXT.getMimeType(),
-                    1234L,
-                    "data".getBytes()))
+                    traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes()))
         .isInstanceOf(UserNotAuthorizedException.class);
   }
 }

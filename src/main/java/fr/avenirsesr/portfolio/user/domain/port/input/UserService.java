@@ -14,10 +14,5 @@ public interface UserService {
   UserProfileOverviewData getUserProfileOverviewDTO(UUID userId, EUserCategory userCategory);
 
   void updateProfile(
-      EUserCategory userCategory,
-      User user,
-      String firstname,
-      String lastname,
-      String email,
-      String bio);
+      EUserCategory userCategory, String firstname, String lastname, String email, String bio);
 }

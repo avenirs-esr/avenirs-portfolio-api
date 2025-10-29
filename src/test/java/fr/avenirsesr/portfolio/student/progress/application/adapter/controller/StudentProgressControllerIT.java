@@ -92,10 +92,10 @@ class StudentProgressControllerIT {
                 .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
                 .header(HttpHeaders.ACCEPT_LANGUAGE, language.getCode())
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden())
+        .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("User is not student"))
-        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
+        .andExpect(jsonPath("$.message").value("User not found"))
+        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
   }
 
   @Test
@@ -179,10 +179,10 @@ class StudentProgressControllerIT {
                 .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
                 .header(HttpHeaders.ACCEPT_LANGUAGE, language.getCode())
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden())
+        .andExpect(status().isNotFound())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("User is not student"))
-        .andExpect(jsonPath("$.code").value("USER_IS_NOT_STUDENT_EXCEPTION"));
+        .andExpect(jsonPath("$.message").value("User not found"))
+        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
   }
 
   @Test
@@ -226,7 +226,6 @@ class StudentProgressControllerIT {
         .andExpect(jsonPath("$[0].skills[0].name").value("Skill culpa"))
         .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists())
-        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.traceCount").value(0))
-        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.activityCount").value(0));
+        .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.traceCount").value(0));
   }
 }

@@ -3,9 +3,7 @@ package fr.avenirsesr.portfolio.trace.domain.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.AdditionalSkillProgressFixture;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
@@ -20,6 +18,8 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
@@ -55,11 +55,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -81,10 +83,22 @@ public class TraceServiceImplTest {
   @InjectMocks private TraceServiceImpl traceService;
 
   private Student student;
+  private MockedStatic<RequestContext> mockedRequestContext;
 
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
+    mockedRequestContext = mockStatic(RequestContext.class);
+    mockedRequestContext
+        .when(RequestContext::get)
+        .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
+
+    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
+  }
+
+  @AfterEach
+  void tearDown() {
+    mockedRequestContext.close();
   }
 
   @Test
@@ -206,7 +220,6 @@ public class TraceServiceImplTest {
         .thenReturn(new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
     PagedResult<Trace> traceView =
         traceService.getTracesView(
-            student.getUser(),
             null,
             new TraceFilter(false, null, null, null),
             null,
@@ -228,7 +241,7 @@ public class TraceServiceImplTest {
 
     BddLogger.when("deleting the trace");
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-    traceService.deleteById(student.getUser(), trace.getId());
+    traceService.deleteById(trace.getId());
 
     BddLogger.then("it should delete the trace and its links to AMS and skill levels");
     verify(traceRepository).save(trace);
@@ -245,9 +258,7 @@ public class TraceServiceImplTest {
     BddLogger.when("deleting the trace but the trace is not found");
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.empty());
     TraceNotFoundException exception =
-        assertThrows(
-            TraceNotFoundException.class,
-            () -> traceService.deleteById(student.getUser(), trace.getId()));
+        assertThrows(TraceNotFoundException.class, () -> traceService.deleteById(trace.getId()));
 
     BddLogger.then("it should throw TRACE_NOT_FOUND");
     assertEquals(EErrorCode.TRACE_NOT_FOUND, exception.getErrorCode());
@@ -259,15 +270,13 @@ public class TraceServiceImplTest {
     BddLogger.given("a TraceServiceImpl service and a trace with AMS and skill levels");
     User otherUser = UserFixture.create().toModel();
     AMS ams = AMSFixture.create().toModel();
-    Trace trace =
-        TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
+    Trace trace = TraceFixture.create().withUser(otherUser).withAmses(List.of(ams)).toModel();
 
     BddLogger.when("deleting the trace of another user");
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
     UserNotAuthorizedException exception =
         assertThrows(
-            UserNotAuthorizedException.class,
-            () -> traceService.deleteById(otherUser, trace.getId()));
+            UserNotAuthorizedException.class, () -> traceService.deleteById(trace.getId()));
 
     BddLogger.then("it should throw UserNotAuthorizedException");
     assertEquals(EErrorCode.USER_NOT_AUTHORIZED, exception.getErrorCode());
@@ -312,7 +321,7 @@ public class TraceServiceImplTest {
     when(traceRepository.findAll(student.getUser(), false)).thenReturn(unassociatedTraces);
     when(traceRepository.findAll(student.getUser(), true)).thenReturn(associatedTraces);
     when(traceConfigurationClient.getTraceConfiguration()).thenReturn(traceConfiguration);
-    TracesSummaryData summary = traceService.getTracesSummary(student.getUser());
+    TracesSummaryData summary = traceService.getTracesSummary();
 
     BddLogger.then("it should return the traces summary");
     assertEquals(4, summary.unassociated());
@@ -332,7 +341,7 @@ public class TraceServiceImplTest {
     String iaJustification = "Justified by AI";
 
     BddLogger.when("creating a new trace");
-    traceService.createTrace(user, title, language, isGroup, personalNote, iaJustification);
+    traceService.createTrace(title, language, isGroup, personalNote, iaJustification);
 
     BddLogger.then("it should create and save the new trace");
     ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
@@ -361,7 +370,7 @@ public class TraceServiceImplTest {
     String title = "Trace with null fields";
 
     BddLogger.when("creating a new trace with null fields");
-    traceService.createTrace(user, title, ELanguage.FRENCH, false, null, null);
+    traceService.createTrace(title, ELanguage.FRENCH, false, null, null);
 
     BddLogger.then("it should create and save the new trace with null fields");
     ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
@@ -406,7 +415,6 @@ public class TraceServiceImplTest {
 
     BddLogger.when("update trace");
     traceService.updateTrace(
-        user,
         trace.getId(),
         titleUpdated,
         languageUpdated,
@@ -461,7 +469,7 @@ public class TraceServiceImplTest {
 
     BddLogger.when("update trace with null fields");
     traceService.updateTrace(
-        user, trace.getId(), titleUpdated, languageUpdated, isGroupUpdated, null, null);
+        trace.getId(), titleUpdated, languageUpdated, isGroupUpdated, null, null);
 
     BddLogger.then("it should update and save the trace with null fields");
     ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
@@ -549,7 +557,6 @@ public class TraceServiceImplTest {
 
     BddLogger.when("associating AMS, SkillLevels and AdditionalSkills");
     traceService.associateTrace(
-        student.getUser(),
         trace.getId(),
         List.of(ams.getId()),
         List.of(skillLevel.getId()),
@@ -572,9 +579,7 @@ public class TraceServiceImplTest {
     TraceNotFoundException ex =
         assertThrows(
             TraceNotFoundException.class,
-            () ->
-                traceService.associateTrace(
-                    student.getUser(), traceId, List.of(), List.of(), List.of()));
+            () -> traceService.associateTrace(traceId, List.of(), List.of(), List.of()));
 
     BddLogger.then("TRACE_NOT_FOUND should be thrown");
     assertEquals(EErrorCode.TRACE_NOT_FOUND, ex.getErrorCode());
@@ -584,16 +589,14 @@ public class TraceServiceImplTest {
   void givenTraceOfAnotherUser_shouldThrowUserNotAuthorizedException() {
     BddLogger.given("a trace belonging to another user");
     User otherUser = UserFixture.create().toModel();
-    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    Trace trace = TraceFixture.create().withUser(otherUser).toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
 
     BddLogger.when("associating with another user");
     UserNotAuthorizedException ex =
         assertThrows(
             UserNotAuthorizedException.class,
-            () ->
-                traceService.associateTrace(
-                    otherUser, trace.getId(), List.of(), List.of(), List.of()));
+            () -> traceService.associateTrace(trace.getId(), List.of(), List.of(), List.of()));
 
     BddLogger.then("USER_NOT_AUTHORIZED should be thrown");
     assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
@@ -611,8 +614,7 @@ public class TraceServiceImplTest {
     assertThrows(
         UserNotAuthorizedException.class,
         () ->
-            traceService.associateTrace(
-                student.getUser(), trace.getId(), List.of(ams.getId()), List.of(), List.of()));
+            traceService.associateTrace(trace.getId(), List.of(ams.getId()), List.of(), List.of()));
   }
 
   @Test
@@ -627,7 +629,7 @@ public class TraceServiceImplTest {
         UserNotAuthorizedException.class,
         () ->
             traceService.associateTrace(
-                student.getUser(), trace.getId(), List.of(), List.of(fakeSkillLevelId), List.of()));
+                trace.getId(), List.of(), List.of(fakeSkillLevelId), List.of()));
   }
 
   @Test
@@ -655,7 +657,6 @@ public class TraceServiceImplTest {
 
     BddLogger.when("unassociating AMS, SkillLevels and AdditionalSkills");
     traceService.unassociateTrace(
-        student.getUser(),
         trace.getId(),
         List.of(ams.getId()),
         List.of(skillLevel.getId()),
@@ -678,9 +679,7 @@ public class TraceServiceImplTest {
     TraceNotFoundException ex =
         assertThrows(
             TraceNotFoundException.class,
-            () ->
-                traceService.unassociateTrace(
-                    student.getUser(), traceId, List.of(), List.of(), List.of()));
+            () -> traceService.unassociateTrace(traceId, List.of(), List.of(), List.of()));
 
     BddLogger.then("TRACE_NOT_FOUND should be thrown");
     assertEquals(EErrorCode.TRACE_NOT_FOUND, ex.getErrorCode());
@@ -690,16 +689,14 @@ public class TraceServiceImplTest {
   void givenTraceOfAnotherUser_shouldThrowUserNotAuthorizedException_whenUnassociating() {
     BddLogger.given("a trace belonging to another user");
     User otherUser = UserFixture.create().toModel();
-    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    Trace trace = TraceFixture.create().withUser(otherUser).toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
 
     BddLogger.when("unassociating with another user");
     UserNotAuthorizedException ex =
         assertThrows(
             UserNotAuthorizedException.class,
-            () ->
-                traceService.unassociateTrace(
-                    otherUser, trace.getId(), List.of(), List.of(), List.of()));
+            () -> traceService.unassociateTrace(trace.getId(), List.of(), List.of(), List.of()));
 
     BddLogger.then("USER_NOT_AUTHORIZED should be thrown");
     assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
@@ -720,8 +717,7 @@ public class TraceServiceImplTest {
     assertThrows(
         UserNotAuthorizedException.class,
         () ->
-            traceService.unassociateTrace(
-                student.getUser(), trace.getId(), List.of(fakeAmsId), List.of(), List.of()));
+            traceService.unassociateTrace(trace.getId(), List.of(fakeAmsId), List.of(), List.of()));
   }
 
   @Test
@@ -730,20 +726,21 @@ public class TraceServiceImplTest {
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
     when(studentService.getStudentById(any(UUID.class))).thenReturn(student);
+    var returnedList =
+        List.of(
+            SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel())
+                .toModel());
 
     UUID fakeSkillLevelId = UUID.randomUUID();
     when(skillLevelProgressRepository.findAllByStudent(any(Student.class)))
-        .thenReturn(
-            List.of(
-                SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel())
-                    .toModel()));
+        .thenReturn(returnedList);
 
     BddLogger.when("unassociating a non-associated SkillLevel");
     assertThrows(
         UserNotAuthorizedException.class,
         () ->
             traceService.unassociateTrace(
-                student.getUser(), trace.getId(), List.of(), List.of(fakeSkillLevelId), List.of()));
+                trace.getId(), List.of(), List.of(fakeSkillLevelId), List.of()));
   }
 
   @Test
@@ -762,7 +759,7 @@ public class TraceServiceImplTest {
         UserNotAuthorizedException.class,
         () ->
             traceService.unassociateTrace(
-                student.getUser(), trace.getId(), List.of(), List.of(), List.of(fakeAdditionalId)));
+                trace.getId(), List.of(), List.of(), List.of(fakeAdditionalId)));
   }
 
   @Test

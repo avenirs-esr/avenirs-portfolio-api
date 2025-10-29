@@ -5,8 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
@@ -17,32 +20,48 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserResourceServiceImplTest {
-  @InjectMocks private UserResourceServiceImpl service;
+  @Mock private StudentRepository studentRepository;
   @Mock private UserPhotoRepository userPhotoRepository;
   @Mock private FileStorageService fileStorageService;
+  @InjectMocks private UserResourceServiceImpl service;
 
   private Student student;
+  private MockedStatic<RequestContext> mockedRequestContext;
 
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
+    mockedRequestContext = mockStatic(RequestContext.class);
+    mockedRequestContext
+        .when(RequestContext::get)
+        .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
+
+    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
+  }
+
+  @AfterEach
+  void tearDown() {
+    mockedRequestContext.close();
   }
 
   @Test
@@ -79,8 +98,7 @@ public class UserResourceServiceImplTest {
     ArgumentCaptor<List<UserPhoto>> captor = ArgumentCaptor.forClass(List.class);
 
     BddLogger.when("uploading a correct photo");
-    UserPhoto result =
-        service.uploadPhoto(user, category, photoType, fileName, mimeType, size, content);
+    UserPhoto result = service.uploadPhoto(category, photoType, fileName, mimeType, size, content);
 
     BddLogger.then("it should save the new photo and return it");
     verify(userPhotoRepository).saveAll(captor.capture());
@@ -112,7 +130,7 @@ public class UserResourceServiceImplTest {
     BddLogger.then("it should throw a FileTypeNotSupportedException");
     org.junit.jupiter.api.Assertions.assertThrows(
         FileTypeNotSupportedException.class,
-        () -> service.uploadPhoto(user, category, photoType, fileName, mimeType, size, content));
+        () -> service.uploadPhoto(category, photoType, fileName, mimeType, size, content));
   }
 
   @Test
@@ -130,7 +148,7 @@ public class UserResourceServiceImplTest {
     BddLogger.then("it should throw a FileSizeTooBigException");
     org.junit.jupiter.api.Assertions.assertThrows(
         FileSizeTooBigException.class,
-        () -> service.uploadPhoto(user, category, photoType, fileName, mimeType, size, content));
+        () -> service.uploadPhoto(category, photoType, fileName, mimeType, size, content));
   }
 
   @Test
@@ -154,7 +172,7 @@ public class UserResourceServiceImplTest {
     when(userPhotoRepository.findById(photoId)).thenReturn(Optional.of(photo));
 
     BddLogger.when("deleting a photo");
-    service.deletePhoto(photoId, user);
+    service.deletePhoto(photoId);
 
     BddLogger.then("it should delete the photo successfully and remove it from database");
     verify(fileStorageService).delete(photo.getId());
@@ -171,7 +189,7 @@ public class UserResourceServiceImplTest {
     BddLogger.when("deleting a non existing photo");
     BddLogger.then("it should throw a FileNotFoundException");
     org.junit.jupiter.api.Assertions.assertThrows(
-        FileNotFoundException.class, () -> service.deletePhoto(photoId, user));
+        FileNotFoundException.class, () -> service.deletePhoto(photoId));
   }
 
   @Test
@@ -198,7 +216,7 @@ public class UserResourceServiceImplTest {
     BddLogger.when("deleting a photo that belongs to another user");
     BddLogger.then("it should throw a UserNotAuthorizedException");
     org.junit.jupiter.api.Assertions.assertThrows(
-        UserNotAuthorizedException.class, () -> service.deletePhoto(photoId, user));
+        UserNotAuthorizedException.class, () -> service.deletePhoto(photoId));
   }
 
   @Test
@@ -226,7 +244,7 @@ public class UserResourceServiceImplTest {
 
     BddLogger.then("it should wrap an IOException in RuntimeException");
     org.junit.jupiter.api.Assertions.assertThrows(
-        RuntimeException.class, () -> service.deletePhoto(photoId, user));
+        RuntimeException.class, () -> service.deletePhoto(photoId));
     verify(userPhotoRepository).removeFromDatabase(photo);
   }
 }

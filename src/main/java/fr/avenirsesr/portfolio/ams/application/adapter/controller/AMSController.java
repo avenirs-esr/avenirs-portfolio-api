@@ -8,8 +8,6 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/me/ams")
 public class AMSController {
-  private final UserUtil userUtil;
   private final AMSService amsService;
 
   @GetMapping("/view")
@@ -43,10 +40,9 @@ public class AMSController {
         studentProgressId,
         pageCriteria.page(),
         pageCriteria.pageSize());
-    Student student = userUtil.getStudent(principal);
 
     PagedResult<AmsView> pagedResult =
-        amsService.findUserAmsByStudentProgress(student, studentProgressId, pageCriteria);
+        amsService.findUserAmsByStudentProgress(studentProgressId, pageCriteria);
 
     List<AmsViewDTO> amsViewDTOs =
         pagedResult.content().stream().map(AmsViewMapper::toDto).toList();

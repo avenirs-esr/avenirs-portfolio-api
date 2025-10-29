@@ -7,8 +7,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceAssociationSearchResultMapper;
@@ -23,7 +21,6 @@ import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -43,14 +40,11 @@ public class TraceController {
   private final TraceService traceService;
   private final AMSService amsService;
   private final StudentProgressService studentProgressService;
-  private final UserUtil userUtil;
 
   @GetMapping("/overview")
   public ResponseEntity<List<TraceOverviewDTO>> getTraceOverview(Principal principal) {
     log.debug("Received request to trace overview of user [{}]", principal.getName());
-    User user = userUtil.getUser(principal);
-
-    List<Trace> traces = traceService.lastTracesOf(user);
+    List<Trace> traces = traceService.lastTracesOf();
 
     List<TraceOverviewDTO> response =
         traces.stream()
@@ -76,10 +70,8 @@ public class TraceController {
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());
-    User user = userUtil.getUser(principal);
-
     PagedResult<Trace> tracesResult =
-        traceService.getTracesView(user, keyword, traceFilter, dateFilter, pageCriteria);
+        traceService.getTracesView(keyword, traceFilter, dateFilter, pageCriteria);
 
     var tracesViewResponse =
         new PagedResponse<>(
@@ -97,9 +89,8 @@ public class TraceController {
   @DeleteMapping("/{traceId}")
   public ResponseEntity<String> deleteTrace(Principal principal, @PathVariable UUID traceId) {
     log.debug("Received request to delete trace [{}] of user [{}]", traceId, principal.getName());
-    User user = userUtil.getUser(principal);
 
-    traceService.deleteById(user, traceId);
+    traceService.deleteById(traceId);
 
     return ResponseEntity.ok("Resource successfully deleted.");
   }
@@ -107,9 +98,8 @@ public class TraceController {
   @GetMapping("/summary")
   public ResponseEntity<TracesSummaryDTO> getTracesSummary(Principal principal) {
     log.debug("Received request to get trace summary of user [{}]", principal.getName());
-    User user = userUtil.getUser(principal);
 
-    TracesSummaryData summary = traceService.getTracesSummary(user);
+    TracesSummaryData summary = traceService.getTracesSummary();
 
     return ResponseEntity.ok(TracesSummaryMapper.toDTO(summary));
   }
@@ -119,9 +109,8 @@ public class TraceController {
       Principal principal, @PathVariable UUID traceId) {
     log.debug(
         "Received request to get trace [{}] detail of user [{}]", traceId, principal.getName());
-    User user = userUtil.getUser(principal);
 
-    TraceDetailData traceDetail = traceService.getTraceDetail(user, traceId);
+    TraceDetailData traceDetail = traceService.getTraceDetail(traceId);
 
     return ResponseEntity.ok(TraceDetailMapper.toDTO(traceDetail));
   }
@@ -133,10 +122,7 @@ public class TraceController {
       @RequestBody AssociateTraceDTO associateTraceDTO) {
     log.info("User [{}] request to associate trace [{}]", principal.getName(), traceId);
 
-    User user = userUtil.getUser(principal);
-
     traceService.associateTrace(
-        user,
         traceId,
         associateTraceDTO.amsIds(),
         associateTraceDTO.skillLevelIds(),
@@ -152,10 +138,7 @@ public class TraceController {
       @RequestBody AssociateTraceDTO associateTraceDTO) {
     log.info("User [{}] request to unassociate trace [{}]", principal.getName(), traceId);
 
-    User user = userUtil.getUser(principal);
-
     traceService.unassociateTrace(
-        user,
         traceId,
         associateTraceDTO.amsIds(),
         associateTraceDTO.skillLevelIds(),
@@ -166,28 +149,24 @@ public class TraceController {
 
   @GetMapping("/search-association/{associationType}")
   public ResponseEntity<PagedResponse<TraceAssociationSearchResult>> getAssociatedTraces(
-      Principal principal,
       @PathVariable ETraceAssociationType associationType,
       @RequestParam(required = false) String keyword,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
-    Student student = userUtil.getStudent(principal);
-
     PagedResult<TraceAssociationSearchResult> results =
         new PagedResult<>(List.of(), new PageInfo(page, pageSize, 0));
 
     switch (associationType) {
       case AMS -> {
-        var amses = amsService.search(student, keyword, pageCriteria);
+        var amses = amsService.search(keyword, pageCriteria);
         results =
             new PagedResult<>(
                 amses.content().stream().map(TraceAssociationSearchResultMapper::toDTO).toList(),
                 amses.pageInfo());
       }
       case SKILL_LEVEL -> {
-        var skillLevelProgresses =
-            studentProgressService.searchSkillLevel(student, keyword, pageCriteria);
+        var skillLevelProgresses = studentProgressService.searchSkillLevel(keyword, pageCriteria);
         results =
             new PagedResult<>(
                 skillLevelProgresses.content().stream()
@@ -196,8 +175,7 @@ public class TraceController {
                 skillLevelProgresses.pageInfo());
       }
       case ADDITIONAL_SKILL -> {
-        var additionalSkills =
-            studentProgressService.searchAdditionalSkill(student, keyword, pageCriteria);
+        var additionalSkills = studentProgressService.searchAdditionalSkill(keyword, pageCriteria);
         results =
             new PagedResult<>(
                 additionalSkills.content().stream()
@@ -215,11 +193,8 @@ public class TraceController {
   public ResponseEntity<TracesCreationResponse> createTrace(
       Principal principal, @Valid @RequestBody CreateTraceDTO createTraceDTO) {
     log.debug("Received request to create new trace for user [{}]", principal.getName());
-    User user = userUtil.getUser(principal);
-
     var trace =
         traceService.createTrace(
-            user,
             createTraceDTO.title(),
             createTraceDTO.language(),
             createTraceDTO.isGroup(),
@@ -236,11 +211,8 @@ public class TraceController {
       @PathVariable UUID traceId,
       @Valid @RequestBody UpdateTraceDTO updateTraceDTO) {
     log.debug("Received request to update trace [{}] for user [{}]", traceId, principal.getName());
-    User user = userUtil.getUser(principal);
-
     var trace =
         traceService.updateTrace(
-            user,
             traceId,
             updateTraceDTO.title(),
             updateTraceDTO.language(),

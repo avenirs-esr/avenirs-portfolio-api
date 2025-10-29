@@ -1,8 +1,6 @@
 package fr.avenirsesr.portfolio.user.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
@@ -33,9 +31,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("/me/users")
 public class UserController {
-
   private final UserService userService;
-  private final UserUtil userUtil;
 
   @GetMapping("/{userCategory}/overview")
   public ResponseEntity<ProfileOverviewDTO> getProfile(
@@ -80,11 +76,8 @@ public class UserController {
           EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {
     log.debug("Received request to update profile of user [{}]", principal.getName());
-    User user = userUtil.getUser(principal);
-
     userService.updateProfile(
         userCategory,
-        user,
         request.getFirstname(),
         request.getLastname(),
         request.getEmail(),

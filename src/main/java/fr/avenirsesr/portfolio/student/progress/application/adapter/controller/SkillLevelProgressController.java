@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillDetailedDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.SkillListItemDTO;
@@ -17,7 +16,6 @@ import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -36,19 +34,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/me/skill-level-progress")
 public class SkillLevelProgressController {
   private final StudentProgressService studentProgressService;
-  private final UserUtil userUtil;
 
   @GetMapping()
   public ResponseEntity<PagedResponse<SkillDTO>> getSkillLevelProgresses(
-      Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(name = "sort", required = false) String sortRaw) {
-    Student student = userUtil.getStudent(principal);
-
     PagedResult<SkillProgressData> pagedResult =
         studentProgressService.getAllTimeSkillsView(
-            student, SortCriteria.fromString(sortRaw), new PageCriteria(page, pageSize));
+            SortCriteria.fromString(sortRaw), new PageCriteria(page, pageSize));
 
     var response =
         new PagedResponse<>(
@@ -70,9 +64,8 @@ public class SkillLevelProgressController {
         "Received request to detailed skill [{}] of user [{}]",
         skillId.toString(),
         principal.getName());
-    Student student = userUtil.getStudent(principal);
     List<SkillLevelProgress> skillLevelProgresses =
-        studentProgressService.getSkillLevelsBySkillId(student, skillId);
+        studentProgressService.getSkillLevelsBySkillId(skillId);
     List<SkillLevel> skillLevels =
         skillLevelProgresses.stream().map(SkillLevelProgress::getSkillLevel).toList();
     Skill skill =
@@ -88,11 +81,10 @@ public class SkillLevelProgressController {
 
   @GetMapping("/all-skill")
   public ResponseEntity<List<SkillListItemDTO>> getAllSkills(Principal principal) {
-    Student student = userUtil.getStudent(principal);
-    log.debug("Received request to all skills of [{}]", student);
+    log.debug("Received request to all skills of [{}]", principal.getName());
 
     var response =
-        studentProgressService.getAllSkillList(student).stream()
+        studentProgressService.getAllSkillList().stream()
             .map(skill -> new SkillListItemDTO(skill.getId(), skill.getName()))
             .toList();
 

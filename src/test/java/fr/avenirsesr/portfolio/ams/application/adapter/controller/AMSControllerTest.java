@@ -3,8 +3,8 @@ package fr.avenirsesr.portfolio.ams.application.adapter.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.ams.application.adapter.dto.AmsViewDTO;
@@ -17,7 +17,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -27,16 +26,16 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@ActiveProfiles("test")
 class AMSControllerTest {
 
-  @Mock private UserUtil userUtil;
   @Mock private AMSService amsService;
 
   @InjectMocks private AMSController controller;
@@ -66,8 +65,7 @@ class AMSControllerTest {
     PagedResult<AmsView> pagedResult =
         new PagedResult<>(amsList, new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 3));
 
-    when(userUtil.getStudent(principal)).thenReturn(student);
-    when(amsService.findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA))
+    when(amsService.findUserAmsByStudentProgress(studentProgressId, DEFAULT_PAGE_CRITERIA))
         .thenReturn(pagedResult);
 
     BddLogger.when("getting the AMS view");
@@ -93,9 +91,7 @@ class AMSControllerTest {
     assertEquals(amsList.getFirst().traceCount(), firstDto.countTraces());
     assertEquals(amsList.getFirst().ams().getStatus(), firstDto.status());
 
-    verify(userUtil).getStudent(principal);
-    verify(amsService)
-        .findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA);
+    verify(amsService).findUserAmsByStudentProgress(studentProgressId, DEFAULT_PAGE_CRITERIA);
   }
 
   @Test
@@ -104,8 +100,7 @@ class AMSControllerTest {
     PagedResult<AmsView> emptyPagedResult =
         new PagedResult<>(new ArrayList<>(), new PageInfo(DEFAULT_PAGE, DEFAULT_SIZE, 0));
 
-    when(userUtil.getStudent(principal)).thenReturn(student);
-    when(amsService.findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA))
+    when(amsService.findUserAmsByStudentProgress(studentProgressId, DEFAULT_PAGE_CRITERIA))
         .thenReturn(emptyPagedResult);
 
     BddLogger.when("getting the AMS view");
@@ -123,9 +118,7 @@ class AMSControllerTest {
     assertEquals(DEFAULT_PAGE, body.page().page());
     assertEquals(DEFAULT_SIZE, body.page().pageSize());
 
-    verify(userUtil).getStudent(principal);
-    verify(amsService)
-        .findUserAmsByStudentProgress(student, studentProgressId, DEFAULT_PAGE_CRITERIA);
+    verify(amsService).findUserAmsByStudentProgress(studentProgressId, DEFAULT_PAGE_CRITERIA);
   }
 
   @Test
@@ -137,9 +130,7 @@ class AMSControllerTest {
         AMSFixture.create().withCount(5).stream().map(ams -> new AmsView(ams, 1, 2)).toList();
     PagedResult<AmsView> pagedResult = new PagedResult<>(amsList, new PageInfo(page, size, 15));
 
-    when(userUtil.getStudent(principal)).thenReturn(student);
-    when(amsService.findUserAmsByStudentProgress(
-            student, studentProgressId, new PageCriteria(page, size)))
+    when(amsService.findUserAmsByStudentProgress(studentProgressId, new PageCriteria(page, size)))
         .thenReturn(pagedResult);
 
     BddLogger.when("getting the AMS view");
@@ -157,15 +148,15 @@ class AMSControllerTest {
     assertEquals(page, body.page().page());
     assertEquals(size, body.page().pageSize());
 
-    verify(userUtil).getStudent(principal);
     verify(amsService)
-        .findUserAmsByStudentProgress(student, studentProgressId, new PageCriteria(page, size));
+        .findUserAmsByStudentProgress(studentProgressId, new PageCriteria(page, size));
   }
 
   @Test
   void shouldPropagateUserNotFoundException() {
     BddLogger.given("a not found user");
-    when(userUtil.getStudent(principal)).thenThrow(new UserNotFoundException());
+    when(amsService.findUserAmsByStudentProgress(any(), any()))
+        .thenThrow(new UserNotFoundException());
 
     BddLogger.when("getting the AMS view");
     BddLogger.then("it should throw an UserNotFoundException");
@@ -173,14 +164,14 @@ class AMSControllerTest {
         UserNotFoundException.class,
         () -> controller.getAmsView(principal, studentProgressId, DEFAULT_PAGE, DEFAULT_SIZE));
 
-    verify(userUtil).getStudent(principal);
-    verifyNoMoreInteractions(amsService);
+    verify(amsService).findUserAmsByStudentProgress(any(), any());
   }
 
   @Test
   void shouldPropagateUserIsNotStudentException() {
     BddLogger.given("a non student user");
-    when(userUtil.getStudent(principal)).thenThrow(new UserIsNotStudentException());
+    when(amsService.findUserAmsByStudentProgress(any(), any()))
+        .thenThrow(new UserIsNotStudentException());
 
     BddLogger.when("getting the AMS view");
     BddLogger.then("it should throw an UserIsNotStudentException");
@@ -188,7 +179,6 @@ class AMSControllerTest {
         UserIsNotStudentException.class,
         () -> controller.getAmsView(principal, studentProgressId, DEFAULT_PAGE, DEFAULT_SIZE));
 
-    verify(userUtil).getStudent(principal);
-    verifyNoMoreInteractions(amsService);
+    verify(amsService).findUserAmsByStudentProgress(any(), any());
   }
 }

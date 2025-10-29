@@ -3,11 +3,11 @@ package fr.avenirsesr.portfolio.user.domain.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
-import fr.avenirsesr.portfolio.user.domain.model.*;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.TeacherService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -61,12 +61,8 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void updateProfile(
-      EUserCategory userCategory,
-      User user,
-      String firstname,
-      String lastname,
-      String email,
-      String bio) {
+      EUserCategory userCategory, String firstname, String lastname, String email, String bio) {
+    var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);
     user.setFirstName(firstname);
     user.setLastName(lastname);
     if (firstname == null) {
