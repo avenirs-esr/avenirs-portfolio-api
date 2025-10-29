@@ -198,13 +198,5 @@ public class StudentProgressServiceImpl implements StudentProgressService {
       Student student, String keyword, PageCriteria pageCriteria) {
 <span class="nc" id="L199">    return additionalSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);</span>
   }
-
-  @Override
-  public AdditionalSkillProgress getAdditionalSkillProgressDetails(
-      Student student, UUID additionalSkillId) {
-<span class="nc" id="L205">    return additionalSkillProgressRepository</span>
-<span class="nc" id="L206">        .findByStudentAndAdditionalSkillId(student.getId(), additionalSkillId)</span>
-<span class="nc" id="L207">        .orElseThrow(AdditionalSkillNotFoundException::new);</span>
-  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
