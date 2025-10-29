@@ -7,36 +7,27 @@ import fr.avenirsesr.portfolio.student.progress.domain.service.StudentProgressSe
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.AdditionalSkillProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-<span class="fc" id="L14">@Slf4j</span>
+<span class="fc" id="L16">@Slf4j</span>
 @Configuration
+@RequiredArgsConstructor
 public class StudentProgressServiceConfig {
-
+  private final StudentRepository studentRepository;
   private final StudentProgressDatabaseRepository studentProgressRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceRepository traceRepository;
   private final AdditionalSkillRepository additionalSkillRepository;
   private final AdditionalSkillProgressDatabaseRepository additionalSkillProgressRepository;
 
-  public StudentProgressServiceConfig(
-      StudentProgressDatabaseRepository studentProgressRepository,
-      SkillLevelProgressRepository skillLevelProgressRepository,
-      TraceRepository traceRepository,
-      AdditionalSkillRepository additionalSkillRepository,
-<span class="fc" id="L29">      AdditionalSkillProgressDatabaseRepository additionalSkillProgressRepository) {</span>
-<span class="fc" id="L30">    this.studentProgressRepository = studentProgressRepository;</span>
-<span class="fc" id="L31">    this.skillLevelProgressRepository = skillLevelProgressRepository;</span>
-<span class="fc" id="L32">    this.traceRepository = traceRepository;</span>
-<span class="fc" id="L33">    this.additionalSkillRepository = additionalSkillRepository;</span>
-<span class="fc" id="L34">    this.additionalSkillProgressRepository = additionalSkillProgressRepository;</span>
-<span class="fc" id="L35">  }</span>
-
   @Bean
   public StudentProgressService studentProgressService() {
-<span class="fc" id="L39">    return new StudentProgressServiceImpl(</span>
+<span class="fc" id="L29">    return new StudentProgressServiceImpl(</span>
+        studentRepository,
         studentProgressRepository,
         skillLevelProgressRepository,
         traceRepository,

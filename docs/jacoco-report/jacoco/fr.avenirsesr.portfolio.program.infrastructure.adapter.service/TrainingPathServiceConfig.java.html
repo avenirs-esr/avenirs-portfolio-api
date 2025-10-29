@@ -3,20 +3,20 @@
 import fr.avenirsesr.portfolio.program.domain.port.input.TrainingPathService;
 import fr.avenirsesr.portfolio.program.domain.port.output.repository.TrainingPathRepository;
 import fr.avenirsesr.portfolio.program.domain.service.TrainingPathServiceImpl;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@RequiredArgsConstructor
 @Configuration
 public class TrainingPathServiceConfig {
+  private final StudentRepository studentRepository;
   private final TrainingPathRepository trainingPathRepository;
-
-<span class="fc" id="L13">  public TrainingPathServiceConfig(TrainingPathRepository trainingPathRepository) {</span>
-<span class="fc" id="L14">    this.trainingPathRepository = trainingPathRepository;</span>
-<span class="fc" id="L15">  }</span>
 
   @Bean
   public TrainingPathService trainingPathService() {
-<span class="fc" id="L19">    return new TrainingPathServiceImpl(trainingPathRepository);</span>
+<span class="fc" id="L19">    return new TrainingPathServiceImpl(studentRepository, trainingPathRepository);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
