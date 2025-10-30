@@ -46,6 +46,12 @@ public interface StudentProgressService {
       EAdditionalSkillLevel level,
       String description);
 
+  AdditionalSkillProgress updateAdditionalSkillProgress(
+      Student student,
+      UUID additionalSkillProgressId,
+      EAdditionalSkillLevel level,
+      String description);
+
   PagedResult<AdditionalSkillProgress> searchAdditionalSkill(
       Student student, String keyword, PageCriteria pageCriteria);
 

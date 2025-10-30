@@ -6,11 +6,13 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDetailsDTO;
+import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressRequest;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.request.AddAdditionalSkillDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
 import java.util.UUID;
@@ -62,6 +64,23 @@ public class AdditionalSkillProgressController {
             additionalSkill.getDescription());
     return ResponseEntity.created(URI.create("/me/additional-skills/" + additionalSkill.getId()))
         .body(AdditionalSkillProgressMapper.toAdditionalSkillProgressDTO(additionalSkillProgress));
+  }
+
+  @PutMapping("/{additionalSkillProgressId}")
+  public ResponseEntity<AdditionalSkillProgressDTO> updateAdditionalSkillProgress(
+      Principal principal,
+      @PathVariable UUID additionalSkillProgressId,
+      @Valid @RequestBody AdditionalSkillProgressRequest additionalSkillProgressRequest) {
+    Student student = userUtil.getStudent(principal);
+    log.debug("Received request to update additional skill progress for student [{}]", student);
+    var additionalSkillProgress =
+        studentProgressService.updateAdditionalSkillProgress(
+            student,
+            additionalSkillProgressId,
+            additionalSkillProgressRequest.level(),
+            additionalSkillProgressRequest.description());
+    return ResponseEntity.ok(
+        AdditionalSkillProgressMapper.toAdditionalSkillProgressDTO(additionalSkillProgress));
   }
 
   @GetMapping("/{additionalSkillProgressId}")

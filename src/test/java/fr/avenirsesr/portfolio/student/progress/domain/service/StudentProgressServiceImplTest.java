@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
+import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
@@ -41,12 +42,14 @@ import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
+import java.util.random.RandomGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,6 +63,9 @@ public class StudentProgressServiceImplTest {
   @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
   @InjectMocks private StudentProgressServiceImpl studentProgressService;
   private Student student;
+  private static final String CHARSET =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  private static final RandomGenerator random = RandomGenerator.getDefault();
 
   @BeforeEach
   void setUp() {
@@ -1042,5 +1048,102 @@ public class StudentProgressServiceImplTest {
         verifyNoInteractions(additionalSkillProgressRepository);
       }
     }
+
+    @Nested
+    class WhenUpdatingAdditionalSkillProgress {
+      @Test
+      void updateAdditionalSkillProgress_shouldSaveLevelAndDescription() {
+        BddLogger.given("the method updateAdditionalSkillProgress");
+        EAdditionalSkillLevel level = EAdditionalSkillLevel.ADVANCED;
+        String description = generate(100);
+        AdditionalSkillProgress additionalSkillProgress =
+            AdditionalSkillProgressFixture.create()
+                .withStudent(student)
+                .withLevel(EAdditionalSkillLevel.BEGINNER)
+                .withDescription(null)
+                .toModel();
+
+        BddLogger.when(
+            "calling the method with a given student, additionalSkillProgressId, level and description");
+        when(additionalSkillProgressRepository.findById(additionalSkillProgress.getId()))
+            .thenReturn(Optional.of(additionalSkillProgress));
+
+        studentProgressService.updateAdditionalSkillProgress(
+            student, additionalSkillProgress.getId(), level, description);
+
+        BddLogger.then("it should save level and description in additional skill progress");
+        ArgumentCaptor<AdditionalSkillProgress> captor =
+            ArgumentCaptor.forClass(AdditionalSkillProgress.class);
+        verify(additionalSkillProgressRepository).save(captor.capture());
+
+        AdditionalSkillProgress savedAdditionalSkillProgress = captor.getValue();
+        assertEquals(additionalSkillProgress.getId(), savedAdditionalSkillProgress.getId());
+        assertEquals(
+            additionalSkillProgress.getStudent(), savedAdditionalSkillProgress.getStudent());
+        assertEquals(additionalSkillProgress.getSkill(), savedAdditionalSkillProgress.getSkill());
+        assertEquals(level, savedAdditionalSkillProgress.getLevel());
+        assertEquals(description, savedAdditionalSkillProgress.getDescription());
+      }
+
+      @Test
+      void updateAdditionalSkillProgress_shouldThrowInvalidDescriptionException() {
+        BddLogger.given("the method getAdditionalSkillProgressDetails");
+        EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
+        String description = generate(401);
+        AdditionalSkillProgress additionalSkillProgress =
+            AdditionalSkillProgressFixture.create().withStudent(student).toModel();
+
+        BddLogger.when(
+            "calling the method with a given student, additionalSkillProgressId, level and too long description");
+        assertThrows(
+            InvalidDescriptionException.class,
+            () ->
+                studentProgressService.updateAdditionalSkillProgress(
+                    student, additionalSkillProgress.getId(), level, description));
+      }
+
+      @Test
+      void updateAdditionalSkillProgress_shouldThrowAdditionalSkillProgressNotFoundException() {
+        BddLogger.given("the method getAdditionalSkillProgressDetails");
+        EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
+        String description = generate(100);
+        AdditionalSkillProgress additionalSkillProgress =
+            AdditionalSkillProgressFixture.create().withStudent(student).toModel();
+
+        BddLogger.when("calling the method with a given student and bad additionalSkillProgressId");
+        assertThrows(
+            AdditionalSkillProgressNotFoundException.class,
+            () ->
+                studentProgressService.updateAdditionalSkillProgress(
+                    student, additionalSkillProgress.getId(), level, description));
+      }
+
+      @Test
+      void updateAdditionalSkillProgress_shouldThrowUserNotAuthorizedException() {
+        BddLogger.given("the method getAdditionalSkillProgressDetails");
+        Student anotherStudent = StudentFixture.create().toModel();
+        EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
+        String description = generate(100);
+        AdditionalSkillProgress additionalSkillProgress =
+            AdditionalSkillProgressFixture.create().withStudent(student).toModel();
+
+        BddLogger.when("calling the method with another given student and level, description");
+        when(additionalSkillProgressRepository.findById(additionalSkillProgress.getId()))
+            .thenReturn(Optional.of(additionalSkillProgress));
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () ->
+                studentProgressService.updateAdditionalSkillProgress(
+                    anotherStudent, additionalSkillProgress.getId(), level, description));
+      }
+    }
+  }
+
+  public static String generate(int length) {
+    return random
+        .ints(length, 0, CHARSET.length())
+        .mapToObj(CHARSET::charAt)
+        .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+        .toString();
   }
 }
