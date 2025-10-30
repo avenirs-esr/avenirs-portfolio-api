@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.domain.service;
 
+import static fr.avenirsesr.portfolio.student.progress.domain.service.StudentProgressServiceImpl.DESCRIPTION_LENGTH_MAX;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -891,7 +892,7 @@ public class StudentProgressServiceImplTest {
       }
 
       @Test
-      void getAdditionalSkillsProgressDetails_shouldReturnAdditionalSkillsProgressDetails() {
+      void getAdditionalSkillProgressDetails_shouldReturnAdditionalSkillsProgressDetails() {
         BddLogger.given("the method getAdditionalSkillProgressDetails");
         String programName = EPortfolioType.LIFE_PROJECT.name();
         AdditionalSkillProgress additionalSkillProgress =
@@ -937,8 +938,7 @@ public class StudentProgressServiceImplTest {
       }
 
       @Test
-      void
-          getAdditionalSkillsProgressDetails_shouldThrowAdditionalSkillProgressNotFoundException() {
+      void getAdditionalSkillProgressDetails_shouldThrowAdditionalSkillProgressNotFoundException() {
         BddLogger.given("the method getAdditionalSkillProgressDetails");
         AdditionalSkillProgress additionalSkillProgress =
             AdditionalSkillProgressFixture.create().withStudent(student).toModel();
@@ -1055,7 +1055,7 @@ public class StudentProgressServiceImplTest {
       void updateAdditionalSkillProgress_shouldSaveLevelAndDescription() {
         BddLogger.given("the method updateAdditionalSkillProgress");
         EAdditionalSkillLevel level = EAdditionalSkillLevel.ADVANCED;
-        String description = generate(100);
+        String description = "Description for additional skill progress test";
         AdditionalSkillProgress additionalSkillProgress =
             AdditionalSkillProgressFixture.create()
                 .withStudent(student)
@@ -1064,7 +1064,8 @@ public class StudentProgressServiceImplTest {
                 .toModel();
 
         BddLogger.when(
-            "calling the method with a given student, additionalSkillProgressId, level and description");
+            "calling the method with a given student, additionalSkillProgressId, level and"
+                + " description");
         when(additionalSkillProgressRepository.findById(additionalSkillProgress.getId()))
             .thenReturn(Optional.of(additionalSkillProgress));
 
@@ -1089,12 +1090,18 @@ public class StudentProgressServiceImplTest {
       void updateAdditionalSkillProgress_shouldThrowInvalidDescriptionException() {
         BddLogger.given("the method getAdditionalSkillProgressDetails");
         EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
-        String description = generate(401);
+        String description =
+            random
+                .ints(DESCRIPTION_LENGTH_MAX + 1, 0, CHARSET.length())
+                .mapToObj(CHARSET::charAt)
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+                .toString();
         AdditionalSkillProgress additionalSkillProgress =
             AdditionalSkillProgressFixture.create().withStudent(student).toModel();
 
         BddLogger.when(
-            "calling the method with a given student, additionalSkillProgressId, level and too long description");
+            "calling the method with a given student, additionalSkillProgressId, level and too long"
+                + " description");
         assertThrows(
             InvalidDescriptionException.class,
             () ->
@@ -1106,7 +1113,7 @@ public class StudentProgressServiceImplTest {
       void updateAdditionalSkillProgress_shouldThrowAdditionalSkillProgressNotFoundException() {
         BddLogger.given("the method getAdditionalSkillProgressDetails");
         EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
-        String description = generate(100);
+        String description = "Description for additional skill progress test";
         AdditionalSkillProgress additionalSkillProgress =
             AdditionalSkillProgressFixture.create().withStudent(student).toModel();
 
@@ -1123,7 +1130,7 @@ public class StudentProgressServiceImplTest {
         BddLogger.given("the method getAdditionalSkillProgressDetails");
         Student anotherStudent = StudentFixture.create().toModel();
         EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
-        String description = generate(100);
+        String description = "Description for additional skill progress test";
         AdditionalSkillProgress additionalSkillProgress =
             AdditionalSkillProgressFixture.create().withStudent(student).toModel();
 
@@ -1137,13 +1144,5 @@ public class StudentProgressServiceImplTest {
                     anotherStudent, additionalSkillProgress.getId(), level, description));
       }
     }
-  }
-
-  public static String generate(int length) {
-    return random
-        .ints(length, 0, CHARSET.length())
-        .mapToObj(CHARSET::charAt)
-        .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
-        .toString();
   }
 }

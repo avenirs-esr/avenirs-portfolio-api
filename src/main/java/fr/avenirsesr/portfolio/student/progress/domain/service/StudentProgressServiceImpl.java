@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class StudentProgressServiceImpl implements StudentProgressService {
+  public static final int DESCRIPTION_LENGTH_MAX = 400;
   private static final int MAX_SKILLS = 6;
   private final StudentProgressRepository studentProgressRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
@@ -249,8 +250,10 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   private static void checkDescriptionField(String description) {
-    if (description != null && description.length() > 400) {
-      log.error("Description too long: {} characters (max = 400)", description.length());
+    if (description != null && description.length() > DESCRIPTION_LENGTH_MAX) {
+      log.error(
+          "Description too long: {} characters (max = " + DESCRIPTION_LENGTH_MAX + ")",
+          description.length());
       throw new InvalidDescriptionException(
           "Description exceeds 400 characters (actual: " + description.length() + ")");
     }
