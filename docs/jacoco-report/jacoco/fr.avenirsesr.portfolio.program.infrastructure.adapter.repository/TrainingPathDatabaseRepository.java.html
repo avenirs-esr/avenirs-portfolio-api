@@ -5,6 +5,9 @@ import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.port.output.repository.TrainingPathRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.TrainingPathMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -14,9 +17,20 @@ public class TrainingPathDatabaseRepository
   private final TrainingPathJpaRepository jpaRepository;
 
   public TrainingPathDatabaseRepository(TrainingPathJpaRepository jpaRepository) {
-<span class="fc" id="L17">    super(</span>
+<span class="fc" id="L20">    super(</span>
         jpaRepository, jpaRepository, TrainingPathMapper::fromDomain, TrainingPathMapper::toDomain);
-<span class="fc" id="L19">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L20">  }</span>
+<span class="fc" id="L22">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L23">  }</span>
+
+  @Override
+  public List&lt;TrainingPath&gt; findAllTrainingPathsByStudents(Student student) {
+<span class="fc" id="L27">    return jpaRepository.findAllByStudentId(student.getId()).stream()</span>
+<span class="fc" id="L28">        .map(TrainingPathMapper::toDomainWithoutRecursion)</span>
+<span class="fc" id="L29">        .collect(Collectors.groupingBy(TrainingPath::getId))</span>
+<span class="fc" id="L30">        .values()</span>
+<span class="fc" id="L31">        .stream()</span>
+<span class="fc" id="L32">        .map(List::getFirst)</span>
+<span class="fc" id="L33">        .toList();</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

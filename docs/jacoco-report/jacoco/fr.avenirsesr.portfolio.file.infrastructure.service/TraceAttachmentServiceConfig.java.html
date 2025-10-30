@@ -6,28 +6,31 @@ import fr.avenirsesr.portfolio.file.domain.service.TraceAttachmentServiceImpl;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.TraceAttachmentDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@RequiredArgsConstructor
 @Configuration
 public class TraceAttachmentServiceConfig {
-  private final StudentRepository studentRepository;
   private final TraceAttachmentDatabaseRepository traceAttachmentRepository;
   private final TraceDatabaseRepository traceRepository;
   private final FileStorageService fileStorageService;
   private final TraceService traceService;
 
+  public TraceAttachmentServiceConfig(
+      TraceAttachmentDatabaseRepository traceAttachmentRepository,
+      TraceDatabaseRepository traceRepository,
+      FileStorageService fileStorageService,
+<span class="fc" id="L23">      TraceService traceService) {</span>
+<span class="fc" id="L24">    this.traceAttachmentRepository = traceAttachmentRepository;</span>
+<span class="fc" id="L25">    this.traceRepository = traceRepository;</span>
+<span class="fc" id="L26">    this.fileStorageService = fileStorageService;</span>
+<span class="fc" id="L27">    this.traceService = traceService;</span>
+<span class="fc" id="L28">  }</span>
+
   @Bean
   public TraceAttachmentService traceAttachmentService() {
-<span class="fc" id="L25">    return new TraceAttachmentServiceImpl(</span>
-        studentRepository,
-        traceAttachmentRepository,
-        traceRepository,
-        fileStorageService,
-        traceService);
+<span class="fc" id="L32">    return new TraceAttachmentServiceImpl(</span>
+        traceAttachmentRepository, traceRepository, fileStorageService, traceService);
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -3,11 +3,11 @@
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
+import fr.avenirsesr.portfolio.user.domain.model.*;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.TeacherService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -61,28 +61,32 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void updateProfile(
-      EUserCategory userCategory, String firstname, String lastname, String email, String bio) {
-<span class="fc" id="L65">    var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);</span>
-<span class="fc" id="L66">    user.setFirstName(firstname);</span>
-<span class="fc" id="L67">    user.setLastName(lastname);</span>
-<span class="pc bpc" id="L68" title="1 of 2 branches missed.">    if (firstname == null) {</span>
-<span class="nc" id="L69">      throw new IllegalArgumentException(&quot;Firstname is null&quot;);</span>
+      EUserCategory userCategory,
+      User user,
+      String firstname,
+      String lastname,
+      String email,
+      String bio) {
+<span class="fc" id="L70">    user.setFirstName(firstname);</span>
+<span class="fc" id="L71">    user.setLastName(lastname);</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">    if (firstname == null) {</span>
+<span class="nc" id="L73">      throw new IllegalArgumentException(&quot;Firstname is null&quot;);</span>
     }
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">    if (lastname == null) {</span>
-<span class="nc" id="L72">      throw new IllegalArgumentException(&quot;Lastname is null&quot;);</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">    if (lastname == null) {</span>
+<span class="nc" id="L76">      throw new IllegalArgumentException(&quot;Lastname is null&quot;);</span>
     }
 
-<span class="fc bfc" id="L75" title="All 2 branches covered.">    if (email != null) {</span>
-<span class="fc" id="L76">      user.setEmail(email);</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">    if (email != null) {</span>
+<span class="fc" id="L80">      user.setEmail(email);</span>
     }
-<span class="fc" id="L78">    userRepository.save(user);</span>
+<span class="fc" id="L82">    userRepository.save(user);</span>
 
-<span class="pc bpc" id="L80" title="1 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="pc bpc" id="L84" title="1 of 3 branches missed.">    switch (userCategory) {</span>
       case STUDENT:
-<span class="fc" id="L82">        studentService.updateProfile(user, bio);</span>
+<span class="fc" id="L86">        studentService.updateProfile(user, bio);</span>
       case TEACHER:
-<span class="fc" id="L84">        teacherService.updateProfile(user, bio);</span>
+<span class="fc" id="L88">        teacherService.updateProfile(user, bio);</span>
     }
-<span class="fc" id="L86">  }</span>
+<span class="fc" id="L90">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
