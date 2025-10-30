@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 <span class="fc" id="L39">@Slf4j</span>
 @AllArgsConstructor
 public class StudentProgressServiceImpl implements StudentProgressService {
+  public static final int DESCRIPTION_LENGTH_MAX = 400;
   private static final int MAX_SKILLS = 6;
   private final StudentProgressRepository studentProgressRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
@@ -49,52 +50,52 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public boolean isStudentFollowingAPCProgram(Student student) {
-<span class="fc" id="L52">    var studentProgress = studentProgressRepository.findAllAPCByStudent(student);</span>
-<span class="fc bfc" id="L53" title="All 2 branches covered.">    return !studentProgress.isEmpty();</span>
+<span class="fc" id="L53">    var studentProgress = studentProgressRepository.findAllAPCByStudent(student);</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">    return !studentProgress.isEmpty();</span>
   }
 
   @Override
   public Map&lt;StudentProgress, List&lt;SkillLevelProgressWithTraceCountData&gt;&gt;
       getStudentProgressOverview(Student student) {
-<span class="fc" id="L59">    var studentProgresses =</span>
-<span class="fc" id="L60">        studentProgressRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L61">            .filter(StudentProgress::isCurrent)</span>
-<span class="fc" id="L62">            .toList();</span>
+<span class="fc" id="L60">    var studentProgresses =</span>
+<span class="fc" id="L61">        studentProgressRepository.findAllByStudent(student).stream()</span>
+<span class="fc" id="L62">            .filter(StudentProgress::isCurrent)</span>
+<span class="fc" id="L63">            .toList();</span>
 
-<span class="fc" id="L64">    return studentProgresses.stream()</span>
-<span class="fc" id="L65">        .collect(</span>
-<span class="fc" id="L66">            Collectors.toMap(</span>
-<span class="fc" id="L67">                Function.identity(),</span>
+<span class="fc" id="L65">    return studentProgresses.stream()</span>
+<span class="fc" id="L66">        .collect(</span>
+<span class="fc" id="L67">            Collectors.toMap(</span>
+<span class="fc" id="L68">                Function.identity(),</span>
                 studentProgress -&gt;
-<span class="fc" id="L69">                    studentProgress.getCurrentSkillLevels().stream()</span>
-<span class="fc" id="L70">                        .limit(MAX_SKILLS / studentProgresses.size())</span>
-<span class="fc" id="L71">                        .map(</span>
+<span class="fc" id="L70">                    studentProgress.getCurrentSkillLevels().stream()</span>
+<span class="fc" id="L71">                        .limit(MAX_SKILLS / studentProgresses.size())</span>
+<span class="fc" id="L72">                        .map(</span>
                             skillLevelProgress -&gt;
-<span class="fc" id="L73">                                new SkillLevelProgressWithTraceCountData(</span>
+<span class="fc" id="L74">                                new SkillLevelProgressWithTraceCountData(</span>
                                     skillLevelProgress,
-<span class="fc" id="L75">                                    traceRepository.linkedWith(skillLevelProgress).size()))</span>
-<span class="fc" id="L76">                        .toList()));</span>
+<span class="fc" id="L76">                                    traceRepository.linkedWith(skillLevelProgress).size()))</span>
+<span class="fc" id="L77">                        .toList()));</span>
   }
 
   @Override
   public Map&lt;StudentProgress, List&lt;SkillLevelProgressWithTraceCountData&gt;&gt; getStudentProgressView(
       Student student, SortCriteria sortCriteria) {
-<span class="fc" id="L82">    return studentProgressRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L83">        .filter(StudentProgress::isCurrent)</span>
-<span class="fc" id="L84">        .sorted(StudentProgress.comparatorOf(sortCriteria))</span>
-<span class="fc" id="L85">        .collect(</span>
-<span class="fc" id="L86">            Collectors.toMap(</span>
-<span class="fc" id="L87">                Function.identity(),</span>
+<span class="fc" id="L83">    return studentProgressRepository.findAllByStudent(student).stream()</span>
+<span class="fc" id="L84">        .filter(StudentProgress::isCurrent)</span>
+<span class="fc" id="L85">        .sorted(StudentProgress.comparatorOf(sortCriteria))</span>
+<span class="fc" id="L86">        .collect(</span>
+<span class="fc" id="L87">            Collectors.toMap(</span>
+<span class="fc" id="L88">                Function.identity(),</span>
                 studentProgress -&gt;
-<span class="fc" id="L89">                    studentProgress.getCurrentSkillLevels().stream()</span>
-<span class="fc" id="L90">                        .sorted(SkillLevelProgress.comparatorOf(sortCriteria))</span>
-<span class="fc" id="L91">                        .map(</span>
+<span class="fc" id="L90">                    studentProgress.getCurrentSkillLevels().stream()</span>
+<span class="fc" id="L91">                        .sorted(SkillLevelProgress.comparatorOf(sortCriteria))</span>
+<span class="fc" id="L92">                        .map(</span>
                             skillLevelProgress -&gt;
-<span class="fc" id="L93">                                new SkillLevelProgressWithTraceCountData(</span>
+<span class="fc" id="L94">                                new SkillLevelProgressWithTraceCountData(</span>
                                     skillLevelProgress,
-<span class="fc" id="L95">                                    traceRepository.linkedWith(skillLevelProgress).size()))</span>
-<span class="fc" id="L96">                        .toList(),</span>
-<span class="nc" id="L97">                (v1, v2) -&gt; v1,</span>
+<span class="fc" id="L96">                                    traceRepository.linkedWith(skillLevelProgress).size()))</span>
+<span class="fc" id="L97">                        .toList(),</span>
+<span class="nc" id="L98">                (v1, v2) -&gt; v1,</span>
                 LinkedHashMap::new));
   }
 
@@ -102,65 +103,65 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   public PagedResult&lt;SkillProgressData&gt; getAllTimeSkillsView(
       Student student, SortCriteria sortCriteria, PageCriteria pageCriteria) {
 
-<span class="fc" id="L105">    var studentProgresses = studentProgressRepository.findAllByStudent(student).stream().toList();</span>
+<span class="fc" id="L106">    var studentProgresses = studentProgressRepository.findAllByStudent(student).stream().toList();</span>
 
-<span class="fc" id="L107">    var skillProgresses =</span>
-<span class="fc" id="L108">        studentProgresses.stream()</span>
-<span class="fc" id="L109">            .filter(studentProgress -&gt; studentProgress.getStartDate().isBefore(LocalDate.now()))</span>
-<span class="fc" id="L110">            .flatMap(</span>
+<span class="fc" id="L108">    var skillProgresses =</span>
+<span class="fc" id="L109">        studentProgresses.stream()</span>
+<span class="fc" id="L110">            .filter(studentProgress -&gt; studentProgress.getStartDate().isBefore(LocalDate.now()))</span>
+<span class="fc" id="L111">            .flatMap(</span>
                 studentProgress -&gt;
-<span class="fc" id="L112">                    studentProgress.getCurrentSkillLevels().stream()</span>
-<span class="fc" id="L113">                        .map(</span>
+<span class="fc" id="L113">                    studentProgress.getCurrentSkillLevels().stream()</span>
+<span class="fc" id="L114">                        .map(</span>
                             currentSkillLevel -&gt;
-<span class="fc" id="L115">                                new SkillProgressData(</span>
-<span class="fc" id="L116">                                    currentSkillLevel.getSkillLevel().getSkill(),</span>
+<span class="fc" id="L116">                                new SkillProgressData(</span>
+<span class="fc" id="L117">                                    currentSkillLevel.getSkillLevel().getSkill(),</span>
                                     studentProgress,
                                     new SkillLevelProgressWithTraceCountData(
                                         currentSkillLevel,
-<span class="fc" id="L120">                                        traceRepository.linkedWith(currentSkillLevel).size()))))</span>
-<span class="fc" id="L121">            .sorted(</span>
-<span class="fc" id="L122">                Comparator.comparing(</span>
+<span class="fc" id="L121">                                        traceRepository.linkedWith(currentSkillLevel).size()))))</span>
+<span class="fc" id="L122">            .sorted(</span>
+<span class="fc" id="L123">                Comparator.comparing(</span>
                         (SkillProgressData skillProgress) -&gt;
-<span class="fc bfc" id="L124" title="All 2 branches covered.">                            skillProgress.studentProgress().isCurrent() ? 0 : 1)</span>
-<span class="fc" id="L125">                    .thenComparing(SkillProgressData.comparatorOf(sortCriteria)))</span>
-<span class="fc" id="L126">            .toList();</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">                            skillProgress.studentProgress().isCurrent() ? 0 : 1)</span>
+<span class="fc" id="L126">                    .thenComparing(SkillProgressData.comparatorOf(sortCriteria)))</span>
+<span class="fc" id="L127">            .toList();</span>
 
-<span class="fc" id="L128">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L129">        skillProgresses.stream()</span>
-<span class="fc" id="L130">            .skip((long) (pageCriteria.page()) * pageCriteria.pageSize())</span>
-<span class="fc" id="L131">            .limit(pageCriteria.pageSize())</span>
-<span class="fc" id="L132">            .toList(),</span>
-<span class="fc" id="L133">        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skillProgresses.size()));</span>
+<span class="fc" id="L129">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L130">        skillProgresses.stream()</span>
+<span class="fc" id="L131">            .skip((long) (pageCriteria.page()) * pageCriteria.pageSize())</span>
+<span class="fc" id="L132">            .limit(pageCriteria.pageSize())</span>
+<span class="fc" id="L133">            .toList(),</span>
+<span class="fc" id="L134">        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skillProgresses.size()));</span>
   }
 
   @Override
   public PagedResult&lt;SkillLevelProgress&gt; searchSkillLevel(
       Student student, String keyword, PageCriteria pageCriteria) {
-<span class="nc" id="L139">    log.debug(&quot;Searching SkillLevelProgress for {} with pagination {}&quot;, student, pageCriteria);</span>
+<span class="nc" id="L140">    log.debug(&quot;Searching SkillLevelProgress for {} with pagination {}&quot;, student, pageCriteria);</span>
 
-<span class="nc" id="L141">    return skillLevelProgressRepository.findAllByStudent(student, pageCriteria, keyword);</span>
+<span class="nc" id="L142">    return skillLevelProgressRepository.findAllByStudent(student, pageCriteria, keyword);</span>
   }
 
   @Override
   public List&lt;SkillLevelProgress&gt; getSkillLevelsBySkillId(Student student, UUID skillId) {
-<span class="fc" id="L146">    return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);</span>
+<span class="fc" id="L147">    return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);</span>
   }
 
   @Override
   public List&lt;Skill&gt; getAllSkillList(Student student) {
-<span class="fc" id="L151">    return studentProgressRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L152">        .flatMap(</span>
+<span class="fc" id="L152">    return studentProgressRepository.findAllByStudent(student).stream()</span>
+<span class="fc" id="L153">        .flatMap(</span>
             studentProgress -&gt;
-<span class="fc" id="L154">                studentProgress.getAllSkillLevels().stream()</span>
-<span class="fc" id="L155">                    .map(skillLevelProgress -&gt; skillLevelProgress.getSkillLevel().getSkill()))</span>
-<span class="fc" id="L156">        .distinct()</span>
-<span class="fc" id="L157">        .toList();</span>
+<span class="fc" id="L155">                studentProgress.getAllSkillLevels().stream()</span>
+<span class="fc" id="L156">                    .map(skillLevelProgress -&gt; skillLevelProgress.getSkillLevel().getSkill()))</span>
+<span class="fc" id="L157">        .distinct()</span>
+<span class="fc" id="L158">        .toList();</span>
   }
 
   @Override
   public PagedResult&lt;AdditionalSkillProgress&gt; getAdditionalSkillsProgresses(
       Student student, PageCriteria pageCriteria) {
-<span class="fc" id="L163">    return additionalSkillProgressRepository.findAllByStudent(student, pageCriteria);</span>
+<span class="fc" id="L164">    return additionalSkillProgressRepository.findAllByStudent(student, pageCriteria);</span>
   }
 
   @Override
@@ -171,63 +172,91 @@ public class StudentProgressServiceImpl implements StudentProgressService {
       EAdditionalSkillLevel level,
       String description) {
     try {
-<span class="pc bpc" id="L174" title="1 of 4 branches missed.">      if (description != null &amp;&amp; description.length() &gt; 400) {</span>
-<span class="nc" id="L175">        log.error(&quot;Description too long: {} characters (max = 400)&quot;, description.length());</span>
-<span class="nc" id="L176">        throw new InvalidDescriptionException(</span>
-<span class="nc" id="L177">            &quot;Description exceeds 400 characters (actual: &quot; + description.length() + &quot;)&quot;);</span>
-      }
-
-<span class="fc" id="L180">      Optional&lt;AdditionalSkill&gt; additionalSkill =</span>
-<span class="fc" id="L181">          additionalSkillRepository.findById(additionalSkillId);</span>
-<span class="fc" id="L182">      AdditionalSkillProgress additionalSkillProgress =</span>
-<span class="fc" id="L183">          AdditionalSkillProgress.create(</span>
+<span class="fc" id="L175">      checkDescriptionField(description);</span>
+<span class="fc" id="L176">      Optional&lt;AdditionalSkill&gt; additionalSkill =</span>
+<span class="fc" id="L177">          additionalSkillRepository.findById(additionalSkillId);</span>
+<span class="fc" id="L178">      AdditionalSkillProgress additionalSkillProgress =</span>
+<span class="fc" id="L179">          AdditionalSkillProgress.create(</span>
               student,
-<span class="fc" id="L185">              additionalSkill.orElseThrow(AdditionalSkillNotFoundException::new),</span>
+<span class="fc" id="L181">              additionalSkill.orElseThrow(AdditionalSkillNotFoundException::new),</span>
               level,
               description);
-<span class="fc bfc" id="L188" title="All 2 branches covered.">      if (additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">      if (additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(</span>
           additionalSkillProgress)) {
-<span class="fc" id="L190">        log.error(</span>
+<span class="fc" id="L186">        log.error(</span>
             &quot;Failed to add additional skill [{}] for student [{}] because it already exists&quot;,
             additionalSkillId,
             student);
-<span class="fc" id="L194">        throw new DuplicateAdditionalSkillException();</span>
+<span class="fc" id="L190">        throw new DuplicateAdditionalSkillException();</span>
       }
-<span class="fc" id="L196">      return additionalSkillProgressRepository.save(additionalSkillProgress);</span>
-<span class="fc" id="L197">    } catch (AdditionalSkillNotFoundException e) {</span>
-<span class="fc" id="L198">      log.error(&quot;Failed to add additional skill for student [{}]: {}&quot;, student, e.getMessage());</span>
-<span class="fc" id="L199">      throw e;</span>
+<span class="fc" id="L192">      return additionalSkillProgressRepository.save(additionalSkillProgress);</span>
+<span class="fc" id="L193">    } catch (AdditionalSkillNotFoundException e) {</span>
+<span class="fc" id="L194">      log.error(&quot;Failed to add additional skill for student [{}]: {}&quot;, student, e.getMessage());</span>
+<span class="fc" id="L195">      throw e;</span>
     }
+  }
+
+  @Override
+  public AdditionalSkillProgress updateAdditionalSkillProgress(
+      Student student,
+      UUID additionalSkillProgressId,
+      EAdditionalSkillLevel level,
+      String description) {
+<span class="fc" id="L205">    checkDescriptionField(description);</span>
+
+<span class="fc" id="L207">    AdditionalSkillProgress additionalSkillProgress =</span>
+        additionalSkillProgressRepository
+<span class="fc" id="L209">            .findById(additionalSkillProgressId)</span>
+<span class="fc" id="L210">            .orElseThrow(AdditionalSkillProgressNotFoundException::new);</span>
+
+<span class="fc bfc" id="L212" title="All 2 branches covered.">    if (!additionalSkillProgress.getStudent().getId().equals(student.getId())) {</span>
+<span class="fc" id="L213">      throw new UserNotAuthorizedException();</span>
+    }
+
+<span class="fc" id="L216">    additionalSkillProgress.setLevel(level);</span>
+<span class="fc" id="L217">    additionalSkillProgress.setDescription(description);</span>
+
+<span class="fc" id="L219">    return additionalSkillProgressRepository.save(additionalSkillProgress);</span>
   }
 
   @Override
   public PagedResult&lt;AdditionalSkillProgress&gt; searchAdditionalSkill(
       Student student, String keyword, PageCriteria pageCriteria) {
-<span class="nc" id="L206">    return additionalSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);</span>
+<span class="nc" id="L225">    return additionalSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);</span>
   }
 
   @Override
   public AdditionalSkillProgressDetails getAdditionalSkillProgressDetails(
       Student student, UUID additionalSkillProgressId) {
-<span class="fc" id="L212">    AdditionalSkillProgress additionalSkillProgress =</span>
+<span class="fc" id="L231">    AdditionalSkillProgress additionalSkillProgress =</span>
         additionalSkillProgressRepository
-<span class="fc" id="L214">            .findById(additionalSkillProgressId)</span>
-<span class="fc" id="L215">            .orElseThrow(AdditionalSkillProgressNotFoundException::new);</span>
+<span class="fc" id="L233">            .findById(additionalSkillProgressId)</span>
+<span class="fc" id="L234">            .orElseThrow(AdditionalSkillProgressNotFoundException::new);</span>
 
-<span class="fc bfc" id="L217" title="All 2 branches covered.">    if (!additionalSkillProgress.getStudent().getId().equals(student.getId())) {</span>
-<span class="fc" id="L218">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">    if (!additionalSkillProgress.getStudent().getId().equals(student.getId())) {</span>
+<span class="fc" id="L237">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L221">    List&lt;Trace&gt; traces =</span>
-<span class="fc" id="L222">        traceService.getTracesLinkedWithAdditionalSkillProgress(</span>
-<span class="fc" id="L223">            student.getUser(), additionalSkillProgress);</span>
-<span class="fc" id="L224">    return new AdditionalSkillProgressDetails(</span>
+<span class="fc" id="L240">    List&lt;Trace&gt; traces =</span>
+<span class="fc" id="L241">        traceService.getTracesLinkedWithAdditionalSkillProgress(</span>
+<span class="fc" id="L242">            student.getUser(), additionalSkillProgress);</span>
+<span class="fc" id="L243">    return new AdditionalSkillProgressDetails(</span>
         additionalSkillProgress,
-<span class="fc" id="L226">        traces.stream()</span>
-<span class="fc" id="L227">            .map(</span>
+<span class="fc" id="L245">        traces.stream()</span>
+<span class="fc" id="L246">            .map(</span>
                 trace -&gt;
-<span class="fc" id="L229">                    new TraceWithProjectNameData(trace, traceService.programNameOfTrace(trace)))</span>
-<span class="fc" id="L230">            .toList());</span>
+<span class="fc" id="L248">                    new TraceWithProjectNameData(trace, traceService.programNameOfTrace(trace)))</span>
+<span class="fc" id="L249">            .toList());</span>
   }
+
+  private static void checkDescriptionField(String description) {
+<span class="fc bfc" id="L253" title="All 4 branches covered.">    if (description != null &amp;&amp; description.length() &gt; DESCRIPTION_LENGTH_MAX) {</span>
+<span class="fc" id="L254">      log.error(</span>
+          &quot;Description too long: {} characters (max = &quot; + DESCRIPTION_LENGTH_MAX + &quot;)&quot;,
+<span class="fc" id="L256">          description.length());</span>
+<span class="fc" id="L257">      throw new InvalidDescriptionException(</span>
+<span class="fc" id="L258">          &quot;Description exceeds 400 characters (actual: &quot; + description.length() + &quot;)&quot;);</span>
+    }
+<span class="fc" id="L260">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
