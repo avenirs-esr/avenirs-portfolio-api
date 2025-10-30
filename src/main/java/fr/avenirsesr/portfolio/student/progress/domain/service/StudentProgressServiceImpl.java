@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class StudentProgressServiceImpl implements StudentProgressService {
+  public static final int DESCRIPTION_LENGTH_MAX = 400;
   private static final int MAX_SKILLS = 6;
   private final StudentProgressRepository studentProgressRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
@@ -171,12 +172,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
       EAdditionalSkillLevel level,
       String description) {
     try {
-      if (description != null && description.length() > 400) {
-        log.error("Description too long: {} characters (max = 400)", description.length());
-        throw new InvalidDescriptionException(
-            "Description exceeds 400 characters (actual: " + description.length() + ")");
-      }
-
+      checkDescriptionField(description);
       Optional<AdditionalSkill> additionalSkill =
           additionalSkillRepository.findById(additionalSkillId);
       AdditionalSkillProgress additionalSkillProgress =
@@ -198,6 +194,29 @@ public class StudentProgressServiceImpl implements StudentProgressService {
       log.error("Failed to add additional skill for student [{}]: {}", student, e.getMessage());
       throw e;
     }
+  }
+
+  @Override
+  public AdditionalSkillProgress updateAdditionalSkillProgress(
+      Student student,
+      UUID additionalSkillProgressId,
+      EAdditionalSkillLevel level,
+      String description) {
+    checkDescriptionField(description);
+
+    AdditionalSkillProgress additionalSkillProgress =
+        additionalSkillProgressRepository
+            .findById(additionalSkillProgressId)
+            .orElseThrow(AdditionalSkillProgressNotFoundException::new);
+
+    if (!additionalSkillProgress.getStudent().getId().equals(student.getId())) {
+      throw new UserNotAuthorizedException();
+    }
+
+    additionalSkillProgress.setLevel(level);
+    additionalSkillProgress.setDescription(description);
+
+    return additionalSkillProgressRepository.save(additionalSkillProgress);
   }
 
   @Override
@@ -228,5 +247,15 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                 trace ->
                     new TraceWithProjectNameData(trace, traceService.programNameOfTrace(trace)))
             .toList());
+  }
+
+  private static void checkDescriptionField(String description) {
+    if (description != null && description.length() > DESCRIPTION_LENGTH_MAX) {
+      log.error(
+          "Description too long: {} characters (max = " + DESCRIPTION_LENGTH_MAX + ")",
+          description.length());
+      throw new InvalidDescriptionException(
+          "Description exceeds 400 characters (actual: " + description.length() + ")");
+    }
   }
 }

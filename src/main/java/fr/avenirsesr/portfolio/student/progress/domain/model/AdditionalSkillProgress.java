@@ -14,8 +14,8 @@ import lombok.Setter;
 public class AdditionalSkillProgress extends AvenirsBaseModel {
   private final Student student;
   private final AdditionalSkill skill;
-  private final EAdditionalSkillLevel level;
-  private final String description;
+  private EAdditionalSkillLevel level;
+  private String description;
 
   private AdditionalSkillProgress(
       UUID id,
