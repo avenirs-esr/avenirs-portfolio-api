@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.user.application.adapter.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.user.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
-import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
@@ -28,14 +26,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-<span class="fc" id="L31">@Slf4j</span>
+<span class="fc" id="L29">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/users&quot;)
 public class UserController {
-
   private final UserService userService;
-  private final UserUtil userUtil;
 
   @GetMapping(&quot;/{userCategory}/overview&quot;)
   public ResponseEntity&lt;ProfileOverviewDTO&gt; getProfile(
@@ -49,22 +45,22 @@ public class UserController {
               schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
           @PathVariable
           EUserCategory userCategory) {
-<span class="fc" id="L52">    UUID userId = UUID.fromString(principal.getName());</span>
+<span class="fc" id="L48">    UUID userId = UUID.fromString(principal.getName());</span>
 
-<span class="fc" id="L54">    UserProfileOverviewData overview = userService.getUserProfileOverviewDTO(userId, userCategory);</span>
-<span class="fc" id="L55">    var userPhotos = userService.getUserPhotos(userId, userCategory);</span>
-<span class="fc" id="L56">    String baseUrl = extractOrigin(request);</span>
+<span class="fc" id="L50">    UserProfileOverviewData overview = userService.getUserProfileOverviewDTO(userId, userCategory);</span>
+<span class="fc" id="L51">    var userPhotos = userService.getUserPhotos(userId, userCategory);</span>
+<span class="fc" id="L52">    String baseUrl = extractOrigin(request);</span>
 
-<span class="fc" id="L58">    return ResponseEntity.ok(</span>
-<span class="fc" id="L59">        ProfileOverviewMapper.userDomainToDto(</span>
+<span class="fc" id="L54">    return ResponseEntity.ok(</span>
+<span class="fc" id="L55">        ProfileOverviewMapper.userDomainToDto(</span>
             overview,
             new UserPhotosData(
-<span class="fc" id="L62">                userPhotos.profileFileId(),</span>
-<span class="fc" id="L63">                userPhotos.profileFileName(),</span>
-<span class="fc" id="L64">                baseUrl + userPhotos.profileFileUrl(),</span>
-<span class="fc" id="L65">                userPhotos.coverFileId(),</span>
-<span class="fc" id="L66">                userPhotos.coverFileName(),</span>
-<span class="fc" id="L67">                baseUrl + userPhotos.coverFileUrl())));</span>
+<span class="fc" id="L58">                userPhotos.profileFileId(),</span>
+<span class="fc" id="L59">                userPhotos.profileFileName(),</span>
+<span class="fc" id="L60">                baseUrl + userPhotos.profileFileUrl(),</span>
+<span class="fc" id="L61">                userPhotos.coverFileId(),</span>
+<span class="fc" id="L62">                userPhotos.coverFileName(),</span>
+<span class="fc" id="L63">                baseUrl + userPhotos.coverFileUrl())));</span>
   }
 
   @PutMapping(&quot;/{userCategory}/update&quot;)
@@ -79,32 +75,29 @@ public class UserController {
           @PathVariable
           EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {
-<span class="fc" id="L82">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L83">    User user = userUtil.getUser(principal);</span>
-
-<span class="fc" id="L85">    userService.updateProfile(</span>
+<span class="fc" id="L78">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
+<span class="fc" id="L79">    userService.updateProfile(</span>
         userCategory,
-        user,
-<span class="fc" id="L88">        request.getFirstname(),</span>
-<span class="fc" id="L89">        request.getLastname(),</span>
-<span class="fc" id="L90">        request.getEmail(),</span>
-<span class="fc" id="L91">        request.getBio());</span>
-<span class="fc" id="L92">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+<span class="fc" id="L81">        request.getFirstname(),</span>
+<span class="fc" id="L82">        request.getLastname(),</span>
+<span class="fc" id="L83">        request.getEmail(),</span>
+<span class="fc" id="L84">        request.getBio());</span>
+<span class="fc" id="L85">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 
   private static String extractOrigin(HttpServletRequest request) {
     try {
-<span class="nc" id="L97">      URI referer = URI.create(request.getHeader(&quot;Referer&quot;));</span>
+<span class="nc" id="L90">      URI referer = URI.create(request.getHeader(&quot;Referer&quot;));</span>
 
-<span class="nc" id="L99">      return ServletUriComponentsBuilder.fromRequestUri(request)</span>
-<span class="nc" id="L100">          .replacePath(&quot;/apim&quot;)</span>
-<span class="nc bnc" id="L101" title="All 2 branches missed.">          .scheme(referer.getScheme() != null ? referer.getScheme() : request.getScheme())</span>
-<span class="nc bnc" id="L102" title="All 2 branches missed.">          .host(referer.getHost() != null ? referer.getHost() : request.getServerName())</span>
-<span class="nc bnc" id="L103" title="All 2 branches missed.">          .port(referer.getHost() != null ? referer.getPort() : request.getServerPort())</span>
-<span class="nc" id="L104">          .build()</span>
-<span class="nc" id="L105">          .toUriString();</span>
-<span class="fc" id="L106">    } catch (Exception e) {</span>
-<span class="fc" id="L107">      return null;</span>
+<span class="nc" id="L92">      return ServletUriComponentsBuilder.fromRequestUri(request)</span>
+<span class="nc" id="L93">          .replacePath(&quot;/apim&quot;)</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">          .scheme(referer.getScheme() != null ? referer.getScheme() : request.getScheme())</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">          .host(referer.getHost() != null ? referer.getHost() : request.getServerName())</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">          .port(referer.getHost() != null ? referer.getPort() : request.getServerPort())</span>
+<span class="nc" id="L97">          .build()</span>
+<span class="nc" id="L98">          .toUriString();</span>
+<span class="fc" id="L99">    } catch (Exception e) {</span>
+<span class="fc" id="L100">      return null;</span>
     }
   }
 }
