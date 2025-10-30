@@ -10,7 +10,9 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericDeletableJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.DateFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
+import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -33,8 +35,11 @@ import org.springframework.stereotype.Repository;
 @Where(clause = "deleted_at IS NULL")
 public class TraceDatabaseRepository
     extends GenericDeletableJpaRepositoryAdapter<Trace, TraceEntity> implements TraceRepository {
+  private final TraceJpaRepository jpaRepository;
+
   public TraceDatabaseRepository(TraceJpaRepository jpaRepository) {
     super(jpaRepository, jpaRepository, TraceMapper::fromDomain, TraceMapper::toDomain);
+    this.jpaRepository = jpaRepository;
   }
 
   @Override
@@ -130,6 +135,17 @@ public class TraceDatabaseRepository
         .findAll(
             TraceSpecification.ofSkillLevelProgress(
                 SkillLevelProgressMapper.fromDomain(skillLevelProgress)))
+        .stream()
+        .map(TraceMapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<Trace> linkedWith(AdditionalSkillProgress additionalSkillProgress) {
+    return jpaSpecificationExecutor
+        .findAll(
+            TraceSpecification.ofAdditionalSkillProgress(
+                AdditionalSkillProgressMapper.fromDomain(additionalSkillProgress)))
         .stream()
         .map(TraceMapper::toDomain)
         .toList();

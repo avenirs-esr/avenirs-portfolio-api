@@ -71,6 +71,14 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
+  public List<Trace> getTracesLinkedWithAdditionalSkillProgress(
+      User user, AdditionalSkillProgress additionalSkillProgress) {
+    List<Trace> traces = traceRepository.linkedWith(additionalSkillProgress);
+    traces.forEach(trace -> checkIfUserIsAuthorizedOnTrace(user, trace));
+    return traces;
+  }
+
+  @Override
   public PagedResult<Trace> getTracesView(
       User user,
       String keyword,

@@ -11,23 +11,31 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.AdditionalSkillProgressFixture;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
+import fr.avenirsesr.portfolio.student.progress.domain.exception.AdditionalSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.model.*;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.*;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
@@ -46,6 +54,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class StudentProgressServiceImplTest {
   @Mock private StudentProgressRepository studentProgressRepository;
+  @Mock private TraceService traceService;
   @Mock private TraceRepository traceRepository;
   @Mock private AdditionalSkillRepository additionalSkillRepository;
   @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
@@ -873,6 +882,85 @@ public class StudentProgressServiceImplTest {
                 + " repository");
         org.assertj.core.api.Assertions.assertThat(result).isSameAs(expected);
         verify(additionalSkillProgressRepository).findAllByStudent(localStudent, criteria);
+      }
+
+      @Test
+      void getAdditionalSkillsProgressDetails_shouldReturnAdditionalSkillsProgressDetails() {
+        BddLogger.given("the method getAdditionalSkillProgressDetails");
+        String programName = EPortfolioType.LIFE_PROJECT.name();
+        AdditionalSkillProgress additionalSkillProgress =
+            AdditionalSkillProgressFixture.create().withStudent(student).toModel();
+        Trace trace1 =
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withAdditionalSkillProgresses(List.of(additionalSkillProgress))
+                .toModel();
+        Trace trace2 =
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withAdditionalSkillProgresses(List.of(additionalSkillProgress))
+                .toModel();
+
+        BddLogger.when("calling the method with a given student and additionalSkillProgressId");
+        when(additionalSkillProgressRepository.findById(additionalSkillProgress.getId()))
+            .thenReturn(Optional.of(additionalSkillProgress));
+        when(traceService.getTracesLinkedWithAdditionalSkillProgress(
+                student.getUser(), additionalSkillProgress))
+            .thenReturn(List.of(trace1, trace2));
+        when(traceService.programNameOfTrace(trace1)).thenReturn(programName);
+        when(traceService.programNameOfTrace(trace2)).thenReturn(programName);
+
+        AdditionalSkillProgressDetails additionalSkillProgressDetails =
+            studentProgressService.getAdditionalSkillProgressDetails(
+                student, additionalSkillProgress.getId());
+
+        BddLogger.then("it should return the expected additional skill progress details");
+        assertEquals(
+            additionalSkillProgressDetails.additionalSkillProgress(), additionalSkillProgress);
+        assertEquals(2, additionalSkillProgressDetails.tracesWithProjectName().size());
+        assertEquals(
+            trace1, additionalSkillProgressDetails.tracesWithProjectName().getFirst().trace());
+        assertEquals(
+            programName,
+            additionalSkillProgressDetails.tracesWithProjectName().getFirst().programName());
+        assertEquals(
+            trace2, additionalSkillProgressDetails.tracesWithProjectName().getLast().trace());
+        assertEquals(
+            programName,
+            additionalSkillProgressDetails.tracesWithProjectName().getLast().programName());
+      }
+
+      @Test
+      void
+          getAdditionalSkillsProgressDetails_shouldThrowAdditionalSkillProgressNotFoundException() {
+        BddLogger.given("the method getAdditionalSkillProgressDetails");
+        AdditionalSkillProgress additionalSkillProgress =
+            AdditionalSkillProgressFixture.create().withStudent(student).toModel();
+
+        BddLogger.when("calling the method with a given student and bad additionalSkillProgressId");
+        assertThrows(
+            AdditionalSkillProgressNotFoundException.class,
+            () ->
+                studentProgressService.getAdditionalSkillProgressDetails(
+                    student, additionalSkillProgress.getId()));
+      }
+
+      @Test
+      void getAdditionalSkillsProgressDetails_shouldThrowUserNotAuthorizedException() {
+        BddLogger.given("the method getAdditionalSkillProgressDetails");
+        Student anotherStudent = StudentFixture.create().toModel();
+        AdditionalSkillProgress additionalSkillProgress =
+            AdditionalSkillProgressFixture.create().withStudent(student).toModel();
+
+        BddLogger.when(
+            "calling the method with another given student and additionalSkillProgressId");
+        when(additionalSkillProgressRepository.findById(additionalSkillProgress.getId()))
+            .thenReturn(Optional.of(additionalSkillProgress));
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () ->
+                studentProgressService.getAdditionalSkillProgressDetails(
+                    anotherStudent, additionalSkillProgress.getId()));
       }
     }
 

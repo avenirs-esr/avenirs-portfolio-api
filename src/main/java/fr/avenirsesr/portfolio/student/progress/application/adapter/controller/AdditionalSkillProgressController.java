@@ -5,8 +5,10 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.shared.application.adapter.utils.UserUtil;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDTO;
+import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.request.AddAdditionalSkillDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.net.URI;
@@ -60,5 +62,22 @@ public class AdditionalSkillProgressController {
             additionalSkill.getDescription());
     return ResponseEntity.created(URI.create("/me/additional-skills/" + additionalSkill.getId()))
         .body(AdditionalSkillProgressMapper.toAdditionalSkillProgressDTO(additionalSkillProgress));
+  }
+
+  @GetMapping("/{additionalSkillProgressId}")
+  public ResponseEntity<AdditionalSkillProgressDetailsDTO> getAdditionalSkillProgressDetails(
+      Principal principal, @PathVariable UUID additionalSkillProgressId) {
+    Student student = userUtil.getStudent(principal);
+    log.debug(
+        "Received request to detailed additional skill progress [{}] for student [{}]",
+        additionalSkillProgressId,
+        student);
+    AdditionalSkillProgressDetails additionalSkillProgressDetails =
+        studentProgressService.getAdditionalSkillProgressDetails(
+            student, additionalSkillProgressId);
+
+    return ResponseEntity.ok(
+        AdditionalSkillProgressMapper.toAdditionalSkillProgressDetailsDTO(
+            additionalSkillProgressDetails));
   }
 }
