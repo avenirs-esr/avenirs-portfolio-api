@@ -8,15 +8,11 @@ import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.Addition
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.request.AddAdditionalSkillDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.net.URI;
 import java.security.Principal;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/additional-skill-progress")
 public class AdditionalSkillProgressController {
   private final StudentProgressService studentProgressService;
-  private final TraceService traceService;
   private final UserUtil userUtil;
 
   @GetMapping()
@@ -69,25 +64,20 @@ public class AdditionalSkillProgressController {
         .body(AdditionalSkillProgressMapper.toAdditionalSkillProgressDTO(additionalSkillProgress));
   }
 
-  @GetMapping("/{additionalSkillId}")
+  @GetMapping("/{additionalSkillProgressId}")
   public ResponseEntity<AdditionalSkillProgressDetailsDTO> getAdditionalSkillProgressDetails(
-      Principal principal, @PathVariable UUID additionalSkillId) {
+      Principal principal, @PathVariable UUID additionalSkillProgressId) {
     Student student = userUtil.getStudent(principal);
     log.debug(
-        "Received request to detailed additional skill [{}] for student [{}]",
-        additionalSkillId,
+        "Received request to detailed additional skill progress [{}] for student [{}]",
+        additionalSkillProgressId,
         student);
-    AdditionalSkillProgress additionalSkillProgress =
-        studentProgressService.getAdditionalSkillProgressDetails(student, additionalSkillId);
-    List<Trace> traces =
-        traceService.getTracesByAdditionalSkillProgressId(additionalSkillProgress.getId());
-    List<TraceOverviewDTO> traceOverviewDTOs =
-        traces.stream()
-            .map(trace -> TraceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))
-            .toList();
+    AdditionalSkillProgressDetails additionalSkillProgressDetails =
+        studentProgressService.getAdditionalSkillProgressDetails(
+            student, additionalSkillProgressId);
 
     return ResponseEntity.ok(
         AdditionalSkillProgressMapper.toAdditionalSkillProgressDetailsDTO(
-            additionalSkillProgress, traceOverviewDTOs));
+            additionalSkillProgressDetails));
   }
 }

@@ -76,6 +76,12 @@ public class TraceFixture {
     return this;
   }
 
+  public TraceFixture withAdditionalSkillProgresses(
+      List<AdditionalSkillProgress> additionalSkillProgresses) {
+    this.additionalSkillProgresses = additionalSkillProgresses;
+    return this;
+  }
+
   public TraceFixture withAmses(List<AMS> amses) {
     this.amses = amses;
     return this;

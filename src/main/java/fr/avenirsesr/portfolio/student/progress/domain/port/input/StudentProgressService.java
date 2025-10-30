@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
+import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
@@ -48,6 +49,6 @@ public interface StudentProgressService {
   PagedResult<AdditionalSkillProgress> searchAdditionalSkill(
       Student student, String keyword, PageCriteria pageCriteria);
 
-  AdditionalSkillProgress getAdditionalSkillProgressDetails(
-      Student student, UUID additionalSkillId);
+  AdditionalSkillProgressDetails getAdditionalSkillProgressDetails(
+      Student student, UUID additionalSkillProgressId);
 }

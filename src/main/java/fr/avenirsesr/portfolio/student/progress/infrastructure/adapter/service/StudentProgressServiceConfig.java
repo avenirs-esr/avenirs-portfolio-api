@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.Sk
 import fr.avenirsesr.portfolio.student.progress.domain.service.StudentProgressServiceImpl;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.AdditionalSkillProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,7 @@ public class StudentProgressServiceConfig {
 
   private final StudentProgressDatabaseRepository studentProgressRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
+  private final TraceService traceService;
   private final TraceRepository traceRepository;
   private final AdditionalSkillRepository additionalSkillRepository;
   private final AdditionalSkillProgressDatabaseRepository additionalSkillProgressRepository;
@@ -24,11 +26,13 @@ public class StudentProgressServiceConfig {
   public StudentProgressServiceConfig(
       StudentProgressDatabaseRepository studentProgressRepository,
       SkillLevelProgressRepository skillLevelProgressRepository,
+      TraceService traceService,
       TraceRepository traceRepository,
       AdditionalSkillRepository additionalSkillRepository,
       AdditionalSkillProgressDatabaseRepository additionalSkillProgressRepository) {
     this.studentProgressRepository = studentProgressRepository;
     this.skillLevelProgressRepository = skillLevelProgressRepository;
+    this.traceService = traceService;
     this.traceRepository = traceRepository;
     this.additionalSkillRepository = additionalSkillRepository;
     this.additionalSkillProgressRepository = additionalSkillProgressRepository;
@@ -39,6 +43,7 @@ public class StudentProgressServiceConfig {
     return new StudentProgressServiceImpl(
         studentProgressRepository,
         skillLevelProgressRepository,
+        traceService,
         traceRepository,
         additionalSkillRepository,
         additionalSkillProgressRepository);

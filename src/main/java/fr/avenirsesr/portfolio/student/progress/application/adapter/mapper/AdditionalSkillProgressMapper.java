@@ -4,9 +4,9 @@ import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.Additi
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillCategory;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDetailsDTO;
+import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
-import java.util.List;
+import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
 
 public interface AdditionalSkillProgressMapper {
   static AdditionalSkillProgressDTO toAdditionalSkillProgressDTO(
@@ -23,18 +23,27 @@ public interface AdditionalSkillProgressMapper {
   }
 
   static AdditionalSkillProgressDetailsDTO toAdditionalSkillProgressDetailsDTO(
-      AdditionalSkillProgress additionalSkillProgress, List<TraceOverviewDTO> traceOverviewDTOs) {
+      AdditionalSkillProgressDetails additionalSkillProgressDetails) {
     return new AdditionalSkillProgressDetailsDTO(
-        additionalSkillProgress.getId(),
-        additionalSkillProgress.getSkill().getLibelle(),
-        additionalSkillProgress.getSkill().getCategoryPath().stream()
+        additionalSkillProgressDetails.additionalSkillProgress().getId(),
+        additionalSkillProgressDetails.additionalSkillProgress().getSkill().getLibelle(),
+        additionalSkillProgressDetails
+            .additionalSkillProgress()
+            .getSkill()
+            .getCategoryPath()
+            .stream()
             .map(AdditionalSkillCategoryMapper::toDTO)
             .toList(),
-        additionalSkillProgress.getDescription(),
-        additionalSkillProgress.getSkill().getType(),
-        additionalSkillProgress.getLevel(),
-        traceOverviewDTOs,
-        additionalSkillProgress.getCreatedAt(),
-        additionalSkillProgress.getUpdatedAt());
+        additionalSkillProgressDetails.additionalSkillProgress().getDescription(),
+        additionalSkillProgressDetails.additionalSkillProgress().getSkill().getType(),
+        additionalSkillProgressDetails.additionalSkillProgress().getLevel(),
+        additionalSkillProgressDetails.tracesWithProjectName().stream()
+            .map(
+                tracesWithProjectName ->
+                    TraceOverviewMapper.toDTO(
+                        tracesWithProjectName.trace(), tracesWithProjectName.programName()))
+            .toList(),
+        additionalSkillProgressDetails.additionalSkillProgress().getCreatedAt(),
+        additionalSkillProgressDetails.additionalSkillProgress().getUpdatedAt());
   }
 }

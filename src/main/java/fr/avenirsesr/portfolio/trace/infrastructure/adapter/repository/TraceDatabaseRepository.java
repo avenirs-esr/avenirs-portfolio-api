@@ -10,7 +10,9 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericDeletableJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.DateFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
+import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -21,7 +23,6 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceF
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceSpecification;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Where;
 import org.springframework.data.domain.PageRequest;
@@ -50,13 +51,6 @@ public class TraceDatabaseRepository
             PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt")))
         .getContent()
         .stream()
-        .map(TraceMapper::toDomain)
-        .toList();
-  }
-
-  @Override
-  public List<Trace> findByAdditionalSkillsProgressesId(UUID additionalSkillProgressId) {
-    return jpaRepository.findByAdditionalSkillsProgresses_Id(additionalSkillProgressId).stream()
         .map(TraceMapper::toDomain)
         .toList();
   }
@@ -141,6 +135,17 @@ public class TraceDatabaseRepository
         .findAll(
             TraceSpecification.ofSkillLevelProgress(
                 SkillLevelProgressMapper.fromDomain(skillLevelProgress)))
+        .stream()
+        .map(TraceMapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<Trace> linkedWith(AdditionalSkillProgress additionalSkillProgress) {
+    return jpaSpecificationExecutor
+        .findAll(
+            TraceSpecification.ofAdditionalSkillProgress(
+                AdditionalSkillProgressMapper.fromDomain(additionalSkillProgress)))
         .stream()
         .map(TraceMapper::toDomain)
         .toList();

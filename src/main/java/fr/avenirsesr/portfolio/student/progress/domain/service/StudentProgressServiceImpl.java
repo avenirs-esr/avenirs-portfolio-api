@@ -11,9 +11,12 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
+import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
+import fr.avenirsesr.portfolio.student.progress.domain.exception.AdditionalSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
@@ -21,6 +24,9 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgres
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceWithProjectNameData;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
@@ -36,6 +42,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   private static final int MAX_SKILLS = 6;
   private final StudentProgressRepository studentProgressRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
+  private final TraceService traceService;
   private final TraceRepository traceRepository;
   private final AdditionalSkillRepository additionalSkillRepository;
   private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
@@ -200,10 +207,26 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   @Override
-  public AdditionalSkillProgress getAdditionalSkillProgressDetails(
-      Student student, UUID additionalSkillId) {
-    return additionalSkillProgressRepository
-        .findByStudentAndAdditionalSkillId(student.getId(), additionalSkillId)
-        .orElseThrow(AdditionalSkillNotFoundException::new);
+  public AdditionalSkillProgressDetails getAdditionalSkillProgressDetails(
+      Student student, UUID additionalSkillProgressId) {
+    AdditionalSkillProgress additionalSkillProgress =
+        additionalSkillProgressRepository
+            .findById(additionalSkillProgressId)
+            .orElseThrow(AdditionalSkillProgressNotFoundException::new);
+
+    if (!additionalSkillProgress.getStudent().getId().equals(student.getId())) {
+      throw new UserNotAuthorizedException();
+    }
+
+    List<Trace> traces =
+        traceService.getTracesLinkedWithAdditionalSkillProgress(
+            student.getUser(), additionalSkillProgress);
+    return new AdditionalSkillProgressDetails(
+        additionalSkillProgress,
+        traces.stream()
+            .map(
+                trace ->
+                    new TraceWithProjectNameData(trace, traceService.programNameOfTrace(trace)))
+            .toList());
   }
 }

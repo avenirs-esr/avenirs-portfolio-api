@@ -72,6 +72,12 @@ public class TraceSpecification {
         criteriaBuilder.isMember(skillLevelProgress, root.get("skillLevels"));
   }
 
+  public static Specification<TraceEntity> ofAdditionalSkillProgress(
+      AdditionalSkillProgressEntity additionalSkillProgress) {
+    return (root, query, criteriaBuilder) ->
+        criteriaBuilder.isMember(additionalSkillProgress, root.get("additionalSkillsProgresses"));
+  }
+
   public static Specification<TraceEntity> search(String keyword, ELanguage language) {
     return (root, query, criteriaBuilder) -> {
       if (keyword == null || keyword.trim().isEmpty() || query == null) {
