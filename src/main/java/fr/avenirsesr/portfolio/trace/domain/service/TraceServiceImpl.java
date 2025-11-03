@@ -495,8 +495,8 @@ public class TraceServiceImpl implements TraceService {
   }
 
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
-    if (!Objects.equals(trace.getUser(), user)) {
-      throw new UserNotAuthorizedException();
+    if (!trace.getUser().equals(user)) {
+      throw new UserNotAuthorizedException("%s does not own this %s".formatted(user, trace));
     }
   }
 
