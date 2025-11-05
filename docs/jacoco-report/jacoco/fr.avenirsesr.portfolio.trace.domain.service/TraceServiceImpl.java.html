@@ -466,34 +466,35 @@ public class TraceServiceImpl implements TraceService {
 <span class="fc" id="L466">  }</span>
 
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
-<span class="fc bfc" id="L469" title="All 2 branches covered.">    if (!trace.getUser().getId().equals(user.getId())) {</span>
-<span class="fc" id="L470">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L469" title="All 2 branches covered.">    if (!trace.getUser().equals(user)) {</span>
+<span class="fc" id="L470">      throw new UserNotAuthorizedException(</span>
+<span class="fc" id="L471">          &quot;User %s does not own this trace %s&quot;.formatted(user, trace));</span>
     }
-<span class="fc" id="L472">  }</span>
+<span class="fc" id="L473">  }</span>
 
   private SkillLevelAssociationData toSkillLevelAssociation(
       SkillLevelProgress skillLevelProgress, SkillLevel skillLevel, Skill skill, AMS ams) {
     AmsAssociationData amsAssociation =
-<span class="nc bnc" id="L477" title="All 2 branches missed.">        (ams == null) ? null : new AmsAssociationData(ams.getId(), ams.getTitle(), ams.getStatus());</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">        (ams == null) ? null : new AmsAssociationData(ams.getId(), ams.getTitle(), ams.getStatus());</span>
 
-<span class="nc" id="L479">    return new SkillLevelAssociationData(</span>
-<span class="nc" id="L480">        skillLevelProgress.getId(),</span>
-<span class="nc" id="L481">        skill.getName(),</span>
-<span class="nc" id="L482">        skillLevel.getName(),</span>
-<span class="nc" id="L483">        skillLevelProgress.getStatus(),</span>
+<span class="nc" id="L480">    return new SkillLevelAssociationData(</span>
+<span class="nc" id="L481">        skillLevelProgress.getId(),</span>
+<span class="nc" id="L482">        skill.getName(),</span>
+<span class="nc" id="L483">        skillLevel.getName(),</span>
+<span class="nc" id="L484">        skillLevelProgress.getStatus(),</span>
         amsAssociation);
   }
 
   private AdditionalSkillAssociationData toAdditionalSkillAssociation(
       AdditionalSkillProgress additionalSkillProgress) {
-<span class="nc" id="L489">    var skill = additionalSkillProgress.getSkill();</span>
+<span class="nc" id="L490">    var skill = additionalSkillProgress.getSkill();</span>
 
-<span class="nc" id="L491">    return new AdditionalSkillAssociationData(</span>
-<span class="nc" id="L492">        additionalSkillProgress.getId(),</span>
-<span class="nc" id="L493">        skill.getLibelle(),</span>
-<span class="nc" id="L494">        additionalSkillProgress.getLevel(),</span>
-<span class="nc" id="L495">        skill.getCategoryPath().stream().map(AdditionalSkillCategory::getLibelle).toList(),</span>
-<span class="nc" id="L496">        skill.getType());</span>
+<span class="nc" id="L492">    return new AdditionalSkillAssociationData(</span>
+<span class="nc" id="L493">        additionalSkillProgress.getId(),</span>
+<span class="nc" id="L494">        skill.getLibelle(),</span>
+<span class="nc" id="L495">        additionalSkillProgress.getLevel(),</span>
+<span class="nc" id="L496">        skill.getCategoryPath().stream().map(AdditionalSkillCategory::getLibelle).toList(),</span>
+<span class="nc" id="L497">        skill.getType());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
