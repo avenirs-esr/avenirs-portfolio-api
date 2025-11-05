@@ -322,6 +322,26 @@ public class StudentProgressServiceImpl implements StudentProgressService {
             .toList());
   }
 
+  @Override
+  public void unassociateTraces(UUID additionalSkillProgressId, List<UUID> traceIds) {
+    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var student =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .orElseThrow(UserIsNotStudentException::new);
+
+    AdditionalSkillProgress additionalSkillProgress =
+        additionalSkillProgressRepository
+            .findById(additionalSkillProgressId)
+            .orElseThrow(AdditionalSkillProgressNotFoundException::new);
+
+    if (additionalSkillProgress.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    traceService.unassociateTraces(additionalSkillProgress, traceIds);
+  }
+
   private static void checkDescriptionField(String description) {
     if (description != null && description.length() > DESCRIPTION_LENGTH_MAX) {
       log.error(

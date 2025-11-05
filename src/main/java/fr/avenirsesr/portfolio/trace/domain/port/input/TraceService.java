@@ -60,4 +60,6 @@ public interface TraceService {
       List<UUID> amsIds,
       List<UUID> skillLevelIds,
       List<UUID> additionalSkillProgressIds);
+
+  void unassociateTraces(AdditionalSkillProgress additionalSkillProgress, List<UUID> traceIds);
 }
