@@ -26,6 +26,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.Ad
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.data.*;
+import fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.*;
@@ -397,6 +398,38 @@ public class TraceServiceImpl implements TraceService {
         additionalSkillProgressIds);
   }
 
+  @Override
+  public void unassociateTraces(
+      AdditionalSkillProgress additionalSkillProgress, List<UUID> traceIds) {
+    User loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+
+    List<Trace> traces = traceRepository.findAllById(traceIds);
+
+    if (!Objects.equals(traceIds.size(), traces.size())) {
+      throw new TraceNotFoundException();
+    }
+
+    for (Trace trace : traces) {
+      checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+
+      boolean isAssociated =
+          trace.getAdditionalSkillProgresses().stream()
+              .anyMatch(asp -> asp.getId().equals(additionalSkillProgress.getId()));
+
+      if (!isAssociated) {
+        throw new AssociationDoesNotExistException(
+            "Trace "
+                + trace.getId()
+                + " is not associated with AdditionalSkillProgress "
+                + additionalSkillProgress.getId());
+      }
+
+      trace.remove(additionalSkillProgress);
+    }
+
+    traceRepository.saveAll(traces);
+  }
+
   private void unassociateAdditionalSkillProgress(
       Student student, Trace trace, List<UUID> additionalSkillProgressIds) {
     if (!new HashSet<>(
@@ -466,7 +499,7 @@ public class TraceServiceImpl implements TraceService {
   }
 
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
-    if (!trace.getUser().getId().equals(user.getId())) {
+    if (!Objects.equals(trace.getUser().getId(), user.getId())) {
       throw new UserNotAuthorizedException();
     }
   }

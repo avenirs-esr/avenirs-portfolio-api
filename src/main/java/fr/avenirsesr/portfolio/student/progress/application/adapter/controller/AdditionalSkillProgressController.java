@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgres
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,5 +91,22 @@ public class AdditionalSkillProgressController {
     return ResponseEntity.ok(
         AdditionalSkillProgressMapper.toAdditionalSkillProgressDetailsDTO(
             additionalSkillProgressDetails));
+  }
+
+  @PostMapping("/{additionalSkillProgressId}/unassociate/traces")
+  public ResponseEntity<String> unassociateTraces(
+      Principal principal,
+      @PathVariable UUID additionalSkillProgressId,
+      @RequestBody List<UUID> traceIds) {
+    log.debug(
+        "Received request to unassociate traces [{}] to additional skill progress [{}] for student"
+            + " [{}]",
+        traceIds,
+        additionalSkillProgressId,
+        principal.getName());
+
+    studentProgressService.unassociateTraces(additionalSkillProgressId, traceIds);
+
+    return ResponseEntity.ok("Trace successfully unassociated.");
   }
 }

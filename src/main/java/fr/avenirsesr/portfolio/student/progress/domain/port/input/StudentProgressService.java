@@ -50,4 +50,6 @@ public interface StudentProgressService {
       String keyword, PageCriteria pageCriteria);
 
   AdditionalSkillProgressDetails getAdditionalSkillProgressDetails(UUID additionalSkillProgressId);
+
+  void unassociateTraces(UUID additionalSkillProgressId, List<UUID> traceIds);
 }
