@@ -335,7 +335,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 <span class="nc" id="L335">            .findById(additionalSkillProgressId)</span>
 <span class="nc" id="L336">            .orElseThrow(AdditionalSkillProgressNotFoundException::new);</span>
 
-<span class="nc bnc" id="L338" title="All 2 branches missed.">    if (!Objects.equals(additionalSkillProgress.getStudent().getId(), student.getId())) {</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">    if (additionalSkillProgress.getStudent().equals(student)) {</span>
 <span class="nc" id="L339">      throw new UserNotAuthorizedException();</span>
     }
 
