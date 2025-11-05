@@ -405,24 +405,20 @@ public class TraceServiceImpl implements TraceService {
 
     List<Trace> traces = traceRepository.findAllById(traceIds);
 
-    if (!Objects.equals(traceIds.size(), traces.size())) {
+    if (traceIds.size() == traces.size()) {
       throw new TraceNotFoundException();
     }
 
     for (Trace trace : traces) {
       checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
-      boolean isAssociated =
-          trace.getAdditionalSkillProgresses().stream()
-              .anyMatch(asp -> asp.getId().equals(additionalSkillProgress.getId()));
-
-      if (!isAssociated) {
-        throw new AssociationDoesNotExistException(
-            "Trace "
-                + trace.getId()
-                + " is not associated with AdditionalSkillProgress "
-                + additionalSkillProgress.getId());
-      }
+      trace.getAdditionalSkillProgresses().stream()
+          .filter(asp -> asp.equals(additionalSkillProgress))
+          .findAny()
+          .orElseThrow(
+              () ->
+                  new AssociationDoesNotExistException(
+                      trace + " is not associated with " + additionalSkillProgress));
 
       trace.remove(additionalSkillProgress);
     }
@@ -499,7 +495,7 @@ public class TraceServiceImpl implements TraceService {
   }
 
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
-    if (!Objects.equals(trace.getUser().getId(), user.getId())) {
+    if (!Objects.equals(trace.getUser(), user)) {
       throw new UserNotAuthorizedException();
     }
   }
