@@ -62,4 +62,5 @@ build/
 
 /logs/
 /src/main/resources/env.properties
+/src/main/resources/.gitkeep
 .DS_Store
