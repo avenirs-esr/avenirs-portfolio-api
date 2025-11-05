@@ -322,14 +322,34 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 <span class="fc" id="L322">            .toList());</span>
   }
 
-  private static void checkDescriptionField(String description) {
-<span class="fc bfc" id="L326" title="All 4 branches covered.">    if (description != null &amp;&amp; description.length() &gt; DESCRIPTION_LENGTH_MAX) {</span>
-<span class="fc" id="L327">      log.error(</span>
-          &quot;Description too long: {} characters (max = &quot; + DESCRIPTION_LENGTH_MAX + &quot;)&quot;,
-<span class="fc" id="L329">          description.length());</span>
-<span class="fc" id="L330">      throw new InvalidDescriptionException(</span>
-<span class="fc" id="L331">          &quot;Description exceeds 400 characters (actual: &quot; + description.length() + &quot;)&quot;);</span>
+  @Override
+  public void unassociateTraces(UUID additionalSkillProgressId, List&lt;UUID&gt; traceIds) {
+<span class="nc" id="L327">    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
+<span class="nc" id="L328">    var student =</span>
+        studentRepository
+<span class="nc" id="L330">            .findById(loggedInUser.getId())</span>
+<span class="nc" id="L331">            .orElseThrow(UserIsNotStudentException::new);</span>
+
+<span class="nc" id="L333">    AdditionalSkillProgress additionalSkillProgress =</span>
+        additionalSkillProgressRepository
+<span class="nc" id="L335">            .findById(additionalSkillProgressId)</span>
+<span class="nc" id="L336">            .orElseThrow(AdditionalSkillProgressNotFoundException::new);</span>
+
+<span class="nc bnc" id="L338" title="All 2 branches missed.">    if (!Objects.equals(additionalSkillProgress.getStudent().getId(), student.getId())) {</span>
+<span class="nc" id="L339">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L333">  }</span>
+
+<span class="nc" id="L342">    traceService.unassociateTraces(additionalSkillProgress, traceIds);</span>
+<span class="nc" id="L343">  }</span>
+
+  private static void checkDescriptionField(String description) {
+<span class="fc bfc" id="L346" title="All 4 branches covered.">    if (description != null &amp;&amp; description.length() &gt; DESCRIPTION_LENGTH_MAX) {</span>
+<span class="fc" id="L347">      log.error(</span>
+          &quot;Description too long: {} characters (max = &quot; + DESCRIPTION_LENGTH_MAX + &quot;)&quot;,
+<span class="fc" id="L349">          description.length());</span>
+<span class="fc" id="L350">      throw new InvalidDescriptionException(</span>
+<span class="fc" id="L351">          &quot;Description exceeds 400 characters (actual: &quot; + description.length() + &quot;)&quot;);</span>
+    }
+<span class="fc" id="L353">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
