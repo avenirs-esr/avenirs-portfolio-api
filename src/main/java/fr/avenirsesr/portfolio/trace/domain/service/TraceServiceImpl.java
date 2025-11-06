@@ -405,7 +405,7 @@ public class TraceServiceImpl implements TraceService {
 
     List<Trace> traces = traceRepository.findAllById(traceIds);
 
-    if (traceIds.size() == traces.size()) {
+    if (traceIds.size() != traces.size()) {
       throw new TraceNotFoundException();
     }
 

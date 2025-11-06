@@ -335,7 +335,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
             .findById(additionalSkillProgressId)
             .orElseThrow(AdditionalSkillProgressNotFoundException::new);
 
-    if (additionalSkillProgress.getStudent().equals(student)) {
+    if (!additionalSkillProgress.getStudent().equals(student)) {
       throw new UserNotAuthorizedException();
     }
 
