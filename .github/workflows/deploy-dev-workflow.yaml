@@ -2,6 +2,7 @@ name: Deploy on dev server
 on:
   push:
     branches: [ develop ]
+  workflow_dispatch:
 
 jobs:
   call-main-ci:
