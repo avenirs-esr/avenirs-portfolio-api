@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 public class AdditionalSkillControllerIT {
 
-  private static final String BASE_PATH = "/me/additional-skills";
+  private static final String BASE_PATH = "/additional-skills";
 
   @Autowired private MockMvc mockMvc;
 

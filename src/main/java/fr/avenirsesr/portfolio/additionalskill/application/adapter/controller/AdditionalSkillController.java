@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @AllArgsConstructor
 @RestController
-@RequestMapping("/me/additional-skills")
+@RequestMapping("/additional-skills")
 public class AdditionalSkillController {
   private final OpenSearchIndex openSearchIndex;
 
