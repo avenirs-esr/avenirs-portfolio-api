@@ -3,6 +3,7 @@ name: Develop to Main Workflow
 on:
   pull_request:
     branches: [ main ]
+  workflow_dispatch
 
 jobs:
   call-main-ci:
