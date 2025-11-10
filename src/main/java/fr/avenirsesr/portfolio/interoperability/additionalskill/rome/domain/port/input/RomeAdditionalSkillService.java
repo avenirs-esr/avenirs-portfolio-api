@@ -5,9 +5,7 @@ import java.util.List;
 
 public interface RomeAdditionalSkillService {
 
-  void cleanAndCreateAdditionalSkillIndex();
-
-  List<AdditionalSkill> synchronizeAndIndexAdditionalSkills(List<AdditionalSkill> additionalSkill);
+  List<AdditionalSkill> synchronizeAndSaveAdditionalSkills(List<AdditionalSkill> additionalSkill);
 
   boolean checkRomeVersionUpdated();
 }

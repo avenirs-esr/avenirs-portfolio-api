@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.service;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.model.Rome4Version;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.port.input.RomeAdditionalSkillService;
@@ -22,15 +21,9 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
   private final AdditionalSkillRepository additionalSkillRepository;
   private final Rome4VersionRepository rome4VersionRepository;
   private final RomeAdditionalSkillApi romeAdditionalSkillApi;
-  private final OpenSearchIndex openSearchIndex;
 
   @Override
-  public void cleanAndCreateAdditionalSkillIndex() {
-    openSearchIndex.cleanAndCreateAdditionalSkillIndex();
-  }
-
-  @Override
-  public List<AdditionalSkill> synchronizeAndIndexAdditionalSkills(
+  public List<AdditionalSkill> synchronizeAndSaveAdditionalSkills(
       List<AdditionalSkill> additionalSkillList) {
     List<String> skillCodes =
         additionalSkillList.stream()
@@ -48,9 +41,7 @@ public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillServic
 
     List<AdditionalSkill> toSave =
         getAdditionalSkillsToSave(additionalSkillList, existingSkillByCode);
-    List<AdditionalSkill> savedAdditionalSkill = additionalSkillRepository.saveAll(toSave);
-    openSearchIndex.indexAll(savedAdditionalSkill);
-    return savedAdditionalSkill;
+    return additionalSkillRepository.saveAll(toSave);
   }
 
   @Override
