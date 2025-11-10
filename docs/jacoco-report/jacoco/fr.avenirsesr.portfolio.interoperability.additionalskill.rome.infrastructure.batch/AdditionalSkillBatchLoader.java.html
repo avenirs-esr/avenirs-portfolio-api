@@ -79,14 +79,14 @@ public class AdditionalSkillBatchLoader {
 
   @Bean
   public Flow importROME4SkillFlow(
-      JobExecutionDecider rome4FlowDecider, Flow shortFlow, Flow fullFlow) {
+      JobExecutionDecider rome4FlowDecider, Flow dumpFlow, Flow apiRome4Flow) {
 <span class="nc" id="L83">    return new FlowBuilder&lt;SimpleFlow&gt;(&quot;importROME4SkillFlow&quot;)</span>
 <span class="nc" id="L84">        .start(rome4FlowDecider)</span>
-<span class="nc" id="L85">        .on(&quot;SHORT&quot;)</span>
-<span class="nc" id="L86">        .to(shortFlow)</span>
+<span class="nc" id="L85">        .on(&quot;DUMP&quot;)</span>
+<span class="nc" id="L86">        .to(dumpFlow)</span>
 <span class="nc" id="L87">        .from(rome4FlowDecider)</span>
-<span class="nc" id="L88">        .on(&quot;FULL&quot;)</span>
-<span class="nc" id="L89">        .to(fullFlow)</span>
+<span class="nc" id="L88">        .on(&quot;API_ROME4&quot;)</span>
+<span class="nc" id="L89">        .to(apiRome4Flow)</span>
 <span class="nc" id="L90">        .end();</span>
   }
 
@@ -99,20 +99,20 @@ public class AdditionalSkillBatchLoader {
 <span class="nc" id="L99">        log.info(</span>
             &quot;No additional skills found, bootstrapping from SQL dump and skipping the rest&quot;
                 + &quot; of the job.&quot;);
-<span class="nc" id="L102">        return new FlowExecutionStatus(&quot;SHORT&quot;);</span>
+<span class="nc" id="L102">        return new FlowExecutionStatus(&quot;DUMP&quot;);</span>
       }
 <span class="nc" id="L104">      log.info(&quot;{} Additional skills found, continuing with sync job.&quot;, count);</span>
 
-<span class="nc" id="L106">      return new FlowExecutionStatus(&quot;FULL&quot;);</span>
+<span class="nc" id="L106">      return new FlowExecutionStatus(&quot;API_ROME4&quot;);</span>
     };
   }
 
   @Bean
-  public Flow shortFlow(
+  public Flow dumpFlow(
       Step importAdditionalSkillDumpStep,
       Step cleanAndCreateOpenSearchIndexStep,
       Step indexToOpenSearchStep) {
-<span class="nc" id="L115">    return new FlowBuilder&lt;SimpleFlow&gt;(&quot;shortFlow&quot;)</span>
+<span class="nc" id="L115">    return new FlowBuilder&lt;SimpleFlow&gt;(&quot;dumpFlow&quot;)</span>
 <span class="nc" id="L116">        .start(importAdditionalSkillDumpStep)</span>
 <span class="nc" id="L117">        .next(cleanAndCreateOpenSearchIndexStep)</span>
 <span class="nc" id="L118">        .next(indexToOpenSearchStep)</span>
@@ -120,12 +120,12 @@ public class AdditionalSkillBatchLoader {
   }
 
   @Bean
-  public Flow fullFlow(
+  public Flow apiRome4Flow(
       Step checkROME4VersionUpdateStep,
       Step importROME4SkillStep,
       Step cleanAndCreateOpenSearchIndexStep,
       Step indexToOpenSearchStep) {
-<span class="nc" id="L128">    return new FlowBuilder&lt;SimpleFlow&gt;(&quot;fullFlow&quot;)</span>
+<span class="nc" id="L128">    return new FlowBuilder&lt;SimpleFlow&gt;(&quot;apiRome4Flow&quot;)</span>
 <span class="nc" id="L129">        .start(checkROME4VersionUpdateStep)</span>
 <span class="nc" id="L130">        .on(&quot;NOOP&quot;)</span>
 <span class="nc" id="L131">        .end()</span>
