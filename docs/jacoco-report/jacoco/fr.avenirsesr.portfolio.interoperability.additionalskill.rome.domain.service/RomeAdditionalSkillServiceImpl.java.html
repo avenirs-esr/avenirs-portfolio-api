@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RomeAdditionalSkillServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.service</a> &gt; <span class="el_source">RomeAdditionalSkillServiceImpl.java</span></div><h1>RomeAdditionalSkillServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.service;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.model.Rome4Version;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.port.input.RomeAdditionalSkillService;
@@ -16,84 +15,76 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L18">@Slf4j</span>
 @AllArgsConstructor
 public class RomeAdditionalSkillServiceImpl implements RomeAdditionalSkillService {
   private final AdditionalSkillRepository additionalSkillRepository;
   private final Rome4VersionRepository rome4VersionRepository;
   private final RomeAdditionalSkillApi romeAdditionalSkillApi;
-  private final OpenSearchIndex openSearchIndex;
 
   @Override
-  public void cleanAndCreateAdditionalSkillIndex() {
-<span class="fc" id="L29">    openSearchIndex.cleanAndCreateAdditionalSkillIndex();</span>
-<span class="fc" id="L30">  }</span>
-
-  @Override
-  public List&lt;AdditionalSkill&gt; synchronizeAndIndexAdditionalSkills(
+  public List&lt;AdditionalSkill&gt; synchronizeAndSaveAdditionalSkills(
       List&lt;AdditionalSkill&gt; additionalSkillList) {
-<span class="fc" id="L35">    List&lt;String&gt; skillCodes =</span>
-<span class="fc" id="L36">        additionalSkillList.stream()</span>
-<span class="fc" id="L37">            .map(AdditionalSkill::getExternalId)</span>
-<span class="fc" id="L38">            .filter(Objects::nonNull)</span>
-<span class="fc" id="L39">            .distinct()</span>
-<span class="fc" id="L40">            .toList();</span>
+<span class="fc" id="L28">    List&lt;String&gt; skillCodes =</span>
+<span class="fc" id="L29">        additionalSkillList.stream()</span>
+<span class="fc" id="L30">            .map(AdditionalSkill::getExternalId)</span>
+<span class="fc" id="L31">            .filter(Objects::nonNull)</span>
+<span class="fc" id="L32">            .distinct()</span>
+<span class="fc" id="L33">            .toList();</span>
 
-<span class="fc" id="L42">    List&lt;AdditionalSkill&gt; existingSkillList =</span>
-<span class="fc" id="L43">        additionalSkillRepository.findAllByExternalId(skillCodes);</span>
+<span class="fc" id="L35">    List&lt;AdditionalSkill&gt; existingSkillList =</span>
+<span class="fc" id="L36">        additionalSkillRepository.findAllByExternalId(skillCodes);</span>
 
-<span class="fc" id="L45">    Map&lt;String, AdditionalSkill&gt; existingSkillByCode =</span>
-<span class="fc" id="L46">        existingSkillList.stream()</span>
-<span class="fc" id="L47">            .collect(Collectors.toMap(AdditionalSkill::getExternalId, Function.identity()));</span>
+<span class="fc" id="L38">    Map&lt;String, AdditionalSkill&gt; existingSkillByCode =</span>
+<span class="fc" id="L39">        existingSkillList.stream()</span>
+<span class="fc" id="L40">            .collect(Collectors.toMap(AdditionalSkill::getExternalId, Function.identity()));</span>
 
-<span class="fc" id="L49">    List&lt;AdditionalSkill&gt; toSave =</span>
-<span class="fc" id="L50">        getAdditionalSkillsToSave(additionalSkillList, existingSkillByCode);</span>
-<span class="fc" id="L51">    List&lt;AdditionalSkill&gt; savedAdditionalSkill = additionalSkillRepository.saveAll(toSave);</span>
-<span class="fc" id="L52">    openSearchIndex.indexAll(savedAdditionalSkill);</span>
-<span class="fc" id="L53">    return savedAdditionalSkill;</span>
+<span class="fc" id="L42">    List&lt;AdditionalSkill&gt; toSave =</span>
+<span class="fc" id="L43">        getAdditionalSkillsToSave(additionalSkillList, existingSkillByCode);</span>
+<span class="fc" id="L44">    return additionalSkillRepository.saveAll(toSave);</span>
   }
 
   @Override
   public boolean checkRomeVersionUpdated() {
     try {
-<span class="fc" id="L59">      Rome4Version newVersion = romeAdditionalSkillApi.fetchRomeVersion();</span>
+<span class="fc" id="L50">      Rome4Version newVersion = romeAdditionalSkillApi.fetchRomeVersion();</span>
 
-<span class="fc" id="L61">      boolean shouldSave =</span>
+<span class="fc" id="L52">      boolean shouldSave =</span>
           rome4VersionRepository
-<span class="fc" id="L63">              .findFirstByOrderByVersionDesc()</span>
-<span class="fc bfc" id="L64" title="All 2 branches covered.">              .map(oldVersion -&gt; newVersion.getVersion() &gt; oldVersion.getVersion())</span>
-<span class="fc" id="L65">              .orElse(true);</span>
+<span class="fc" id="L54">              .findFirstByOrderByVersionDesc()</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">              .map(oldVersion -&gt; newVersion.getVersion() &gt; oldVersion.getVersion())</span>
+<span class="fc" id="L56">              .orElse(true);</span>
 
-<span class="fc bfc" id="L67" title="All 2 branches covered.">      if (shouldSave) {</span>
-<span class="fc" id="L68">        var rome4Version =</span>
-<span class="fc" id="L69">            Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate());</span>
-<span class="fc" id="L70">        rome4VersionRepository.save(rome4Version);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">      if (shouldSave) {</span>
+<span class="fc" id="L59">        var rome4Version =</span>
+<span class="fc" id="L60">            Rome4Version.create(newVersion.getVersion(), newVersion.getLastModifiedDate());</span>
+<span class="fc" id="L61">        rome4VersionRepository.save(rome4Version);</span>
       }
 
-<span class="fc" id="L73">      return shouldSave;</span>
-<span class="nc" id="L74">    } catch (Exception e) {</span>
-<span class="nc" id="L75">      log.error(&quot;An error occurred while fetching ROME 4.0 version.&quot;, e);</span>
-<span class="nc" id="L76">      return false;</span>
+<span class="fc" id="L64">      return shouldSave;</span>
+<span class="nc" id="L65">    } catch (Exception e) {</span>
+<span class="nc" id="L66">      log.error(&quot;An error occurred while fetching ROME 4.0 version.&quot;, e);</span>
+<span class="nc" id="L67">      return false;</span>
     }
   }
 
   private List&lt;AdditionalSkill&gt; getAdditionalSkillsToSave(
       List&lt;AdditionalSkill&gt; additionalSkillList, Map&lt;String, AdditionalSkill&gt; existingSkillByCode) {
-<span class="fc" id="L82">    List&lt;AdditionalSkill&gt; toSave = new ArrayList&lt;&gt;(additionalSkillList.size());</span>
+<span class="fc" id="L73">    List&lt;AdditionalSkill&gt; toSave = new ArrayList&lt;&gt;(additionalSkillList.size());</span>
 
-<span class="fc bfc" id="L84" title="All 2 branches covered.">    for (AdditionalSkill additionalSkill : additionalSkillList) {</span>
-<span class="fc" id="L85">      AdditionalSkill existingSkill = existingSkillByCode.get(additionalSkill.getExternalId());</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">    for (AdditionalSkill additionalSkill : additionalSkillList) {</span>
+<span class="fc" id="L76">      AdditionalSkill existingSkill = existingSkillByCode.get(additionalSkill.getExternalId());</span>
 
-<span class="fc bfc" id="L87" title="All 2 branches covered.">      if (existingSkill != null) {</span>
-<span class="fc" id="L88">        existingSkill.setAdditionalSkillCategory(</span>
-<span class="fc" id="L89">            additionalSkill.getAdditionalSkillCategory().orElse(null));</span>
-<span class="fc" id="L90">        existingSkill.setType(additionalSkill.getType());</span>
-<span class="fc" id="L91">        toSave.add(existingSkill);</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">      if (existingSkill != null) {</span>
+<span class="fc" id="L79">        existingSkill.setAdditionalSkillCategory(</span>
+<span class="fc" id="L80">            additionalSkill.getAdditionalSkillCategory().orElse(null));</span>
+<span class="fc" id="L81">        existingSkill.setType(additionalSkill.getType());</span>
+<span class="fc" id="L82">        toSave.add(existingSkill);</span>
       } else {
-<span class="fc" id="L93">        toSave.add(additionalSkill);</span>
+<span class="fc" id="L84">        toSave.add(additionalSkill);</span>
       }
-<span class="fc" id="L95">    }</span>
-<span class="fc" id="L96">    return toSave;</span>
+<span class="fc" id="L86">    }</span>
+<span class="fc" id="L87">    return toSave;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
