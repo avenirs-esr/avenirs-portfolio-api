@@ -13,7 +13,6 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillCategory;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillCategoryType;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.interoperability.additionalskill.rome.domain.model.Rome4Version;
@@ -38,8 +37,6 @@ class RomeAdditionalSkillServiceImplTest {
   @Mock private Rome4VersionRepository rome4VersionRepository;
 
   @Mock private RomeAdditionalSkillApi romeAdditionalSkillApi;
-
-  @Mock private OpenSearchIndex openSearchIndex;
 
   @InjectMocks private RomeAdditionalSkillServiceImpl service;
 
@@ -75,18 +72,6 @@ class RomeAdditionalSkillServiceImplTest {
         AdditionalSkill.create("skillLibelle2", "skillCode2", macro2, EAdditionalSkillType.ROME4);
   }
 
-  // --- cleanAndCreateAdditionalSkillIndex ---
-  @Test
-  void shouldDelegateCleanAndCreateAdditionalSkillIndex() {
-    BddLogger.given("the method cleanAndCreateAdditionalSkillIndex");
-
-    BddLogger.when("calling the method from the RomeAdditionalSkillServiceImpl service");
-    service.cleanAndCreateAdditionalSkillIndex();
-
-    BddLogger.then("it should delegate the method to openSearchIndex");
-    verify(openSearchIndex).cleanAndCreateAdditionalSkillIndex();
-  }
-
   // --- synchronizeAndIndexAdditionalSkills ---
   @Test
   void shouldSaveAndIndexAdditionalSkills_WhenNewSkills() {
@@ -98,13 +83,12 @@ class RomeAdditionalSkillServiceImplTest {
 
     BddLogger.when(
         "calling the method from the RomeAdditionalSkillServiceImpl service with new skills");
-    List<AdditionalSkill> result = service.synchronizeAndIndexAdditionalSkills(inputSkills);
+    List<AdditionalSkill> result = service.synchronizeAndSaveAdditionalSkills(inputSkills);
 
     BddLogger.then("it should save and index additional skills");
     assertThat(result).hasSize(2);
     verify(additionalSkillRepository).findAllByExternalId(List.of("skillCode1", "skillCode2"));
     verify(additionalSkillRepository).saveAll(anyList());
-    verify(openSearchIndex).indexAll(result);
   }
 
   @Test
@@ -130,12 +114,11 @@ class RomeAdditionalSkillServiceImplTest {
     BddLogger.when(
         "calling the method from the RomeAdditionalSkillServiceImpl service with existing skills");
     List<AdditionalSkill> result =
-        service.synchronizeAndIndexAdditionalSkills(List.of(additionalSkill1));
+        service.synchronizeAndSaveAdditionalSkills(List.of(additionalSkill1));
 
     BddLogger.then("it should update existing additional skill and index");
     assertThat(result).hasSize(1);
     assertThat(result.getFirst().getType()).isEqualTo(EAdditionalSkillType.ROME4);
-    verify(openSearchIndex).indexAll(result);
   }
 
   // --- checkRomeVersionUpdated ---
