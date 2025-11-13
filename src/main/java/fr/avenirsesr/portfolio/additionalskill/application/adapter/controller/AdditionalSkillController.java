@@ -1,9 +1,8 @@
 package fr.avenirsesr.portfolio.additionalskill.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillDTO;
-import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.AdditionalSkillMapper;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.OpenSearchIndex;
-import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import lombok.AllArgsConstructor;
@@ -16,17 +15,31 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/additional-skills")
 public class AdditionalSkillController {
-  private final OpenSearchIndex openSearchIndex;
+  private final ExternalSkillClient externalSkillClient;
 
+  /**
+   * @deprecated This endpoint is obsolete and will be removed in a future version
+   */
+  @Deprecated(since = "2025-11-25", forRemoval = true)
   @GetMapping(path = "/search")
   public ResponseEntity<PagedResponse<AdditionalSkillDTO>> searchAdditionalSkills(
       @RequestParam String keyword,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-    var result = openSearchIndex.search(keyword, new PageCriteria(page, pageSize));
+    PagedResponse<
+            fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDTO>
+        result = externalSkillClient.search(keyword, new PageCriteria(page, pageSize));
     return ResponseEntity.ok(
         new PagedResponse<>(
-            result.content().stream().map(AdditionalSkillMapper::toAdditionalSkillDTO).toList(),
-            PageInfoDTO.fromDomain(result.pageInfo())));
+            result.data().stream()
+                .map(
+                    externalSkill ->
+                        new AdditionalSkillDTO(
+                            externalSkill.id(),
+                            externalSkill.title(),
+                            externalSkill.pathSegments(),
+                            EAdditionalSkillType.valueOf(externalSkill.type().name())))
+                .toList(),
+            result.page()));
   }
 }

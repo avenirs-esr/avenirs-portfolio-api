@@ -1,16 +1,13 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillSyncService;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
-import fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.domain.port.input.CasocService;
-import fr.avenirsesr.portfolio.interoperability.additionalskill.casol.domain.port.input.CasolService;
-import fr.avenirsesr.portfolio.interoperability.additionalskill.xxi.domain.port.input.XXIService;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,26 +15,37 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class AdditionalSkillSeeder {
-  private final XXIService xxiService;
-  private final CasocService casocService;
-  private final CasolService casolService;
+  private final ExternalSkillClient externalSkillClient;
+  private final AdditionalSkillSyncService additionalSkillSyncService;
+
+  @Value("${seeder.source:FAKER}")
+  private String seederSource;
+
+  public boolean checkInteroperabilityMicroserviceIfNeeded() {
+    return "FAKER".equalsIgnoreCase(seederSource)
+        || externalSkillClient.checkInteroperabilityMicroservice();
+  }
 
   @Transactional
   public List<AdditionalSkillEntity> seed() {
-    log.info("Seeding additional skill...");
+    log.info("Seeding additional skills from interoperability...");
 
-    var xxi = xxiService.syncSkills();
-    var casoc = casocService.syncSkills();
-    var casol = casolService.syncSkills();
+    var externalSkills = externalSkillClient.getRandomSkills(200);
+    log.info("Retrieved {} random external skills", externalSkills.size());
 
-    var additionalSkills =
-        Stream.of(xxi, casoc, casol)
-            .flatMap(Collection::stream)
-            .map(AdditionalSkillMapper::fromDomain)
-            .collect(Collectors.toList());
+    var additionalSkillEntities =
+        externalSkills.stream()
+            .map(
+                externalSkill ->
+                    additionalSkillSyncService
+                        .getOrCreateFromExternalSkill(externalSkill.id())
+                        .map(AdditionalSkillMapper::fromDomain)
+                        .orElse(null))
+            .filter(entity -> entity != null)
+            .toList();
 
-    log.info("✔ {} additionalSkills synced", additionalSkills.size());
+    log.info("✔ {} additionalSkill synced", additionalSkillEntities.size());
 
-    return additionalSkills;
+    return additionalSkillEntities;
   }
 }

@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.seeder.AdditionalSkillProgressDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
@@ -9,12 +10,13 @@ import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProg
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public class AdditionalSkillProgressFixture {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
       new DataGeneratorProvider<SharedDataGenerator>()
-          .init(AdditionalSkillFixture.class, SharedDataGenerator.class);
+          .init(AdditionalSkillProgressFixture.class, SharedDataGenerator.class);
 
   private static final DataGeneratorProvider<AdditionalSkillProgressDataGenerator>
       additionalSkillProgressGenerator =
@@ -33,7 +35,12 @@ public class AdditionalSkillProgressFixture {
   private AdditionalSkillProgressFixture() {
     this.id = dataGenerator.with("id").uuid();
     this.student = StudentFixture.create().toModel();
-    this.skill = AdditionalSkillFixture.create().toModel();
+    this.skill =
+        AdditionalSkill.create(
+            UUID.randomUUID(),
+            "Test Skill",
+            EAdditionalSkillType.ROME4,
+            List.of("Category", "Subcategory"));
     this.level = dataGenerator.with("level").pickIn(EAdditionalSkillLevel.class);
     this.description = additionalSkillProgressGenerator.with("sentence").description();
     this.createdAt = Instant.now();

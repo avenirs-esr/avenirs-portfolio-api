@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.service;
 
+import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillSyncService;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
@@ -18,23 +20,25 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class StudentProgressServiceConfig {
-  private final StudentProgressDatabaseRepository studentProgressRepository;
-  private final SkillLevelProgressRepository skillLevelProgressRepository;
-  private final TraceService traceService;
-  private final TraceRepository traceRepository;
-  private final AdditionalSkillRepository additionalSkillRepository;
-  private final AdditionalSkillProgressDatabaseRepository additionalSkillProgressRepository;
-  private final LoggedInUserService loggedInUserService;
+    private final StudentProgressDatabaseRepository studentProgressRepository;
+    private final SkillLevelProgressRepository skillLevelProgressRepository;
+    private final TraceService traceService;
+    private final TraceRepository traceRepository;
+    private final AdditionalSkillSyncService additionalSkillSyncService;
+    private final AdditionalSkillProgressDatabaseRepository additionalSkillProgressRepository;
+    private final ExternalSkillClient externalSkillClient;
+    private final LoggedInUserService loggedInUserService;
 
-  @Bean
-  public StudentProgressService studentProgressService() {
-    return new StudentProgressServiceImpl(
-        studentProgressRepository,
-        skillLevelProgressRepository,
-        traceService,
-        traceRepository,
-        additionalSkillRepository,
-        additionalSkillProgressRepository,
-        loggedInUserService);
-  }
+    @Bean
+    public StudentProgressService studentProgressService() {
+        return new StudentProgressServiceImpl(
+                studentProgressRepository,
+                skillLevelProgressRepository,
+                traceService,
+                traceRepository,
+                additionalSkillSyncService,
+                additionalSkillProgressRepository,
+                externalSkillClient,
+                loggedInUserService);
+    }
 }

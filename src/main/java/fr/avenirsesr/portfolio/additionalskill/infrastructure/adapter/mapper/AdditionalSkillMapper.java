@@ -1,20 +1,17 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.*;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 
 public interface AdditionalSkillMapper {
 
   static AdditionalSkill toDomain(AdditionalSkillEntity entity) {
     return AdditionalSkill.toDomain(
         entity.getId(),
+        entity.getExternalSkillId(),
         entity.getLibelle(),
-        entity.getExternalId(),
-        entity
-            .getAdditionalSkillCategory()
-            .map(AdditionalSkillCategoryMapper::toDomain)
-            .orElse(null),
         entity.getType(),
+        entity.getPathSegments(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -22,12 +19,9 @@ public interface AdditionalSkillMapper {
   static AdditionalSkillEntity fromDomain(AdditionalSkill domain) {
     return AdditionalSkillEntity.of(
         domain.getId(),
-        domain.getExternalId(),
+        domain.getExternalSkillId(),
         domain.getLibelle(),
         domain.getType(),
-        domain
-            .getAdditionalSkillCategory()
-            .map(AdditionalSkillCategoryMapper::fromDomain)
-            .orElse(null));
+        domain.getPathSegments());
   }
 }

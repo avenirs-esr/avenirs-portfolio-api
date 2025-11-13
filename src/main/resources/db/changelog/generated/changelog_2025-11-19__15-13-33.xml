@@ -1,0 +1,37 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="Arnaud (generated)" id="1763565233532-3">
+        <dropForeignKeyConstraint baseTableName="additional_skill_category"
+                                  constraintName="FK97sea1mytpehijoersmq0r564"/>
+    </changeSet>
+    <changeSet author="Arnaud (generated)" id="1763565233532-4">
+        <dropForeignKeyConstraint baseTableName="additional_skill" constraintName="FK9uosyssnq3dpvs2700r44tidw"/>
+    </changeSet>
+    <changeSet author="Arnaud (generated)" id="1763565233532-1">
+        <addColumn tableName="additional_skill">
+            <column name="external_skill_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="Arnaud (generated)" id="1763565233532-2">
+        <addColumn tableName="additional_skill">
+            <column name="path_segments" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="Arnaud (generated)" id="1763565233532-5">
+        <dropTable tableName="additional_skill_category"/>
+    </changeSet>
+    <changeSet author="Arnaud (generated)" id="1763565233532-6">
+        <dropTable tableName="rome_4_version"/>
+    </changeSet>
+    <changeSet author="Arnaud (generated)" id="1763565233532-7">
+        <dropColumn columnName="additional_skill_category_id" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet author="Arnaud (generated)" id="1763565233532-8">
+        <dropColumn columnName="external_id" tableName="additional_skill"/>
+    </changeSet>
+</databaseChangeLog>

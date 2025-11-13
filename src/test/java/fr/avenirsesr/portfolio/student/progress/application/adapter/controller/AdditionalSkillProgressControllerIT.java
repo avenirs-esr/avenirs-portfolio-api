@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
-import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -39,6 +38,9 @@ public class AdditionalSkillProgressControllerIT {
 
   @Value("${user.student.signature}")
   private String studentSignature;
+
+  @Value("${external-skill.not-found-id}")
+  private String notFoundExternalSkillId;
 
   @BeforeAll
   static void setup(@Autowired SeederRunner seederRunner) {
@@ -77,10 +79,8 @@ public class AdditionalSkillProgressControllerIT {
   @Transactional
   @Test
   void shouldCreateAdditionalSkillProgress() throws Exception {
-    var additionalSkill =
-        additionalSkillRepository.findAllByExternalId(List.of("1")).stream()
-            .findFirst()
-            .orElseThrow();
+    var additionalSkill = additionalSkillRepository.findAll().stream().findFirst().orElseThrow();
+    UUID externalSkillId = additionalSkill.getExternalSkillId();
 
     BddLogger.given("the " + BASE_PATH + " enpoint");
     BddLogger.when("performing a POST with a non already existing additional skill progress");
@@ -92,7 +92,7 @@ public class AdditionalSkillProgressControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(buildAdditionalSkillsJson(additionalSkill.getId())))
+                .content(buildAdditionalSkillsJson(externalSkillId)))
         .andExpect(status().isCreated());
   }
 
@@ -100,9 +100,8 @@ public class AdditionalSkillProgressControllerIT {
   @Test
   void shouldReturnConflictWhenAdditionalSkillAlreadyExists() throws Exception {
     var additionalSkill =
-        additionalSkillRepository.findAllByExternalId(List.of("1")).stream()
-            .findFirst()
-            .orElseThrow();
+        additionalSkillRepository.findAll().stream().skip(1).findFirst().orElseThrow();
+    UUID externalSkillId = additionalSkill.getExternalSkillId();
 
     BddLogger.given("the " + BASE_PATH + " enpoint");
     BddLogger.when("performing a POST with and already existing additional skill progress");
@@ -116,7 +115,7 @@ public class AdditionalSkillProgressControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(buildAdditionalSkillsJson(additionalSkill.getId())))
+                .content(buildAdditionalSkillsJson(externalSkillId)))
         .andExpect(status().isCreated());
 
     mockMvc
@@ -126,7 +125,7 @@ public class AdditionalSkillProgressControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(buildAdditionalSkillsJson(additionalSkill.getId())))
+                .content(buildAdditionalSkillsJson(externalSkillId)))
         .andExpect(status().isConflict());
   }
 
@@ -144,9 +143,7 @@ public class AdditionalSkillProgressControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    buildAdditionalSkillsJson(
-                        UUID.fromString("2f024a1c-5429-43f6-bb2e-ac5a3ca662e7"))))
+                .content(buildAdditionalSkillsJson(UUID.fromString(notFoundExternalSkillId))))
         .andExpect(status().isNotFound());
   }
 }
