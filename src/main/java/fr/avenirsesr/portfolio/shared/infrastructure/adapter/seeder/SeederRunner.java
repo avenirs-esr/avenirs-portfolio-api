@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.Institution
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
+import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeCategorySeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.*;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
@@ -41,6 +42,7 @@ public class SeederRunner implements CommandLineRunner {
   private final SkillSeeder skillSeeder;
   private final AdditionalSkillSeeder additionalSkillSeeder;
   private final AdditionalSkillProgressSeeder additionalSkillProgressSeeder;
+  private final SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder;
 
   @Value("${seeder.enabled:false}")
   private boolean seedEnabled;
@@ -61,7 +63,8 @@ public class SeederRunner implements CommandLineRunner {
       StudentProgressSeeder studentProgressSeeder,
       SkillSeeder skillSeeder,
       AdditionalSkillSeeder additionalSkillSeeder,
-      AdditionalSkillProgressSeeder additionalSkillProgressSeeder) {
+      AdditionalSkillProgressSeeder additionalSkillProgressSeeder,
+      SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder) {
 
     this.userRepository = userRepository;
     this.userPhotoSeeder = userPhotoSeeder;
@@ -79,6 +82,7 @@ public class SeederRunner implements CommandLineRunner {
     this.skillSeeder = skillSeeder;
     this.additionalSkillSeeder = additionalSkillSeeder;
     this.additionalSkillProgressSeeder = additionalSkillProgressSeeder;
+    this.selfKnowledgeCategorySeeder = selfKnowledgeCategorySeeder;
   }
 
   @Override
@@ -110,6 +114,7 @@ public class SeederRunner implements CommandLineRunner {
       var savedTracesAttachment = traceAttachmentSeeder.seed(savedTraces);
       var savedAmses =
           amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
+      var savedSelfKnowledgeCategories = selfKnowledgeCategorySeeder.seed();
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
