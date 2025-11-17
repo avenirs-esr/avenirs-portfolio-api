@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeCategoryMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
-import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,18 +15,12 @@ public class SelfKnowledgeCategoryDatabaseRepository
   private final SelfKnowledgeCategoryJpaRepository jpaRepository;
 
   public SelfKnowledgeCategoryDatabaseRepository(SelfKnowledgeCategoryJpaRepository jpaRepository) {
-<span class="fc" id="L19">    super(</span>
+<span class="fc" id="L18">    super(</span>
         jpaRepository,
         jpaRepository,
         SelfKnowledgeCategoryMapper::fromDomain,
         SelfKnowledgeCategoryMapper::toDomain);
-<span class="fc" id="L24">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L25">  }</span>
-
-  public void saveAllEntities(List&lt;SelfKnowledgeCategoryEntity&gt; entities) {
-<span class="pc bpc" id="L28" title="2 of 4 branches missed.">    if (entities != null &amp;&amp; !entities.isEmpty()) {</span>
-<span class="fc" id="L29">      jpaRepository.saveAll(entities);</span>
-    }
-<span class="fc" id="L31">  }</span>
+<span class="fc" id="L23">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L24">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
