@@ -66,14 +66,16 @@ public class SelfKnowledgeCategorySeeder {
 
     repository.saveAllEntities(entities);
 
-    long mandatoryCount =
-        entities.stream().filter(SelfKnowledgeCategoryEntity::isMandatory).count();
+    List<SelfKnowledgeCategoryEntity> mandatoryCategories =
+        entities.stream().filter(SelfKnowledgeCategoryEntity::isMandatory).toList();
+
+    long mandatoryCount = mandatoryCategories.size();
     log.info(
         "✔ {} self-knowledge categories created ({} mandatory, {} optional)",
         entities.size(),
         mandatoryCount,
         entities.size() - mandatoryCount);
 
-    return entities;
+    return mandatoryCategories;
   }
 }

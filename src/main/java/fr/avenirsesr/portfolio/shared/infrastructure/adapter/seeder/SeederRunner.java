@@ -92,9 +92,10 @@ public class SeederRunner implements CommandLineRunner {
     if (seedEnabled && userCont == 0) {
       log.info("Seeding enabled and starting...");
 
+      var savedSelfKnowledgeMandatoryCategories = selfKnowledgeCategorySeeder.seed();
       var savedUsers = userSeeder.seed();
       var savedTeachers = teacherSeeder.seed(savedUsers);
-      var savedStudents = studentSeeder.seed(savedUsers);
+      var savedStudents = studentSeeder.seed(savedUsers, savedSelfKnowledgeMandatoryCategories);
       var savedUserPhotos = userPhotoSeeder.seed(savedStudents, savedTeachers);
       var savedAdditionalSkills = additionalSkillSeeder.seed();
       var savedStudentAdditionalSkills =
@@ -114,7 +115,6 @@ public class SeederRunner implements CommandLineRunner {
       var savedTracesAttachment = traceAttachmentSeeder.seed(savedTraces);
       var savedAmses =
           amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
-      var savedSelfKnowledgeCategories = selfKnowledgeCategorySeeder.seed();
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);

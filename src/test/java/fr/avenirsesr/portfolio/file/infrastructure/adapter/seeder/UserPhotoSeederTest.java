@@ -37,7 +37,7 @@ class UserPhotoSeederTest {
   void setUp() {
     // Seed des utilisateurs avec UserSeeder
     this.users = userSeeder.seed();
-    this.students = studentSeeder.seed(users);
+    this.students = studentSeeder.seed(users, List.of());
     this.teachers = teacherSeeder.seed(users);
   }
 

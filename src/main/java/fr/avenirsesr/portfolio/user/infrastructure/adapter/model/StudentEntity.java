@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
+import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +18,13 @@ import lombok.Setter;
 public class StudentEntity extends AvenirsBaseEntity {
   @OneToOne private UserEntity user;
   @Column private String bio;
+
+  @ManyToMany
+  @JoinTable(
+      name = "student_self_knowledge_category",
+      joinColumns = @JoinColumn(name = "student_id"),
+      inverseJoinColumns = @JoinColumn(name = "category_id"))
+  private Set<SelfKnowledgeCategoryEntity> selfKnowledgeCategories = new HashSet<>();
 
   private StudentEntity(UUID id, UserEntity user, String bio) {
     setId(id);

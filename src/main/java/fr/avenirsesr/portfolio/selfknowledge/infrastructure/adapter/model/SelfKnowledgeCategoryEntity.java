@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,6 +31,9 @@ public class SelfKnowledgeCategoryEntity extends AvenirsBaseEntity {
       orphanRemoval = true,
       fetch = FetchType.LAZY)
   private Set<SelfKnowledgeCategoryTranslationEntity> translations = new HashSet<>();
+
+  @ManyToMany(mappedBy = "selfKnowledgeCategories")
+  private Set<StudentEntity> students = new HashSet<>();
 
   private SelfKnowledgeCategoryEntity(UUID id, ESelfKnowledgeCategoryType type, boolean mandatory) {
     this.setId(id);

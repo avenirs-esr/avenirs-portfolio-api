@@ -81,7 +81,7 @@ class AMSSeederTest {
 
     // Seed les données comme dans SeederRunner
     var savedUsers = userSeeder.seed();
-    var savedStudents = studentSeeder.seed(savedUsers);
+    var savedStudents = studentSeeder.seed(savedUsers, List.of());
     var additionalSkills = additionalSkillSeeder.seed();
     List<AdditionalSkillProgressEntity> additionalSkillProgresses =
         additionalSkillProgressSeeder.seed(savedStudents, additionalSkills);
