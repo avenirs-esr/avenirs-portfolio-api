@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.data
 
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.CsvReader;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,10 @@ public class SelfKnowledgeCategoryCSVData {
             SelfKnowledgeCategoryCSVData.class.getClassLoader().getResourceAsStream(path),
             values ->
                 new CsvSelfKnowledgeCategoryDto(
-                    values[0], values[1], Boolean.parseBoolean(values[2])));
+                    values[0],
+                    values[1],
+                    Boolean.parseBoolean(values[2]),
+                    ESelfKnowledgeCategoryType.valueOf(values[3])));
   }
 
   private static final Map<ELanguage, ArrayList<CsvSelfKnowledgeCategoryDto>> data =
