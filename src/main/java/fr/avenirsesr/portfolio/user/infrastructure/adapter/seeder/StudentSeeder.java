@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
+import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.StudentDatabaseRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeStudent;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,10 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class StudentSeeder {
-  private final StudentRepository studentRepository;
+  private final StudentDatabaseRepository studentRepository;
 
   @Transactional
-  public List<StudentEntity> seed(List<UserEntity> savedUsers) {
+  public List<StudentEntity> seed(
+      List<UserEntity> savedUsers, List<SelfKnowledgeCategoryEntity> mandatoryCategories) {
     ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");
     log.info("Seeding Students ...");
 
@@ -36,10 +37,14 @@ public class StudentSeeder {
 
     List<StudentEntity> students = new ArrayList<>();
     for (UserEntity user : usersToAdd) {
-      students.add(FakeStudent.create(user).toEntity());
+      StudentEntity student = FakeStudent.create(user).toEntity();
+      for (SelfKnowledgeCategoryEntity category : mandatoryCategories) {
+        student.getSelfKnowledgeCategories().add(category);
+      }
+      students.add(student);
     }
 
-    studentRepository.saveAll(students.stream().map(StudentMapper::toDomain).toList());
+    studentRepository.saveAllEntities(students);
     log.info("✔ {} students synced", students.size());
 
     return students;
