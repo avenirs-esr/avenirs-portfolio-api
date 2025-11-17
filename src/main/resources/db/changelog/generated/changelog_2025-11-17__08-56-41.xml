@@ -1,6 +1,6 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-    <changeSet author="nathp (generated)" id="1763114083781-1">
+    <changeSet author="nathp (generated)" id="1763369813537-1">
         <createTable tableName="self_knowledge_category">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="self_knowledge_categoryPK"/>
@@ -14,9 +14,12 @@
             <column name="mandatory" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
-    <changeSet author="nathp (generated)" id="1763114083781-2">
+    <changeSet author="nathp (generated)" id="1763369813537-2">
         <createTable tableName="self_knowledge_category_translation">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="self_knowledge_category_translationPK"/>
@@ -41,7 +44,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="nathp (generated)" id="1763114083781-3">
+    <changeSet author="nathp (generated)" id="1763369813537-3">
         <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="self_knowledge_category_translation" constraintName="FKi4gix0crn0p0gatpqbylbp3u3" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="self_knowledge_category" validate="true"/>
     </changeSet>
 </databaseChangeLog>

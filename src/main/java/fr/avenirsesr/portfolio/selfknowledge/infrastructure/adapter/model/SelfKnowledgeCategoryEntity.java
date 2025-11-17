@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +17,10 @@ import lombok.Setter;
 @Setter
 public class SelfKnowledgeCategoryEntity extends AvenirsBaseEntity {
 
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private ESelfKnowledgeCategoryType type;
+
   @Column(nullable = false)
   private boolean mandatory;
 
@@ -26,12 +31,14 @@ public class SelfKnowledgeCategoryEntity extends AvenirsBaseEntity {
       fetch = FetchType.LAZY)
   private Set<SelfKnowledgeCategoryTranslationEntity> translations = new HashSet<>();
 
-  private SelfKnowledgeCategoryEntity(UUID id, boolean mandatory) {
+  private SelfKnowledgeCategoryEntity(UUID id, ESelfKnowledgeCategoryType type, boolean mandatory) {
     this.setId(id);
+    this.type = type;
     this.mandatory = mandatory;
   }
 
-  public static SelfKnowledgeCategoryEntity of(UUID id, boolean mandatory) {
-    return new SelfKnowledgeCategoryEntity(id, mandatory);
+  public static SelfKnowledgeCategoryEntity of(
+      UUID id, ESelfKnowledgeCategoryType type, boolean mandatory) {
+    return new SelfKnowledgeCategoryEntity(id, type, mandatory);
   }
 }

@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryTranslationEntity;
 import java.util.Set;
@@ -15,9 +16,9 @@ public class FakeSelfKnowledgeCategory {
   }
 
   public static FakeSelfKnowledgeCategory of(
-      String frTitle, String frDescription, boolean mandatory) {
+      String frTitle, String frDescription, ESelfKnowledgeCategoryType type, boolean mandatory) {
 
-    var entity = SelfKnowledgeCategoryEntity.of(UUID.randomUUID(), mandatory);
+    var entity = SelfKnowledgeCategoryEntity.of(UUID.randomUUID(), type, mandatory);
 
     var frTranslation =
         SelfKnowledgeCategoryTranslationEntity.of(

@@ -42,7 +42,8 @@ public class SelfKnowledgeCategorySeeder {
       CsvSelfKnowledgeCategoryDto en = enRows.get(i);
       CsvSelfKnowledgeCategoryDto es = esRows.get(i);
 
-      var categoryEntity = SelfKnowledgeCategoryEntity.of(UUID.randomUUID(), fr.mandatory());
+      var categoryEntity =
+          SelfKnowledgeCategoryEntity.of(UUID.randomUUID(), fr.type(), fr.mandatory());
 
       Set<SelfKnowledgeCategoryTranslationEntity> translations = new HashSet<>();
 

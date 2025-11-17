@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.selfknowledge.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
@@ -12,34 +13,42 @@ public class SelfKnowledgeCategory extends AvenirsBaseModel {
 
   private final String title;
   private final String description;
-  private boolean mandatory;
+  private final ESelfKnowledgeCategoryType type;
+  private final boolean mandatory;
 
   private SelfKnowledgeCategory(
       UUID id,
       String title,
       String description,
+      ESelfKnowledgeCategoryType type,
       boolean mandatory,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
     this.title = title;
     this.description = description;
+    this.type = type;
     this.mandatory = mandatory;
   }
 
   public static SelfKnowledgeCategory create(
-      UUID id, String title, String description, boolean mandatory) {
+      UUID id,
+      String title,
+      String description,
+      ESelfKnowledgeCategoryType type,
+      boolean mandatory) {
     return new SelfKnowledgeCategory(
-        id, title, description, mandatory, Instant.now(), Instant.now());
+        id, title, description, type, mandatory, Instant.now(), Instant.now());
   }
 
   public static SelfKnowledgeCategory toDomain(
       UUID id,
       String title,
       String description,
+      ESelfKnowledgeCategoryType type,
       boolean mandatory,
       Instant createdAt,
       Instant updatedAt) {
-    return new SelfKnowledgeCategory(id, title, description, mandatory, createdAt, updatedAt);
+    return new SelfKnowledgeCategory(id, title, description, type, mandatory, createdAt, updatedAt);
   }
 }

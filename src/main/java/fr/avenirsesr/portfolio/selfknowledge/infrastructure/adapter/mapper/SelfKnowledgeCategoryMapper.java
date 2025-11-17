@@ -8,7 +8,8 @@ import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKn
 public interface SelfKnowledgeCategoryMapper {
 
   static SelfKnowledgeCategoryEntity fromDomain(SelfKnowledgeCategory category) {
-    return SelfKnowledgeCategoryEntity.of(category.getId(), category.isMandatory());
+    return SelfKnowledgeCategoryEntity.of(
+        category.getId(), category.getType(), category.isMandatory());
   }
 
   static SelfKnowledgeCategory toDomain(SelfKnowledgeCategoryEntity entity) {
@@ -19,6 +20,7 @@ public interface SelfKnowledgeCategoryMapper {
         entity.getId(),
         translation.getTitle(),
         translation.getDescription(),
+        entity.getType(),
         entity.isMandatory(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
