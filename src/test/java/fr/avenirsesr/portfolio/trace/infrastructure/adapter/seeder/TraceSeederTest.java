@@ -40,7 +40,7 @@ class TraceSeederTest {
   @BeforeAll
   void setUp() {
     users = userSeeder.seed();
-    List<StudentEntity> students = studentSeeder.seed(users, List.of());
+    List<StudentEntity> students = studentSeeder.seed(users);
     var additionalSkills = additionalSkillSeeder.seed();
     additionalSkillProgresses = additionalSkillProgressSeeder.seed(students, additionalSkills);
   }
