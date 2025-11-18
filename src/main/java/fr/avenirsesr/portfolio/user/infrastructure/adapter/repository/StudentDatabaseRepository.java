@@ -1,6 +1,9 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
+import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeCategoryMapper;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
@@ -20,5 +23,15 @@ public class StudentDatabaseRepository extends GenericJpaRepositoryAdapter<Stude
 
   public void saveAllEntities(List<StudentEntity> entities) {
     jpaRepository.saveAll(entities);
+  }
+
+  @Override
+  public void addSelfKnowledgeCategories(Student student, List<SelfKnowledgeCategory> categories) {
+    StudentEntity studentEntity =
+        jpaRepository.findById(student.getId()).orElseThrow(UserNotFoundException::new);
+    studentEntity
+        .getSelfKnowledgeCategories()
+        .addAll(categories.stream().map(SelfKnowledgeCategoryMapper::fromDomain).toList());
+    jpaRepository.save(studentEntity);
   }
 }

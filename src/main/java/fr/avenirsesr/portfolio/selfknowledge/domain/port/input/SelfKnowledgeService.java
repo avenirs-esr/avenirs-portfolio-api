@@ -7,4 +7,6 @@ public interface SelfKnowledgeService {
   List<SelfKnowledgeCategory> getSelfKnowledgeCategories();
 
   List<SelfKnowledgeCategory> getSelfKnowledgeCategoriesAvailable();
+
+  void addSelfKnowledgeCategories(List<String> categoriesId);
 }

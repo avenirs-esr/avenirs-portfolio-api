@@ -7,9 +7,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @AllArgsConstructor
@@ -24,6 +22,12 @@ public class SelfKnowledgeController {
         selfKnowledgeService.getSelfKnowledgeCategories().stream()
             .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)
             .toList());
+  }
+
+  @PostMapping("/categories")
+  public ResponseEntity<String> getSelfKnowledgeCategories(@RequestBody List<String> categories) {
+    selfKnowledgeService.addSelfKnowledgeCategories(categories);
+    return ResponseEntity.ok("Categories successfully associated with user");
   }
 
   @GetMapping("/categories/available")
