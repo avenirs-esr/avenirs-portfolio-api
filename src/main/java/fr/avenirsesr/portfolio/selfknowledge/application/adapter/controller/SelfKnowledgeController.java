@@ -25,4 +25,12 @@ public class SelfKnowledgeController {
             .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)
             .toList());
   }
+
+  @GetMapping("/categories/available")
+  public ResponseEntity<List<SelfKnowledgeCategoryDTO>> getSelfKnowledgeCategoriesAvailable() {
+    return ResponseEntity.ok(
+        selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()
+            .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)
+            .toList());
+  }
 }

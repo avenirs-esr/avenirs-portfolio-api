@@ -27,6 +27,7 @@ class SelfKnowledgeControllerIT {
 
   private static final String BASE_PATH = "/me/self-knowledge";
   private static final String CATEGORIES_BASE_PATH = BASE_PATH + "/categories";
+  private static final String CATEGORIES_AVAILABLE_BASE_PATH = CATEGORIES_BASE_PATH + "/available";
 
   @Autowired private MockMvc mockMvc;
 
@@ -76,13 +77,55 @@ class SelfKnowledgeControllerIT {
   }
 
   @Test
-  void shouldReturn404WhenUserNotFound() throws Exception {
+  void shouldReturn404WhenUserNotFoundOnCategoriesEndpoint() throws Exception {
     BddLogger.given("the " + CATEGORIES_BASE_PATH + " enpoint");
     BddLogger.when("performing a GET and the user is not found");
     BddLogger.then("it should return a 404");
     mockMvc
         .perform(
             get(CATEGORIES_BASE_PATH)
+                .header("X-Signed-Context", unknownUserPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", unknownUserSignature))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("User not found"))
+        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+  }
+
+  @Test
+  void shouldReturnSelfKnowledgeCategoriesAvailableForStudent() throws Exception {
+    BddLogger.given("the " + CATEGORIES_AVAILABLE_BASE_PATH + " endpoint");
+    BddLogger.when("performing a GET as a student");
+    BddLogger.then("it should return the self knowledge categories not linked to the student");
+
+    mockMvc
+        .perform(
+            get(CATEGORIES_AVAILABLE_BASE_PATH)
+                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$").isArray())
+        .andExpect(jsonPath("$[0]").exists())
+        .andExpect(jsonPath("$[0].id", notNullValue()))
+        .andExpect(jsonPath("$[0].title", notNullValue()))
+        .andExpect(jsonPath("$[0].description", notNullValue()))
+        .andExpect(jsonPath("$[0].type", notNullValue()))
+        .andExpect(jsonPath("$[0].type", is("MOTIVATION")));
+  }
+
+  @Test
+  void shouldReturn404WhenUserNotFoundOnCategoriesAvailableEndpoint() throws Exception {
+    BddLogger.given("the " + CATEGORIES_AVAILABLE_BASE_PATH + " enpoint");
+    BddLogger.when("performing a GET and the user is not found");
+    BddLogger.then("it should return a 404");
+    mockMvc
+        .perform(
+            get(CATEGORIES_AVAILABLE_BASE_PATH)
                 .header("X-Signed-Context", unknownUserPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", unknownUserSignature))

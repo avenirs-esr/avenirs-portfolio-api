@@ -35,4 +35,14 @@ public class SelfKnowledgeCategoryDatabaseRepository
         .map(SelfKnowledgeCategoryMapper::toDomain)
         .toList();
   }
+
+  @Override
+  public List<SelfKnowledgeCategory> findAllAvailableByStudent(Student student) {
+    return jpaRepository
+        .findAll(
+            SelfKnowledgeCategorySpecification.hasNotStudent(StudentMapper.fromDomain(student)))
+        .stream()
+        .map(SelfKnowledgeCategoryMapper::toDomain)
+        .toList();
+  }
 }
