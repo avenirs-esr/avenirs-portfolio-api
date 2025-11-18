@@ -2,14 +2,35 @@
 
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="pc" id="L7">public class SelfKnowledgeCategorySpecification {</span>
+<span class="pc" id="L9">public class SelfKnowledgeCategorySpecification {</span>
+
   public static Specification&lt;SelfKnowledgeCategoryEntity&gt; hasStudent(StudentEntity student) {
-<span class="fc" id="L9">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L10" title="1 of 2 branches missed.">      assert query != null;</span>
-<span class="fc" id="L11">      query.distinct(true);</span>
-<span class="fc" id="L12">      return criteriaBuilder.equal(root.join(&quot;students&quot;), student);</span>
+<span class="fc" id="L12">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L13" title="1 of 2 branches missed.">      assert query != null;</span>
+<span class="fc" id="L14">      query.distinct(true);</span>
+<span class="fc" id="L15">      return criteriaBuilder.equal(root.join(&quot;students&quot;), student);</span>
+    };
+  }
+
+  public static Specification&lt;SelfKnowledgeCategoryEntity&gt; hasNotStudent(StudentEntity student) {
+<span class="fc" id="L20">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">      assert query != null;</span>
+<span class="fc" id="L22">      query.distinct(true);</span>
+
+<span class="fc" id="L24">      Subquery&lt;Long&gt; sub = query.subquery(Long.class);</span>
+<span class="fc" id="L25">      var subRoot = sub.from(SelfKnowledgeCategoryEntity.class);</span>
+<span class="fc" id="L26">      Join&lt;SelfKnowledgeCategoryEntity, StudentEntity&gt; subStudents = subRoot.join(&quot;students&quot;);</span>
+
+<span class="fc" id="L28">      sub.select(criteriaBuilder.literal(1L))</span>
+<span class="fc" id="L29">          .where(</span>
+<span class="fc" id="L30">              criteriaBuilder.equal(subRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L31">              criteriaBuilder.equal(subStudents.get(&quot;id&quot;), student.getId()));</span>
+
+<span class="fc" id="L33">      return criteriaBuilder.not(criteriaBuilder.exists(sub));</span>
     };
   }
 }
