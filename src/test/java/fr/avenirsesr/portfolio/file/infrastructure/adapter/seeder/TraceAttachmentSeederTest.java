@@ -39,7 +39,7 @@ class TraceAttachmentSeederTest {
   void setUp() {
     // Seed des utilisateurs
     var users = userSeeder.seed();
-    var students = studentSeeder.seed(users, List.of());
+    var students = studentSeeder.seed(users);
     var additionalSkills = additionalSkillSeeder.seed();
     List<AdditionalSkillProgressEntity> additionalSkillProgresses =
         additionalSkillProgressSeeder.seed(students, additionalSkills);

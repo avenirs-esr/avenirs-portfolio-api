@@ -48,7 +48,7 @@ class StudentProgressSeederTest {
     var savedUsers = userSeeder.seed();
 
     // Seed des students
-    students = studentSeeder.seed(savedUsers, List.of());
+    students = studentSeeder.seed(savedUsers);
 
     // Seed des institutions
     var savedInstitutions = institutionSeeder.seed();

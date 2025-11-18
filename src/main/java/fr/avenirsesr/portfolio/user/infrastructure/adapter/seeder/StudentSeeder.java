@@ -23,6 +23,11 @@ public class StudentSeeder {
   private final StudentDatabaseRepository studentRepository;
 
   @Transactional
+  public List<StudentEntity> seed(List<UserEntity> savedUsers) {
+    return seed(savedUsers, List.of());
+  }
+
+  @Transactional
   public List<StudentEntity> seed(
       List<UserEntity> savedUsers, List<SelfKnowledgeCategoryEntity> mandatoryCategories) {
     ValidationUtils.requireNonEmpty(savedUsers, "users cannot be empty");

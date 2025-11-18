@@ -6,4 +6,8 @@ import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "title", "description", "type"})
 public record SelfKnowledgeCategoryDTO(
-    UUID id, String title, String description, ESelfKnowledgeCategoryType type) {}
+    UUID id,
+    String title,
+    String description,
+    @Schema(ref = "#/components/schemas/ESelfKnowledgeCategoryType")
+        ESelfKnowledgeCategoryType type) {}
