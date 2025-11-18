@@ -157,6 +157,87 @@ class SelfKnowledgeServiceImplTest {
           }
         }
       }
+
+      @Nested
+      class AndAvailableSelfKnowledgeCategoriesForThisStudent {
+
+        private SelfKnowledgeCategory motivationsCategory;
+        private SelfKnowledgeCategory interestsCategory;
+        private List<SelfKnowledgeCategory> result;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("available self knowledge categories for this student");
+
+          motivationsCategory =
+              SelfKnowledgeCategoryFixture.create()
+                  .withType(ESelfKnowledgeCategoryType.MOTIVATION)
+                  .toModel();
+          interestsCategory =
+              SelfKnowledgeCategoryFixture.create()
+                  .withType(ESelfKnowledgeCategoryType.INTERESTS)
+                  .toModel();
+
+          when(selfKnowledgeCategoryRepository.findAllAvailableByStudent(eq(student)))
+              .thenReturn(List.of(interestsCategory, motivationsCategory));
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeCategoriesAvailable {
+
+          @BeforeEach
+          void setupWhen() {
+            BddLogger.when("getting available self knowledge categories for the current student");
+            result = selfKnowledgeService.getSelfKnowledgeCategoriesAvailable();
+          }
+
+          @Test
+          void thenItShouldReturnAvailableCategoriesSortedByTypeOrder() {
+            BddLogger.then(
+                "it should return available categories sorted by ESelfKnowledgeCategoryType.order");
+
+            assertThat(result).hasSize(2);
+
+            assertThat(result.get(0).getType()).isEqualTo(ESelfKnowledgeCategoryType.MOTIVATION);
+            assertThat(result.get(1).getType()).isEqualTo(ESelfKnowledgeCategoryType.INTERESTS);
+
+            verify(studentRepository).findById(eq(student.getId()));
+            verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
+          }
+        }
+      }
+
+      @Nested
+      class AndNoAvailableSelfKnowledgeCategoryForThisStudent {
+
+        private List<SelfKnowledgeCategory> result;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("no available self knowledge category for this student");
+          when(selfKnowledgeCategoryRepository.findAllAvailableByStudent(eq(student)))
+              .thenReturn(List.of());
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeCategoriesAvailable {
+
+          @BeforeEach
+          void setupWhen() {
+            BddLogger.when("getting available self knowledge categories for the current student");
+            result = selfKnowledgeService.getSelfKnowledgeCategoriesAvailable();
+          }
+
+          @Test
+          void thenItShouldReturnAnEmptyList() {
+            BddLogger.then("it should return an empty list");
+            assertThat(result).isEmpty();
+
+            verify(studentRepository).findById(eq(student.getId()));
+            verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
+          }
+        }
+      }
     }
 
     @Nested
@@ -180,6 +261,24 @@ class SelfKnowledgeServiceImplTest {
 
           assertThrows(
               UserNotFoundException.class, () -> selfKnowledgeService.getSelfKnowledgeCategories());
+
+          verifyNoInteractions(studentRepository);
+          verifyNoInteractions(selfKnowledgeCategoryRepository);
+        }
+      }
+
+      @Nested
+      class WhenGettingSelfKnowledgeCategoriesAvailable {
+
+        @Test
+        void thenItShouldThrowUserNotFoundException() {
+          BddLogger.when(
+              "getting available self knowledge categories available without logged in user");
+          BddLogger.then("it should throw UserNotFoundException");
+
+          assertThrows(
+              UserNotFoundException.class,
+              () -> selfKnowledgeService.getSelfKnowledgeCategoriesAvailable());
 
           verifyNoInteractions(studentRepository);
           verifyNoInteractions(selfKnowledgeCategoryRepository);
@@ -210,6 +309,23 @@ class SelfKnowledgeServiceImplTest {
           assertThrows(
               UserIsNotStudentException.class,
               () -> selfKnowledgeService.getSelfKnowledgeCategories());
+
+          verify(studentRepository).findById(eq(student.getId()));
+          verifyNoInteractions(selfKnowledgeCategoryRepository);
+        }
+      }
+
+      @Nested
+      class WhenGettingSelfKnowledgeCategoriesAvailable {
+
+        @Test
+        void thenItShouldThrowUserIsNotStudentException() {
+          BddLogger.when("getting self knowledge categories available for a non student user");
+          BddLogger.then("it should throw UserIsNotStudentException");
+
+          assertThrows(
+              UserIsNotStudentException.class,
+              () -> selfKnowledgeService.getSelfKnowledgeCategoriesAvailable());
 
           verify(studentRepository).findById(eq(student.getId()));
           verifyNoInteractions(selfKnowledgeCategoryRepository);

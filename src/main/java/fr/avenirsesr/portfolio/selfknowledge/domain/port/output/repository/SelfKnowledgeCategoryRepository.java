@@ -8,4 +8,6 @@ import java.util.List;
 public interface SelfKnowledgeCategoryRepository
     extends GenericRepositoryPort<SelfKnowledgeCategory> {
   List<SelfKnowledgeCategory> findAllByStudent(Student student);
+
+  List<SelfKnowledgeCategory> findAllAvailableByStudent(Student student);
 }

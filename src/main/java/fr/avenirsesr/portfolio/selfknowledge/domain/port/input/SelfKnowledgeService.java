@@ -5,4 +5,6 @@ import java.util.List;
 
 public interface SelfKnowledgeService {
   List<SelfKnowledgeCategory> getSelfKnowledgeCategories();
+
+  List<SelfKnowledgeCategory> getSelfKnowledgeCategoriesAvailable();
 }
