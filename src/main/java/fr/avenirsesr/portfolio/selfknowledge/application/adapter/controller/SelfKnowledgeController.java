@@ -1,18 +1,9 @@
 package fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
-import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.selfknowledge.application.adapter.SelfKnowledgeElementViewMapper;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeCategoryDTO;
-import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementViewDTO;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.mapper.SelfKnowledgeCategoryMapper;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
-import java.security.Principal;
 import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
