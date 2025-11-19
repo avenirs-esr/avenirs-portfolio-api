@@ -7,11 +7,9 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-<span class="fc" id="L14">@Slf4j</span>
+<span class="fc" id="L12">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/self-knowledge&quot;)
@@ -20,18 +18,24 @@ public class SelfKnowledgeController {
 
   @GetMapping(&quot;/categories&quot;)
   public ResponseEntity&lt;List&lt;SelfKnowledgeCategoryDTO&gt;&gt; getSelfKnowledgeCategories() {
-<span class="fc" id="L23">    return ResponseEntity.ok(</span>
-<span class="fc" id="L24">        selfKnowledgeService.getSelfKnowledgeCategories().stream()</span>
-<span class="fc" id="L25">            .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
-<span class="fc" id="L26">            .toList());</span>
+<span class="fc" id="L21">    return ResponseEntity.ok(</span>
+<span class="fc" id="L22">        selfKnowledgeService.getSelfKnowledgeCategories().stream()</span>
+<span class="fc" id="L23">            .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
+<span class="fc" id="L24">            .toList());</span>
+  }
+
+  @PostMapping(&quot;/categories&quot;)
+  public ResponseEntity&lt;String&gt; getSelfKnowledgeCategories(@RequestBody List&lt;String&gt; categories) {
+<span class="fc" id="L29">    selfKnowledgeService.addSelfKnowledgeCategories(categories);</span>
+<span class="fc" id="L30">    return ResponseEntity.ok(&quot;Categories successfully associated with user&quot;);</span>
   }
 
   @GetMapping(&quot;/categories/available&quot;)
   public ResponseEntity&lt;List&lt;SelfKnowledgeCategoryDTO&gt;&gt; getSelfKnowledgeCategoriesAvailable() {
-<span class="fc" id="L31">    return ResponseEntity.ok(</span>
-<span class="fc" id="L32">        selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()</span>
-<span class="fc" id="L33">            .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
-<span class="fc" id="L34">            .toList());</span>
+<span class="fc" id="L35">    return ResponseEntity.ok(</span>
+<span class="fc" id="L36">        selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()</span>
+<span class="fc" id="L37">            .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
+<span class="fc" id="L38">            .toList());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

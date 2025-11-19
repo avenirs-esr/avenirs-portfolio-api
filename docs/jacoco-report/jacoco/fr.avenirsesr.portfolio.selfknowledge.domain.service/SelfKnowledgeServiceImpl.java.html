@@ -3,44 +3,78 @@
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L17">@Slf4j</span>
+<span class="fc" id="L19">@Slf4j</span>
 @AllArgsConstructor
 public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   private final StudentRepository studentRepository;
   private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
 
   private Student getStudent() {
-<span class="fc" id="L24">    User loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L25">    return studentRepository</span>
-<span class="fc" id="L26">        .findById(loggedInUser.getId())</span>
-<span class="fc" id="L27">        .orElseThrow(UserIsNotStudentException::new);</span>
+<span class="fc" id="L26">    User loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L27">    return studentRepository</span>
+<span class="fc" id="L28">        .findById(loggedInUser.getId())</span>
+<span class="fc" id="L29">        .orElseThrow(UserIsNotStudentException::new);</span>
   }
 
   @Override
   public List&lt;SelfKnowledgeCategory&gt; getSelfKnowledgeCategories() {
-<span class="fc" id="L32">    Student student = getStudent();</span>
-<span class="fc" id="L33">    return selfKnowledgeCategoryRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L34">        .sorted(Comparator.comparing(c -&gt; c.getType().getOrder()))</span>
-<span class="fc" id="L35">        .toList();</span>
+<span class="fc" id="L34">    Student student = getStudent();</span>
+<span class="fc" id="L35">    return selfKnowledgeCategoryRepository.findAllByStudent(student).stream()</span>
+<span class="fc" id="L36">        .sorted(Comparator.comparing(c -&gt; c.getType().getOrder()))</span>
+<span class="fc" id="L37">        .toList();</span>
   }
 
   @Override
   public List&lt;SelfKnowledgeCategory&gt; getSelfKnowledgeCategoriesAvailable() {
-<span class="fc" id="L40">    Student student = getStudent();</span>
-<span class="fc" id="L41">    return selfKnowledgeCategoryRepository.findAllAvailableByStudent(student).stream()</span>
-<span class="fc" id="L42">        .sorted(Comparator.comparing(c -&gt; c.getType().getOrder()))</span>
-<span class="fc" id="L43">        .toList();</span>
+<span class="fc" id="L42">    Student student = getStudent();</span>
+<span class="fc" id="L43">    return selfKnowledgeCategoryRepository.findAllAvailableByStudent(student).stream()</span>
+<span class="fc" id="L44">        .sorted(Comparator.comparing(c -&gt; c.getType().getOrder()))</span>
+<span class="fc" id="L45">        .toList();</span>
+  }
+
+  @Override
+  public void addSelfKnowledgeCategories(List&lt;String&gt; categories) {
+<span class="fc" id="L50">    Student student = getStudent();</span>
+<span class="fc" id="L51">    List&lt;UUID&gt; categoryIds = categories.stream().map(UUID::fromString).toList();</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">    if (categoryIds.isEmpty()) {</span>
+<span class="fc" id="L53">      throw new SelfKnowledgeCategoryListIsEmptyException();</span>
+    }
+<span class="fc" id="L55">    List&lt;SelfKnowledgeCategory&gt; categoriesToAssociate =</span>
+<span class="fc" id="L56">        getAvailableCategoriesToAdd(student, categoryIds);</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">    if (categoriesToAssociate.isEmpty()) {</span>
+<span class="nc" id="L58">      throw new SelfKnowledgeCategoryNotFoundException();</span>
+    }
+<span class="fc" id="L60">    studentRepository.addSelfKnowledgeCategories(student, categoriesToAssociate);</span>
+<span class="fc" id="L61">  }</span>
+
+  private List&lt;SelfKnowledgeCategory&gt; getAvailableCategoriesToAdd(
+      Student student, List&lt;UUID&gt; categoryIds) {
+<span class="fc" id="L65">    List&lt;SelfKnowledgeCategory&gt; availableCategories =</span>
+<span class="fc" id="L66">        selfKnowledgeCategoryRepository.findAllAvailableByStudent(student);</span>
+<span class="fc" id="L67">    Set&lt;UUID&gt; requestedIds = new HashSet&lt;&gt;(categoryIds);</span>
+<span class="fc" id="L68">    Set&lt;UUID&gt; availableIds =</span>
+<span class="fc" id="L69">        availableCategories.stream()</span>
+<span class="fc" id="L70">            .map(SelfKnowledgeCategory::getId)</span>
+<span class="fc" id="L71">            .collect(java.util.stream.Collectors.toSet());</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">    if (!availableIds.containsAll(requestedIds)) {</span>
+<span class="fc" id="L73">      throw new SelfKnowledgeCategoryNotAvailableException();</span>
+    }
+<span class="fc" id="L75">    return availableCategories.stream()</span>
+<span class="fc" id="L76">        .filter(category -&gt; requestedIds.contains(category.getId()))</span>
+<span class="fc" id="L77">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
