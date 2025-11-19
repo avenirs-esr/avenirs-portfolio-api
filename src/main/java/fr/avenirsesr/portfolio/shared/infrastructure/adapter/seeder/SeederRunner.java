@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeed
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeCategorySeeder;
+import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.*;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
@@ -42,6 +43,7 @@ public class SeederRunner implements CommandLineRunner {
   private final SkillSeeder skillSeeder;
   private final AdditionalSkillSeeder additionalSkillSeeder;
   private final AdditionalSkillProgressSeeder additionalSkillProgressSeeder;
+  private final SelfKnowledgeElementSeeder selfKnowledgeElementSeeder;
   private final SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder;
 
   @Value("${seeder.enabled:false}")
@@ -64,6 +66,7 @@ public class SeederRunner implements CommandLineRunner {
       SkillSeeder skillSeeder,
       AdditionalSkillSeeder additionalSkillSeeder,
       AdditionalSkillProgressSeeder additionalSkillProgressSeeder,
+      SelfKnowledgeElementSeeder selfKnowledgeElementSeeder,
       SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder) {
 
     this.userRepository = userRepository;
@@ -82,6 +85,7 @@ public class SeederRunner implements CommandLineRunner {
     this.skillSeeder = skillSeeder;
     this.additionalSkillSeeder = additionalSkillSeeder;
     this.additionalSkillProgressSeeder = additionalSkillProgressSeeder;
+    this.selfKnowledgeElementSeeder = selfKnowledgeElementSeeder;
     this.selfKnowledgeCategorySeeder = selfKnowledgeCategorySeeder;
   }
 
@@ -115,6 +119,7 @@ public class SeederRunner implements CommandLineRunner {
       var savedTracesAttachment = traceAttachmentSeeder.seed(savedTraces);
       var savedAmses =
           amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
+      var savedSelfKnowledgeElements = selfKnowledgeElementSeeder.seed(savedStudents);
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);

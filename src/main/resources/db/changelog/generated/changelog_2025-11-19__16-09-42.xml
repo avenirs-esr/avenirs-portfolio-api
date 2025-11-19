@@ -1,0 +1,35 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="mouha (generated)" id="1763568604827-1">
+        <createTable tableName="self_knowledge_element">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="self_knowledge_elementPK"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(400)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="INTEGER"/>
+            <column name="title" type="VARCHAR(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="self_knowledge_category_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="student_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="mouha (generated)" id="1763568604827-2">
+        <addForeignKeyConstraint baseColumnNames="self_knowledge_category_id" baseTableName="self_knowledge_element" constraintName="FKe5je73shyj3w0luu6e5v5c2nf" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="self_knowledge_category" validate="true"/>
+    </changeSet>
+    <changeSet author="mouha (generated)" id="1763568604827-3">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="self_knowledge_element" constraintName="FKr6psqown1l7yhdcbghetqtd9u" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="student" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

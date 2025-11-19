@@ -51,4 +51,8 @@ public class SeederConfig {
   // Student Additional Skills
   public static final int MIN_ADDITIONAL_SKILLS_PER_STUDENT = 1;
   public static final int MAX_ADDITIONAL_SKILLS_PER_STUDENT = 4;
+
+  // Student Self Knowledge Elements
+  public static final int MIN_SELF_KNOWLEDGE_ELEMENT_RATING = 1;
+  public static final int MAX_SELF_KNOWLEDGE_ELEMENT_RATING = 5;
 }
