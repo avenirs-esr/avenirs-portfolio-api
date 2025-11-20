@@ -7,11 +7,12 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.filter,ETraceFilterKe
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.filter,TraceFilter,30,36,9,3,1,7,6,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.service,AdditionalSkillProgressDataGeneratorConfig,0,7,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification,SelfKnowledgeCategorySpecification,11,77,2,2,0,16,3,5,1,5
+avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification,SelfKnowledgeElementSpecification,35,0,4,0,7,0,7,0,5,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.infrastructure.adapter.specification,AMSSpecification,45,11,4,0,10,2,5,2,3,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.specification,AdditionalSkillSpecification,16,14,2,2,3,3,5,2,3,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.application.adapter.controller,AMSController,0,58,0,0,0,13,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,168,151,4,0,49,40,8,8,5,8
-avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller,SelfKnowledgeController,0,29,0,0,0,11,0,4,0,4
+avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller,SelfKnowledgeController,46,29,0,0,9,11,1,4,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils,TranslationUtil,20,27,0,0,5,8,2,3,2,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.ams.domain.service,AMSServiceImpl,22,91,0,0,5,25,1,4,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.service,InstitutionServiceConfig,0,12,0,0,0,2,0,2,0,2
@@ -51,6 +52,8 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,Prom
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,39,69,6,0,8,22,3,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.xxi.domain.service,XXIServiceImpl,0,117,0,4,0,33,0,10,0,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository,SelfKnowledgeCategoryDatabaseRepository,0,32,0,0,0,14,0,3,0,3
+avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository,SelfKnowledgeElementDatabaseRepository,40,10,0,0,9,3,1,1,1,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.application.adapter,SelfKnowledgeElementViewMapper,12,0,0,0,5,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository,AdditionalSkillProgressDatabaseRepository,23,74,2,2,9,19,4,5,2,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository,StudentProgressDatabaseRepository,40,51,3,1,19,20,3,5,1,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository,SkillLevelProgressDatabaseRepository,59,54,0,2,17,18,2,6,2,5
@@ -144,4 +147,4 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.domain.service,St
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository,TraceDatabaseRepository,34,171,4,6,11,57,5,9,1,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio,AvenirsPortfolioApiApplication,5,3,0,0,2,1,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.domain.service,InstitutionServiceImpl,0,42,0,0,0,9,0,4,0,4
-avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.domain.service,SelfKnowledgeServiceImpl,4,123,1,5,1,34,1,11,0,9
+avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.domain.service,SelfKnowledgeServiceImpl,22,123,1,5,7,34,2,11,1,9
