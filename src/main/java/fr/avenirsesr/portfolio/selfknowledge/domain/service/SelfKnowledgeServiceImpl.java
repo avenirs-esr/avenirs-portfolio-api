@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.selfknowledge.domain.service;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
@@ -7,12 +9,18 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCateg
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
+import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   private final StudentRepository studentRepository;
+  private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
 
   private Student getStudent() {
@@ -27,6 +36,19 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
     return studentRepository
         .findById(loggedInUser.getId())
         .orElseThrow(UserIsNotStudentException::new);
+  }
+
+  @Override
+  public PagedResult<SelfKnowledgeElement> getSelfKnowledgeElements(
+      UUID selfKnowledgeCategoryId, PageCriteria pageCriteria) {
+    Student student = getStudent();
+
+    selfKnowledgeCategoryRepository
+        .findById(selfKnowledgeCategoryId)
+        .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);
+
+    return selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
+        student.getId(), selfKnowledgeCategoryId, pageCriteria);
   }
 
   @Override

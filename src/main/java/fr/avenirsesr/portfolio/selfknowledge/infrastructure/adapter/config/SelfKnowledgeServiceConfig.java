@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.config;
 
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
+import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
 import fr.avenirsesr.portfolio.selfknowledge.domain.service.SelfKnowledgeServiceImpl;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +15,12 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class SelfKnowledgeServiceConfig {
   private final StudentRepository studentRepository;
+  private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
 
   @Bean
   public SelfKnowledgeService selfKnowledgeService() {
-    return new SelfKnowledgeServiceImpl(studentRepository, selfKnowledgeCategoryRepository);
+    return new SelfKnowledgeServiceImpl(
+        studentRepository, selfKnowledgeElementRepository, selfKnowledgeCategoryRepository);
   }
 }
