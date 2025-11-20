@@ -38,7 +38,8 @@ public class SelfKnowledgeController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     log.debug(
-        "Received request to get elements of self knowledge category [{}] for user [{}], with pagination (page={}, pageSize={})",
+        "Received request to get elements of self knowledge category [{}] for user [{}], with"
+            + " pagination (page={}, pageSize={})",
         selfKnowledgeCategoryId,
         principal.getName(),
         page,
