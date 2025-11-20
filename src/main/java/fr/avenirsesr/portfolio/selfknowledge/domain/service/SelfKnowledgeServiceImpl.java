@@ -4,12 +4,15 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementRequest;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeElementNotFoundException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidRatingException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
@@ -36,6 +39,8 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   public static final int TITLE_LENGTH_MAX = 80;
   public static final int DESCRIPTION_LENGTH_MAX = 400;
+  public static final int RATING_MIN = 1;
+  public static final int RATING_MAX = 5;
 
   private Student getStudent() {
     User loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
@@ -64,6 +69,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
     checkTitleField(selfKnowledgeElementRequest.title());
     checkDescriptionField(selfKnowledgeElementRequest.description());
+    checkRating(selfKnowledgeElementRequest.rating());
 
     SelfKnowledgeCategory selfKnowledgeCategory =
         selfKnowledgeCategoryRepository
@@ -79,6 +85,21 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
             selfKnowledgeElementRequest.rating(),
             selfKnowledgeCategory);
     return selfKnowledgeElementRepository.save(selfKnowledgeElement);
+  }
+
+  public void deleteSelfKnowledgeElement(UUID selfKnowledgeElementId) {
+    Student student = getStudent();
+
+    SelfKnowledgeElement selfKnowledgeElement =
+        selfKnowledgeElementRepository
+            .findById(selfKnowledgeElementId)
+            .orElseThrow(SelfKnowledgeElementNotFoundException::new);
+
+    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {
+      throw new UserNotAuthorizedException();
+    }
+
+    selfKnowledgeElementRepository.removeFromDatabase(selfKnowledgeElement);
   }
 
   @Override
@@ -147,6 +168,22 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
               + DESCRIPTION_LENGTH_MAX
               + " characters (actual: "
               + description.length()
+              + ")");
+    }
+  }
+
+  private static void checkRating(Integer rating) {
+    if (rating != null && (rating < RATING_MIN || rating > RATING_MAX)) {
+      log.error(
+          "Rating is out of bounce: {} (min = " + RATING_MIN + ", max = " + RATING_MAX + ")",
+          rating);
+      throw new SelfKnowledgeInvalidRatingException(
+          "Rating is out of bounce ["
+              + RATING_MIN
+              + ","
+              + RATING_MAX
+              + "] (actual: "
+              + rating
               + ")");
     }
   }

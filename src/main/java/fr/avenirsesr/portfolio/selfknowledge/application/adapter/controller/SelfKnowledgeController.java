@@ -18,6 +18,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -73,6 +74,17 @@ public class SelfKnowledgeController {
         selfKnowledgeService.createSelfKnowledgeElement(
             selfKnowledgeCategoryId, selfKnowledgeElementRequest);
     return ResponseEntity.ok(SelfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
+  }
+
+  @DeleteMapping("/element/{selfKnowledgeElementId}")
+  public ResponseEntity<String> deleteSelfKnowledgeElement(
+      Principal principal, @PathVariable("selfKnowledgeElementId") UUID selfKnowledgeElementId) {
+    log.debug(
+        "Received request to delete self knowledge element [{}] for user [{}]",
+        selfKnowledgeElementId,
+        principal.getName());
+    selfKnowledgeService.deleteSelfKnowledgeElement(selfKnowledgeElementId);
+    return ResponseEntity.ok("Self knowledge element successfully deleted");
   }
 
   @GetMapping("/categories")
