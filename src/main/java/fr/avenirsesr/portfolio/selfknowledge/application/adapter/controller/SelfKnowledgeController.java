@@ -4,11 +4,14 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.selfknowledge.application.adapter.SelfKnowledgeElementViewMapper;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeCategoryDTO;
+import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementDetailsDTO;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementRequest;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementViewDTO;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.mapper.SelfKnowledgeCategoryMapper;
+import fr.avenirsesr.portfolio.selfknowledge.application.adapter.mapper.SelfKnowledgeElementDetailsMapper;
+import fr.avenirsesr.portfolio.selfknowledge.application.adapter.mapper.SelfKnowledgeElementViewMapper;
+import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import jakarta.validation.Valid;
@@ -57,6 +60,21 @@ public class SelfKnowledgeController {
                 .map(SelfKnowledgeElementViewMapper::toDTO)
                 .toList(),
             PageInfoDTO.fromDomain(selfKnowledgeElementPagedResult.pageInfo())));
+  }
+
+  @GetMapping("/element/{selfKnowledgeElementId}")
+  public ResponseEntity<SelfKnowledgeElementDetailsDTO> getSelfKnowledgeElementDetails(
+      Principal principal, @PathVariable("selfKnowledgeElementId") UUID selfKnowledgeElementId) {
+    log.debug(
+        "Received request to get self knowledge element [{}] details for user [{}]",
+        selfKnowledgeElementId,
+        principal.getName());
+
+    SelfKnowledgeElementDetails selfKnowledgeElement =
+        selfKnowledgeService.getSelfKnowledgeElementDetails(selfKnowledgeElementId);
+
+    return ResponseEntity.ok(
+        SelfKnowledgeElementDetailsMapper.toDTO(selfKnowledgeElement.selfKnowledgeElement()));
   }
 
   @PostMapping("/{selfKnowledgeCategoryId}/elements")
