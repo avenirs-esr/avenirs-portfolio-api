@@ -5,9 +5,12 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementRequest;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
@@ -31,6 +34,9 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
 
+  public static final int TITLE_LENGTH_MAX = 80;
+  public static final int DESCRIPTION_LENGTH_MAX = 400;
+
   private Student getStudent() {
     User loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
     return studentRepository
@@ -49,6 +55,30 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
     return selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
         student.getId(), selfKnowledgeCategoryId, pageCriteria);
+  }
+
+  @Override
+  public SelfKnowledgeElement createSelfKnowledgeElement(
+      UUID selfKnowledgeCategoryId, SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
+    Student student = getStudent();
+
+    checkTitleField(selfKnowledgeElementRequest.title());
+    checkDescriptionField(selfKnowledgeElementRequest.description());
+
+    SelfKnowledgeCategory selfKnowledgeCategory =
+        selfKnowledgeCategoryRepository
+            .findById(selfKnowledgeCategoryId)
+            .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);
+
+    SelfKnowledgeElement selfKnowledgeElement =
+        SelfKnowledgeElement.create(
+            UUID.randomUUID(),
+            student,
+            selfKnowledgeElementRequest.title(),
+            selfKnowledgeElementRequest.description(),
+            selfKnowledgeElementRequest.rating(),
+            selfKnowledgeCategory);
+    return selfKnowledgeElementRepository.save(selfKnowledgeElement);
   }
 
   @Override
@@ -97,5 +127,27 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
     return availableCategories.stream()
         .filter(category -> requestedIds.contains(category.getId()))
         .toList();
+  }
+
+  private static void checkTitleField(String title) {
+    if (title != null && title.length() > TITLE_LENGTH_MAX) {
+      log.error("Title too long: {} characters (max = " + TITLE_LENGTH_MAX + ")", title.length());
+      throw new SelfKnowledgeInvalidTitleException(
+          "Title exceeds " + TITLE_LENGTH_MAX + " characters (actual: " + title.length() + ")");
+    }
+  }
+
+  private static void checkDescriptionField(String description) {
+    if (description != null && description.length() > DESCRIPTION_LENGTH_MAX) {
+      log.error(
+          "Description too long: {} characters (max = " + DESCRIPTION_LENGTH_MAX + ")",
+          description.length());
+      throw new SelfKnowledgeInvalidDescriptionException(
+          "Description exceeds "
+              + DESCRIPTION_LENGTH_MAX
+              + " characters (actual: "
+              + description.length()
+              + ")");
+    }
   }
 }

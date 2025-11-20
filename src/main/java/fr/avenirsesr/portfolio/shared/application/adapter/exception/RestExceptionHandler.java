@@ -10,6 +10,8 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.StudentProgressNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
@@ -106,6 +108,20 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   @ExceptionHandler(InvalidDescriptionException.class)
   public ResponseEntity<ErrorResponse> handleInvalidDescriptionException(
       InvalidDescriptionException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(SelfKnowledgeInvalidTitleException.class)
+  public ResponseEntity<ErrorResponse> handleSelfKnowledgeInvalidTitleException(
+      SelfKnowledgeInvalidTitleException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(SelfKnowledgeInvalidDescriptionException.class)
+  public ResponseEntity<ErrorResponse> handleSelfKnowledgeInvalidDescriptionException(
+      SelfKnowledgeInvalidDescriptionException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }

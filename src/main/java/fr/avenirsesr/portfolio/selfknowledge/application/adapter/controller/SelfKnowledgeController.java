@@ -1,9 +1,20 @@
 package fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.selfknowledge.application.adapter.SelfKnowledgeElementViewMapper;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeCategoryDTO;
+import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementRequest;
+import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementViewDTO;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.mapper.SelfKnowledgeCategoryMapper;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
+import jakarta.validation.Valid;
+import java.security.Principal;
 import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +56,23 @@ public class SelfKnowledgeController {
                 .map(SelfKnowledgeElementViewMapper::toDTO)
                 .toList(),
             PageInfoDTO.fromDomain(selfKnowledgeElementPagedResult.pageInfo())));
+  }
+
+  @PostMapping("/{selfKnowledgeCategoryId}/elements")
+  public ResponseEntity<SelfKnowledgeElementViewDTO> createSelfKnowledgeElement(
+      Principal principal,
+      @PathVariable("selfKnowledgeCategoryId") UUID selfKnowledgeCategoryId,
+      @Valid @RequestBody SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
+    log.debug(
+        "Received request to create self knowledge element [{}] to category [{}] for user [{}]",
+        selfKnowledgeElementRequest,
+        selfKnowledgeCategoryId,
+        principal.getName());
+
+    SelfKnowledgeElement selfKnowledgeElement =
+        selfKnowledgeService.createSelfKnowledgeElement(
+            selfKnowledgeCategoryId, selfKnowledgeElementRequest);
+    return ResponseEntity.ok(SelfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
   }
 
   @GetMapping("/categories")
