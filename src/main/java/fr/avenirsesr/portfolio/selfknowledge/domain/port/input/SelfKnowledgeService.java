@@ -15,6 +15,8 @@ public interface SelfKnowledgeService {
   SelfKnowledgeElement createSelfKnowledgeElement(
       UUID selfKnowledgeCategoryId, SelfKnowledgeElementRequest selfKnowledgeElementRequest);
 
+  void deleteSelfKnowledgeElement(UUID selfKnowledgeElementId);
+
   List<SelfKnowledgeCategory> getSelfKnowledgeCategories();
 
   List<SelfKnowledgeCategory> getSelfKnowledgeCategoriesAvailable();

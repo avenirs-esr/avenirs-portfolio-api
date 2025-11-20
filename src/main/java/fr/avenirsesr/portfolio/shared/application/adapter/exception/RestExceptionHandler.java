@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidRatingException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.StudentProgressNotFoundException;
@@ -122,6 +123,13 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   @ExceptionHandler(SelfKnowledgeInvalidDescriptionException.class)
   public ResponseEntity<ErrorResponse> handleSelfKnowledgeInvalidDescriptionException(
       SelfKnowledgeInvalidDescriptionException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(SelfKnowledgeInvalidRatingException.class)
+  public ResponseEntity<ErrorResponse> handleSelfKnowledgeInvalidRatingException(
+      SelfKnowledgeInvalidRatingException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }

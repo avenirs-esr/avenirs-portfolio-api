@@ -8,6 +8,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,7 +32,10 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
   @Column(nullable = false, length = 400)
   private String description;
 
-  @Column private Integer rating;
+  @Column(nullable = true)
+  @Min(1)
+  @Max(5)
+  private Integer rating;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "self_knowledge_category_id", nullable = false)
