@@ -127,7 +127,7 @@ public class SelfKnowledgeController {
   }
 
   @PostMapping("/categories")
-  public ResponseEntity<String> getSelfKnowledgeCategories(@RequestBody List<String> categories) {
+  public ResponseEntity<String> addSelfKnowledgeCategories(@RequestBody List<String> categories) {
     selfKnowledgeService.addSelfKnowledgeCategories(categories);
     return ResponseEntity.ok("Categories successfully associated with user");
   }
@@ -138,5 +138,11 @@ public class SelfKnowledgeController {
         selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()
             .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)
             .toList());
+  }
+
+  @DeleteMapping("/categories/{categoryId}")
+  public ResponseEntity<String> removeSelfKnowledgeCategory(@PathVariable UUID categoryId) {
+    selfKnowledgeService.removeSelfKnowledgeCategory(categoryId);
+    return ResponseEntity.ok("Categories successfully deleted");
   }
 }

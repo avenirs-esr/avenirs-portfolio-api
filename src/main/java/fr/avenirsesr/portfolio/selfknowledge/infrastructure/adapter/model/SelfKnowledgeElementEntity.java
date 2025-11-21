@@ -2,12 +2,7 @@ package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.UUID;
@@ -16,7 +11,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "self_knowledge_element")
+@Table(
+    name = "self_knowledge_element",
+    indexes = {
+      @Index(
+          name = "idx_ske_student_category",
+          columnList = "student_id, self_knowledge_category_id")
+    })
 @NoArgsConstructor
 @Getter
 @Setter

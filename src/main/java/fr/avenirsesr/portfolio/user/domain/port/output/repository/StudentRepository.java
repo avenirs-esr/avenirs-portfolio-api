@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface StudentRepository extends GenericRepositoryPort<Student> {
   void addSelfKnowledgeCategories(Student student, List<SelfKnowledgeCategory> categories);
+
+  void removeSelfKnowledgeCategory(Student student, SelfKnowledgeCategory selfKnowledgeCategory);
 }
