@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundExcepti
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementRequest;
+import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
@@ -60,6 +61,22 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
     return selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
         student.getId(), selfKnowledgeCategoryId, pageCriteria);
+  }
+
+  @Override
+  public SelfKnowledgeElementDetails getSelfKnowledgeElementDetails(UUID selfKnowledgeElementId) {
+    Student student = getStudent();
+
+    SelfKnowledgeElement selfKnowledgeElement =
+        selfKnowledgeElementRepository
+            .findById(selfKnowledgeElementId)
+            .orElseThrow(SelfKnowledgeElementNotFoundException::new);
+
+    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {
+      throw new UserNotAuthorizedException();
+    }
+
+    return new SelfKnowledgeElementDetails(selfKnowledgeElement);
   }
 
   @Override

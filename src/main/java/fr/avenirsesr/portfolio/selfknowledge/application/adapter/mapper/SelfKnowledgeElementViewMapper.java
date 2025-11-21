@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.selfknowledge.application.adapter;
+package fr.avenirsesr.portfolio.selfknowledge.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementViewDTO;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
