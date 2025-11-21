@@ -53,8 +53,6 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controlle
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.xxi.domain.service,XXIServiceImpl,0,117,0,4,0,33,0,10,0,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository,SelfKnowledgeCategoryDatabaseRepository,0,32,0,0,0,14,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository,SelfKnowledgeElementDatabaseRepository,40,10,0,0,9,3,1,1,1,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.application.adapter,SelfKnowledgeElementDetailsMapper,16,0,0,0,7,0,1,0,1,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.application.adapter,SelfKnowledgeElementViewMapper,12,0,0,0,5,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository,AdditionalSkillProgressDatabaseRepository,23,74,2,2,9,19,4,5,2,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository,StudentProgressDatabaseRepository,40,51,3,1,19,20,3,5,1,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository,SkillLevelProgressDatabaseRepository,59,54,0,2,17,18,2,6,2,5
