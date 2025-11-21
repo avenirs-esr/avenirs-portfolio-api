@@ -6,7 +6,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
-import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementRequest;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
@@ -81,12 +80,12 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public SelfKnowledgeElement createSelfKnowledgeElement(
-      UUID selfKnowledgeCategoryId, SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
+      UUID selfKnowledgeCategoryId, String title, String description, Integer rating) {
     Student student = getStudent();
 
-    checkTitleField(selfKnowledgeElementRequest.title());
-    checkDescriptionField(selfKnowledgeElementRequest.description());
-    checkRating(selfKnowledgeElementRequest.rating());
+    checkTitleField(title);
+    checkDescriptionField(description);
+    checkRating(rating);
 
     SelfKnowledgeCategory selfKnowledgeCategory =
         selfKnowledgeCategoryRepository
@@ -95,12 +94,35 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
     SelfKnowledgeElement selfKnowledgeElement =
         SelfKnowledgeElement.create(
-            UUID.randomUUID(),
-            student,
-            selfKnowledgeElementRequest.title(),
-            selfKnowledgeElementRequest.description(),
-            selfKnowledgeElementRequest.rating(),
-            selfKnowledgeCategory);
+            UUID.randomUUID(), student, title, description, rating, selfKnowledgeCategory);
+    return selfKnowledgeElementRepository.save(selfKnowledgeElement);
+  }
+
+  @Override
+  public SelfKnowledgeElement updateSelfKnowledgeElement(
+      UUID selfKnowledgeElementId, String title, String description, Integer rating) {
+    Student student = getStudent();
+
+    checkTitleField(title);
+    checkDescriptionField(description);
+    checkRating(rating);
+
+    SelfKnowledgeElement selfKnowledgeElement =
+        selfKnowledgeElementRepository
+            .findById(selfKnowledgeElementId)
+            .orElseThrow(SelfKnowledgeElementNotFoundException::new);
+
+    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {
+      throw new UserNotAuthorizedException();
+    }
+
+    selfKnowledgeElement.setTitle(title);
+    selfKnowledgeElement.setDescription(description);
+
+    if (rating != null) {
+      selfKnowledgeElement.setRating(rating);
+    }
+
     return selfKnowledgeElementRepository.save(selfKnowledgeElement);
   }
 
