@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.selfknowledge.domain.port.input;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementRequest;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
@@ -16,7 +15,10 @@ public interface SelfKnowledgeService {
   SelfKnowledgeElementDetails getSelfKnowledgeElementDetails(UUID selfKnowledgeElementId);
 
   SelfKnowledgeElement createSelfKnowledgeElement(
-      UUID selfKnowledgeCategoryId, SelfKnowledgeElementRequest selfKnowledgeElementRequest);
+      UUID selfKnowledgeCategoryId, String title, String description, Integer rating);
+
+  SelfKnowledgeElement updateSelfKnowledgeElement(
+      UUID selfKnowledgeElementId, String title, String description, Integer rating);
 
   void deleteSelfKnowledgeElement(UUID selfKnowledgeElementId);
 

@@ -15,7 +15,6 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDet
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import jakarta.validation.Valid;
-import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -25,6 +24,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,15 +39,13 @@ public class SelfKnowledgeController {
 
   @GetMapping("/{selfKnowledgeCategoryId}/elements")
   public ResponseEntity<PagedResponse<SelfKnowledgeElementViewDTO>> getSelfKnowledgeElements(
-      Principal principal,
       @PathVariable("selfKnowledgeCategoryId") UUID selfKnowledgeCategoryId,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     log.debug(
-        "Received request to get elements of self knowledge category [{}] for user [{}], with"
+        "Received request to get elements of self knowledge category [{}], with"
             + " pagination (page={}, pageSize={})",
         selfKnowledgeCategoryId,
-        principal.getName(),
         page,
         pageSize);
     PagedResult<SelfKnowledgeElement> selfKnowledgeElementPagedResult =
@@ -64,11 +62,9 @@ public class SelfKnowledgeController {
 
   @GetMapping("/element/{selfKnowledgeElementId}")
   public ResponseEntity<SelfKnowledgeElementDetailsDTO> getSelfKnowledgeElementDetails(
-      Principal principal, @PathVariable("selfKnowledgeElementId") UUID selfKnowledgeElementId) {
+      @PathVariable("selfKnowledgeElementId") UUID selfKnowledgeElementId) {
     log.debug(
-        "Received request to get self knowledge element [{}] details for user [{}]",
-        selfKnowledgeElementId,
-        principal.getName());
+        "Received request to get self knowledge element [{}] details", selfKnowledgeElementId);
 
     SelfKnowledgeElementDetails selfKnowledgeElement =
         selfKnowledgeService.getSelfKnowledgeElementDetails(selfKnowledgeElementId);
@@ -79,28 +75,45 @@ public class SelfKnowledgeController {
 
   @PostMapping("/{selfKnowledgeCategoryId}/elements")
   public ResponseEntity<SelfKnowledgeElementViewDTO> createSelfKnowledgeElement(
-      Principal principal,
       @PathVariable("selfKnowledgeCategoryId") UUID selfKnowledgeCategoryId,
       @Valid @RequestBody SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
     log.debug(
-        "Received request to create self knowledge element [{}] to category [{}] for user [{}]",
+        "Received request to create self knowledge element [{}] to category [{}]",
         selfKnowledgeElementRequest,
-        selfKnowledgeCategoryId,
-        principal.getName());
+        selfKnowledgeCategoryId);
 
     SelfKnowledgeElement selfKnowledgeElement =
         selfKnowledgeService.createSelfKnowledgeElement(
-            selfKnowledgeCategoryId, selfKnowledgeElementRequest);
+            selfKnowledgeCategoryId,
+            selfKnowledgeElementRequest.title(),
+            selfKnowledgeElementRequest.description(),
+            selfKnowledgeElementRequest.rating());
+    return ResponseEntity.ok(SelfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
+  }
+
+  @PutMapping("/element/{selfKnowledgeElementId}")
+  public ResponseEntity<SelfKnowledgeElementViewDTO> updateSelfKnowledgeElement(
+      @PathVariable("selfKnowledgeElementId") UUID selfKnowledgeElementId,
+      @Valid @RequestBody SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
+    log.debug(
+        "Received request to update self knowledge element [{}] with infos [{}]",
+        selfKnowledgeElementId,
+        selfKnowledgeElementRequest);
+
+    SelfKnowledgeElement selfKnowledgeElement =
+        selfKnowledgeService.updateSelfKnowledgeElement(
+            selfKnowledgeElementId,
+            selfKnowledgeElementRequest.title(),
+            selfKnowledgeElementRequest.description(),
+            selfKnowledgeElementRequest.rating());
+
     return ResponseEntity.ok(SelfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
   }
 
   @DeleteMapping("/element/{selfKnowledgeElementId}")
   public ResponseEntity<String> deleteSelfKnowledgeElement(
-      Principal principal, @PathVariable("selfKnowledgeElementId") UUID selfKnowledgeElementId) {
-    log.debug(
-        "Received request to delete self knowledge element [{}] for user [{}]",
-        selfKnowledgeElementId,
-        principal.getName());
+      @PathVariable("selfKnowledgeElementId") UUID selfKnowledgeElementId) {
+    log.debug("Received request to delete self knowledge element [{}]", selfKnowledgeElementId);
     selfKnowledgeService.deleteSelfKnowledgeElement(selfKnowledgeElementId);
     return ResponseEntity.ok("Self knowledge element successfully deleted");
   }

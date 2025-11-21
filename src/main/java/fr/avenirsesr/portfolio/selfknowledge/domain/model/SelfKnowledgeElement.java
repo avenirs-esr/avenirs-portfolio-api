@@ -11,9 +11,9 @@ import lombok.Setter;
 @Setter
 public class SelfKnowledgeElement extends AvenirsBaseModel {
   private final Student student;
-  private final String title;
-  private final String description;
-  private final Integer rating;
+  private String title;
+  private String description;
+  private Integer rating;
   private final SelfKnowledgeCategory selfKnowledgeCategory;
 
   private SelfKnowledgeElement(
