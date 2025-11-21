@@ -4,15 +4,11 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
-import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeCategoryMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeElementMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification.SelfKnowledgeElementSpecification;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,33 +24,27 @@ public class SelfKnowledgeElementDatabaseRepository
   private final SelfKnowledgeElementJpaRepository jpaRepository;
 
   public SelfKnowledgeElementDatabaseRepository(SelfKnowledgeElementJpaRepository jpaRepository) {
-<span class="fc" id="L31">    super(</span>
+<span class="fc" id="L27">    super(</span>
         jpaRepository,
         jpaRepository,
         SelfKnowledgeElementMapper::fromDomain,
         SelfKnowledgeElementMapper::toDomain);
-<span class="fc" id="L36">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L37">  }</span>
+<span class="fc" id="L32">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L33">  }</span>
 
   @Override
   public PagedResult&lt;SelfKnowledgeElement&gt; findAllByStudentIdAndCategoryId(
       UUID studentId, UUID selfKnowledgeCategoryId, PageCriteria pageCriteria) {
-<span class="nc" id="L42">    Specification&lt;SelfKnowledgeElementEntity&gt; spec =</span>
-<span class="nc" id="L43">        SelfKnowledgeElementSpecification.hasStudentId(studentId)</span>
-<span class="nc" id="L44">            .and(</span>
-<span class="nc" id="L45">                SelfKnowledgeElementSpecification.hasSelfKnowledgeCategoryId(</span>
+<span class="nc" id="L38">    Specification&lt;SelfKnowledgeElementEntity&gt; spec =</span>
+<span class="nc" id="L39">        SelfKnowledgeElementSpecification.hasStudentId(studentId)</span>
+<span class="nc" id="L40">            .and(</span>
+<span class="nc" id="L41">                SelfKnowledgeElementSpecification.hasSelfKnowledgeCategoryId(</span>
                     selfKnowledgeCategoryId));
-<span class="nc" id="L47">    Pageable pageable = PageRequest.of(pageCriteria.page(), pageCriteria.pageSize());</span>
-<span class="nc" id="L48">    Page&lt;SelfKnowledgeElementEntity&gt; entities = jpaRepository.findAll(spec, pageable);</span>
-<span class="nc" id="L49">    return new PagedResult&lt;&gt;(</span>
-<span class="nc" id="L50">        entities.stream().map(SelfKnowledgeElementMapper::toDomain).toList(),</span>
-<span class="nc" id="L51">        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), entities.getTotalElements()));</span>
+<span class="nc" id="L43">    Pageable pageable = PageRequest.of(pageCriteria.page(), pageCriteria.pageSize());</span>
+<span class="nc" id="L44">    Page&lt;SelfKnowledgeElementEntity&gt; entities = jpaRepository.findAll(spec, pageable);</span>
+<span class="nc" id="L45">    return new PagedResult&lt;&gt;(</span>
+<span class="nc" id="L46">        entities.stream().map(SelfKnowledgeElementMapper::toDomain).toList(),</span>
+<span class="nc" id="L47">        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), entities.getTotalElements()));</span>
   }
-
-  @Override
-  public void deleteAllByStudentAndCategory(Student student, SelfKnowledgeCategory category) {
-<span class="fc" id="L56">    jpaRepository.deleteByStudentAndSelfKnowledgeCategory(</span>
-<span class="fc" id="L57">        StudentMapper.fromDomain(student), SelfKnowledgeCategoryMapper.fromDomain(category));</span>
-<span class="fc" id="L58">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

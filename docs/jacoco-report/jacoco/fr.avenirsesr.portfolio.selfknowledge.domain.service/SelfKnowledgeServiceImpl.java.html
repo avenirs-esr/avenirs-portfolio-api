@@ -6,9 +6,14 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
-import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementRequest;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
-import fr.avenirsesr.portfolio.selfknowledge.domain.exception.*;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeElementNotFoundException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidRatingException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
@@ -25,7 +30,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L28">@Slf4j</span>
+<span class="fc" id="L33">@Slf4j</span>
 @AllArgsConstructor
 public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   private final StudentRepository studentRepository;
@@ -38,171 +43,180 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   public static final int RATING_MAX = 5;
 
   private Student getStudent() {
-<span class="fc" id="L41">    User loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L42">    return studentRepository</span>
-<span class="fc" id="L43">        .findById(loggedInUser.getId())</span>
-<span class="fc" id="L44">        .orElseThrow(UserIsNotStudentException::new);</span>
+<span class="fc" id="L46">    User loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L47">    return studentRepository</span>
+<span class="fc" id="L48">        .findById(loggedInUser.getId())</span>
+<span class="fc" id="L49">        .orElseThrow(UserIsNotStudentException::new);</span>
   }
 
   @Override
   public PagedResult&lt;SelfKnowledgeElement&gt; getSelfKnowledgeElements(
       UUID selfKnowledgeCategoryId, PageCriteria pageCriteria) {
-<span class="nc" id="L50">    Student student = getStudent();</span>
+<span class="nc" id="L55">    Student student = getStudent();</span>
 
-<span class="nc" id="L52">    selfKnowledgeCategoryRepository</span>
-<span class="nc" id="L53">        .findById(selfKnowledgeCategoryId)</span>
-<span class="nc" id="L54">        .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);</span>
+<span class="nc" id="L57">    selfKnowledgeCategoryRepository</span>
+<span class="nc" id="L58">        .findById(selfKnowledgeCategoryId)</span>
+<span class="nc" id="L59">        .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);</span>
 
-<span class="nc" id="L56">    return selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(</span>
-<span class="nc" id="L57">        student.getId(), selfKnowledgeCategoryId, pageCriteria);</span>
+<span class="nc" id="L61">    return selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(</span>
+<span class="nc" id="L62">        student.getId(), selfKnowledgeCategoryId, pageCriteria);</span>
   }
 
   @Override
   public SelfKnowledgeElementDetails getSelfKnowledgeElementDetails(UUID selfKnowledgeElementId) {
-<span class="nc" id="L62">    Student student = getStudent();</span>
+<span class="nc" id="L67">    Student student = getStudent();</span>
 
-<span class="nc" id="L64">    SelfKnowledgeElement selfKnowledgeElement =</span>
+<span class="nc" id="L69">    SelfKnowledgeElement selfKnowledgeElement =</span>
         selfKnowledgeElementRepository
-<span class="nc" id="L66">            .findById(selfKnowledgeElementId)</span>
-<span class="nc" id="L67">            .orElseThrow(SelfKnowledgeElementNotFoundException::new);</span>
+<span class="nc" id="L71">            .findById(selfKnowledgeElementId)</span>
+<span class="nc" id="L72">            .orElseThrow(SelfKnowledgeElementNotFoundException::new);</span>
 
-<span class="nc bnc" id="L69" title="All 2 branches missed.">    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {</span>
-<span class="nc" id="L70">      throw new UserNotAuthorizedException();</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {</span>
+<span class="nc" id="L75">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="nc" id="L73">    return new SelfKnowledgeElementDetails(selfKnowledgeElement);</span>
+<span class="nc" id="L78">    return new SelfKnowledgeElementDetails(selfKnowledgeElement);</span>
   }
 
   @Override
   public SelfKnowledgeElement createSelfKnowledgeElement(
-      UUID selfKnowledgeCategoryId, SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
-<span class="nc" id="L79">    Student student = getStudent();</span>
+      UUID selfKnowledgeCategoryId, String title, String description, Integer rating) {
+<span class="nc" id="L84">    Student student = getStudent();</span>
 
-<span class="nc" id="L81">    checkTitleField(selfKnowledgeElementRequest.title());</span>
-<span class="nc" id="L82">    checkDescriptionField(selfKnowledgeElementRequest.description());</span>
-<span class="nc" id="L83">    checkRating(selfKnowledgeElementRequest.rating());</span>
+<span class="nc" id="L86">    checkTitleField(title);</span>
+<span class="nc" id="L87">    checkDescriptionField(description);</span>
+<span class="nc" id="L88">    checkRating(rating);</span>
 
-<span class="nc" id="L85">    SelfKnowledgeCategory selfKnowledgeCategory =</span>
+<span class="nc" id="L90">    SelfKnowledgeCategory selfKnowledgeCategory =</span>
         selfKnowledgeCategoryRepository
-<span class="nc" id="L87">            .findById(selfKnowledgeCategoryId)</span>
-<span class="nc" id="L88">            .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);</span>
+<span class="nc" id="L92">            .findById(selfKnowledgeCategoryId)</span>
+<span class="nc" id="L93">            .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);</span>
 
     SelfKnowledgeElement selfKnowledgeElement =
-<span class="nc" id="L91">        SelfKnowledgeElement.create(</span>
-<span class="nc" id="L92">            UUID.randomUUID(),</span>
-            student,
-<span class="nc" id="L94">            selfKnowledgeElementRequest.title(),</span>
-<span class="nc" id="L95">            selfKnowledgeElementRequest.description(),</span>
-<span class="nc" id="L96">            selfKnowledgeElementRequest.rating(),</span>
-            selfKnowledgeCategory);
+<span class="nc" id="L96">        SelfKnowledgeElement.create(</span>
+<span class="nc" id="L97">            UUID.randomUUID(), student, title, description, rating, selfKnowledgeCategory);</span>
 <span class="nc" id="L98">    return selfKnowledgeElementRepository.save(selfKnowledgeElement);</span>
   }
 
-  public void deleteSelfKnowledgeElement(UUID selfKnowledgeElementId) {
-<span class="nc" id="L102">    Student student = getStudent();</span>
+  @Override
+  public SelfKnowledgeElement updateSelfKnowledgeElement(
+      UUID selfKnowledgeElementId, String title, String description, Integer rating) {
+<span class="nc" id="L104">    Student student = getStudent();</span>
 
-<span class="nc" id="L104">    SelfKnowledgeElement selfKnowledgeElement =</span>
+<span class="nc" id="L106">    checkTitleField(title);</span>
+<span class="nc" id="L107">    checkDescriptionField(description);</span>
+<span class="nc" id="L108">    checkRating(rating);</span>
+
+<span class="nc" id="L110">    SelfKnowledgeElement selfKnowledgeElement =</span>
         selfKnowledgeElementRepository
-<span class="nc" id="L106">            .findById(selfKnowledgeElementId)</span>
-<span class="nc" id="L107">            .orElseThrow(SelfKnowledgeElementNotFoundException::new);</span>
+<span class="nc" id="L112">            .findById(selfKnowledgeElementId)</span>
+<span class="nc" id="L113">            .orElseThrow(SelfKnowledgeElementNotFoundException::new);</span>
 
-<span class="nc bnc" id="L109" title="All 2 branches missed.">    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {</span>
-<span class="nc" id="L110">      throw new UserNotAuthorizedException();</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {</span>
+<span class="nc" id="L116">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="nc" id="L113">    selfKnowledgeElementRepository.removeFromDatabase(selfKnowledgeElement);</span>
-<span class="nc" id="L114">  }</span>
+<span class="nc" id="L119">    selfKnowledgeElement.setTitle(title);</span>
+<span class="nc" id="L120">    selfKnowledgeElement.setDescription(description);</span>
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">    if (rating != null) {</span>
+<span class="nc" id="L123">      selfKnowledgeElement.setRating(rating);</span>
+    }
+
+<span class="nc" id="L126">    return selfKnowledgeElementRepository.save(selfKnowledgeElement);</span>
+  }
+
+  public void deleteSelfKnowledgeElement(UUID selfKnowledgeElementId) {
+<span class="nc" id="L130">    Student student = getStudent();</span>
+
+<span class="nc" id="L132">    SelfKnowledgeElement selfKnowledgeElement =</span>
+        selfKnowledgeElementRepository
+<span class="nc" id="L134">            .findById(selfKnowledgeElementId)</span>
+<span class="nc" id="L135">            .orElseThrow(SelfKnowledgeElementNotFoundException::new);</span>
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {</span>
+<span class="nc" id="L138">      throw new UserNotAuthorizedException();</span>
+    }
+
+<span class="nc" id="L141">    selfKnowledgeElementRepository.removeFromDatabase(selfKnowledgeElement);</span>
+<span class="nc" id="L142">  }</span>
 
   @Override
   public List&lt;SelfKnowledgeCategory&gt; getSelfKnowledgeCategories() {
-<span class="fc" id="L118">    Student student = getStudent();</span>
-<span class="fc" id="L119">    return selfKnowledgeCategoryRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L120">        .sorted(Comparator.comparing(c -&gt; c.getType().getOrder()))</span>
-<span class="fc" id="L121">        .toList();</span>
+<span class="fc" id="L146">    Student student = getStudent();</span>
+<span class="fc" id="L147">    return selfKnowledgeCategoryRepository.findAllByStudent(student).stream()</span>
+<span class="fc" id="L148">        .sorted(Comparator.comparing(c -&gt; c.getType().getOrder()))</span>
+<span class="fc" id="L149">        .toList();</span>
   }
 
   @Override
   public List&lt;SelfKnowledgeCategory&gt; getSelfKnowledgeCategoriesAvailable() {
-<span class="fc" id="L126">    Student student = getStudent();</span>
-<span class="fc" id="L127">    return selfKnowledgeCategoryRepository.findAllAvailableByStudent(student).stream()</span>
-<span class="fc" id="L128">        .sorted(Comparator.comparing(c -&gt; c.getType().getOrder()))</span>
-<span class="fc" id="L129">        .toList();</span>
+<span class="fc" id="L154">    Student student = getStudent();</span>
+<span class="fc" id="L155">    return selfKnowledgeCategoryRepository.findAllAvailableByStudent(student).stream()</span>
+<span class="fc" id="L156">        .sorted(Comparator.comparing(c -&gt; c.getType().getOrder()))</span>
+<span class="fc" id="L157">        .toList();</span>
   }
 
   @Override
   public void addSelfKnowledgeCategories(List&lt;String&gt; categories) {
-<span class="fc" id="L134">    Student student = getStudent();</span>
-<span class="fc" id="L135">    List&lt;UUID&gt; categoryIds = categories.stream().map(UUID::fromString).toList();</span>
-<span class="fc bfc" id="L136" title="All 2 branches covered.">    if (categoryIds.isEmpty()) {</span>
-<span class="fc" id="L137">      throw new SelfKnowledgeCategoryListIsEmptyException();</span>
+<span class="fc" id="L162">    Student student = getStudent();</span>
+<span class="fc" id="L163">    List&lt;UUID&gt; categoryIds = categories.stream().map(UUID::fromString).toList();</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">    if (categoryIds.isEmpty()) {</span>
+<span class="fc" id="L165">      throw new SelfKnowledgeCategoryListIsEmptyException();</span>
     }
-<span class="fc" id="L139">    List&lt;SelfKnowledgeCategory&gt; categoriesToAssociate =</span>
-<span class="fc" id="L140">        getAvailableCategoriesToAdd(student, categoryIds);</span>
-<span class="pc bpc" id="L141" title="1 of 2 branches missed.">    if (categoriesToAssociate.isEmpty()) {</span>
-<span class="nc" id="L142">      throw new SelfKnowledgeCategoryNotFoundException();</span>
+<span class="fc" id="L167">    List&lt;SelfKnowledgeCategory&gt; categoriesToAssociate =</span>
+<span class="fc" id="L168">        getAvailableCategoriesToAdd(student, categoryIds);</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">    if (categoriesToAssociate.isEmpty()) {</span>
+<span class="nc" id="L170">      throw new SelfKnowledgeCategoryNotFoundException();</span>
     }
-<span class="fc" id="L144">    studentRepository.addSelfKnowledgeCategories(student, categoriesToAssociate);</span>
-<span class="fc" id="L145">  }</span>
-
-  @Override
-  public void removeSelfKnowledgeCategory(UUID categoryId) {
-<span class="fc" id="L149">    Student student = getStudent();</span>
-<span class="fc" id="L150">    SelfKnowledgeCategory selfKnowledgeCategory =</span>
-        selfKnowledgeCategoryRepository
-<span class="fc" id="L152">            .findById(categoryId)</span>
-<span class="fc" id="L153">            .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);</span>
-<span class="fc bfc" id="L154" title="All 2 branches covered.">    if (selfKnowledgeCategory.isMandatory()) {</span>
-<span class="fc" id="L155">      throw new SelfKnowledgeCategoryIsMandatoryException();</span>
-    }
-<span class="fc" id="L157">    selfKnowledgeElementRepository.deleteAllByStudentAndCategory(student, selfKnowledgeCategory);</span>
-<span class="fc" id="L158">    studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);</span>
-<span class="fc" id="L159">  }</span>
+<span class="fc" id="L172">    studentRepository.addSelfKnowledgeCategories(student, categoriesToAssociate);</span>
+<span class="fc" id="L173">  }</span>
 
   private List&lt;SelfKnowledgeCategory&gt; getAvailableCategoriesToAdd(
       Student student, List&lt;UUID&gt; categoryIds) {
-<span class="fc" id="L163">    List&lt;SelfKnowledgeCategory&gt; availableCategories =</span>
-<span class="fc" id="L164">        selfKnowledgeCategoryRepository.findAllAvailableByStudent(student);</span>
-<span class="fc" id="L165">    Set&lt;UUID&gt; requestedIds = new HashSet&lt;&gt;(categoryIds);</span>
-<span class="fc" id="L166">    Set&lt;UUID&gt; availableIds =</span>
-<span class="fc" id="L167">        availableCategories.stream()</span>
-<span class="fc" id="L168">            .map(SelfKnowledgeCategory::getId)</span>
-<span class="fc" id="L169">            .collect(java.util.stream.Collectors.toSet());</span>
-<span class="fc bfc" id="L170" title="All 2 branches covered.">    if (!availableIds.containsAll(requestedIds)) {</span>
-<span class="fc" id="L171">      throw new SelfKnowledgeCategoryNotAvailableException();</span>
+<span class="fc" id="L177">    List&lt;SelfKnowledgeCategory&gt; availableCategories =</span>
+<span class="fc" id="L178">        selfKnowledgeCategoryRepository.findAllAvailableByStudent(student);</span>
+<span class="fc" id="L179">    Set&lt;UUID&gt; requestedIds = new HashSet&lt;&gt;(categoryIds);</span>
+<span class="fc" id="L180">    Set&lt;UUID&gt; availableIds =</span>
+<span class="fc" id="L181">        availableCategories.stream()</span>
+<span class="fc" id="L182">            .map(SelfKnowledgeCategory::getId)</span>
+<span class="fc" id="L183">            .collect(java.util.stream.Collectors.toSet());</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">    if (!availableIds.containsAll(requestedIds)) {</span>
+<span class="fc" id="L185">      throw new SelfKnowledgeCategoryNotAvailableException();</span>
     }
-<span class="fc" id="L173">    return availableCategories.stream()</span>
-<span class="fc" id="L174">        .filter(category -&gt; requestedIds.contains(category.getId()))</span>
-<span class="fc" id="L175">        .toList();</span>
+<span class="fc" id="L187">    return availableCategories.stream()</span>
+<span class="fc" id="L188">        .filter(category -&gt; requestedIds.contains(category.getId()))</span>
+<span class="fc" id="L189">        .toList();</span>
   }
 
   private static void checkTitleField(String title) {
-<span class="nc bnc" id="L179" title="All 4 branches missed.">    if (title != null &amp;&amp; title.length() &gt; TITLE_LENGTH_MAX) {</span>
-<span class="nc" id="L180">      log.error(&quot;Title too long: {} characters (max = &quot; + TITLE_LENGTH_MAX + &quot;)&quot;, title.length());</span>
-<span class="nc" id="L181">      throw new SelfKnowledgeInvalidTitleException(</span>
-<span class="nc" id="L182">          &quot;Title exceeds &quot; + TITLE_LENGTH_MAX + &quot; characters (actual: &quot; + title.length() + &quot;)&quot;);</span>
-    }
-<span class="nc" id="L184">  }</span>
-
-  private static void checkDescriptionField(String description) {
-<span class="nc bnc" id="L187" title="All 4 branches missed.">    if (description != null &amp;&amp; description.length() &gt; DESCRIPTION_LENGTH_MAX) {</span>
-<span class="nc" id="L188">      log.error(</span>
-          &quot;Description too long: {} characters (max = &quot; + DESCRIPTION_LENGTH_MAX + &quot;)&quot;,
-<span class="nc" id="L190">          description.length());</span>
-<span class="nc" id="L191">      throw new SelfKnowledgeInvalidDescriptionException(</span>
-          &quot;Description exceeds &quot;
-              + DESCRIPTION_LENGTH_MAX
-              + &quot; characters (actual: &quot;
-<span class="nc" id="L195">              + description.length()</span>
-              + &quot;)&quot;);
+<span class="nc bnc" id="L193" title="All 4 branches missed.">    if (title != null &amp;&amp; title.length() &gt; TITLE_LENGTH_MAX) {</span>
+<span class="nc" id="L194">      log.error(&quot;Title too long: {} characters (max = &quot; + TITLE_LENGTH_MAX + &quot;)&quot;, title.length());</span>
+<span class="nc" id="L195">      throw new SelfKnowledgeInvalidTitleException(</span>
+<span class="nc" id="L196">          &quot;Title exceeds &quot; + TITLE_LENGTH_MAX + &quot; characters (actual: &quot; + title.length() + &quot;)&quot;);</span>
     }
 <span class="nc" id="L198">  }</span>
 
-  private static void checkRating(Integer rating) {
-<span class="nc bnc" id="L201" title="All 6 branches missed.">    if (rating != null &amp;&amp; (rating &lt; RATING_MIN || rating &gt; RATING_MAX)) {</span>
+  private static void checkDescriptionField(String description) {
+<span class="nc bnc" id="L201" title="All 4 branches missed.">    if (description != null &amp;&amp; description.length() &gt; DESCRIPTION_LENGTH_MAX) {</span>
 <span class="nc" id="L202">      log.error(</span>
+          &quot;Description too long: {} characters (max = &quot; + DESCRIPTION_LENGTH_MAX + &quot;)&quot;,
+<span class="nc" id="L204">          description.length());</span>
+<span class="nc" id="L205">      throw new SelfKnowledgeInvalidDescriptionException(</span>
+          &quot;Description exceeds &quot;
+              + DESCRIPTION_LENGTH_MAX
+              + &quot; characters (actual: &quot;
+<span class="nc" id="L209">              + description.length()</span>
+              + &quot;)&quot;);
+    }
+<span class="nc" id="L212">  }</span>
+
+  private static void checkRating(Integer rating) {
+<span class="nc bnc" id="L215" title="All 6 branches missed.">    if (rating != null &amp;&amp; (rating &lt; RATING_MIN || rating &gt; RATING_MAX)) {</span>
+<span class="nc" id="L216">      log.error(</span>
           &quot;Rating is out of bounce: {} (min = &quot; + RATING_MIN + &quot;, max = &quot; + RATING_MAX + &quot;)&quot;,
           rating);
-<span class="nc" id="L205">      throw new SelfKnowledgeInvalidRatingException(</span>
+<span class="nc" id="L219">      throw new SelfKnowledgeInvalidRatingException(</span>
           &quot;Rating is out of bounce [&quot;
               + RATING_MIN
               + &quot;,&quot;
@@ -211,6 +225,6 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
               + rating
               + &quot;)&quot;);
     }
-<span class="nc" id="L214">  }</span>
+<span class="nc" id="L228">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
