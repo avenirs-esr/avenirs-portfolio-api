@@ -4,11 +4,15 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
+import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeCategoryMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeElementMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification.SelfKnowledgeElementSpecification;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,5 +49,11 @@ public class SelfKnowledgeElementDatabaseRepository
     return new PagedResult<>(
         entities.stream().map(SelfKnowledgeElementMapper::toDomain).toList(),
         new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), entities.getTotalElements()));
+  }
+
+  @Override
+  public void deleteAllByStudentAndCategory(Student student, SelfKnowledgeCategory category) {
+    jpaRepository.deleteByStudentAndSelfKnowledgeCategory(
+        StudentMapper.fromDomain(student), SelfKnowledgeCategoryMapper.fromDomain(category));
   }
 }

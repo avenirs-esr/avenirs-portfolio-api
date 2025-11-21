@@ -25,4 +25,6 @@ public interface SelfKnowledgeService {
   List<SelfKnowledgeCategory> getSelfKnowledgeCategoriesAvailable();
 
   void addSelfKnowledgeCategories(List<String> categoriesId);
+
+  void removeSelfKnowledgeCategory(UUID categoryId);
 }

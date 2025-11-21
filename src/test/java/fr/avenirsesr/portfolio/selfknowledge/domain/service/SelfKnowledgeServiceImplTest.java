@@ -11,11 +11,14 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryIsMandatoryException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
+import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture.SelfKnowledgeCategoryFixture;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -38,6 +41,7 @@ class SelfKnowledgeServiceImplTest {
 
   @Mock private StudentRepository studentRepository;
   @Mock private SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
+  @Mock private SelfKnowledgeElementRepository selfKnowledgeElementRepository;
 
   @InjectMocks private SelfKnowledgeServiceImpl selfKnowledgeService;
 
@@ -332,6 +336,104 @@ class SelfKnowledgeServiceImplTest {
           verifyNoMoreInteractions(studentRepository);
         }
       }
+
+      @Nested
+      class AndANonMandatorySelfKnowledgeCategory {
+
+        private SelfKnowledgeCategory removableCategory;
+        private UUID categoryId;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("a non mandatory self knowledge category linked to this student");
+          removableCategory =
+              SelfKnowledgeCategoryFixture.create()
+                  .withType(ESelfKnowledgeCategoryType.STRENGTHS)
+                  .withMandatory(false)
+                  .toModel();
+          categoryId = removableCategory.getId();
+
+          when(selfKnowledgeCategoryRepository.findById(eq(categoryId)))
+              .thenReturn(Optional.of(removableCategory));
+        }
+
+        @Nested
+        class WhenRemovingSelfKnowledgeCategory {
+
+          @BeforeEach
+          void setupWhen() {
+            BddLogger.when(
+                "removing a non mandatory self knowledge category for the current student");
+            selfKnowledgeService.removeSelfKnowledgeCategory(categoryId);
+          }
+
+          @Test
+          void thenItShouldDeleteElementsAndRemoveCategoryForStudent() {
+            BddLogger.then(
+                "it should delete all elements for this student and category, then remove the"
+                    + " category link for the student");
+
+            verify(studentRepository).findById(eq(student.getId()));
+            verify(selfKnowledgeCategoryRepository).findById(eq(categoryId));
+            verify(selfKnowledgeElementRepository)
+                .deleteAllByStudentAndCategory(eq(student), eq(removableCategory));
+            verify(studentRepository)
+                .removeSelfKnowledgeCategory(eq(student), eq(removableCategory));
+          }
+        }
+      }
+
+      @Nested
+      class WhenRemovingUnknownSelfKnowledgeCategory {
+
+        @Test
+        void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
+          BddLogger.when("removing a self knowledge category that does not exist");
+          BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
+
+          UUID unknownId = UUID.randomUUID();
+
+          when(selfKnowledgeCategoryRepository.findById(eq(unknownId)))
+              .thenReturn(Optional.empty());
+
+          assertThrows(
+              SelfKnowledgeCategoryNotFoundException.class,
+              () -> selfKnowledgeService.removeSelfKnowledgeCategory(unknownId));
+
+          verify(studentRepository).findById(eq(student.getId()));
+          verify(selfKnowledgeCategoryRepository).findById(eq(unknownId));
+          verifyNoInteractions(selfKnowledgeElementRepository);
+          verify(studentRepository, never())
+              .removeSelfKnowledgeCategory(any(), any(SelfKnowledgeCategory.class));
+        }
+      }
+
+      @Nested
+      class WhenRemovingMandatorySelfKnowledgeCategory {
+
+        @Test
+        void thenItShouldThrowSelfKnowledgeCategoryIsMandatoryException() {
+          BddLogger.when("removing a mandatory self knowledge category");
+          BddLogger.then("it should throw SelfKnowledgeCategoryIsMandatoryException");
+
+          UUID categoryId = UUID.randomUUID();
+          SelfKnowledgeCategory mandatoryCategory = mock(SelfKnowledgeCategory.class);
+
+          when(mandatoryCategory.isMandatory()).thenReturn(true);
+          when(selfKnowledgeCategoryRepository.findById(eq(categoryId)))
+              .thenReturn(Optional.of(mandatoryCategory));
+
+          assertThrows(
+              SelfKnowledgeCategoryIsMandatoryException.class,
+              () -> selfKnowledgeService.removeSelfKnowledgeCategory(categoryId));
+
+          verify(studentRepository).findById(eq(student.getId()));
+          verify(selfKnowledgeCategoryRepository).findById(eq(categoryId));
+          verifyNoInteractions(selfKnowledgeElementRepository);
+          verify(studentRepository, never())
+              .removeSelfKnowledgeCategory(eq(student), any(SelfKnowledgeCategory.class));
+        }
+      }
     }
 
     @Nested
@@ -400,6 +502,26 @@ class SelfKnowledgeServiceImplTest {
 
           verifyNoInteractions(studentRepository);
           verifyNoInteractions(selfKnowledgeCategoryRepository);
+        }
+      }
+
+      @Nested
+      class WhenRemovingSelfKnowledgeCategory {
+
+        @Test
+        void thenItShouldThrowUserNotFoundException() {
+          BddLogger.when("removing a self knowledge category without logged in user");
+          BddLogger.then("it should throw UserNotFoundException");
+
+          UUID categoryId = UUID.randomUUID();
+
+          assertThrows(
+              UserNotFoundException.class,
+              () -> selfKnowledgeService.removeSelfKnowledgeCategory(categoryId));
+
+          verifyNoInteractions(studentRepository);
+          verifyNoInteractions(selfKnowledgeCategoryRepository);
+          verifyNoInteractions(selfKnowledgeElementRepository);
         }
       }
     }
@@ -471,6 +593,26 @@ class SelfKnowledgeServiceImplTest {
 
           verify(studentRepository).findById(eq(student.getId()));
           verifyNoInteractions(selfKnowledgeCategoryRepository);
+        }
+      }
+
+      @Nested
+      class WhenRemovingSelfKnowledgeCategory {
+
+        @Test
+        void thenItShouldThrowUserIsNotStudentException() {
+          BddLogger.when("removing self knowledge category for a non student user");
+          BddLogger.then("it should throw UserIsNotStudentException");
+
+          UUID categoryId = UUID.randomUUID();
+
+          assertThrows(
+              UserIsNotStudentException.class,
+              () -> selfKnowledgeService.removeSelfKnowledgeCategory(categoryId));
+
+          verify(studentRepository).findById(eq(student.getId()));
+          verifyNoInteractions(selfKnowledgeCategoryRepository);
+          verifyNoInteractions(selfKnowledgeElementRepository);
         }
       }
     }

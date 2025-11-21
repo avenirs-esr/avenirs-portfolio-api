@@ -8,13 +8,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementRequest;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
-import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
-import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
-import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
-import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeElementNotFoundException;
-import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
-import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidRatingException;
-import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.*;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
@@ -148,6 +142,20 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
       throw new SelfKnowledgeCategoryNotFoundException();
     }
     studentRepository.addSelfKnowledgeCategories(student, categoriesToAssociate);
+  }
+
+  @Override
+  public void removeSelfKnowledgeCategory(UUID categoryId) {
+    Student student = getStudent();
+    SelfKnowledgeCategory selfKnowledgeCategory =
+        selfKnowledgeCategoryRepository
+            .findById(categoryId)
+            .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);
+    if (selfKnowledgeCategory.isMandatory()) {
+      throw new SelfKnowledgeCategoryIsMandatoryException();
+    }
+    selfKnowledgeElementRepository.deleteAllByStudentAndCategory(student, selfKnowledgeCategory);
+    studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);
   }
 
   private List<SelfKnowledgeCategory> getAvailableCategoriesToAdd(

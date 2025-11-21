@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -12,6 +13,7 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +76,23 @@ class SelfKnowledgeControllerIT {
     JsonNode availableJson = objectMapper.readTree(availableBody);
 
     return availableJson.get(0).get("id").asText();
+  }
+
+  private String getLinkedCategoryId() throws Exception {
+    String categoryId = getAvailableCategoryId();
+
+    mockMvc
+        .perform(
+            post(CATEGORIES_BASE_PATH)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(java.util.List.of(categoryId)))
+                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isOk());
+
+    return categoryId;
   }
 
   @Test
@@ -243,5 +262,76 @@ class SelfKnowledgeControllerIT {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.message").value("Self knowledge category list is empty"))
         .andExpect(jsonPath("$.code").value("SELF_KNOWLEDGE_CATEGORY_LIST_EMPTY"));
+  }
+
+  @Test
+  void shouldDeleteSelfKnowledgeCategoryForStudent() throws Exception {
+    BddLogger.given("the " + CATEGORIES_BASE_PATH + "/{categoryId} DELETE endpoint");
+    BddLogger.and("a self knowledge category currently linked to the student");
+    String categoryId = getLinkedCategoryId();
+    BddLogger.when("performing a DELETE as a student");
+    BddLogger.then("it should delete the category link and return a success message");
+
+    mockMvc
+        .perform(
+            delete(CATEGORIES_BASE_PATH + "/{categoryId}", categoryId)
+                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isOk())
+        .andExpect(content().string("Categories successfully deleted"));
+
+    mockMvc
+        .perform(
+            get(CATEGORIES_BASE_PATH)
+                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[?(@.id == '%s')]", categoryId).doesNotExist());
+  }
+
+  @Test
+  void shouldReturn404WhenUserNotFoundOnCategoriesDeleteEndpoint() throws Exception {
+    BddLogger.given("the " + CATEGORIES_BASE_PATH + "/{categoryId} DELETE endpoint");
+    BddLogger.when("performing a DELETE and the user is not found");
+    BddLogger.then("it should return a 404 USER_NOT_FOUND");
+
+    String someCategoryId = UUID.randomUUID().toString();
+
+    mockMvc
+        .perform(
+            delete(CATEGORIES_BASE_PATH + "/{categoryId}", someCategoryId)
+                .header("X-Signed-Context", unknownUserPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", unknownUserSignature))
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("User not found"))
+        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+  }
+
+  @Test
+  void shouldReturn400WhenCategoryDoesNotExistOnCategoriesDeleteEndpoint() throws Exception {
+    BddLogger.given("the " + CATEGORIES_BASE_PATH + "/{categoryId} DELETE endpoint");
+    BddLogger.when("performing a DELETE with a non existing category id");
+    BddLogger.then(
+        "it should return a 400 SELF_KNOWLEDGE_CATEGORY_NOT_FOUND (business constraint)");
+
+    String randomCategoryId = UUID.randomUUID().toString();
+
+    mockMvc
+        .perform(
+            delete(CATEGORIES_BASE_PATH + "/{categoryId}", randomCategoryId)
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("Self knowledge category not found"))
+        .andExpect(jsonPath("$.code").value("SELF_KNOWLEDGE_CATEGORY_NOT_FOUND"));
   }
 }
