@@ -2,8 +2,8 @@
 
 import fr.avenirsesr.portfolio.program.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.program.domain.service.InstitutionServiceImpl;
+import fr.avenirsesr.portfolio.shared.domain.port.input.SharedService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -13,12 +13,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class InstitutionServiceConfig {
-  private final StudentRepository studentRepository;
   private final StudentProgressRepository studentProgressRepository;
+  private final SharedService sharedService;
 
   @Bean
   public InstitutionService institutionService() {
-<span class="fc" id="L21">    return new InstitutionServiceImpl(studentRepository, studentProgressRepository);</span>
+<span class="fc" id="L21">    return new InstitutionServiceImpl(studentProgressRepository, sharedService);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

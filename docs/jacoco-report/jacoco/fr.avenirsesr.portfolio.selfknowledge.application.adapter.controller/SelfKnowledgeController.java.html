@@ -127,7 +127,7 @@ public class SelfKnowledgeController {
   }
 
   @PostMapping(&quot;/categories&quot;)
-  public ResponseEntity&lt;String&gt; getSelfKnowledgeCategories(@RequestBody List&lt;String&gt; categories) {
+  public ResponseEntity&lt;String&gt; addSelfKnowledgeCategories(@RequestBody List&lt;String&gt; categories) {
 <span class="fc" id="L131">    selfKnowledgeService.addSelfKnowledgeCategories(categories);</span>
 <span class="fc" id="L132">    return ResponseEntity.ok(&quot;Categories successfully associated with user&quot;);</span>
   }
@@ -138,6 +138,12 @@ public class SelfKnowledgeController {
 <span class="fc" id="L138">        selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()</span>
 <span class="fc" id="L139">            .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
 <span class="fc" id="L140">            .toList());</span>
+  }
+
+  @DeleteMapping(&quot;/categories/{categoryId}&quot;)
+  public ResponseEntity&lt;String&gt; removeSelfKnowledgeCategory(@PathVariable UUID categoryId) {
+<span class="fc" id="L145">    selfKnowledgeService.removeSelfKnowledgeCategory(categoryId);</span>
+<span class="fc" id="L146">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

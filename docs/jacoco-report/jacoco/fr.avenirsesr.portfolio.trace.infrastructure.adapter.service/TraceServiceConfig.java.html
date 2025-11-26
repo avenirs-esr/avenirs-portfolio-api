@@ -2,6 +2,7 @@
 
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
+import fr.avenirsesr.portfolio.shared.domain.port.input.SharedService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
@@ -24,6 +25,7 @@ public class TraceServiceConfig {
   private final TraceConfigurationClient traceConfigurationClient;
   private final TraceAttachmentRepository traceAttachmentRepository;
   private final StudentService studentService;
+  private final SharedService sharedService;
 
   public TraceServiceConfig(
       TraceDatabaseRepository traceRepository,
@@ -33,20 +35,22 @@ public class TraceServiceConfig {
       SkillLevelProgressRepository skillLevelProgressRepository,
       TraceAttachmentRepository traceAttachmentRepository,
       TraceConfigurationClient traceConfigurationClient,
-<span class="fc" id="L36">      StudentService studentService) {</span>
-<span class="fc" id="L37">    this.traceRepository = traceRepository;</span>
-<span class="fc" id="L38">    this.studentProgressRepository = studentProgressRepository;</span>
-<span class="fc" id="L39">    this.additionalSkillProgressRepository = additionalSkillProgressRepository;</span>
-<span class="fc" id="L40">    this.amsRepository = amsRepository;</span>
-<span class="fc" id="L41">    this.skillLevelProgressRepository = skillLevelProgressRepository;</span>
-<span class="fc" id="L42">    this.traceConfigurationClient = traceConfigurationClient;</span>
-<span class="fc" id="L43">    this.traceAttachmentRepository = traceAttachmentRepository;</span>
-<span class="fc" id="L44">    this.studentService = studentService;</span>
-<span class="fc" id="L45">  }</span>
+      StudentService studentService,
+<span class="fc" id="L39">      SharedService sharedService) {</span>
+<span class="fc" id="L40">    this.traceRepository = traceRepository;</span>
+<span class="fc" id="L41">    this.studentProgressRepository = studentProgressRepository;</span>
+<span class="fc" id="L42">    this.additionalSkillProgressRepository = additionalSkillProgressRepository;</span>
+<span class="fc" id="L43">    this.amsRepository = amsRepository;</span>
+<span class="fc" id="L44">    this.skillLevelProgressRepository = skillLevelProgressRepository;</span>
+<span class="fc" id="L45">    this.traceConfigurationClient = traceConfigurationClient;</span>
+<span class="fc" id="L46">    this.traceAttachmentRepository = traceAttachmentRepository;</span>
+<span class="fc" id="L47">    this.studentService = studentService;</span>
+<span class="fc" id="L48">    this.sharedService = sharedService;</span>
+<span class="fc" id="L49">  }</span>
 
   @Bean
   public TraceService traceService() {
-<span class="fc" id="L49">    return new TraceServiceImpl(</span>
+<span class="fc" id="L53">    return new TraceServiceImpl(</span>
         traceRepository,
         studentProgressRepository,
         additionalSkillProgressRepository,
@@ -54,7 +58,8 @@ public class TraceServiceConfig {
         skillLevelProgressRepository,
         traceAttachmentRepository,
         studentService,
-        traceConfigurationClient);
+        traceConfigurationClient,
+        sharedService);
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
