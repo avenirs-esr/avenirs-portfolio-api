@@ -5,11 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
-import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
@@ -19,49 +16,37 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserResourceServiceImplTest {
-  @Mock private StudentRepository studentRepository;
   @Mock private UserPhotoRepository userPhotoRepository;
   @Mock private FileStorageService fileStorageService;
+  @Mock private LoggedInUserService loggedInUserService;
   @InjectMocks private UserResourceServiceImpl service;
 
   private Student student;
-  private MockedStatic<RequestContext> mockedRequestContext;
 
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
-    mockedRequestContext = mockStatic(RequestContext.class);
-    mockedRequestContext
-        .when(RequestContext::get)
-        .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
-
-    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
-  }
-
-  @AfterEach
-  void tearDown() {
-    mockedRequestContext.close();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
   }
 
   @Test

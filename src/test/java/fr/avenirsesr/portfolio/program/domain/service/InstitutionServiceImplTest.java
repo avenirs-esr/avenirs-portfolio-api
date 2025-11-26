@@ -3,22 +3,17 @@ package fr.avenirsesr.portfolio.program.domain.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -28,28 +23,17 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 @ActiveProfiles("test")
 class InstitutionServiceImplTest {
-  @Mock private StudentRepository studentRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
+  @Mock private LoggedInUserService loggedInUserService;
 
   @InjectMocks private InstitutionServiceImpl institutionService;
 
   private Student student;
-  private MockedStatic<RequestContext> mockedRequestContext;
 
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
-    mockedRequestContext = mockStatic(RequestContext.class);
-    mockedRequestContext
-        .when(RequestContext::get)
-        .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
-
-    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
-  }
-
-  @AfterEach
-  void tearDown() {
-    mockedRequestContext.close();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
   }
 
   @Test

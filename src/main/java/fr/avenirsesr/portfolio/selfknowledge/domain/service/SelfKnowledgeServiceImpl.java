@@ -2,10 +2,7 @@ package fr.avenirsesr.portfolio.selfknowledge.domain.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.*;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
@@ -13,7 +10,7 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
-import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.util.Comparator;
@@ -30,23 +27,17 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   private final StudentRepository studentRepository;
   private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
+  private final LoggedInUserService loggedInUserService;
 
   public static final int TITLE_LENGTH_MAX = 80;
   public static final int DESCRIPTION_LENGTH_MAX = 400;
   public static final int RATING_MIN = 1;
   public static final int RATING_MAX = 5;
 
-  private Student getStudent() {
-    User loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
-    return studentRepository
-        .findById(loggedInUser.getId())
-        .orElseThrow(UserIsNotStudentException::new);
-  }
-
   @Override
   public PagedResult<SelfKnowledgeElement> getSelfKnowledgeElements(
       UUID selfKnowledgeCategoryId, PageCriteria pageCriteria) {
-    Student student = getStudent();
+    Student student = loggedInUserService.getLoggedInStudent();
 
     selfKnowledgeCategoryRepository
         .findById(selfKnowledgeCategoryId)
@@ -58,7 +49,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public SelfKnowledgeElementDetails getSelfKnowledgeElementDetails(UUID selfKnowledgeElementId) {
-    Student student = getStudent();
+    Student student = loggedInUserService.getLoggedInStudent();
 
     SelfKnowledgeElement selfKnowledgeElement =
         selfKnowledgeElementRepository
@@ -75,7 +66,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   @Override
   public SelfKnowledgeElement createSelfKnowledgeElement(
       UUID selfKnowledgeCategoryId, String title, String description, Integer rating) {
-    Student student = getStudent();
+    Student student = loggedInUserService.getLoggedInStudent();
 
     checkTitleField(title);
     checkDescriptionField(description);
@@ -95,7 +86,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   @Override
   public SelfKnowledgeElement updateSelfKnowledgeElement(
       UUID selfKnowledgeElementId, String title, String description, Integer rating) {
-    Student student = getStudent();
+    Student student = loggedInUserService.getLoggedInStudent();
 
     checkTitleField(title);
     checkDescriptionField(description);
@@ -121,7 +112,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   }
 
   public void deleteSelfKnowledgeElements(List<UUID> selfKnowledgeElementIds) {
-    Student student = getStudent();
+    Student student = loggedInUserService.getLoggedInStudent();
 
     List<SelfKnowledgeElement> selfKnowledgeElements =
         selfKnowledgeElementRepository.findAllById(selfKnowledgeElementIds);
@@ -144,7 +135,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public List<SelfKnowledgeCategory> getSelfKnowledgeCategories() {
-    Student student = getStudent();
+    Student student = loggedInUserService.getLoggedInStudent();
     return selfKnowledgeCategoryRepository.findAllByStudent(student).stream()
         .sorted(Comparator.comparing(c -> c.getType().getOrder()))
         .toList();
@@ -152,7 +143,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public List<SelfKnowledgeCategory> getSelfKnowledgeCategoriesAvailable() {
-    Student student = getStudent();
+    Student student = loggedInUserService.getLoggedInStudent();
     return selfKnowledgeCategoryRepository.findAllAvailableByStudent(student).stream()
         .sorted(Comparator.comparing(c -> c.getType().getOrder()))
         .toList();
@@ -160,7 +151,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public void addSelfKnowledgeCategories(List<String> categories) {
-    Student student = getStudent();
+    Student student = loggedInUserService.getLoggedInStudent();
     List<UUID> categoryIds = categories.stream().map(UUID::fromString).toList();
     if (categoryIds.isEmpty()) {
       throw new SelfKnowledgeCategoryListIsEmptyException();
@@ -175,7 +166,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public void removeSelfKnowledgeCategory(UUID categoryId) {
-    Student student = getStudent();
+    Student student = loggedInUserService.getLoggedInStudent();
     SelfKnowledgeCategory selfKnowledgeCategory =
         selfKnowledgeCategoryRepository
             .findById(categoryId)

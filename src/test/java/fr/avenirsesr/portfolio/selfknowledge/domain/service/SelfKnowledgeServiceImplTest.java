@@ -4,13 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.mockStatic;
 
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryIsMandatoryException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
@@ -20,6 +16,7 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCa
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture.SelfKnowledgeCategoryFixture;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
@@ -31,7 +28,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Nested;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -42,21 +38,16 @@ class SelfKnowledgeServiceImplTest {
   @Mock private StudentRepository studentRepository;
   @Mock private SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
   @Mock private SelfKnowledgeElementRepository selfKnowledgeElementRepository;
+  @Mock private LoggedInUserService loggedInUserService;
 
   @InjectMocks private SelfKnowledgeServiceImpl selfKnowledgeService;
 
   private Student student;
-  private MockedStatic<RequestContext> mockedRequestContext;
 
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
-    mockedRequestContext = mockStatic(RequestContext.class);
-  }
-
-  @AfterEach
-  void tearDown() {
-    mockedRequestContext.close();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
   }
 
   @Nested
@@ -73,9 +64,6 @@ class SelfKnowledgeServiceImplTest {
       @BeforeEach
       void setupAnd() {
         BddLogger.and("a logged in student");
-        mockedRequestContext
-            .when(RequestContext::get)
-            .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
         when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
       }
 
@@ -128,7 +116,6 @@ class SelfKnowledgeServiceImplTest {
             assertThat(result.get(1).getType()).isEqualTo(ESelfKnowledgeCategoryType.VALUES);
             assertThat(result.get(2).getType()).isEqualTo(ESelfKnowledgeCategoryType.ASPIRATIONS);
 
-            verify(studentRepository).findById(eq(student.getId()));
             verify(selfKnowledgeCategoryRepository).findAllByStudent(eq(student));
           }
         }
@@ -159,7 +146,6 @@ class SelfKnowledgeServiceImplTest {
             BddLogger.then("it should return an empty list");
             assertThat(result).isEmpty();
 
-            verify(studentRepository).findById(eq(student.getId()));
             verify(selfKnowledgeCategoryRepository).findAllByStudent(eq(student));
           }
         }
@@ -208,7 +194,6 @@ class SelfKnowledgeServiceImplTest {
             assertThat(result.get(0).getType()).isEqualTo(ESelfKnowledgeCategoryType.MOTIVATION);
             assertThat(result.get(1).getType()).isEqualTo(ESelfKnowledgeCategoryType.INTERESTS);
 
-            verify(studentRepository).findById(eq(student.getId()));
             verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
           }
         }
@@ -240,7 +225,6 @@ class SelfKnowledgeServiceImplTest {
             BddLogger.then("it should return an empty list");
             assertThat(result).isEmpty();
 
-            verify(studentRepository).findById(eq(student.getId()));
             verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
           }
         }
@@ -308,7 +292,6 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeCategoryListIsEmptyException.class,
               () -> selfKnowledgeService.addSelfKnowledgeCategories(List.of()));
 
-          verify(studentRepository).findById(eq(student.getId()));
           verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
@@ -331,7 +314,6 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeCategoryNotAvailableException.class,
               () -> selfKnowledgeService.addSelfKnowledgeCategories(categoryIdsAsString));
 
-          verify(studentRepository).findById(eq(student.getId()));
           verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
           verifyNoMoreInteractions(studentRepository);
         }
@@ -373,7 +355,6 @@ class SelfKnowledgeServiceImplTest {
                 "it should delete all elements for this student and category, then remove the"
                     + " category link for the student");
 
-            verify(studentRepository).findById(eq(student.getId()));
             verify(selfKnowledgeCategoryRepository).findById(eq(categoryId));
             verify(selfKnowledgeElementRepository)
                 .deleteAllByStudentAndCategory(eq(student), eq(removableCategory));
@@ -400,7 +381,6 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeCategoryNotFoundException.class,
               () -> selfKnowledgeService.removeSelfKnowledgeCategory(unknownId));
 
-          verify(studentRepository).findById(eq(student.getId()));
           verify(selfKnowledgeCategoryRepository).findById(eq(unknownId));
           verifyNoInteractions(selfKnowledgeElementRepository);
           verify(studentRepository, never())
@@ -427,7 +407,6 @@ class SelfKnowledgeServiceImplTest {
               SelfKnowledgeCategoryIsMandatoryException.class,
               () -> selfKnowledgeService.removeSelfKnowledgeCategory(categoryId));
 
-          verify(studentRepository).findById(eq(student.getId()));
           verify(selfKnowledgeCategoryRepository).findById(eq(categoryId));
           verifyNoInteractions(selfKnowledgeElementRepository);
           verify(studentRepository, never())
@@ -442,9 +421,7 @@ class SelfKnowledgeServiceImplTest {
       @BeforeEach
       void setupAnd() {
         BddLogger.and("no logged in user");
-        mockedRequestContext
-            .when(RequestContext::get)
-            .thenReturn(new RequestData(Optional.empty(), ELanguage.FRENCH));
+        when(loggedInUserService.getLoggedInStudent()).thenThrow(UserNotFoundException.class);
       }
 
       @Nested
@@ -532,10 +509,7 @@ class SelfKnowledgeServiceImplTest {
       @BeforeEach
       void setupAnd() {
         BddLogger.and("a logged in user that is not a student");
-        mockedRequestContext
-            .when(RequestContext::get)
-            .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
-        when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.empty());
+        when(loggedInUserService.getLoggedInStudent()).thenThrow(UserIsNotStudentException.class);
       }
 
       @Nested
@@ -550,7 +524,6 @@ class SelfKnowledgeServiceImplTest {
               UserIsNotStudentException.class,
               () -> selfKnowledgeService.getSelfKnowledgeCategories());
 
-          verify(studentRepository).findById(eq(student.getId()));
           verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
@@ -567,7 +540,6 @@ class SelfKnowledgeServiceImplTest {
               UserIsNotStudentException.class,
               () -> selfKnowledgeService.getSelfKnowledgeCategoriesAvailable());
 
-          verify(studentRepository).findById(eq(student.getId()));
           verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
@@ -591,7 +563,6 @@ class SelfKnowledgeServiceImplTest {
               UserIsNotStudentException.class,
               () -> selfKnowledgeService.addSelfKnowledgeCategories(categoryIdsAsString));
 
-          verify(studentRepository).findById(eq(student.getId()));
           verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
@@ -610,7 +581,6 @@ class SelfKnowledgeServiceImplTest {
               UserIsNotStudentException.class,
               () -> selfKnowledgeService.removeSelfKnowledgeCategory(categoryId));
 
-          verify(studentRepository).findById(eq(student.getId()));
           verifyNoInteractions(selfKnowledgeCategoryRepository);
           verifyNoInteractions(selfKnowledgeElementRepository);
         }

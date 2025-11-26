@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification;
 
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
+import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -10,13 +11,9 @@ import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
 public class SkillLevelProgressSpecification {
-  public static Specification<SkillLevelProgressEntity> linkedTo(AMSEntity ams) {
-    return (root, query, criteriaBuilder) -> criteriaBuilder.isMember(ams, root.get("amses"));
-  }
-
-  public static Specification<SkillLevelProgressEntity> with(Student student) {
+  public static Specification<SkillLevelProgressEntity> linkedTo(AMS ams) {
     return (root, query, criteriaBuilder) ->
-        criteriaBuilder.equal(root.get("student"), StudentMapper.fromDomain(student));
+        criteriaBuilder.isMember(AMSMapper.fromDomain(ams), root.get("amses"));
   }
 
   public static Specification<SkillLevelProgressEntity> with(Student student, UUID skillId) {

@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.ams.domain.port.output.repository.CohortRepositor
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.CohortMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
-import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,11 +15,5 @@ public class CohortDatabaseRepository extends GenericJpaRepositoryAdapter<Cohort
   public CohortDatabaseRepository(CohortJpaRepository repository) {
     super(repository, repository, CohortMapper::fromDomain, CohortMapper::toDomain);
     this.jpaRepository = repository;
-  }
-
-  public void saveAllEntities(List<CohortEntity> entities) {
-    if (entities != null) {
-      jpaRepository.saveAll(entities);
-    }
   }
 }

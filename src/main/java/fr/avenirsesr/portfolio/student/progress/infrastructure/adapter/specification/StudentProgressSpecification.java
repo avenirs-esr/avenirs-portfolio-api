@@ -1,16 +1,14 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.criteria.Join;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
 public class StudentProgressSpecification {
-  public static Specification<StudentProgressEntity> hasStudent(StudentEntity student) {
-    return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("student"), student);
-  }
 
   public static Specification<StudentProgressEntity> isAPC() {
     return (root, query, cb) -> {
@@ -20,11 +18,13 @@ public class StudentProgressSpecification {
   }
 
   public static Specification<StudentProgressEntity> hasSkillLevelProgresses(
-      List<SkillLevelProgressEntity> skillLevelProgresses) {
+      List<SkillLevelProgress> skillLevelProgresses) {
+    List<SkillLevelProgressEntity> skillLevelProgressEntities =
+        skillLevelProgresses.stream().map(SkillLevelProgressMapper::fromDomain).toList();
     return (root, query, criteriaBuilder) -> {
       Join<StudentProgressEntity, SkillLevelProgressEntity> skillLevelProgressJoin =
           root.join("skillLevels");
-      return skillLevelProgressJoin.in(skillLevelProgresses);
+      return skillLevelProgressJoin.in(skillLevelProgressEntities);
     };
   }
 }

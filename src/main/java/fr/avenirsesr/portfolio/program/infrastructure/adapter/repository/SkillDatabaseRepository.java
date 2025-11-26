@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.port.output.repository.SkillRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillEntity;
-import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,11 +15,5 @@ public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter<Skill, 
   public SkillDatabaseRepository(SkillJpaRepository jpaRepository) {
     super(jpaRepository, jpaRepository, SkillMapper::fromDomain, SkillMapper::toDomain);
     this.jpaRepository = jpaRepository;
-  }
-
-  public void saveAllEntities(List<SkillEntity> entities) {
-    if (entities != null && !entities.isEmpty()) {
-      jpaRepository.saveAll(entities);
-    }
   }
 }
