@@ -3,7 +3,6 @@
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.domain.service.UserResourceServiceImpl;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.service.FileStorageServiceImpl;
-import fr.avenirsesr.portfolio.shared.domain.port.input.SharedService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,20 +10,16 @@ import org.springframework.context.annotation.Configuration;
 public class UserResourceServiceConfig {
   private final FileStorageServiceImpl fileStorageService;
   private final UserPhotoRepository userPhotoRepository;
-  private final SharedService sharedService;
 
   public UserResourceServiceConfig(
-      FileStorageServiceImpl fileStorageService,
-      UserPhotoRepository userPhotoRepository,
-<span class="fc" id="L19">      SharedService sharedService) {</span>
-<span class="fc" id="L20">    this.fileStorageService = fileStorageService;</span>
-<span class="fc" id="L21">    this.userPhotoRepository = userPhotoRepository;</span>
-<span class="fc" id="L22">    this.sharedService = sharedService;</span>
-<span class="fc" id="L23">  }</span>
+<span class="fc" id="L15">      FileStorageServiceImpl fileStorageService, UserPhotoRepository userPhotoRepository) {</span>
+<span class="fc" id="L16">    this.fileStorageService = fileStorageService;</span>
+<span class="fc" id="L17">    this.userPhotoRepository = userPhotoRepository;</span>
+<span class="fc" id="L18">  }</span>
 
   @Bean
   public UserResourceServiceImpl userResourceService() {
-<span class="fc" id="L27">    return new UserResourceServiceImpl(fileStorageService, userPhotoRepository, sharedService);</span>
+<span class="fc" id="L22">    return new UserResourceServiceImpl(fileStorageService, userPhotoRepository);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -2,7 +2,9 @@
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.file.domain.data.UserPhotoData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
@@ -15,7 +17,6 @@ import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
-import fr.avenirsesr.portfolio.shared.domain.port.input.SharedService;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -24,15 +25,14 @@ import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L27">@Slf4j</span>
+<span class="fc" id="L28">@Slf4j</span>
 @AllArgsConstructor
 public class UserResourceServiceImpl implements UserResourceService {
-<span class="fc" id="L30">  public static final List&lt;EFileType&gt; ALLOWED_FILE_TYPES =</span>
-<span class="fc" id="L31">      List.of(EFileType.PNG, EFileType.JPEG, EFileType.GIF, EFileType.WEBP, EFileType.PJPEG);</span>
+<span class="fc" id="L31">  public static final List&lt;EFileType&gt; ALLOWED_FILE_TYPES =</span>
+<span class="fc" id="L32">      List.of(EFileType.PNG, EFileType.JPEG, EFileType.GIF, EFileType.WEBP, EFileType.PJPEG);</span>
 
   private final FileStorageService fileStorageService;
   private final UserPhotoRepository userPhotoRepository;
-  private final SharedService sharedService;
 
   @Override
   public UserPhotoData getUserPhotoUrl(User user, EUserCategory userCategory, EUserPhotoType type) {
@@ -71,7 +71,7 @@ public class UserResourceServiceImpl implements UserResourceService {
       long size,
       byte[] content)
       throws IOException {
-<span class="fc" id="L74">    var loggedInUser = sharedService.getCurrentUser();</span>
+<span class="fc" id="L74">    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
 
 <span class="fc" id="L76">    var fileResource =</span>
         new FileResource(
@@ -121,7 +121,7 @@ public class UserResourceServiceImpl implements UserResourceService {
 <span class="fc" id="L121">                  log.error(&quot;No user photo with id {} found&quot;, fileId);</span>
 <span class="fc" id="L122">                  return new FileNotFoundException();</span>
                 });
-<span class="fc" id="L124">    var loggedInUser = sharedService.getCurrentUser();</span>
+<span class="fc" id="L124">    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
 <span class="fc bfc" id="L125" title="All 2 branches covered.">    if (!fileResource.getUser().equals(loggedInUser)) {</span>
 <span class="fc" id="L126">      throw new UserNotAuthorizedException();</span>
     }

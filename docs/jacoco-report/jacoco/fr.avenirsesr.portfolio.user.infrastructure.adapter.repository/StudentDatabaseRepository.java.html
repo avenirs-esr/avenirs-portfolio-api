@@ -22,29 +22,33 @@ public class StudentDatabaseRepository extends GenericJpaRepositoryAdapter&lt;St
 <span class="fc" id="L22">    this.jpaRepository = repository;</span>
 <span class="fc" id="L23">  }</span>
 
+  public void saveAllEntities(List&lt;StudentEntity&gt; entities) {
+<span class="fc" id="L26">    jpaRepository.saveAll(entities);</span>
+<span class="fc" id="L27">  }</span>
+
   @Override
   public void addSelfKnowledgeCategories(Student student, List&lt;SelfKnowledgeCategory&gt; categories) {
-<span class="fc" id="L27">    StudentEntity studentEntity =</span>
-<span class="fc" id="L28">        jpaRepository.findById(student.getId()).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L29">    studentEntity</span>
-<span class="fc" id="L30">        .getSelfKnowledgeCategories()</span>
-<span class="fc" id="L31">        .addAll(categories.stream().map(SelfKnowledgeCategoryMapper::fromDomain).toList());</span>
-<span class="fc" id="L32">    jpaRepository.save(studentEntity);</span>
-<span class="fc" id="L33">  }</span>
+<span class="fc" id="L31">    StudentEntity studentEntity =</span>
+<span class="fc" id="L32">        jpaRepository.findById(student.getId()).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L33">    studentEntity</span>
+<span class="fc" id="L34">        .getSelfKnowledgeCategories()</span>
+<span class="fc" id="L35">        .addAll(categories.stream().map(SelfKnowledgeCategoryMapper::fromDomain).toList());</span>
+<span class="fc" id="L36">    jpaRepository.save(studentEntity);</span>
+<span class="fc" id="L37">  }</span>
 
   @Override
   public void removeSelfKnowledgeCategory(
       Student student, SelfKnowledgeCategory selfKnowledgeCategory) {
-<span class="fc" id="L38">    StudentEntity studentEntity =</span>
-<span class="fc" id="L39">        jpaRepository.findById(student.getId()).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L40">    boolean removed =</span>
+<span class="fc" id="L42">    StudentEntity studentEntity =</span>
+<span class="fc" id="L43">        jpaRepository.findById(student.getId()).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L44">    boolean removed =</span>
         studentEntity
-<span class="fc" id="L42">            .getSelfKnowledgeCategories()</span>
-<span class="fc" id="L43">            .removeIf(category -&gt; category.getId().equals(selfKnowledgeCategory.getId()));</span>
-<span class="pc bpc" id="L44" title="1 of 2 branches missed.">    if (!removed) {</span>
-<span class="nc" id="L45">      throw new SelfKnowledgeCategoryNotLinkedToStudentException();</span>
+<span class="fc" id="L46">            .getSelfKnowledgeCategories()</span>
+<span class="fc" id="L47">            .removeIf(category -&gt; category.getId().equals(selfKnowledgeCategory.getId()));</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (!removed) {</span>
+<span class="nc" id="L49">      throw new SelfKnowledgeCategoryNotLinkedToStudentException();</span>
     }
-<span class="fc" id="L47">    jpaRepository.save(studentEntity);</span>
-<span class="fc" id="L48">  }</span>
+<span class="fc" id="L51">    jpaRepository.save(studentEntity);</span>
+<span class="fc" id="L52">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceAttachmentServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.file.domain.service</a> &gt; <span class="el_source">TraceAttachmentServiceImpl.java</span></div><h1>TraceAttachmentServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.file.domain.service;
 
+import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
@@ -8,12 +10,13 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
-import fr.avenirsesr.portfolio.shared.domain.port.input.SharedService;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -21,48 +24,52 @@ import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L27">@Slf4j</span>
 @AllArgsConstructor
 public class TraceAttachmentServiceImpl implements TraceAttachmentService {
+  private final StudentRepository studentRepository;
   private final TraceAttachmentRepository traceAttachmentRepository;
   private final TraceRepository traceRepository;
   private final FileStorageService fileStorageService;
   private final TraceService traceService;
-  private final SharedService sharedService;
 
   @Override
   public TraceAttachment uploadTraceAttachment(
       UUID traceId, String fileName, String mimeType, long size, byte[] content)
       throws IOException {
-<span class="fc" id="L37">    Student student = sharedService.getCurrentStudent();</span>
-<span class="fc" id="L38">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
-<span class="fc" id="L39">    var allTraceAttachments = traceAttachmentRepository.findByTrace(trace);</span>
+<span class="fc" id="L40">    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L41">    var student =</span>
+        studentRepository
+<span class="fc" id="L43">            .findById(loggedInUser.getId())</span>
+<span class="fc" id="L44">            .orElseThrow(UserIsNotStudentException::new);</span>
+<span class="fc" id="L45">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L46">    var allTraceAttachments = traceAttachmentRepository.findByTrace(trace);</span>
 
-<span class="fc bfc" id="L41" title="All 2 branches covered.">    if (!trace.getUser().equals(student.getUser())) {</span>
-<span class="fc" id="L42">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">    if (!trace.getUser().equals(student.getUser())) {</span>
+<span class="fc" id="L49">      throw new UserNotAuthorizedException();</span>
     }
 
     try {
-<span class="fc" id="L46">      var fileType = EFileType.fromMimeType(mimeType);</span>
-<span class="fc bfc" id="L47" title="All 2 branches covered.">      if (fileType.getSizeLimit().isLessThan(size)) {</span>
-<span class="fc" id="L48">        throw new FileSizeTooBigException();</span>
+<span class="fc" id="L53">      var fileType = EFileType.fromMimeType(mimeType);</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">      if (fileType.getSizeLimit().isLessThan(size)) {</span>
+<span class="fc" id="L55">        throw new FileSizeTooBigException();</span>
       }
 
-<span class="fc" id="L51">      var fileResource = new FileResource(UUID.randomUUID(), fileName, fileType, size, content);</span>
-<span class="fc" id="L52">      var uri = fileStorageService.upload(fileResource);</span>
+<span class="fc" id="L58">      var fileResource = new FileResource(UUID.randomUUID(), fileName, fileType, size, content);</span>
+<span class="fc" id="L59">      var uri = fileStorageService.upload(fileResource);</span>
 
-<span class="fc" id="L54">      var newAttachment = createAttachment(student, allTraceAttachments, fileResource, trace, uri);</span>
+<span class="fc" id="L61">      var newAttachment = createAttachment(student, allTraceAttachments, fileResource, trace, uri);</span>
 
-<span class="fc" id="L56">      traceAttachmentRepository.saveAll(</span>
-<span class="fc" id="L57">          Stream.concat(allTraceAttachments.stream(), Stream.of(newAttachment)).toList());</span>
-<span class="fc" id="L58">      log.info(&quot;New trace attachment saved: {}&quot;, newAttachment);</span>
-<span class="fc" id="L59">      return newAttachment;</span>
-<span class="fc" id="L60">    } catch (Exception e) {</span>
-<span class="fc" id="L61">      log.error(&quot;Failed to upload trace attachment for trace {}&quot;, trace, e);</span>
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">      if (allTraceAttachments.isEmpty()) {</span>
-<span class="fc" id="L63">        traceService.deleteById(trace.getId());</span>
+<span class="fc" id="L63">      traceAttachmentRepository.saveAll(</span>
+<span class="fc" id="L64">          Stream.concat(allTraceAttachments.stream(), Stream.of(newAttachment)).toList());</span>
+<span class="fc" id="L65">      log.info(&quot;New trace attachment saved: {}&quot;, newAttachment);</span>
+<span class="fc" id="L66">      return newAttachment;</span>
+<span class="fc" id="L67">    } catch (Exception e) {</span>
+<span class="fc" id="L68">      log.error(&quot;Failed to upload trace attachment for trace {}&quot;, trace, e);</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">      if (allTraceAttachments.isEmpty()) {</span>
+<span class="fc" id="L70">        traceService.deleteById(trace.getId());</span>
       }
-<span class="fc" id="L65">      throw e;</span>
+<span class="fc" id="L72">      throw e;</span>
     }
   }
 
@@ -72,24 +79,24 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
       FileResource fileResource,
       Trace trace,
       String uri) {
-<span class="fc" id="L75">    var version =</span>
-<span class="fc" id="L76">        allTraceAttachments.stream()</span>
-<span class="fc" id="L77">                .map(TraceAttachment::getVersion)</span>
-<span class="fc" id="L78">                .max(Integer::compareTo)</span>
-<span class="fc" id="L79">                .orElse(0)</span>
+<span class="fc" id="L82">    var version =</span>
+<span class="fc" id="L83">        allTraceAttachments.stream()</span>
+<span class="fc" id="L84">                .map(TraceAttachment::getVersion)</span>
+<span class="fc" id="L85">                .max(Integer::compareTo)</span>
+<span class="fc" id="L86">                .orElse(0)</span>
             + 1;
-<span class="fc" id="L81">    allTraceAttachments.forEach(a -&gt; a.setActiveVersion(false));</span>
+<span class="fc" id="L88">    allTraceAttachments.forEach(a -&gt; a.setActiveVersion(false));</span>
 
-<span class="fc" id="L83">    return TraceAttachment.create(</span>
-<span class="fc" id="L84">        fileResource.id(),</span>
+<span class="fc" id="L90">    return TraceAttachment.create(</span>
+<span class="fc" id="L91">        fileResource.id(),</span>
         trace,
-<span class="fc" id="L86">        fileResource.fileName(),</span>
-<span class="fc" id="L87">        fileResource.fileType(),</span>
-<span class="fc" id="L88">        fileResource.size(),</span>
+<span class="fc" id="L93">        fileResource.fileName(),</span>
+<span class="fc" id="L94">        fileResource.fileType(),</span>
+<span class="fc" id="L95">        fileResource.size(),</span>
         version,
         true,
         uri,
-<span class="fc" id="L92">        student.getUser());</span>
+<span class="fc" id="L99">        student.getUser());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
