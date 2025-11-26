@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdditionalSkillProgressDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository</a> &gt; <span class="el_source">AdditionalSkillProgressDatabaseRepository.java</span></div><h1>AdditionalSkillProgressDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
@@ -12,7 +11,6 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specifica
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import java.util.List;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
@@ -25,66 +23,47 @@ public class AdditionalSkillProgressDatabaseRepository
 
   public AdditionalSkillProgressDatabaseRepository(
       AdditionalSkillProgressJpaRepository jpaRepository) {
-<span class="fc" id="L28">    super(</span>
+<span class="fc" id="L26">    super(</span>
         jpaRepository,
         jpaRepository,
         AdditionalSkillProgressMapper::fromDomain,
         AdditionalSkillProgressMapper::toDomain);
-<span class="fc" id="L33">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L34">  }</span>
-
-  public void saveAllEntities(List&lt;AdditionalSkillProgressEntity&gt; entities) {
-<span class="pc bpc" id="L37" title="2 of 4 branches missed.">    if (entities != null &amp;&amp; !entities.isEmpty()) {</span>
-<span class="fc" id="L38">      jpaRepository.saveAll(entities);</span>
-    }
-<span class="fc" id="L40">  }</span>
+<span class="fc" id="L31">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L32">  }</span>
 
   @Override
   public boolean additionalSkillProgressAlreadyExists(
       AdditionalSkillProgress additionalSkillProgress) {
-<span class="fc" id="L45">    return jpaRepository.exists(</span>
-<span class="fc" id="L46">        AdditionalSkillProgressSpecification.additionalSkillProgressAlreadyExists(</span>
-<span class="fc" id="L47">            additionalSkillProgress.getSkill(), additionalSkillProgress.getStudent().getId()));</span>
+<span class="fc" id="L37">    return jpaRepository.exists(</span>
+<span class="fc" id="L38">        AdditionalSkillProgressSpecification.additionalSkillProgressAlreadyExists(</span>
+<span class="fc" id="L39">            additionalSkillProgress.getSkill(), additionalSkillProgress.getStudent().getId()));</span>
   }
 
   @Override
   public List&lt;AdditionalSkillProgress&gt; findAllByStudent(Student student) {
-<span class="nc" id="L52">    return jpaRepository</span>
-<span class="nc" id="L53">        .findAll(AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student)))</span>
-<span class="nc" id="L54">        .stream()</span>
-<span class="nc" id="L55">        .map(AdditionalSkillProgressMapper::toDomain)</span>
-<span class="nc" id="L56">        .toList();</span>
+<span class="nc" id="L44">    return findAllToDomain(hasStudent(StudentMapper.fromDomain(student)));</span>
   }
 
   @Override
   public PagedResult&lt;AdditionalSkillProgress&gt; findAllByStudent(
       Student student, PageCriteria pageCriteria) {
-<span class="fc" id="L62">    var specification =</span>
-<span class="fc" id="L63">        AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student));</span>
-<span class="fc" id="L64">    return findAllByStudent(specification, pageCriteria);</span>
+<span class="fc" id="L50">    var specification = hasStudent(StudentMapper.fromDomain(student));</span>
+<span class="fc" id="L51">    return findAllByStudent(specification, pageCriteria);</span>
   }
 
   @Override
   public PagedResult&lt;AdditionalSkillProgress&gt; findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword) {
-<span class="nc" id="L70">    var specification =</span>
-<span class="nc" id="L71">        AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student))</span>
-<span class="nc" id="L72">            .and(AdditionalSkillProgressSpecification.search(keyword));</span>
-<span class="nc" id="L73">    return findAllByStudent(specification, pageCriteria);</span>
+<span class="nc" id="L57">    var specification =</span>
+<span class="nc" id="L58">        hasStudent(StudentMapper.fromDomain(student))</span>
+<span class="nc" id="L59">            .and(AdditionalSkillProgressSpecification.search(keyword));</span>
+<span class="nc" id="L60">    return findAllByStudent(specification, pageCriteria);</span>
   }
 
   private PagedResult&lt;AdditionalSkillProgress&gt; findAllByStudent(
       Specification&lt;AdditionalSkillProgressEntity&gt; specification, PageCriteria pageCriteria) {
-
-<span class="fc" id="L79">    Page&lt;AdditionalSkillProgressEntity&gt; entities =</span>
-<span class="fc" id="L80">        jpaRepository.findAll(</span>
-<span class="fc" id="L81">            specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
-
-<span class="fc" id="L83">    List&lt;AdditionalSkillProgress&gt; progresses =</span>
-<span class="fc" id="L84">        entities.stream().map(AdditionalSkillProgressMapper::toDomain).toList();</span>
-<span class="fc" id="L85">    return new PagedResult&lt;&gt;(</span>
-        progresses,
-<span class="fc" id="L87">        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), entities.getTotalElements()));</span>
+<span class="fc" id="L65">    return findAllToDomain(</span>
+<span class="fc" id="L66">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -9,7 +9,6 @@ import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepos
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.UserPhotoMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.specification.UserResourceSpecification;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -18,28 +17,24 @@ import org.springframework.stereotype.Repository;
 public class UserPhotoDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;UserPhoto, UserPhotoEntity&gt; implements UserPhotoRepository {
   public UserPhotoDatabaseRepository(UserPhotoJpaRepository jpaRepository) {
-<span class="fc" id="L21">    super(jpaRepository, jpaRepository, UserPhotoMapper::fromDomain, UserPhotoMapper::toDomain);</span>
-<span class="fc" id="L22">  }</span>
+<span class="fc" id="L20">    super(jpaRepository, jpaRepository, UserPhotoMapper::fromDomain, UserPhotoMapper::toDomain);</span>
+<span class="fc" id="L21">  }</span>
 
   @Override
   public List&lt;UserPhoto&gt; findAllByUser(User user, EUserCategory userCategory, EUserPhotoType type) {
-<span class="fc" id="L26">    return jpaSpecificationExecutor</span>
-<span class="fc" id="L27">        .findAll(UserResourceSpecification.ofUser(UserMapper.fromDomain(user), userCategory, type))</span>
-<span class="fc" id="L28">        .stream()</span>
-<span class="fc" id="L29">        .map(UserPhotoMapper::toDomain)</span>
-<span class="fc" id="L30">        .toList();</span>
+<span class="fc" id="L25">    return findAllToDomain(UserResourceSpecification.ofUser(user, userCategory, type));</span>
   }
 
   @Override
   public Optional&lt;UserPhoto&gt; findActiveByUser(
       User user, EUserCategory userCategory, EUserPhotoType type) {
-<span class="fc" id="L36">    return jpaSpecificationExecutor</span>
-<span class="fc" id="L37">        .findOne(</span>
-<span class="fc" id="L38">            UserResourceSpecification.ofUser(UserMapper.fromDomain(user), userCategory, type)</span>
-<span class="fc" id="L39">                .and(UserResourceSpecification.onlyActiveVersion()))</span>
-<span class="fc" id="L40">        .stream()</span>
-<span class="fc" id="L41">        .map(UserPhotoMapper::toDomain)</span>
-<span class="fc" id="L42">        .findAny();</span>
+<span class="fc" id="L31">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L32">        .findOne(</span>
+<span class="fc" id="L33">            UserResourceSpecification.ofUser(user, userCategory, type)</span>
+<span class="fc" id="L34">                .and(UserResourceSpecification.onlyActiveVersion()))</span>
+<span class="fc" id="L35">        .stream()</span>
+<span class="fc" id="L36">        .map(UserPhotoMapper::toDomain)</span>
+<span class="fc" id="L37">        .findAny();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
