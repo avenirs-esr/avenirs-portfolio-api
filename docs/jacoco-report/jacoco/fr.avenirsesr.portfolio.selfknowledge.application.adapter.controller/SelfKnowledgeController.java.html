@@ -110,7 +110,7 @@ public class SelfKnowledgeController {
 <span class="nc" id="L110">    return ResponseEntity.ok(SelfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));</span>
   }
 
-  @DeleteMapping(&quot;/element&quot;)
+  @DeleteMapping(&quot;/elements&quot;)
   public ResponseEntity&lt;String&gt; deleteSelfKnowledgeElement(
       @RequestBody List&lt;UUID&gt; selfKnowledgeElementIds) {
 <span class="nc" id="L116">    log.debug(&quot;Received request to delete self knowledge elements [{}]&quot;, selfKnowledgeElementIds);</span>
