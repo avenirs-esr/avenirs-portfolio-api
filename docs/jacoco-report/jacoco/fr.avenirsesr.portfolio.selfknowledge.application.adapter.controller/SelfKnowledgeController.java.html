@@ -111,7 +111,7 @@ public class SelfKnowledgeController {
   }
 
   @DeleteMapping(&quot;/elements&quot;)
-  public ResponseEntity&lt;String&gt; deleteSelfKnowledgeElement(
+  public ResponseEntity&lt;String&gt; deleteSelfKnowledgeElements(
       @RequestBody List&lt;UUID&gt; selfKnowledgeElementIds) {
 <span class="nc" id="L116">    log.debug(&quot;Received request to delete self knowledge elements [{}]&quot;, selfKnowledgeElementIds);</span>
 <span class="nc" id="L117">    selfKnowledgeService.deleteSelfKnowledgeElements(selfKnowledgeElementIds);</span>
