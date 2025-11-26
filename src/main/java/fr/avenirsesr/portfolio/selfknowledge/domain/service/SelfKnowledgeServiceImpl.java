@@ -120,19 +120,26 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
     return selfKnowledgeElementRepository.save(selfKnowledgeElement);
   }
 
-  public void deleteSelfKnowledgeElement(UUID selfKnowledgeElementId) {
+  public void deleteSelfKnowledgeElements(List<UUID> selfKnowledgeElementIds) {
     Student student = getStudent();
 
-    SelfKnowledgeElement selfKnowledgeElement =
-        selfKnowledgeElementRepository
-            .findById(selfKnowledgeElementId)
-            .orElseThrow(SelfKnowledgeElementNotFoundException::new);
+    List<SelfKnowledgeElement> selfKnowledgeElements =
+        selfKnowledgeElementRepository.findAllById(selfKnowledgeElementIds);
 
-    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {
+    if (!selfKnowledgeElements.stream().allMatch(e -> e.getStudent().equals(student))) {
       throw new UserNotAuthorizedException();
     }
 
-    selfKnowledgeElementRepository.removeFromDatabase(selfKnowledgeElement);
+    List<SelfKnowledgeCategory> categories =
+        selfKnowledgeElements.stream().map(element -> element.getSelfKnowledgeCategory()).toList();
+
+    boolean allEqual = categories.size() <= 1 || categories.stream().distinct().count() == 1;
+
+    if (!allEqual) {
+      throw new SelfKnowledgeElementsAreNotInSameCategoryException();
+    }
+
+    selfKnowledgeElementRepository.removeAllFromDatabase(selfKnowledgeElements);
   }
 
   @Override
