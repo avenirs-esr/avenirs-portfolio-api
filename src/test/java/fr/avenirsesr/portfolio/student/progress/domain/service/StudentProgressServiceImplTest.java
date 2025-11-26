@@ -6,7 +6,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.mockStatic;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
@@ -21,16 +20,14 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
-import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
@@ -44,13 +41,11 @@ import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
 import java.util.random.RandomGenerator;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -59,41 +54,30 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
 public class StudentProgressServiceImplTest {
-  @Mock private StudentRepository studentRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
   @Mock private TraceService traceService;
   @Mock private TraceRepository traceRepository;
   @Mock private AdditionalSkillRepository additionalSkillRepository;
   @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
+  @Mock private LoggedInUserService loggedInUserService;
   @InjectMocks private StudentProgressServiceImpl studentProgressService;
   private static final String CHARSET =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   private static final RandomGenerator random = RandomGenerator.getDefault();
 
   private Student student;
-  private MockedStatic<RequestContext> mockedRequestContext;
 
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
-    mockedRequestContext = mockStatic(RequestContext.class);
-    mockedRequestContext
-        .when(RequestContext::get)
-        .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
 
-    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
-  }
-
-  @AfterEach
-  void tearDown() {
-    mockedRequestContext.close();
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
   }
 
   @Nested
@@ -135,10 +119,6 @@ public class StudentProgressServiceImplTest {
         @BeforeEach
         void setupWhen() {
           BddLogger.when("checking if the student is following an APC program");
-          mockedRequestContext
-              .when(RequestContext::get)
-              .thenReturn(
-                  new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
           result = studentProgressService.isStudentFollowingAPCProgram();
         }
 
@@ -166,10 +146,6 @@ public class StudentProgressServiceImplTest {
         @BeforeEach
         void setupWhen() {
           BddLogger.when("checking if the student is following an APC program");
-          mockedRequestContext
-              .when(RequestContext::get)
-              .thenReturn(
-                  new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
           result = studentProgressService.isStudentFollowingAPCProgram();
         }
 
@@ -231,10 +207,6 @@ public class StudentProgressServiceImplTest {
         @BeforeEach
         void setupWhen() {
           BddLogger.when("getting the studen progress overview");
-          mockedRequestContext
-              .when(RequestContext::get)
-              .thenReturn(
-                  new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
           result = studentProgressService.getStudentProgressOverview();
         }
 
@@ -261,10 +233,6 @@ public class StudentProgressServiceImplTest {
         @BeforeEach
         void setupWhen() {
           BddLogger.when("getting the student progress view");
-          mockedRequestContext
-              .when(RequestContext::get)
-              .thenReturn(
-                  new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
           result =
               studentProgressService.getStudentProgressView(
                   new SortCriteria(ESortField.DATE, ESortOrder.ASC));
@@ -301,10 +269,6 @@ public class StudentProgressServiceImplTest {
         @BeforeEach
         void setupWhen() {
           BddLogger.when("getting the student progress overview");
-          mockedRequestContext
-              .when(RequestContext::get)
-              .thenReturn(
-                  new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
           result = studentProgressService.getStudentProgressOverview();
         }
 
@@ -325,10 +289,6 @@ public class StudentProgressServiceImplTest {
           BddLogger.when("getting the skills life project view");
           sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
           pageCriteria = new PageCriteria(0, 5);
-          mockedRequestContext
-              .when(RequestContext::get)
-              .thenReturn(
-                  new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
           result = studentProgressService.getAllTimeSkillsView(sortCriteria, pageCriteria);
         }
 
@@ -397,10 +357,6 @@ public class StudentProgressServiceImplTest {
         @BeforeEach
         void setupWhen() {
           BddLogger.when("getting the student progress overview");
-          mockedRequestContext
-              .when(RequestContext::get)
-              .thenReturn(
-                  new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
           result = studentProgressService.getStudentProgressOverview();
         }
 
@@ -426,10 +382,6 @@ public class StudentProgressServiceImplTest {
         @BeforeEach
         void setupWhen() {
           BddLogger.when("getting the student pogress view");
-          mockedRequestContext
-              .when(RequestContext::get)
-              .thenReturn(
-                  new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
           result =
               studentProgressService.getStudentProgressView(
                   new SortCriteria(ESortField.DATE, ESortOrder.ASC));
@@ -456,10 +408,6 @@ public class StudentProgressServiceImplTest {
           BddLogger.when("getting the skills life project view");
           sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
           pageCriteria = new PageCriteria(0, 10);
-          mockedRequestContext
-              .when(RequestContext::get)
-              .thenReturn(
-                  new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
           result = studentProgressService.getAllTimeSkillsView(sortCriteria, pageCriteria);
         }
 
@@ -500,10 +448,6 @@ public class StudentProgressServiceImplTest {
         @BeforeEach
         void setupWhen() {
           BddLogger.when("getting the student progress view");
-          mockedRequestContext
-              .when(RequestContext::get)
-              .thenReturn(
-                  new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
           result = studentProgressService.getStudentProgressView(customSort);
         }
 
@@ -617,10 +561,6 @@ public class StudentProgressServiceImplTest {
             BddLogger.then(
                 "it should return all student progresses and all skill levels progresses ordered by"
                     + " name");
-            mockedRequestContext
-                .when(RequestContext::get)
-                .thenReturn(
-                    new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
             result =
                 studentProgressService.getStudentProgressView(new SortCriteria(sortField, order));
             orderedKeys = new ArrayList<>(result.keySet());
@@ -671,10 +611,6 @@ public class StudentProgressServiceImplTest {
             BddLogger.then(
                 "it should return all student progresses and all skill levels progresses ordered by"
                     + " date");
-            mockedRequestContext
-                .when(RequestContext::get)
-                .thenReturn(
-                    new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
             result =
                 studentProgressService.getStudentProgressView(new SortCriteria(sortField, order));
             orderedKeys = new ArrayList<>(result.keySet());
@@ -727,10 +663,6 @@ public class StudentProgressServiceImplTest {
             BddLogger.and("a sort by date criteria is passed");
             sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
             pageCriteria = new PageCriteria(0, 5);
-            mockedRequestContext
-                .when(RequestContext::get)
-                .thenReturn(
-                    new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
             result = studentProgressService.getAllTimeSkillsView(sortCriteria, pageCriteria);
           }
 
@@ -751,10 +683,6 @@ public class StudentProgressServiceImplTest {
             BddLogger.and("a page size criteria is passed");
             sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
             pageCriteria = new PageCriteria(0, 1); // 1 element by page
-            mockedRequestContext
-                .when(RequestContext::get)
-                .thenReturn(
-                    new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
             result = studentProgressService.getAllTimeSkillsView(sortCriteria, pageCriteria);
           }
 
@@ -777,10 +705,6 @@ public class StudentProgressServiceImplTest {
             BddLogger.and("a page index criteria is passed");
             sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
             pageCriteria = new PageCriteria(1, 3); // second page, 3 elements by page
-            mockedRequestContext
-                .when(RequestContext::get)
-                .thenReturn(
-                    new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
             result = studentProgressService.getAllTimeSkillsView(sortCriteria, pageCriteria);
           }
 
@@ -849,10 +773,6 @@ public class StudentProgressServiceImplTest {
             BddLogger.and("a desc sorting date criteria is passed");
             sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
             pageCriteria = new PageCriteria(0, 10);
-            mockedRequestContext
-                .when(RequestContext::get)
-                .thenReturn(
-                    new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
             result = studentProgressService.getAllTimeSkillsView(sortCriteria, pageCriteria);
           }
 
@@ -915,9 +835,6 @@ public class StudentProgressServiceImplTest {
         when(studentProgressRepository.findAllByStudent(eq(student)))
             .thenReturn(List.of(progress1, progress2));
 
-        mockedRequestContext
-            .when(RequestContext::get)
-            .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
         result = studentProgressService.getAllSkillList();
       }
 
@@ -939,9 +856,7 @@ public class StudentProgressServiceImplTest {
       void setupWhen() {
         BddLogger.when("getting all skills list with no student progress");
         when(studentProgressRepository.findAllByStudent(eq(student))).thenReturn(List.of());
-        mockedRequestContext
-            .when(RequestContext::get)
-            .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
+
         result = studentProgressService.getAllSkillList();
       }
 
@@ -1071,10 +986,6 @@ public class StudentProgressServiceImplTest {
         when(additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(any()))
             .thenReturn(false);
 
-        mockedRequestContext
-            .when(RequestContext::get)
-            .thenReturn(new RequestData(Optional.of(student.getUser()), ELanguage.FRENCH));
-
         studentProgressService.createAdditionalSkillProgress(skillId, type, level, description);
 
         BddLogger.then("it should save the additional skill progress");
@@ -1099,9 +1010,6 @@ public class StudentProgressServiceImplTest {
 
         BddLogger.then(
             "it should throw a DuplicateAdditionalSkillException and not save the progress");
-        mockedRequestContext
-            .when(RequestContext::get)
-            .thenReturn(new RequestData(Optional.of(student.getUser()), ELanguage.FRENCH));
 
         assertThrows(
             DuplicateAdditionalSkillException.class,
@@ -1127,9 +1035,6 @@ public class StudentProgressServiceImplTest {
             .thenThrow(new AdditionalSkillNotFoundException());
 
         BddLogger.then("it should throw an AdditionalSkillNotFoundException");
-        mockedRequestContext
-            .when(RequestContext::get)
-            .thenReturn(new RequestData(Optional.of(student.getUser()), ELanguage.FRENCH));
 
         assertThrows(
             AdditionalSkillNotFoundException.class,

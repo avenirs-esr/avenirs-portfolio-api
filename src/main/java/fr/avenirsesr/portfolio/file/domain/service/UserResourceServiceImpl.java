@@ -2,9 +2,7 @@ package fr.avenirsesr.portfolio.file.domain.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
-import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.file.domain.data.UserPhotoData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
@@ -17,6 +15,7 @@ import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +32,7 @@ public class UserResourceServiceImpl implements UserResourceService {
 
   private final FileStorageService fileStorageService;
   private final UserPhotoRepository userPhotoRepository;
+  private final LoggedInUserService loggedInUserService;
 
   @Override
   public UserPhotoData getUserPhotoUrl(User user, EUserCategory userCategory, EUserPhotoType type) {
@@ -71,7 +71,7 @@ public class UserResourceServiceImpl implements UserResourceService {
       long size,
       byte[] content)
       throws IOException {
-    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var loggedInUser = loggedInUserService.getLoggedInUser();
 
     var fileResource =
         new FileResource(
@@ -121,7 +121,7 @@ public class UserResourceServiceImpl implements UserResourceService {
                   log.error("No user photo with id {} found", fileId);
                   return new FileNotFoundException();
                 });
-    var loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    var loggedInUser = loggedInUserService.getLoggedInUser();
     if (!fileResource.getUser().equals(loggedInUser)) {
       throw new UserNotAuthorizedException();
     }

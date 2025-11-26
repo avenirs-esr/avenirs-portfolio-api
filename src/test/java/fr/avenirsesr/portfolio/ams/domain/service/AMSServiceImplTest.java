@@ -18,13 +18,13 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,11 +39,11 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class AMSServiceImplTest {
 
-  @Mock private StudentRepository studentRepository;
   @Mock private AMSRepository amsRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
   @Mock private SkillLevelProgressRepository skillLevelProgressRepository;
   @Mock private TraceRepository traceRepository;
+  @Mock private LoggedInUserService loggedInUserService;
 
   @InjectMocks private AMSServiceImpl amsService;
 
@@ -75,7 +75,7 @@ class AMSServiceImplTest {
         .thenReturn(Optional.of(studentProgress));
     when(skillLevelProgressRepository.linkedWith(any())).thenReturn(Collections.emptyList());
     when(traceRepository.linkedWith(any(AMS.class))).thenReturn(Collections.emptyList());
-    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     try (MockedStatic<RequestContext> mockedRequestContext = mockStatic(RequestContext.class)) {
       mockedRequestContext
           .when(RequestContext::get)
@@ -105,7 +105,7 @@ class AMSServiceImplTest {
         .thenReturn(expectedResult);
     when(studentProgressRepository.findById(eq(studentProgressId)))
         .thenReturn(Optional.of(studentProgress));
-    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     try (MockedStatic<RequestContext> mockedRequestContext = mockStatic(RequestContext.class)) {
       mockedRequestContext
           .when(RequestContext::get)
@@ -139,7 +139,7 @@ class AMSServiceImplTest {
         .thenReturn(Optional.of(studentProgress));
     when(skillLevelProgressRepository.linkedWith(any())).thenReturn(Collections.emptyList());
     when(traceRepository.linkedWith(any(AMS.class))).thenReturn(Collections.emptyList());
-    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     try (MockedStatic<RequestContext> mockedRequestContext = mockStatic(RequestContext.class)) {
       mockedRequestContext
           .when(RequestContext::get)
@@ -171,7 +171,7 @@ class AMSServiceImplTest {
         .thenReturn(Optional.of(studentProgress));
     when(skillLevelProgressRepository.linkedWith(any())).thenReturn(Collections.emptyList());
     when(traceRepository.linkedWith(any(AMS.class))).thenReturn(Collections.emptyList());
-    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     try (MockedStatic<RequestContext> mockedRequestContext = mockStatic(RequestContext.class)) {
       mockedRequestContext
           .when(RequestContext::get)

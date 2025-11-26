@@ -18,8 +18,6 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
@@ -27,6 +25,7 @@ import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
@@ -42,9 +41,7 @@ import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceReposito
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.service.StudentServiceImpl;
-import fr.avenirsesr.portfolio.user.domain.service.TeacherServiceImpl;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Duration;
@@ -55,13 +52,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -69,7 +64,6 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class TraceServiceImplTest {
   @Mock private TraceRepository traceRepository;
-  @Mock private StudentRepository studentRepository;
   @Mock private TraceAttachmentRepository traceAttachmentRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
   @Mock private AMSRepository amsRepository;
@@ -79,26 +73,16 @@ public class TraceServiceImplTest {
   @Mock private TraceConfigurationClient traceConfigurationClient;
 
   @Mock private StudentServiceImpl studentService;
-  @Mock private TeacherServiceImpl teacherService;
+  @Mock private LoggedInUserService loggedInUserService;
   @InjectMocks private TraceServiceImpl traceService;
 
   private Student student;
-  private MockedStatic<RequestContext> mockedRequestContext;
 
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
-    mockedRequestContext = mockStatic(RequestContext.class);
-    mockedRequestContext
-        .when(RequestContext::get)
-        .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
 
-    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
-  }
-
-  @AfterEach
-  void tearDown() {
-    mockedRequestContext.close();
+    when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
   }
 
   @Test
@@ -303,7 +287,7 @@ public class TraceServiceImplTest {
                 .toModel(),
             TraceFixture.create()
                 .withUser(student.getUser())
-                .withCreatedAt(Instant.now().minus(85, ChronoUnit.DAYS))
+                .withCreatedAt(Instant.now().minus(86, ChronoUnit.DAYS))
                 .toModel());
 
     List<Trace> associatedTraces =

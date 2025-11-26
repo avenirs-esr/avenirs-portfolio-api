@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeServ
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
 import fr.avenirsesr.portfolio.selfknowledge.domain.service.SelfKnowledgeServiceImpl;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +18,14 @@ public class SelfKnowledgeServiceConfig {
   private final StudentRepository studentRepository;
   private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
+  private final LoggedInUserService loggedInUserService;
 
   @Bean
   public SelfKnowledgeService selfKnowledgeService() {
     return new SelfKnowledgeServiceImpl(
-        studentRepository, selfKnowledgeElementRepository, selfKnowledgeCategoryRepository);
+        studentRepository,
+        selfKnowledgeElementRepository,
+        selfKnowledgeCategoryRepository,
+        loggedInUserService);
   }
 }

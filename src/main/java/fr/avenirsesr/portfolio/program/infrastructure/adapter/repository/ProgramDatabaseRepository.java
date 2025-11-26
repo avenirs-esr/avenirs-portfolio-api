@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.program.domain.port.output.repository.ProgramRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.ProgramMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntity;
-import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,11 +15,5 @@ public class ProgramDatabaseRepository extends GenericJpaRepositoryAdapter<Progr
   public ProgramDatabaseRepository(ProgramJpaRepository jpaRepository) {
     super(jpaRepository, jpaRepository, ProgramMapper::fromDomain, ProgramMapper::toDomain);
     this.jpaRepository = jpaRepository;
-  }
-
-  public void saveAllEntities(List<ProgramEntity> entities) {
-    if (entities != null) {
-      jpaRepository.saveAll(entities);
-    }
   }
 }

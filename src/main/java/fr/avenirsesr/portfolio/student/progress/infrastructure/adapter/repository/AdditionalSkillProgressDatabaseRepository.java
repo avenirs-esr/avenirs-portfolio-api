@@ -1,25 +1,22 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.AdditionalSkillProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class AdditionalSkillProgressDatabaseRepository
-    extends GenericJpaRepositoryAdapter<AdditionalSkillProgress, AdditionalSkillProgressEntity>
+    extends GenericUserJpaRepositoryAdapter<AdditionalSkillProgress, AdditionalSkillProgressEntity>
     implements AdditionalSkillProgressRepository {
   private final AdditionalSkillProgressJpaRepository jpaRepository;
 
@@ -33,12 +30,6 @@ public class AdditionalSkillProgressDatabaseRepository
     this.jpaRepository = jpaRepository;
   }
 
-  public void saveAllEntities(List<AdditionalSkillProgressEntity> entities) {
-    if (entities != null && !entities.isEmpty()) {
-      jpaRepository.saveAll(entities);
-    }
-  }
-
   @Override
   public boolean additionalSkillProgressAlreadyExists(
       AdditionalSkillProgress additionalSkillProgress) {
@@ -49,18 +40,13 @@ public class AdditionalSkillProgressDatabaseRepository
 
   @Override
   public List<AdditionalSkillProgress> findAllByStudent(Student student) {
-    return jpaRepository
-        .findAll(AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student)))
-        .stream()
-        .map(AdditionalSkillProgressMapper::toDomain)
-        .toList();
+    return findAll(hasStudent(student));
   }
 
   @Override
   public PagedResult<AdditionalSkillProgress> findAllByStudent(
       Student student, PageCriteria pageCriteria) {
-    var specification =
-        AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student));
+    var specification = hasStudent(student);
     return findAllByStudent(specification, pageCriteria);
   }
 
@@ -68,22 +54,12 @@ public class AdditionalSkillProgressDatabaseRepository
   public PagedResult<AdditionalSkillProgress> findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword) {
     var specification =
-        AdditionalSkillProgressSpecification.hasStudent(StudentMapper.fromDomain(student))
-            .and(AdditionalSkillProgressSpecification.search(keyword));
+        hasStudent(student).and(AdditionalSkillProgressSpecification.search(keyword));
     return findAllByStudent(specification, pageCriteria);
   }
 
   private PagedResult<AdditionalSkillProgress> findAllByStudent(
       Specification<AdditionalSkillProgressEntity> specification, PageCriteria pageCriteria) {
-
-    Page<AdditionalSkillProgressEntity> entities =
-        jpaRepository.findAll(
-            specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
-
-    List<AdditionalSkillProgress> progresses =
-        entities.stream().map(AdditionalSkillProgressMapper::toDomain).toList();
-    return new PagedResult<>(
-        progresses,
-        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), entities.getTotalElements()));
+    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
   }
 }

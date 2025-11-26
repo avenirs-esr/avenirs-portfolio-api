@@ -22,10 +22,6 @@ public class StudentDatabaseRepository extends GenericJpaRepositoryAdapter<Stude
     this.jpaRepository = repository;
   }
 
-  public void saveAllEntities(List<StudentEntity> entities) {
-    jpaRepository.saveAll(entities);
-  }
-
   @Override
   public void addSelfKnowledgeCategories(Student student, List<SelfKnowledgeCategory> categories) {
     StudentEntity studentEntity =

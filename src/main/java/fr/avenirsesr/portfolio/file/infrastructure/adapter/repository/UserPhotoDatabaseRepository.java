@@ -9,7 +9,6 @@ import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepos
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.UserPhotoMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.specification.UserResourceSpecification;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -23,11 +22,7 @@ public class UserPhotoDatabaseRepository
 
   @Override
   public List<UserPhoto> findAllByUser(User user, EUserCategory userCategory, EUserPhotoType type) {
-    return jpaSpecificationExecutor
-        .findAll(UserResourceSpecification.ofUser(UserMapper.fromDomain(user), userCategory, type))
-        .stream()
-        .map(UserPhotoMapper::toDomain)
-        .toList();
+    return findAll(UserResourceSpecification.ofUser(user, userCategory, type));
   }
 
   @Override
@@ -35,7 +30,7 @@ public class UserPhotoDatabaseRepository
       User user, EUserCategory userCategory, EUserPhotoType type) {
     return jpaSpecificationExecutor
         .findOne(
-            UserResourceSpecification.ofUser(UserMapper.fromDomain(user), userCategory, type)
+            UserResourceSpecification.ofUser(user, userCategory, type)
                 .and(UserResourceSpecification.onlyActiveVersion()))
         .stream()
         .map(UserPhotoMapper::toDomain)

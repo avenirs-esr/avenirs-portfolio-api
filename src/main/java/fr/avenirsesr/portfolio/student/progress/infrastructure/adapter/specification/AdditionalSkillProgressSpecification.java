@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specific
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -15,10 +14,6 @@ public class AdditionalSkillProgressSpecification {
             criteriaBuilder.equal(
                 root.get("additionalSkill"), AdditionalSkillMapper.fromDomain(additionalSkill)),
             criteriaBuilder.equal(root.get("student").get("id"), studentId));
-  }
-
-  public static Specification<AdditionalSkillProgressEntity> hasStudent(StudentEntity student) {
-    return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("student"), student);
   }
 
   public static Specification<AdditionalSkillProgressEntity> search(String keyword) {

@@ -1,19 +1,26 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
+import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
+import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TraceSpecification {
-  public static Specification<TraceEntity> ofUser(UserEntity user) {
-    return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("user"), user);
+  public static Specification<TraceEntity> ofUser(User user) {
+    return (root, query, criteriaBuilder) ->
+        criteriaBuilder.equal(root.get("user"), UserMapper.fromDomain(user));
   }
 
   public static Specification<TraceEntity> unassociated() {
@@ -62,20 +69,24 @@ public class TraceSpecification {
     return (root, query, cb) -> cb.isNull(root.get("deletedAt"));
   }
 
-  public static Specification<TraceEntity> ofAms(AMSEntity ams) {
-    return (root, query, criteriaBuilder) -> criteriaBuilder.isMember(ams, root.get("amses"));
+  public static Specification<TraceEntity> ofAms(AMS ams) {
+    return (root, query, criteriaBuilder) ->
+        criteriaBuilder.isMember(AMSMapper.fromDomain(ams), root.get("amses"));
   }
 
   public static Specification<TraceEntity> ofSkillLevelProgress(
-      SkillLevelProgressEntity skillLevelProgress) {
+      SkillLevelProgress skillLevelProgress) {
     return (root, query, criteriaBuilder) ->
-        criteriaBuilder.isMember(skillLevelProgress, root.get("skillLevels"));
+        criteriaBuilder.isMember(
+            SkillLevelProgressMapper.fromDomain(skillLevelProgress), root.get("skillLevels"));
   }
 
   public static Specification<TraceEntity> ofAdditionalSkillProgress(
-      AdditionalSkillProgressEntity additionalSkillProgress) {
+      AdditionalSkillProgress additionalSkillProgress) {
     return (root, query, criteriaBuilder) ->
-        criteriaBuilder.isMember(additionalSkillProgress, root.get("additionalSkillsProgresses"));
+        criteriaBuilder.isMember(
+            AdditionalSkillProgressMapper.fromDomain(additionalSkillProgress),
+            root.get("additionalSkillsProgresses"));
   }
 
   public static Specification<TraceEntity> search(String keyword, ELanguage language) {

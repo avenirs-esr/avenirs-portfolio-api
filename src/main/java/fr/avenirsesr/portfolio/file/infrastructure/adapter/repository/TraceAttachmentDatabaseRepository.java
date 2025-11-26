@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.TraceAttachmen
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.specification.TraceAttachmentSpecification;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -25,10 +24,6 @@ public class TraceAttachmentDatabaseRepository
 
   @Override
   public List<TraceAttachment> findByTrace(Trace trace) {
-    return jpaSpecificationExecutor
-        .findAll(TraceAttachmentSpecification.ofTrace(TraceMapper.fromDomain(trace)))
-        .stream()
-        .map(TraceAttachmentMapper::toDomain)
-        .toList();
+    return findAll(TraceAttachmentSpecification.ofTrace(trace));
   }
 }

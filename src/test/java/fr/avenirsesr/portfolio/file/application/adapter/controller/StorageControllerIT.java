@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.domain.service.UserResourceServiceImpl;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.UserPhotoDatabaseRepository;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -40,6 +41,7 @@ class StorageControllerIT {
   @Mock private FileStorageService fileStorageService;
   @Autowired private StorageController storageController;
   @Autowired private UserPhotoDatabaseRepository userPhotoDatabaseRepository;
+  @Autowired private LoggedInUserService loggedInUserService;
 
   @Value("${hmac.secret-key}")
   private String secretKey;
@@ -60,7 +62,8 @@ class StorageControllerIT {
     MockitoAnnotations.openMocks(this);
     storageController =
         new StorageController(
-            new UserResourceServiceImpl(fileStorageService, userPhotoDatabaseRepository),
+            new UserResourceServiceImpl(
+                fileStorageService, userPhotoDatabaseRepository, loggedInUserService),
             fileStorageService);
     mockMvc = MockMvcBuilders.standaloneSetup(storageController).build();
   }
