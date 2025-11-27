@@ -25,7 +25,6 @@ import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.Exte
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillCategoryType;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
-import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;

@@ -12,45 +12,44 @@ import fr.avenirsesr.portfolio.student.progress.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.model.StudentProgress;
-
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public interface StudentProgressService {
-    boolean isStudentFollowingAPCProgram();
+  boolean isStudentFollowingAPCProgram();
 
-    List<StudentProgress> getAllCurrentStudentProgress();
+  List<StudentProgress> getAllCurrentStudentProgress();
 
-    Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> getStudentProgressOverview();
+  Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> getStudentProgressOverview();
 
-    Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> getStudentProgressView(
-            SortCriteria sortCriteria);
+  Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> getStudentProgressView(
+      SortCriteria sortCriteria);
 
-    PagedResult<SkillProgressData> getAllTimeSkillsView(
-            SortCriteria sortCriteria, PageCriteria pageCriteria);
+  PagedResult<SkillProgressData> getAllTimeSkillsView(
+      SortCriteria sortCriteria, PageCriteria pageCriteria);
 
-    PagedResult<SkillLevelProgress> searchSkillLevel(String keyword, PageCriteria pageCriteria);
+  PagedResult<SkillLevelProgress> searchSkillLevel(String keyword, PageCriteria pageCriteria);
 
-    List<SkillLevelProgress> getSkillLevelsBySkillId(UUID skillId);
+  List<SkillLevelProgress> getSkillLevelsBySkillId(UUID skillId);
 
-    List<Skill> getAllSkillList();
+  List<Skill> getAllSkillList();
 
-    PagedResult<AdditionalSkillProgress> getAdditionalSkillsProgresses(PageCriteria criteria);
+  PagedResult<AdditionalSkillProgress> getAdditionalSkillsProgresses(PageCriteria criteria);
 
-    AdditionalSkillProgress createAdditionalSkillProgress(
-            UUID additionalSkillId,
-            EAdditionalSkillType type,
-            EAdditionalSkillLevel level,
-            String description);
+  AdditionalSkillProgress createAdditionalSkillProgress(
+      UUID additionalSkillId,
+      EAdditionalSkillType type,
+      EAdditionalSkillLevel level,
+      String description);
 
-    AdditionalSkillProgress updateAdditionalSkillProgress(
-            UUID additionalSkillProgressId, EAdditionalSkillLevel level, String description);
+  AdditionalSkillProgress updateAdditionalSkillProgress(
+      UUID additionalSkillProgressId, EAdditionalSkillLevel level, String description);
 
-    PagedResult<AdditionalSkillProgress> searchAdditionalSkill(
-            String keyword, PageCriteria pageCriteria);
+  PagedResult<AdditionalSkillProgress> searchAdditionalSkill(
+      String keyword, PageCriteria pageCriteria);
 
-    AdditionalSkillProgressDetails getAdditionalSkillProgressDetails(UUID additionalSkillProgressId);
+  AdditionalSkillProgressDetails getAdditionalSkillProgressDetails(UUID additionalSkillProgressId);
 
-    void unassociateTraces(UUID additionalSkillProgressId, List<UUID> traceIds);
+  void unassociateTraces(UUID additionalSkillProgressId, List<UUID> traceIds);
 }
