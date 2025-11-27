@@ -3,32 +3,27 @@
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper.AdditionalSkillMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L10">public class AdditionalSkillProgressSpecification {</span>
+<span class="nc" id="L9">public class AdditionalSkillProgressSpecification {</span>
   public static Specification&lt;AdditionalSkillProgressEntity&gt; additionalSkillProgressAlreadyExists(
       AdditionalSkill additionalSkill, UUID studentId) {
-<span class="fc" id="L13">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L14">        criteriaBuilder.and(</span>
-<span class="fc" id="L15">            criteriaBuilder.equal(</span>
-<span class="fc" id="L16">                root.get(&quot;additionalSkill&quot;), AdditionalSkillMapper.fromDomain(additionalSkill)),</span>
-<span class="fc" id="L17">            criteriaBuilder.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId));</span>
-  }
-
-  public static Specification&lt;AdditionalSkillProgressEntity&gt; hasStudent(StudentEntity student) {
-<span class="fc" id="L21">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;student&quot;), student);</span>
+<span class="fc" id="L12">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="fc" id="L13">        criteriaBuilder.and(</span>
+<span class="fc" id="L14">            criteriaBuilder.equal(</span>
+<span class="fc" id="L15">                root.get(&quot;additionalSkill&quot;), AdditionalSkillMapper.fromDomain(additionalSkill)),</span>
+<span class="fc" id="L16">            criteriaBuilder.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId));</span>
   }
 
   public static Specification&lt;AdditionalSkillProgressEntity&gt; search(String keyword) {
-<span class="nc" id="L25">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L26" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="nc" id="L27">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L20">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L21" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L22">        return criteriaBuilder.conjunction();</span>
       }
-<span class="nc" id="L29">      return criteriaBuilder.like(</span>
-<span class="nc" id="L30">          criteriaBuilder.lower(root.get(&quot;additionalSkill&quot;).get(&quot;libelle&quot;)),</span>
-<span class="nc" id="L31">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
+<span class="nc" id="L24">      return criteriaBuilder.like(</span>
+<span class="nc" id="L25">          criteriaBuilder.lower(root.get(&quot;additionalSkill&quot;).get(&quot;libelle&quot;)),</span>
+<span class="nc" id="L26">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
     };
   }
 }

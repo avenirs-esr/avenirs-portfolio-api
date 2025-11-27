@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.user.domain.model.Teacher;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.TeacherRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.TeacherMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
-import java.util.List;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -14,12 +13,8 @@ public class TeacherDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Te
   private final TeacherJpaRepository jpaRepository;
 
   public TeacherDatabaseRepository(TeacherJpaRepository repository) {
-<span class="fc" id="L17">    super(repository, repository, TeacherMapper::fromDomain, TeacherMapper::toDomain);</span>
-<span class="fc" id="L18">    this.jpaRepository = repository;</span>
-<span class="fc" id="L19">  }</span>
-
-  public void saveAllEntities(List&lt;TeacherEntity&gt; entities) {
-<span class="nc" id="L22">    jpaRepository.saveAll(entities);</span>
-<span class="nc" id="L23">  }</span>
+<span class="fc" id="L16">    super(repository, repository, TeacherMapper::fromDomain, TeacherMapper::toDomain);</span>
+<span class="fc" id="L17">    this.jpaRepository = repository;</span>
+<span class="fc" id="L18">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
