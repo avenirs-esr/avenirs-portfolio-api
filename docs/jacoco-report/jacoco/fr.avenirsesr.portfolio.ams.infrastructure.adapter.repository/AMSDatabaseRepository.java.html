@@ -6,13 +6,11 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.specification.AMSSpecification;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,55 +22,37 @@ public class AMSDatabaseRepository extends GenericJpaRepositoryAdapter&lt;AMS, A
   private final AMSJpaRepository jpaRepository;
 
   public AMSDatabaseRepository(AMSJpaRepository repository) {
-<span class="fc" id="L27">    super(repository, repository, AMSMapper::fromDomain, AMSMapper::toDomain);</span>
-<span class="fc" id="L28">    this.jpaRepository = repository;</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L25">    super(repository, repository, AMSMapper::fromDomain, AMSMapper::toDomain);</span>
+<span class="fc" id="L26">    this.jpaRepository = repository;</span>
+<span class="fc" id="L27">  }</span>
 
   @Override
   public PagedResult&lt;AMS&gt; findByStudent(Student student, PageCriteria pageCriteria) {
-<span class="fc" id="L33">    return findAllBy(AMSSpecification.belongsTo(student), pageCriteria);</span>
+<span class="fc" id="L31">    return findAllBy(hasStudent(student), pageCriteria);</span>
   }
 
   @Override
   public PagedResult&lt;AMS&gt; findByStudent(
       Student student, PageCriteria pageCriteria, String keyword) {
-<span class="nc" id="L39">    return findAllBy(</span>
-<span class="nc" id="L40">        AMSSpecification.belongsTo(student)</span>
-<span class="nc" id="L41">            .and(AMSSpecification.search(keyword, TranslationUtil.getRequestLanguage())),</span>
+<span class="nc" id="L37">    return findAllBy(</span>
+<span class="nc" id="L38">        hasStudent(student)</span>
+<span class="nc" id="L39">            .and(AMSSpecification.search(keyword, TranslationUtil.getRequestLanguage())),</span>
         pageCriteria);
   }
 
   private PagedResult&lt;AMS&gt; findAllBy(
       Specification&lt;AMSEntity&gt; specification, PageCriteria pageCriteria) {
-<span class="fc" id="L47">    Page&lt;AMSEntity&gt; pageResult =</span>
-<span class="fc" id="L48">        jpaSpecificationExecutor.findAll(</span>
-            specification,
-<span class="fc" id="L50">            PageRequest.of(</span>
-<span class="fc" id="L51">                pageCriteria.page(),</span>
-<span class="fc" id="L52">                pageCriteria.pageSize(),</span>
-<span class="fc" id="L53">                Sort.by(Sort.Direction.DESC, &quot;startDate&quot;)));</span>
-
-<span class="fc" id="L55">    List&lt;AMS&gt; content = pageResult.getContent().stream().map(AMSMapper::toDomain).toList();</span>
-
-<span class="fc" id="L57">    return new PagedResult&lt;&gt;(</span>
-        content,
-        new PageInfo(
-<span class="fc" id="L60">            pageResult.getPageable().getPageNumber(),</span>
-<span class="fc" id="L61">            pageResult.getPageable().getPageSize(),</span>
-<span class="fc" id="L62">            pageResult.getTotalElements()));</span>
+<span class="fc" id="L45">    return findAll(</span>
+        specification,
+<span class="fc" id="L47">        PageRequest.of(</span>
+<span class="fc" id="L48">            pageCriteria.page(),</span>
+<span class="fc" id="L49">            pageCriteria.pageSize(),</span>
+<span class="fc" id="L50">            Sort.by(Sort.Direction.DESC, &quot;startDate&quot;)));</span>
   }
 
   @Override
   public List&lt;AMS&gt; findAllByStudent(Student student) {
-<span class="nc" id="L67">    return jpaSpecificationExecutor.findAll(AMSSpecification.belongsTo(student)).stream()</span>
-<span class="nc" id="L68">        .map(AMSMapper::toDomain)</span>
-<span class="nc" id="L69">        .toList();</span>
+<span class="nc" id="L55">    return findAll(hasStudent(student));</span>
   }
-
-  public void saveAllEntities(List&lt;AMSEntity&gt; entities) {
-<span class="pc bpc" id="L73" title="1 of 2 branches missed.">    if (entities != null) {</span>
-<span class="fc" id="L74">      jpaRepository.saveAll(entities);</span>
-    }
-<span class="fc" id="L76">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
