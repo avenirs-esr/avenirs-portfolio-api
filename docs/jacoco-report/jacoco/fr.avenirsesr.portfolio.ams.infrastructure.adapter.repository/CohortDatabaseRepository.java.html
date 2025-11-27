@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.ams.domain.port.output.repository.CohortRepositor
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.CohortMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,8 +14,14 @@ public class CohortDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Coh
   private final CohortJpaRepository jpaRepository;
 
   public CohortDatabaseRepository(CohortJpaRepository repository) {
-<span class="fc" id="L16">    super(repository, repository, CohortMapper::fromDomain, CohortMapper::toDomain);</span>
-<span class="fc" id="L17">    this.jpaRepository = repository;</span>
-<span class="fc" id="L18">  }</span>
+<span class="fc" id="L17">    super(repository, repository, CohortMapper::fromDomain, CohortMapper::toDomain);</span>
+<span class="fc" id="L18">    this.jpaRepository = repository;</span>
+<span class="fc" id="L19">  }</span>
+
+  public void saveAllEntities(List&lt;CohortEntity&gt; entities) {
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">    if (entities != null) {</span>
+<span class="fc" id="L23">      jpaRepository.saveAll(entities);</span>
+    }
+<span class="fc" id="L25">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

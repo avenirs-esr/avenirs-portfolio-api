@@ -110,12 +110,12 @@ public class SelfKnowledgeController {
 <span class="nc" id="L110">    return ResponseEntity.ok(SelfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));</span>
   }
 
-  @DeleteMapping(&quot;/element/{selfKnowledgeElementId}&quot;)
-  public ResponseEntity&lt;String&gt; deleteSelfKnowledgeElement(
-      @PathVariable(&quot;selfKnowledgeElementId&quot;) UUID selfKnowledgeElementId) {
-<span class="nc" id="L116">    log.debug(&quot;Received request to delete self knowledge element [{}]&quot;, selfKnowledgeElementId);</span>
-<span class="nc" id="L117">    selfKnowledgeService.deleteSelfKnowledgeElement(selfKnowledgeElementId);</span>
-<span class="nc" id="L118">    return ResponseEntity.ok(&quot;Self knowledge element successfully deleted&quot;);</span>
+  @DeleteMapping(&quot;/elements&quot;)
+  public ResponseEntity&lt;String&gt; deleteSelfKnowledgeElements(
+      @RequestBody List&lt;UUID&gt; selfKnowledgeElementIds) {
+<span class="nc" id="L116">    log.debug(&quot;Received request to delete self knowledge elements [{}]&quot;, selfKnowledgeElementIds);</span>
+<span class="nc" id="L117">    selfKnowledgeService.deleteSelfKnowledgeElements(selfKnowledgeElementIds);</span>
+<span class="nc" id="L118">    return ResponseEntity.ok(&quot;Self knowledge elements successfully deleted&quot;);</span>
   }
 
   @GetMapping(&quot;/categories&quot;)
