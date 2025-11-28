@@ -12,7 +12,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "user_photo")
+@Table(
+    name = "user_photo",
+    indexes = {
+      @Index(name = "idx_user_photo_user", columnList = "user_id"),
+      @Index(
+          name = "idx_user_photo_user_type_active",
+          columnList = "user_id, user_photo_type, is_active_version"),
+      @Index(name = "idx_user_photo_user_version", columnList = "user_id, version DESC")
+    })
 @NoArgsConstructor
 @Getter
 @Setter

@@ -1,0 +1,258 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="nathp (generated)" id="1764327325076-1">
+        <createIndex indexName="idx_ams_student" tableName="ams">
+            <column name="student_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-2">
+        <createIndex indexName="idx_ams_student_status" tableName="ams">
+            <column name="student_id"/>
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-3">
+        <createIndex indexName="idx_ams_tr_ams" tableName="ams_translation">
+            <column name="ams_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-4">
+        <createIndex indexName="idx_ams_tr_ams_lang" tableName="ams_translation">
+            <column name="ams_id"/>
+            <column name="language"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-5">
+        <createIndex indexName="idx_ext_user_email" tableName="external_user">
+            <column name="email"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-6">
+        <createIndex indexName="idx_ext_user_user" tableName="external_user">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-7">
+        <createIndex indexName="idx_institution_tr_institution" tableName="institution_translation">
+            <column name="institution_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-8">
+        <createIndex indexName="idx_institution_tr_institution_lang" tableName="institution_translation">
+            <column name="institution_id"/>
+            <column name="language"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-9">
+        <createIndex indexName="idx_program_institution" tableName="program">
+            <column name="institution_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-10">
+        <createIndex indexName="idx_program_institution_apc" tableName="program">
+            <column name="institution_id"/>
+            <column name="is_apc"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-11">
+        <createIndex indexName="idx_program_tr_program" tableName="program_translation">
+            <column name="program_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-12">
+        <createIndex indexName="idx_program_tr_program_lang" tableName="program_translation">
+            <column name="program_id"/>
+            <column name="language"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-13">
+        <createIndex indexName="idx_sk_category_tr_category" tableName="self_knowledge_category_translation">
+            <column name="category_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-14">
+        <createIndex indexName="idx_sk_category_tr_category_lang" tableName="self_knowledge_category_translation">
+            <column name="category_id"/>
+            <column name="language"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-15">
+        <createIndex indexName="idx_skill_level_skill" tableName="skill_level">
+            <column name="skill_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-16">
+        <createIndex indexName="idx_skill_level_tr_skill_level" tableName="skill_level_translation">
+            <column name="skill_level_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-17">
+        <createIndex indexName="idx_skill_level_tr_skill_level_lang" tableName="skill_level_translation">
+            <column name="skill_level_id"/>
+            <column name="language"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-18">
+        <createIndex indexName="idx_skill_level_training_path" tableName="skill_level">
+            <column name="training_path_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-19">
+        <createIndex indexName="idx_skill_tr_skill" tableName="skill_translation">
+            <column name="skill_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-20">
+        <createIndex indexName="idx_skill_tr_skill_lang" tableName="skill_translation">
+            <column name="skill_id"/>
+            <column name="language"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-21">
+        <createIndex indexName="idx_slp_student" tableName="skill_level_progress">
+            <column name="student_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-22">
+        <createIndex indexName="idx_slp_student_skill_level" tableName="skill_level_progress">
+            <column name="student_id"/>
+            <column name="skill_level_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-23">
+        <createIndex indexName="idx_sp_student" tableName="student_progress">
+            <column name="student_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-24">
+        <createIndex indexName="idx_sp_student_training_path" tableName="student_progress">
+            <column name="student_id"/>
+            <column name="training_path_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-25">
+        <createIndex indexName="idx_trace_attachment_trace" tableName="trace_attachment">
+            <column name="trace_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-26">
+        <createIndex indexName="idx_trace_attachment_trace_active" tableName="trace_attachment">
+            <column name="trace_id"/>
+            <column name="is_active_version"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-27">
+        <createIndex indexName="idx_trace_attachment_trace_version" tableName="trace_attachment">
+            <column name="trace_id"/>
+            <column descending="true" name="version"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-28">
+        <createIndex indexName="idx_trace_user_deleted_created" tableName="trace">
+            <column name="user_id"/>
+            <column name="deleted_at"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-29">
+        <createIndex indexName="idx_trace_user_deleted_updated" tableName="trace">
+            <column name="user_id"/>
+            <column name="deleted_at"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-30">
+        <createIndex indexName="idx_training_path_program" tableName="training_path">
+            <column name="program_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-31">
+        <createIndex indexName="idx_user_photo_user" tableName="user_photo">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-32">
+        <createIndex indexName="idx_user_photo_user_type_active" tableName="user_photo">
+            <column name="user_id"/>
+            <column name="user_photo_type"/>
+            <column name="is_active_version"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1764327325076-33">
+        <createIndex indexName="idx_user_photo_user_version" tableName="user_photo">
+            <column name="user_id"/>
+            <column descending="true" name="version"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-34">
+        <createIndex indexName="idx_sskc_student" tableName="student_self_knowledge_category">
+            <column name="student_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-35">
+        <createIndex indexName="idx_sskc_category" tableName="student_self_knowledge_category">
+            <column name="category_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-36">
+        <createIndex indexName="idx_cohort_user_cohort" tableName="cohort_user">
+            <column name="cohort_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-37">
+        <createIndex indexName="idx_cohort_user_user" tableName="cohort_user">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-38">
+        <createIndex indexName="idx_cohort_ams_cohort" tableName="cohort_ams">
+            <column name="cohort_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-39">
+        <createIndex indexName="idx_cohort_ams_ams" tableName="cohort_ams">
+            <column name="ams_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-40">
+        <createIndex indexName="idx_ams_slp_slp" tableName="ams_skill_level_progress">
+            <column name="skill_level_progress_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-41">
+        <createIndex indexName="idx_ams_slp_ams" tableName="ams_skill_level_progress">
+            <column name="ams_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-42">
+        <createIndex indexName="idx_tslp_trace" tableName="trace_skill_level_progress">
+            <column name="trace_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-43">
+        <createIndex indexName="idx_tslp_slp" tableName="trace_skill_level_progress">
+            <column name="skill_level_progress_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-44">
+        <createIndex indexName="idx_ta_trace" tableName="trace_ams">
+            <column name="trace_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-45">
+        <createIndex indexName="idx_ta_ams" tableName="trace_ams">
+            <column name="ams_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-46">
+        <createIndex indexName="idx_tasp_trace" tableName="trace_additional_skill_progress">
+            <column name="trace_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp" id="1764241818118-47">
+        <createIndex indexName="idx_tasp_asp" tableName="trace_additional_skill_progress">
+            <column name="additional_skill_progress_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

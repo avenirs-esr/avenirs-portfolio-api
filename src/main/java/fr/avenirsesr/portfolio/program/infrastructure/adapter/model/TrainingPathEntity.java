@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "training_path")
+@Table(
+    name = "training_path",
+    indexes = {@Index(name = "idx_training_path_program", columnList = "program_id")})
 @NoArgsConstructor
 @Getter
 @Setter

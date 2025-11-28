@@ -17,7 +17,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "ams")
+@Table(
+    name = "ams",
+    indexes = {
+      @Index(name = "idx_ams_student", columnList = "student_id"),
+      @Index(name = "idx_ams_student_status", columnList = "student_id, status")
+    })
 @NoArgsConstructor
 @Getter
 @Setter

@@ -3,13 +3,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.model;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import java.util.UUID;
 import lombok.Getter;
@@ -19,7 +13,11 @@ import lombok.Setter;
 @Entity
 @Table(
     name = "external_user",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"external_id", "source"}))
+    uniqueConstraints = @UniqueConstraint(columnNames = {"external_id", "source"}),
+    indexes = {
+      @Index(name = "idx_ext_user_user", columnList = "user_id"),
+      @Index(name = "idx_ext_user_email", columnList = "email")
+    })
 @NoArgsConstructor
 @Getter
 @Setter

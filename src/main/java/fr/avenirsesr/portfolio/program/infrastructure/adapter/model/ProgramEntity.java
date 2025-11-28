@@ -11,7 +11,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "program")
+@Table(
+    name = "program",
+    indexes = {
+      @Index(name = "idx_program_institution", columnList = "institution_id"),
+      @Index(name = "idx_program_institution_apc", columnList = "institution_id, is_apc")
+    })
 @NoArgsConstructor
 @Getter
 @Setter
