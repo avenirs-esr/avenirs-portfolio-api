@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.program.domain.model.Institution;
 import fr.avenirsesr.portfolio.program.domain.port.output.repository.InstitutionRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.InstitutionMapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionEntity;
-import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,14 +14,8 @@ public class InstitutionDatabaseRepository
   private final InstitutionJpaRepository jpaRepository;
 
   public InstitutionDatabaseRepository(InstitutionJpaRepository jpaRepository) {
-<span class="fc" id="L18">    super(jpaRepository, jpaRepository, InstitutionMapper::fromDomain, InstitutionMapper::toDomain);</span>
-<span class="fc" id="L19">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L20">  }</span>
-
-  public void saveAllEntities(List&lt;InstitutionEntity&gt; entities) {
-<span class="pc bpc" id="L23" title="2 of 4 branches missed.">    if (entities != null &amp;&amp; !entities.isEmpty()) {</span>
-<span class="fc" id="L24">      jpaRepository.saveAll(entities);</span>
-    }
-<span class="fc" id="L26">  }</span>
+<span class="fc" id="L17">    super(jpaRepository, jpaRepository, InstitutionMapper::fromDomain, InstitutionMapper::toDomain);</span>
+<span class="fc" id="L18">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L19">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

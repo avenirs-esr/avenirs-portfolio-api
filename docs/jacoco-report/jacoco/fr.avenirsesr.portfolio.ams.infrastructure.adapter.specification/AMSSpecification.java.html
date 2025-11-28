@@ -2,29 +2,22 @@
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L9">public class AMSSpecification {</span>
-
-  public static Specification&lt;AMSEntity&gt; belongsTo(Student student) {
-<span class="fc" id="L12">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L13">        criteriaBuilder.equal(root.get(&quot;student&quot;), StudentMapper.fromDomain(student));</span>
-  }
+<span class="nc" id="L7">public class AMSSpecification {</span>
 
   public static Specification&lt;AMSEntity&gt; search(String keyword, ELanguage language) {
-<span class="nc" id="L17">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L18" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="nc" id="L19">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L10">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L11" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L12">        return criteriaBuilder.conjunction();</span>
       }
 
-<span class="nc" id="L22">      var translationJoin = root.join(&quot;translations&quot;);</span>
-<span class="nc" id="L23">      var languagePredicate = criteriaBuilder.equal(translationJoin.get(&quot;language&quot;), language);</span>
-<span class="nc" id="L24">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
-<span class="nc" id="L25">      var namePredicate =</span>
-<span class="nc" id="L26">          criteriaBuilder.like(criteriaBuilder.lower(translationJoin.get(&quot;title&quot;)), pattern);</span>
-<span class="nc" id="L27">      return criteriaBuilder.and(languagePredicate, namePredicate);</span>
+<span class="nc" id="L15">      var translationJoin = root.join(&quot;translations&quot;);</span>
+<span class="nc" id="L16">      var languagePredicate = criteriaBuilder.equal(translationJoin.get(&quot;language&quot;), language);</span>
+<span class="nc" id="L17">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
+<span class="nc" id="L18">      var namePredicate =</span>
+<span class="nc" id="L19">          criteriaBuilder.like(criteriaBuilder.lower(translationJoin.get(&quot;title&quot;)), pattern);</span>
+<span class="nc" id="L20">      return criteriaBuilder.and(languagePredicate, namePredicate);</span>
     };
   }
 }
