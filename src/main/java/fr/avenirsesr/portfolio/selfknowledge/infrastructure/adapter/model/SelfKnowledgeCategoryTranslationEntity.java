@@ -9,7 +9,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "self_knowledge_category_translation")
+@Table(
+    name = "self_knowledge_category_translation",
+    indexes = {
+      @Index(name = "idx_sk_category_tr_category", columnList = "category_id"),
+      @Index(name = "idx_sk_category_tr_category_lang", columnList = "category_id, language")
+    })
 @NoArgsConstructor
 @Getter
 @Setter

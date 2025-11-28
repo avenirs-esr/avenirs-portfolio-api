@@ -11,7 +11,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "trace_attachment")
+@Table(
+    name = "trace_attachment",
+    indexes = {
+      @Index(name = "idx_trace_attachment_trace", columnList = "trace_id"),
+      @Index(
+          name = "idx_trace_attachment_trace_active",
+          columnList = "trace_id, is_active_version"),
+      @Index(name = "idx_trace_attachment_trace_version", columnList = "trace_id, version DESC")
+    })
 @NoArgsConstructor
 @Getter
 @Setter

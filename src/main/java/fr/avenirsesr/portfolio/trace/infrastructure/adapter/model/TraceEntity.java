@@ -16,7 +16,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "trace")
+@Table(
+    name = "trace",
+    indexes = {
+      @Index(
+          name = "idx_trace_user_deleted_created",
+          columnList = "user_id, deleted_at, created_at"),
+      @Index(
+          name = "idx_trace_user_deleted_updated",
+          columnList = "user_id, deleted_at, updated_at, created_at")
+    })
 @NoArgsConstructor
 @Getter
 @Setter
