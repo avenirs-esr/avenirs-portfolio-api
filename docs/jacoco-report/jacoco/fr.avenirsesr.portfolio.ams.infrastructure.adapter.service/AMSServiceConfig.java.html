@@ -6,32 +6,23 @@ import fr.avenirsesr.portfolio.ams.domain.service.AMSServiceImpl;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-<span class="fc" id="L13">@Slf4j</span>
+<span class="fc" id="L14">@Slf4j</span>
 @Configuration
+@AllArgsConstructor
 public class AMSServiceConfig {
   private final AMSRepository amsRepository;
   private final TraceRepository traceRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final LoggedInUserService loggedInUserService;
 
-  public AMSServiceConfig(
-      AMSRepository amsRepository,
-      TraceRepository traceRepository,
-      SkillLevelProgressRepository skillLevelProgressRepository,
-<span class="fc" id="L25">      LoggedInUserService loggedInUserService) {</span>
-<span class="fc" id="L26">    this.amsRepository = amsRepository;</span>
-<span class="fc" id="L27">    this.traceRepository = traceRepository;</span>
-<span class="fc" id="L28">    this.skillLevelProgressRepository = skillLevelProgressRepository;</span>
-<span class="fc" id="L29">    this.loggedInUserService = loggedInUserService;</span>
-<span class="fc" id="L30">  }</span>
-
   @Bean
   public AMSService amsService() {
-<span class="fc" id="L34">    return new AMSServiceImpl(</span>
+<span class="fc" id="L25">    return new AMSServiceImpl(</span>
         amsRepository, traceRepository, skillLevelProgressRepository, loggedInUserService);
   }
 }

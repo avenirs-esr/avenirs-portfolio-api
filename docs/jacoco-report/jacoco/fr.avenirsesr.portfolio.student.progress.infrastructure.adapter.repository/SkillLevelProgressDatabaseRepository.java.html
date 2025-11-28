@@ -3,7 +3,6 @@
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
@@ -12,6 +11,7 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.Sk
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.SkillLevelProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class SkillLevelProgressDatabaseRepository
-    extends GenericJpaRepositoryAdapter&lt;SkillLevelProgress, SkillLevelProgressEntity&gt;
+    extends GenericUserJpaRepositoryAdapter&lt;SkillLevelProgress, SkillLevelProgressEntity&gt;
     implements SkillLevelProgressRepository {
   private final SkillLevelProgressJpaRepository jpaRepository;
 

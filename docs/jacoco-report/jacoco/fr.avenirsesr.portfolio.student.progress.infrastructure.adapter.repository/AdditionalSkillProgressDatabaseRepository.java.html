@@ -2,13 +2,13 @@
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.AdditionalSkillProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class AdditionalSkillProgressDatabaseRepository
-    extends GenericJpaRepositoryAdapter&lt;AdditionalSkillProgress, AdditionalSkillProgressEntity&gt;
+    extends GenericUserJpaRepositoryAdapter&lt;AdditionalSkillProgress, AdditionalSkillProgressEntity&gt;
     implements AdditionalSkillProgressRepository {
   private final AdditionalSkillProgressJpaRepository jpaRepository;
 
