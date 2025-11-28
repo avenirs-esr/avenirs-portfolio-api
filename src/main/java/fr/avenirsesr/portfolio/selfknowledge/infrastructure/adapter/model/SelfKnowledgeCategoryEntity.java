@@ -12,7 +12,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "self_knowledge_category")
+@Table(
+    name = "self_knowledge_category",
+    uniqueConstraints = {
+      @UniqueConstraint(
+          name = "uk_self_knowledge_category_type",
+          columnNames = {"type"})
+    })
 @NoArgsConstructor
 @Getter
 @Setter
