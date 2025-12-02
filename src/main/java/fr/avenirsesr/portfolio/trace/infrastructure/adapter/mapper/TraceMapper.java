@@ -1,14 +1,17 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import java.util.List;
+import java.util.UUID;
 
 public interface TraceMapper {
+
   static TraceEntity fromDomain(Trace trace) {
     return TraceEntity.of(
         trace.getId(),
@@ -29,6 +32,7 @@ public interface TraceMapper {
   }
 
   static Trace toDomain(TraceEntity traceEntity) {
+    List<UUID> amsIds = traceEntity.getAmses().stream().map(AvenirsBaseEntity::getId).toList();
     Trace trace =
         Trace.toDomain(
             traceEntity.getId(),

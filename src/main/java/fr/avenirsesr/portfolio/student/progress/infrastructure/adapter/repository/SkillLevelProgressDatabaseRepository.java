@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.reposito
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
@@ -11,7 +12,7 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.Sk
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.SkillLevelProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.specification.StudentOwnershipSpecification;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,9 +22,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class SkillLevelProgressDatabaseRepository
-    extends GenericUserJpaRepositoryAdapter<SkillLevelProgress, SkillLevelProgressEntity>
+    extends GenericJpaRepositoryAdapter<SkillLevelProgress, SkillLevelProgressEntity>
     implements SkillLevelProgressRepository {
-  private final SkillLevelProgressJpaRepository jpaRepository;
 
   public SkillLevelProgressDatabaseRepository(SkillLevelProgressJpaRepository jpaRepository) {
     super(
@@ -31,7 +31,6 @@ public class SkillLevelProgressDatabaseRepository
         jpaRepository,
         SkillLevelProgressMapper::fromDomain,
         SkillLevelProgressMapper::toDomain);
-    this.jpaRepository = jpaRepository;
   }
 
   @Override
@@ -41,7 +40,7 @@ public class SkillLevelProgressDatabaseRepository
 
   @Override
   public List<SkillLevelProgress> findAllByStudent(Student student) {
-    return findAll(hasStudent(student));
+    return findAll(StudentOwnershipSpecification.hasStudent(student));
   }
 
   @Override
@@ -57,7 +56,8 @@ public class SkillLevelProgressDatabaseRepository
     var language = TranslationUtil.getRequestLanguage();
 
     return findAll(
-        hasStudent(student).and(SkillLevelProgressSpecification.search(keyword, language)),
+        StudentOwnershipSpecification.<SkillLevelProgressEntity>hasStudent(student)
+            .and(SkillLevelProgressSpecification.search(keyword, language)),
         PageRequest.of(
             pageCriteria.page(),
             pageCriteria.pageSize(),

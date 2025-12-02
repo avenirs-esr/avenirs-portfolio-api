@@ -25,4 +25,17 @@ public interface SelfKnowledgeCategoryMapper {
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
+
+  static SelfKnowledgeCategory toDomain(SelfKnowledgeCategoryTranslationEntity translation) {
+    SelfKnowledgeCategoryEntity category = translation.getCategory();
+
+    return SelfKnowledgeCategory.toDomain(
+        category.getId(),
+        translation.getTitle(),
+        translation.getDescription(),
+        category.getType(),
+        category.isMandatory(),
+        category.getCreatedAt(),
+        category.getUpdatedAt());
+  }
 }

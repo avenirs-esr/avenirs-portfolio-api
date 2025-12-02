@@ -20,4 +20,14 @@ public interface InstitutionMapper {
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
+
+  static Institution toDomain(InstitutionTranslationEntity translationEntity) {
+    InstitutionEntity entity = translationEntity.getInstitution();
+    return Institution.toDomain(
+        entity.getId(),
+        translationEntity.getName(),
+        entity.getEnabledFields(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
+  }
 }

@@ -29,4 +29,17 @@ public interface AMSMapper {
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
+
+  static AMS toDomain(AMSTranslationEntity translationEntity) {
+    AMSEntity entity = translationEntity.getAms();
+    return AMS.toDomain(
+        entity.getId(),
+        StudentMapper.toDomain(entity.getStudent()),
+        translationEntity.getTitle(),
+        entity.getStartDate(),
+        entity.getEndDate(),
+        entity.getStatus(),
+        entity.getCreatedAt(),
+        entity.getUpdatedAt());
+  }
 }

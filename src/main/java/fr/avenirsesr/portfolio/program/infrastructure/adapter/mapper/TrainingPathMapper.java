@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface TrainingPathMapper {
+
   static TrainingPathEntity fromDomain(TrainingPath trainingPath) {
     var entity =
         new TrainingPathEntity(

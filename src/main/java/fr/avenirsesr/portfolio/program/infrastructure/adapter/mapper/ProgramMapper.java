@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntit
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramTranslationEntity;
 
 public interface ProgramMapper {
+
   static ProgramEntity fromDomain(Program program) {
     return ProgramEntity.of(
         program.getId(),
@@ -18,6 +19,19 @@ public interface ProgramMapper {
   static Program toDomain(ProgramEntity programEntity) {
     ProgramTranslationEntity translationEntity =
         TranslationUtil.getTranslation(programEntity.getTranslations());
+    return Program.toDomain(
+        programEntity.getId(),
+        InstitutionMapper.toDomain(programEntity.getInstitution()),
+        translationEntity.getName(),
+        programEntity.isAPC(),
+        programEntity.getDurationUnit(),
+        programEntity.getDurationCount(),
+        programEntity.getCreatedAt(),
+        programEntity.getUpdatedAt());
+  }
+
+  static Program toDomain(ProgramTranslationEntity translationEntity) {
+    ProgramEntity programEntity = translationEntity.getProgram();
     return Program.toDomain(
         programEntity.getId(),
         InstitutionMapper.toDomain(programEntity.getInstitution()),

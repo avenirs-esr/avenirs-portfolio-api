@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.Ski
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 
 public interface SkillLevelProgressMapper {
+
   static SkillLevelProgressEntity fromDomain(SkillLevelProgress skillLevelProgress) {
     return SkillLevelProgressEntity.of(
         skillLevelProgress.getId(),

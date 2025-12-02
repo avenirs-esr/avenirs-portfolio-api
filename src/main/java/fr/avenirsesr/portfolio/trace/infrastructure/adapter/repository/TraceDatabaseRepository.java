@@ -30,11 +30,9 @@ import org.springframework.stereotype.Repository;
 @Where(clause = "deleted_at IS NULL")
 public class TraceDatabaseRepository
     extends GenericDeletableJpaRepositoryAdapter<Trace, TraceEntity> implements TraceRepository {
-  private final TraceJpaRepository jpaRepository;
 
   public TraceDatabaseRepository(TraceJpaRepository jpaRepository) {
     super(jpaRepository, jpaRepository, TraceMapper::fromDomain, TraceMapper::toDomain);
-    this.jpaRepository = jpaRepository;
   }
 
   @Override

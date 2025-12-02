@@ -20,4 +20,13 @@ public interface SkillMapper {
         skillEntity.getCreatedAt(),
         skillEntity.getUpdatedAt());
   }
+
+  static Skill toDomain(SkillTranslationEntity skillTranslationEntity) {
+    SkillEntity skillEntity = skillTranslationEntity.getSkill();
+    return Skill.toDomain(
+        skillEntity.getId(),
+        skillTranslationEntity.getName(),
+        skillEntity.getCreatedAt(),
+        skillEntity.getUpdatedAt());
+  }
 }
