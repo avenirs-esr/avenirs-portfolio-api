@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StudentOwnershipSpecification.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.user.infrastructure.adapter.specification</a> &gt; <span class="el_source">StudentOwnershipSpecification.java</span></div><h1>StudentOwnershipSpecification.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.user.infrastructure.adapter.specification;
+
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
+import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
+
+<span class="fc" id="L13">@NoArgsConstructor</span>
+public final class StudentOwnershipSpecification {
+  public static &lt;T&gt; Specification&lt;T&gt; hasStudent(Student student, String pathToStudent) {
+<span class="fc" id="L16">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc" id="L17">      var from = (From&lt;?, ?&gt;) root;</span>
+
+<span class="fc bfc" id="L19" title="All 2 branches covered.">      for (String part : pathToStudent.split(&quot;\\.&quot;)) {</span>
+<span class="fc" id="L20">        from = from.join(part);</span>
+      }
+
+<span class="fc" id="L23">      return criteriaBuilder.equal(from, StudentMapper.fromDomain(student));</span>
+    };
+  }
+
+  public static &lt;T&gt; Specification&lt;T&gt; hasStudent(Student student) {
+<span class="fc" id="L28">    return hasStudent(student, &quot;student&quot;);</span>
+  }
+
+  public static &lt;T&gt; Specification&lt;T&gt; hasNotStudent(Student student) {
+<span class="nc" id="L32">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">      assert query != null;</span>
+<span class="nc" id="L34">      query.distinct(true);</span>
+
+<span class="nc" id="L36">      Subquery&lt;Long&gt; sub = query.subquery(Long.class);</span>
+<span class="nc" id="L37">      Class&lt;T&gt; entityClass = (Class&lt;T&gt;) root.getModel().getBindableJavaType();</span>
+<span class="nc" id="L38">      Root&lt;T&gt; subRoot = sub.from(entityClass);</span>
+
+<span class="nc" id="L40">      Join&lt;T, StudentEntity&gt; subStudents = subRoot.join(&quot;students&quot;);</span>
+
+<span class="nc" id="L42">      sub.select(criteriaBuilder.literal(1L))</span>
+<span class="nc" id="L43">          .where(</span>
+<span class="nc" id="L44">              criteriaBuilder.equal(subRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
+<span class="nc" id="L45">              criteriaBuilder.equal(</span>
+<span class="nc" id="L46">                  subStudents.get(&quot;id&quot;), StudentMapper.fromDomain(student).getId()));</span>
+
+<span class="nc" id="L48">      return criteriaBuilder.not(criteriaBuilder.exists(sub));</span>
+    };
+  }
+
+  public static &lt;T&gt; Specification&lt;T&gt; hasNotStudent(Student student, String pathToStudents) {
+<span class="fc" id="L53">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">      assert query != null;</span>
+<span class="fc" id="L55">      query.distinct(true);</span>
+
+<span class="fc" id="L57">      var subquery = query.subquery(Long.class);</span>
+<span class="fc" id="L58">      Root&lt;T&gt; subRoot = subquery.from((Class&lt;T&gt;) root.getModel().getBindableJavaType());</span>
+
+<span class="fc" id="L60">      var pathParts = pathToStudents.split(&quot;\\.&quot;);</span>
+<span class="fc" id="L61">      var from = (jakarta.persistence.criteria.From&lt;?, ?&gt;) subRoot;</span>
+
+<span class="fc bfc" id="L63" title="All 2 branches covered.">      for (String part : pathParts) {</span>
+<span class="fc" id="L64">        from = from.join(part);</span>
+      }
+
+<span class="fc" id="L67">      var subStudents = (Join&lt;?, StudentEntity&gt;) from;</span>
+
+<span class="fc" id="L69">      subquery</span>
+<span class="fc" id="L70">          .select(criteriaBuilder.literal(1L))</span>
+<span class="fc" id="L71">          .where(</span>
+<span class="fc" id="L72">              criteriaBuilder.equal(subRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L73">              criteriaBuilder.equal(</span>
+<span class="fc" id="L74">                  subStudents.get(&quot;id&quot;), StudentMapper.fromDomain(student).getId()));</span>
+
+<span class="fc" id="L76">      return criteriaBuilder.not(criteriaBuilder.exists(subquery));</span>
+    };
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

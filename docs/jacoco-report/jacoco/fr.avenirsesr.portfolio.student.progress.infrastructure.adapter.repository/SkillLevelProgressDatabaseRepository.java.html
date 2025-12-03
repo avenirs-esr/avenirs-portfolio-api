@@ -3,6 +3,7 @@
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.domain.model.SkillLevelProgress;
@@ -11,7 +12,7 @@ import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.mapper.Sk
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.specification.SkillLevelProgressSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.specification.StudentOwnershipSpecification;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,9 +22,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class SkillLevelProgressDatabaseRepository
-    extends GenericUserJpaRepositoryAdapter&lt;SkillLevelProgress, SkillLevelProgressEntity&gt;
+    extends GenericJpaRepositoryAdapter&lt;SkillLevelProgress, SkillLevelProgressEntity&gt;
     implements SkillLevelProgressRepository {
-  private final SkillLevelProgressJpaRepository jpaRepository;
 
   public SkillLevelProgressDatabaseRepository(SkillLevelProgressJpaRepository jpaRepository) {
 <span class="fc" id="L29">    super(</span>
@@ -31,33 +31,33 @@ public class SkillLevelProgressDatabaseRepository
         jpaRepository,
         SkillLevelProgressMapper::fromDomain,
         SkillLevelProgressMapper::toDomain);
-<span class="fc" id="L34">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L35">  }</span>
+<span class="fc" id="L34">  }</span>
 
   @Override
   public List&lt;SkillLevelProgress&gt; linkedWith(AMS ams) {
-<span class="fc" id="L39">    return findAll(SkillLevelProgressSpecification.linkedTo(ams));</span>
+<span class="fc" id="L38">    return findAll(SkillLevelProgressSpecification.linkedTo(ams));</span>
   }
 
   @Override
   public List&lt;SkillLevelProgress&gt; findAllByStudent(Student student) {
-<span class="nc" id="L44">    return findAll(hasStudent(student));</span>
+<span class="nc" id="L43">    return findAll(StudentOwnershipSpecification.hasStudent(student));</span>
   }
 
   @Override
   public List&lt;SkillLevelProgress&gt; findAllByStudentAndSkillId(Student student, UUID skillId) {
-<span class="fc" id="L49">    return Optional.of(findAll(SkillLevelProgressSpecification.with(student, skillId)))</span>
-<span class="fc bfc" id="L50" title="All 2 branches covered.">        .filter(list -&gt; !list.isEmpty())</span>
-<span class="fc" id="L51">        .orElseThrow(() -&gt; new SkillLevelNotFoundException(skillId.toString()));</span>
+<span class="fc" id="L48">    return Optional.of(findAll(SkillLevelProgressSpecification.with(student, skillId)))</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        .filter(list -&gt; !list.isEmpty())</span>
+<span class="fc" id="L50">        .orElseThrow(() -&gt; new SkillLevelNotFoundException(skillId.toString()));</span>
   }
 
   @Override
   public PagedResult&lt;SkillLevelProgress&gt; findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword) {
-<span class="nc" id="L57">    var language = TranslationUtil.getRequestLanguage();</span>
+<span class="nc" id="L56">    var language = TranslationUtil.getRequestLanguage();</span>
 
-<span class="nc" id="L59">    return findAll(</span>
-<span class="nc" id="L60">        hasStudent(student).and(SkillLevelProgressSpecification.search(keyword, language)),</span>
+<span class="nc" id="L58">    return findAll(</span>
+<span class="nc" id="L59">        StudentOwnershipSpecification.&lt;SkillLevelProgressEntity&gt;hasStudent(student)</span>
+<span class="nc" id="L60">            .and(SkillLevelProgressSpecification.search(keyword, language)),</span>
 <span class="nc" id="L61">        PageRequest.of(</span>
 <span class="nc" id="L62">            pageCriteria.page(),</span>
 <span class="nc" id="L63">            pageCriteria.pageSize(),</span>

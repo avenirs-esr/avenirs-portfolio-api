@@ -10,9 +10,9 @@ import java.util.Set;
 
 public interface TranslationUtil {
   static ELanguage getRequestLanguage() {
-<span class="nc" id="L13">    return Optional.ofNullable(RequestContext.get())</span>
-<span class="nc" id="L14">        .map(RequestData::preferredLanguage)</span>
-<span class="nc" id="L15">        .orElse(ELanguage.FALLBACK);</span>
+<span class="fc" id="L13">    return Optional.ofNullable(RequestContext.get())</span>
+<span class="fc" id="L14">        .map(RequestData::preferredLanguage)</span>
+<span class="fc" id="L15">        .orElse(ELanguage.FALLBACK);</span>
   }
 
   static &lt;T extends TranslationEntity&gt; T getTranslation(Set&lt;T&gt; translations) {

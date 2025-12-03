@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenericTranslatedJpaRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.common.repository</a> &gt; <span class="el_source">GenericTranslatedJpaRepositoryAdapter.java</span></div><h1>GenericTranslatedJpaRepositoryAdapter.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.common.repository;
+
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.error.domain.exception.UnsupportedTranslationMappingException;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.model.TranslationEntity;
+import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
+import fr.avenirsesr.portfolio.common.specification.TranslationSpecification;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+<span class="fc" id="L23">@Slf4j</span>
+public abstract class GenericTranslatedJpaRepositoryAdapter&lt;
+        D extends AvenirsBaseModel, E extends AvenirsBaseEntity, T extends TranslationEntity&gt;
+        extends GenericJpaRepositoryAdapter&lt;D, E&gt; {
+
+    protected final JpaRepository&lt;T, UUID&gt; jpaTranslationRepository;
+    protected final JpaSpecificationExecutor&lt;T&gt; jpaTranslationSpecificationExecutor;
+    private final Function&lt;T, D&gt; toDomain;
+
+    protected GenericTranslatedJpaRepositoryAdapter(
+            JpaRepository&lt;E, UUID&gt; jpaRepository,
+            JpaSpecificationExecutor&lt;E&gt; jpaSpecificationExecutor,
+            JpaRepository&lt;T, UUID&gt; jpaTranslationRepository,
+            JpaSpecificationExecutor&lt;T&gt; jpaTranslationSpecificationExecutor,
+            Function&lt;D, E&gt; fromDomain,
+            Function&lt;E, D&gt; entityToDomain,
+            Function&lt;T, D&gt; toDomain) {
+
+<span class="fc" id="L41">        super(</span>
+                jpaRepository,
+                jpaSpecificationExecutor,
+                fromDomain,
+                entityToDomain);
+<span class="fc" id="L46">        this.jpaTranslationRepository = jpaTranslationRepository;</span>
+<span class="fc" id="L47">        this.jpaTranslationSpecificationExecutor = jpaTranslationSpecificationExecutor;</span>
+<span class="fc" id="L48">        this.toDomain = toDomain;</span>
+<span class="fc" id="L49">    }</span>
+
+    protected List&lt;D&gt; mapToDomain(List&lt;T&gt; entities) {
+<span class="fc" id="L52">        return entities.stream().map(toDomain).toList();</span>
+    }
+
+    protected D mapToDomain(T entity) {
+<span class="nc" id="L56">        return toDomain.apply(entity);</span>
+    }
+
+    protected PagedResult&lt;D&gt; mapToPagedResult(Page&lt;T&gt; page) {
+<span class="fc" id="L60">        List&lt;D&gt; content = mapToDomain(page.getContent());</span>
+
+<span class="fc" id="L62">        return new PagedResult&lt;&gt;(</span>
+                content,
+                new PageInfo(
+<span class="fc" id="L65">                        page.getPageable().getPageNumber(),</span>
+<span class="fc" id="L66">                        page.getPageable().getPageSize(),</span>
+<span class="fc" id="L67">                        page.getTotalElements()));</span>
+    }
+
+    private void loggingFallBack(
+            ELanguage language, int resultsSize, int resultsFallBackLanguageSize) {
+<span class="nc" id="L72">        log.warn(</span>
+                &quot;Translation fallback activated: number of results for language {} ({}) differs from fallback language {} ({})&quot;,
+                language,
+<span class="nc" id="L75">                resultsSize,</span>
+                ELanguage.FALLBACK,
+<span class="nc" id="L77">                resultsFallBackLanguageSize);</span>
+<span class="nc" id="L78">    }</span>
+
+    private Specification&lt;T&gt; createSpecification(Specification&lt;T&gt; specification, ELanguage language) {
+<span class="fc" id="L81">        return Specification.where(specification).and(TranslationSpecification.hasLanguage(language));</span>
+    }
+
+    protected List&lt;D&gt; findAllByTranslation(Specification&lt;T&gt; specification) {
+<span class="fc" id="L85">        ELanguage language = TranslationUtil.getRequestLanguage();</span>
+
+<span class="fc" id="L87">        Specification&lt;T&gt; specificationWithLanguage = createSpecification(specification, language);</span>
+<span class="fc" id="L88">        Specification&lt;T&gt; specificationWithFallBackLanguage =</span>
+<span class="fc" id="L89">                createSpecification(specification, ELanguage.FALLBACK);</span>
+
+<span class="fc" id="L91">        List&lt;T&gt; results = jpaTranslationSpecificationExecutor.findAll(specificationWithLanguage);</span>
+<span class="fc" id="L92">        List&lt;T&gt; resultsFallBackLanguage =</span>
+<span class="fc" id="L93">                jpaTranslationSpecificationExecutor.findAll(specificationWithFallBackLanguage);</span>
+
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if (results.size() != resultsFallBackLanguage.size()) {</span>
+<span class="nc" id="L96">            loggingFallBack(language, results.size(), resultsFallBackLanguage.size());</span>
+<span class="nc" id="L97">            return mapToDomain(resultsFallBackLanguage);</span>
+        }
+<span class="fc" id="L99">        return mapToDomain(results);</span>
+    }
+
+    protected PagedResult&lt;D&gt; findAllByTranslation(
+            Specification&lt;T&gt; specification, PageRequest pageRequest) {
+<span class="fc" id="L104">        ELanguage language = TranslationUtil.getRequestLanguage();</span>
+
+<span class="fc" id="L106">        Specification&lt;T&gt; specificationWithLanguage = createSpecification(specification, language);</span>
+<span class="fc" id="L107">        Specification&lt;T&gt; specificationWithFallBackLanguage =</span>
+<span class="fc" id="L108">                createSpecification(specification, ELanguage.FALLBACK);</span>
+
+<span class="fc" id="L110">        Page&lt;T&gt; results =</span>
+<span class="fc" id="L111">                jpaTranslationSpecificationExecutor.findAll(specificationWithLanguage, pageRequest);</span>
+<span class="fc" id="L112">        Page&lt;T&gt; resultsFallBackLanguage =</span>
+<span class="fc" id="L113">                jpaTranslationSpecificationExecutor.findAll(specificationWithFallBackLanguage, pageRequest);</span>
+
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if (results.getContent().size() != resultsFallBackLanguage.getContent().size()) {</span>
+<span class="nc" id="L116">            loggingFallBack(</span>
+<span class="nc" id="L117">                    language, results.getContent().size(), resultsFallBackLanguage.getContent().size());</span>
+<span class="nc" id="L118">            return mapToPagedResult(resultsFallBackLanguage);</span>
+        }
+<span class="fc" id="L120">        return mapToPagedResult(results);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
