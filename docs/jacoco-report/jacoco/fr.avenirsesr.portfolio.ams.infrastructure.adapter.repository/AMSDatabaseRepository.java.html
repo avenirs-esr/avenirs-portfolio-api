@@ -4,14 +4,12 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSTranslationEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.specification.AMSSpecification;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
-import fr.avenirsesr.portfolio.common.repository.GenericTranslatedJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.specification.StudentOwnershipSpecification;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -19,50 +17,40 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AMSDatabaseRepository
-    extends GenericTranslatedJpaRepositoryAdapter&lt;AMS, AMSEntity, AMSTranslationEntity&gt;
+public class AMSDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;AMS, AMSEntity&gt;
     implements AMSRepository {
 
-  public AMSDatabaseRepository(
-      AMSJpaRepository repository, AMSTranslationJpaRepository translationRepository) {
-<span class="fc" id="L28">    super(</span>
-        repository,
-        repository,
-        translationRepository,
-        translationRepository,
-        AMSMapper::fromDomain,
-        AMSMapper::toDomain,
-        AMSMapper::toDomain);
-<span class="fc" id="L36">  }</span>
+  public AMSDatabaseRepository(AMSJpaRepository repository) {
+<span class="fc" id="L24">    super(repository, repository, AMSMapper::fromDomain, AMSMapper::toDomain);</span>
+<span class="fc" id="L25">  }</span>
 
   @Override
   public PagedResult&lt;AMS&gt; findByStudent(Student student, PageCriteria pageCriteria) {
-<span class="fc" id="L40">    return findAllBy(</span>
-<span class="fc" id="L41">        StudentOwnershipSpecification.hasStudent(student, &quot;ams.student&quot;), pageCriteria);</span>
+<span class="fc" id="L29">    return findAllBy(hasStudent(student), pageCriteria);</span>
   }
 
   @Override
   public PagedResult&lt;AMS&gt; findByStudent(
       Student student, PageCriteria pageCriteria, String keyword) {
-<span class="nc" id="L47">    return findAllBy(</span>
-<span class="nc" id="L48">        StudentOwnershipSpecification.&lt;AMSTranslationEntity&gt;hasStudent(student)</span>
-<span class="nc" id="L49">            .and(AMSSpecification.search(keyword, TranslationUtil.getRequestLanguage())),</span>
+<span class="nc" id="L35">    return findAllBy(</span>
+<span class="nc" id="L36">        hasStudent(student)</span>
+<span class="nc" id="L37">            .and(AMSSpecification.search(keyword, TranslationUtil.getRequestLanguage())),</span>
         pageCriteria);
   }
 
   private PagedResult&lt;AMS&gt; findAllBy(
-      Specification&lt;AMSTranslationEntity&gt; specification, PageCriteria pageCriteria) {
-<span class="fc" id="L55">    return findAllByTranslation(</span>
+      Specification&lt;AMSEntity&gt; specification, PageCriteria pageCriteria) {
+<span class="fc" id="L43">    return findAll(</span>
         specification,
-<span class="fc" id="L57">        PageRequest.of(</span>
-<span class="fc" id="L58">            pageCriteria.page(),</span>
-<span class="fc" id="L59">            pageCriteria.pageSize(),</span>
-<span class="fc" id="L60">            Sort.by(Sort.Direction.DESC, &quot;ams.startDate&quot;)));</span>
+<span class="fc" id="L45">        PageRequest.of(</span>
+<span class="fc" id="L46">            pageCriteria.page(),</span>
+<span class="fc" id="L47">            pageCriteria.pageSize(),</span>
+<span class="fc" id="L48">            Sort.by(Sort.Direction.DESC, &quot;startDate&quot;)));</span>
   }
 
   @Override
   public List&lt;AMS&gt; findAllByStudent(Student student) {
-<span class="nc" id="L65">    return findAllByTranslation(StudentOwnershipSpecification.hasStudent(student));</span>
+<span class="nc" id="L53">    return findAll(hasStudent(student));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
