@@ -10,6 +10,7 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
 
 @Entity
 @Table(
@@ -36,6 +37,7 @@ public class SelfKnowledgeCategoryEntity extends AvenirsBaseEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
+  @Filter(name = "langFilter")
   private Set<SelfKnowledgeCategoryTranslationEntity> translations = new HashSet<>();
 
   @ManyToMany(mappedBy = "selfKnowledgeCategories")

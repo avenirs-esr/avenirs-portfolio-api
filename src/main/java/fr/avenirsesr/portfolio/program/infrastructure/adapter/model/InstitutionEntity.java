@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Filter;
 
 @Entity
 @Table(name = "institution")
@@ -29,6 +30,7 @@ public class InstitutionEntity extends AvenirsBaseEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
+  @Filter(name = "langFilter")
   private Set<InstitutionTranslationEntity> translations = new HashSet<>();
 
   private InstitutionEntity(UUID id, Set<EPortfolioType> enabledFields) {
