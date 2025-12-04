@@ -69,7 +69,8 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.r
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastructure.batch,AdditionalSkillBatchLoader.new ItemReader() {...},39,0,4,0,9,0,4,0,2,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastructure.batch,AdditionalSkillBatchLoader.new JobExecutionListener() {...},73,0,16,0,17,0,12,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastructure.batch,AdditionalSkillBatchLoader,380,0,4,0,121,0,29,0,27,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.common.language.infrastructure.adapter.filter,LanguageFilterAspect,1,31,1,1,0,7,1,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.common.language.infrastructure.adapter.filter,LanguageFilterSupplier,0,14,0,2,0,5,0,3,0,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.common.language.infrastructure.adapter.filter,LanguageFilterAspect,10,0,0,0,3,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,256,807,19,17,59,209,18,47,6,41
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastructure.adapter.repository,Rome4VersionDatabaseRepository,4,10,0,0,1,3,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.casoc.infrastructure.service,CsvCompetenceReader,0,63,0,2,0,12,0,7,0,6

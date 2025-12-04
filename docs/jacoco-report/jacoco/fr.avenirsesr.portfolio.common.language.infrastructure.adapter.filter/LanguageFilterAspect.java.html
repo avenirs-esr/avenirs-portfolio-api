@@ -16,15 +16,10 @@ public class LanguageFilterAspect {
 
   @PersistenceContext private final EntityManager em;
 
-  @Before(&quot;@annotation(EnableLangFilter)&quot;)
-  public void enableFilter() {
-<span class="fc" id="L21">    var session = em.unwrap(Session.class);</span>
-<span class="fc" id="L22">    var lang = RequestContext.get().preferredLanguage().name();</span>
-
-<span class="fc" id="L24">    var filter = session.enableFilter(&quot;langFilter&quot;);</span>
-<span class="fc" id="L25">    filter.setParameter(&quot;lang&quot;, lang);</span>
-<span class="fc" id="L26">    var f = session.getEnabledFilter(&quot;langFilter&quot;);</span>
-<span class="pc bpc" id="L27" title="1 of 2 branches missed.">    System.out.println(&quot;LangFilter enabled? &quot; + (f != null));</span>
-<span class="fc" id="L28">  }</span>
+  @Before(&quot;@annotation(DisableLangFilter)&quot;)
+  public void disableFilter() {
+<span class="nc" id="L21">    var session = em.unwrap(Session.class);</span>
+<span class="nc" id="L22">    session.disableFilter(&quot;langFilter&quot;);</span>
+<span class="nc" id="L23">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
