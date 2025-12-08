@@ -58,4 +58,7 @@ public class SeederConfig {
 
   // Declared experience
   public static final int NB_OF_DECLARED_EXPERIENCES = 10;
+  
+  // Declared Programs
+  public static final int NB_OF_DECLARED_PROGRAMS = 3;
 }
