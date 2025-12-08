@@ -62,7 +62,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.common.web.infrastructure.context,
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.web.infrastructure.context,RequestContextFilter,0,66,0,2,0,19,0,5,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.web.infrastructure.context,RequestData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.data,UserPhotoData,0,12,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.domain.data,SelfKnowledgeElementDetails,6,0,0,0,1,0,1,0,1,0
+avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.domain.data,SelfKnowledgeElementDetails,0,6,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastructure.batch,AdditionalSkillBatchScheduler,40,0,0,0,13,0,3,0,3,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastructure.batch,AdditionalSkillReaderListener,67,0,0,0,20,0,4,0,4,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.interoperability.additionalskill.rome.infrastructure.batch,AdditionalSkillBatchLoader.new SkipListener() {...},23,0,0,0,7,0,4,0,4,0
@@ -152,4 +152,4 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.domain.service,St
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository,TraceDatabaseRepository,28,118,4,6,5,32,5,8,1,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio,AvenirsPortfolioApiApplication,5,3,0,0,2,1,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.domain.service,InstitutionServiceImpl,0,31,0,0,0,6,0,4,0,4
-avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.domain.service,SelfKnowledgeServiceImpl,249,141,29,7,65,39,25,12,10,9
+avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.domain.service,SelfKnowledgeServiceImpl,64,326,16,20,14,90,15,22,0,19
