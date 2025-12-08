@@ -13,8 +13,8 @@ import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedExcepti
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidRatingException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
-import fr.avenirsesr.portfolio.student.progress.domain.exception.SkillLevelNotFoundException;
-import fr.avenirsesr.portfolio.student.progress.domain.exception.StudentProgressNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.exception.SkillLevelNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.exception.StudentProgressNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserCategoryNotRecognizedException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
