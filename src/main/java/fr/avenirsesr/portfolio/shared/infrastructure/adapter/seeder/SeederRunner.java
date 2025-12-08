@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeCategorySeeder;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
+import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.DeclaredProgramSeeder;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder.DeclaredExperienceSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
@@ -49,6 +50,7 @@ public class SeederRunner implements CommandLineRunner {
   private final SelfKnowledgeElementSeeder selfKnowledgeElementSeeder;
   private final SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder;
   private final DeclaredExperienceSeeder declaredExperienceSeeder;
+  private final DeclaredProgramSeeder declaredProgramSeeder;
 
   @Value("${seeder.enabled:false}")
   private boolean seedEnabled;
@@ -79,7 +81,8 @@ public class SeederRunner implements CommandLineRunner {
       AdditionalSkillProgressSeeder additionalSkillProgressSeeder,
       SelfKnowledgeElementSeeder selfKnowledgeElementSeeder,
       SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder,
-      DeclaredExperienceSeeder declaredExperienceSeeder) {
+      DeclaredExperienceSeeder declaredExperienceSeeder,
+      DeclaredProgramSeeder declaredProgramSeeder) {
 
     this.dependencyChecker = dependencyChecker;
     this.userRepository = userRepository;
@@ -101,6 +104,7 @@ public class SeederRunner implements CommandLineRunner {
     this.selfKnowledgeElementSeeder = selfKnowledgeElementSeeder;
     this.selfKnowledgeCategorySeeder = selfKnowledgeCategorySeeder;
     this.declaredExperienceSeeder = declaredExperienceSeeder;
+    this.declaredProgramSeeder = declaredProgramSeeder;
   }
 
   @Override
@@ -139,6 +143,7 @@ public class SeederRunner implements CommandLineRunner {
       var savedAmses =
           amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
       var savedSelfKnowledgeElements = selfKnowledgeElementSeeder.seed(savedStudents);
+      var savedDeclaredProgramSeeder = declaredProgramSeeder.seed(savedStudents);
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
