@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedExcepti
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidRatingException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.exception.StudentProgressNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
@@ -131,6 +132,13 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   public ResponseEntity<ErrorResponse> handleSelfKnowledgeInvalidRatingException(
       SelfKnowledgeInvalidRatingException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(DeclaredExperienceNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleDeclaredExperienceNotFoundException(
+      DeclaredExperienceNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 }

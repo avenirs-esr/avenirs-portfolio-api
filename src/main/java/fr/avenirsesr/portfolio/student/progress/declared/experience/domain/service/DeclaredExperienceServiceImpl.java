@@ -1,8 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
+
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.shared.application.adapter.exception.RequestContextNotDefinedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
@@ -17,6 +19,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class DeclaredExperienceServiceImpl implements DeclaredExperienceService {
+  private static final int TITLE_MAX_LENGTH = 80;
+  private static final int ORGANIZATION_MAX_LENGTH = 80;
+  private static final int ACTIVITY_SECTOR_MAX_LENGTH = 50;
+  private static final int LOCATION_MAX_LENGTH = 50;
+  private static final int SOURCE_MAX_LENGTH = 200;
+  private static final int DESCRIPTION_MAX_LENGTH = 400;
+  private static final int SUMMARY_MAX_LENGTH = 400;
+
   private final LoggedInUserService loggedInUserService;
   private final DeclaredExperienceRepository experienceRepository;
   private final StudentRepository studentRepository;
@@ -35,18 +45,76 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-    Student student;
-    try {
-      student = loggedInUserService.getLoggedInStudent();
-    } catch (RequestContextNotDefinedException e) {
-      student = studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);
-    }
+    Student student =
+        studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);
+    return create(
+        student,
+        title,
+        experienceType,
+        organization,
+        activitySector,
+        location,
+        description,
+        sourceOfInformation,
+        summary,
+        externalLink,
+        startDate,
+        endDate);
+  }
 
-    if (!student.getId().equals(studentId)) {
-      throw new UserNotAuthorizedException(
-          "Student not authorized. loggedIn student : %s student is provided : %s"
-              .formatted(student, studentId));
-    }
+  @Override
+  public DeclaredExperience create(
+      String title,
+      EExperienceType experienceType,
+      String organization,
+      String activitySector,
+      String location,
+      String description,
+      String sourceOfInformation,
+      String summary,
+      String externalLink,
+      LocalDate startDate,
+      LocalDate endDate) {
+    return create(
+        loggedInUserService.getLoggedInStudent(),
+        title,
+        experienceType,
+        organization,
+        activitySector,
+        location,
+        description,
+        sourceOfInformation,
+        summary,
+        externalLink,
+        startDate,
+        endDate);
+  }
+
+  private DeclaredExperience create(
+      Student student,
+      String title,
+      EExperienceType experienceType,
+      String organization,
+      String activitySector,
+      String location,
+      String description,
+      String sourceOfInformation,
+      String summary,
+      String externalLink,
+      LocalDate startDate,
+      LocalDate endDate) {
+    log.info("DeclaredExperience creation for {}", student);
+
+    requireNotBlankAndMaxLength("title", title, TITLE_MAX_LENGTH);
+    requireNotBlankAndMaxLength("organization", organization, ORGANIZATION_MAX_LENGTH);
+    validateOptionalTextMaxLength("activitySector", activitySector, ACTIVITY_SECTOR_MAX_LENGTH);
+    validateOptionalTextMaxLength("location", location, LOCATION_MAX_LENGTH);
+    validateOptionalTextMaxLength("sourceOfInformation", sourceOfInformation, SOURCE_MAX_LENGTH);
+    validateOptionalTextMaxLength("description", description, DESCRIPTION_MAX_LENGTH);
+    validateOptionalTextMaxLength("summary", summary, SUMMARY_MAX_LENGTH);
+    requireNotNull("startDate", startDate);
+    validateDateOrder(startDate, endDate);
+
     var experience =
         DeclaredExperience.create(
             student,
@@ -64,6 +132,22 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
     experience = experienceRepository.save(experience);
     log.info("{} has been created", experience);
+    return experience;
+  }
+
+  @Override
+  public DeclaredExperience get(UUID experienceId) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    log.info("Get experienceId {} by {}", experienceId, student);
+
+    var experience =
+        experienceRepository
+            .findById(experienceId)
+            .orElseThrow(DeclaredExperienceNotFoundException::new);
+
+    if (!experience.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
     return experience;
   }
 }

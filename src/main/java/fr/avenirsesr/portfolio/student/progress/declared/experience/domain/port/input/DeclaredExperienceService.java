@@ -19,4 +19,19 @@ public interface DeclaredExperienceService {
       String externalLink,
       LocalDate startDate,
       LocalDate endDate);
+
+  DeclaredExperience create(
+      String title,
+      EExperienceType experienceType,
+      String organization,
+      String activitySector,
+      String location,
+      String description,
+      String sourceOfInformation,
+      String summary,
+      String externalLink,
+      LocalDate startDate,
+      LocalDate endDate);
+
+  DeclaredExperience get(UUID experienceId);
 }
