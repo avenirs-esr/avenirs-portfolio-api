@@ -1,0 +1,59 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1765277117656-1">
+        <createTable tableName="declared_experience">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="declared_experiencePK"/>
+            </column>
+            <column name="student_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="date"/>
+            <column name="experience_type" type="VARCHAR(255)"/>
+            <column name="activity_sector" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="external_link" type="VARCHAR(255)"/>
+            <column name="location" type="VARCHAR(255)"/>
+            <column name="organization" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_of_information" type="VARCHAR(255)"/>
+            <column name="summary" type="VARCHAR(255)"/>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1765277117656-2">
+        <createIndex indexName="idx_declared_experience_end_date" tableName="declared_experience">
+            <column name="end_date"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1765277117656-3">
+        <createIndex indexName="idx_declared_experience_start_date" tableName="declared_experience">
+            <column name="start_date"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1765277117656-4">
+        <createIndex indexName="idx_declared_experience_student" tableName="declared_experience">
+            <column name="student_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1765277117656-5">
+        <createIndex indexName="idx_declared_experience_type" tableName="declared_experience">
+            <column name="experience_type"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1765277117656-6">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="declared_experience" constraintName="FKr7gd8qy8fxa5kf92ere0iqhh" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="student" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

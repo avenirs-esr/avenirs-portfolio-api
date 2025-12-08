@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.user.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeUser;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -15,13 +14,12 @@ public class UserFixture {
   private Instant updatedAt;
 
   private UserFixture() {
-    var base = FakeUser.create().toEntity();
-    this.id = base.getId();
-    this.firstName = base.getFirstName();
-    this.lastName = base.getLastName();
-    this.email = base.getEmail();
-    this.createdAt = base.getCreatedAt();
-    this.updatedAt = base.getUpdatedAt();
+    this.id = UUID.randomUUID();
+    this.firstName = "firstName";
+    this.lastName = "lastName";
+    this.email = "user@email.com";
+    this.createdAt = Instant.now();
+    this.updatedAt = Instant.now();
   }
 
   public static UserFixture create() {

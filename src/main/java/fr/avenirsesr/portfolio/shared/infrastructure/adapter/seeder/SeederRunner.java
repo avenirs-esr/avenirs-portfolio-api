@@ -13,8 +13,9 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeCategorySeeder;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder.DeclaredExperienceSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
+import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
@@ -47,6 +48,7 @@ public class SeederRunner implements CommandLineRunner {
   private final AdditionalSkillProgressSeeder additionalSkillProgressSeeder;
   private final SelfKnowledgeElementSeeder selfKnowledgeElementSeeder;
   private final SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder;
+  private final DeclaredExperienceSeeder declaredExperienceSeeder;
 
   @Value("${seeder.enabled:false}")
   private boolean seedEnabled;
@@ -76,7 +78,8 @@ public class SeederRunner implements CommandLineRunner {
       AdditionalSkillSeeder additionalSkillSeeder,
       AdditionalSkillProgressSeeder additionalSkillProgressSeeder,
       SelfKnowledgeElementSeeder selfKnowledgeElementSeeder,
-      SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder) {
+      SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder,
+      DeclaredExperienceSeeder declaredExperienceSeeder) {
 
     this.dependencyChecker = dependencyChecker;
     this.userRepository = userRepository;
@@ -97,6 +100,7 @@ public class SeederRunner implements CommandLineRunner {
     this.additionalSkillProgressSeeder = additionalSkillProgressSeeder;
     this.selfKnowledgeElementSeeder = selfKnowledgeElementSeeder;
     this.selfKnowledgeCategorySeeder = selfKnowledgeCategorySeeder;
+    this.declaredExperienceSeeder = declaredExperienceSeeder;
   }
 
   @Override
@@ -114,6 +118,7 @@ public class SeederRunner implements CommandLineRunner {
       var savedUsers = userSeeder.seed();
       var savedTeachers = teacherSeeder.seed(savedUsers);
       var savedStudents = studentSeeder.seed(savedUsers, savedSelfKnowledgeMandatoryCategories);
+      declaredExperienceSeeder.seed(savedStudents);
       var savedUserPhotos = userPhotoSeeder.seed(savedStudents, savedTeachers);
       var savedAdditionalSkills = additionalSkillSeeder.seed();
       var savedStudentAdditionalSkills =

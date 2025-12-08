@@ -55,4 +55,7 @@ public class SeederConfig {
   // Student Self Knowledge Elements
   public static final int MIN_SELF_KNOWLEDGE_ELEMENT_RATING = 1;
   public static final int MAX_SELF_KNOWLEDGE_ELEMENT_RATING = 5;
+
+  // Declared experience
+  public static final int NB_OF_DECLARED_EXPERIENCES = 10;
 }

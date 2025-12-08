@@ -26,6 +26,7 @@ public class StudentFixture {
 
   public StudentFixture withId(UUID id) {
     this.id = id;
+    this.user = UserFixture.create().withId(id).toModel();
     return this;
   }
 

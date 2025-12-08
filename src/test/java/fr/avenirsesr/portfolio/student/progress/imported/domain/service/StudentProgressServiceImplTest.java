@@ -37,14 +37,14 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.data.AdditionalS
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.exception.AdditionalSkillProgressNotFoundException;
-import fr.avenirsesr.portfolio.student.progress.domain.model.*;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.model.*;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
-import fr.avenirsesr.portfolio.student.progress.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;

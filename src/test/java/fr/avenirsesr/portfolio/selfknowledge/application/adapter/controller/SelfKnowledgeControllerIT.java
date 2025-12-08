@@ -93,7 +93,7 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
   @Test
   void shouldReturnSelfKnowledgeCategoriesForStudent() throws Exception {
     BddLogger.given("the " + CATEGORIES_BASE_PATH + " endpoint");
-    BddLogger.when("performing a GET as a student");
+    BddLogger.when("performing a GET as student");
     BddLogger.then("it should return the self knowledge categories linked to the student");
 
     mockMvc
