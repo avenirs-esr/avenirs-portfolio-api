@@ -5,22 +5,30 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryIsMandatoryException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryListIsEmptyException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeElementNotFoundException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture.SelfKnowledgeCategoryFixture;
+import fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture.SelfKnowledgeElementFixture;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -117,6 +125,97 @@ class SelfKnowledgeServiceImplTest {
             assertThat(result.get(2).getType()).isEqualTo(ESelfKnowledgeCategoryType.ASPIRATIONS);
 
             verify(selfKnowledgeCategoryRepository).findAllByStudent(eq(student));
+          }
+        }
+      }
+
+      @Nested
+      class AndUnknownCategory {
+
+        private UUID unknownId;
+
+        @BeforeEach
+        void setupAnd() {
+          unknownId = UUID.randomUUID();
+
+          when(selfKnowledgeCategoryRepository.findById(eq(unknownId)))
+              .thenReturn(Optional.empty());
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeElementsPaginated {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
+            BddLogger.when("getting self knowledge elements paginated with unknown category");
+            BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
+
+            assertThrows(
+                SelfKnowledgeCategoryNotFoundException.class,
+                () ->
+                    selfKnowledgeService.getSelfKnowledgeElements(
+                        unknownId, new PageCriteria(0, 8)));
+          }
+        }
+
+        @Nested
+        class WhenCreatingSelfKnowledgeElement {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
+            BddLogger.when("creating self knowledge element with unknown category");
+            BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
+
+            assertThrows(
+                SelfKnowledgeCategoryNotFoundException.class,
+                () ->
+                    selfKnowledgeService.createSelfKnowledgeElement(
+                        unknownId, "Title", "Description", 1));
+          }
+        }
+      }
+
+      @Nested
+      class AndUnknownElements {
+
+        private UUID unknownId;
+
+        @BeforeEach
+        void setupAnd() {
+          unknownId = UUID.randomUUID();
+
+          when(selfKnowledgeElementRepository.findById(eq(unknownId))).thenReturn(Optional.empty());
+          when(selfKnowledgeElementRepository.findAllById(eq(List.of(unknownId))))
+              .thenReturn(Collections.emptyList());
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeElementDetails {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeElementNotFoundException() {
+            BddLogger.when("getting self knowledge elements details with unknown element");
+            BddLogger.then("it should throw SelfKnowledgeElementNotFoundException");
+
+            assertThrows(
+                SelfKnowledgeElementNotFoundException.class,
+                () -> selfKnowledgeService.getSelfKnowledgeElementDetails(unknownId));
+          }
+        }
+
+        @Nested
+        class WhenUpdatingSelfKnowledgeElement {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeElementNotFoundException() {
+            BddLogger.when("updating self knowledge element with unknown element");
+            BddLogger.then("it should throw SelfKnowledgeElementNotFoundException");
+
+            assertThrows(
+                SelfKnowledgeElementNotFoundException.class,
+                () ->
+                    selfKnowledgeService.updateSelfKnowledgeElement(
+                        unknownId, "Title", "Description", 1));
           }
         }
       }
@@ -413,6 +512,168 @@ class SelfKnowledgeServiceImplTest {
               .removeSelfKnowledgeCategory(eq(student), any(SelfKnowledgeCategory.class));
         }
       }
+
+      @Nested
+      class AndSelfKnowledgeElement {
+
+        private SelfKnowledgeElement selfKnowledgeElement;
+        private SelfKnowledgeCategory selfKnowledgeCategory;
+        private UUID selfKnowledgeElementId;
+        private UUID selfKnowledgeCategoryId;
+        private PageCriteria pageCriteria;
+
+        @BeforeEach
+        void setupAnd() {
+          selfKnowledgeElement =
+              SelfKnowledgeElementFixture.create().withStudent(student).toModel();
+          selfKnowledgeCategory = selfKnowledgeElement.getSelfKnowledgeCategory();
+          selfKnowledgeElementId = selfKnowledgeElement.getId();
+          selfKnowledgeCategoryId = selfKnowledgeCategory.getId();
+          pageCriteria = new PageCriteria(0, 8);
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeElementsPaginated {
+
+          @Test
+          void thenItShouldGetSelfKnowledgeElementsPaginated() {
+            PagedResult<SelfKnowledgeElement> expectedResult =
+                new PagedResult<>(List.of(selfKnowledgeElement), new PageInfo(0, 8, 1));
+
+            when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
+                .thenReturn(Optional.of(selfKnowledgeCategory));
+            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
+                    student.getId(), selfKnowledgeCategoryId, pageCriteria))
+                .thenReturn(expectedResult);
+
+            BddLogger.when("getting self knowledge elements paginated");
+            PagedResult<SelfKnowledgeElement> actualResult =
+                selfKnowledgeService.getSelfKnowledgeElements(
+                    selfKnowledgeCategoryId, pageCriteria);
+
+            BddLogger.then("it should retrieve self knowledge elements paginated");
+            assertThat(actualResult).isEqualTo(expectedResult);
+
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(selfKnowledgeCategoryRepository).findById(selfKnowledgeCategoryId);
+            verify(selfKnowledgeElementRepository)
+                .findAllByStudentIdAndCategoryId(
+                    student.getId(), selfKnowledgeCategoryId, pageCriteria);
+          }
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeElementDetails {
+
+          @Test
+          void thenItShouldGetSelfKnowledgeElementDetails() {
+            when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
+                .thenReturn(Optional.of(selfKnowledgeElement));
+
+            BddLogger.when("getting self knowledge elements details");
+            SelfKnowledgeElementDetails actualResult =
+                selfKnowledgeService.getSelfKnowledgeElementDetails(selfKnowledgeElement.getId());
+
+            BddLogger.then("it should retrieve self knowledge elements details");
+            assertThat(actualResult.selfKnowledgeElement()).isEqualTo(selfKnowledgeElement);
+
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(selfKnowledgeElementRepository).findById(selfKnowledgeElementId);
+          }
+        }
+
+        @Nested
+        class WhenUpdatingSelfKnowledgeElement {
+
+          @Test
+          void thenItShouldUpdateSelfKnowledgeElement() {
+            String newTitle = "Titre Mis à jour";
+            String newDescription = "Description Mise à jour";
+            Integer newRating = 4;
+
+            when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
+                .thenReturn(Optional.of(selfKnowledgeElement));
+            when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+            BddLogger.when("updating self knowledge element");
+            SelfKnowledgeElement result =
+                selfKnowledgeService.updateSelfKnowledgeElement(
+                    selfKnowledgeElementId, newTitle, newDescription, newRating);
+
+            BddLogger.then("it should update self knowledge element");
+
+            assertThat(result.getTitle()).isEqualTo(newTitle);
+            assertThat(result.getDescription()).isEqualTo(newDescription);
+            assertThat(result.getRating()).isEqualTo(newRating);
+
+            assertThat(selfKnowledgeElement.getTitle()).isEqualTo(newTitle);
+
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(selfKnowledgeElementRepository).findById(selfKnowledgeElementId);
+            verify(selfKnowledgeElementRepository).save(selfKnowledgeElement);
+          }
+        }
+
+        @Nested
+        class WhenDeletingSelfKnowledgeElement {
+
+          @Test
+          void thenItShouldDeleteSelfKnowledgeElement() {
+            List<UUID> idsToDelete = List.of(selfKnowledgeElementId);
+
+            when(selfKnowledgeElementRepository.findAllById(idsToDelete))
+                .thenReturn(List.of(selfKnowledgeElement));
+
+            BddLogger.when("deleting self knowledge element");
+            selfKnowledgeService.deleteSelfKnowledgeElements(idsToDelete);
+
+            BddLogger.then("it should delete self knowledge element");
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(selfKnowledgeElementRepository).findAllById(idsToDelete);
+            verify(selfKnowledgeElementRepository)
+                .removeAllFromDatabase(List.of(selfKnowledgeElement));
+          }
+        }
+      }
+
+      @Nested
+      class WhenCreatingSelfKnowledgeElement {
+
+        @Test
+        void thenItShouldCreateSelfKnowledgeElement() {
+          SelfKnowledgeCategory selfKnowledgeCategory =
+              SelfKnowledgeCategoryFixture.create().toModel();
+          UUID selfKnowledgeCategoryId = selfKnowledgeCategory.getId();
+          String title = "Empathie";
+          String description = "J’ai une bonne capacité à écouter et comprendre les autres.";
+          Integer rating = 5;
+
+          when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
+              .thenReturn(Optional.of(selfKnowledgeCategory));
+          when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
+              .thenAnswer(invocation -> invocation.getArgument(0));
+
+          BddLogger.when("creating self knowledge element");
+          SelfKnowledgeElement result =
+              selfKnowledgeService.createSelfKnowledgeElement(
+                  selfKnowledgeCategoryId, title, description, rating);
+
+          BddLogger.then("it should create self knowledge element");
+
+          assertThat(result).isNotNull();
+          assertThat(result.getId()).isNotNull();
+          assertThat(result.getTitle()).isEqualTo(title);
+          assertThat(result.getDescription()).isEqualTo(description);
+          assertThat(result.getRating()).isEqualTo(rating);
+          assertThat(result.getStudent()).isEqualTo(student);
+          assertThat(result.getSelfKnowledgeCategory()).isEqualTo(selfKnowledgeCategory);
+
+          verify(loggedInUserService).getLoggedInStudent();
+          verify(selfKnowledgeCategoryRepository).findById(selfKnowledgeCategoryId);
+          verify(selfKnowledgeElementRepository).save(any(SelfKnowledgeElement.class));
+        }
+      }
     }
 
     @Nested
@@ -501,6 +762,84 @@ class SelfKnowledgeServiceImplTest {
           verifyNoInteractions(selfKnowledgeElementRepository);
         }
       }
+
+      @Nested
+      class WhenGettingSelfKnowledgeElementsPaginated {
+
+        @Test
+        void thenItShouldThrowUserNotFoundException() {
+          BddLogger.when("getting self knowledge elements paginated without logged in user");
+          BddLogger.then("it should throw UserNotFoundException");
+
+          assertThrows(
+              UserNotFoundException.class,
+              () ->
+                  selfKnowledgeService.getSelfKnowledgeElements(
+                      UUID.randomUUID(), new PageCriteria(0, 8)));
+        }
+      }
+
+      @Nested
+      class WhenGettingSelfKnowledgeElementDetails {
+
+        @Test
+        void thenItShouldThrowUserNotFoundException() {
+          BddLogger.when("getting self knowledge elements details without logged in user");
+          BddLogger.then("it should throw UserNotFoundException");
+
+          assertThrows(
+              UserNotFoundException.class,
+              () -> selfKnowledgeService.getSelfKnowledgeElementDetails(UUID.randomUUID()));
+        }
+      }
+
+      @Nested
+      class WhenCreatingSelfKnowledgeElement {
+
+        @Test
+        void thenItShouldThrowUserNotFoundException() {
+          BddLogger.when("creating self knowledge element without logged in user");
+          BddLogger.then("it should throw UserNotFoundException");
+
+          assertThrows(
+              UserNotFoundException.class,
+              () ->
+                  selfKnowledgeService.createSelfKnowledgeElement(
+                      UUID.randomUUID(), "Title", "Description", 1));
+        }
+      }
+
+      @Nested
+      class WhenUpdatingSelfKnowledgeElement {
+
+        @Test
+        void thenItShouldThrowUserNotFoundException() {
+          BddLogger.when("updating self knowledge element without logged in user");
+          BddLogger.then("it should throw UserNotFoundException");
+
+          assertThrows(
+              UserNotFoundException.class,
+              () ->
+                  selfKnowledgeService.updateSelfKnowledgeElement(
+                      UUID.randomUUID(), "Title", "Description", 1));
+        }
+      }
+
+      @Nested
+      class WhenDeletingSelfKnowledgeElement {
+
+        @Test
+        void thenItShouldThrowUserNotFoundException() {
+          BddLogger.when("deleting self knowledge element without logged in user");
+          BddLogger.then("it should throw UserNotFoundException");
+
+          assertThrows(
+              UserNotFoundException.class,
+              () ->
+                  selfKnowledgeService.deleteSelfKnowledgeElements(
+                      List.of(UUID.randomUUID(), UUID.randomUUID())));
+        }
+      }
     }
 
     @Nested
@@ -583,6 +922,84 @@ class SelfKnowledgeServiceImplTest {
 
           verifyNoInteractions(selfKnowledgeCategoryRepository);
           verifyNoInteractions(selfKnowledgeElementRepository);
+        }
+      }
+
+      @Nested
+      class WhenGettingSelfKnowledgeElementsPaginated {
+
+        @Test
+        void thenItShouldThrowUserIsNotStudentException() {
+          BddLogger.when("getting self knowledge elements paginated for a non student user");
+          BddLogger.then("it should throw UserIsNotStudentException");
+
+          assertThrows(
+              UserIsNotStudentException.class,
+              () ->
+                  selfKnowledgeService.getSelfKnowledgeElements(
+                      UUID.randomUUID(), new PageCriteria(0, 8)));
+        }
+      }
+
+      @Nested
+      class WhenGettingSelfKnowledgeElementDetails {
+
+        @Test
+        void thenItShouldThrowUserIsNotStudentException() {
+          BddLogger.when("getting self knowledge elements details for a non student user");
+          BddLogger.then("it should throw UserIsNotStudentException");
+
+          assertThrows(
+              UserIsNotStudentException.class,
+              () -> selfKnowledgeService.getSelfKnowledgeElementDetails(UUID.randomUUID()));
+        }
+      }
+
+      @Nested
+      class WhenCreatingSelfKnowledgeElement {
+
+        @Test
+        void thenItShouldThrowUserIsNotStudentException() {
+          BddLogger.when("creating self knowledge element for a non student user");
+          BddLogger.then("it should throw UserIsNotStudentException");
+
+          assertThrows(
+              UserIsNotStudentException.class,
+              () ->
+                  selfKnowledgeService.createSelfKnowledgeElement(
+                      UUID.randomUUID(), "Title", "Description", 1));
+        }
+      }
+
+      @Nested
+      class WhenUpdatingSelfKnowledgeElement {
+
+        @Test
+        void thenItShouldThrowUserIsNotStudentException() {
+          BddLogger.when("updating self knowledge element for a non student user");
+          BddLogger.then("it should throw UserIsNotStudentException");
+
+          assertThrows(
+              UserIsNotStudentException.class,
+              () ->
+                  selfKnowledgeService.updateSelfKnowledgeElement(
+                      UUID.randomUUID(), "Title", "Description", 1));
+        }
+      }
+
+      @Nested
+      class WhenDeletingSelfKnowledgeElement {
+
+        @Test
+        void thenItShouldThrowUserIsNotStudentException() {
+          BddLogger.when("deleting self knowledge element for a non student user");
+          BddLogger.then("it should throw UserIsNotStudentException");
+
+          assertThrows(
+              UserIsNotStudentException.class,
+              () ->
+                  selfKnowledgeService.deleteSelfKnowledgeElements(
+                      List.of(UUID.randomUUID(), UUID.randomUUID())));
         }
       }
     }
