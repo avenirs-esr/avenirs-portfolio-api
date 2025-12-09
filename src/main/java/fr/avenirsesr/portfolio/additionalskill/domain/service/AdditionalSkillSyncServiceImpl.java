@@ -10,10 +10,11 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class AdditionalSkillSyncServiceImpl implements AdditionalSkillSyncService {
 
@@ -47,16 +48,9 @@ public class AdditionalSkillSyncServiceImpl implements AdditionalSkillSyncServic
             EAdditionalSkillType.valueOf(dto.type().name()),
             dto.pathSegments());
 
-    AdditionalSkill saved = saveSafe(externalSkillId, newSkill);
+    AdditionalSkill saved = additionalSkillRepository.save(newSkill);
     log.info("Created new AdditionalSkill from external skill: {}", externalSkillId);
-    return Optional.of(saved);
-  }
 
-  private AdditionalSkill saveSafe(UUID externalSkillId, AdditionalSkill newSkill) {
-    try {
-      return additionalSkillRepository.save(newSkill);
-    } catch (DataIntegrityViolationException e) {
-      return additionalSkillRepository.findByExternalSkillId(externalSkillId).orElseThrow(() -> e);
-    }
+    return Optional.of(saved);
   }
 }

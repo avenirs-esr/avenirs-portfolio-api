@@ -20,7 +20,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
 class AdditionalSkillSyncServiceImplTest {
@@ -165,41 +164,5 @@ class AdditionalSkillSyncServiceImplTest {
     List<AdditionalSkill> savedSkills = captor.getAllValues();
     assertThat(savedSkills.get(0).getType()).isEqualTo(EAdditionalSkillType.ROME4);
     assertThat(savedSkills.get(1).getType()).isEqualTo(EAdditionalSkillType.XXI);
-  }
-
-  @Test
-  void shouldReturnExistingAdditionalSkillWhenSaveFailsWithUniqueConstraint() {
-    BddLogger.given("no existing AdditionalSkill at first check but a concurrent insert occurs");
-    UUID externalSkillId = UUID.randomUUID();
-    ExternalSkillDTO externalSkillDTO =
-        new ExternalSkillDTO(
-            externalSkillId,
-            "Concurrent Skill",
-            List.of("IT", "Development"),
-            EExternalSkillType.ROME4);
-
-    AdditionalSkill existingSkill =
-        AdditionalSkill.create(
-            externalSkillId,
-            "Concurrent Skill",
-            EAdditionalSkillType.ROME4,
-            List.of("IT", "Development"));
-
-    when(additionalSkillRepository.findByExternalSkillId(externalSkillId))
-        .thenReturn(Optional.empty())
-        .thenReturn(Optional.of(existingSkill));
-    when(externalSkillClient.getById(externalSkillId)).thenReturn(Optional.of(externalSkillDTO));
-    when(additionalSkillRepository.save(any(AdditionalSkill.class)))
-        .thenThrow(new DataIntegrityViolationException("duplicate key"));
-
-    BddLogger.when("calling getOrCreateFromExternalSkill while a concurrent insert happens");
-    Optional<AdditionalSkill> result = service.getOrCreateFromExternalSkill(externalSkillId);
-
-    BddLogger.then("it should return the existing skill created by the concurrent operation");
-    assertThat(result).isPresent();
-    assertThat(result.get()).isEqualTo(existingSkill);
-
-    verify(additionalSkillRepository, times(2)).findByExternalSkillId(externalSkillId);
-    verify(additionalSkillRepository).save(any(AdditionalSkill.class));
   }
 }

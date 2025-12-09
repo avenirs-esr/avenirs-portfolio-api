@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(
-    name = "additional_skill",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"external_skill_id", "type"}))
+@Table(name = "additional_skill")
 @NoArgsConstructor
 @Getter
 @Setter
