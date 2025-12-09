@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface AdditionalSkillRepository extends GenericRepositoryPort<AdditionalSkill> {
   Optional<AdditionalSkill> findByExternalSkillId(UUID externalSkillId);
+
+  AdditionalSkill saveOrGet(AdditionalSkill additionalSkill);
 }

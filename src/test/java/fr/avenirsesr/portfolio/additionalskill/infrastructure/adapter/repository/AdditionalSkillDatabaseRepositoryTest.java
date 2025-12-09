@@ -246,4 +246,27 @@ class AdditionalSkillDatabaseRepositoryTest {
     assertNotNull(foundSkill.get().getPathSegments());
     assertTrue(foundSkill.get().getPathSegments().isEmpty());
   }
+
+  @Test
+  void shouldReturnExistingSkillWhenSaveOrGetOnDuplicateExternalSkillIdAndType() {
+    BddLogger.given("an existing AdditionalSkillEntity with a given externalSkillId and type");
+    UUID externalSkillId = UUID.randomUUID();
+    EAdditionalSkillType type = EAdditionalSkillType.ROME4;
+
+    AdditionalSkillEntity existingEntity =
+        AdditionalSkillEntity.create(externalSkillId, "Existing Skill", type, List.of("A", "B"));
+    existingEntity = jpaRepository.save(existingEntity);
+
+    BddLogger.when(
+        "calling saveOrGet with a domain object having the same externalSkillId and type");
+    AdditionalSkill toSave =
+        AdditionalSkill.create(externalSkillId, "New Name", type, List.of("X", "Y"));
+
+    AdditionalSkill result = repository.saveOrGet(toSave);
+
+    BddLogger.then("it should return a skill with the same externalSkillId and type");
+    assertNotNull(result);
+    assertEquals(existingEntity.getExternalSkillId(), result.getExternalSkillId());
+    assertEquals(existingEntity.getType(), result.getType());
+  }
 }

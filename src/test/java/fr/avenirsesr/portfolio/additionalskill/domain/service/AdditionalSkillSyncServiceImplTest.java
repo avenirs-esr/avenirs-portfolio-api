@@ -20,7 +20,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
 class AdditionalSkillSyncServiceImplTest {
@@ -48,7 +47,7 @@ class AdditionalSkillSyncServiceImplTest {
     assertThat(result).isPresent();
     assertThat(result.get()).isEqualTo(existing);
     verify(externalSkillClient, never()).getById(any());
-    verify(additionalSkillRepository, never()).save(any());
+    verify(additionalSkillRepository, never()).saveOrGet(any());
   }
 
   @Test
@@ -72,7 +71,7 @@ class AdditionalSkillSyncServiceImplTest {
             "Java Programming",
             EAdditionalSkillType.ROME4,
             List.of("IT", "Development"));
-    when(additionalSkillRepository.save(any(AdditionalSkill.class))).thenReturn(savedSkill);
+    when(additionalSkillRepository.saveOrGet(any(AdditionalSkill.class))).thenReturn(savedSkill);
 
     BddLogger.when("calling getOrCreateFromExternalSkill");
     Optional<AdditionalSkill> result = service.getOrCreateFromExternalSkill(externalSkillId);
@@ -81,7 +80,7 @@ class AdditionalSkillSyncServiceImplTest {
     assertThat(result).isPresent();
 
     ArgumentCaptor<AdditionalSkill> captor = ArgumentCaptor.forClass(AdditionalSkill.class);
-    verify(additionalSkillRepository).save(captor.capture());
+    verify(additionalSkillRepository).saveOrGet(captor.capture());
 
     AdditionalSkill captured = captor.getValue();
     assertThat(captured.getExternalSkillId()).isEqualTo(externalSkillId);
@@ -104,7 +103,7 @@ class AdditionalSkillSyncServiceImplTest {
 
     BddLogger.then("it should return empty and not save anything");
     assertThat(result).isEmpty();
-    verify(additionalSkillRepository, never()).save(any());
+    verify(additionalSkillRepository, never()).saveOrGet(any());
   }
 
   @Test
@@ -120,7 +119,7 @@ class AdditionalSkillSyncServiceImplTest {
 
     AdditionalSkill savedSkill =
         AdditionalSkill.create(externalSkillId, "Simple Skill", EAdditionalSkillType.XXI, null);
-    when(additionalSkillRepository.save(any(AdditionalSkill.class))).thenReturn(savedSkill);
+    when(additionalSkillRepository.saveOrGet(any(AdditionalSkill.class))).thenReturn(savedSkill);
 
     BddLogger.when("calling getOrCreateFromExternalSkill");
     Optional<AdditionalSkill> result = service.getOrCreateFromExternalSkill(externalSkillId);
@@ -129,7 +128,7 @@ class AdditionalSkillSyncServiceImplTest {
     assertThat(result).isPresent();
 
     ArgumentCaptor<AdditionalSkill> captor = ArgumentCaptor.forClass(AdditionalSkill.class);
-    verify(additionalSkillRepository).save(captor.capture());
+    verify(additionalSkillRepository).saveOrGet(captor.capture());
 
     AdditionalSkill captured = captor.getValue();
     assertThat(captured.getPathSegments()).isNotNull();
@@ -151,7 +150,7 @@ class AdditionalSkillSyncServiceImplTest {
     when(externalSkillClient.getById(externalSkillId1)).thenReturn(Optional.of(rome4Skill));
     when(externalSkillClient.getById(externalSkillId2)).thenReturn(Optional.of(xxiSkill));
 
-    when(additionalSkillRepository.save(any(AdditionalSkill.class)))
+    when(additionalSkillRepository.saveOrGet(any(AdditionalSkill.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
     BddLogger.when("creating skills with different types");
@@ -160,7 +159,7 @@ class AdditionalSkillSyncServiceImplTest {
 
     BddLogger.then("types should be correctly mapped");
     ArgumentCaptor<AdditionalSkill> captor = ArgumentCaptor.forClass(AdditionalSkill.class);
-    verify(additionalSkillRepository, times(2)).save(captor.capture());
+    verify(additionalSkillRepository, times(2)).saveOrGet(captor.capture());
 
     List<AdditionalSkill> savedSkills = captor.getAllValues();
     assertThat(savedSkills.get(0).getType()).isEqualTo(EAdditionalSkillType.ROME4);
@@ -189,8 +188,7 @@ class AdditionalSkillSyncServiceImplTest {
         .thenReturn(Optional.empty())
         .thenReturn(Optional.of(existingSkill));
     when(externalSkillClient.getById(externalSkillId)).thenReturn(Optional.of(externalSkillDTO));
-    when(additionalSkillRepository.save(any(AdditionalSkill.class)))
-        .thenThrow(new DataIntegrityViolationException("duplicate key"));
+    when(additionalSkillRepository.saveOrGet(any(AdditionalSkill.class))).thenReturn(existingSkill);
 
     BddLogger.when("calling getOrCreateFromExternalSkill while a concurrent insert happens");
     Optional<AdditionalSkill> result = service.getOrCreateFromExternalSkill(externalSkillId);
@@ -199,7 +197,7 @@ class AdditionalSkillSyncServiceImplTest {
     assertThat(result).isPresent();
     assertThat(result.get()).isEqualTo(existingSkill);
 
-    verify(additionalSkillRepository, times(2)).findByExternalSkillId(externalSkillId);
-    verify(additionalSkillRepository).save(any(AdditionalSkill.class));
+    verify(additionalSkillRepository, times(1)).findByExternalSkillId(externalSkillId);
+    verify(additionalSkillRepository).saveOrGet(any(AdditionalSkill.class));
   }
 }

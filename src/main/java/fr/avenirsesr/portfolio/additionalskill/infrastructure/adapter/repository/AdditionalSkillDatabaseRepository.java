@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.Addi
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,5 +30,14 @@ public class AdditionalSkillDatabaseRepository
     return jpaRepository
         .findByExternalSkillId(externalSkillId)
         .map(AdditionalSkillMapper::toDomain);
+  }
+
+  @Override
+  public AdditionalSkill saveOrGet(AdditionalSkill additionalSkill) {
+    try {
+      return save(additionalSkill);
+    } catch (DataIntegrityViolationException e) {
+      return findByExternalSkillId(additionalSkill.getExternalSkillId()).orElseThrow(() -> e);
+    }
   }
 }
