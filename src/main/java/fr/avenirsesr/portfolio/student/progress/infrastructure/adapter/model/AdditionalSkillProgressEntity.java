@@ -25,7 +25,7 @@ public class AdditionalSkillProgressEntity extends AvenirsBaseEntity {
   private StudentEntity student;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "additional_skill_id")
+  @JoinColumn(name = "additional_skill_id", nullable = true)
   private AdditionalSkillEntity additionalSkill;
 
   @Column(name = "level")

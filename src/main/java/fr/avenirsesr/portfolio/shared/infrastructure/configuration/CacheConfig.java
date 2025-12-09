@@ -1,8 +1,10 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillPagedResult;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.opensearch.AdditionalSkillConstants;
+import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDTO;
+import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
+import java.time.Duration;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -18,19 +20,42 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 public class CacheConfig {
 
   @Bean
-  public CacheManager additionalSkillCacheManager(RedisConnectionFactory factory) {
+  public CacheManager externalSkillCacheManager(RedisConnectionFactory factory) {
     ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
 
-    Jackson2JsonRedisSerializer<AdditionalSkillPagedResult> serializer =
-        new Jackson2JsonRedisSerializer<>(mapper, AdditionalSkillPagedResult.class);
+    @SuppressWarnings("unchecked")
+    Jackson2JsonRedisSerializer<PagedResponse<ExternalSkillDTO>> searchSerializer =
+        (Jackson2JsonRedisSerializer<PagedResponse<ExternalSkillDTO>>)
+            (Jackson2JsonRedisSerializer<?>)
+                new Jackson2JsonRedisSerializer<>(mapper, PagedResponse.class);
 
-    RedisCacheConfiguration config =
+    Jackson2JsonRedisSerializer<ExternalSkillDetailsDTO> detailsSerializer =
+        new Jackson2JsonRedisSerializer<>(mapper, ExternalSkillDetailsDTO.class);
+
+    Jackson2JsonRedisSerializer<ExternalSkillDTO> byIdSerializer =
+        new Jackson2JsonRedisSerializer<>(mapper, ExternalSkillDTO.class);
+
+    RedisCacheConfiguration searchConfig =
         RedisCacheConfiguration.defaultCacheConfig()
             .serializeValuesWith(
-                RedisSerializationContext.SerializationPair.fromSerializer(serializer));
+                RedisSerializationContext.SerializationPair.fromSerializer(searchSerializer));
+
+    RedisCacheConfiguration detailsConfig =
+        RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofHours(24))
+            .serializeValuesWith(
+                RedisSerializationContext.SerializationPair.fromSerializer(detailsSerializer));
+
+    RedisCacheConfiguration byIdConfig =
+        RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofHours(24))
+            .serializeValuesWith(
+                RedisSerializationContext.SerializationPair.fromSerializer(byIdSerializer));
 
     return RedisCacheManager.builder(factory)
-        .withCacheConfiguration(AdditionalSkillConstants.INDEX, config)
+        .withCacheConfiguration("external-skill-search", searchConfig)
+        .withCacheConfiguration("externalSkillDetails", detailsConfig)
+        .withCacheConfiguration("externalSkillById", byIdConfig)
         .build();
   }
 }

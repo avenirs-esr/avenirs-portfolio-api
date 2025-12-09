@@ -1,12 +1,13 @@
 package fr.avenirsesr.portfolio.student.progress.application.adapter.mapper;
 
-import fr.avenirsesr.portfolio.additionalskill.application.adapter.mapper.AdditionalSkillCategoryMapper;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkillCategory;
+import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillCategoryDTO;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillCategoryType;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.application.adapter.dto.AdditionalSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
+import java.util.List;
 
 public interface AdditionalSkillProgressMapper {
   static AdditionalSkillProgressDTO toAdditionalSkillProgressDTO(
@@ -14,9 +15,7 @@ public interface AdditionalSkillProgressMapper {
     return new AdditionalSkillProgressDTO(
         additionalSkillProgress.getId(),
         additionalSkillProgress.getSkill().getLibelle(),
-        additionalSkillProgress.getSkill().getCategoryPath().stream()
-            .map(AdditionalSkillCategory::getLibelle)
-            .toList(),
+        additionalSkillProgress.getSkill().getPathSegments(),
         additionalSkillProgress.getSkill().getType(),
         additionalSkillProgress.getLevel(),
         additionalSkillProgress.getDescription());
@@ -24,16 +23,19 @@ public interface AdditionalSkillProgressMapper {
 
   static AdditionalSkillProgressDetailsDTO toAdditionalSkillProgressDetailsDTO(
       AdditionalSkillProgressDetails additionalSkillProgressDetails) {
+    List<AdditionalSkillCategoryDTO> categories =
+        additionalSkillProgressDetails.externalCategories().stream()
+            .map(
+                externalCat ->
+                    new AdditionalSkillCategoryDTO(
+                        externalCat.libelle(),
+                        EAdditionalSkillCategoryType.valueOf(externalCat.type().name())))
+            .toList();
+
     return new AdditionalSkillProgressDetailsDTO(
         additionalSkillProgressDetails.additionalSkillProgress().getId(),
         additionalSkillProgressDetails.additionalSkillProgress().getSkill().getLibelle(),
-        additionalSkillProgressDetails
-            .additionalSkillProgress()
-            .getSkill()
-            .getCategoryPath()
-            .stream()
-            .map(AdditionalSkillCategoryMapper::toDTO)
-            .toList(),
+        categories,
         additionalSkillProgressDetails.additionalSkillProgress().getDescription(),
         additionalSkillProgressDetails.additionalSkillProgress().getSkill().getType(),
         additionalSkillProgressDetails.additionalSkillProgress().getLevel(),

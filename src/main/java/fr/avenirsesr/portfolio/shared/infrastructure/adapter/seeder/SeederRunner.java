@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
+import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.TraceAttachmentSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class SeederRunner implements CommandLineRunner {
+  private final DependencyChecker dependencyChecker;
   private final UserRepository userRepository;
   private final UserSeeder userSeeder;
   private final StudentSeeder studentSeeder;
@@ -49,7 +51,14 @@ public class SeederRunner implements CommandLineRunner {
   @Value("${seeder.enabled:false}")
   private boolean seedEnabled;
 
+  @Value("${seeder.source:FAKER}")
+  private String seederSource;
+
+  @Value("${avenirs.interoperability.actuator.health}")
+  private String interoperabilityHealthUrl;
+
   public SeederRunner(
+      DependencyChecker dependencyChecker,
       UserRepository userRepository,
       UserSeeder userSeeder,
       StudentSeeder studentSeeder,
@@ -69,6 +78,7 @@ public class SeederRunner implements CommandLineRunner {
       SelfKnowledgeElementSeeder selfKnowledgeElementSeeder,
       SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder) {
 
+    this.dependencyChecker = dependencyChecker;
     this.userRepository = userRepository;
     this.userPhotoSeeder = userPhotoSeeder;
     this.studentSeeder = studentSeeder;
@@ -95,6 +105,10 @@ public class SeederRunner implements CommandLineRunner {
 
     if (seedEnabled && userCont == 0) {
       log.info("Seeding enabled and starting...");
+
+      if (!"FAKER".equalsIgnoreCase(seederSource)) {
+        dependencyChecker.checkAndWait("Interoperability", interoperabilityHealthUrl);
+      }
 
       var savedSelfKnowledgeMandatoryCategories = selfKnowledgeCategorySeeder.seed();
       var savedUsers = userSeeder.seed();

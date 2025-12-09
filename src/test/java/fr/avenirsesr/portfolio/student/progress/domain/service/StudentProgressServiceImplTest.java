@@ -13,13 +13,18 @@ import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescripti
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillSyncService;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.AdditionalSkillProgressFixture;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
+import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
+import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillCategoryType;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
@@ -63,8 +68,9 @@ public class StudentProgressServiceImplTest {
   @Mock private StudentProgressRepository studentProgressRepository;
   @Mock private TraceService traceService;
   @Mock private TraceRepository traceRepository;
-  @Mock private AdditionalSkillRepository additionalSkillRepository;
+  @Mock private AdditionalSkillSyncService additionalSkillSyncService;
   @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
+  @Mock private ExternalSkillClient externalSkillClient;
   @Mock private LoggedInUserService loggedInUserService;
   @InjectMocks private StudentProgressServiceImpl studentProgressService;
   private static final String CHARSET =
@@ -917,6 +923,19 @@ public class StudentProgressServiceImplTest {
         when(traceService.programNameOfTrace(trace1)).thenReturn(programName);
         when(traceService.programNameOfTrace(trace2)).thenReturn(programName);
 
+        List<ExternalSkillCategoryDTO> categories =
+            List.of(
+                new ExternalSkillCategoryDTO("Domain", EExternalSkillCategoryType.DOMAIN),
+                new ExternalSkillCategoryDTO("Issue", EExternalSkillCategoryType.ISSUE));
+        ExternalSkillDetailsDTO externalSkillDetails =
+            new ExternalSkillDetailsDTO(
+                additionalSkillProgress.getSkill().getExternalSkillId(),
+                "Test Skill",
+                categories,
+                EExternalSkillType.ROME4);
+        when(externalSkillClient.getExternalSkillDetails(any(UUID.class)))
+            .thenReturn(Optional.of(externalSkillDetails));
+
         AdditionalSkillProgressDetails additionalSkillProgressDetails =
             studentProgressService.getAdditionalSkillProgressDetails(
                 additionalSkillProgress.getId());
@@ -982,14 +1001,15 @@ public class StudentProgressServiceImplTest {
         AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
 
         BddLogger.when("calling the method with an available and not duplicate skill");
-        when(additionalSkillRepository.findById(skillId)).thenReturn(Optional.of(additionalSkill));
+        when(additionalSkillSyncService.getOrCreateFromExternalSkill(skillId))
+            .thenReturn(Optional.of(additionalSkill));
         when(additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(any()))
             .thenReturn(false);
 
         studentProgressService.createAdditionalSkillProgress(skillId, type, level, description);
 
         BddLogger.then("it should save the additional skill progress");
-        verify(additionalSkillRepository).findById(skillId);
+        verify(additionalSkillSyncService).getOrCreateFromExternalSkill(skillId);
         verify(additionalSkillProgressRepository).additionalSkillProgressAlreadyExists(any());
         verify(additionalSkillProgressRepository).save(any(AdditionalSkillProgress.class));
       }
@@ -1004,7 +1024,8 @@ public class StudentProgressServiceImplTest {
         AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
 
         BddLogger.when("calling the method with a duplicate skill");
-        when(additionalSkillRepository.findById(skillId)).thenReturn(Optional.of(additionalSkill));
+        when(additionalSkillSyncService.getOrCreateFromExternalSkill(skillId))
+            .thenReturn(Optional.of(additionalSkill));
         when(additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(any()))
             .thenReturn(true);
 
@@ -1017,7 +1038,7 @@ public class StudentProgressServiceImplTest {
                 studentProgressService.createAdditionalSkillProgress(
                     skillId, type, level, description));
 
-        verify(additionalSkillRepository).findById(skillId);
+        verify(additionalSkillSyncService).getOrCreateFromExternalSkill(skillId);
         verify(additionalSkillProgressRepository).additionalSkillProgressAlreadyExists(any());
         verify(additionalSkillProgressRepository, never()).save(any());
       }
@@ -1031,8 +1052,8 @@ public class StudentProgressServiceImplTest {
         String description = "Description for additional skill progress test";
 
         BddLogger.when("calling the method with an unknown skill");
-        when(additionalSkillRepository.findById(skillId))
-            .thenThrow(new AdditionalSkillNotFoundException());
+        when(additionalSkillSyncService.getOrCreateFromExternalSkill(skillId))
+            .thenReturn(Optional.empty());
 
         BddLogger.then("it should throw an AdditionalSkillNotFoundException");
 
@@ -1042,7 +1063,7 @@ public class StudentProgressServiceImplTest {
                 studentProgressService.createAdditionalSkillProgress(
                     skillId, type, level, description));
 
-        verify(additionalSkillRepository).findById(skillId);
+        verify(additionalSkillSyncService).getOrCreateFromExternalSkill(skillId);
         verifyNoInteractions(additionalSkillProgressRepository);
       }
     }

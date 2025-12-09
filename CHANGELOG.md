@@ -6,6 +6,17 @@ and [Conventional Commits](https://www.conventionalcommits.org/) standard.
 
 ---
 
+## [Unreleased] - 2025-11-25
+
+- ** Integration with Interoperability Microservice**
+    - External skills now retrieved from dedicated interoperability microservice via `ExternalSkillClient`.
+    - `AdditionalSkill` entity stores only essential data locally (externalSkillId, title, type, pathSegments).
+    - First-time addition of a skill progress triggers synchronization: fetches external skill details and creates corresponding `AdditionalSkill` entry.
+    - Training path data remains stored locally for performance.
+    - **Note:** Full synchronization of existing data is not implemented in this version.
+    - Added Redis cache (24h TTL) for external skill details to reduce inter-microservice calls.
+    - Deprecated `searchAdditionalSkills()` endpoint (to be removed in future version).
+
 ## [v1.4.8] - 2025-10-16
 
 - Use an API key for back office microservice.

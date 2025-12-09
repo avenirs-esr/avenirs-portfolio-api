@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.service;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillSyncService;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.domain.port.output.repository.SkillLevelProgressRepository;
@@ -22,8 +23,9 @@ public class StudentProgressServiceConfig {
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceService traceService;
   private final TraceRepository traceRepository;
-  private final AdditionalSkillRepository additionalSkillRepository;
+  private final AdditionalSkillSyncService additionalSkillSyncService;
   private final AdditionalSkillProgressDatabaseRepository additionalSkillProgressRepository;
+  private final ExternalSkillClient externalSkillClient;
   private final LoggedInUserService loggedInUserService;
 
   @Bean
@@ -33,8 +35,9 @@ public class StudentProgressServiceConfig {
         skillLevelProgressRepository,
         traceService,
         traceRepository,
-        additionalSkillRepository,
+        additionalSkillSyncService,
         additionalSkillProgressRepository,
+        externalSkillClient,
         loggedInUserService);
   }
 }

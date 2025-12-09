@@ -28,11 +28,14 @@ public class FakeAdditionalSkillProgress {
       StudentEntity student,
       List<AdditionalSkillEntity> savedAdditionalSkills,
       List<UUID> bannedSkillsIds) {
+    AdditionalSkillEntity randomSkill =
+        getRandomAdditionalSkill(savedAdditionalSkills, bannedSkillsIds);
+
     return new FakeAdditionalSkillProgress(
         AdditionalSkillProgressEntity.of(
             dataGenerator.with("id").uuid(),
             student,
-            getRandomAdditionalSkill(savedAdditionalSkills, bannedSkillsIds),
+            randomSkill,
             dataGenerator.with("EAdditionalSkillLevel").pickIn(EAdditionalSkillLevel.class),
             additionalSkillProgressGenerator.with("sentence").description()));
   }
@@ -48,17 +51,17 @@ public class FakeAdditionalSkillProgress {
       throw new IllegalStateException("The list must contain more than 2 items.");
     }
 
-    List<AdditionalSkillEntity> allowedIds =
+    List<AdditionalSkillEntity> allowedSkills =
         savedAdditionalSkills.stream()
-            .skip(2) // Do not attribute the first two elements for integration tests.
-            .filter(additionalSkill -> !bannedIds.contains(additionalSkill.getId()))
+            .skip(2)
+            .filter(skill -> !bannedIds.contains(skill.getId()))
             .toList();
 
-    if (allowedIds.isEmpty()) {
+    if (allowedSkills.isEmpty()) {
       throw new IllegalStateException("No IDs available after excluding banned IDs.");
     }
 
-    return allowedIds.get(
-        dataGenerator.with("CompetenceComplementaireDetaillee").number(allowedIds.size()));
+    return allowedSkills.get(
+        dataGenerator.with("CompetenceComplementaireDetaillee").number(allowedSkills.size()));
   }
 }

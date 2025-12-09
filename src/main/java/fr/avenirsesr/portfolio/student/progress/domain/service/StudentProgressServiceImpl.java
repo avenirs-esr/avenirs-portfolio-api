@@ -6,11 +6,13 @@ import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescripti
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
+import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillSyncService;
+import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -46,8 +48,9 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceService traceService;
   private final TraceRepository traceRepository;
-  private final AdditionalSkillRepository additionalSkillRepository;
+  private final AdditionalSkillSyncService additionalSkillSyncService;
   private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
+  private final ExternalSkillClient externalSkillClient;
   private final LoggedInUserService loggedInUserService;
 
   @Override
@@ -184,26 +187,24 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
   @Override
   public AdditionalSkillProgress createAdditionalSkillProgress(
-      UUID additionalSkillId,
+      UUID externalSkillId,
       EAdditionalSkillType type,
       EAdditionalSkillLevel level,
       String description) {
     Student student = loggedInUserService.getLoggedInStudent();
     try {
       checkDescriptionField(description);
-      Optional<AdditionalSkill> additionalSkill =
-          additionalSkillRepository.findById(additionalSkillId);
+      AdditionalSkill additionalSkill =
+          additionalSkillSyncService
+              .getOrCreateFromExternalSkill(externalSkillId)
+              .orElseThrow(AdditionalSkillNotFoundException::new);
       AdditionalSkillProgress additionalSkillProgress =
-          AdditionalSkillProgress.create(
-              student,
-              additionalSkill.orElseThrow(AdditionalSkillNotFoundException::new),
-              level,
-              description);
+          AdditionalSkillProgress.create(student, additionalSkill, level, description);
       if (additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(
           additionalSkillProgress)) {
         log.error(
             "Failed to add additional skill [{}] for student [{}] because it already exists",
-            additionalSkillId,
+            externalSkillId,
             student);
         throw new DuplicateAdditionalSkillException();
       }
@@ -259,13 +260,21 @@ public class StudentProgressServiceImpl implements StudentProgressService {
     List<Trace> traces =
         traceService.getTracesLinkedWithAdditionalSkillProgress(
             student.getUser(), additionalSkillProgress);
+
+    UUID externalSkillId = additionalSkillProgress.getSkill().getExternalSkillId();
+    ExternalSkillDetailsDTO externalSkillDetails =
+        externalSkillClient
+            .getExternalSkillDetails(externalSkillId)
+            .orElse(new ExternalSkillDetailsDTO(externalSkillId, "", List.of(), null));
+
     return new AdditionalSkillProgressDetails(
         additionalSkillProgress,
         traces.stream()
             .map(
                 trace ->
                     new TraceWithProjectNameData(trace, traceService.programNameOfTrace(trace)))
-            .toList());
+            .toList(),
+        externalSkillDetails.categoryPath());
   }
 
   @Override
