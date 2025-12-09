@@ -63,12 +63,20 @@ public class DeclaredProgramSeeder {
                   .toList();
         };
 
-    creationDataList.forEach(creationData -> {
-        declaredProgramService.create(creationData.studentId(),creationData.status(), creationData.title(),
-            creationData.description(), creationData.organization(), creationData.result(),
-            creationData.sourceOfInformation(), creationData.link(), creationData.startDate(),
-            creationData.endDate());
-    });
+    creationDataList.forEach(
+        creationData -> {
+          declaredProgramService.create(
+              creationData.studentId(),
+              creationData.status(),
+              creationData.title(),
+              creationData.description(),
+              creationData.organization(),
+              creationData.result(),
+              creationData.sourceOfInformation(),
+              creationData.link(),
+              creationData.startDate(),
+              creationData.endDate());
+        });
 
     log.info("✔ {} declared programs created", creationDataList.size());
     return creationDataList;

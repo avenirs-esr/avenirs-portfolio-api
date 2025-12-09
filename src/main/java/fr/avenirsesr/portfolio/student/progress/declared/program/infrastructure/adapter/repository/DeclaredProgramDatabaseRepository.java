@@ -9,7 +9,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class DeclaredProgramDatabaseRepository
-    extends GenericUserJpaRepositoryAdapter<DeclaredProgram, DeclaredProgramEntity> implements DeclaredProgramRepository {
+    extends GenericUserJpaRepositoryAdapter<DeclaredProgram, DeclaredProgramEntity>
+    implements DeclaredProgramRepository {
   public DeclaredProgramDatabaseRepository(DeclaredProgramJpaRepository jpaRepository) {
     super(
         jpaRepository,
