@@ -49,16 +49,16 @@ class ExternalSkillClientTest {
     UUID skillId = UUID.randomUUID();
     String responseBody =
         """
-                {
-                    "id": "%s",
-                    "title": "Java Programming",
-                    "categoryPath": [
-                        {"libelle": "Informatique", "type": "DOMAIN"},
-                        {"libelle": "Développement", "type": "ISSUE"}
-                    ],
-                    "type": "ROME4"
-                }
-                """
+        {
+            "id": "%s",
+            "title": "Java Programming",
+            "categoryPath": [
+                {"libelle": "Informatique", "type": "DOMAIN"},
+                {"libelle": "Développement", "type": "ISSUE"}
+            ],
+            "type": "ROME4"
+        }
+        """
             .formatted(skillId);
     mockWebServer.enqueue(
         new MockResponse().setBody(responseBody).addHeader("Content-Type", "application/json"));
@@ -149,16 +149,16 @@ class ExternalSkillClientTest {
     UUID skillId = UUID.randomUUID();
     String responseBody =
         """
-                {
-                    "id": "%s",
-                    "title": "Java Programming",
-                    "categoryPath": [
-                        {"libelle": "Informatique", "type": "DOMAIN"},
-                        {"libelle": "Développement", "type": "ISSUE"}
-                    ],
-                    "type": "ROME4"
-                }
-                """
+        {
+            "id": "%s",
+            "title": "Java Programming",
+            "categoryPath": [
+                {"libelle": "Informatique", "type": "DOMAIN"},
+                {"libelle": "Développement", "type": "ISSUE"}
+            ],
+            "type": "ROME4"
+        }
+        """
             .formatted(skillId);
     mockWebServer.enqueue(
         new MockResponse().setBody(responseBody).addHeader("Content-Type", "application/json"));
