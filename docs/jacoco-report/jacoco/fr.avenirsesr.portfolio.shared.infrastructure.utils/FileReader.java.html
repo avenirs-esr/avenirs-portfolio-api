@@ -10,16 +10,16 @@ import java.util.stream.Collectors;
 
 public interface FileReader {
   static &lt;T&gt; List&lt;T&gt; readCSV(String fileName, String separator, Function&lt;String[], T&gt; mapper) {
-<span class="fc" id="L13">    try (var inputStream = FileReader.class.getResourceAsStream(fileName);</span>
-<span class="fc" id="L14">        var reader =</span>
+<span class="nc" id="L13">    try (var inputStream = FileReader.class.getResourceAsStream(fileName);</span>
+<span class="nc" id="L14">        var reader =</span>
             new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-<span class="fc" id="L17">      return reader</span>
-<span class="fc" id="L18">          .lines()</span>
-<span class="fc" id="L19">          .skip(1)</span>
-<span class="fc" id="L20">          .map(line -&gt; line.split(separator))</span>
-<span class="fc" id="L21">          .map(mapper)</span>
-<span class="fc" id="L22">          .collect(Collectors.toList());</span>
+<span class="nc" id="L17">      return reader</span>
+<span class="nc" id="L18">          .lines()</span>
+<span class="nc" id="L19">          .skip(1)</span>
+<span class="nc" id="L20">          .map(line -&gt; line.split(separator))</span>
+<span class="nc" id="L21">          .map(mapper)</span>
+<span class="nc" id="L22">          .collect(Collectors.toList());</span>
 
 <span class="nc" id="L24">    } catch (IOException | NullPointerException e) {</span>
 <span class="nc" id="L25">      throw new RuntimeException(&quot;Erreur de lecture du fichier CSV&quot;, e);</span>

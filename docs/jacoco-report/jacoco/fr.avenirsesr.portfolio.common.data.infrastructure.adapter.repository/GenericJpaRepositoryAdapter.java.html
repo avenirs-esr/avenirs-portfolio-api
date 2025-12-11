@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,102 +29,102 @@ public abstract class GenericJpaRepositoryAdapter&lt;
       JpaRepository&lt;E, UUID&gt; jpaRepository,
       JpaSpecificationExecutor&lt;E&gt; jpaSpecificationExecutor,
       Function&lt;D, E&gt; fromDomain,
-<span class="fc" id="L33">      Function&lt;E, D&gt; toDomain) {</span>
-<span class="fc" id="L34">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L35">    this.jpaSpecificationExecutor = jpaSpecificationExecutor;</span>
-<span class="fc" id="L36">    this.fromDomain = fromDomain;</span>
-<span class="fc" id="L37">    this.toDomain = toDomain;</span>
-<span class="fc" id="L38">  }</span>
+<span class="fc" id="L32">      Function&lt;E, D&gt; toDomain) {</span>
+<span class="fc" id="L33">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L34">    this.jpaSpecificationExecutor = jpaSpecificationExecutor;</span>
+<span class="fc" id="L35">    this.fromDomain = fromDomain;</span>
+<span class="fc" id="L36">    this.toDomain = toDomain;</span>
+<span class="fc" id="L37">  }</span>
 
   @Override
   public D save(D domain) {
-<span class="fc" id="L42">    return toDomain.apply(jpaRepository.save(fromDomain.apply(domain)));</span>
+<span class="fc" id="L41">    return toDomain.apply(jpaRepository.save(fromDomain.apply(domain)));</span>
   }
 
   @Override
   public List&lt;D&gt; saveAll(List&lt;D&gt; domains) {
-<span class="fc" id="L47">    return jpaRepository.saveAll(domains.stream().map(fromDomain).toList()).stream()</span>
-<span class="fc" id="L48">        .map(toDomain)</span>
-<span class="fc" id="L49">        .toList();</span>
+<span class="fc" id="L46">    return jpaRepository.saveAll(domains.stream().map(fromDomain).toList()).stream()</span>
+<span class="fc" id="L47">        .map(toDomain)</span>
+<span class="fc" id="L48">        .toList();</span>
   }
 
   public void saveAllEntities(List&lt;E&gt; entities) {
-<span class="pc bpc" id="L53" title="2 of 4 branches missed.">    if (entities != null &amp;&amp; !entities.isEmpty()) {</span>
-<span class="fc" id="L54">      jpaRepository.saveAll(entities);</span>
+<span class="pc bpc" id="L52" title="2 of 4 branches missed.">    if (entities != null &amp;&amp; !entities.isEmpty()) {</span>
+<span class="fc" id="L53">      jpaRepository.saveAll(entities);</span>
     }
-<span class="fc" id="L56">  }</span>
+<span class="fc" id="L55">  }</span>
 
   @Override
   public List&lt;D&gt; findAll() {
-<span class="nc" id="L60">    return jpaRepository.findAll().stream().map(toDomain).toList();</span>
+<span class="fc" id="L59">    return jpaRepository.findAll().stream().map(toDomain).toList();</span>
   }
 
   @Override
   public Optional&lt;D&gt; findById(UUID id) {
-<span class="fc" id="L65">    E entity = jpaRepository.findById(id).orElse(null);</span>
-<span class="fc bfc" id="L66" title="All 2 branches covered.">    return entity == null ? Optional.empty() : Optional.of(toDomain.apply(entity));</span>
+<span class="fc" id="L64">    E entity = jpaRepository.findById(id).orElse(null);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">    return entity == null ? Optional.empty() : Optional.of(toDomain.apply(entity));</span>
   }
 
   @Override
   public List&lt;D&gt; findAllById(List&lt;UUID&gt; ids) {
-<span class="nc" id="L71">    return jpaRepository.findAllById(ids).stream().map(toDomain).toList();</span>
+<span class="nc" id="L70">    return jpaRepository.findAllById(ids).stream().map(toDomain).toList();</span>
   }
 
   @Override
   public void flush() {
-<span class="nc" id="L76">    jpaRepository.flush();</span>
-<span class="nc" id="L77">  }</span>
+<span class="nc" id="L75">    jpaRepository.flush();</span>
+<span class="nc" id="L76">  }</span>
 
   @Override
   public void removeFromDatabase(D domain) {
-<span class="nc" id="L81">    jpaRepository.delete(fromDomain.apply(domain));</span>
-<span class="nc" id="L82">  }</span>
+<span class="fc" id="L80">    jpaRepository.delete(fromDomain.apply(domain));</span>
+<span class="fc" id="L81">  }</span>
 
   @Override
   public void removeAllFromDatabase(List&lt;D&gt; domains) {
-<span class="nc" id="L86">    jpaRepository.deleteAll(domains.stream().map(fromDomain).toList());</span>
-<span class="nc" id="L87">  }</span>
+<span class="nc" id="L85">    jpaRepository.deleteAll(domains.stream().map(fromDomain).toList());</span>
+<span class="nc" id="L86">  }</span>
 
   protected List&lt;D&gt; mapEntitiesToDomain(List&lt;E&gt; entities) {
-<span class="fc" id="L90">    return entities.stream().map(toDomain).toList();</span>
+<span class="fc" id="L89">    return entities.stream().map(toDomain).toList();</span>
   }
 
   protected PagedResult&lt;D&gt; toPagedResult(Page&lt;E&gt; page) {
-<span class="fc" id="L94">    var content = mapEntitiesToDomain(page.getContent());</span>
+<span class="fc" id="L93">    var content = mapEntitiesToDomain(page.getContent());</span>
 
-<span class="fc" id="L96">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L95">    return new PagedResult&lt;&gt;(</span>
         content,
         new PageInfo(
-<span class="fc" id="L99">            page.getPageable().getPageNumber(),</span>
-<span class="fc" id="L100">            page.getPageable().getPageSize(),</span>
-<span class="fc" id="L101">            page.getTotalElements()));</span>
+<span class="fc" id="L98">            page.getPageable().getPageNumber(),</span>
+<span class="fc" id="L99">            page.getPageable().getPageSize(),</span>
+<span class="fc" id="L100">            page.getTotalElements()));</span>
   }
 
   protected List&lt;D&gt; findAll(Specification&lt;E&gt; specification) {
-<span class="fc" id="L105">    return mapEntitiesToDomain(jpaSpecificationExecutor.findAll(specification));</span>
+<span class="fc" id="L104">    return mapEntitiesToDomain(jpaSpecificationExecutor.findAll(specification));</span>
   }
 
   protected PagedResult&lt;D&gt; findAll(Specification&lt;E&gt; specification, PageCriteria pageCriteria) {
-<span class="nc" id="L109">    var page =</span>
-<span class="nc" id="L110">        jpaSpecificationExecutor.findAll(</span>
-<span class="nc" id="L111">            specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
+<span class="nc" id="L108">    var page =</span>
+<span class="nc" id="L109">        jpaSpecificationExecutor.findAll(</span>
+<span class="nc" id="L110">            specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
 
-<span class="nc" id="L113">    return toPagedResult(page);</span>
+<span class="nc" id="L112">    return toPagedResult(page);</span>
   }
 
   protected PagedResult&lt;D&gt; findAll(
       Specification&lt;E&gt; specification, PageCriteria pageCriteria, Sort sort) {
-<span class="nc" id="L118">    var page =</span>
-<span class="nc" id="L119">        jpaSpecificationExecutor.findAll(</span>
-<span class="nc" id="L120">            specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+<span class="nc" id="L117">    var page =</span>
+<span class="nc" id="L118">        jpaSpecificationExecutor.findAll(</span>
+<span class="nc" id="L119">            specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
 
-<span class="nc" id="L122">    return toPagedResult(page);</span>
+<span class="nc" id="L121">    return toPagedResult(page);</span>
   }
 
   protected PagedResult&lt;D&gt; findAll(Specification&lt;E&gt; specification, PageRequest pageRequest) {
-<span class="fc" id="L126">    var page = jpaSpecificationExecutor.findAll(specification, pageRequest);</span>
+<span class="fc" id="L125">    var page = jpaSpecificationExecutor.findAll(specification, pageRequest);</span>
 
-<span class="fc" id="L128">    return toPagedResult(page);</span>
+<span class="fc" id="L127">    return toPagedResult(page);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
