@@ -72,7 +72,7 @@ class DeclaredProgramServiceImplTest {
         sourceOfInformation = "Source";
         link = "https://example.com";
         startDate = LocalDate.now().minusMonths(1);
-        endDate = LocalDate.now();
+        endDate = LocalDate.now().plusMonths(1);
       }
 
       @Nested
@@ -195,12 +195,38 @@ class DeclaredProgramServiceImplTest {
         }
 
         @Test
-        void thenItShouldCreateDeclaredProgramForLoggedInStudent() {
-          BddLogger.then("it should create and save a declared program for the logged in student");
+        void thenItShouldCreateNotStartedDeclaredProgramForLoggedInStudent() {
+          BddLogger.then(
+              "it should create and save a not started declared program for the logged in student");
+
+          LocalDate futureStartDate = LocalDate.now().plusMonths(1);
+          LocalDate futureEndDate = futureStartDate.plusMonths(3);
 
           DeclaredProgram declaredProgram =
               declaredProgramService.create(
-                  status,
+                  title,
+                  description,
+                  organization,
+                  result,
+                  sourceOfInformation,
+                  link,
+                  futureStartDate,
+                  futureEndDate);
+
+          assertNotNull(declaredProgram);
+          assertEquals(savedProgram, declaredProgram);
+          verify(loggedInUserService).getLoggedInStudent();
+          verify(studentRepository, never()).findById(any());
+          verify(declaredProgramRepository).save(any(DeclaredProgram.class));
+        }
+
+        @Test
+        void thenItShouldCreateInProgressDeclaredProgramForLoggedInStudent() {
+          BddLogger.then(
+              "it should create and save a in progress declared program for the logged in student");
+
+          DeclaredProgram declaredProgram =
+              declaredProgramService.create(
                   title,
                   description,
                   organization,
@@ -209,6 +235,32 @@ class DeclaredProgramServiceImplTest {
                   link,
                   startDate,
                   endDate);
+
+          assertNotNull(declaredProgram);
+          assertEquals(savedProgram, declaredProgram);
+          verify(loggedInUserService).getLoggedInStudent();
+          verify(studentRepository, never()).findById(any());
+          verify(declaredProgramRepository).save(any(DeclaredProgram.class));
+        }
+
+        @Test
+        void thenItShouldCreateCompletedDeclaredProgramForLoggedInStudent() {
+          BddLogger.then(
+              "it should create and save a completed declared program for the logged in student");
+
+          LocalDate pastStartDate = LocalDate.now().minusMonths(3);
+          LocalDate pastEndDate = LocalDate.now().minusMonths(1);
+
+          DeclaredProgram declaredProgram =
+              declaredProgramService.create(
+                  title,
+                  description,
+                  organization,
+                  result,
+                  sourceOfInformation,
+                  link,
+                  pastStartDate,
+                  pastEndDate);
 
           assertNotNull(declaredProgram);
           assertEquals(savedProgram, declaredProgram);
@@ -236,7 +288,6 @@ class DeclaredProgramServiceImplTest {
               RuntimeException.class,
               () ->
                   declaredProgramService.create(
-                      status,
                       title,
                       description,
                       organization,

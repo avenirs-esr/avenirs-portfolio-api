@@ -19,7 +19,6 @@ public interface DeclaredProgramService {
       LocalDate endDate);
 
   DeclaredProgram create(
-      EProgramStatus status,
       String title,
       String description,
       String organization,

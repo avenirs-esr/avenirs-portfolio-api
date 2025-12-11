@@ -1,8 +1,11 @@
 package fr.avenirsesr.portfolio.student.progress.declared.program.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.temporal.domain.model.enums.EPeriodStatus;
+import fr.avenirsesr.portfolio.common.temporal.domain.utils.PeriodUtils;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
@@ -34,11 +37,12 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       LocalDate startDate,
       LocalDate endDate) {
 
-    requireNotBlankAndMaxLength("title", title, 80);
-    requireNotBlankAndMaxLength("organization", organization, 50);
-    validateOptionalTextMaxLength("description", description, 400);
-    validateOptionalTextMaxLength("result", result, 50);
-    validateOptionalTextMaxLength("sourceOfInformation", sourceOfInformation, 200);
+    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
+    requireNotBlankAndMaxLength("organization", organization, ORGANIZATION_LENGTH);
+    validateOptionalTextMaxLength("description", description, DESCRIPTION_LENGTH);
+    validateOptionalTextMaxLength("result", result, RESULT_LENGTH);
+    validateOptionalTextMaxLength(
+        "sourceOfInformation", sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
     requireNotNull("startDate", startDate);
     validateDateOrder(startDate, endDate);
 
@@ -87,7 +91,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
 
   @Override
   public DeclaredProgram create(
-      EProgramStatus status,
       String title,
       String description,
       String organization,
@@ -99,7 +102,7 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
     Student student = loggedInUserService.getLoggedInStudent();
     return create(
         student,
-        status,
+        getProgramStatus(startDate, endDate),
         title,
         description,
         organization,
@@ -108,5 +111,16 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
         link,
         startDate,
         endDate);
+  }
+
+  private EProgramStatus getProgramStatus(LocalDate startDate, LocalDate endDate) {
+    requireNotNull("startDate", startDate);
+    validateDateOrder(startDate, endDate);
+    EPeriodStatus periodStatus = PeriodUtils.getPeriodStatus(startDate, endDate);
+    return switch (periodStatus) {
+      case EPeriodStatus.DURING -> EProgramStatus.IN_PROGRESS;
+      case EPeriodStatus.AFTER -> EProgramStatus.NOT_STARTED;
+      case EPeriodStatus.BEFORE -> EProgramStatus.COMPLETED;
+    };
   }
 }
