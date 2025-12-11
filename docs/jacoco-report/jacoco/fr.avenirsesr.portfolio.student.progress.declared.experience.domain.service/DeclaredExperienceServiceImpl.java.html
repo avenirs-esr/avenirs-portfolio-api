@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeclaredExperienceServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.declared.experience.domain.service</a> &gt; <span class="el_source">DeclaredExperienceServiceImpl.java</span></div><h1>DeclaredExperienceServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.service;
+
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.shared.application.adapter.exception.RequestContextNotDefinedException;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.output.repository.DeclaredExperienceRepository;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import java.time.LocalDate;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="fc" id="L17">@Slf4j</span>
+@RequiredArgsConstructor
+public class DeclaredExperienceServiceImpl implements DeclaredExperienceService {
+  private final LoggedInUserService loggedInUserService;
+  private final DeclaredExperienceRepository experienceRepository;
+  private final StudentRepository studentRepository;
+
+  @Override
+  public DeclaredExperience create(
+      UUID studentId,
+      String title,
+      EExperienceType experienceType,
+      String organization,
+      String activitySector,
+      String location,
+      String description,
+      String sourceOfInformation,
+      String summary,
+      String externalLink,
+      LocalDate startDate,
+      LocalDate endDate) {
+    Student student;
+    try {
+<span class="fc" id="L40">      student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L41">    } catch (RequestContextNotDefinedException e) {</span>
+<span class="fc" id="L42">      student = studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);</span>
+<span class="fc" id="L43">    }</span>
+
+<span class="fc bfc" id="L45" title="All 2 branches covered.">    if (!student.getId().equals(studentId)) {</span>
+<span class="fc" id="L46">      throw new UserNotAuthorizedException(</span>
+          &quot;Student not authorized. loggedIn student : %s student is provided : %s&quot;
+<span class="fc" id="L48">              .formatted(student, studentId));</span>
+    }
+<span class="fc" id="L50">    var experience =</span>
+<span class="fc" id="L51">        DeclaredExperience.create(</span>
+            student,
+            title,
+            experienceType,
+            organization,
+            activitySector,
+            location,
+            description,
+            sourceOfInformation,
+            summary,
+            externalLink,
+            startDate,
+            endDate);
+
+<span class="fc" id="L65">    experience = experienceRepository.save(experience);</span>
+<span class="fc" id="L66">    log.info(&quot;{} has been created&quot;, experience);</span>
+<span class="fc" id="L67">    return experience;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
