@@ -12,24 +12,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class SelfKnowledgeControllerIT {
+class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/self-knowledge";
   private static final String CATEGORIES_BASE_PATH = BASE_PATH + "/categories";
@@ -55,7 +50,7 @@ class SelfKnowledgeControllerIT {
   private String unknownUserSignature;
 
   @BeforeAll
-  static void setup(@Autowired SeederRunner seederRunner) {
+  void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
   }
 

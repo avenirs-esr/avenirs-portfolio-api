@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,17 +16,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class TraceAttachmentControllerIT {
+class TraceAttachmentControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/storage/traces/{traceId}";
 
@@ -46,7 +41,7 @@ class TraceAttachmentControllerIT {
   private String storagePath;
 
   @BeforeAll
-  static void setup(@Autowired SeederRunner seederRunner) {
+  void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
   }
 

@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.Institution
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
+import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.model.StudentProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
@@ -18,15 +19,9 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ActiveProfiles("test")
-class StudentProgressSeederTest {
+class StudentProgressSeederTest extends ContainerConfigurationTest {
 
   @Autowired private StudentProgressSeeder studentProgressSeeder;
   @Autowired private StudentProgressDatabaseRepository studentProgressRepository;

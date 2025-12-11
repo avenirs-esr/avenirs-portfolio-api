@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfigurat
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
@@ -18,20 +19,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class TraceControllerIT {
+class TraceControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/traces";
   private static final String BASE_PATH_WITH_ID = BASE_PATH + "/{traceId}";
@@ -58,7 +53,7 @@ class TraceControllerIT {
   private String unknownUserSignature;
 
   @BeforeAll
-  static void setup(@Autowired SeederRunner seederRunner) {
+  void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
   }
 

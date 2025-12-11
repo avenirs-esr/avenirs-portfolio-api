@@ -31,6 +31,7 @@ import lombok.Setter;
 @Setter
 public class TraceEntity extends DeletableAvenirsBaseEntity {
   @ManyToOne(optional = false)
+  @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
 
   @Column(nullable = false)

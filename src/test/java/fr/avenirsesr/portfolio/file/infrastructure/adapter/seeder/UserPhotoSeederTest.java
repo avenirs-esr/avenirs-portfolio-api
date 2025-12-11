@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
+import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -13,15 +14,9 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ActiveProfiles("test")
-class UserPhotoSeederTest {
+class UserPhotoSeederTest extends ContainerConfigurationTest {
 
   @Autowired private UserPhotoSeeder userPhotoSeeder;
 

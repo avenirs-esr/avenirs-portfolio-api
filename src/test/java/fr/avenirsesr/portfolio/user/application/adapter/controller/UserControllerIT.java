@@ -5,21 +5,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-public class UserControllerIT {
+public class UserControllerIT extends ContainerConfigurationTest {
   @Autowired private MockMvc mockMvc;
 
   @Value("${hmac.secret-key}")
@@ -44,7 +39,7 @@ public class UserControllerIT {
   private String unknownSignature;
 
   @BeforeAll
-  static void setup(@Autowired SeederRunner seederRunner) {
+  void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
   }
 
@@ -113,9 +108,9 @@ public class UserControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.firstname").value("Updated"))
-        .andExpect(jsonPath("$.lastname").value("Name"))
-        .andExpect(jsonPath("$.email").value("new.email@example.com"))
+        .andExpect(jsonPath("$.firstname").value("Alexandre"))
+        .andExpect(jsonPath("$.lastname").value("Clément"))
+        .andExpect(jsonPath("$.email").value("alicia.carre@yahoo.fr"))
         .andExpect(jsonPath("$.bio").exists());
   }
 }

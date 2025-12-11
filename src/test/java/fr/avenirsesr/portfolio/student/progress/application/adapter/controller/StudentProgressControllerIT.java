@@ -6,22 +6,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class StudentProgressControllerIT {
+class StudentProgressControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/student-progress";
   private static final String OVERVIEW_BASE_PATH = "/me/student-progress/overview";
@@ -53,7 +48,7 @@ class StudentProgressControllerIT {
   private ELanguage language = ELanguage.FRENCH;
 
   @BeforeAll
-  static void setup(@Autowired SeederRunner seederRunner) {
+  void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
   }
 
