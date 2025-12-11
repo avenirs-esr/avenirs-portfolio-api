@@ -6,12 +6,10 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeeder
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.input.DeclaredProgramService;
-import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.model.DeclaredProgramEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.data.DeclaredProgramCreationData;
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.fake.FakeDeclaredProgram;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.io.InputStream;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
@@ -80,34 +78,6 @@ public class DeclaredProgramSeeder {
 
     log.info("✔ {} declared programs created", creationDataList.size());
     return creationDataList;
-  }
-
-  private DeclaredProgramEntity toEntity(
-      DeclaredProgramCreationData data, Map<UUID, StudentEntity> studentById) {
-
-    StudentEntity student =
-        Optional.ofNullable(studentById.get(data.studentId()))
-            .orElseThrow(
-                () ->
-                    new IllegalStateException(
-                        "Student not found for id "
-                            + data.studentId()
-                            + " in DeclaredProgramSeeder"));
-
-    return DeclaredProgramEntity.of(
-        UUID.randomUUID(),
-        student,
-        data.status(),
-        data.title(),
-        data.description(),
-        data.organization(),
-        data.result(),
-        data.sourceOfInformation(),
-        data.link(),
-        data.startDate(),
-        data.endDate(),
-        Instant.now(),
-        Instant.now());
   }
 
   private List<DeclaredProgramCreationData> readDeclaredProgramCreationDataFromFile() {

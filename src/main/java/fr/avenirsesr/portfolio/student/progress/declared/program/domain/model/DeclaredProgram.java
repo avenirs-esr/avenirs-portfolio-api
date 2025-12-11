@@ -11,15 +11,15 @@ import lombok.Getter;
 @Getter
 public class DeclaredProgram extends AvenirsBaseModel {
   private final Student student;
-  private final EProgramStatus status;
-  private final String title;
-  private final String description;
-  private final String organization;
-  private final String result;
-  private final String sourceOfInformation;
-  private final String link;
-  private final LocalDate startDate;
-  private final LocalDate endDate;
+  private EProgramStatus status;
+  private String title;
+  private String description;
+  private String organization;
+  private String result;
+  private String sourceOfInformation;
+  private String link;
+  private LocalDate startDate;
+  private LocalDate endDate;
 
   private DeclaredProgram(
       UUID id,

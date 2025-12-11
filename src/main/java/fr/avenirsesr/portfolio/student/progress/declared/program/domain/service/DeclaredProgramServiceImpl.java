@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.program.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
+
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
@@ -31,7 +33,16 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String link,
       LocalDate startDate,
       LocalDate endDate) {
-    var declaredProgram =
+
+    requireNotBlankAndMaxLength("title", title, 80);
+    requireNotBlankAndMaxLength("organization", organization, 50);
+    validateOptionalTextMaxLength("description", description, 400);
+    validateOptionalTextMaxLength("result", result, 50);
+    validateOptionalTextMaxLength("sourceOfInformation", sourceOfInformation, 200);
+    requireNotNull("startDate", startDate);
+    validateDateOrder(startDate, endDate);
+
+    DeclaredProgram declaredProgram =
         DeclaredProgram.create(
             student,
             status,
