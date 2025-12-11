@@ -26,8 +26,8 @@ public class LoggedInUserServiceImpl implements LoggedInUserService {
   @Override
   public User getLoggedInUser() {
 <span class="fc" id="L28">    var context = RequestContext.get();</span>
-<span class="pc bpc" id="L29" title="1 of 2 branches missed.">    if (context == null) {</span>
-<span class="nc" id="L30">      throw new RequestContextNotDefinedException();</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">    if (context == null) {</span>
+<span class="fc" id="L30">      throw new RequestContextNotDefinedException();</span>
     }
 <span class="fc" id="L32">    return RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
   }
