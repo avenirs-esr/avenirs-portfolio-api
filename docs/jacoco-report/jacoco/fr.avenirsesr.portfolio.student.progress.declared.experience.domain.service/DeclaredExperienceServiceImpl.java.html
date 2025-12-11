@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeclaredExperienceServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.declared.experience.domain.service</a> &gt; <span class="el_source">DeclaredExperienceServiceImpl.java</span></div><h1>DeclaredExperienceServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.service;
 
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.shared.application.adapter.exception.RequestContextNotDefinedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.InvalidDeclaredExperienceDataException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
@@ -17,6 +17,14 @@ import lombok.extern.slf4j.Slf4j;
 <span class="fc" id="L17">@Slf4j</span>
 @RequiredArgsConstructor
 public class DeclaredExperienceServiceImpl implements DeclaredExperienceService {
+  private static final int TITLE_MAX_LENGTH = 80;
+  private static final int ORGANIZATION_MAX_LENGTH = 80;
+  private static final int ACTIVITY_SECTOR_MAX_LENGTH = 50;
+  private static final int LOCATION_MAX_LENGTH = 50;
+  private static final int SOURCE_MAX_LENGTH = 200;
+  private static final int DESCRIPTION_MAX_LENGTH = 400;
+  private static final int SUMMARY_MAX_LENGTH = 400;
+
   private final LoggedInUserService loggedInUserService;
   private final DeclaredExperienceRepository experienceRepository;
   private final StudentRepository studentRepository;
@@ -35,20 +43,79 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-    Student student;
-    try {
-<span class="fc" id="L40">      student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L41">    } catch (RequestContextNotDefinedException e) {</span>
-<span class="fc" id="L42">      student = studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);</span>
-<span class="fc" id="L43">    }</span>
+<span class="fc" id="L46">    Student student =</span>
+<span class="fc" id="L47">        studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);</span>
+<span class="fc" id="L48">    return create(</span>
+        student,
+        title,
+        experienceType,
+        organization,
+        activitySector,
+        location,
+        description,
+        sourceOfInformation,
+        summary,
+        externalLink,
+        startDate,
+        endDate);
+  }
 
-<span class="fc bfc" id="L45" title="All 2 branches covered.">    if (!student.getId().equals(studentId)) {</span>
-<span class="fc" id="L46">      throw new UserNotAuthorizedException(</span>
-          &quot;Student not authorized. loggedIn student : %s student is provided : %s&quot;
-<span class="fc" id="L48">              .formatted(student, studentId));</span>
-    }
-<span class="fc" id="L50">    var experience =</span>
-<span class="fc" id="L51">        DeclaredExperience.create(</span>
+  @Override
+  public DeclaredExperience create(
+      String title,
+      EExperienceType experienceType,
+      String organization,
+      String activitySector,
+      String location,
+      String description,
+      String sourceOfInformation,
+      String summary,
+      String externalLink,
+      LocalDate startDate,
+      LocalDate endDate) {
+<span class="fc" id="L76">    return create(</span>
+<span class="fc" id="L77">        loggedInUserService.getLoggedInStudent(),</span>
+        title,
+        experienceType,
+        organization,
+        activitySector,
+        location,
+        description,
+        sourceOfInformation,
+        summary,
+        externalLink,
+        startDate,
+        endDate);
+  }
+
+  private DeclaredExperience create(
+      Student student,
+      String title,
+      EExperienceType experienceType,
+      String organization,
+      String activitySector,
+      String location,
+      String description,
+      String sourceOfInformation,
+      String summary,
+      String externalLink,
+      LocalDate startDate,
+      LocalDate endDate) {
+<span class="fc" id="L104">    log.info(&quot;DeclaredExperience creation for {}&quot;, student);</span>
+
+<span class="fc" id="L106">    checkValidity(</span>
+        title,
+        organization,
+        activitySector,
+        location,
+        description,
+        sourceOfInformation,
+        summary,
+        startDate,
+        endDate);
+
+<span class="fc" id="L117">    var experience =</span>
+<span class="fc" id="L118">        DeclaredExperience.create(</span>
             student,
             title,
             experienceType,
@@ -62,9 +129,72 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
             startDate,
             endDate);
 
-<span class="fc" id="L65">    experience = experienceRepository.save(experience);</span>
-<span class="fc" id="L66">    log.info(&quot;{} has been created&quot;, experience);</span>
-<span class="fc" id="L67">    return experience;</span>
+<span class="fc" id="L132">    experience = experienceRepository.save(experience);</span>
+<span class="fc" id="L133">    log.info(&quot;{} has been created&quot;, experience);</span>
+<span class="fc" id="L134">    return experience;</span>
   }
+
+  private void checkValidity(
+      String title,
+      String organization,
+      String activitySector,
+      String location,
+      String description,
+      String sourceOfInformation,
+      String summary,
+      LocalDate startDate,
+      LocalDate endDate) {
+<span class="pc bpc" id="L147" title="1 of 4 branches missed.">    if (title == null || title.isBlank()) {</span>
+<span class="fc" id="L148">      throw new InvalidDeclaredExperienceDataException(&quot;The job title is required.&quot;);</span>
+    }
+<span class="fc bfc" id="L150" title="All 2 branches covered.">    if (title.length() &gt; TITLE_MAX_LENGTH) {</span>
+<span class="fc" id="L151">      throw new InvalidDeclaredExperienceDataException(</span>
+<span class="fc" id="L152">          &quot;Please limit your job title input to %d characters.&quot;.formatted(TITLE_MAX_LENGTH));</span>
+    }
+
+<span class="pc bpc" id="L155" title="1 of 4 branches missed.">    if (organization == null || organization.isBlank()) {</span>
+<span class="fc" id="L156">      throw new InvalidDeclaredExperienceDataException(&quot;The organization is required.&quot;);</span>
+    }
+<span class="fc bfc" id="L158" title="All 2 branches covered.">    if (organization.length() &gt; ORGANIZATION_MAX_LENGTH) {</span>
+<span class="fc" id="L159">      throw new InvalidDeclaredExperienceDataException(</span>
+          &quot;Please limit your organization input to %d characters.&quot;
+<span class="fc" id="L161">              .formatted(ORGANIZATION_MAX_LENGTH));</span>
+    }
+
+<span class="pc bpc" id="L164" title="1 of 4 branches missed.">    if (activitySector != null &amp;&amp; activitySector.length() &gt; ACTIVITY_SECTOR_MAX_LENGTH) {</span>
+<span class="fc" id="L165">      throw new InvalidDeclaredExperienceDataException(</span>
+          &quot;The activity sector must not exceed %d characters.&quot;
+<span class="fc" id="L167">              .formatted(ACTIVITY_SECTOR_MAX_LENGTH));</span>
+    }
+
+<span class="pc bpc" id="L170" title="1 of 4 branches missed.">    if (location != null &amp;&amp; location.length() &gt; LOCATION_MAX_LENGTH) {</span>
+<span class="fc" id="L171">      throw new InvalidDeclaredExperienceDataException(</span>
+<span class="fc" id="L172">          &quot;The location must not exceed %d characters.&quot;.formatted(LOCATION_MAX_LENGTH));</span>
+    }
+
+<span class="pc bpc" id="L175" title="1 of 4 branches missed.">    if (sourceOfInformation != null &amp;&amp; sourceOfInformation.length() &gt; SOURCE_MAX_LENGTH) {</span>
+<span class="fc" id="L176">      throw new InvalidDeclaredExperienceDataException(</span>
+<span class="fc" id="L177">          &quot;The information source must not exceed %d characters.&quot;.formatted(SOURCE_MAX_LENGTH));</span>
+    }
+
+<span class="pc bpc" id="L180" title="1 of 4 branches missed.">    if (description != null &amp;&amp; description.length() &gt; DESCRIPTION_MAX_LENGTH) {</span>
+<span class="fc" id="L181">      throw new InvalidDeclaredExperienceDataException(</span>
+<span class="fc" id="L182">          &quot;The description must not exceed %d characters.&quot;.formatted(DESCRIPTION_MAX_LENGTH));</span>
+    }
+
+<span class="pc bpc" id="L185" title="1 of 4 branches missed.">    if (summary != null &amp;&amp; summary.length() &gt; SUMMARY_MAX_LENGTH) {</span>
+<span class="fc" id="L186">      throw new InvalidDeclaredExperienceDataException(</span>
+<span class="fc" id="L187">          &quot;The summary must not exceed %d characters.&quot;.formatted(SUMMARY_MAX_LENGTH));</span>
+    }
+
+<span class="fc bfc" id="L190" title="All 2 branches covered.">    if (startDate == null) {</span>
+<span class="fc" id="L191">      throw new InvalidDeclaredExperienceDataException(&quot;The start date is  required.&quot;);</span>
+    }
+
+<span class="fc bfc" id="L194" title="All 4 branches covered.">    if (endDate != null &amp;&amp; endDate.isBefore(startDate)) {</span>
+<span class="fc" id="L195">      throw new InvalidDeclaredExperienceDataException(</span>
+          &quot;The end date cannot be earlier than the start date.&quot;);
+    }
+<span class="fc" id="L198">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
