@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditio
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.common.error.application.adapter.exception.BaseRestExceptionHandler;
 import fr.avenirsesr.portfolio.common.error.application.adapter.response.ErrorResponse;
+import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
@@ -139,6 +140,12 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   public ResponseEntity<ErrorResponse> handleDeclaredExperienceNotFoundException(
       DeclaredExperienceNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+  
+  @ExceptionHandler(FieldValidationException.class)
+  public ResponseEntity<ErrorResponse> handleFieldValidationException(FieldValidationException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 }
