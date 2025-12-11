@@ -13,8 +13,8 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeCategorySeeder;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
-import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.DeclaredProgramSeeder;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder.DeclaredExperienceSeeder;
+import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.DeclaredProgramSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;

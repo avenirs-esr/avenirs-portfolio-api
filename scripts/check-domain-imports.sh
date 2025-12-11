@@ -3,7 +3,7 @@
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-ALLOWED_IMPORTS=("java." "fr.avenirsesr.portfolio." "lombok." "org.slf4j.")
+ALLOWED_IMPORTS=("java." "fr.avenirsesr.portfolio." "lombok." "org.slf4j." "static fr.avenirsesr.portfolio.")
 
 BASE_DIR="src/main/java/fr/avenirsesr/portfolio"
 

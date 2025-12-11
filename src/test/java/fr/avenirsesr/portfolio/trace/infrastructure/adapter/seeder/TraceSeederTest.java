@@ -6,8 +6,6 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;

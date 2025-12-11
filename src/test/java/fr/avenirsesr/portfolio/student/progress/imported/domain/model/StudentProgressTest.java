@@ -8,8 +8,6 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.util.List;

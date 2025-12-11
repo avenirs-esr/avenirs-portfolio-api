@@ -13,8 +13,6 @@ import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
-import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.mapper.SkillMapper;
-import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.mapper.StudentProgressViewMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.util.List;
