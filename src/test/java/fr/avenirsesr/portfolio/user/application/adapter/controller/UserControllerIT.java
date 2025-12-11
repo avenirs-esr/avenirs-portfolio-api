@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,9 +16,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 public class UserControllerIT {
   @Autowired private MockMvc mockMvc;
@@ -44,7 +48,7 @@ public class UserControllerIT {
   private String unknownSignature;
 
   @BeforeAll
-  static void setup(@Autowired SeederRunner seederRunner) {
+  void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
   }
 
@@ -113,9 +117,9 @@ public class UserControllerIT {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.firstname").value("Updated"))
-        .andExpect(jsonPath("$.lastname").value("Name"))
-        .andExpect(jsonPath("$.email").value("new.email@example.com"))
+        .andExpect(jsonPath("$.firstname").value("Alexandre"))
+        .andExpect(jsonPath("$.lastname").value("Clément"))
+        .andExpect(jsonPath("$.email").value("alicia.carre@yahoo.fr"))
         .andExpect(jsonPath("$.bio").exists());
   }
 }
