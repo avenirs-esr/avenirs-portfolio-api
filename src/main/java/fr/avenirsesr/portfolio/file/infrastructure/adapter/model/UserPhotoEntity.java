@@ -27,6 +27,7 @@ import lombok.Setter;
 public class UserPhotoEntity extends FileEntity {
 
   @ManyToOne(optional = false)
+  @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
 
   @Column(nullable = false)

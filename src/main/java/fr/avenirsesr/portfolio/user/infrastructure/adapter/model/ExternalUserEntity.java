@@ -30,6 +30,7 @@ public class ExternalUserEntity extends AvenirsBaseEntity {
   private EExternalSource source;
 
   @ManyToOne(optional = false)
+  @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
 
   @Column(nullable = false)

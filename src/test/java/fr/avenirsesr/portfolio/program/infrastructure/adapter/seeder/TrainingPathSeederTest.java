@@ -8,20 +8,13 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntit
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.SkillLevelDatabaseRepository;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.repository.TrainingPathDatabaseRepository;
+import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
-@Transactional
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ActiveProfiles("test")
-class TrainingPathSeederTest {
+class TrainingPathSeederTest extends ContainerConfigurationTest {
 
   @Autowired private TrainingPathSeeder trainingPathSeeder;
   @Autowired private TrainingPathDatabaseRepository trainingPathRepository;
