@@ -2,6 +2,8 @@ package fr.avenirsesr.portfolio.student.progress.declared.program.application.ad
 
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -13,6 +15,7 @@ import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.AddDeclaredProgramDTO;
 import java.time.LocalDate;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,14 +39,41 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.payload}")
   private String studentPayload;
 
+  @Value("${user.second.student.payload}")
+  private String secondStudentPayload;
+
   @Value("${user.unknown.payload}")
   private String unknownUserPayload;
 
   @Value("${user.student.signature}")
   private String studentSignature;
 
+  @Value("${user.second.student.signature}")
+  private String secondStudentSignature;
+
   @Value("${user.unknown.signature}")
   private String unknownUserSignature;
+
+  private String createDeclaredProgramAndReturnId(
+      AddDeclaredProgramDTO body, String userPayload, String userSignature) throws Exception {
+    var result =
+        mockMvc
+            .perform(
+                post(BASE_PATH)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(body))
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, userPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, userSignature))
+            .andExpect(status().isCreated())
+            .andExpect(header().string(HttpHeaders.LOCATION, notNullValue()))
+            .andReturn();
+
+    String location = result.getResponse().getHeader(HttpHeaders.LOCATION);
+    assertNotNull(location);
+    return location.substring(location.lastIndexOf('/') + 1);
+  }
 
   @BeforeAll
   static void setup(@Autowired SeederRunner seederRunner) {
@@ -89,7 +119,9 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     .string(
                         HttpHeaders.LOCATION,
                         matchesPattern(".*/me/declared/programs/[0-9a-fA-F\\-]{36}")))
-            .andExpect(content().string("Declared program created successfully"));
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.title").value("Stage d'observation"))
+            .andExpect(jsonPath("$.organization").value("Tech4Future"));
       }
 
       @Test
@@ -221,6 +253,113 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.code").value("NOT_NULL"))
             .andExpect(jsonPath("$.message").value("The field startDate cannot be null"));
+      }
+    }
+
+    @Nested
+    class WhenGettingADeclaredProgram {
+
+      @Test
+      void shouldReturn200WhenDeclaredProgramExistsAndBelongsToLoggedInStudent() throws Exception {
+        BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} GET endpoint");
+        BddLogger.when(
+            "performing a GET for an existing declared program owned by the logged-in student");
+        BddLogger.then("it should return 200 with the declared program dto");
+
+        String id =
+            createDeclaredProgramAndReturnId(
+                new AddDeclaredProgramDTO(
+                    "Stage d'observation",
+                    "Participation aux activités d'une équipe technique",
+                    "Tech4Future",
+                    "Acquisition de premières compétences techniques",
+                    "Conseiller d'orientation",
+                    "https://tech4future.example.com",
+                    LocalDate.now().minusMonths(1),
+                    LocalDate.now()),
+                studentPayload,
+                studentSignature);
+
+        mockMvc
+            .perform(
+                get(BASE_PATH + "/" + id)
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.title").value("Stage d'observation"))
+            .andExpect(jsonPath("$.organization").value("Tech4Future"))
+            .andExpect(jsonPath("$.startDate").isNotEmpty());
+      }
+
+      @Test
+      void shouldReturn404WhenDeclaredProgramNotFound() throws Exception {
+        BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} GET endpoint");
+        BddLogger.when("performing a GET for a non-existing declared program");
+        BddLogger.then("it should return 404 DECLARED_PROGRAM_NOT_FOUND");
+
+        String unknownId = UUID.randomUUID().toString();
+
+        mockMvc
+            .perform(
+                get(BASE_PATH + "/" + unknownId)
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.code").value("DECLARED_PROGRAM_NOT_FOUND"));
+      }
+
+      @Test
+      void shouldReturn400WhenDeclaredProgramIdIsNotUUID() throws Exception {
+        BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} GET endpoint");
+        BddLogger.when("performing a GET with an invalid UUID");
+        BddLogger.then("it should return 400");
+
+        mockMvc
+            .perform(
+                get(BASE_PATH + "/not-a-uuid")
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isBadRequest());
+      }
+
+      @Test
+      void shouldReturn403WhenDeclaredProgramBelongsToAnotherStudent() throws Exception {
+        BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} GET endpoint");
+        BddLogger.when(
+            "performing a GET for an existing declared program owned by another student");
+        BddLogger.then("it should return 403 (or 401 depending on your handler)");
+
+        String id =
+            createDeclaredProgramAndReturnId(
+                new AddDeclaredProgramDTO(
+                    "Programme privé",
+                    "Description",
+                    "Org",
+                    "Result",
+                    "Source",
+                    "https://example.com",
+                    LocalDate.now().minusMonths(1),
+                    LocalDate.now()),
+                secondStudentPayload,
+                secondStudentSignature);
+
+        mockMvc
+            .perform(
+                get(BASE_PATH + "/" + id)
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isForbidden());
       }
     }
   }
