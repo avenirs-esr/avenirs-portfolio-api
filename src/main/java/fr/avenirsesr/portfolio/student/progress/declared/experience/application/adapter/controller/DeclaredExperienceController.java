@@ -1,5 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceViewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.mapper.DeclaredExperienceMapper;
@@ -42,10 +46,23 @@ public class DeclaredExperienceController {
   }
 
   @GetMapping("/{experienceId}")
-  public ResponseEntity<DeclaredExperienceViewDTO> createDeclaredExperience(
+  public ResponseEntity<DeclaredExperienceViewDTO> getDeclaredExperience(
       @Valid @PathVariable UUID experienceId) {
     DeclaredExperience experience = declaredExperienceService.get(experienceId);
 
     return ResponseEntity.ok(DeclaredExperienceMapper.toDTO(experience));
+  }
+
+  @GetMapping("/view")
+  public ResponseEntity<PagedResponse<DeclaredExperienceViewDTO>> getDeclaredExperienceView(
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+    PagedResult<DeclaredExperience> pagedExperiences =
+        declaredExperienceService.getView(new PageCriteria(page, pageSize));
+
+    return ResponseEntity.ok(
+        new PagedResponse<>(
+            pagedExperiences.content().stream().map(DeclaredExperienceMapper::toDTO).toList(),
+            PageInfoDTO.fromDomain(pagedExperiences.pageInfo())));
   }
 }

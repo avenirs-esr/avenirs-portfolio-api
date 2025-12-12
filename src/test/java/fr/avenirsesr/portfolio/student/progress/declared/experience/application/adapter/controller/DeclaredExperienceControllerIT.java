@@ -124,4 +124,69 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                 .header("X-Context-Signature", studentSignature))
         .andExpect(status().isNotFound());
   }
+
+  @Transactional
+  @Test
+  void shouldGetDeclaredExperienceViewWithDefaultPagination() throws Exception {
+    BddLogger.given("several declared experiences exist");
+    BddLogger.when("performing a GET on /view without pagination params");
+    BddLogger.then("it should return a paged list of declared experiences");
+
+    mockMvc
+        .perform(
+            get(BASE_PATH + "/view")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.page").exists())
+        .andExpect(jsonPath("$.page.pageSize").exists())
+        .andExpect(jsonPath("$.page.totalElements").exists())
+        .andExpect(jsonPath("$.page.totalPages").exists());
+  }
+
+  @Transactional
+  @Test
+  void shouldGetDeclaredExperienceViewWithPaginationParams() throws Exception {
+    BddLogger.given("several declared experiences exist");
+    BddLogger.when("performing a GET on /view with pagination params");
+    BddLogger.then("it should return a paged list respecting pagination");
+
+    mockMvc
+        .perform(
+            get(BASE_PATH + "/view")
+                .param("page", "0")
+                .param("pageSize", "5")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.data.length()").value(lessThanOrEqualTo(5)))
+        .andExpect(jsonPath("$.page.page").value(0))
+        .andExpect(jsonPath("$.page.pageSize").value(5));
+  }
+
+  @Transactional
+  @Test
+  void shouldReturnEmptyContentWhenNoDeclaredExperienceExists() throws Exception {
+    BddLogger.given("no declared experience exists for the student");
+    BddLogger.when("performing a GET on /view");
+    BddLogger.then("it should return an empty paged response");
+
+    mockMvc
+        .perform(
+            get(BASE_PATH + "/view")
+                .param("page", "0")
+                .param("pageSize", "10")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.data").isEmpty())
+        .andExpect(jsonPath("$.page.totalElements").value(0));
+  }
 }

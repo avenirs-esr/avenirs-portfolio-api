@@ -2,6 +2,8 @@ package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.serv
 
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
@@ -149,5 +151,13 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       throw new UserNotAuthorizedException();
     }
     return experience;
+  }
+
+  @Override
+  public PagedResult<DeclaredExperience> getView(PageCriteria pageCriteria) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    log.info("Get experience view by {}", student);
+
+    return experienceRepository.findAllByStudent(student, pageCriteria);
   }
 }

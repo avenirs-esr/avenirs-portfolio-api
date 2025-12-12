@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import java.time.LocalDate;
@@ -34,4 +36,6 @@ public interface DeclaredExperienceService {
       LocalDate endDate);
 
   DeclaredExperience get(UUID experienceId);
+
+  PagedResult<DeclaredExperience> getView(PageCriteria pageCriteria);
 }
