@@ -48,7 +48,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.infrastr
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils,ValidationUtils,3,11,1,3,1,3,2,2,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,PrometheusLogFilter,5,11,3,3,1,3,2,3,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,39,69,6,0,8,22,3,4,0,4
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.controller,DeclaredExperienceController,45,4,0,0,17,1,2,1,2,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.controller,DeclaredExperienceController,0,49,0,0,0,18,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.dependency.domain.service,DependencyCheckerImpl,238,13,14,0,48,5,10,2,3,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.domain.data,SkillLevelProgressWithTraceCountData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.domain.data,SkillProgressData,0,46,0,4,0,14,0,6,0,4
