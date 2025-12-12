@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeclaredProgramServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.declared.program.domain.service</a> &gt; <span class="el_source">DeclaredProgramServiceImpl.java</span></div><h1>DeclaredProgramServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.declared.program.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.temporal.domain.model.enums.EPeriodStatus;
+import fr.avenirsesr.portfolio.common.temporal.domain.utils.PeriodUtils;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
@@ -15,7 +18,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L18">@Slf4j</span>
+<span class="fc" id="L21">@Slf4j</span>
 @AllArgsConstructor
 public class DeclaredProgramServiceImpl implements DeclaredProgramService {
   private final StudentRepository studentRepository;
@@ -34,16 +37,17 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       LocalDate startDate,
       LocalDate endDate) {
 
-<span class="fc" id="L37">    requireNotBlankAndMaxLength(&quot;title&quot;, title, 80);</span>
-<span class="fc" id="L38">    requireNotBlankAndMaxLength(&quot;organization&quot;, organization, 50);</span>
-<span class="fc" id="L39">    validateOptionalTextMaxLength(&quot;description&quot;, description, 400);</span>
-<span class="fc" id="L40">    validateOptionalTextMaxLength(&quot;result&quot;, result, 50);</span>
-<span class="fc" id="L41">    validateOptionalTextMaxLength(&quot;sourceOfInformation&quot;, sourceOfInformation, 200);</span>
-<span class="fc" id="L42">    requireNotNull(&quot;startDate&quot;, startDate);</span>
-<span class="fc" id="L43">    validateDateOrder(startDate, endDate);</span>
+<span class="fc" id="L40">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
+<span class="fc" id="L41">    requireNotBlankAndMaxLength(&quot;organization&quot;, organization, ORGANIZATION_LENGTH);</span>
+<span class="fc" id="L42">    validateOptionalTextMaxLength(&quot;description&quot;, description, DESCRIPTION_LENGTH);</span>
+<span class="fc" id="L43">    validateOptionalTextMaxLength(&quot;result&quot;, result, RESULT_LENGTH);</span>
+<span class="fc" id="L44">    validateOptionalTextMaxLength(</span>
+        &quot;sourceOfInformation&quot;, sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
+<span class="fc" id="L46">    requireNotNull(&quot;startDate&quot;, startDate);</span>
+<span class="fc" id="L47">    validateDateOrder(startDate, endDate);</span>
 
-<span class="fc" id="L45">    DeclaredProgram declaredProgram =</span>
-<span class="fc" id="L46">        DeclaredProgram.create(</span>
+<span class="fc" id="L49">    DeclaredProgram declaredProgram =</span>
+<span class="fc" id="L50">        DeclaredProgram.create(</span>
             student,
             status,
             title,
@@ -55,7 +59,7 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
             startDate,
             endDate);
 
-<span class="fc" id="L58">    return declaredProgramRepository.save(declaredProgram);</span>
+<span class="fc" id="L62">    return declaredProgramRepository.save(declaredProgram);</span>
   }
 
   @Override
@@ -70,9 +74,9 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String link,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L73">    Student student =</span>
-<span class="fc" id="L74">        studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);</span>
-<span class="fc" id="L75">    return create(</span>
+<span class="fc" id="L77">    Student student =</span>
+<span class="fc" id="L78">        studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);</span>
+<span class="fc" id="L79">    return create(</span>
         student,
         status,
         title,
@@ -87,7 +91,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
 
   @Override
   public DeclaredProgram create(
-      EProgramStatus status,
       String title,
       String description,
       String organization,
@@ -96,10 +99,10 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String link,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L99">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L100">    return create(</span>
+<span class="fc" id="L102">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L103">    return create(</span>
         student,
-        status,
+<span class="fc" id="L105">        getProgramStatus(startDate, endDate),</span>
         title,
         description,
         organization,
@@ -108,6 +111,17 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
         link,
         startDate,
         endDate);
+  }
+
+  private EProgramStatus getProgramStatus(LocalDate startDate, LocalDate endDate) {
+<span class="fc" id="L117">    requireNotNull(&quot;startDate&quot;, startDate);</span>
+<span class="fc" id="L118">    validateDateOrder(startDate, endDate);</span>
+<span class="fc" id="L119">    EPeriodStatus periodStatus = PeriodUtils.getPeriodStatus(startDate, endDate);</span>
+<span class="fc bfc" id="L120" title="All 3 branches covered.">    return switch (periodStatus) {</span>
+<span class="fc" id="L121">      case EPeriodStatus.DURING -&gt; EProgramStatus.IN_PROGRESS;</span>
+<span class="fc" id="L122">      case EPeriodStatus.AFTER -&gt; EProgramStatus.NOT_STARTED;</span>
+<span class="fc" id="L123">      case EPeriodStatus.BEFORE -&gt; EProgramStatus.COMPLETED;</span>
+    };
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
