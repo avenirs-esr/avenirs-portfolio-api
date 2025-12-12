@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.program.domain.exception.DeclaredProgramNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.output.DeclaredProgramRepository;
@@ -299,6 +300,110 @@ class DeclaredProgramServiceImplTest {
 
           verify(studentRepository, never()).findById(any());
           verify(declaredProgramRepository, never()).save(any());
+        }
+      }
+    }
+
+    @Nested
+    class WhenGetByIdIsCalled {
+
+      private UUID declaredProgramId;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("getById(UUID declaredProgramId) is called");
+        declaredProgramId = UUID.randomUUID();
+      }
+
+      @Nested
+      class AndDeclaredProgramExists {
+
+        private DeclaredProgram declaredProgram;
+        private Student loggedStudent;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("declared program exists in repository");
+          declaredProgram = mock(DeclaredProgram.class);
+          when(declaredProgramRepository.findById(declaredProgramId))
+              .thenReturn(Optional.of(declaredProgram));
+
+          loggedStudent = mock(Student.class);
+          when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedStudent);
+        }
+
+        @Nested
+        class AndItBelongsToLoggedInStudent {
+
+          @BeforeEach
+          void setupAnd2() {
+            BddLogger.and("declared program belongs to logged in student");
+            // IMPORTANT: même instance => equals() true (réflexif)
+            when(declaredProgram.getStudent()).thenReturn(loggedStudent);
+          }
+
+          @Test
+          void thenItShouldReturnDeclaredProgram() {
+            BddLogger.then("it should return the declared program");
+
+            DeclaredProgram result = declaredProgramService.getById(declaredProgramId);
+
+            assertNotNull(result);
+            assertEquals(declaredProgram, result);
+
+            verify(declaredProgramRepository).findById(declaredProgramId);
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(declaredProgram).getStudent();
+          }
+        }
+
+        @Nested
+        class AndItDoesNotBelongToLoggedInStudent {
+
+          private Student otherStudent;
+
+          @BeforeEach
+          void setupAnd2() {
+            BddLogger.and("declared program does not belong to logged in student");
+            otherStudent = mock(Student.class);
+            when(declaredProgram.getStudent()).thenReturn(otherStudent);
+          }
+
+          @Test
+          void thenItShouldThrowUserNotAuthorizedException() {
+            BddLogger.then("it should throw UserNotAuthorizedException");
+
+            assertThrows(
+                UserNotAuthorizedException.class,
+                () -> declaredProgramService.getById(declaredProgramId));
+
+            verify(declaredProgramRepository).findById(declaredProgramId);
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(declaredProgram).getStudent();
+          }
+        }
+      }
+
+      @Nested
+      class AndDeclaredProgramDoesNotExist {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("declared program does not exist in repository");
+          when(declaredProgramRepository.findById(declaredProgramId)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void thenItShouldThrowDeclaredProgramNotFoundException() {
+          BddLogger.then("it should throw DeclaredProgramNotFoundException");
+
+          assertThrows(
+              DeclaredProgramNotFoundException.class,
+              () -> declaredProgramService.getById(declaredProgramId));
+
+          verify(declaredProgramRepository).findById(declaredProgramId);
+          verify(loggedInUserService, never()).getLoggedInStudent();
+          verifyNoMoreInteractions(declaredProgramRepository);
         }
       }
     }

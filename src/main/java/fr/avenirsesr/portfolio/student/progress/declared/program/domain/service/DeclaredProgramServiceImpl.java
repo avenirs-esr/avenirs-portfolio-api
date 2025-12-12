@@ -4,10 +4,10 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.common.temporal.domain.model.enums.EPeriodStatus;
-import fr.avenirsesr.portfolio.common.temporal.domain.utils.PeriodUtils;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.program.domain.exception.DeclaredProgramNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
+import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EPeriodStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.input.DeclaredProgramService;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.output.DeclaredProgramRepository;
@@ -113,10 +113,21 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
         endDate);
   }
 
+  @Override
+  public DeclaredProgram getById(UUID declaredProgramId) {
+    DeclaredProgram declaredProgram =
+        declaredProgramRepository
+            .findById(declaredProgramId)
+            .orElseThrow(DeclaredProgramNotFoundException::new);
+    Student student = loggedInUserService.getLoggedInStudent();
+    if (!declaredProgram.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
+    return declaredProgram;
+  }
+
   private EProgramStatus getProgramStatus(LocalDate startDate, LocalDate endDate) {
-    requireNotNull("startDate", startDate);
-    validateDateOrder(startDate, endDate);
-    EPeriodStatus periodStatus = PeriodUtils.getPeriodStatus(startDate, endDate);
+    EPeriodStatus periodStatus = EPeriodStatus.of(startDate, endDate);
     return switch (periodStatus) {
       case EPeriodStatus.DURING -> EProgramStatus.IN_PROGRESS;
       case EPeriodStatus.AFTER -> EProgramStatus.NOT_STARTED;

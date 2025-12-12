@@ -27,4 +27,6 @@ public interface DeclaredProgramService {
       String link,
       LocalDate startDate,
       LocalDate endDate);
+
+  DeclaredProgram getById(UUID declaredProgramId);
 }
