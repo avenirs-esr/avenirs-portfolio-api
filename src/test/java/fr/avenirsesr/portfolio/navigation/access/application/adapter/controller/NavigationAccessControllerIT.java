@@ -1,16 +1,24 @@
 package fr.avenirsesr.portfolio.navigation.access.application.adapter.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import fr.avenirsesr.portfolio.common.configuration.domain.model.InstitutionConfigurationElements;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.program.domain.port.output.client.InstitutionConfigClient;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -46,6 +54,21 @@ class NavigationAccessControllerIT extends ContainerConfigurationTest {
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
+  }
+
+  @TestConfiguration
+  static class TestConfig {
+
+    @Bean
+    @Primary
+    public InstitutionConfigClient institutionConfigClient() {
+      InstitutionConfigClient mock = org.mockito.Mockito.mock(InstitutionConfigClient.class);
+
+      InstitutionConfigurationElements config = new InstitutionConfigurationElements(true, false);
+      when(mock.getInstitutionConfigElementsById(any(UUID.class))).thenReturn(config);
+
+      return mock;
+    }
   }
 
   @Test

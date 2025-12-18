@@ -81,7 +81,6 @@ class CohortMapperTest {
 
     InstitutionEntity institutionEntity = new InstitutionEntity();
     institutionEntity.setId(UUID.randomUUID());
-    institutionEntity.setEnabledFields(new HashSet<>());
 
     InstitutionTranslationEntity institutionTranslationEntity = new InstitutionTranslationEntity();
     institutionTranslationEntity.setLanguage(language);
@@ -158,7 +157,6 @@ class CohortMapperTest {
 
     InstitutionEntity institutionEntity = new InstitutionEntity();
     institutionEntity.setId(UUID.randomUUID());
-    institutionEntity.setEnabledFields(new HashSet<>());
 
     InstitutionTranslationEntity institutionTranslationEntity = new InstitutionTranslationEntity();
     institutionTranslationEntity.setLanguage(language);

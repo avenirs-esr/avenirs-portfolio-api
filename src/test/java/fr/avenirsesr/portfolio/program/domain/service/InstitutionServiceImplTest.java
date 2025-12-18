@@ -3,10 +3,15 @@ package fr.avenirsesr.portfolio.program.domain.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.configuration.domain.model.InstitutionConfigurationElements;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.program.domain.model.Institution;
+import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
+import fr.avenirsesr.portfolio.program.domain.port.output.client.InstitutionConfigClient;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.InstitutionFixture;
+import fr.avenirsesr.portfolio.program.infrastructure.fixture.ProgramFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
@@ -14,17 +19,20 @@ import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class InstitutionServiceImplTest {
+
   @Mock private StudentProgressRepository studentProgressRepository;
   @Mock private LoggedInUserService loggedInUserService;
+  @Mock private InstitutionConfigClient institutionConfigClient;
 
   @InjectMocks private InstitutionServiceImpl institutionService;
 
@@ -37,71 +45,130 @@ class InstitutionServiceImplTest {
   }
 
   @Test
-  void shouldReturnTrueWhenInstitutionHasEnabledNavigationField() {
-    BddLogger.given(
-        "an InstitutionServiceImpl service and checking if the navigation is enabled for student");
-    TrainingPath apcTrainingPath = TrainingPathFixture.createWithAPC().toModel();
-    TrainingPath lifeProjectTrainingPath = TrainingPathFixture.createWithoutAPC().toModel();
-    StudentProgress studentProgressAPC =
-        StudentProgressFixture.create()
-            .withTrainingPath(apcTrainingPath)
-            .withStudent(student)
-            .toModel();
-    StudentProgress studentProgressLifeProject =
-        StudentProgressFixture.create()
-            .withTrainingPath(lifeProjectTrainingPath)
-            .withStudent(student)
-            .toModel();
+  void shouldAggregateConfigurationAcrossInstitutions_anyTrue() {
+    BddLogger.given("a student with progresses in multiple institutions");
 
-    when(studentProgressRepository.findAllByStudent(student))
-        .thenReturn(List.of(studentProgressAPC, studentProgressLifeProject));
+    UUID institutionId1 = UUID.randomUUID();
+    UUID institutionId2 = UUID.randomUUID();
 
-    BddLogger.when("at least one institution has enabled navigation field");
-    boolean result = institutionService.isNavigationEnabledFor(EPortfolioType.APC);
+    Institution inst1 = InstitutionFixture.create().withId(institutionId1).toModel();
+    Institution inst2 = InstitutionFixture.create().withId(institutionId2).toModel();
+    Program prog1 = ProgramFixture.create().withInstitution(inst1).toModel();
+    Program prog2 = ProgramFixture.create().withInstitution(inst2).toModel();
+    TrainingPath tp1 = TrainingPathFixture.createWithAPC().withProgram(prog1).toModel();
+    TrainingPath tp2 = TrainingPathFixture.createWithoutAPC().withProgram(prog2).toModel();
 
-    BddLogger.when("it should return true");
-    assertTrue(result);
+    StudentProgress sp1 =
+        StudentProgressFixture.create().withTrainingPath(tp1).withStudent(student).toModel();
+    StudentProgress sp2 =
+        StudentProgressFixture.create().withTrainingPath(tp2).withStudent(student).toModel();
+
+    when(studentProgressRepository.findAllByStudent(student)).thenReturn(List.of(sp1, sp2));
+
+    when(institutionConfigClient.getInstitutionConfigElementsById(institutionId1))
+        .thenReturn(new InstitutionConfigurationElements(true, false));
+    when(institutionConfigClient.getInstitutionConfigElementsById(institutionId2))
+        .thenReturn(new InstitutionConfigurationElements(false, true));
+
+    BddLogger.when("getting the aggregated institution configuration");
+    InstitutionConfigurationElements result = institutionService.getInstitutionConfiguration();
+
+    BddLogger.then("it should OR the flags across configs");
+    assertTrue(result.apcEnabled());
+    assertTrue(result.lifeProjectEnabled());
+
     verify(studentProgressRepository).findAllByStudent(student);
+    verify(institutionConfigClient).getInstitutionConfigElementsById(institutionId1);
+    verify(institutionConfigClient).getInstitutionConfigElementsById(institutionId2);
+    verifyNoMoreInteractions(institutionConfigClient);
   }
 
   @Test
-  void shouldReturnFalseWhenNoInstitutionHasEnabledNavigationField() {
-    BddLogger.given(
-        "an InstitutionServiceImpl service and checking if the navigation is enabled for student");
-    TrainingPath apcTrainingPath = TrainingPathFixture.createWithAPC().toModel();
-    TrainingPath apcTrainingPath2 = TrainingPathFixture.createWithAPC().toModel();
-    StudentProgress studentProgressAPC =
-        StudentProgressFixture.create()
-            .withTrainingPath(apcTrainingPath)
-            .withStudent(student)
-            .toModel();
-    StudentProgress studentProgress2 =
-        StudentProgressFixture.create()
-            .withTrainingPath(apcTrainingPath2)
-            .withStudent(student)
-            .toModel();
+  void shouldCallConfigClientOnlyOncePerInstitution_distinct() {
+    BddLogger.given("a student with multiple progresses in the same institution");
 
-    when(studentProgressRepository.findAllByStudent(student))
-        .thenReturn(List.of(studentProgressAPC, studentProgress2));
+    UUID institutionId = UUID.randomUUID();
 
-    BddLogger.when("no institutions has enabled navigation field");
-    boolean result = institutionService.isNavigationEnabledFor(EPortfolioType.LIFE_PROJECT);
+    Institution inst1 = InstitutionFixture.create().withId(institutionId).toModel();
+    Institution inst2 = InstitutionFixture.create().withId(institutionId).toModel();
+    Program prog1 = ProgramFixture.create().withInstitution(inst1).toModel();
+    Program prog2 = ProgramFixture.create().withInstitution(inst2).toModel();
+    TrainingPath tp1 = TrainingPathFixture.createWithAPC().withProgram(prog1).toModel();
+    TrainingPath tp2 = TrainingPathFixture.createWithAPC().withProgram(prog2).toModel();
 
-    BddLogger.when("it should return false");
-    assertFalse(result);
+    StudentProgress sp1 =
+        StudentProgressFixture.create().withTrainingPath(tp1).withStudent(student).toModel();
+    StudentProgress sp2 =
+        StudentProgressFixture.create().withTrainingPath(tp2).withStudent(student).toModel();
+
+    when(studentProgressRepository.findAllByStudent(student)).thenReturn(List.of(sp1, sp2));
+
+    when(institutionConfigClient.getInstitutionConfigElementsById(institutionId))
+        .thenReturn(new InstitutionConfigurationElements(true, true));
+
+    BddLogger.when("getting the aggregated institution configuration");
+    InstitutionConfigurationElements result = institutionService.getInstitutionConfiguration();
+
+    BddLogger.then("it should call the client once thanks to distinct()");
+    assertTrue(result.apcEnabled());
+    assertTrue(result.lifeProjectEnabled());
+
     verify(studentProgressRepository).findAllByStudent(student);
+    verify(institutionConfigClient, times(1)).getInstitutionConfigElementsById(institutionId);
+    verifyNoMoreInteractions(institutionConfigClient);
   }
 
   @Test
-  void shouldReturnFalseWhenStudentHasNoProgramProgress() {
-    BddLogger.given("a InstitutionServiceImpl service");
+  void shouldReturnAllFalseWhenStudentHasNoProgress() {
+    BddLogger.given("a student with no progresses");
     when(studentProgressRepository.findAllByStudent(student)).thenReturn(List.of());
 
-    BddLogger.when("student has no program progresses");
-    boolean result = institutionService.isNavigationEnabledFor(EPortfolioType.APC);
+    BddLogger.when("getting the aggregated institution configuration");
+    InstitutionConfigurationElements result = institutionService.getInstitutionConfiguration();
 
-    BddLogger.when("it should return false");
-    assertFalse(result);
+    BddLogger.then("it should return a configuration with all disabled");
+    assertFalse(result.apcEnabled());
+    assertFalse(result.lifeProjectEnabled());
+
     verify(studentProgressRepository).findAllByStudent(student);
+    verifyNoInteractions(institutionConfigClient);
+  }
+
+  @Test
+  void shouldReturnFalseForMissingFlagsWhenAllConfigsAreFalse() {
+    BddLogger.given("institutions configs where all flags are disabled");
+
+    UUID institutionId1 = UUID.randomUUID();
+    UUID institutionId2 = UUID.randomUUID();
+
+    Institution inst1 = InstitutionFixture.create().withId(institutionId1).toModel();
+    Institution inst2 = InstitutionFixture.create().withId(institutionId2).toModel();
+    Program prog1 = ProgramFixture.create().withInstitution(inst1).toModel();
+    Program prog2 = ProgramFixture.create().withInstitution(inst2).toModel();
+    TrainingPath tp1 = TrainingPathFixture.createWithAPC().withProgram(prog1).toModel();
+    TrainingPath tp2 = TrainingPathFixture.createWithAPC().withProgram(prog2).toModel();
+
+    StudentProgress sp1 =
+        StudentProgressFixture.create().withTrainingPath(tp1).withStudent(student).toModel();
+    StudentProgress sp2 =
+        StudentProgressFixture.create().withTrainingPath(tp2).withStudent(student).toModel();
+
+    when(studentProgressRepository.findAllByStudent(student)).thenReturn(List.of(sp1, sp2));
+
+    when(institutionConfigClient.getInstitutionConfigElementsById(institutionId1))
+        .thenReturn(new InstitutionConfigurationElements(false, false));
+    when(institutionConfigClient.getInstitutionConfigElementsById(institutionId2))
+        .thenReturn(new InstitutionConfigurationElements(false, false));
+
+    BddLogger.when("getting the aggregated institution configuration");
+    InstitutionConfigurationElements result = institutionService.getInstitutionConfiguration();
+
+    BddLogger.then("it should return all false");
+    assertFalse(result.apcEnabled());
+    assertFalse(result.lifeProjectEnabled());
+
+    verify(institutionConfigClient).getInstitutionConfigElementsById(institutionId1);
+    verify(institutionConfigClient).getInstitutionConfigElementsById(institutionId2);
+    verifyNoMoreInteractions(institutionConfigClient);
   }
 }

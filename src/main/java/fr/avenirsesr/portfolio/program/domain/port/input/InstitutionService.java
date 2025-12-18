@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.program.domain.port.input;
 
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
+import fr.avenirsesr.portfolio.common.configuration.domain.model.InstitutionConfigurationElements;
 
 public interface InstitutionService {
-  boolean isNavigationEnabledFor(EPortfolioType navigationField);
+  InstitutionConfigurationElements getInstitutionConfiguration();
 }

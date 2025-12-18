@@ -7,17 +7,13 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionT
 
 public interface InstitutionMapper {
   static InstitutionEntity fromDomain(Institution institution) {
-    return InstitutionEntity.of(institution.getId(), institution.getEnabledFields());
+    return InstitutionEntity.of(institution.getId());
   }
 
   static Institution toDomain(InstitutionEntity entity) {
     InstitutionTranslationEntity translationEntity =
         TranslationUtil.getTranslation(entity.getTranslations());
     return Institution.toDomain(
-        entity.getId(),
-        translationEntity.getName(),
-        entity.getEnabledFields(),
-        entity.getCreatedAt(),
-        entity.getUpdatedAt());
+        entity.getId(), translationEntity.getName(), entity.getCreatedAt(), entity.getUpdatedAt());
   }
 }

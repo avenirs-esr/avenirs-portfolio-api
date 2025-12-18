@@ -3,9 +3,6 @@ package fr.avenirsesr.portfolio.program.infrastructure.fixture;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeSkill;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeSkillLevel;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,22 +18,34 @@ public class SkillLevelFixture {
   private Instant createdAt;
   private Instant updatedAt;
 
-  private SkillLevelFixture() {
-    var skillLevelEntity = FakeSkillLevel.create().toEntity();
-    var skillEntity = FakeSkill.of(List.of(skillLevelEntity)).toEntity();
-    skillLevelEntity.setSkill(skillEntity);
-    SkillLevel base = SkillLevelMapper.toDomain(skillLevelEntity);
+  private SkillLevelFixture(
+      UUID id,
+      String name,
+      String description,
+      Skill skill,
+      ELanguage language,
+      Instant createdAt,
+      Instant updatedAt) {
 
-    this.id = base.getId();
-    this.name = base.getName();
-    this.description = base.getDescription().orElse(null);
-    this.skill = base.getSkill();
-    this.createdAt = base.getCreatedAt();
-    this.updatedAt = base.getUpdatedAt();
+    this.id = id;
+    this.name = name;
+    this.description = description;
+    this.skill = skill;
+    this.language = language;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
   }
 
   public static SkillLevelFixture create() {
-    return new SkillLevelFixture();
+    Skill skill = SkillFixture.create().toModel();
+    return new SkillLevelFixture(
+        UUID.randomUUID(),
+        "Skill Level " + UUID.randomUUID(),
+        "Description for Skill Level " + UUID.randomUUID(),
+        skill,
+        ELanguage.FRENCH,
+        Instant.now(),
+        Instant.now());
   }
 
   public SkillLevelFixture withId(UUID id) {

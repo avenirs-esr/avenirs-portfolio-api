@@ -2,9 +2,6 @@ package fr.avenirsesr.portfolio.program.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillMapper;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeSkill;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeSkillLevel;
 import java.time.Instant;
 import java.util.*;
 
@@ -16,20 +13,18 @@ public class SkillFixture {
   private Instant createdAt;
   private Instant updatedAt;
 
-  private SkillFixture() {
-    var skillLevelEntity = FakeSkillLevel.create().toEntity();
-    var skillEntity = FakeSkill.of(List.of(skillLevelEntity)).toEntity();
-    skillLevelEntity.setSkill(skillEntity);
-    Skill base = SkillMapper.toDomain(skillEntity);
-
-    this.id = base.getId();
-    this.name = base.getName();
-    this.createdAt = base.getCreatedAt();
-    this.updatedAt = base.getUpdatedAt();
+  private SkillFixture(
+      UUID id, String name, ELanguage language, Instant createdAt, Instant updatedAt) {
+    this.id = id;
+    this.name = name;
+    this.language = language;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
   }
 
   public static SkillFixture create() {
-    return new SkillFixture();
+    return new SkillFixture(
+        UUID.randomUUID(), "Default Skill", ELanguage.FALLBACK, Instant.now(), Instant.now());
   }
 
   public SkillFixture withId(UUID id) {
