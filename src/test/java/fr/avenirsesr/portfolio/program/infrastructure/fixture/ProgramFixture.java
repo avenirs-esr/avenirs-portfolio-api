@@ -4,9 +4,7 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.temporal.domain.model.enums.EDurationUnit;
 import fr.avenirsesr.portfolio.program.domain.model.Institution;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import java.time.Instant;
-import java.util.Set;
 import java.util.UUID;
 
 public class ProgramFixture {
@@ -37,17 +35,13 @@ public class ProgramFixture {
   public static ProgramFixture createWithAPC() {
     return new ProgramFixture()
         .withAPC(true)
-        .withInstitution(
-            InstitutionFixture.create().withEnabledFields(Set.of(EPortfolioType.APC)).toModel());
+        .withInstitution(InstitutionFixture.create().toModel());
   }
 
   public static ProgramFixture createWithoutAPC() {
     return new ProgramFixture()
         .withAPC(false)
-        .withInstitution(
-            InstitutionFixture.create()
-                .withEnabledFields(Set.of(EPortfolioType.LIFE_PROJECT))
-                .toModel());
+        .withInstitution(InstitutionFixture.create().toModel());
   }
 
   public ProgramFixture withId(UUID id) {

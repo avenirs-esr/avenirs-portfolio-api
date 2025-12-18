@@ -6,7 +6,6 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGen
 import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGenerator;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionTranslationEntity;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import java.util.Set;
 
 public class FakeInstitution {
@@ -24,7 +23,7 @@ public class FakeInstitution {
   }
 
   public static FakeInstitution create() {
-    var entity = InstitutionEntity.of(dataGenerator.with("id").uuid(), Set.of());
+    var entity = InstitutionEntity.of(dataGenerator.with("id").uuid());
     var fakeInstitution = new FakeInstitution(entity);
 
     entity.setTranslations(
@@ -49,11 +48,6 @@ public class FakeInstitution {
             institution));
 
     institution.setTranslations(translations);
-  }
-
-  public FakeInstitution withEnabledFiled(Set<EPortfolioType> enabledFields) {
-    institution.setEnabledFields(enabledFields);
-    return this;
   }
 
   public InstitutionEntity toEntity() {
