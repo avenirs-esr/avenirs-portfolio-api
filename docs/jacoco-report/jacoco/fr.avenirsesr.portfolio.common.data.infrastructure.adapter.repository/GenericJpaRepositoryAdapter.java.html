@@ -105,11 +105,11 @@ public abstract class GenericJpaRepositoryAdapter&lt;
   }
 
   protected PagedResult&lt;D&gt; findAll(Specification&lt;E&gt; specification, PageCriteria pageCriteria) {
-<span class="fc" id="L108">    var page =</span>
-<span class="fc" id="L109">        jpaSpecificationExecutor.findAll(</span>
-<span class="fc" id="L110">            specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
+<span class="nc" id="L108">    var page =</span>
+<span class="nc" id="L109">        jpaSpecificationExecutor.findAll(</span>
+<span class="nc" id="L110">            specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
 
-<span class="fc" id="L112">    return toPagedResult(page);</span>
+<span class="nc" id="L112">    return toPagedResult(page);</span>
   }
 
   protected PagedResult&lt;D&gt; findAll(
