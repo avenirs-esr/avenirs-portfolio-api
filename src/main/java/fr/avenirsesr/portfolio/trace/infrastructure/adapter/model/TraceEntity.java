@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.model;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
+
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.DeletableAvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
@@ -34,7 +36,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
   @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
 
-  @Column(nullable = false)
+  @Column(nullable = false, length = TITLE_LENGTH)
   private String title;
 
   @Column(nullable = false)
@@ -65,11 +67,13 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
   @Column(nullable = false, name = "is_group")
   private boolean isGroup;
 
-  @Size(max = 200, message = "ai use justification can not exceed 200 characters")
+  @Size(
+      max = AI_JUSTIFICATION_LENGTH,
+      message = "ai use justification can not exceed {max} characters")
   @Column(name = "ai_use_justification")
   private String aiUseJustification;
 
-  @Size(max = 200, message = "personal note can not exceed 200 characters")
+  @Size(max = PERSONAL_NOTE_LENGTH, message = "personal note can not exceed {max} characters")
   @Column(name = "personal_note")
   private String personalNote;
 

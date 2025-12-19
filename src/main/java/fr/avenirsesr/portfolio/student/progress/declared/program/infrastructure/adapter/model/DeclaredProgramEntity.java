@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.model;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
+
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
@@ -31,17 +33,19 @@ public class DeclaredProgramEntity extends PeriodEntity<LocalDate> {
   @Enumerated(EnumType.STRING)
   private EProgramStatus status;
 
-  @Column(nullable = false)
+  @Column(nullable = false, length = TITLE_LENGTH)
   private String title;
 
-  @Column() private String description;
+  @Column(length = DESCRIPTION_LENGTH)
+  private String description;
 
-  @Column(nullable = false)
+  @Column(nullable = false, length = ORGANIZATION_LENGTH)
   private String organization;
 
-  @Column() private String result;
+  @Column(length = RESULT_LENGTH)
+  private String result;
 
-  @Column(name = "source_of_information")
+  @Column(name = "source_of_information", length = SOURCE_OF_INFORMATION_LENGTH)
   private String sourceOfInformation;
 
   @Column() private String link;

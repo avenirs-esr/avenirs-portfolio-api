@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
+
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
@@ -32,7 +34,7 @@ public class AdditionalSkillProgressEntity extends AvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private EAdditionalSkillLevel level;
 
-  @Column(length = 400)
+  @Column(length = DESCRIPTION_LENGTH)
   private String description;
 
   private AdditionalSkillProgressEntity(

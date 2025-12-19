@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -21,13 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class DeclaredExperienceServiceImpl implements DeclaredExperienceService {
-  private static final int TITLE_MAX_LENGTH = 80;
-  private static final int ORGANIZATION_MAX_LENGTH = 80;
-  private static final int ACTIVITY_SECTOR_MAX_LENGTH = 50;
-  private static final int LOCATION_MAX_LENGTH = 50;
-  private static final int SOURCE_MAX_LENGTH = 200;
-  private static final int DESCRIPTION_MAX_LENGTH = 400;
-  private static final int SUMMARY_MAX_LENGTH = 400;
 
   private final LoggedInUserService loggedInUserService;
   private final DeclaredExperienceRepository experienceRepository;
@@ -107,13 +101,14 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       LocalDate endDate) {
     log.info("DeclaredExperience creation for {}", student);
 
-    requireNotBlankAndMaxLength("title", title, TITLE_MAX_LENGTH);
-    requireNotBlankAndMaxLength("organization", organization, ORGANIZATION_MAX_LENGTH);
-    validateOptionalTextMaxLength("activitySector", activitySector, ACTIVITY_SECTOR_MAX_LENGTH);
-    validateOptionalTextMaxLength("location", location, LOCATION_MAX_LENGTH);
-    validateOptionalTextMaxLength("sourceOfInformation", sourceOfInformation, SOURCE_MAX_LENGTH);
-    validateOptionalTextMaxLength("description", description, DESCRIPTION_MAX_LENGTH);
-    validateOptionalTextMaxLength("summary", summary, SUMMARY_MAX_LENGTH);
+    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
+    requireNotBlankAndMaxLength("organization", organization, ORGANIZATION_LENGTH);
+    validateOptionalTextMaxLength("activitySector", activitySector, ACTIVITY_SECTOR_LENGTH);
+    validateOptionalTextMaxLength("location", location, LOCATION_LENGTH);
+    validateOptionalTextMaxLength(
+        "sourceOfInformation", sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
+    validateOptionalTextMaxLength("description", description, DESCRIPTION_LENGTH);
+    validateOptionalTextMaxLength("summary", summary, SUMMARY_LENGTH);
     requireNotNull("startDate", startDate);
     validateDateOrder(startDate, endDate);
 

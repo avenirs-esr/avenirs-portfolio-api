@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
+
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.model.TranslationEntity;
 import jakarta.persistence.*;
@@ -22,7 +24,8 @@ public class SkillLevelTranslationEntity extends TranslationEntity {
   @Column(nullable = false)
   private String name;
 
-  @Column() private String description;
+  @Column(length = DESCRIPTION_LENGTH)
+  private String description;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "skill_level_id", nullable = false)
