@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.input;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
 import java.time.LocalDate;
@@ -29,4 +31,6 @@ public interface DeclaredProgramService {
       LocalDate endDate);
 
   DeclaredProgram getById(UUID declaredProgramId);
+
+  PagedResult<DeclaredProgram> getDeclaredPrograms(PageCriteria pageCriteria);
 }

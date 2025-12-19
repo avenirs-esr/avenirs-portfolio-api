@@ -3,6 +3,8 @@ package fr.avenirsesr.portfolio.student.progress.declared.program.domain.service
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.exception.DeclaredProgramNotFoundException;
@@ -124,6 +126,12 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       throw new UserNotAuthorizedException();
     }
     return declaredProgram;
+  }
+
+  @Override
+  public PagedResult<DeclaredProgram> getDeclaredPrograms(PageCriteria pageCriteria) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    return declaredProgramRepository.findAllByStudent(student, pageCriteria);
   }
 
   private EProgramStatus getProgramStatus(LocalDate startDate, LocalDate endDate) {

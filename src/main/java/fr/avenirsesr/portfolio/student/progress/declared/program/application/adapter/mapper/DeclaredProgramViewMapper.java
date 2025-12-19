@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.De
 
 public interface DeclaredProgramViewMapper {
 
-  static DeclaredProgramViewDTO toDto(DeclaredProgram declaredProgram) {
+  static DeclaredProgramViewDTO toDTO(DeclaredProgram declaredProgram) {
     return new DeclaredProgramViewDTO(
         declaredProgram.getId(),
         declaredProgram.getStatus(),

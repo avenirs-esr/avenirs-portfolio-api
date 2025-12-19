@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -14,8 +17,11 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.out
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -404,6 +410,52 @@ class DeclaredProgramServiceImplTest {
           verify(loggedInUserService, never()).getLoggedInStudent();
           verifyNoMoreInteractions(declaredProgramRepository);
         }
+      }
+    }
+
+    @Nested
+    class WhenGetDeclaredProgramsIsCalled {
+      private List<DeclaredProgram> declaredProgramList;
+      private Student loggedStudent;
+      private int nbElements = 5;
+      private PageCriteria pageCriteria = new PageCriteria(0, 8);
+      private PageInfo pageInfo = new PageInfo(0, 8, nbElements);
+
+      @BeforeEach
+      void setup() {
+        declaredProgramList =
+            Stream.generate(() -> mock(DeclaredProgram.class))
+                .limit(nbElements)
+                .collect(Collectors.toList());
+        loggedStudent = mock(Student.class);
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedStudent);
+        when(declaredProgramRepository.findAllByStudent(loggedStudent, pageCriteria))
+            .thenReturn(new PagedResult<>(declaredProgramList, pageInfo));
+      }
+
+      @Test
+      void thenItShouldReturnDeclaredPrograms() {
+        BddLogger.when("getDeclaredPrograms(PageCriteria pageCriteria) is called");
+        PagedResult<DeclaredProgram> result =
+            declaredProgramService.getDeclaredPrograms(pageCriteria);
+
+        assertNotNull(result);
+
+        List<DeclaredProgram> resultContent = result.content();
+        PageInfo resultPageInfo = result.pageInfo();
+
+        assertEquals(declaredProgramList.size(), resultContent.size());
+
+        for (int i = 0; i < nbElements; i++) {
+          assertEquals(declaredProgramList.get(i).getId(), resultContent.get(i).getId());
+        }
+
+        assertEquals(pageInfo.page(), resultPageInfo.page());
+        assertEquals(pageInfo.pageSize(), resultPageInfo.pageSize());
+        assertEquals(pageInfo.totalElements(), resultPageInfo.totalElements());
+
+        verify(loggedInUserService).getLoggedInStudent();
+        verify(declaredProgramRepository).findAllByStudent(loggedStudent, pageCriteria);
       }
     }
   }
