@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.ams.infrastructure.adapter.model;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
+
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -26,7 +28,7 @@ public class CohortEntity extends AvenirsBaseEntity {
   @Column(nullable = false)
   private String name;
 
-  @Column(length = 255)
+  @Column(length = DESCRIPTION_LENGTH)
   private String description;
 
   @ManyToMany

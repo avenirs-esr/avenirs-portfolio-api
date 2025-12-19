@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.imported.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
+
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescriptionException;
@@ -193,6 +195,9 @@ public class StudentProgressServiceImpl implements StudentProgressService {
       EAdditionalSkillLevel level,
       String description) {
     Student student = loggedInUserService.getLoggedInStudent();
+    requireNotNull("externalSkillId", externalSkillId);
+    requireNotNull("type", type);
+    requireNotNull("level", level);
     try {
       checkDescriptionField(description);
       AdditionalSkill additionalSkill =

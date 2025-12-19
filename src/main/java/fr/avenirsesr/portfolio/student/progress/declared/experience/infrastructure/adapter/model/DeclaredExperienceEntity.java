@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.model;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
+
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
@@ -31,7 +33,7 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
   private StudentEntity student;
 
   @Column(nullable = false)
-  @Size(max = 80, message = "title can not exceed 80 characters")
+  @Size(max = TITLE_LENGTH, message = "title can not exceed {max} characters")
   private String title;
 
   @Enumerated(EnumType.STRING)
@@ -39,24 +41,26 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
   private EExperienceType experienceType;
 
   @Column(nullable = false)
-  @Size(max = 80, message = "organization can not exceed 80 characters")
+  @Size(max = ORGANIZATION_LENGTH, message = "organization can not exceed {max} characters")
   private String organization;
 
-  @Size(max = 50, message = "activity sector can not exceed 50 characters")
+  @Size(max = ACTIVITY_SECTOR_LENGTH, message = "activity sector can not exceed {max} characters")
   @Column(name = "activity_sector")
   private String activitySector;
 
-  @Size(max = 50, message = "location can not exceed 50 characters")
+  @Size(max = LOCATION_LENGTH, message = "location can not exceed {max} characters")
   private String location;
 
-  @Size(max = 400, message = "description can not exceed 400 characters")
+  @Size(max = DESCRIPTION_LENGTH, message = "description can not exceed {max} characters")
   private String description;
 
-  @Size(max = 200, message = "source of information can not exceed 200 characters")
+  @Size(
+      max = SOURCE_OF_INFORMATION_LENGTH,
+      message = "source of information can not exceed {max} characters")
   @Column(name = "source_of_information")
   private String sourceOfInformation;
 
-  @Size(max = 400, message = "summary can not exceed 400 characters")
+  @Size(max = SUMMARY_LENGTH, message = "summary can not exceed {max} characters")
   private String summary;
 
   @Column(name = "external_link")

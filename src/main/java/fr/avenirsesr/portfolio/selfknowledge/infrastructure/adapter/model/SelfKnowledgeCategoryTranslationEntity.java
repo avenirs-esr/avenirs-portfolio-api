@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
+
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.model.TranslationEntity;
 import jakarta.persistence.*;
@@ -23,7 +25,7 @@ public class SelfKnowledgeCategoryTranslationEntity extends TranslationEntity {
   @Column(nullable = false)
   private String title;
 
-  @Column(nullable = false, columnDefinition = "TEXT")
+  @Column(nullable = false, columnDefinition = "TEXT", length = DESCRIPTION_LENGTH)
   private String description;
 
   @ManyToOne(fetch = FetchType.LAZY)

@@ -1,5 +1,8 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
+
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
@@ -27,10 +30,10 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
   @JoinColumn(name = "student_id", nullable = false)
   private StudentEntity student;
 
-  @Column(nullable = false, length = 80)
+  @Column(nullable = false, length = TITLE_LENGTH)
   private String title;
 
-  @Column(nullable = false, length = 400)
+  @Column(nullable = false, length = DESCRIPTION_LENGTH)
   private String description;
 
   @Column(nullable = true)

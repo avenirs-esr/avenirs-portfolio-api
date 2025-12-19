@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,11 +10,11 @@ import java.time.LocalDate;
 
 @Schema(requiredProperties = {"title", "organization", "startDate"})
 public record AddDeclaredProgramDTO(
-    @NotBlank @Size(max = 80) String title,
-    @Size(max = 400) String description,
-    @NotBlank @Size(max = 50) String organization,
-    @Size(max = 50) String result,
-    @Size(max = 200) String sourceOfInformation,
+    @NotBlank @Size(max = TITLE_LENGTH) String title,
+    @Size(max = DESCRIPTION_LENGTH) String description,
+    @NotBlank @Size(max = ORGANIZATION_LENGTH) String organization,
+    @Size(max = RESULT_LENGTH) String result,
+    @Size(max = SOURCE_OF_INFORMATION_LENGTH) String sourceOfInformation,
     String link,
     @NotNull LocalDate startDate,
     LocalDate endDate) {}

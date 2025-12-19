@@ -1,5 +1,9 @@
 package fr.avenirsesr.portfolio.trace.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
+
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
@@ -197,6 +201,7 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
+    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     var trace =
         Trace.create(
             UUID.randomUUID(),
@@ -276,6 +281,10 @@ public class TraceServiceImpl implements TraceService {
       List<UUID> skillLevelIds,
       List<UUID> additionalSkillProgressIds) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
+    requireNotNull("traceId", traceId);
+    requireNotNull("amsIds", amsIds);
+    requireNotNull("skillLevelIds", skillLevelIds);
+    requireNotNull("additionalSkillProgressIds", additionalSkillProgressIds);
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
@@ -381,6 +390,10 @@ public class TraceServiceImpl implements TraceService {
       List<UUID> skillLevelIds,
       List<UUID> additionalSkillProgressIds) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
+    requireNotNull("traceId", traceId);
+    requireNotNull("amsIds", amsIds);
+    requireNotNull("skillLevelIds", skillLevelIds);
+    requireNotNull("additionalSkillProgressIds", additionalSkillProgressIds);
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 

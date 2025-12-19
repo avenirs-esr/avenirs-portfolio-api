@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.model;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.BIO_LENGTH;
+
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +19,9 @@ import lombok.Setter;
 @Setter
 public class TeacherEntity extends AvenirsBaseEntity {
   @OneToOne private UserEntity user;
-  @Column private String bio;
+
+  @Column(length = BIO_LENGTH)
+  private String bio;
 
   private TeacherEntity(UUID id, UserEntity user, String bio) {
     setId(id);
