@@ -6,7 +6,6 @@ import java.util.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Filter;
 
 @Entity
 @Table(
@@ -32,7 +31,6 @@ public class SkillLevelEntity extends AvenirsBaseEntity {
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       fetch = FetchType.LAZY)
-  @Filter(name = "langFilter")
   private Set<SkillLevelTranslationEntity> translations = new HashSet<>();
 
   private SkillLevelEntity(UUID id, SkillEntity skill) {
