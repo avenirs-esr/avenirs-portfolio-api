@@ -2,6 +2,8 @@
 
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
@@ -16,7 +18,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L21">@Slf4j</span>
 @RequiredArgsConstructor
 public class DeclaredExperienceServiceImpl implements DeclaredExperienceService {
   private static final int TITLE_MAX_LENGTH = 80;
@@ -45,9 +47,9 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L48">    Student student =</span>
-<span class="fc" id="L49">        studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);</span>
-<span class="fc" id="L50">    return create(</span>
+<span class="fc" id="L50">    Student student =</span>
+<span class="fc" id="L51">        studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);</span>
+<span class="fc" id="L52">    return create(</span>
         student,
         title,
         experienceType,
@@ -75,8 +77,8 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L78">    return create(</span>
-<span class="fc" id="L79">        loggedInUserService.getLoggedInStudent(),</span>
+<span class="fc" id="L80">    return create(</span>
+<span class="fc" id="L81">        loggedInUserService.getLoggedInStudent(),</span>
         title,
         experienceType,
         organization,
@@ -103,20 +105,20 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L106">    log.info(&quot;DeclaredExperience creation for {}&quot;, student);</span>
+<span class="fc" id="L108">    log.info(&quot;DeclaredExperience creation for {}&quot;, student);</span>
 
-<span class="fc" id="L108">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_MAX_LENGTH);</span>
-<span class="fc" id="L109">    requireNotBlankAndMaxLength(&quot;organization&quot;, organization, ORGANIZATION_MAX_LENGTH);</span>
-<span class="fc" id="L110">    validateOptionalTextMaxLength(&quot;activitySector&quot;, activitySector, ACTIVITY_SECTOR_MAX_LENGTH);</span>
-<span class="fc" id="L111">    validateOptionalTextMaxLength(&quot;location&quot;, location, LOCATION_MAX_LENGTH);</span>
-<span class="fc" id="L112">    validateOptionalTextMaxLength(&quot;sourceOfInformation&quot;, sourceOfInformation, SOURCE_MAX_LENGTH);</span>
-<span class="fc" id="L113">    validateOptionalTextMaxLength(&quot;description&quot;, description, DESCRIPTION_MAX_LENGTH);</span>
-<span class="fc" id="L114">    validateOptionalTextMaxLength(&quot;summary&quot;, summary, SUMMARY_MAX_LENGTH);</span>
-<span class="fc" id="L115">    requireNotNull(&quot;startDate&quot;, startDate);</span>
-<span class="fc" id="L116">    validateDateOrder(startDate, endDate);</span>
+<span class="fc" id="L110">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_MAX_LENGTH);</span>
+<span class="fc" id="L111">    requireNotBlankAndMaxLength(&quot;organization&quot;, organization, ORGANIZATION_MAX_LENGTH);</span>
+<span class="fc" id="L112">    validateOptionalTextMaxLength(&quot;activitySector&quot;, activitySector, ACTIVITY_SECTOR_MAX_LENGTH);</span>
+<span class="fc" id="L113">    validateOptionalTextMaxLength(&quot;location&quot;, location, LOCATION_MAX_LENGTH);</span>
+<span class="fc" id="L114">    validateOptionalTextMaxLength(&quot;sourceOfInformation&quot;, sourceOfInformation, SOURCE_MAX_LENGTH);</span>
+<span class="fc" id="L115">    validateOptionalTextMaxLength(&quot;description&quot;, description, DESCRIPTION_MAX_LENGTH);</span>
+<span class="fc" id="L116">    validateOptionalTextMaxLength(&quot;summary&quot;, summary, SUMMARY_MAX_LENGTH);</span>
+<span class="fc" id="L117">    requireNotNull(&quot;startDate&quot;, startDate);</span>
+<span class="fc" id="L118">    validateDateOrder(startDate, endDate);</span>
 
-<span class="fc" id="L118">    var experience =</span>
-<span class="fc" id="L119">        DeclaredExperience.create(</span>
+<span class="fc" id="L120">    var experience =</span>
+<span class="fc" id="L121">        DeclaredExperience.create(</span>
             student,
             title,
             experienceType,
@@ -130,25 +132,33 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
             startDate,
             endDate);
 
-<span class="fc" id="L133">    experience = experienceRepository.save(experience);</span>
-<span class="fc" id="L134">    log.info(&quot;{} has been created&quot;, experience);</span>
-<span class="fc" id="L135">    return experience;</span>
+<span class="fc" id="L135">    experience = experienceRepository.save(experience);</span>
+<span class="fc" id="L136">    log.info(&quot;{} has been created&quot;, experience);</span>
+<span class="fc" id="L137">    return experience;</span>
   }
 
   @Override
   public DeclaredExperience get(UUID experienceId) {
-<span class="fc" id="L140">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L141">    log.info(&quot;Get experienceId {} by {}&quot;, experienceId, student);</span>
+<span class="fc" id="L142">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L143">    log.info(&quot;Get experienceId {} by {}&quot;, experienceId, student);</span>
 
-<span class="fc" id="L143">    var experience =</span>
+<span class="fc" id="L145">    var experience =</span>
         experienceRepository
-<span class="fc" id="L145">            .findById(experienceId)</span>
-<span class="fc" id="L146">            .orElseThrow(DeclaredExperienceNotFoundException::new);</span>
+<span class="fc" id="L147">            .findById(experienceId)</span>
+<span class="fc" id="L148">            .orElseThrow(DeclaredExperienceNotFoundException::new);</span>
 
-<span class="fc bfc" id="L148" title="All 2 branches covered.">    if (!experience.getStudent().equals(student)) {</span>
-<span class="fc" id="L149">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">    if (!experience.getStudent().equals(student)) {</span>
+<span class="fc" id="L151">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L151">    return experience;</span>
+<span class="fc" id="L153">    return experience;</span>
+  }
+
+  @Override
+  public PagedResult&lt;DeclaredExperience&gt; getView(PageCriteria pageCriteria) {
+<span class="fc" id="L158">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L159">    log.info(&quot;Get experience view by {}&quot;, student);</span>
+
+<span class="fc" id="L161">    return experienceRepository.findAllByStudent(student, pageCriteria);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
