@@ -69,7 +69,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.common.web.infrastructure.context,
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.web.infrastructure.context,RequestData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.data,UserPhotoData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.domain.data,SelfKnowledgeElementDetails,0,6,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.common.language.infrastructure.adapter.filter,LanguageFilterSupplier,0,14,0,2,0,5,0,3,0,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.common.language.infrastructure.adapter.filter,LanguageFilterSupplier,11,3,2,0,4,1,2,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.language.infrastructure.adapter.filter,LanguageFilterAspect,10,0,0,0,3,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,257,807,21,17,59,209,19,47,6,41
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.openapi,OpenApiSharedEnumConfiguration,10,6,0,0,3,2,1,2,1,2
