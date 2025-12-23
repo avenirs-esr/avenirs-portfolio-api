@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.AddDeclaredProgramDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -360,6 +361,69 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
                     .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
             .andExpect(status().isForbidden());
+      }
+    }
+
+    @Nested
+    class WhenGettingDeclaredPrograms {
+
+      @Test
+      void shouldReturn200WhenDeclaredProgramsExistsAndBelongsToLoggedInStudent() throws Exception {
+        BddLogger.given("the " + BASE_PATH + " GET endpoint");
+        BddLogger.when(
+            "performing a GET for existing declared programs owned by the logged-in student");
+        BddLogger.then("it should return 200 with declared programs dto");
+
+        String declaredProgramId1 =
+            createDeclaredProgramAndReturnId(
+                new AddDeclaredProgramDTO(
+                    "1-Title",
+                    "1-Description",
+                    "1-Organization",
+                    "1-Result",
+                    "1-Source",
+                    "https://link-1.example.com",
+                    LocalDate.now().minusMonths(1),
+                    LocalDate.now()),
+                studentPayload,
+                studentSignature);
+
+        String declaredProgramId2 =
+            createDeclaredProgramAndReturnId(
+                new AddDeclaredProgramDTO(
+                    "2-Title",
+                    "2-Description",
+                    "2-Organization",
+                    "2-Result",
+                    "2-Source",
+                    "https://link-2.example.com",
+                    LocalDate.now().minusMonths(1),
+                    LocalDate.now()),
+                studentPayload,
+                studentSignature);
+
+        mockMvc
+            .perform(
+                get(BASE_PATH)
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.data.length()").value(2))
+            .andExpect(jsonPath("$.data[0].id").value(declaredProgramId1))
+            .andExpect(jsonPath("$.data[0].title").value("1-Title"))
+            .andExpect(jsonPath("$.data[0].organization").value("1-Organization"))
+            .andExpect(jsonPath("$.data[0].status").value(EProgramStatus.IN_PROGRESS.name()))
+            .andExpect(jsonPath("$.data[1].id").value(declaredProgramId2))
+            .andExpect(jsonPath("$.data[1].title").value("2-Title"))
+            .andExpect(jsonPath("$.data[1].organization").value("2-Organization"))
+            .andExpect(jsonPath("$.data[1].status").value(EProgramStatus.IN_PROGRESS.name()))
+            .andExpect(jsonPath("$.page.page").value(0))
+            .andExpect(jsonPath("$.page.pageSize").value(8))
+            .andExpect(jsonPath("$.page.totalElements").value(2))
+            .andExpect(jsonPath("$.page.totalPages").value(1));
       }
     }
   }
