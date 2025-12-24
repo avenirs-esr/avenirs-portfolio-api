@@ -46,7 +46,7 @@ public class TraceAttachmentSeeder {
     }
 
     attachmentRepository.saveAll(
-        attachmentEntities.stream().map(TraceAttachmentMapper::toDomain).toList());
+        attachmentEntities.stream().map(TraceAttachmentMapper.INSTANCE::toDomain).toList());
     log.info("✔ {} traces attachments created", attachmentEntities.size());
     return attachmentEntities;
   }

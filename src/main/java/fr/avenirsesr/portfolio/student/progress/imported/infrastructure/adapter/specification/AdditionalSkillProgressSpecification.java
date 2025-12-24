@@ -12,7 +12,8 @@ public class AdditionalSkillProgressSpecification {
     return (root, query, criteriaBuilder) ->
         criteriaBuilder.and(
             criteriaBuilder.equal(
-                root.get("additionalSkill"), AdditionalSkillMapper.fromDomain(additionalSkill)),
+                root.get("additionalSkill"),
+                AdditionalSkillMapper.INSTANCE.fromDomain(additionalSkill)),
             criteriaBuilder.equal(root.get("student").get("id"), studentId));
   }
 

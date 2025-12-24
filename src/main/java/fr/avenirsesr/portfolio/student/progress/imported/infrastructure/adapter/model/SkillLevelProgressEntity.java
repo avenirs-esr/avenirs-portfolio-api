@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEn
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,7 +43,7 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
       name = "ams_skill_level_progress",
       joinColumns = @JoinColumn(name = "skill_level_progress_id"),
       inverseJoinColumns = @JoinColumn(name = "ams_id"))
-  private List<AMSEntity> amses;
+  private Set<AMSEntity> amses;
 
   private SkillLevelProgressEntity(
       UUID id,
@@ -52,7 +52,7 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
       ESkillLevelStatus status,
       LocalDate startDate,
       LocalDate endDate,
-      List<AMSEntity> amses) {
+      Set<AMSEntity> amses) {
     setId(id);
     this.student = student;
     this.skillLevel = skillLevelEntity;
@@ -69,7 +69,7 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
       ESkillLevelStatus status,
       LocalDate startDate,
       LocalDate endDate,
-      List<AMSEntity> amses) {
+      Set<AMSEntity> amses) {
     return new SkillLevelProgressEntity(
         id, student, skillLevelEntity, status, startDate, endDate, amses);
   }

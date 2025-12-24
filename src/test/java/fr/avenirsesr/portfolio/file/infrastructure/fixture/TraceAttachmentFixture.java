@@ -32,7 +32,7 @@ public class TraceAttachmentFixture {
     Trace defaultTrace = TraceFixture.create().toModel();
     var entity =
         FakeTraceAttachment.of(
-                FakeTrace.of(UserMapper.fromDomain(defaultTrace.getUser())).toEntity())
+                FakeTrace.of(UserMapper.INSTANCE.fromDomain(defaultTrace.getUser())).toEntity())
             .toEntity();
     var user = UserFixture.create().toModel();
     this.id = entity.getId();

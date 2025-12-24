@@ -28,8 +28,8 @@ public class SelfKnowledgeElementDatabaseRepository
     super(
         jpaRepository,
         jpaRepository,
-        SelfKnowledgeElementMapper::fromDomain,
-        SelfKnowledgeElementMapper::toDomain);
+        SelfKnowledgeElementEntity.class,
+        SelfKnowledgeElementMapper.INSTANCE);
     this.jpaRepository = jpaRepository;
   }
 
@@ -47,6 +47,7 @@ public class SelfKnowledgeElementDatabaseRepository
   @Override
   public void deleteAllByStudentAndCategory(Student student, SelfKnowledgeCategory category) {
     jpaRepository.deleteByStudentAndSelfKnowledgeCategory(
-        StudentMapper.fromDomain(student), SelfKnowledgeCategoryMapper.fromDomain(category));
+        StudentMapper.INSTANCE.fromDomain(student),
+        SelfKnowledgeCategoryMapper.INSTANCE.fromDomain(category));
   }
 }

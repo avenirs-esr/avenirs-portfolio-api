@@ -2,10 +2,14 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 
-public interface AdditionalSkillMapper {
+public class AdditionalSkillMapper implements Mapper<AdditionalSkillEntity, AdditionalSkill> {
 
-  static AdditionalSkill toDomain(AdditionalSkillEntity entity) {
+  public static final AdditionalSkillMapper INSTANCE = new AdditionalSkillMapper();
+
+  @Override
+  public AdditionalSkill toDomain(AdditionalSkillEntity entity) {
     return AdditionalSkill.toDomain(
         entity.getId(),
         entity.getExternalSkillId(),
@@ -16,7 +20,8 @@ public interface AdditionalSkillMapper {
         entity.getUpdatedAt());
   }
 
-  static AdditionalSkillEntity fromDomain(AdditionalSkill domain) {
+  @Override
+  public AdditionalSkillEntity fromDomain(AdditionalSkill domain) {
     return AdditionalSkillEntity.of(
         domain.getId(),
         domain.getExternalSkillId(),

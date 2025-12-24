@@ -9,7 +9,7 @@ import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.List;
+import java.util.Set;
 
 public class FakeSkillLevelProgress {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
@@ -33,7 +33,7 @@ public class FakeSkillLevelProgress {
             ESkillLevelStatus.NOT_STARTED,
             futureStartDate,
             futureEndDate,
-            List.of()));
+            Set.of()));
   }
 
   public FakeSkillLevelProgress withStatus(ESkillLevelStatus status) {
@@ -59,7 +59,7 @@ public class FakeSkillLevelProgress {
     return this;
   }
 
-  public FakeSkillLevelProgress withAmses(List<AMSEntity> amses) {
+  public FakeSkillLevelProgress withAmses(Set<AMSEntity> amses) {
     this.skillLevelProgress.setAmses(amses);
     return this;
   }

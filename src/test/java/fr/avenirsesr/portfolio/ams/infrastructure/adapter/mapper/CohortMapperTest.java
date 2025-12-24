@@ -52,7 +52,7 @@ class CohortMapperTest {
             .toModel();
 
     BddLogger.when("mapping a domain Cohort to CohortEntity");
-    CohortEntity entity = CohortMapper.fromDomain(cohort);
+    CohortEntity entity = CohortMapper.INSTANCE.fromDomain(cohort);
 
     BddLogger.when("it should return a correct CohortEntity");
     assertNotNull(entity);
@@ -133,7 +133,7 @@ class CohortMapperTest {
     entity.setAmsEntities(new HashSet<>());
 
     BddLogger.when("mapping a CohortEntity to domain Cohort");
-    Cohort mappedCohort = CohortMapper.toDomain(entity);
+    Cohort mappedCohort = CohortMapper.INSTANCE.toDomain(entity);
 
     BddLogger.when("it should return a correct domain Cohort");
     assertNotNull(mappedCohort);
@@ -204,7 +204,7 @@ class CohortMapperTest {
     assertTrue(entity.getAmsEntities().isEmpty());
 
     BddLogger.when("mapping an empty collection to domain Cohort");
-    Cohort mappedCohort = CohortMapper.toDomain(entity);
+    Cohort mappedCohort = CohortMapper.INSTANCE.toDomain(entity);
 
     BddLogger.then("it should return a correct domain Cohort");
     assertNotNull(mappedCohort);

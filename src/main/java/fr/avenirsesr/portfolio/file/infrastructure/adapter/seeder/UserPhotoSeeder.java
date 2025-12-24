@@ -87,7 +87,8 @@ public class UserPhotoSeeder {
       }
     }
 
-    userPhotoRepository.saveAll(userPhotoEntities.stream().map(UserPhotoMapper::toDomain).toList());
+    userPhotoRepository.saveAll(
+        userPhotoEntities.stream().map(UserPhotoMapper.INSTANCE::toDomain).toList());
     log.info("✔ {} user photos created", userPhotoEntities.size());
     return userPhotoEntities;
   }

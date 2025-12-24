@@ -18,6 +18,7 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceSpecification;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.Where;
 import org.springframework.data.domain.PageRequest;
@@ -33,7 +34,7 @@ public class TraceDatabaseRepository
   private final TraceJpaRepository jpaRepository;
 
   public TraceDatabaseRepository(TraceJpaRepository jpaRepository) {
-    super(jpaRepository, jpaRepository, TraceMapper::fromDomain, TraceMapper::toDomain);
+    super(jpaRepository, jpaRepository, TraceEntity.class, TraceMapper.INSTANCE);
     this.jpaRepository = jpaRepository;
   }
 
@@ -102,6 +103,12 @@ public class TraceDatabaseRepository
   @Override
   public List<Trace> linkedWith(SkillLevelProgress skillLevelProgress) {
     return findAll(TraceSpecification.ofSkillLevelProgress(skillLevelProgress));
+  }
+
+  @Override
+  public Map<SkillLevelProgress, List<Trace>> linkedWith(
+      List<SkillLevelProgress> skillLevelProgresses) {
+    return Map.of();
   }
 
   @Override

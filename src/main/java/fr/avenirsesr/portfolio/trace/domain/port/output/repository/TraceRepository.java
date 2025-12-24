@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevel
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.util.List;
+import java.util.Map;
 
 public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {
   List<Trace> findLastsOf(User user, int limit);
@@ -27,6 +28,8 @@ public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {
   List<Trace> linkedWith(AMS ams);
 
   List<Trace> linkedWith(SkillLevelProgress skillLevelProgress);
+
+  Map<SkillLevelProgress, List<Trace>> linkedWith(List<SkillLevelProgress> skillLevelProgresses);
 
   List<Trace> linkedWith(AdditionalSkillProgress additionalSkillProgress);
 }

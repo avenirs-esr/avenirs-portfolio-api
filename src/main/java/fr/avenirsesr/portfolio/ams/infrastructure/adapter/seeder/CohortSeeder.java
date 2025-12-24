@@ -68,7 +68,7 @@ public class CohortSeeder {
               .toEntity());
     }
 
-    cohortRepository.saveAll(cohorts.stream().map(CohortMapper::toDomain).toList());
+    cohortRepository.saveAll(cohorts.stream().map(CohortMapper.INSTANCE::toDomain).toList());
     log.info("✔ {} cohorts created", cohorts.size());
 
     return cohorts;

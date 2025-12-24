@@ -33,7 +33,7 @@ class AdditionalSkillMapperTest {
     entity.setUpdatedAt(updatedAt);
 
     BddLogger.when("mapping to domain");
-    AdditionalSkill domain = AdditionalSkillMapper.toDomain(entity);
+    AdditionalSkill domain = AdditionalSkillMapper.INSTANCE.toDomain(entity);
 
     BddLogger.then("it should map all fields correctly");
     assertNotNull(domain);
@@ -54,7 +54,7 @@ class AdditionalSkillMapperTest {
             id, externalSkillId, libelle, type, pathSegments, createdAt, updatedAt);
 
     BddLogger.when("mapping to entity");
-    AdditionalSkillEntity entity = AdditionalSkillMapper.fromDomain(domain);
+    AdditionalSkillEntity entity = AdditionalSkillMapper.INSTANCE.fromDomain(domain);
 
     BddLogger.then("it should map all fields correctly");
     assertNotNull(entity);
@@ -74,7 +74,7 @@ class AdditionalSkillMapperTest {
     entity.setUpdatedAt(updatedAt);
 
     BddLogger.when("mapping to domain");
-    AdditionalSkill domain = AdditionalSkillMapper.toDomain(entity);
+    AdditionalSkill domain = AdditionalSkillMapper.INSTANCE.toDomain(entity);
 
     BddLogger.then("it should map with empty pathSegments list");
     assertNotNull(domain);
@@ -93,7 +93,7 @@ class AdditionalSkillMapperTest {
         AdditionalSkill.toDomain(id, externalSkillId, libelle, type, null, createdAt, updatedAt);
 
     BddLogger.when("mapping to entity");
-    AdditionalSkillEntity entity = AdditionalSkillMapper.fromDomain(domain);
+    AdditionalSkillEntity entity = AdditionalSkillMapper.INSTANCE.fromDomain(domain);
 
     BddLogger.then("it should map with empty pathSegments list");
     assertNotNull(entity);
@@ -115,7 +115,7 @@ class AdditionalSkillMapperTest {
     entity.setUpdatedAt(updatedAt);
 
     BddLogger.when("mapping to domain");
-    AdditionalSkill domain = AdditionalSkillMapper.toDomain(entity);
+    AdditionalSkill domain = AdditionalSkillMapper.INSTANCE.toDomain(entity);
 
     BddLogger.then("it should map with empty pathSegments");
     assertNotNull(domain);
@@ -131,10 +131,10 @@ class AdditionalSkillMapperTest {
             id, externalSkillId, libelle, type, pathSegments, createdAt, updatedAt);
 
     BddLogger.when("mapping to entity and back to domain");
-    AdditionalSkillEntity entity = AdditionalSkillMapper.fromDomain(originalDomain);
+    AdditionalSkillEntity entity = AdditionalSkillMapper.INSTANCE.fromDomain(originalDomain);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
-    AdditionalSkill resultDomain = AdditionalSkillMapper.toDomain(entity);
+    AdditionalSkill resultDomain = AdditionalSkillMapper.INSTANCE.toDomain(entity);
 
     BddLogger.then("all fields should be preserved");
     assertNotNull(resultDomain);
@@ -157,7 +157,7 @@ class AdditionalSkillMapperTest {
     entity.setUpdatedAt(updatedAt);
 
     BddLogger.when("mapping to domain");
-    AdditionalSkill domain = AdditionalSkillMapper.toDomain(entity);
+    AdditionalSkill domain = AdditionalSkillMapper.INSTANCE.toDomain(entity);
 
     BddLogger.then("all segments should be preserved");
     assertNotNull(domain);
@@ -182,7 +182,7 @@ class AdditionalSkillMapperTest {
       entity.setCreatedAt(createdAt);
       entity.setUpdatedAt(updatedAt);
 
-      AdditionalSkill domain = AdditionalSkillMapper.toDomain(entity);
+      AdditionalSkill domain = AdditionalSkillMapper.INSTANCE.toDomain(entity);
 
       BddLogger.then("the type should be correctly mapped");
       assertEquals(skillType, domain.getType());

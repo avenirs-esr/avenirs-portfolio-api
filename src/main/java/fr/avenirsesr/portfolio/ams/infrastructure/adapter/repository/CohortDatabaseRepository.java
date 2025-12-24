@@ -13,7 +13,7 @@ public class CohortDatabaseRepository extends GenericJpaRepositoryAdapter<Cohort
   private final CohortJpaRepository jpaRepository;
 
   public CohortDatabaseRepository(CohortJpaRepository repository) {
-    super(repository, repository, CohortMapper::fromDomain, CohortMapper::toDomain);
+    super(repository, repository, CohortEntity.class, CohortMapper.INSTANCE);
     this.jpaRepository = repository;
   }
 }

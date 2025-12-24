@@ -18,10 +18,7 @@ public class AdditionalSkillDatabaseRepository
 
   public AdditionalSkillDatabaseRepository(AdditionalSkillJpaRepository jpaRepository) {
     super(
-        jpaRepository,
-        jpaRepository,
-        AdditionalSkillMapper::fromDomain,
-        AdditionalSkillMapper::toDomain);
+        jpaRepository, jpaRepository, AdditionalSkillEntity.class, AdditionalSkillMapper.INSTANCE);
     this.jpaRepository = jpaRepository;
   }
 
@@ -29,7 +26,7 @@ public class AdditionalSkillDatabaseRepository
   public Optional<AdditionalSkill> findByExternalSkillId(UUID externalSkillId) {
     return jpaRepository
         .findByExternalSkillId(externalSkillId)
-        .map(AdditionalSkillMapper::toDomain);
+        .map(AdditionalSkillMapper.INSTANCE::toDomain);
   }
 
   @Override

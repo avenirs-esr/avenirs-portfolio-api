@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSki
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillSyncService;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
+import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -250,7 +251,9 @@ public class StudentProgressServiceImpl implements StudentProgressService {
 
     AdditionalSkillProgress additionalSkillProgress =
         additionalSkillProgressRepository
-            .findById(additionalSkillProgressId)
+            .findById(
+                additionalSkillProgressId,
+                FetchGraph.init().fetch("student").fetch("additionalSkill"))
             .orElseThrow(AdditionalSkillProgressNotFoundException::new);
 
     if (!additionalSkillProgress.getStudent().getId().equals(student.getId())) {

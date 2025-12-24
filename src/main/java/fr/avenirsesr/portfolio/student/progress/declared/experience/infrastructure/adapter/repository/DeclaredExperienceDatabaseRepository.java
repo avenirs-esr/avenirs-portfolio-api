@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructu
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.specification.DeclaredExperienceSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -20,14 +21,15 @@ public class DeclaredExperienceDatabaseRepository
     super(
         jpaRepository,
         jpaRepository,
-        DeclaredExperienceMapper::fromDomain,
-        DeclaredExperienceMapper::toDomain);
+        DeclaredExperienceEntity.class,
+        DeclaredExperienceMapper.INSTANCE);
   }
 
   @Override
   public PagedResult<DeclaredExperience> findAllByStudent(
       Student student, PageCriteria pageCriteria) {
     return findAll(
-        hasStudent(student).and(DeclaredExperienceSpecification.ordered()), pageCriteria);
+        hasStudent(student).and(DeclaredExperienceSpecification.ordered()),
+        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
   }
 }

@@ -1,29 +1,34 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeElementEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 
-public interface SelfKnowledgeElementMapper {
+public class SelfKnowledgeElementMapper
+    implements Mapper<SelfKnowledgeElementEntity, SelfKnowledgeElement> {
+  public static final SelfKnowledgeElementMapper INSTANCE = new SelfKnowledgeElementMapper();
 
-  static SelfKnowledgeElementEntity fromDomain(SelfKnowledgeElement element) {
+  @Override
+  public SelfKnowledgeElementEntity fromDomain(SelfKnowledgeElement element) {
     return SelfKnowledgeElementEntity.of(
         element.getId(),
-        StudentMapper.fromDomain(element.getStudent()),
+        StudentMapper.INSTANCE.fromDomain(element.getStudent()),
         element.getTitle(),
         element.getDescription(),
         element.getRating(),
-        SelfKnowledgeCategoryMapper.fromDomain(element.getSelfKnowledgeCategory()));
+        SelfKnowledgeCategoryMapper.INSTANCE.fromDomain(element.getSelfKnowledgeCategory()));
   }
 
-  static SelfKnowledgeElement toDomain(SelfKnowledgeElementEntity entity) {
+  @Override
+  public SelfKnowledgeElement toDomain(SelfKnowledgeElementEntity entity) {
     return SelfKnowledgeElement.toDomain(
         entity.getId(),
-        StudentMapper.toDomain(entity.getStudent()),
+        StudentMapper.INSTANCE.toDomain(entity.getStudent()),
         entity.getTitle(),
         entity.getDescription(),
         entity.getRating(),
-        SelfKnowledgeCategoryMapper.toDomain(entity.getSelfKnowledgeCategory()),
+        SelfKnowledgeCategoryMapper.INSTANCE.toDomain(entity.getSelfKnowledgeCategory()),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }

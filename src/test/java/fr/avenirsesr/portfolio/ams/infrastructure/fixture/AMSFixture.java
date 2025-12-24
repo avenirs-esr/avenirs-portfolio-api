@@ -25,7 +25,7 @@ public class AMSFixture {
 
   private AMSFixture() {
     var fakeStudent = StudentFixture.create().toModel();
-    var base = FakeAMS.of(StudentMapper.fromDomain(fakeStudent)).toEntity();
+    var base = FakeAMS.of(StudentMapper.INSTANCE.fromDomain(fakeStudent)).toEntity();
     this.id = base.getId();
     this.student = fakeStudent;
     this.title = "fake ams title";

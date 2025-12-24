@@ -1,18 +1,23 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryTranslationEntity;
 
-public interface SelfKnowledgeCategoryMapper {
+public class SelfKnowledgeCategoryMapper
+    implements Mapper<SelfKnowledgeCategoryEntity, SelfKnowledgeCategory> {
+  public static SelfKnowledgeCategoryMapper INSTANCE = new SelfKnowledgeCategoryMapper();
 
-  static SelfKnowledgeCategoryEntity fromDomain(SelfKnowledgeCategory category) {
+  @Override
+  public SelfKnowledgeCategoryEntity fromDomain(SelfKnowledgeCategory category) {
     return SelfKnowledgeCategoryEntity.of(
         category.getId(), category.getType(), category.isMandatory());
   }
 
-  static SelfKnowledgeCategory toDomain(SelfKnowledgeCategoryEntity entity) {
+  @Override
+  public SelfKnowledgeCategory toDomain(SelfKnowledgeCategoryEntity entity) {
     SelfKnowledgeCategoryTranslationEntity translation =
         TranslationUtil.getTranslation(entity.getTranslations());
 

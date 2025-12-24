@@ -14,7 +14,8 @@ public class SelfKnowledgeCategorySpecification {
     return (root, query, criteriaBuilder) -> {
       assert query != null;
       query.distinct(true);
-      return criteriaBuilder.equal(root.join("students"), StudentMapper.fromDomain(student));
+      return criteriaBuilder.equal(
+          root.join("students"), StudentMapper.INSTANCE.fromDomain(student));
     };
   }
 
@@ -31,7 +32,7 @@ public class SelfKnowledgeCategorySpecification {
           .where(
               criteriaBuilder.equal(subRoot.get("id"), root.get("id")),
               criteriaBuilder.equal(
-                  subStudents.get("id"), StudentMapper.fromDomain(student).getId()));
+                  subStudents.get("id"), StudentMapper.INSTANCE.fromDomain(student).getId()));
 
       return criteriaBuilder.not(criteriaBuilder.exists(sub));
     };

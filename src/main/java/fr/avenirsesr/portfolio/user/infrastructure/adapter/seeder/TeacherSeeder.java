@@ -39,7 +39,7 @@ public class TeacherSeeder {
       teachers.add(FakeTeacher.create(user).toEntity());
     }
 
-    teacherRepository.saveAll(teachers.stream().map(TeacherMapper::toDomain).toList());
+    teacherRepository.saveAll(teachers.stream().map(TeacherMapper.INSTANCE::toDomain).toList());
     log.info("✔ {} teachers synced", teachers.size());
 
     return teachers;

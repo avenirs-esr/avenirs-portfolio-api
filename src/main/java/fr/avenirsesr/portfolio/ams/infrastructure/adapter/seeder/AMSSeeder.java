@@ -133,7 +133,9 @@ public class AMSSeeder {
       var skillLevels = getRandomSkillLevels(savedSkillLevels);
       skillLevels.forEach(
           level ->
-              level.setAmses(Stream.concat(level.getAmses().stream(), Stream.of(ams)).toList()));
+              level.setAmses(
+                  Stream.concat(level.getAmses().stream(), Stream.of(ams))
+                      .collect(Collectors.toSet())));
       skillLevelProgressList.addAll(skillLevels);
 
       var traces = getRandomTraces(savedTraces);

@@ -14,7 +14,7 @@ public class InstitutionDatabaseRepository
   private final InstitutionJpaRepository jpaRepository;
 
   public InstitutionDatabaseRepository(InstitutionJpaRepository jpaRepository) {
-    super(jpaRepository, jpaRepository, InstitutionMapper::fromDomain, InstitutionMapper::toDomain);
+    super(jpaRepository, jpaRepository, InstitutionEntity.class, InstitutionMapper.INSTANCE);
     this.jpaRepository = jpaRepository;
   }
 }

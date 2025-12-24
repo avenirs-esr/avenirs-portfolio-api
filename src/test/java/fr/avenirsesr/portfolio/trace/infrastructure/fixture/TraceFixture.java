@@ -35,16 +35,16 @@ public class TraceFixture {
 
   private TraceFixture() {
     var fakeUser = UserFixture.create().toModel();
-    var base = FakeTrace.of(UserMapper.fromDomain(fakeUser)).toEntity();
+    var base = FakeTrace.of(UserMapper.INSTANCE.fromDomain(fakeUser)).toEntity();
     this.id = base.getId();
     this.user = fakeUser;
     this.title = base.getTitle();
     this.skillLevels =
-        base.getSkillLevels().stream().map(SkillLevelProgressMapper::toDomain).toList();
-    this.amses = base.getAmses().stream().map(AMSMapper::toDomain).toList();
+        base.getSkillLevels().stream().map(SkillLevelProgressMapper.INSTANCE::toDomain).toList();
+    this.amses = base.getAmses().stream().map(AMSMapper.INSTANCE::toDomain).toList();
     this.additionalSkillProgresses =
         base.getAdditionalSkillsProgresses().stream()
-            .map(AdditionalSkillProgressMapper::toDomain)
+            .map(AdditionalSkillProgressMapper.INSTANCE::toDomain)
             .toList();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();

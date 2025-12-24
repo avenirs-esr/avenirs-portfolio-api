@@ -21,8 +21,8 @@ public class SelfKnowledgeCategoryDatabaseRepository
     super(
         jpaRepository,
         jpaRepository,
-        SelfKnowledgeCategoryMapper::fromDomain,
-        SelfKnowledgeCategoryMapper::toDomain);
+        SelfKnowledgeCategoryEntity.class,
+        SelfKnowledgeCategoryMapper.INSTANCE);
     this.jpaRepository = jpaRepository;
   }
 

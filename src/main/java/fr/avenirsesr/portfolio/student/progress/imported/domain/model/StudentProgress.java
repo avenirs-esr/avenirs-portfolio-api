@@ -81,12 +81,12 @@ public class StudentProgress extends AvenirsBaseModel {
   }
 
   public List<SkillLevelProgress> getAllSkillLevels() {
-    return skillLevelProgresses;
+    return skillLevelProgresses.stream().distinct().collect(Collectors.toList());
   }
 
   public List<SkillLevelProgress> getCurrentSkillLevels() {
     Map<Skill, List<SkillLevelProgress>> startedSkillLevelsBySkill =
-        skillLevelProgresses.stream()
+        getAllSkillLevels().stream()
             .collect(
                 Collectors.groupingBy(
                     skillLevelProgress -> skillLevelProgress.getSkillLevel().getSkill(),

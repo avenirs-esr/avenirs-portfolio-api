@@ -39,7 +39,7 @@ public class AdditionalSkillSeeder {
                 externalSkill ->
                     additionalSkillSyncService
                         .getOrCreateFromExternalSkill(externalSkill.id())
-                        .map(AdditionalSkillMapper::fromDomain)
+                        .map(AdditionalSkillMapper.INSTANCE::fromDomain)
                         .orElse(null))
             .filter(entity -> entity != null)
             .toList();

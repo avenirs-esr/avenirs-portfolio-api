@@ -1,15 +1,19 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.file.domain.model.UserPhoto;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 
-public interface UserPhotoMapper {
-  static UserPhotoEntity fromDomain(UserPhoto userPhoto) {
+public class UserPhotoMapper implements Mapper<UserPhotoEntity, UserPhoto> {
+  public static UserPhotoMapper INSTANCE = new UserPhotoMapper();
+
+  @Override
+  public UserPhotoEntity fromDomain(UserPhoto userPhoto) {
     return UserPhotoEntity.of(
         userPhoto.getId(),
         userPhoto.getName(),
-        UserMapper.fromDomain(userPhoto.getUser()),
+        UserMapper.INSTANCE.fromDomain(userPhoto.getUser()),
         userPhoto.getUserCategory(),
         userPhoto.getUserPhotoType(),
         userPhoto.getFileType(),
@@ -17,11 +21,12 @@ public interface UserPhotoMapper {
         userPhoto.getVersion(),
         userPhoto.isActiveVersion(),
         userPhoto.getUri(),
-        UserMapper.fromDomain(userPhoto.getUploadedBy()),
+        UserMapper.INSTANCE.fromDomain(userPhoto.getUploadedBy()),
         userPhoto.getUploadedAt());
   }
 
-  static UserPhoto toDomain(UserPhotoEntity entity) {
+  @Override
+  public UserPhoto toDomain(UserPhotoEntity entity) {
     return UserPhoto.toDomain(
         entity.getId(),
         entity.getName(),
@@ -30,9 +35,9 @@ public interface UserPhotoMapper {
         entity.getVersion(),
         entity.isActiveVersion(),
         entity.getUri(),
-        UserMapper.toDomain(entity.getUploadedBy()),
+        UserMapper.INSTANCE.toDomain(entity.getUploadedBy()),
         entity.getUploadedAt(),
-        UserMapper.toDomain(entity.getUser()),
+        UserMapper.INSTANCE.toDomain(entity.getUser()),
         entity.getUserCategory(),
         entity.getUserPhotoType(),
         entity.getCreatedAt(),

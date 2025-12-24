@@ -18,7 +18,7 @@ public class StudentDatabaseRepository extends GenericJpaRepositoryAdapter<Stude
   private final StudentJpaRepository jpaRepository;
 
   public StudentDatabaseRepository(StudentJpaRepository repository) {
-    super(repository, repository, StudentMapper::fromDomain, StudentMapper::toDomain);
+    super(repository, repository, StudentEntity.class, StudentMapper.INSTANCE);
     this.jpaRepository = repository;
   }
 
@@ -28,7 +28,7 @@ public class StudentDatabaseRepository extends GenericJpaRepositoryAdapter<Stude
         jpaRepository.findById(student.getId()).orElseThrow(UserNotFoundException::new);
     studentEntity
         .getSelfKnowledgeCategories()
-        .addAll(categories.stream().map(SelfKnowledgeCategoryMapper::fromDomain).toList());
+        .addAll(categories.stream().map(SelfKnowledgeCategoryMapper.INSTANCE::fromDomain).toList());
     jpaRepository.save(studentEntity);
   }
 

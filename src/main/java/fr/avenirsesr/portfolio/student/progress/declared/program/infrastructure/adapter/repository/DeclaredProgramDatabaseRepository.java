@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.model.DeclaredProgramEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -16,14 +17,12 @@ public class DeclaredProgramDatabaseRepository
     implements DeclaredProgramRepository {
   public DeclaredProgramDatabaseRepository(DeclaredProgramJpaRepository jpaRepository) {
     super(
-        jpaRepository,
-        jpaRepository,
-        DeclaredProgramMapper::fromDomain,
-        DeclaredProgramMapper::toDomain);
+        jpaRepository, jpaRepository, DeclaredProgramEntity.class, DeclaredProgramMapper.INSTANCE);
   }
 
   @Override
   public PagedResult<DeclaredProgram> findAllByStudent(Student student, PageCriteria pageCriteria) {
-    return findAll(hasStudent(student), pageCriteria);
+    return findAll(
+        hasStudent(student), PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
   }
 }

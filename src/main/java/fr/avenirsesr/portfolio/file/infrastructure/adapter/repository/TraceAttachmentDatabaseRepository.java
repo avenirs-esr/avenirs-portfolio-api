@@ -16,10 +16,7 @@ public class TraceAttachmentDatabaseRepository
     implements TraceAttachmentRepository {
   public TraceAttachmentDatabaseRepository(TraceAttachmentJpaRepository jpaRepository) {
     super(
-        jpaRepository,
-        jpaRepository,
-        TraceAttachmentMapper::fromDomain,
-        TraceAttachmentMapper::toDomain);
+        jpaRepository, jpaRepository, TraceAttachmentEntity.class, TraceAttachmentMapper.INSTANCE);
   }
 
   @Override

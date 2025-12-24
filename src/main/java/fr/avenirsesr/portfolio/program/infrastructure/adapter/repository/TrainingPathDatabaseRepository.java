@@ -14,8 +14,7 @@ public class TrainingPathDatabaseRepository
   private final TrainingPathJpaRepository jpaRepository;
 
   public TrainingPathDatabaseRepository(TrainingPathJpaRepository jpaRepository) {
-    super(
-        jpaRepository, jpaRepository, TrainingPathMapper::fromDomain, TrainingPathMapper::toDomain);
+    super(jpaRepository, jpaRepository, TrainingPathEntity.class, TrainingPathMapper.INSTANCE);
     this.jpaRepository = jpaRepository;
   }
 }

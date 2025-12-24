@@ -12,7 +12,7 @@ public interface UserResourceSpecification {
       User user, EUserCategory userCategory, EUserPhotoType type) {
     return (root, query, criteriaBuilder) ->
         criteriaBuilder.and(
-            criteriaBuilder.equal(root.get("user"), UserMapper.fromDomain(user)),
+            criteriaBuilder.equal(root.get("user"), UserMapper.INSTANCE.fromDomain(user)),
             criteriaBuilder.equal(root.get("userCategory"), userCategory),
             criteriaBuilder.equal(root.get("userPhotoType"), type));
   }

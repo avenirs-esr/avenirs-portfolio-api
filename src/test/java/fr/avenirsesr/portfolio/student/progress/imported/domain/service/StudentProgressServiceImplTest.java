@@ -919,7 +919,7 @@ public class StudentProgressServiceImplTest {
                 .toModel();
 
         BddLogger.when("calling the method with a given student and additionalSkillProgressId");
-        when(additionalSkillProgressRepository.findById(additionalSkillProgress.getId()))
+        when(additionalSkillProgressRepository.findById(any(), any()))
             .thenReturn(Optional.of(additionalSkillProgress));
         when(traceService.getTracesLinkedWithAdditionalSkillProgress(
                 student.getUser(), additionalSkillProgress))
@@ -983,7 +983,7 @@ public class StudentProgressServiceImplTest {
 
         BddLogger.when(
             "calling the method with another given student and additionalSkillProgressId");
-        when(additionalSkillProgressRepository.findById(additionalSkillProgress.getId()))
+        when(additionalSkillProgressRepository.findById(any(), any()))
             .thenReturn(Optional.of(additionalSkillProgress));
         assertThrows(
             UserNotAuthorizedException.class,

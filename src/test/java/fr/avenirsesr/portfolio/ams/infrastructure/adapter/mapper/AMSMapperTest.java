@@ -55,7 +55,7 @@ class AMSMapperTest {
   void shouldMapFromDomainToEntity() {
     BddLogger.given("an AMS mapper");
     BddLogger.when("mapping a domain AMS to AMSEntity");
-    AMSEntity entity = AMSMapper.fromDomain(ams);
+    AMSEntity entity = AMSMapper.INSTANCE.fromDomain(ams);
 
     BddLogger.then("it should return a correct AMSEntity");
     assertNotNull(entity);
@@ -71,7 +71,7 @@ class AMSMapperTest {
     BddLogger.given("an AMS mapper");
     AMSEntity entity = new AMSEntity();
     entity.setId(id);
-    entity.setStudent(StudentMapper.fromDomain(student));
+    entity.setStudent(StudentMapper.INSTANCE.fromDomain(student));
     entity.setStatus(status);
     entity.setStartDate(startDate);
     entity.setEndDate(endDate);
@@ -86,7 +86,7 @@ class AMSMapperTest {
     entity.setTranslations(translations);
 
     BddLogger.when("mapping an AMSEntity to domain AMS");
-    AMS mappedAms = AMSMapper.toDomain(entity);
+    AMS mappedAms = AMSMapper.INSTANCE.toDomain(entity);
 
     BddLogger.then("it should return a correct domain AMS");
     assertNotNull(mappedAms);
@@ -101,7 +101,7 @@ class AMSMapperTest {
     BddLogger.given("an AMS mapper");
     AMSEntity entity = new AMSEntity();
     entity.setId(id);
-    entity.setStudent(StudentMapper.fromDomain(student));
+    entity.setStudent(StudentMapper.INSTANCE.fromDomain(student));
     entity.setStatus(status);
     entity.setStartDate(startDate);
     entity.setEndDate(endDate);
@@ -118,7 +118,7 @@ class AMSMapperTest {
     entity.setTranslations(translations);
 
     BddLogger.when("mapping an empty collection to domain AMS");
-    AMS mappedAms = AMSMapper.toDomain(entity);
+    AMS mappedAms = AMSMapper.INSTANCE.toDomain(entity);
 
     BddLogger.then("it should return a correct domain AMS");
     assertNotNull(mappedAms);

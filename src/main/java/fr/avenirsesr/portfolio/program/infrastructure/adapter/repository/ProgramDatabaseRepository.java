@@ -13,7 +13,7 @@ public class ProgramDatabaseRepository extends GenericJpaRepositoryAdapter<Progr
   private final ProgramJpaRepository jpaRepository;
 
   public ProgramDatabaseRepository(ProgramJpaRepository jpaRepository) {
-    super(jpaRepository, jpaRepository, ProgramMapper::fromDomain, ProgramMapper::toDomain);
+    super(jpaRepository, jpaRepository, ProgramEntity.class, ProgramMapper.INSTANCE);
     this.jpaRepository = jpaRepository;
   }
 }

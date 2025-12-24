@@ -20,7 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 public class TraceSpecification {
   public static Specification<TraceEntity> ofUser(User user) {
     return (root, query, criteriaBuilder) ->
-        criteriaBuilder.equal(root.get("user"), UserMapper.fromDomain(user));
+        criteriaBuilder.equal(root.get("user"), UserMapper.INSTANCE.fromDomain(user));
   }
 
   public static Specification<TraceEntity> unassociated() {
@@ -71,21 +71,22 @@ public class TraceSpecification {
 
   public static Specification<TraceEntity> ofAms(AMS ams) {
     return (root, query, criteriaBuilder) ->
-        criteriaBuilder.isMember(AMSMapper.fromDomain(ams), root.get("amses"));
+        criteriaBuilder.isMember(AMSMapper.INSTANCE.fromDomain(ams), root.get("amses"));
   }
 
   public static Specification<TraceEntity> ofSkillLevelProgress(
       SkillLevelProgress skillLevelProgress) {
     return (root, query, criteriaBuilder) ->
         criteriaBuilder.isMember(
-            SkillLevelProgressMapper.fromDomain(skillLevelProgress), root.get("skillLevels"));
+            SkillLevelProgressMapper.INSTANCE.fromDomain(skillLevelProgress),
+            root.get("skillLevels"));
   }
 
   public static Specification<TraceEntity> ofAdditionalSkillProgress(
       AdditionalSkillProgress additionalSkillProgress) {
     return (root, query, criteriaBuilder) ->
         criteriaBuilder.isMember(
-            AdditionalSkillProgressMapper.fromDomain(additionalSkillProgress),
+            AdditionalSkillProgressMapper.INSTANCE.fromDomain(additionalSkillProgress),
             root.get("additionalSkillsProgresses"));
   }
 

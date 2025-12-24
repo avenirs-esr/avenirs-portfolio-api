@@ -1,52 +1,65 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.dto.StudentTrainingPathSummaryDTO;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public interface TrainingPathMapper {
-  static TrainingPathEntity fromDomain(TrainingPath trainingPath) {
+public class TrainingPathMapper implements Mapper<TrainingPathEntity, TrainingPath> {
+  public static TrainingPathMapper INSTANCE = new TrainingPathMapper();
+
+  @Override
+  public TrainingPathEntity fromDomain(TrainingPath trainingPath) {
     var entity =
         new TrainingPathEntity(
-            trainingPath.getId(), ProgramMapper.fromDomain(trainingPath.getProgram()), Set.of());
+            trainingPath.getId(),
+            ProgramMapper.INSTANCE.fromDomain(trainingPath.getProgram()),
+            Set.of());
 
     entity.setSkillLevels(
         trainingPath.getSkillLevels().stream()
-            .map(
-                skillLevel ->
-                    SkillLevelMapper.fromDomain(
-                        skillLevel, SkillMapper.fromDomain(skillLevel.getSkill())))
+            .map(SkillLevelMapper.INSTANCE::fromDomain)
             .collect(Collectors.toSet()));
 
     return entity;
   }
 
-  static TrainingPath toDomain(TrainingPathEntity trainingPathEntity) {
+  @Override
+  public TrainingPath toDomain(TrainingPathEntity trainingPathEntity) {
     var trainingPath =
         TrainingPath.toDomain(
             trainingPathEntity.getId(),
-            ProgramMapper.toDomain(trainingPathEntity.getProgram()),
+            ProgramMapper.INSTANCE.toDomain(trainingPathEntity.getProgram()),
             Set.of(),
             trainingPathEntity.getCreatedAt(),
             trainingPathEntity.getUpdatedAt());
 
     trainingPath.setSkillLevels(
         trainingPathEntity.getSkillLevels().stream()
-            .map(SkillLevelMapper::toDomain)
+            .map(SkillLevelMapper.INSTANCE::toDomain)
             .collect(Collectors.toSet()));
 
     return trainingPath;
   }
 
-  static TrainingPath toDomainWithoutRecursion(
-      StudentTrainingPathSummaryDTO studentTrainingPathSummaryDTO) {
+  @Override
+  public TrainingPath toDomain(TrainingPathEntity trainingPathEntity, EntityGrapher<?> graph) {
+    var attributes = graph.attributes();
     return TrainingPath.toDomain(
-        studentTrainingPathSummaryDTO.id(),
-        ProgramMapper.toDomain(studentTrainingPathSummaryDTO.program()),
-        Set.of(),
-        studentTrainingPathSummaryDTO.program().getCreatedAt(),
-        studentTrainingPathSummaryDTO.program().getUpdatedAt());
+        trainingPathEntity.getId(),
+        attributes.contains("program")
+            ? ProgramMapper.INSTANCE.toDomain(
+                trainingPathEntity.getProgram(), graph.from("program"))
+            : null,
+        attributes.contains("skillLevels")
+            ? trainingPathEntity.getSkillLevels().stream()
+                .map(
+                    entity -> SkillLevelMapper.INSTANCE.toDomain(entity, graph.from("skillLevels")))
+                .collect(Collectors.toSet())
+            : Set.of(),
+        trainingPathEntity.getCreatedAt(),
+        trainingPathEntity.getUpdatedAt());
   }
 }

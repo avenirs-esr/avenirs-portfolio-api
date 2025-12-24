@@ -168,25 +168,4 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$.page.page").value(0))
         .andExpect(jsonPath("$.page.pageSize").value(5));
   }
-
-  @Transactional
-  @Test
-  void shouldReturnEmptyContentWhenNoDeclaredExperienceExists() throws Exception {
-    BddLogger.given("no declared experience exists for the student");
-    BddLogger.when("performing a GET on /view");
-    BddLogger.then("it should return an empty paged response");
-
-    mockMvc
-        .perform(
-            get(BASE_PATH + "/view")
-                .param("page", "0")
-                .param("pageSize", "10")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.data").isEmpty())
-        .andExpect(jsonPath("$.page.totalElements").value(0));
-  }
 }

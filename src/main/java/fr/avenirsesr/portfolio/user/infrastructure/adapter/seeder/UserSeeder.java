@@ -40,7 +40,7 @@ public class UserSeeder {
 
     List<UserEntity> users =
         fakeUsers.stream().map(FakeUser::toEntity).collect(Collectors.toList());
-    userRepository.saveAll(users.stream().map(UserMapper::toDomain).toList());
+    userRepository.saveAll(users.stream().map(UserMapper.INSTANCE::toDomain).toList());
 
     var externalUsers =
         users.stream()
@@ -55,7 +55,7 @@ public class UserSeeder {
             .toList();
 
     externalUserRepository.saveAll(
-        externalUsers.stream().map(ExternalUserMapper::toDomain).toList());
+        externalUsers.stream().map(ExternalUserMapper.INSTANCE::toDomain).toList());
 
     log.info("✔ {} externalUsers created", externalUsers.size());
     log.info("✔ {} users created", users.size());

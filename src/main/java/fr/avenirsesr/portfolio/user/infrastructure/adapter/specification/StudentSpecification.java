@@ -9,6 +9,6 @@ import org.springframework.data.jpa.domain.Specification;
 public final class StudentSpecification {
   public static <T> Specification<T> hasStudent(Student student) {
     return (root, query, criteriaBuilder) ->
-        criteriaBuilder.equal(root.get("student"), StudentMapper.fromDomain(student));
+        criteriaBuilder.equal(root.get("student"), StudentMapper.INSTANCE.fromDomain(student));
   }
 }

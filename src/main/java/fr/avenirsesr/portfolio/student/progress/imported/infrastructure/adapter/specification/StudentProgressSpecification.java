@@ -20,7 +20,7 @@ public class StudentProgressSpecification {
   public static Specification<StudentProgressEntity> hasSkillLevelProgresses(
       List<SkillLevelProgress> skillLevelProgresses) {
     List<SkillLevelProgressEntity> skillLevelProgressEntities =
-        skillLevelProgresses.stream().map(SkillLevelProgressMapper::fromDomain).toList();
+        skillLevelProgresses.stream().map(SkillLevelProgressMapper.INSTANCE::fromDomain).toList();
     return (root, query, criteriaBuilder) -> {
       Join<StudentProgressEntity, SkillLevelProgressEntity> skillLevelProgressJoin =
           root.join("skillLevels");
