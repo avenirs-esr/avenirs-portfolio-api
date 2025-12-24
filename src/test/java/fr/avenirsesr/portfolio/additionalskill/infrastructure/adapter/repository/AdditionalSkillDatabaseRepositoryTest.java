@@ -3,8 +3,8 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.repositor
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import java.util.List;
@@ -24,7 +24,7 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     BddLogger.given("a new AdditionalSkill");
     UUID externalSkillId = UUID.randomUUID();
     String libelle = "Java Programming";
-    EAdditionalSkillType type = EAdditionalSkillType.ROME4;
+    EExternalSkillType type = EExternalSkillType.ROME4;
     List<String> pathSegments = List.of("Domain", "Issue", "MacroSkill", "Skill");
 
     AdditionalSkill skill = AdditionalSkill.create(externalSkillId, libelle, type, pathSegments);
@@ -48,8 +48,7 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     List<String> pathSegments = List.of("A", "B", "C", "D");
 
     AdditionalSkill skill =
-        AdditionalSkill.create(
-            externalSkillId, "Test Skill", EAdditionalSkillType.XXI, pathSegments);
+        AdditionalSkill.create(externalSkillId, "Test Skill", EExternalSkillType.XXI, pathSegments);
 
     BddLogger.when("saving and retrieving the skill");
     AdditionalSkill savedSkill = repository.save(skill);
@@ -66,10 +65,7 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     BddLogger.given("a saved AdditionalSkill");
     AdditionalSkillEntity entity =
         AdditionalSkillEntity.create(
-            UUID.randomUUID(),
-            "Test Skill",
-            EAdditionalSkillType.ROME4,
-            List.of("Domain", "Issue"));
+            UUID.randomUUID(), "Test Skill", EExternalSkillType.ROME4, List.of("Domain", "Issue"));
     AdditionalSkillEntity savedEntity = jpaRepository.save(entity);
 
     BddLogger.when("finding by ID");
@@ -100,7 +96,7 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     UUID externalSkillId = UUID.randomUUID();
     AdditionalSkillEntity entity =
         AdditionalSkillEntity.create(
-            externalSkillId, "Test Skill", EAdditionalSkillType.CASOC, List.of("A", "B"));
+            externalSkillId, "Test Skill", EExternalSkillType.CASOC, List.of("A", "B"));
     jpaRepository.save(entity);
 
     BddLogger.when("finding by external skill ID");
@@ -129,7 +125,7 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     UUID externalSkillId = UUID.randomUUID();
     AdditionalSkill skill =
         AdditionalSkill.create(
-            externalSkillId, "Original Skill", EAdditionalSkillType.ROME4, List.of("A", "B"));
+            externalSkillId, "Original Skill", EExternalSkillType.ROME4, List.of("A", "B"));
     AdditionalSkill savedSkill = repository.save(skill);
 
     BddLogger.when("updating the skill");
@@ -153,7 +149,7 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     BddLogger.given("a saved AdditionalSkill with path segments");
     AdditionalSkill skill =
         AdditionalSkill.create(
-            UUID.randomUUID(), "Test Skill", EAdditionalSkillType.XXI, List.of("A", "B"));
+            UUID.randomUUID(), "Test Skill", EExternalSkillType.XXI, List.of("A", "B"));
     AdditionalSkill savedSkill = repository.save(skill);
 
     BddLogger.when("updating path segments");
@@ -172,7 +168,7 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     BddLogger.given("a saved AdditionalSkill");
     AdditionalSkill skill =
         AdditionalSkill.create(
-            UUID.randomUUID(), "Test Skill", EAdditionalSkillType.CASOL, List.of("A"));
+            UUID.randomUUID(), "Test Skill", EExternalSkillType.CASOL, List.of("A"));
     AdditionalSkill savedSkill = repository.save(skill);
     UUID skillId = savedSkill.getId();
 
@@ -189,13 +185,12 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     BddLogger.given("multiple saved AdditionalSkill");
     AdditionalSkill skill1 =
         AdditionalSkill.create(
-            UUID.randomUUID(), "Skill 1", EAdditionalSkillType.ROME4, List.of("A"));
+            UUID.randomUUID(), "Skill 1", EExternalSkillType.ROME4, List.of("A"));
     AdditionalSkill skill2 =
-        AdditionalSkill.create(
-            UUID.randomUUID(), "Skill 2", EAdditionalSkillType.XXI, List.of("B"));
+        AdditionalSkill.create(UUID.randomUUID(), "Skill 2", EExternalSkillType.XXI, List.of("B"));
     AdditionalSkill skill3 =
         AdditionalSkill.create(
-            UUID.randomUUID(), "Skill 3", EAdditionalSkillType.CASOC, List.of("C"));
+            UUID.randomUUID(), "Skill 3", EExternalSkillType.CASOC, List.of("C"));
 
     repository.save(skill1);
     repository.save(skill2);
@@ -212,7 +207,7 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
   void shouldHandleNullPathSegments() {
     BddLogger.given("an AdditionalSkill with null path segments");
     AdditionalSkill skill =
-        AdditionalSkill.create(UUID.randomUUID(), "Test Skill", EAdditionalSkillType.ROME4, null);
+        AdditionalSkill.create(UUID.randomUUID(), "Test Skill", EExternalSkillType.ROME4, null);
 
     BddLogger.when("saving and retrieving the skill");
     AdditionalSkill savedSkill = repository.save(skill);
@@ -230,7 +225,7 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     List<String> emptySegments = List.of();
     AdditionalSkill skill =
         AdditionalSkill.create(
-            UUID.randomUUID(), "Test Skill", EAdditionalSkillType.XXI, emptySegments);
+            UUID.randomUUID(), "Test Skill", EExternalSkillType.XXI, emptySegments);
 
     BddLogger.when("saving and retrieving the skill");
     AdditionalSkill savedSkill = repository.save(skill);
@@ -246,7 +241,7 @@ class AdditionalSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
   void shouldReturnExistingSkillWhenSaveOrGetOnDuplicateExternalSkillIdAndType() {
     BddLogger.given("an existing AdditionalSkillEntity with a given externalSkillId and type");
     UUID externalSkillId = UUID.randomUUID();
-    EAdditionalSkillType type = EAdditionalSkillType.ROME4;
+    EExternalSkillType type = EExternalSkillType.ROME4;
 
     AdditionalSkillEntity existingEntity =
         AdditionalSkillEntity.create(externalSkillId, "Existing Skill", type, List.of("A", "B"));

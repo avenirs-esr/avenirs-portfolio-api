@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.additionalskill.domain.service;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillSyncService;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDTO;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ public class AdditionalSkillSyncServiceImpl implements AdditionalSkillSyncServic
         AdditionalSkill.create(
             dto.id(),
             dto.title(),
-            EAdditionalSkillType.valueOf(dto.type().name()),
+            EExternalSkillType.valueOf(dto.type().name()),
             dto.pathSegments());
 
     AdditionalSkill saved = additionalSkillRepository.saveOrGet(newSkill);

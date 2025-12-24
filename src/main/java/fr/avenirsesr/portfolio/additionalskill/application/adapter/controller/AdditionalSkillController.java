@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.additionalskill.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillDTO;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +38,7 @@ public class AdditionalSkillController {
                             externalSkill.id(),
                             externalSkill.title(),
                             externalSkill.pathSegments(),
-                            EAdditionalSkillType.valueOf(externalSkill.type().name())))
+                            EExternalSkillType.valueOf(externalSkill.type().name())))
                 .toList(),
             result.page()));
   }

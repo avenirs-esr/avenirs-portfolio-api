@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.seeder.AdditionalSkillProgressDataGenerator;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
@@ -39,7 +39,7 @@ public class AdditionalSkillProgressFixture {
         AdditionalSkill.create(
             UUID.randomUUID(),
             "Test Skill",
-            EAdditionalSkillType.ROME4,
+            EExternalSkillType.ROME4,
             List.of("Category", "Subcategory"));
     this.level = dataGenerator.with("level").pickIn(EAdditionalSkillLevel.class);
     this.description = additionalSkillProgressGenerator.with("sentence").description();

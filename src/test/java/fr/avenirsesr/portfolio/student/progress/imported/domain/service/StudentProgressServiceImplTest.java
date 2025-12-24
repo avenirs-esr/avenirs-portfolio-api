@@ -12,7 +12,6 @@ import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditio
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillSyncService;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.AdditionalSkillProgressFixture;
@@ -999,7 +998,7 @@ public class StudentProgressServiceImplTest {
       void createAdditionalSkillProgress_shouldSaveWhenSkillIsAvailableAndNotDuplicate() {
         BddLogger.given("the method createAdditionalSkillProgress");
         UUID skillId = randomUUID();
-        EAdditionalSkillType type = EAdditionalSkillType.ROME4;
+        EExternalSkillType type = EExternalSkillType.ROME4;
         EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
         String description = "Description for additional skill progress test";
         AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
@@ -1022,7 +1021,7 @@ public class StudentProgressServiceImplTest {
       void createAdditionalSkillProgress_shouldThrowDuplicateWhenAlreadyExists() {
         BddLogger.given("the method createAdditionalSkillProgress");
         UUID skillId = randomUUID();
-        EAdditionalSkillType type = EAdditionalSkillType.ROME4;
+        EExternalSkillType type = EExternalSkillType.ROME4;
         EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
         String description = "Description for additional skill progress test";
         AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
@@ -1051,7 +1050,7 @@ public class StudentProgressServiceImplTest {
       void createAdditionalSkillProgress_shouldRethrowWhenSkillNotFound() {
         BddLogger.given("the method createAdditionalSkillProgress");
         UUID skillId = randomUUID();
-        EAdditionalSkillType type = EAdditionalSkillType.ROME4;
+        EExternalSkillType type = EExternalSkillType.ROME4;
         EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
         String description = "Description for additional skill progress test";
 

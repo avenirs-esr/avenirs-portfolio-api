@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.output.repository.AdditionalSkillRepository;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDTO;
@@ -36,7 +35,7 @@ class AdditionalSkillSyncServiceImplTest {
     UUID externalSkillId = UUID.randomUUID();
     AdditionalSkill existing =
         AdditionalSkill.create(
-            externalSkillId, "Existing Skill", EAdditionalSkillType.ROME4, List.of("A", "B"));
+            externalSkillId, "Existing Skill", EExternalSkillType.ROME4, List.of("A", "B"));
     when(additionalSkillRepository.findByExternalSkillId(externalSkillId))
         .thenReturn(Optional.of(existing));
 
@@ -69,7 +68,7 @@ class AdditionalSkillSyncServiceImplTest {
         AdditionalSkill.create(
             externalSkillId,
             "Java Programming",
-            EAdditionalSkillType.ROME4,
+            EExternalSkillType.ROME4,
             List.of("IT", "Development"));
     when(additionalSkillRepository.saveOrGet(any(AdditionalSkill.class))).thenReturn(savedSkill);
 
@@ -85,7 +84,7 @@ class AdditionalSkillSyncServiceImplTest {
     AdditionalSkill captured = captor.getValue();
     assertThat(captured.getExternalSkillId()).isEqualTo(externalSkillId);
     assertThat(captured.getLibelle()).isEqualTo("Java Programming");
-    assertThat(captured.getType()).isEqualTo(EAdditionalSkillType.ROME4);
+    assertThat(captured.getType()).isEqualTo(EExternalSkillType.ROME4);
     assertThat(captured.getPathSegments()).containsExactly("IT", "Development");
   }
 
@@ -118,7 +117,7 @@ class AdditionalSkillSyncServiceImplTest {
     when(externalSkillClient.getById(externalSkillId)).thenReturn(Optional.of(externalSkillDTO));
 
     AdditionalSkill savedSkill =
-        AdditionalSkill.create(externalSkillId, "Simple Skill", EAdditionalSkillType.XXI, null);
+        AdditionalSkill.create(externalSkillId, "Simple Skill", EExternalSkillType.XXI, null);
     when(additionalSkillRepository.saveOrGet(any(AdditionalSkill.class))).thenReturn(savedSkill);
 
     BddLogger.when("calling getOrCreateFromExternalSkill");
@@ -162,8 +161,8 @@ class AdditionalSkillSyncServiceImplTest {
     verify(additionalSkillRepository, times(2)).saveOrGet(captor.capture());
 
     List<AdditionalSkill> savedSkills = captor.getAllValues();
-    assertThat(savedSkills.get(0).getType()).isEqualTo(EAdditionalSkillType.ROME4);
-    assertThat(savedSkills.get(1).getType()).isEqualTo(EAdditionalSkillType.XXI);
+    assertThat(savedSkills.get(0).getType()).isEqualTo(EExternalSkillType.ROME4);
+    assertThat(savedSkills.get(1).getType()).isEqualTo(EExternalSkillType.XXI);
   }
 
   @Test
@@ -181,7 +180,7 @@ class AdditionalSkillSyncServiceImplTest {
         AdditionalSkill.create(
             externalSkillId,
             "Concurrent Skill",
-            EAdditionalSkillType.ROME4,
+            EExternalSkillType.ROME4,
             List.of("IT", "Development"));
 
     when(additionalSkillRepository.findByExternalSkillId(externalSkillId))

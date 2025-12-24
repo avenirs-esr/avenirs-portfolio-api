@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.converter.PathSegmentsConverter;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import jakarta.persistence.*;
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +28,7 @@ public class AdditionalSkillEntity extends AvenirsBaseEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "type")
-  private EAdditionalSkillType type;
+  private EExternalSkillType type;
 
   @Setter(AccessLevel.NONE)
   @Column(name = "path_segments")
@@ -39,7 +39,7 @@ public class AdditionalSkillEntity extends AvenirsBaseEntity {
       UUID id,
       UUID externalSkillId,
       String libelle,
-      EAdditionalSkillType type,
+      EExternalSkillType type,
       List<String> pathSegments) {
     setId(id);
     this.externalSkillId = externalSkillId;
@@ -52,13 +52,13 @@ public class AdditionalSkillEntity extends AvenirsBaseEntity {
       UUID id,
       UUID externalSkillId,
       String libelle,
-      EAdditionalSkillType type,
+      EExternalSkillType type,
       List<String> pathSegments) {
     return new AdditionalSkillEntity(id, externalSkillId, libelle, type, pathSegments);
   }
 
   public static AdditionalSkillEntity create(
-      UUID externalSkillId, String libelle, EAdditionalSkillType type, List<String> pathSegments) {
+      UUID externalSkillId, String libelle, EExternalSkillType type, List<String> pathSegments) {
     return new AdditionalSkillEntity(
         UUID.randomUUID(), externalSkillId, libelle, type, pathSegments);
   }

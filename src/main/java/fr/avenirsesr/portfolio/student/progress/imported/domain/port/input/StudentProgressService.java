@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.imported.domain.port.input;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillLevelProgressWithTraceCountData;
@@ -39,7 +39,7 @@ public interface StudentProgressService {
 
   AdditionalSkillProgress createAdditionalSkillProgress(
       UUID additionalSkillId,
-      EAdditionalSkillType type,
+      EExternalSkillType type,
       EAdditionalSkillLevel level,
       String description);
 

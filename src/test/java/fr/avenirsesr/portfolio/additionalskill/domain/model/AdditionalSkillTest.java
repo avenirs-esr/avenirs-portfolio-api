@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.additionalskill.domain.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import java.time.Instant;
 import java.util.List;
@@ -13,7 +13,7 @@ class AdditionalSkillTest {
 
   private final UUID externalSkillId = UUID.randomUUID();
   private final String libelle = "Java Programming";
-  private final EAdditionalSkillType type = EAdditionalSkillType.ROME4;
+  private final EExternalSkillType type = EExternalSkillType.ROME4;
   private final List<String> pathSegments = List.of("Domain", "Issue", "MacroSkill", "Skill");
 
   @Test
@@ -126,7 +126,7 @@ class AdditionalSkillTest {
     BddLogger.when("using setters to modify fields");
     UUID newExternalSkillId = UUID.randomUUID();
     String newLibelle = "New Skill";
-    EAdditionalSkillType newType = EAdditionalSkillType.XXI;
+    EExternalSkillType newType = EExternalSkillType.XXI;
     List<String> newPathSegments = List.of("A", "B", "C");
 
     skill.setExternalSkillId(newExternalSkillId);

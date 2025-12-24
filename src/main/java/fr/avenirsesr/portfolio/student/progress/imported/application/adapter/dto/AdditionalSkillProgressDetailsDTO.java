@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dt
 
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillCategoryDTO;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
@@ -25,7 +25,7 @@ public record AdditionalSkillProgressDetailsDTO(
     String title,
     List<AdditionalSkillCategoryDTO> pathSegments,
     String description,
-    @Schema(ref = "#/components/schemas/EAdditionalSkillType") EAdditionalSkillType type,
+    @Schema(ref = "#/components/schemas/EExternalSkillType") EExternalSkillType type,
     @Schema(ref = "#/components/schemas/EAdditionalSkillLevel") EAdditionalSkillLevel level,
     List<TraceOverviewDTO> traceAssociations,
     Instant createdAt,

@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.converter.PathSegmentsConverter;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -18,7 +18,7 @@ class AdditionalSkillEntityTest {
 
   private final UUID externalSkillId = UUID.randomUUID();
   private final String libelle = "Java Programming";
-  private final EAdditionalSkillType type = EAdditionalSkillType.ROME4;
+  private final EExternalSkillType type = EExternalSkillType.ROME4;
   private final List<String> pathSegments = List.of("Domain", "Issue", "MacroSkill", "Skill");
 
   @Test
@@ -78,7 +78,7 @@ class AdditionalSkillEntityTest {
     UUID id = UUID.randomUUID();
     UUID newExternalSkillId = UUID.randomUUID();
     String newLibelle = "Python Programming";
-    EAdditionalSkillType newType = EAdditionalSkillType.XXI;
+    EExternalSkillType newType = EExternalSkillType.XXI;
     List<String> newPathSegments = List.of("A", "B", "C");
 
     entity.setId(id);

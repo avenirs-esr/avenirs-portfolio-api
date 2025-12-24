@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.domain.model;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -14,7 +14,7 @@ import lombok.Setter;
 public class AdditionalSkill extends AvenirsBaseModel {
   private UUID externalSkillId;
   private String libelle;
-  private EAdditionalSkillType type;
+  private EExternalSkillType type;
 
   @Setter(AccessLevel.NONE)
   private List<String> pathSegments;
@@ -23,7 +23,7 @@ public class AdditionalSkill extends AvenirsBaseModel {
       UUID id,
       UUID externalSkillId,
       String libelle,
-      EAdditionalSkillType type,
+      EExternalSkillType type,
       List<String> pathSegments,
       Instant createdAt,
       Instant updatedAt) {
@@ -35,7 +35,7 @@ public class AdditionalSkill extends AvenirsBaseModel {
   }
 
   public static AdditionalSkill create(
-      UUID externalSkillId, String libelle, EAdditionalSkillType type, List<String> pathSegments) {
+      UUID externalSkillId, String libelle, EExternalSkillType type, List<String> pathSegments) {
     Instant now = Instant.now();
     return new AdditionalSkill(
         UUID.randomUUID(), externalSkillId, libelle, type, pathSegments, now, now);
@@ -45,7 +45,7 @@ public class AdditionalSkill extends AvenirsBaseModel {
       UUID id,
       UUID externalSkillId,
       String libelle,
-      EAdditionalSkillType type,
+      EExternalSkillType type,
       List<String> pathSegments,
       Instant createdAt,
       Instant updatedAt) {

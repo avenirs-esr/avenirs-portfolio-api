@@ -3,8 +3,8 @@ package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.mapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.model.AdditionalSkillEntity;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import java.time.Instant;
 import java.util.List;
@@ -19,7 +19,7 @@ class AdditionalSkillMapperTest {
   private final UUID id = UUID.randomUUID();
   private final UUID externalSkillId = UUID.randomUUID();
   private final String libelle = "Java Programming";
-  private final EAdditionalSkillType type = EAdditionalSkillType.ROME4;
+  private final EExternalSkillType type = EExternalSkillType.ROME4;
   private final List<String> pathSegments = List.of("Domain", "Issue", "MacroSkill", "Skill");
   private final Instant createdAt = Instant.parse("2023-01-01T00:00:00Z");
   private final Instant updatedAt = Instant.parse("2023-12-31T23:59:59Z");
@@ -168,14 +168,14 @@ class AdditionalSkillMapperTest {
   @Test
   void shouldMapDifferentSkillTypes() {
     BddLogger.given("entities with different skill types");
-    EAdditionalSkillType[] types = {
-      EAdditionalSkillType.ROME4,
-      EAdditionalSkillType.XXI,
-      EAdditionalSkillType.CASOC,
-      EAdditionalSkillType.CASOL
+    EExternalSkillType[] types = {
+      EExternalSkillType.ROME4,
+      EExternalSkillType.XXI,
+      EExternalSkillType.CASOC,
+      EExternalSkillType.CASOL
     };
 
-    for (EAdditionalSkillType skillType : types) {
+    for (EExternalSkillType skillType : types) {
       BddLogger.when("mapping entity with type " + skillType);
       AdditionalSkillEntity entity =
           AdditionalSkillEntity.of(id, externalSkillId, libelle, skillType, pathSegments);
