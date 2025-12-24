@@ -21,7 +21,7 @@ public class AMSDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;AM
     implements AMSRepository {
 
   public AMSDatabaseRepository(AMSJpaRepository repository) {
-<span class="fc" id="L24">    super(repository, repository, AMSMapper::fromDomain, AMSMapper::toDomain);</span>
+<span class="fc" id="L24">    super(repository, repository, AMSEntity.class, AMSMapper.INSTANCE);</span>
 <span class="fc" id="L25">  }</span>
 
   @Override

@@ -8,11 +8,11 @@ import java.util.function.Supplier;
 
   @Override
   public Object get() {
-<span class="fc" id="L11">    var requestData = RequestContext.get();</span>
-<span class="fc bfc" id="L12" title="All 2 branches covered.">    if (requestData == null) {</span>
-<span class="fc" id="L13">      return ELanguage.FALLBACK.name();</span>
+<span class="nc" id="L11">    var requestData = RequestContext.get();</span>
+<span class="nc bnc" id="L12" title="All 2 branches missed.">    if (requestData == null) {</span>
+<span class="nc" id="L13">      return ELanguage.FALLBACK.name();</span>
     }
-<span class="fc" id="L15">    return requestData.preferredLanguage().name();</span>
+<span class="nc" id="L15">    return requestData.preferredLanguage().name();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

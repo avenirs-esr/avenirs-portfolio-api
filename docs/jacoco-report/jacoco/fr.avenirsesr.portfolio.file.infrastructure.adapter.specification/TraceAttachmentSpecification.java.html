@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 public interface TraceAttachmentSpecification {
   static Specification&lt;TraceAttachmentEntity&gt; ofTrace(Trace trace) {
 <span class="fc" id="L10">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L11">        criteriaBuilder.equal(root.get(&quot;trace&quot;), TraceMapper.fromDomain(trace));</span>
+<span class="fc" id="L11">        criteriaBuilder.equal(root.get(&quot;trace&quot;), TraceMapper.INSTANCE.fromDomain(trace));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

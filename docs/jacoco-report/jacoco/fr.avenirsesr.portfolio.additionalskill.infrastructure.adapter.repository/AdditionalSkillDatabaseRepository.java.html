@@ -18,26 +18,23 @@ public class AdditionalSkillDatabaseRepository
 
   public AdditionalSkillDatabaseRepository(AdditionalSkillJpaRepository jpaRepository) {
 <span class="fc" id="L20">    super(</span>
-        jpaRepository,
-        jpaRepository,
-        AdditionalSkillMapper::fromDomain,
-        AdditionalSkillMapper::toDomain);
-<span class="fc" id="L25">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L26">  }</span>
+        jpaRepository, jpaRepository, AdditionalSkillEntity.class, AdditionalSkillMapper.INSTANCE);
+<span class="fc" id="L22">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L23">  }</span>
 
   @Override
   public Optional&lt;AdditionalSkill&gt; findByExternalSkillId(UUID externalSkillId) {
-<span class="fc" id="L30">    return jpaRepository</span>
-<span class="fc" id="L31">        .findByExternalSkillId(externalSkillId)</span>
-<span class="fc" id="L32">        .map(AdditionalSkillMapper::toDomain);</span>
+<span class="fc" id="L27">    return jpaRepository</span>
+<span class="fc" id="L28">        .findByExternalSkillId(externalSkillId)</span>
+<span class="fc" id="L29">        .map(AdditionalSkillMapper.INSTANCE::toDomain);</span>
   }
 
   @Override
   public AdditionalSkill saveOrGet(AdditionalSkill additionalSkill) {
     try {
-<span class="fc" id="L38">      return save(additionalSkill);</span>
-<span class="nc" id="L39">    } catch (DataIntegrityViolationException e) {</span>
-<span class="nc" id="L40">      return findByExternalSkillId(additionalSkill.getExternalSkillId()).orElseThrow(() -&gt; e);</span>
+<span class="fc" id="L35">      return save(additionalSkill);</span>
+<span class="nc" id="L36">    } catch (DataIntegrityViolationException e) {</span>
+<span class="nc" id="L37">      return findByExternalSkillId(additionalSkill.getExternalSkillId()).orElseThrow(() -&gt; e);</span>
     }
   }
 }

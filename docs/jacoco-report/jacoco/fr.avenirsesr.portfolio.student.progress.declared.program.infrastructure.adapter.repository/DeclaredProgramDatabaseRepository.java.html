@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.model.DeclaredProgramEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -15,16 +16,14 @@ public class DeclaredProgramDatabaseRepository
     extends GenericUserJpaRepositoryAdapter&lt;DeclaredProgram, DeclaredProgramEntity&gt;
     implements DeclaredProgramRepository {
   public DeclaredProgramDatabaseRepository(DeclaredProgramJpaRepository jpaRepository) {
-<span class="fc" id="L18">    super(</span>
-        jpaRepository,
-        jpaRepository,
-        DeclaredProgramMapper::fromDomain,
-        DeclaredProgramMapper::toDomain);
-<span class="fc" id="L23">  }</span>
+<span class="fc" id="L19">    super(</span>
+        jpaRepository, jpaRepository, DeclaredProgramEntity.class, DeclaredProgramMapper.INSTANCE);
+<span class="fc" id="L21">  }</span>
 
   @Override
   public PagedResult&lt;DeclaredProgram&gt; findAllByStudent(Student student, PageCriteria pageCriteria) {
-<span class="fc" id="L27">    return findAll(hasStudent(student), pageCriteria);</span>
+<span class="fc" id="L25">    return findAll(</span>
+<span class="fc" id="L26">        hasStudent(student), PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

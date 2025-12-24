@@ -13,7 +13,7 @@ public class TeacherDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Te
   private final TeacherJpaRepository jpaRepository;
 
   public TeacherDatabaseRepository(TeacherJpaRepository repository) {
-<span class="fc" id="L16">    super(repository, repository, TeacherMapper::fromDomain, TeacherMapper::toDomain);</span>
+<span class="fc" id="L16">    super(repository, repository, TeacherEntity.class, TeacherMapper.INSTANCE);</span>
 <span class="fc" id="L17">    this.jpaRepository = repository;</span>
 <span class="fc" id="L18">  }</span>
 }

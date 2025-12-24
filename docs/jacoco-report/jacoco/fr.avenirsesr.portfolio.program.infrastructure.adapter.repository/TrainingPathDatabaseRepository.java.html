@@ -14,9 +14,8 @@ public class TrainingPathDatabaseRepository
   private final TrainingPathJpaRepository jpaRepository;
 
   public TrainingPathDatabaseRepository(TrainingPathJpaRepository jpaRepository) {
-<span class="fc" id="L17">    super(</span>
-        jpaRepository, jpaRepository, TrainingPathMapper::fromDomain, TrainingPathMapper::toDomain);
-<span class="fc" id="L19">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L20">  }</span>
+<span class="fc" id="L17">    super(jpaRepository, jpaRepository, TrainingPathEntity.class, TrainingPathMapper.INSTANCE);</span>
+<span class="fc" id="L18">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L19">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

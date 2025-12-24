@@ -20,7 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
   public static Specification&lt;StudentProgressEntity&gt; hasSkillLevelProgresses(
       List&lt;SkillLevelProgress&gt; skillLevelProgresses) {
 <span class="nc" id="L22">    List&lt;SkillLevelProgressEntity&gt; skillLevelProgressEntities =</span>
-<span class="nc" id="L23">        skillLevelProgresses.stream().map(SkillLevelProgressMapper::fromDomain).toList();</span>
+<span class="nc" id="L23">        skillLevelProgresses.stream().map(SkillLevelProgressMapper.INSTANCE::fromDomain).toList();</span>
 <span class="nc" id="L24">    return (root, query, criteriaBuilder) -&gt; {</span>
 <span class="nc" id="L25">      Join&lt;StudentProgressEntity, SkillLevelProgressEntity&gt; skillLevelProgressJoin =</span>
 <span class="nc" id="L26">          root.join(&quot;skillLevels&quot;);</span>

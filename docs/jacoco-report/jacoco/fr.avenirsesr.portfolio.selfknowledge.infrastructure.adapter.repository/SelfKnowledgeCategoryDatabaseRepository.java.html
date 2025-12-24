@@ -21,8 +21,8 @@ public class SelfKnowledgeCategoryDatabaseRepository
 <span class="fc" id="L21">    super(</span>
         jpaRepository,
         jpaRepository,
-        SelfKnowledgeCategoryMapper::fromDomain,
-        SelfKnowledgeCategoryMapper::toDomain);
+        SelfKnowledgeCategoryEntity.class,
+        SelfKnowledgeCategoryMapper.INSTANCE);
 <span class="fc" id="L26">    this.jpaRepository = jpaRepository;</span>
 <span class="fc" id="L27">  }</span>
 

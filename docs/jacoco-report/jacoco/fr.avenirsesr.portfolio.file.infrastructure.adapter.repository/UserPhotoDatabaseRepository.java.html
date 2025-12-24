@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
 public class UserPhotoDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;UserPhoto, UserPhotoEntity&gt; implements UserPhotoRepository {
   public UserPhotoDatabaseRepository(UserPhotoJpaRepository jpaRepository) {
-<span class="fc" id="L20">    super(jpaRepository, jpaRepository, UserPhotoMapper::fromDomain, UserPhotoMapper::toDomain);</span>
+<span class="fc" id="L20">    super(jpaRepository, jpaRepository, UserPhotoEntity.class, UserPhotoMapper.INSTANCE);</span>
 <span class="fc" id="L21">  }</span>
 
   @Override
@@ -33,7 +33,7 @@ public class UserPhotoDatabaseRepository
 <span class="fc" id="L33">            UserResourceSpecification.ofUser(user, userCategory, type)</span>
 <span class="fc" id="L34">                .and(UserResourceSpecification.onlyActiveVersion()))</span>
 <span class="fc" id="L35">        .stream()</span>
-<span class="fc" id="L36">        .map(UserPhotoMapper::toDomain)</span>
+<span class="fc" id="L36">        .map(UserPhotoMapper.INSTANCE::toDomain)</span>
 <span class="fc" id="L37">        .findAny();</span>
   }
 }

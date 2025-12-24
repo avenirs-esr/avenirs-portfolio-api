@@ -13,7 +13,7 @@ public class SkillDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Skil
   private final SkillJpaRepository jpaRepository;
 
   public SkillDatabaseRepository(SkillJpaRepository jpaRepository) {
-<span class="fc" id="L16">    super(jpaRepository, jpaRepository, SkillMapper::fromDomain, SkillMapper::toDomain);</span>
+<span class="fc" id="L16">    super(jpaRepository, jpaRepository, SkillEntity.class, SkillMapper.INSTANCE);</span>
 <span class="fc" id="L17">    this.jpaRepository = jpaRepository;</span>
 <span class="fc" id="L18">  }</span>
 }

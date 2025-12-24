@@ -14,26 +14,27 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="fc" id="L14">    return (root, query, criteriaBuilder) -&gt; {</span>
 <span class="pc bpc" id="L15" title="1 of 2 branches missed.">      assert query != null;</span>
 <span class="fc" id="L16">      query.distinct(true);</span>
-<span class="fc" id="L17">      return criteriaBuilder.equal(root.join(&quot;students&quot;), StudentMapper.fromDomain(student));</span>
+<span class="fc" id="L17">      return criteriaBuilder.equal(</span>
+<span class="fc" id="L18">          root.join(&quot;students&quot;), StudentMapper.INSTANCE.fromDomain(student));</span>
     };
   }
 
   public static Specification&lt;SelfKnowledgeCategoryEntity&gt; hasNotStudent(Student student) {
-<span class="fc" id="L22">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L23" title="1 of 2 branches missed.">      assert query != null;</span>
-<span class="fc" id="L24">      query.distinct(true);</span>
+<span class="fc" id="L23">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">      assert query != null;</span>
+<span class="fc" id="L25">      query.distinct(true);</span>
 
-<span class="fc" id="L26">      Subquery&lt;Long&gt; sub = query.subquery(Long.class);</span>
-<span class="fc" id="L27">      var subRoot = sub.from(SelfKnowledgeCategoryEntity.class);</span>
-<span class="fc" id="L28">      Join&lt;SelfKnowledgeCategoryEntity, StudentEntity&gt; subStudents = subRoot.join(&quot;students&quot;);</span>
+<span class="fc" id="L27">      Subquery&lt;Long&gt; sub = query.subquery(Long.class);</span>
+<span class="fc" id="L28">      var subRoot = sub.from(SelfKnowledgeCategoryEntity.class);</span>
+<span class="fc" id="L29">      Join&lt;SelfKnowledgeCategoryEntity, StudentEntity&gt; subStudents = subRoot.join(&quot;students&quot;);</span>
 
-<span class="fc" id="L30">      sub.select(criteriaBuilder.literal(1L))</span>
-<span class="fc" id="L31">          .where(</span>
-<span class="fc" id="L32">              criteriaBuilder.equal(subRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
-<span class="fc" id="L33">              criteriaBuilder.equal(</span>
-<span class="fc" id="L34">                  subStudents.get(&quot;id&quot;), StudentMapper.fromDomain(student).getId()));</span>
+<span class="fc" id="L31">      sub.select(criteriaBuilder.literal(1L))</span>
+<span class="fc" id="L32">          .where(</span>
+<span class="fc" id="L33">              criteriaBuilder.equal(subRoot.get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L34">              criteriaBuilder.equal(</span>
+<span class="fc" id="L35">                  subStudents.get(&quot;id&quot;), StudentMapper.INSTANCE.fromDomain(student).getId()));</span>
 
-<span class="fc" id="L36">      return criteriaBuilder.not(criteriaBuilder.exists(sub));</span>
+<span class="fc" id="L37">      return criteriaBuilder.not(criteriaBuilder.exists(sub));</span>
     };
   }
 }

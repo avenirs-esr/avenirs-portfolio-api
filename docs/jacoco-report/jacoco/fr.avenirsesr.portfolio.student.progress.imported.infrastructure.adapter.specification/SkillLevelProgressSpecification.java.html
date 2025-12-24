@@ -13,13 +13,13 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="nc" id="L13">public class SkillLevelProgressSpecification {</span>
   public static Specification&lt;SkillLevelProgressEntity&gt; linkedTo(AMS ams) {
 <span class="fc" id="L15">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L16">        criteriaBuilder.isMember(AMSMapper.fromDomain(ams), root.get(&quot;amses&quot;));</span>
+<span class="fc" id="L16">        criteriaBuilder.isMember(AMSMapper.INSTANCE.fromDomain(ams), root.get(&quot;amses&quot;));</span>
   }
 
   public static Specification&lt;SkillLevelProgressEntity&gt; with(Student student, UUID skillId) {
 <span class="fc" id="L20">    return (root, query, criteriaBuilder) -&gt; {</span>
 <span class="fc" id="L21">      var studentPredicate =</span>
-<span class="fc" id="L22">          criteriaBuilder.equal(root.get(&quot;student&quot;), StudentMapper.fromDomain(student));</span>
+<span class="fc" id="L22">          criteriaBuilder.equal(root.get(&quot;student&quot;), StudentMapper.INSTANCE.fromDomain(student));</span>
 <span class="fc" id="L23">      Join&lt;Object, Object&gt; skillEntity = root.join(&quot;skillLevel&quot;).join(&quot;skill&quot;);</span>
 <span class="fc" id="L24">      var skillPredicate = criteriaBuilder.equal(skillEntity.get(&quot;id&quot;), skillId);</span>
 

@@ -16,15 +16,12 @@ public class TraceAttachmentDatabaseRepository
     implements TraceAttachmentRepository {
   public TraceAttachmentDatabaseRepository(TraceAttachmentJpaRepository jpaRepository) {
 <span class="fc" id="L18">    super(</span>
-        jpaRepository,
-        jpaRepository,
-        TraceAttachmentMapper::fromDomain,
-        TraceAttachmentMapper::toDomain);
-<span class="fc" id="L23">  }</span>
+        jpaRepository, jpaRepository, TraceAttachmentEntity.class, TraceAttachmentMapper.INSTANCE);
+<span class="fc" id="L20">  }</span>
 
   @Override
   public List&lt;TraceAttachment&gt; findByTrace(Trace trace) {
-<span class="fc" id="L27">    return findAll(TraceAttachmentSpecification.ofTrace(trace));</span>
+<span class="fc" id="L24">    return findAll(TraceAttachmentSpecification.ofTrace(trace));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

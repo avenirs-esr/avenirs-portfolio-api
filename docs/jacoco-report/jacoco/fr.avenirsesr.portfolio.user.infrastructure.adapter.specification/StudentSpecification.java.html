@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 public final class StudentSpecification {
   public static &lt;T&gt; Specification&lt;T&gt; hasStudent(Student student) {
 <span class="fc" id="L11">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L12">        criteriaBuilder.equal(root.get(&quot;student&quot;), StudentMapper.fromDomain(student));</span>
+<span class="fc" id="L12">        criteriaBuilder.equal(root.get(&quot;student&quot;), StudentMapper.INSTANCE.fromDomain(student));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

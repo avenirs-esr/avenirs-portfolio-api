@@ -29,8 +29,8 @@ public class SkillLevelProgressDatabaseRepository
 <span class="fc" id="L29">    super(</span>
         jpaRepository,
         jpaRepository,
-        SkillLevelProgressMapper::fromDomain,
-        SkillLevelProgressMapper::toDomain);
+        SkillLevelProgressEntity.class,
+        SkillLevelProgressMapper.INSTANCE);
 <span class="fc" id="L34">    this.jpaRepository = jpaRepository;</span>
 <span class="fc" id="L35">  }</span>
 

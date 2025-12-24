@@ -12,18 +12,19 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="fc" id="L12">    return (root, query, criteriaBuilder) -&gt;</span>
 <span class="fc" id="L13">        criteriaBuilder.and(</span>
 <span class="fc" id="L14">            criteriaBuilder.equal(</span>
-<span class="fc" id="L15">                root.get(&quot;additionalSkill&quot;), AdditionalSkillMapper.fromDomain(additionalSkill)),</span>
-<span class="fc" id="L16">            criteriaBuilder.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId));</span>
+<span class="fc" id="L15">                root.get(&quot;additionalSkill&quot;),</span>
+<span class="fc" id="L16">                AdditionalSkillMapper.INSTANCE.fromDomain(additionalSkill)),</span>
+<span class="fc" id="L17">            criteriaBuilder.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId));</span>
   }
 
   public static Specification&lt;AdditionalSkillProgressEntity&gt; search(String keyword) {
-<span class="nc" id="L20">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L21" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="nc" id="L22">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L21">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L22" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L23">        return criteriaBuilder.conjunction();</span>
       }
-<span class="nc" id="L24">      return criteriaBuilder.like(</span>
-<span class="nc" id="L25">          criteriaBuilder.lower(root.get(&quot;additionalSkill&quot;).get(&quot;libelle&quot;)),</span>
-<span class="nc" id="L26">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
+<span class="nc" id="L25">      return criteriaBuilder.like(</span>
+<span class="nc" id="L26">          criteriaBuilder.lower(root.get(&quot;additionalSkill&quot;).get(&quot;libelle&quot;)),</span>
+<span class="nc" id="L27">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
     };
   }
 }

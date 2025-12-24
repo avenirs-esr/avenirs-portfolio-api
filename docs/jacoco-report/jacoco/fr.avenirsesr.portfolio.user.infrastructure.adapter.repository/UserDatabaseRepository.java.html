@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 public class UserDatabaseRepository extends GenericJpaRepositoryAdapter&lt;User, UserEntity&gt;
     implements UserRepository {
   public UserDatabaseRepository(UserJpaRepository jpaRepository) {
-<span class="fc" id="L14">    super(jpaRepository, jpaRepository, UserMapper::fromDomain, UserMapper::toDomain);</span>
+<span class="fc" id="L14">    super(jpaRepository, jpaRepository, UserEntity.class, UserMapper.INSTANCE);</span>
 <span class="fc" id="L15">  }</span>
 
   @Override
