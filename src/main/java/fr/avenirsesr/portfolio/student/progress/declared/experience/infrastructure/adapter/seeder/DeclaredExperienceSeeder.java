@@ -1,15 +1,14 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder.data.DeclaredExperienceCreationData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder.fake.FakeDeclaredExperience;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -24,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DeclaredExperienceSeeder {
   private static final String PATH_FILE = "seeder/declared-experience.json";
-  private final ObjectMapper objectMapper;
+  private final FileReader fileReader;
   private final DeclaredExperienceService declaredExperienceService;
 
   @Value("${seeder.source}")
@@ -36,7 +35,9 @@ public class DeclaredExperienceSeeder {
 
     List<DeclaredExperienceCreationData> creationData =
         switch (seederSource) {
-          case CSV -> readInstitutionCreationDataFromFile();
+          case CSV ->
+              fileReader.readJSON(
+                  PATH_FILE, new TypeReference<List<DeclaredExperienceCreationData>>() {});
           case FAKER ->
               IntStream.range(0, SeederConfig.NB_OF_DECLARED_EXPERIENCES)
                   .mapToObj(i -> savedStudents.get(new Random().nextInt(savedStudents.size())))
@@ -75,16 +76,5 @@ public class DeclaredExperienceSeeder {
                 data.externalLink(),
                 data.startDate(),
                 data.endDate()));
-  }
-
-  private List<DeclaredExperienceCreationData> readInstitutionCreationDataFromFile() {
-    try (InputStream is = getClass().getClassLoader().getResourceAsStream(PATH_FILE)) {
-      if (is == null) {
-        throw new IllegalStateException("File not found: " + PATH_FILE);
-      }
-      return objectMapper.readValue(is, new TypeReference<>() {});
-    } catch (Exception e) {
-      throw new RuntimeException("Error while reading %s".formatted(PATH_FILE), e);
-    }
   }
 }

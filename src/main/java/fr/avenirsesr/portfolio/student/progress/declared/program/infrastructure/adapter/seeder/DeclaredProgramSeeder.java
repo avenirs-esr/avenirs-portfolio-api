@@ -1,15 +1,14 @@
 package fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.input.DeclaredProgramService;
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.data.DeclaredProgramCreationData;
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.fake.FakeDeclaredProgram;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
-import java.io.InputStream;
 import java.util.*;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class DeclaredProgramSeeder {
-
   private static final String PATH_FILE = "seeder/declared-programs.json";
-
-  private final ObjectMapper objectMapper;
+  private final FileReader fileReader;
   private final DeclaredProgramService declaredProgramService;
 
   @Value("${seeder.source}")
@@ -39,7 +36,9 @@ public class DeclaredProgramSeeder {
 
     List<DeclaredProgramCreationData> creationDataList =
         switch (seederSource) {
-          case CSV -> readDeclaredProgramCreationDataFromFile();
+          case CSV ->
+              fileReader.readJSON(
+                  PATH_FILE, new TypeReference<List<DeclaredProgramCreationData>>() {});
           case FAKER ->
               IntStream.range(0, SeederConfig.NB_OF_DECLARED_PROGRAMS)
                   .mapToObj(i -> savedStudents.get(new Random().nextInt(savedStudents.size())))
@@ -78,16 +77,5 @@ public class DeclaredProgramSeeder {
 
     log.info("✔ {} declared programs created", creationDataList.size());
     return creationDataList;
-  }
-
-  private List<DeclaredProgramCreationData> readDeclaredProgramCreationDataFromFile() {
-    try (InputStream is = getClass().getClassLoader().getResourceAsStream(PATH_FILE)) {
-      if (is == null) {
-        throw new IllegalStateException("File not found: " + PATH_FILE);
-      }
-      return objectMapper.readValue(is, new TypeReference<>() {});
-    } catch (Exception e) {
-      throw new RuntimeException("Error while reading " + PATH_FILE, e);
-    }
   }
 }
