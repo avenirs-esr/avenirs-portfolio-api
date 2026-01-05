@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditio
 import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
+import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillSyncService;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
@@ -13,7 +14,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -189,7 +189,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   @Override
   public AdditionalSkillProgress createAdditionalSkillProgress(
       UUID externalSkillId,
-      EExternalSkillType type,
+      EAdditionalSkillType type,
       EAdditionalSkillLevel level,
       String description) {
 <span class="fc" id="L195">    Student student = loggedInUserService.getLoggedInStudent();</span>
