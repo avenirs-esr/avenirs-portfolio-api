@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdditionalSkillController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.additionalskill.application.adapter.controller</a> &gt; <span class="el_source">AdditionalSkillController.java</span></div><h1>AdditionalSkillController.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.additionalskill.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillDTO;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillType;
 import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +38,7 @@ public class AdditionalSkillController {
 <span class="nc" id="L38">                            externalSkill.id(),</span>
 <span class="nc" id="L39">                            externalSkill.title(),</span>
 <span class="nc" id="L40">                            externalSkill.pathSegments(),</span>
-<span class="nc" id="L41">                            EAdditionalSkillType.valueOf(externalSkill.type().name())))</span>
+<span class="nc" id="L41">                            EExternalSkillType.valueOf(externalSkill.type().name())))</span>
 <span class="fc" id="L42">                .toList(),</span>
 <span class="fc" id="L43">            result.page()));</span>
   }
