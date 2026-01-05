@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.imported.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.additionalskill.application.adapter.dto.AdditionalSkillCategoryDTO;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillCategoryType;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillCategoryType;
 import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto.AdditionalSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto.AdditionalSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.AdditionalSkillProgressDetails;
@@ -29,7 +29,7 @@ public interface AdditionalSkillProgressMapper {
                 externalCat ->
                     new AdditionalSkillCategoryDTO(
                         externalCat.libelle(),
-                        EAdditionalSkillCategoryType.valueOf(externalCat.type().name())))
+                        EExternalSkillCategoryType.valueOf(externalCat.type().name())))
             .toList();
 
     return new AdditionalSkillProgressDetailsDTO(

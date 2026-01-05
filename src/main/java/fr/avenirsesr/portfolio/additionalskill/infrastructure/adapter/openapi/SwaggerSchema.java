@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.openapi;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillCategoryType;
 import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillCategoryType;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -14,15 +14,15 @@ public interface SwaggerSchema {
           ._enum(Arrays.stream(EAdditionalSkillLevel.values()).map(Enum::name).toList())
           .description("Enum for additional skill level");
 
-  Schema<String> additionalSkillTypeSchema =
+  Schema<String> externalSkillTypeSchema =
       new StringSchema()
           .name("EExternalSkillType")
           ._enum(Arrays.stream(EExternalSkillType.values()).map(Enum::name).toList())
-          .description("Enum for additional skill type");
+          .description("Enum for external skill type");
 
-  Schema<String> additionalSkillCategoryTypeSchema =
+  Schema<String> externalSkillCategoryTypeSchema =
       new StringSchema()
-          .name("EAdditionalSkillCategoryType")
-          ._enum(Arrays.stream(EAdditionalSkillCategoryType.values()).map(Enum::name).toList())
-          .description("Enum for additional skill category type");
+          .name("EExternalSkillCategoryType")
+          ._enum(Arrays.stream(EExternalSkillCategoryType.values()).map(Enum::name).toList())
+          .description("Enum for external skill category type");
 }
