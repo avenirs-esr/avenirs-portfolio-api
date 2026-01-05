@@ -5,9 +5,9 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.AddDeclaredProgramDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.DeclaredProgramDetailedDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.DeclaredProgramDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.DeclaredProgramViewDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.mapper.DeclaredProgramDetailedMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.mapper.DeclaredProgramMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.mapper.DeclaredProgramViewMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.input.DeclaredProgramService;
@@ -27,7 +27,7 @@ public class DeclaredProgramController {
   private final DeclaredProgramService declaredProgramService;
 
   @GetMapping
-  public ResponseEntity&lt;PagedResponse&lt;DeclaredProgramViewDTO&gt;&gt; getDeclaredPrograms(
+  public ResponseEntity&lt;PagedResponse&lt;DeclaredProgramDTO&gt;&gt; getDeclaredPrograms(
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
 <span class="fc" id="L33">    var pageCriteria = new PageCriteria(page, pageSize);</span>
@@ -41,7 +41,7 @@ public class DeclaredProgramController {
 <span class="fc" id="L41">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
 <span class="fc" id="L43">            declaredProgramPagedResult.content().stream()</span>
-<span class="fc" id="L44">                .map(DeclaredProgramViewMapper::toDTO)</span>
+<span class="fc" id="L44">                .map(DeclaredProgramMapper::toDTO)</span>
 <span class="fc" id="L45">                .toList(),</span>
 <span class="fc" id="L46">            PageInfoDTO.fromDomain(declaredProgramPagedResult.pageInfo())));</span>
   }
@@ -64,10 +64,10 @@ public class DeclaredProgramController {
   }
 
   @GetMapping(&quot;/{declaredProgramId}&quot;)
-  public ResponseEntity&lt;DeclaredProgramDetailedDTO&gt; getDeclaredProgram(
+  public ResponseEntity&lt;DeclaredProgramViewDTO&gt; getDeclaredProgram(
       @PathVariable(&quot;declaredProgramId&quot;) UUID declaredProgramId) {
 <span class="fc" id="L69">    DeclaredProgram declaredProgram = declaredProgramService.getById(declaredProgramId);</span>
-<span class="fc" id="L70">    return ResponseEntity.ok(DeclaredProgramDetailedMapper.toDTO(declaredProgram));</span>
+<span class="fc" id="L70">    return ResponseEntity.ok(DeclaredProgramViewMapper.toDTO(declaredProgram));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
