@@ -65,7 +65,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.specification,AdditionalSkillProgressSpecification,28,23,4,0,7,6,5,2,3,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.specification,StudentProgressSpecification,24,16,0,0,7,3,3,2,3,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.specification,SkillLevelProgressSpecification,69,43,4,0,18,8,5,4,3,4
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.domain.service,StudentProgressServiceImpl,56,453,2,14,14,120,5,31,4,24
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.domain.service,StudentProgressServiceImpl,56,462,2,14,14,123,5,31,4,24
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.web.infrastructure.context,RequestContext,3,16,0,0,1,6,1,4,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.web.infrastructure.context,RequestContextFilter,8,67,0,2,3,20,0,5,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.web.infrastructure.context,RequestData,0,9,0,0,0,1,0,1,0,1
@@ -73,7 +73,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.data,UserPhotoData,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.domain.data,SelfKnowledgeElementDetails,0,6,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.language.infrastructure.adapter.filter,LanguageFilterSupplier,11,3,2,0,4,1,2,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.common.language.infrastructure.adapter.filter,LanguageFilterAspect,10,0,0,0,3,0,1,0,1,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,257,807,21,17,59,209,19,47,6,41
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,257,835,21,17,59,218,19,47,6,41
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.openapi,OpenApiSharedEnumConfiguration,10,6,0,0,3,2,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.adapter.openapi,SwaggerSchema,15,0,0,0,4,0,1,0,1,0
 avenirs-portfolio-api,fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.openapi,SwaggerSchema,43,0,0,0,12,0,1,0,1,0
