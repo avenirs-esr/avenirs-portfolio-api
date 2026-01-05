@@ -291,9 +291,20 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.status").value(EProgramStatus.IN_PROGRESS.name()))
             .andExpect(jsonPath("$.title").value("Stage d'observation"))
+            .andExpect(
+                jsonPath("$.description")
+                    .value("Participation aux activités d'une équipe technique"))
             .andExpect(jsonPath("$.organization").value("Tech4Future"))
-            .andExpect(jsonPath("$.startDate").isNotEmpty());
+            .andExpect(
+                jsonPath("$.result").value("Acquisition de premières compétences techniques"))
+            .andExpect(jsonPath("$.sourceOfInformation").value("Conseiller d'orientation"))
+            .andExpect(jsonPath("$.link").value("https://tech4future.example.com"))
+            .andExpect(jsonPath("$.startDate").isNotEmpty())
+            .andExpect(jsonPath("$.endDate").isNotEmpty())
+            .andExpect(jsonPath("$.createdAt").isNotEmpty())
+            .andExpect(jsonPath("$.updatedAt").isNotEmpty());
       }
 
       @Test
@@ -413,13 +424,15 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.data.length()").value(2))
             .andExpect(jsonPath("$.data[0].id").value(declaredProgramId1))
+            .andExpect(jsonPath("$.data[0].status").value(EProgramStatus.IN_PROGRESS.name()))
             .andExpect(jsonPath("$.data[0].title").value("1-Title"))
             .andExpect(jsonPath("$.data[0].organization").value("1-Organization"))
-            .andExpect(jsonPath("$.data[0].status").value(EProgramStatus.IN_PROGRESS.name()))
+            .andExpect(jsonPath("$.data[0].result").value("1-Result"))
             .andExpect(jsonPath("$.data[1].id").value(declaredProgramId2))
+            .andExpect(jsonPath("$.data[1].status").value(EProgramStatus.IN_PROGRESS.name()))
             .andExpect(jsonPath("$.data[1].title").value("2-Title"))
             .andExpect(jsonPath("$.data[1].organization").value("2-Organization"))
-            .andExpect(jsonPath("$.data[1].status").value(EProgramStatus.IN_PROGRESS.name()))
+            .andExpect(jsonPath("$.data[1].result").value("2-Result"))
             .andExpect(jsonPath("$.page.page").value(0))
             .andExpect(jsonPath("$.page.pageSize").value(8))
             .andExpect(jsonPath("$.page.totalElements").value(2))

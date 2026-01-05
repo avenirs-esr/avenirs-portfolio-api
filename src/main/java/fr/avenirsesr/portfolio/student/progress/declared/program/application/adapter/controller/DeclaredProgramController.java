@@ -5,9 +5,9 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.AddDeclaredProgramDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.DeclaredProgramDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.DeclaredProgramDetailedDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.DeclaredProgramViewDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.mapper.DeclaredProgramMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.mapper.DeclaredProgramDetailedMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.mapper.DeclaredProgramViewMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.input.DeclaredProgramService;
@@ -27,7 +27,7 @@ public class DeclaredProgramController {
   private final DeclaredProgramService declaredProgramService;
 
   @GetMapping
-  public ResponseEntity<PagedResponse<DeclaredProgramDTO>> getDeclaredPrograms(
+  public ResponseEntity<PagedResponse<DeclaredProgramViewDTO>> getDeclaredPrograms(
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
@@ -41,7 +41,7 @@ public class DeclaredProgramController {
     return ResponseEntity.ok(
         new PagedResponse<>(
             declaredProgramPagedResult.content().stream()
-                .map(DeclaredProgramMapper::toDTO)
+                .map(DeclaredProgramViewMapper::toDTO)
                 .toList(),
             PageInfoDTO.fromDomain(declaredProgramPagedResult.pageInfo())));
   }
@@ -64,9 +64,9 @@ public class DeclaredProgramController {
   }
 
   @GetMapping("/{declaredProgramId}")
-  public ResponseEntity<DeclaredProgramViewDTO> getDeclaredProgram(
+  public ResponseEntity<DeclaredProgramDetailedDTO> getDeclaredProgram(
       @PathVariable("declaredProgramId") UUID declaredProgramId) {
     DeclaredProgram declaredProgram = declaredProgramService.getById(declaredProgramId);
-    return ResponseEntity.ok(DeclaredProgramViewMapper.toDTO(declaredProgram));
+    return ResponseEntity.ok(DeclaredProgramDetailedMapper.toDTO(declaredProgram));
   }
 }
