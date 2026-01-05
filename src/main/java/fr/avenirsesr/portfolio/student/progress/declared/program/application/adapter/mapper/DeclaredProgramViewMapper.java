@@ -10,14 +10,7 @@ public interface DeclaredProgramViewMapper {
         declaredProgram.getId(),
         declaredProgram.getStatus(),
         declaredProgram.getTitle(),
-        declaredProgram.getDescription(),
         declaredProgram.getOrganization(),
-        declaredProgram.getResult(),
-        declaredProgram.getSourceOfInformation(),
-        declaredProgram.getLink(),
-        declaredProgram.getStartDate(),
-        declaredProgram.getEndDate(),
-        declaredProgram.getCreatedAt(),
-        declaredProgram.getUpdatedAt());
+        declaredProgram.getResult());
   }
 }

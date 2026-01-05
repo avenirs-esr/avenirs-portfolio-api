@@ -2,12 +2,21 @@ package fr.avenirsesr.portfolio.student.progress.declared.program.application.ad
 
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"id", "status", "title", "organization"})
-public record DeclaredProgramViewDTO(
+@Schema(requiredProperties = {"id", "title", "organization", "startDate", "createdAt", "updatedAt"})
+public record DeclaredProgramDetailedDTO(
     UUID id,
     @Schema(ref = "#/components/schemas/EProgramStatus") EProgramStatus status,
     String title,
+    String description,
     String organization,
-    String result) {}
+    String result,
+    String sourceOfInformation,
+    String link,
+    LocalDate startDate,
+    LocalDate endDate,
+    Instant createdAt,
+    Instant updatedAt) {}
