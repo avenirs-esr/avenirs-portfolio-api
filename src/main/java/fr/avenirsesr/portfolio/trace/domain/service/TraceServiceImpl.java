@@ -23,10 +23,10 @@ import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.data.*;
@@ -53,7 +53,7 @@ public class TraceServiceImpl implements TraceService {
   private static final int MAX_TRACES_OVERVIEW = 3;
   private final TraceRepository traceRepository;
   private final StudentProgressRepository studentProgressRepository;
-  private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
+  private final DeclaredSkillProgressRepository declaredSkillProgressRepository;
   private final AMSRepository amsRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceAttachmentRepository traceAttachmentRepository;
@@ -80,9 +80,9 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public List<Trace> getTracesLinkedWithAdditionalSkillProgress(
-      User user, AdditionalSkillProgress additionalSkillProgress) {
-    List<Trace> traces = traceRepository.linkedWith(additionalSkillProgress);
+  public List<Trace> getTracesLinkedWithDeclaredSkillProgress(
+      User user, DeclaredSkillProgress declaredSkillProgress) {
+    List<Trace> traces = traceRepository.linkedWith(declaredSkillProgress);
     traces.forEach(trace -> checkIfUserIsAuthorizedOnTrace(user, trace));
     return traces;
   }
@@ -104,7 +104,7 @@ public class TraceServiceImpl implements TraceService {
 
     trace.setAmses(new ArrayList<>());
     trace.setSkillLevels(new ArrayList<>());
-    trace.setAdditionalSkillProgresses(new ArrayList<>());
+    trace.setDeclaredSkillProgresses(new ArrayList<>());
     trace.setDeletedAt(Instant.now());
 
     traceRepository.save(trace);
@@ -169,7 +169,7 @@ public class TraceServiceImpl implements TraceService {
 
   private TraceAssociationsData getTraceAssociations(Trace trace) {
     List<SkillLevelAssociationData> skillLevelAssociations = new ArrayList<>();
-    List<AdditionalSkillAssociationData> additionalSkillAssociations = new ArrayList<>();
+    List<DeclaredSkillAssociationData> declaredSkillAssociations = new ArrayList<>();
 
     for (SkillLevelProgress skillLevelProgress : trace.getSkillLevels()) {
       var skillLevel = skillLevelProgress.getSkillLevel();
@@ -186,11 +186,11 @@ public class TraceServiceImpl implements TraceService {
       }
     }
 
-    for (AdditionalSkillProgress additionalSkillProgress : trace.getAdditionalSkillProgresses()) {
-      additionalSkillAssociations.add(toAdditionalSkillAssociation(additionalSkillProgress));
+    for (DeclaredSkillProgress declaredSkillProgress : trace.getDeclaredSkillProgresses()) {
+      declaredSkillAssociations.add(toDeclaredSkillAssociation(declaredSkillProgress));
     }
 
-    return new TraceAssociationsData(skillLevelAssociations, additionalSkillAssociations);
+    return new TraceAssociationsData(skillLevelAssociations, declaredSkillAssociations);
   }
 
   @Override
@@ -279,28 +279,28 @@ public class TraceServiceImpl implements TraceService {
       UUID traceId,
       List<UUID> amsIds,
       List<UUID> skillLevelIds,
-      List<UUID> additionalSkillProgressIds) {
+      List<UUID> declaredSkillProgressIds) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
     requireNotNull("traceId", traceId);
     requireNotNull("amsIds", amsIds);
     requireNotNull("skillLevelIds", skillLevelIds);
-    requireNotNull("additionalSkillProgressIds", additionalSkillProgressIds);
+    requireNotNull("declaredSkillProgressIds", declaredSkillProgressIds);
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
     var student = studentService.getStudentById(loggedInUser.getId());
     associateAMS(student, trace, amsIds);
     associateSkillLevels(student, trace, skillLevelIds);
-    associateAdditionalSkillProgress(student, trace, additionalSkillProgressIds);
+    associateDeclaredSkillProgress(student, trace, declaredSkillProgressIds);
 
     traceRepository.save(trace);
     log.info(
-        "Trace {} successfully associated with amses : {} - skill level progress {} - additional"
+        "Trace {} successfully associated with amses : {} - skill level progress {} - declared"
             + " skill progress {}",
         trace,
         amsIds,
         skillLevelIds,
-        additionalSkillProgressIds);
+        declaredSkillProgressIds);
   }
 
   private void associateAMS(Student student, Trace trace, List<UUID> amsIds) {
@@ -353,33 +353,32 @@ public class TraceServiceImpl implements TraceService {
         });
   }
 
-  private void associateAdditionalSkillProgress(
-      Student student, Trace trace, List<UUID> additionalSkillProgressIds) {
-    if (additionalSkillProgressIds.stream()
+  private void associateDeclaredSkillProgress(
+      Student student, Trace trace, List<UUID> declaredSkillProgressIds) {
+    if (declaredSkillProgressIds.stream()
         .anyMatch(
             id ->
-                trace.getAdditionalSkillProgresses().stream()
-                    .map(AdditionalSkillProgress::getId)
+                trace.getDeclaredSkillProgresses().stream()
+                    .map(DeclaredSkillProgress::getId)
                     .toList()
                     .contains(id))) {
       log.error(
-          "{} tried to associate trace with an additional skill that is already associated. IDS :"
+          "{} tried to associate trace with an declared skill that is already associated. IDS :"
               + " {}",
           student,
-          additionalSkillProgressIds);
+          declaredSkillProgressIds);
       throw new UserNotAuthorizedException();
     }
 
-    var studentAdditionalSkillProgress =
-        additionalSkillProgressRepository.findAllByStudent(student);
-    additionalSkillProgressIds.forEach(
-        additionalSkillProgressId -> {
-          var additionalSkillProgress =
-              studentAdditionalSkillProgress.stream()
-                  .filter(s -> additionalSkillProgressId.equals(s.getId()))
+    var studentDeclaredSkillProgress = declaredSkillProgressRepository.findAllByStudent(student);
+    declaredSkillProgressIds.forEach(
+        declaredSkillProgressId -> {
+          var declaredSkillProgress =
+              studentDeclaredSkillProgress.stream()
+                  .filter(s -> declaredSkillProgressId.equals(s.getId()))
                   .findAny()
                   .orElseThrow(UserNotAuthorizedException::new);
-          trace.add(additionalSkillProgress);
+          trace.add(declaredSkillProgress);
         });
   }
 
@@ -388,33 +387,32 @@ public class TraceServiceImpl implements TraceService {
       UUID traceId,
       List<UUID> amsIds,
       List<UUID> skillLevelIds,
-      List<UUID> additionalSkillProgressIds) {
+      List<UUID> declaredSkillProgressIds) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
     requireNotNull("traceId", traceId);
     requireNotNull("amsIds", amsIds);
     requireNotNull("skillLevelIds", skillLevelIds);
-    requireNotNull("additionalSkillProgressIds", additionalSkillProgressIds);
+    requireNotNull("declaredSkillProgressIds", declaredSkillProgressIds);
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
     var student = studentService.getStudentById(loggedInUser.getId());
-    unassociateAdditionalSkillProgress(student, trace, additionalSkillProgressIds);
+    unassociateDeclaredSkillProgress(student, trace, declaredSkillProgressIds);
     unassociateAms(student, trace, amsIds);
     unassociateSkillLevel(student, trace, skillLevelIds);
 
     traceRepository.save(trace);
     log.info(
-        "Trace {} successfully unassociated with amses : {} - skill level progress {} - additional"
+        "Trace {} successfully unassociated with amses : {} - skill level progress {} - declared"
             + " skill progress {}",
         trace,
         amsIds,
         skillLevelIds,
-        additionalSkillProgressIds);
+        declaredSkillProgressIds);
   }
 
   @Override
-  public void unassociateTraces(
-      AdditionalSkillProgress additionalSkillProgress, List<UUID> traceIds) {
+  public void unassociateTraces(DeclaredSkillProgress declaredSkillProgress, List<UUID> traceIds) {
     User loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
 
     List<Trace> traces = traceRepository.findAllById(traceIds);
@@ -426,40 +424,37 @@ public class TraceServiceImpl implements TraceService {
     for (Trace trace : traces) {
       checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
-      trace.getAdditionalSkillProgresses().stream()
-          .filter(asp -> asp.equals(additionalSkillProgress))
+      trace.getDeclaredSkillProgresses().stream()
+          .filter(asp -> asp.equals(declaredSkillProgress))
           .findAny()
           .orElseThrow(
               () ->
                   new AssociationDoesNotExistException(
-                      trace + " is not associated with " + additionalSkillProgress));
+                      trace + " is not associated with " + declaredSkillProgress));
 
-      trace.remove(additionalSkillProgress);
+      trace.remove(declaredSkillProgress);
     }
 
     traceRepository.saveAll(traces);
   }
 
-  private void unassociateAdditionalSkillProgress(
-      Student student, Trace trace, List<UUID> additionalSkillProgressIds) {
+  private void unassociateDeclaredSkillProgress(
+      Student student, Trace trace, List<UUID> declaredSkillProgressIds) {
     if (!new HashSet<>(
-            trace.getAdditionalSkillProgresses().stream()
-                .map(AdditionalSkillProgress::getId)
-                .toList())
-        .containsAll(additionalSkillProgressIds)) {
+            trace.getDeclaredSkillProgresses().stream().map(DeclaredSkillProgress::getId).toList())
+        .containsAll(declaredSkillProgressIds)) {
       log.error(
-          "{} tried to unassociate trace with an additional skill that is not associated. ids : "
+          "{} tried to unassociate trace with an declared skill that is not associated. ids : "
               + " {}",
           student,
-          additionalSkillProgressIds);
+          declaredSkillProgressIds);
       throw new UserNotAuthorizedException();
     }
-    var studentAdditionalSkillProgress =
-        additionalSkillProgressRepository.findAllByStudent(student);
-    additionalSkillProgressIds.forEach(
+    var studentDeclaredSkillProgress = declaredSkillProgressRepository.findAllByStudent(student);
+    declaredSkillProgressIds.forEach(
         id -> {
           var progress =
-              studentAdditionalSkillProgress.stream()
+              studentDeclaredSkillProgress.stream()
                   .filter(s -> id.equals(s.getId()))
                   .findAny()
                   .orElseThrow(UserNotAuthorizedException::new);
@@ -527,14 +522,14 @@ public class TraceServiceImpl implements TraceService {
         amsAssociation);
   }
 
-  private AdditionalSkillAssociationData toAdditionalSkillAssociation(
-      AdditionalSkillProgress additionalSkillProgress) {
-    var skill = additionalSkillProgress.getSkill();
+  private DeclaredSkillAssociationData toDeclaredSkillAssociation(
+      DeclaredSkillProgress declaredSkillProgress) {
+    var skill = declaredSkillProgress.getSkill();
 
-    return new AdditionalSkillAssociationData(
-        additionalSkillProgress.getId(),
+    return new DeclaredSkillAssociationData(
+        declaredSkillProgress.getId(),
         skill.getLibelle(),
-        additionalSkillProgress.getLevel(),
+        declaredSkillProgress.getLevel(),
         skill.getPathSegments() != null ? skill.getPathSegments() : List.of(),
         skill.getType());
   }

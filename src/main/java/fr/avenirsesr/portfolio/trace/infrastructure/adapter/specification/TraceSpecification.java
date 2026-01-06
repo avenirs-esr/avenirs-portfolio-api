@@ -7,11 +7,11 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.mapper.DeclaredSkillProgressMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper.SkillLevelProgressMapper;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.AdditionalSkillProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import jakarta.persistence.criteria.*;
@@ -46,22 +46,22 @@ public class TraceSpecification {
           .select(amsJoin)
           .where(criteriaBuilder.equal(amsSubRoot.get("id"), root.get("id")));
 
-      Subquery<AdditionalSkillProgressEntity> addSkillSubquery =
-          query.subquery(AdditionalSkillProgressEntity.class);
+      Subquery<DeclaredSkillProgressEntity> addSkillSubquery =
+          query.subquery(DeclaredSkillProgressEntity.class);
       Root<TraceEntity> addSkillSubRoot = addSkillSubquery.from(TraceEntity.class);
-      Join<TraceEntity, AdditionalSkillProgressEntity> addSkillJoin =
-          addSkillSubRoot.join("additionalSkillsProgresses");
+      Join<TraceEntity, DeclaredSkillProgressEntity> addSkillJoin =
+          addSkillSubRoot.join("declaredSkillsProgresses");
       addSkillSubquery
           .select(addSkillJoin)
           .where(criteriaBuilder.equal(addSkillSubRoot.get("id"), root.get("id")));
 
       Predicate hasSkillLevels = criteriaBuilder.exists(skillLevelSubquery);
       Predicate hasAmses = criteriaBuilder.exists(amsSubquery);
-      Predicate noAdditionalSkills = criteriaBuilder.exists(addSkillSubquery);
+      Predicate noDeclaredSkills = criteriaBuilder.exists(addSkillSubquery);
 
       query.distinct(true);
 
-      return criteriaBuilder.or(hasSkillLevels, hasAmses, noAdditionalSkills);
+      return criteriaBuilder.or(hasSkillLevels, hasAmses, noDeclaredSkills);
     };
   }
 
@@ -82,12 +82,12 @@ public class TraceSpecification {
             root.get("skillLevels"));
   }
 
-  public static Specification<TraceEntity> ofAdditionalSkillProgress(
-      AdditionalSkillProgress additionalSkillProgress) {
+  public static Specification<TraceEntity> ofDeclaredSkillProgress(
+      DeclaredSkillProgress declaredSkillProgress) {
     return (root, query, criteriaBuilder) ->
         criteriaBuilder.isMember(
-            AdditionalSkillProgressMapper.INSTANCE.fromDomain(additionalSkillProgress),
-            root.get("additionalSkillsProgresses"));
+            DeclaredSkillProgressMapper.INSTANCE.fromDomain(declaredSkillProgress),
+            root.get("declaredSkillsProgresses"));
   }
 
   public static Specification<TraceEntity> search(String keyword, ELanguage language) {
@@ -118,13 +118,12 @@ public class TraceSpecification {
               criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get("name")), pattern));
       Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);
 
-      // Additional skills
-      var additionalSkillJoin =
-          root.join("additionalSkillsProgresses", JoinType.LEFT)
-              .join("additionalSkill", JoinType.LEFT);
+      // Declared skills
+      var declaredSkillJoin =
+          root.join("declaredSkillsProgresses", JoinType.LEFT).join("declaredSkill", JoinType.LEFT);
 
-      var additionalSkillPredicate =
-          criteriaBuilder.like(criteriaBuilder.lower(additionalSkillJoin.get("libelle")), pattern);
+      var declaredSkillPredicate =
+          criteriaBuilder.like(criteriaBuilder.lower(declaredSkillJoin.get("libelle")), pattern);
 
       // Skill level
       var slpJoin =
@@ -152,7 +151,7 @@ public class TraceSpecification {
           aiUsePredicate,
           personalNotePredicate,
           attachmentPredicate,
-          additionalSkillPredicate,
+          declaredSkillPredicate,
           skillLevelPredicate,
           amsPredicate);
     };

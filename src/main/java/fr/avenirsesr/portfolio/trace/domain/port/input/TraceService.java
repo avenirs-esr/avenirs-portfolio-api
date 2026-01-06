@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
@@ -20,8 +20,8 @@ public interface TraceService {
 
   List<Trace> lastTracesOf();
 
-  List<Trace> getTracesLinkedWithAdditionalSkillProgress(
-      User user, AdditionalSkillProgress additionalSkillProgress);
+  List<Trace> getTracesLinkedWithDeclaredSkillProgress(
+      User user, DeclaredSkillProgress declaredSkillProgress);
 
   PagedResult<Trace> getTracesView(
       String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria);
@@ -53,13 +53,13 @@ public interface TraceService {
       UUID traceId,
       List<UUID> amsIds,
       List<UUID> skillLevelIds,
-      List<UUID> additionalSkillProgressIds);
+      List<UUID> declaredSkillProgressIds);
 
   void unassociateTrace(
       UUID traceId,
       List<UUID> amsIds,
       List<UUID> skillLevelIds,
-      List<UUID> additionalSkillProgressIds);
+      List<UUID> declaredSkillProgressIds);
 
-  void unassociateTraces(AdditionalSkillProgress additionalSkillProgress, List<UUID> traceIds);
+  void unassociateTraces(DeclaredSkillProgress declaredSkillProgress, List<UUID> traceIds);
 }

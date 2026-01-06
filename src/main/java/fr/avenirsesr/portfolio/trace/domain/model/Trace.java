@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.DeletableAvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class Trace extends DeletableAvenirsBaseModel {
   private final User user;
   private String title;
   private List<SkillLevelProgress> skillLevels;
-  private List<AdditionalSkillProgress> additionalSkillProgresses;
+  private List<DeclaredSkillProgress> declaredSkillProgresses;
   private List<AMS> amses;
   private boolean isGroup;
   private ELanguage language;
@@ -42,7 +42,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       String aiUseJustification,
       String personalNote,
       List<SkillLevelProgress> skillLevels,
-      List<AdditionalSkillProgress> additionalSkillProgresses,
+      List<DeclaredSkillProgress> declaredSkillProgresses,
       List<AMS> amses,
       Instant createdAt,
       Instant updatedAt,
@@ -52,7 +52,7 @@ public class Trace extends DeletableAvenirsBaseModel {
     this.title = title;
     this.language = language;
     this.skillLevels = skillLevels;
-    this.additionalSkillProgresses = additionalSkillProgresses;
+    this.declaredSkillProgresses = declaredSkillProgresses;
     this.amses = amses;
     this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
@@ -89,7 +89,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       User user,
       String title,
       List<SkillLevelProgress> skillLevels,
-      List<AdditionalSkillProgress> additionalSkillProgresses,
+      List<DeclaredSkillProgress> declaredSkillProgresses,
       List<AMS> amses,
       boolean group,
       String aiUseJustification,
@@ -107,7 +107,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         aiUseJustification,
         personalNote,
         skillLevels,
-        additionalSkillProgresses,
+        declaredSkillProgresses,
         amses,
         createdAt,
         updatedAt,
@@ -123,7 +123,7 @@ public class Trace extends DeletableAvenirsBaseModel {
   }
 
   public boolean isUnassociated() {
-    return amses.isEmpty() && skillLevels.isEmpty() && additionalSkillProgresses.isEmpty();
+    return amses.isEmpty() && skillLevels.isEmpty() && declaredSkillProgresses.isEmpty();
   }
 
   public void add(AMS ams) {
@@ -134,16 +134,15 @@ public class Trace extends DeletableAvenirsBaseModel {
     setSkillLevels(Stream.concat(skillLevels.stream(), Stream.of(skillLevelProgress)).toList());
   }
 
-  public void add(AdditionalSkillProgress additionalSkillProgress) {
-    setAdditionalSkillProgresses(
-        Stream.concat(additionalSkillProgresses.stream(), Stream.of(additionalSkillProgress))
-            .toList());
+  public void add(DeclaredSkillProgress declaredSkillProgress) {
+    setDeclaredSkillProgresses(
+        Stream.concat(declaredSkillProgresses.stream(), Stream.of(declaredSkillProgress)).toList());
   }
 
-  public void remove(AdditionalSkillProgress additionalSkillProgress) {
-    var newAdditionalSkillProgresses = new ArrayList<>(additionalSkillProgresses);
-    newAdditionalSkillProgresses.remove(additionalSkillProgress);
-    setAdditionalSkillProgresses(newAdditionalSkillProgresses);
+  public void remove(DeclaredSkillProgress declaredSkillProgress) {
+    var newDeclaredSkillProgresses = new ArrayList<>(declaredSkillProgresses);
+    newDeclaredSkillProgresses.remove(declaredSkillProgress);
+    setDeclaredSkillProgresses(newDeclaredSkillProgresses);
   }
 
   public void remove(SkillLevelProgress skillLevelProgress) {

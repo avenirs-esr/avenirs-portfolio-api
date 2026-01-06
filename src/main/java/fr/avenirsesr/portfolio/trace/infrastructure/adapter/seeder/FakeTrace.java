@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.domain.port.output.seeder.TraceDataGenerator;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
@@ -49,9 +49,9 @@ public class FakeTrace {
     return this;
   }
 
-  public FakeTrace withAdditionalSkillsProgress(
-      List<AdditionalSkillProgressEntity> additionalSkillsProgress) {
-    trace.setAdditionalSkillsProgresses(additionalSkillsProgress);
+  public FakeTrace withDeclaredSkillsProgress(
+      List<DeclaredSkillProgressEntity> declaredSkillsProgress) {
+    trace.setDeclaredSkillsProgresses(declaredSkillsProgress);
     return this;
   }
 

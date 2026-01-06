@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenera
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -27,7 +27,7 @@ public class TraceSeeder {
 
   @Transactional
   public List<TraceEntity> seed(
-      List<UserEntity> users, List<AdditionalSkillProgressEntity> additionalSkillsProgresses) {
+      List<UserEntity> users, List<DeclaredSkillProgressEntity> declaredSkillsProgresses) {
     ValidationUtils.requireNonEmpty(users, "users cannot be empty");
 
     log.info("Seeding Traces...");
@@ -49,14 +49,14 @@ public class TraceSeeder {
         if (dataGenerator.with("isGroup").bool()) fakeTrace = fakeTrace.isGroup();
 
         fakeTrace =
-            fakeTrace.withAdditionalSkillsProgress(
-                additionalSkillsProgresses.subList(
+            fakeTrace.withDeclaredSkillsProgress(
+                declaredSkillsProgresses.subList(
                     0,
                     dataGenerator
-                        .with("nb-additional-skills")
+                        .with("nb-declared-skills")
                         .number(
-                            SeederConfig.MIN_TRACES_ADDITIONAL_SKILL_PROGRESS,
-                            SeederConfig.MAX_TRACES_ADDITIONAL_SKILL_PROGRESS)));
+                            SeederConfig.MIN_TRACES_DECLARED_SKILL_PROGRESS,
+                            SeederConfig.MAX_TRACES_DECLARED_SKILL_PROGRESS)));
 
         var trace = fakeTrace.toEntity();
         traceList.add(trace);

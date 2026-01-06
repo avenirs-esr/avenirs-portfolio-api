@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.mapper;
 
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.AdditionalSkillAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.AmsAssociationDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.DeclaredSkillAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.SkillLevelAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceAssociationsDTO;
-import fr.avenirsesr.portfolio.trace.domain.data.AdditionalSkillAssociationData;
 import fr.avenirsesr.portfolio.trace.domain.data.AmsAssociationData;
+import fr.avenirsesr.portfolio.trace.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.trace.domain.data.SkillLevelAssociationData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
 
@@ -15,7 +15,7 @@ public interface TraceAssociationsMapper {
         traceAssociations.skillLevelAssociations().stream()
             .map(TraceAssociationsMapper::toDTO)
             .toList(),
-        traceAssociations.additionalSkillAssociations().stream()
+        traceAssociations.declaredSkillAssociations().stream()
             .map(TraceAssociationsMapper::toDTO)
             .toList());
   }
@@ -31,15 +31,14 @@ public interface TraceAssociationsMapper {
         : null;
   }
 
-  static AdditionalSkillAssociationDTO toDTO(
-      AdditionalSkillAssociationData additionalSkillAssociation) {
-    return additionalSkillAssociation != null
-        ? new AdditionalSkillAssociationDTO(
-            additionalSkillAssociation.id(),
-            additionalSkillAssociation.title(),
-            additionalSkillAssociation.level(),
-            additionalSkillAssociation.pathSegments(),
-            additionalSkillAssociation.type())
+  static DeclaredSkillAssociationDTO toDTO(DeclaredSkillAssociationData declaredSkillAssociation) {
+    return declaredSkillAssociation != null
+        ? new DeclaredSkillAssociationDTO(
+            declaredSkillAssociation.id(),
+            declaredSkillAssociation.title(),
+            declaredSkillAssociation.level(),
+            declaredSkillAssociation.pathSegments(),
+            declaredSkillAssociation.type())
         : null;
   }
 

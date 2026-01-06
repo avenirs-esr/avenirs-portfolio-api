@@ -22,8 +22,8 @@ public class SeederConfig {
   public static final int TRACES_NB_MIN = 10;
   public static final int TRACES_NB_MAX = 20;
   public static final int MAX_ATTACHMENT_PER_TRACE = 3;
-  public static final int MIN_TRACES_ADDITIONAL_SKILL_PROGRESS = 0;
-  public static final int MAX_TRACES_ADDITIONAL_SKILL_PROGRESS = 2;
+  public static final int MIN_TRACES_DECLARED_SKILL_PROGRESS = 0;
+  public static final int MAX_TRACES_DECLARED_SKILL_PROGRESS = 2;
 
   // Skill
   public static final int SKILL_BY_PROGRAM = 6;
@@ -48,9 +48,9 @@ public class SeederConfig {
   public static final int NB_TRACES_MIN_PER_AMS = 0;
   public static final int NB_TRACES_MAX_PER_AMS = 3;
 
-  // Student Additional Skills
-  public static final int MIN_ADDITIONAL_SKILLS_PER_STUDENT = 1;
-  public static final int MAX_ADDITIONAL_SKILLS_PER_STUDENT = 4;
+  // Student Declared Skills
+  public static final int MIN_DECLARED_SKILLS_PER_STUDENT = 1;
+  public static final int MAX_DECLARED_SKILLS_PER_STUDENT = 4;
 
   // Student Self Knowledge Elements
   public static final int MIN_SELF_KNOWLEDGE_ELEMENT_RATING = 1;

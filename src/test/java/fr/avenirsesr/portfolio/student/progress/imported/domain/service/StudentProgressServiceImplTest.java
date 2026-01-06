@@ -1,65 +1,37 @@
 package fr.avenirsesr.portfolio.student.progress.imported.domain.service;
 
-import static fr.avenirsesr.portfolio.student.progress.imported.domain.service.StudentProgressServiceImpl.DESCRIPTION_LENGTH_MAX;
-import static java.util.UUID.randomUUID;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
-import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
-import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescriptionException;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.AdditionalSkill;
-import fr.avenirsesr.portfolio.additionalskill.domain.model.enums.EAdditionalSkillLevel;
-import fr.avenirsesr.portfolio.additionalskill.domain.port.input.AdditionalSkillSyncService;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.client.ExternalSkillClient;
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.AdditionalSkillProgressFixture;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
-import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
-import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillCategoryType;
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
-import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.data.AdditionalSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillProgressData;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.exception.AdditionalSkillProgressNotFoundException;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.*;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
-import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
-import java.util.random.RandomGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -69,16 +41,9 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class StudentProgressServiceImplTest {
   @Mock private StudentProgressRepository studentProgressRepository;
-  @Mock private TraceService traceService;
   @Mock private TraceRepository traceRepository;
-  @Mock private AdditionalSkillSyncService additionalSkillSyncService;
-  @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
-  @Mock private ExternalSkillClient externalSkillClient;
   @Mock private LoggedInUserService loggedInUserService;
   @InjectMocks private StudentProgressServiceImpl studentProgressService;
-  private static final String CHARSET =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  private static final RandomGenerator random = RandomGenerator.getDefault();
 
   private Student student;
 
@@ -874,296 +839,6 @@ public class StudentProgressServiceImplTest {
         BddLogger.then("it should return an empty list when no student progress is found");
         assertTrue(result.isEmpty(), "Result should be empty");
         verify(studentProgressRepository).findAllByStudent(eq(student));
-      }
-    }
-
-    @Nested
-    class WhenGettingAdditionalSkillsProgresses {
-
-      @Test
-      void getAdditionalSkillsProgresses_shouldDelegateToRepositoryAndReturnResult() {
-        BddLogger.given("the method getAdditionalSkillsProgresses");
-        PageCriteria criteria = new PageCriteria(1, 8);
-        PagedResult<AdditionalSkillProgress> expected = mock(PagedResult.class);
-
-        BddLogger.when("calling the method with a given student");
-        when(additionalSkillProgressRepository.findAllByStudent(student, criteria))
-            .thenReturn(expected);
-
-        PagedResult<AdditionalSkillProgress> result =
-            studentProgressService.getAdditionalSkillsProgresses(criteria);
-
-        BddLogger.then(
-            "it should return the expected paged additional skill progress and delegate to"
-                + " repository");
-        assertThat(result).isSameAs(expected);
-        verify(additionalSkillProgressRepository).findAllByStudent(student, criteria);
-      }
-
-      @Test
-      void getAdditionalSkillProgressDetails_shouldReturnAdditionalSkillsProgressDetails() {
-        BddLogger.given("the method getAdditionalSkillProgressDetails");
-        String programName = EPortfolioType.LIFE_PROJECT.name();
-        AdditionalSkillProgress additionalSkillProgress =
-            AdditionalSkillProgressFixture.create().withStudent(student).toModel();
-        Trace trace1 =
-            TraceFixture.create()
-                .withUser(student.getUser())
-                .withAdditionalSkillProgresses(List.of(additionalSkillProgress))
-                .toModel();
-        Trace trace2 =
-            TraceFixture.create()
-                .withUser(student.getUser())
-                .withAdditionalSkillProgresses(List.of(additionalSkillProgress))
-                .toModel();
-
-        BddLogger.when("calling the method with a given student and additionalSkillProgressId");
-        when(additionalSkillProgressRepository.findById(any(), any()))
-            .thenReturn(Optional.of(additionalSkillProgress));
-        when(traceService.getTracesLinkedWithAdditionalSkillProgress(
-                student.getUser(), additionalSkillProgress))
-            .thenReturn(List.of(trace1, trace2));
-        when(traceService.programNameOfTrace(trace1)).thenReturn(programName);
-        when(traceService.programNameOfTrace(trace2)).thenReturn(programName);
-
-        List<ExternalSkillCategoryDTO> categories =
-            List.of(
-                new ExternalSkillCategoryDTO("Domain", EExternalSkillCategoryType.DOMAIN),
-                new ExternalSkillCategoryDTO("Issue", EExternalSkillCategoryType.ISSUE));
-        ExternalSkillDetailsDTO externalSkillDetails =
-            new ExternalSkillDetailsDTO(
-                additionalSkillProgress.getSkill().getExternalSkillId(),
-                "Test Skill",
-                categories,
-                EExternalSkillType.ROME4);
-        when(externalSkillClient.getExternalSkillDetails(any(UUID.class)))
-            .thenReturn(Optional.of(externalSkillDetails));
-
-        AdditionalSkillProgressDetails additionalSkillProgressDetails =
-            studentProgressService.getAdditionalSkillProgressDetails(
-                additionalSkillProgress.getId());
-
-        BddLogger.then("it should return the expected additional skill progress details");
-        assertEquals(
-            additionalSkillProgressDetails.additionalSkillProgress(), additionalSkillProgress);
-        assertEquals(2, additionalSkillProgressDetails.tracesWithProjectName().size());
-        assertEquals(
-            trace1, additionalSkillProgressDetails.tracesWithProjectName().getFirst().trace());
-        assertEquals(
-            programName,
-            additionalSkillProgressDetails.tracesWithProjectName().getFirst().programName());
-        assertEquals(
-            trace2, additionalSkillProgressDetails.tracesWithProjectName().getLast().trace());
-        assertEquals(
-            programName,
-            additionalSkillProgressDetails.tracesWithProjectName().getLast().programName());
-      }
-
-      @Test
-      void getAdditionalSkillProgressDetails_shouldThrowAdditionalSkillProgressNotFoundException() {
-        BddLogger.given("the method getAdditionalSkillProgressDetails");
-        AdditionalSkillProgress additionalSkillProgress =
-            AdditionalSkillProgressFixture.create().withStudent(student).toModel();
-
-        BddLogger.when("calling the method with a given student and bad additionalSkillProgressId");
-        assertThrows(
-            AdditionalSkillProgressNotFoundException.class,
-            () ->
-                studentProgressService.getAdditionalSkillProgressDetails(
-                    additionalSkillProgress.getId()));
-      }
-
-      @Test
-      void getAdditionalSkillsProgressDetails_shouldThrowUserNotAuthorizedException() {
-        BddLogger.given("the method getAdditionalSkillProgressDetails");
-        Student anotherStudent = StudentFixture.create().toModel();
-        AdditionalSkillProgress additionalSkillProgress =
-            AdditionalSkillProgressFixture.create().withStudent(anotherStudent).toModel();
-
-        BddLogger.when(
-            "calling the method with another given student and additionalSkillProgressId");
-        when(additionalSkillProgressRepository.findById(any(), any()))
-            .thenReturn(Optional.of(additionalSkillProgress));
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () ->
-                studentProgressService.getAdditionalSkillProgressDetails(
-                    additionalSkillProgress.getId()));
-      }
-    }
-
-    @Nested
-    class WhenCreatingAdditionalSkillProgress {
-      @Test
-      void createAdditionalSkillProgress_shouldSaveWhenSkillIsAvailableAndNotDuplicate() {
-        BddLogger.given("the method createAdditionalSkillProgress");
-        UUID skillId = randomUUID();
-        EExternalSkillType type = EExternalSkillType.ROME4;
-        EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
-        String description = "Description for additional skill progress test";
-        AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
-
-        BddLogger.when("calling the method with an available and not duplicate skill");
-        when(additionalSkillSyncService.getOrCreateFromExternalSkill(skillId))
-            .thenReturn(Optional.of(additionalSkill));
-        when(additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(any()))
-            .thenReturn(false);
-
-        studentProgressService.createAdditionalSkillProgress(skillId, type, level, description);
-
-        BddLogger.then("it should save the additional skill progress");
-        verify(additionalSkillSyncService).getOrCreateFromExternalSkill(skillId);
-        verify(additionalSkillProgressRepository).additionalSkillProgressAlreadyExists(any());
-        verify(additionalSkillProgressRepository).save(any(AdditionalSkillProgress.class));
-      }
-
-      @Test
-      void createAdditionalSkillProgress_shouldThrowDuplicateWhenAlreadyExists() {
-        BddLogger.given("the method createAdditionalSkillProgress");
-        UUID skillId = randomUUID();
-        EExternalSkillType type = EExternalSkillType.ROME4;
-        EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
-        String description = "Description for additional skill progress test";
-        AdditionalSkill additionalSkill = mock(AdditionalSkill.class);
-
-        BddLogger.when("calling the method with a duplicate skill");
-        when(additionalSkillSyncService.getOrCreateFromExternalSkill(skillId))
-            .thenReturn(Optional.of(additionalSkill));
-        when(additionalSkillProgressRepository.additionalSkillProgressAlreadyExists(any()))
-            .thenReturn(true);
-
-        BddLogger.then(
-            "it should throw a DuplicateAdditionalSkillException and not save the progress");
-
-        assertThrows(
-            DuplicateAdditionalSkillException.class,
-            () ->
-                studentProgressService.createAdditionalSkillProgress(
-                    skillId, type, level, description));
-
-        verify(additionalSkillSyncService).getOrCreateFromExternalSkill(skillId);
-        verify(additionalSkillProgressRepository).additionalSkillProgressAlreadyExists(any());
-        verify(additionalSkillProgressRepository, never()).save(any());
-      }
-
-      @Test
-      void createAdditionalSkillProgress_shouldRethrowWhenSkillNotFound() {
-        BddLogger.given("the method createAdditionalSkillProgress");
-        UUID skillId = randomUUID();
-        EExternalSkillType type = EExternalSkillType.ROME4;
-        EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
-        String description = "Description for additional skill progress test";
-
-        BddLogger.when("calling the method with an unknown skill");
-        when(additionalSkillSyncService.getOrCreateFromExternalSkill(skillId))
-            .thenReturn(Optional.empty());
-
-        BddLogger.then("it should throw an AdditionalSkillNotFoundException");
-
-        assertThrows(
-            AdditionalSkillNotFoundException.class,
-            () ->
-                studentProgressService.createAdditionalSkillProgress(
-                    skillId, type, level, description));
-
-        verify(additionalSkillSyncService).getOrCreateFromExternalSkill(skillId);
-        verifyNoInteractions(additionalSkillProgressRepository);
-      }
-    }
-
-    @Nested
-    class WhenUpdatingAdditionalSkillProgress {
-      @Test
-      void updateAdditionalSkillProgress_shouldSaveLevelAndDescription() {
-        BddLogger.given("the method updateAdditionalSkillProgress");
-        EAdditionalSkillLevel level = EAdditionalSkillLevel.ADVANCED;
-        String description = "Description for additional skill progress test";
-        AdditionalSkillProgress additionalSkillProgress =
-            AdditionalSkillProgressFixture.create()
-                .withStudent(student)
-                .withLevel(EAdditionalSkillLevel.BEGINNER)
-                .withDescription(null)
-                .toModel();
-
-        BddLogger.when(
-            "calling the method with a given student, additionalSkillProgressId, level and"
-                + " description");
-        when(additionalSkillProgressRepository.findById(additionalSkillProgress.getId()))
-            .thenReturn(Optional.of(additionalSkillProgress));
-
-        studentProgressService.updateAdditionalSkillProgress(
-            additionalSkillProgress.getId(), level, description);
-
-        BddLogger.then("it should save level and description in additional skill progress");
-        ArgumentCaptor<AdditionalSkillProgress> captor =
-            ArgumentCaptor.forClass(AdditionalSkillProgress.class);
-        verify(additionalSkillProgressRepository).save(captor.capture());
-
-        AdditionalSkillProgress savedAdditionalSkillProgress = captor.getValue();
-        assertEquals(additionalSkillProgress.getId(), savedAdditionalSkillProgress.getId());
-        assertEquals(
-            additionalSkillProgress.getStudent(), savedAdditionalSkillProgress.getStudent());
-        assertEquals(additionalSkillProgress.getSkill(), savedAdditionalSkillProgress.getSkill());
-        assertEquals(level, savedAdditionalSkillProgress.getLevel());
-        assertEquals(description, savedAdditionalSkillProgress.getDescription());
-      }
-
-      @Test
-      void updateAdditionalSkillProgress_shouldThrowInvalidDescriptionException() {
-        BddLogger.given("the method getAdditionalSkillProgressDetails");
-        EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
-        String description =
-            random
-                .ints(DESCRIPTION_LENGTH_MAX + 1, 0, CHARSET.length())
-                .mapToObj(CHARSET::charAt)
-                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
-                .toString();
-        AdditionalSkillProgress additionalSkillProgress =
-            AdditionalSkillProgressFixture.create().withStudent(student).toModel();
-
-        BddLogger.when(
-            "calling the method with a given student, additionalSkillProgressId, level and too long"
-                + " description");
-        assertThrows(
-            InvalidDescriptionException.class,
-            () ->
-                studentProgressService.updateAdditionalSkillProgress(
-                    additionalSkillProgress.getId(), level, description));
-      }
-
-      @Test
-      void updateAdditionalSkillProgress_shouldThrowAdditionalSkillProgressNotFoundException() {
-        BddLogger.given("the method getAdditionalSkillProgressDetails");
-        EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
-        String description = "Description for additional skill progress test";
-        AdditionalSkillProgress additionalSkillProgress =
-            AdditionalSkillProgressFixture.create().withStudent(student).toModel();
-
-        BddLogger.when("calling the method with a given student and bad additionalSkillProgressId");
-        assertThrows(
-            AdditionalSkillProgressNotFoundException.class,
-            () ->
-                studentProgressService.updateAdditionalSkillProgress(
-                    additionalSkillProgress.getId(), level, description));
-      }
-
-      @Test
-      void updateAdditionalSkillProgress_shouldThrowUserNotAuthorizedException() {
-        BddLogger.given("the method getAdditionalSkillProgressDetails");
-        Student anotherStudent = StudentFixture.create().toModel();
-        EAdditionalSkillLevel level = EAdditionalSkillLevel.BEGINNER;
-        String description = "Description for additional skill progress test";
-        AdditionalSkillProgress additionalSkillProgress =
-            AdditionalSkillProgressFixture.create().withStudent(anotherStudent).toModel();
-
-        BddLogger.when("calling the method with another given student and level, description");
-        when(additionalSkillProgressRepository.findById(additionalSkillProgress.getId()))
-            .thenReturn(Optional.of(additionalSkillProgress));
-        assertThrows(
-            UserNotAuthorizedException.class,
-            () ->
-                studentProgressService.updateAdditionalSkillProgress(
-                    additionalSkillProgress.getId(), level, description));
       }
     }
   }

@@ -4,9 +4,9 @@ import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.mapper.DeclaredSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper.AdditionalSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.FakeTrace;
@@ -23,7 +23,7 @@ public class TraceFixture {
   private User user;
   private String title;
   private List<SkillLevelProgress> skillLevels;
-  private List<AdditionalSkillProgress> additionalSkillProgresses;
+  private List<DeclaredSkillProgress> declaredSkillProgresses;
   private List<AMS> amses;
   private Instant createdAt;
   private Instant updatedAt;
@@ -42,9 +42,9 @@ public class TraceFixture {
     this.skillLevels =
         base.getSkillLevels().stream().map(SkillLevelProgressMapper.INSTANCE::toDomain).toList();
     this.amses = base.getAmses().stream().map(AMSMapper.INSTANCE::toDomain).toList();
-    this.additionalSkillProgresses =
-        base.getAdditionalSkillsProgresses().stream()
-            .map(AdditionalSkillProgressMapper.INSTANCE::toDomain)
+    this.declaredSkillProgresses =
+        base.getDeclaredSkillsProgresses().stream()
+            .map(DeclaredSkillProgressMapper.INSTANCE::toDomain)
             .toList();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
@@ -76,9 +76,9 @@ public class TraceFixture {
     return this;
   }
 
-  public TraceFixture withAdditionalSkillProgresses(
-      List<AdditionalSkillProgress> additionalSkillProgresses) {
-    this.additionalSkillProgresses = additionalSkillProgresses;
+  public TraceFixture withDeclaredSkillProgresses(
+      List<DeclaredSkillProgress> declaredSkillProgresses) {
+    this.declaredSkillProgresses = declaredSkillProgresses;
     return this;
   }
 
@@ -136,7 +136,7 @@ public class TraceFixture {
         user,
         title,
         skillLevels,
-        additionalSkillProgresses,
+        declaredSkillProgresses,
         amses,
         isGroup,
         aiUseJustification,
