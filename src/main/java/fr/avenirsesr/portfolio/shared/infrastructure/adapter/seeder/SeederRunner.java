@@ -18,6 +18,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.ad
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.ExternalUserSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.TeacherSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
@@ -32,6 +33,7 @@ public class SeederRunner implements CommandLineRunner {
   private final DependencyChecker dependencyChecker;
   private final UserRepository userRepository;
   private final UserSeeder userSeeder;
+  private final ExternalUserSeeder externalUserSeeder;
   private final StudentSeeder studentSeeder;
   private final TeacherSeeder teacherSeeder;
   private final UserPhotoSeeder userPhotoSeeder;
@@ -63,6 +65,7 @@ public class SeederRunner implements CommandLineRunner {
       DependencyChecker dependencyChecker,
       UserRepository userRepository,
       UserSeeder userSeeder,
+      ExternalUserSeeder externalUserSeeder,
       StudentSeeder studentSeeder,
       TeacherSeeder teacherSeeder,
       UserPhotoSeeder userPhotoSeeder,
@@ -83,6 +86,7 @@ public class SeederRunner implements CommandLineRunner {
 
     this.dependencyChecker = dependencyChecker;
     this.userRepository = userRepository;
+    this.externalUserSeeder = externalUserSeeder;
     this.userPhotoSeeder = userPhotoSeeder;
     this.studentSeeder = studentSeeder;
     this.teacherSeeder = teacherSeeder;
@@ -115,6 +119,7 @@ public class SeederRunner implements CommandLineRunner {
 
       var savedSelfKnowledgeMandatoryCategories = selfKnowledgeCategorySeeder.seed();
       var savedUsers = userSeeder.seed();
+      externalUserSeeder.seed(savedUsers);
       var savedTeachers = teacherSeeder.seed(savedUsers);
       var savedStudents = studentSeeder.seed(savedUsers, savedSelfKnowledgeMandatoryCategories);
       declaredExperienceSeeder.seed(savedStudents);
