@@ -8,7 +8,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericDeletableJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.DateFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -112,8 +112,8 @@ public class TraceDatabaseRepository
   }
 
   @Override
-  public List&lt;Trace&gt; linkedWith(AdditionalSkillProgress additionalSkillProgress) {
-<span class="nc" id="L116">    return findAll(TraceSpecification.ofAdditionalSkillProgress(additionalSkillProgress));</span>
+  public List&lt;Trace&gt; linkedWith(DeclaredSkillProgress declaredSkillProgress) {
+<span class="nc" id="L116">    return findAll(TraceSpecification.ofDeclaredSkillProgress(declaredSkillProgress));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

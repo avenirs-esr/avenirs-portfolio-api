@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExternalSkillClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client</a> &gt; <span class="el_source">ExternalSkillClient.java</span></div><h1>ExternalSkillClient.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client;
+
+import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
+import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
+import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDTO;
+import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
+import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+
+<span class="fc" id="L20">@Slf4j</span>
+@Component
+public class ExternalSkillClient {
+
+  private final WebClient webClient;
+
+  @Value(&quot;${avenirs.interoperability.api-key}&quot;)
+  private String apiKey;
+
+  @Value(&quot;${avenirs.interoperability.external-skill.endpoint}&quot;)
+  private String externalSkillEndpoint;
+
+  @Value(&quot;${avenirs.interoperability.actuator.health}&quot;)
+  private String healthEndpoint;
+
+<span class="fc" id="L35">  public ExternalSkillClient(WebClient webClient) {</span>
+<span class="fc" id="L36">    this.webClient = webClient;</span>
+<span class="fc" id="L37">  }</span>
+
+  @Cacheable(value = &quot;externalSkillById&quot;, key = &quot;#externalSkillId&quot;)
+  public Optional&lt;ExternalSkillDTO&gt; getById(UUID externalSkillId) {
+    try {
+<span class="fc" id="L42">      log.debug(&quot;Fetching external skill from interoperability: {}&quot;, externalSkillId);</span>
+<span class="fc" id="L43">      ExternalSkillDetailsDTO details =</span>
+          webClient
+<span class="fc" id="L45">              .get()</span>
+<span class="fc" id="L46">              .uri(externalSkillEndpoint + &quot;/&quot; + externalSkillId)</span>
+<span class="fc" id="L47">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L48">              .retrieve()</span>
+<span class="fc" id="L49">              .bodyToMono(ExternalSkillDetailsDTO.class)</span>
+<span class="fc" id="L50">              .block();</span>
+
+<span class="fc bfc" id="L52" title="All 2 branches covered.">      if (details == null) {</span>
+<span class="fc" id="L53">        return Optional.empty();</span>
+      }
+
+<span class="fc" id="L56">      ExternalSkillDTO result =</span>
+          new ExternalSkillDTO(
+<span class="fc" id="L58">              details.id(),</span>
+<span class="fc" id="L59">              details.title(),</span>
+<span class="fc" id="L60">              details.categoryPath().stream().map(ExternalSkillCategoryDTO::libelle).toList(),</span>
+<span class="fc" id="L61">              details.type());</span>
+
+<span class="fc" id="L63">      return Optional.of(result);</span>
+<span class="fc" id="L64">    } catch (Exception e) {</span>
+<span class="fc" id="L65">      log.error(</span>
+          &quot;Failed to fetch external skill {} from interoperability at '{}'. Error: {}&quot;,
+          externalSkillId,
+          externalSkillEndpoint,
+<span class="fc" id="L69">          e.getMessage());</span>
+<span class="fc" id="L70">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L71">      return Optional.empty();</span>
+    }
+  }
+
+  @Cacheable(value = &quot;externalSkillDetails&quot;, key = &quot;#externalSkillId&quot;)
+  public Optional&lt;ExternalSkillDetailsDTO&gt; getExternalSkillDetails(UUID externalSkillId) {
+    try {
+<span class="fc" id="L78">      log.debug(&quot;Fetching external skill details from interoperability: {}&quot;, externalSkillId);</span>
+<span class="fc" id="L79">      ExternalSkillDetailsDTO result =</span>
+          webClient
+<span class="fc" id="L81">              .get()</span>
+<span class="fc" id="L82">              .uri(externalSkillEndpoint + &quot;/&quot; + externalSkillId)</span>
+<span class="fc" id="L83">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L84">              .retrieve()</span>
+<span class="fc" id="L85">              .bodyToMono(ExternalSkillDetailsDTO.class)</span>
+<span class="fc" id="L86">              .block();</span>
+<span class="fc" id="L87">      return Optional.ofNullable(result);</span>
+<span class="fc" id="L88">    } catch (Exception e) {</span>
+<span class="fc" id="L89">      log.error(</span>
+          &quot;Failed to fetch external skill details {} from interoperability at '{}'. Error: {}&quot;,
+          externalSkillId,
+          externalSkillEndpoint,
+<span class="fc" id="L93">          e.getMessage());</span>
+<span class="fc" id="L94">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L95">      return Optional.empty();</span>
+    }
+  }
+
+  public List&lt;ExternalSkillDTO&gt; getRandomSkills(int count) {
+    try {
+<span class="nc" id="L101">      log.debug(&quot;Fetching {} random external skills from interoperability&quot;, count);</span>
+<span class="nc" id="L102">      List&lt;ExternalSkillDTO&gt; result =</span>
+          webClient
+<span class="nc" id="L104">              .get()</span>
+<span class="nc" id="L105">              .uri(externalSkillEndpoint + &quot;/random?count=&quot; + count)</span>
+<span class="nc" id="L106">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="nc" id="L107">              .retrieve()</span>
+<span class="nc" id="L108">              .bodyToMono(new ParameterizedTypeReference&lt;List&lt;ExternalSkillDTO&gt;&gt;() {})</span>
+<span class="nc" id="L109">              .block();</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">      return result != null ? result : List.of();</span>
+<span class="nc" id="L111">    } catch (Exception e) {</span>
+<span class="nc" id="L112">      log.error(</span>
+          &quot;Failed to fetch random external skills from interoperability at '{}'. Error: {}&quot;,
+          externalSkillEndpoint,
+<span class="nc" id="L115">          e.getMessage());</span>
+<span class="nc" id="L116">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="nc" id="L117">      return List.of();</span>
+    }
+  }
+
+  @Cacheable(
+      value = &quot;external-skill-search&quot;,
+      key = &quot;#keyword + '-' + #pageCriteria.page() + '-' + #pageCriteria.pageSize()&quot;)
+  public PagedResponse&lt;ExternalSkillDTO&gt; search(String keyword, PageCriteria pageCriteria) {
+    try {
+<span class="fc" id="L126">      log.debug(&quot;Searching external skills from interoperability: {}&quot;, keyword);</span>
+
+<span class="fc" id="L128">      String uri =</span>
+<span class="fc" id="L129">          String.format(</span>
+              &quot;%s/search?keyword=%s&amp;page=%d&amp;pageSize=%d&quot;,
+<span class="fc" id="L131">              externalSkillEndpoint, keyword, pageCriteria.page(), pageCriteria.pageSize());</span>
+
+<span class="fc" id="L133">      PagedResponse&lt;ExternalSkillDTO&gt; result =</span>
+          webClient
+<span class="nc" id="L135">              .get()</span>
+<span class="nc" id="L136">              .uri(uri)</span>
+<span class="nc" id="L137">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="nc" id="L138">              .retrieve()</span>
+<span class="nc" id="L139">              .bodyToMono(new ParameterizedTypeReference&lt;PagedResponse&lt;ExternalSkillDTO&gt;&gt;() {})</span>
+<span class="nc" id="L140">              .block();</span>
+
+<span class="nc bnc" id="L142" title="All 2 branches missed.">      return result != null ? result : emptyPagedResponse(pageCriteria);</span>
+<span class="fc" id="L143">    } catch (Exception e) {</span>
+<span class="fc" id="L144">      log.error(</span>
+          &quot;Failed to search external skills from interoperability at '{}'. Error: {}&quot;,
+          externalSkillEndpoint,
+<span class="fc" id="L147">          e.getMessage());</span>
+<span class="fc" id="L148">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L149">      return emptyPagedResponse(pageCriteria);</span>
+    }
+  }
+
+  public boolean checkInteroperabilityMicroservice() {
+    try {
+<span class="nc" id="L155">      log.debug(&quot;Checking interoperability microservice health at: {}&quot;, healthEndpoint);</span>
+<span class="nc" id="L156">      String response =</span>
+<span class="nc" id="L157">          webClient.get().uri(healthEndpoint).retrieve().bodyToMono(String.class).block();</span>
+
+<span class="nc" id="L159">      log.info(&quot;Interoperability microservice is UP&quot;);</span>
+<span class="nc bnc" id="L160" title="All 4 branches missed.">      return response != null &amp;&amp; response.contains(&quot;\&quot;status\&quot;:\&quot;UP\&quot;&quot;);</span>
+<span class="nc" id="L161">    } catch (Exception e) {</span>
+<span class="nc" id="L162">      log.error(</span>
+          &quot;Interoperability microservice health check failed at '{}'. Error: {}&quot;,
+          healthEndpoint,
+<span class="nc" id="L165">          e.getMessage());</span>
+<span class="nc" id="L166">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="nc" id="L167">      return false;</span>
+    }
+  }
+
+  private PagedResponse&lt;ExternalSkillDTO&gt; emptyPagedResponse(PageCriteria pageCriteria) {
+<span class="fc" id="L172">    return new PagedResponse&lt;&gt;(</span>
+<span class="fc" id="L173">        List.of(), new PageInfoDTO(pageCriteria.page(), pageCriteria.pageSize(), 0L, 0));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

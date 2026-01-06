@@ -3,7 +3,7 @@
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.AdditionalSkillProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
@@ -21,7 +21,7 @@ public class TraceServiceConfig {
   private final TraceDatabaseRepository traceRepository;
   private final StudentProgressDatabaseRepository studentProgressRepository;
 
-  private final AdditionalSkillProgressRepository additionalSkillProgressRepository;
+  private final DeclaredSkillProgressRepository declaredSkillProgressRepository;
   private final AMSRepository amsRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceConfigurationClient traceConfigurationClient;
@@ -34,7 +34,7 @@ public class TraceServiceConfig {
 <span class="fc" id="L34">    return new TraceServiceImpl(</span>
         traceRepository,
         studentProgressRepository,
-        additionalSkillProgressRepository,
+        declaredSkillProgressRepository,
         amsRepository,
         skillLevelProgressRepository,
         traceAttachmentRepository,
