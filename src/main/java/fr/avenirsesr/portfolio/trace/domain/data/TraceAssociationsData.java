@@ -4,4 +4,4 @@ import java.util.List;
 
 public record TraceAssociationsData(
     List<SkillLevelAssociationData> skillLevelAssociations,
-    List<AdditionalSkillAssociationData> additionalSkillAssociations) {}
+    List<DeclaredSkillAssociationData> declaredSkillAssociations) {}

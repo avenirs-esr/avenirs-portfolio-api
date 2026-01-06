@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceAssociationSearchResultMapper;
@@ -40,6 +41,7 @@ public class TraceController {
   private final TraceService traceService;
   private final AMSService amsService;
   private final StudentProgressService studentProgressService;
+  private final DeclaredSkillProgressService declaredSkillProgressService;
 
   @GetMapping("/overview")
   public ResponseEntity<List<TraceOverviewDTO>> getTraceOverview(Principal principal) {
@@ -126,7 +128,7 @@ public class TraceController {
         traceId,
         associateTraceDTO.amsIds(),
         associateTraceDTO.skillLevelIds(),
-        associateTraceDTO.additionalSkillProgressIds());
+        associateTraceDTO.declaredSkillProgressIds());
 
     return ResponseEntity.ok("Trace successfully associated.");
   }
@@ -142,7 +144,7 @@ public class TraceController {
         traceId,
         associateTraceDTO.amsIds(),
         associateTraceDTO.skillLevelIds(),
-        associateTraceDTO.additionalSkillProgressIds());
+        associateTraceDTO.declaredSkillProgressIds());
 
     return ResponseEntity.ok("Trace successfully unassociated.");
   }
@@ -174,14 +176,15 @@ public class TraceController {
                     .toList(),
                 skillLevelProgresses.pageInfo());
       }
-      case ADDITIONAL_SKILL -> {
-        var additionalSkills = studentProgressService.searchAdditionalSkill(keyword, pageCriteria);
+      case DECLARED_SKILL -> {
+        var declaredSkills =
+            declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria);
         results =
             new PagedResult<>(
-                additionalSkills.content().stream()
+                declaredSkills.content().stream()
                     .map(TraceAssociationSearchResultMapper::toDTO)
                     .toList(),
-                additionalSkills.pageInfo());
+                declaredSkills.pageInfo());
       }
     }
 

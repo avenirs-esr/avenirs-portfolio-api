@@ -3,22 +3,22 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.AMSDatabaseRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.CohortDatabaseRepository;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.AdditionalSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.repository.SkillLevelProgressDatabaseRepository;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
@@ -53,8 +53,8 @@ class AMSSeederTest extends ContainerConfigurationTest {
   @Autowired StudentProgressSeeder studentProgressSeeder;
 
   @Autowired InstitutionSeeder institutionSeeder;
-  @Autowired private AdditionalSkillProgressSeeder additionalSkillProgressSeeder;
-  @Autowired private AdditionalSkillSeeder additionalSkillSeeder;
+  @Autowired private DeclaredSkillProgressSeeder declaredSkillProgressSeeder;
+  @Autowired private DeclaredSkillSeeder declaredSkillSeeder;
 
   @Mock private AMSDatabaseRepository amsRepository;
   @Mock private SkillLevelProgressDatabaseRepository skillLevelProgressRepository;
@@ -75,12 +75,12 @@ class AMSSeederTest extends ContainerConfigurationTest {
     // Seed les données comme dans SeederRunner
     var savedUsers = userSeeder.seed();
     var savedStudents = studentSeeder.seed(savedUsers);
-    var additionalSkills = additionalSkillSeeder.seed();
-    List<AdditionalSkillProgressEntity> additionalSkillProgresses =
-        additionalSkillProgressSeeder.seed(savedStudents, additionalSkills);
+    var declaredSkills = declaredSkillSeeder.seed();
+    List<DeclaredSkillProgressEntity> declaredSkillProgresses =
+        declaredSkillProgressSeeder.seed(savedStudents, declaredSkills);
     var savedInstitutions = institutionSeeder.seed();
     var savedPrograms = programSeeder.seed(savedInstitutions);
-    var savedTraces = traceSeeder.seed(savedUsers, additionalSkillProgresses);
+    var savedTraces = traceSeeder.seed(savedUsers, declaredSkillProgresses);
     var savedSkillLevels = skillSeeder.seed(savedPrograms);
     var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
     var savedStudentProgresses =

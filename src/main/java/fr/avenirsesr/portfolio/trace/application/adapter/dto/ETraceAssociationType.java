@@ -6,5 +6,5 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public enum ETraceAssociationType {
   AMS,
   SKILL_LEVEL,
-  ADDITIONAL_SKILL
+  DECLARED_SKILL
 }

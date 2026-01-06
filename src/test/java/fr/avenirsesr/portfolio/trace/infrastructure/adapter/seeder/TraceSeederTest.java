@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
@@ -26,18 +26,18 @@ class TraceSeederTest extends ContainerConfigurationTest {
 
   @Autowired private UserSeeder userSeeder;
   @Autowired private StudentSeeder studentSeeder;
-  @Autowired private AdditionalSkillProgressSeeder additionalSkillProgressSeeder;
-  @Autowired private AdditionalSkillSeeder additionalSkillSeeder;
+  @Autowired private DeclaredSkillProgressSeeder declaredSkillProgressSeeder;
+  @Autowired private DeclaredSkillSeeder declaredSkillSeeder;
 
   private static List<UserEntity> users;
-  private static List<AdditionalSkillProgressEntity> additionalSkillProgresses;
+  private static List<DeclaredSkillProgressEntity> declaredSkillProgresses;
 
   @BeforeAll
   void setUp() {
     users = userSeeder.seed();
     List<StudentEntity> students = studentSeeder.seed(users);
-    var additionalSkills = additionalSkillSeeder.seed();
-    additionalSkillProgresses = additionalSkillProgressSeeder.seed(students, additionalSkills);
+    var declaredSkills = declaredSkillSeeder.seed();
+    declaredSkillProgresses = declaredSkillProgressSeeder.seed(students, declaredSkills);
   }
 
   @Test
@@ -50,7 +50,7 @@ class TraceSeederTest extends ContainerConfigurationTest {
     Exception exception =
         assertThrows(
             IllegalArgumentException.class,
-            () -> traceSeeder.seed(emptyUsers, additionalSkillProgresses));
+            () -> traceSeeder.seed(emptyUsers, declaredSkillProgresses));
     assertTrue(exception.getMessage().contains("users cannot be empty"));
   }
 
@@ -58,7 +58,7 @@ class TraceSeederTest extends ContainerConfigurationTest {
   void seed_shouldReturnTraces_withCorrectSizeAndUser() {
     BddLogger.given("a trace seeder");
     BddLogger.when("seeding traces with correct size and user");
-    List<TraceEntity> traces = traceSeeder.seed(users, additionalSkillProgresses);
+    List<TraceEntity> traces = traceSeeder.seed(users, declaredSkillProgresses);
 
     BddLogger.then("it should return traces");
     assertNotNull(traces);
@@ -78,7 +78,7 @@ class TraceSeederTest extends ContainerConfigurationTest {
     TraceSeeder seederWithMock = new TraceSeeder(mockRepo);
 
     BddLogger.when("seeding traces");
-    List<TraceEntity> result = seederWithMock.seed(users, additionalSkillProgresses);
+    List<TraceEntity> result = seederWithMock.seed(users, declaredSkillProgresses);
 
     BddLogger.then("it should call repository and save all");
     verify(mockRepo, times(1)).saveAllEntities(any());

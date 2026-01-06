@@ -1,0 +1,165 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="1767692913055-30" author="nathp">
+        <dropForeignKeyConstraint baseTableName="additional_skill_progress"
+                                  constraintName="FK1e1hh8cnwvytpolw91vu2u2yn"/>
+    </changeSet>
+    <changeSet id="1767692913055-31" author="nathp">
+        <dropForeignKeyConstraint baseTableName="additional_skill_progress"
+                                  constraintName="FK83n4vwxybet4q7kv0hmpgnlei"/>
+    </changeSet>
+    <changeSet id="1767692913055-32" author="nathp">
+        <dropForeignKeyConstraint baseTableName="trace_additional_skill_progress"
+                                  constraintName="FKey16i3km01tsn9ckurewqumxx"/>
+    </changeSet>
+    <changeSet id="1767692913055-33" author="nathp">
+        <dropForeignKeyConstraint baseTableName="trace_additional_skill_progress"
+                                  constraintName="FKsm8ws5m10yfb3rbj2365rc57j"/>
+    </changeSet>
+    <changeSet id="1767692913055-20" author="nathp">
+        <createTable tableName="declared_skill">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_declared_skill"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_skill_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="libelle" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="path_segments" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1767692913055-21" author="nathp">
+        <createTable tableName="declared_skill_progress">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_declared_skill_progress"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="student_id" type="UUID"/>
+            <column name="declared_skill_id" type="UUID"/>
+            <column name="level" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(400)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1767692913055-22" author="nathp">
+        <createTable tableName="trace_declared_skill_progress">
+            <column name="declared_skill_progress_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trace_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1767692913055-23" author="nathp">
+        <addPrimaryKey columnNames="ams_id, skill_level_progress_id" constraintName="pk_ams_skill_level_progress"
+                       tableName="ams_skill_level_progress"/>
+    </changeSet>
+    <changeSet id="1767692913055-24" author="nathp">
+        <addUniqueConstraint columnNames="external_skill_id, type" constraintName="uc_8cc5a8856ba2ba06239c9cbd8"
+                             tableName="declared_skill"/>
+    </changeSet>
+    <changeSet id="1767692913055-25" author="nathp">
+        <addUniqueConstraint columnNames="student_id, declared_skill_id" constraintName="uc_f2d56af4ab4f318916544f00b"
+                             tableName="declared_skill_progress"/>
+    </changeSet>
+    <changeSet id="1767692913055-26" author="nathp">
+        <addForeignKeyConstraint baseColumnNames="declared_skill_id" baseTableName="declared_skill_progress"
+                                 constraintName="FK_DECLARED_SKILL_PROGRESS_ON_DECLARED_SKILL"
+                                 referencedColumnNames="id" referencedTableName="declared_skill"/>
+    </changeSet>
+    <changeSet id="1767692913055-27" author="nathp">
+        <addForeignKeyConstraint baseColumnNames="student_id" baseTableName="declared_skill_progress"
+                                 constraintName="FK_DECLARED_SKILL_PROGRESS_ON_STUDENT" referencedColumnNames="id"
+                                 referencedTableName="student"/>
+    </changeSet>
+    <changeSet id="1767692913055-28" author="nathp">
+        <addForeignKeyConstraint baseColumnNames="declared_skill_progress_id"
+                                 baseTableName="trace_declared_skill_progress"
+                                 constraintName="fk_tradecskipro_on_declared_skill_progress_entity"
+                                 referencedColumnNames="id" referencedTableName="declared_skill_progress"/>
+    </changeSet>
+    <changeSet id="1767692913055-29" author="nathp">
+        <addForeignKeyConstraint baseColumnNames="trace_id" baseTableName="trace_declared_skill_progress"
+                                 constraintName="fk_tradecskipro_on_trace_entity" referencedColumnNames="id"
+                                 referencedTableName="trace"/>
+    </changeSet>
+    <changeSet id="1767692913055-38" author="nathp">
+        <dropTable cascadeConstraints="true" tableName="additional_skill"/>
+    </changeSet>
+    <changeSet id="1767692913055-39" author="nathp">
+        <dropTable cascadeConstraints="true" tableName="additional_skill_progress"/>
+    </changeSet>
+    <changeSet id="1767692913055-40" author="nathp">
+        <dropTable cascadeConstraints="true" tableName="trace_additional_skill_progress"/>
+    </changeSet>
+    <changeSet id="1767692913055-1" author="nathp">
+        <modifyDataType columnName="activity_sector" newDataType="VARCHAR(50)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet id="1767692913055-2" author="nathp">
+        <modifyDataType columnName="ai_use_justification" newDataType="VARCHAR(200)" tableName="trace"/>
+    </changeSet>
+    <changeSet id="1767692913055-3" author="nathp">
+        <modifyDataType columnName="bio" newDataType="VARCHAR(400)" tableName="student"/>
+    </changeSet>
+    <changeSet id="1767692913055-4" author="nathp">
+        <modifyDataType columnName="bio" newDataType="VARCHAR(400)" tableName="teacher"/>
+    </changeSet>
+    <changeSet id="1767692913055-5" author="nathp">
+        <modifyDataType columnName="description" newDataType="VARCHAR(400)" tableName="cohort"/>
+    </changeSet>
+    <changeSet id="1767692913055-6" author="nathp">
+        <modifyDataType columnName="description" newDataType="VARCHAR(400)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet id="1767692913055-7" author="nathp">
+        <modifyDataType columnName="description" newDataType="VARCHAR(400)" tableName="declared_program"/>
+    </changeSet>
+    <changeSet id="1767692913055-8" author="nathp">
+        <modifyDataType columnName="description" newDataType="VARCHAR(400)" tableName="skill_level_translation"/>
+    </changeSet>
+    <changeSet id="1767692913055-9" author="nathp">
+        <modifyDataType columnName="location" newDataType="VARCHAR(50)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet id="1767692913055-10" author="nathp">
+        <modifyDataType columnName="organization" newDataType="VARCHAR(50)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet id="1767692913055-11" author="nathp">
+        <modifyDataType columnName="organization" newDataType="VARCHAR(50)" tableName="declared_program"/>
+    </changeSet>
+    <changeSet id="1767692913055-12" author="nathp">
+        <modifyDataType columnName="personal_note" newDataType="VARCHAR(200)" tableName="trace"/>
+    </changeSet>
+    <changeSet id="1767692913055-13" author="nathp">
+        <modifyDataType columnName="result" newDataType="VARCHAR(50)" tableName="declared_program"/>
+    </changeSet>
+    <changeSet id="1767692913055-14" author="nathp">
+        <modifyDataType columnName="source_of_information" newDataType="VARCHAR(200)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet id="1767692913055-15" author="nathp">
+        <modifyDataType columnName="source_of_information" newDataType="VARCHAR(200)" tableName="declared_program"/>
+    </changeSet>
+    <changeSet id="1767692913055-16" author="nathp">
+        <modifyDataType columnName="summary" newDataType="VARCHAR(400)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet id="1767692913055-17" author="nathp">
+        <modifyDataType columnName="title" newDataType="VARCHAR(80)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet id="1767692913055-18" author="nathp">
+        <modifyDataType columnName="title" newDataType="VARCHAR(80)" tableName="declared_program"/>
+    </changeSet>
+    <changeSet id="1767692913055-19" author="nathp">
+        <modifyDataType columnName="title" newDataType="VARCHAR(80)" tableName="trace"/>
+    </changeSet>
+
+</databaseChangeLog>

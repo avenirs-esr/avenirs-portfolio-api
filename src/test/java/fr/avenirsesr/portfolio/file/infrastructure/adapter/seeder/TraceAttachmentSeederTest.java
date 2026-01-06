@@ -2,12 +2,12 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.AdditionalSkillProgressEntity;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
@@ -25,8 +25,8 @@ class TraceAttachmentSeederTest extends ContainerConfigurationTest {
 
   @Autowired private UserSeeder userSeeder;
   @Autowired StudentSeeder studentSeeder;
-  @Autowired private AdditionalSkillProgressSeeder additionalSkillProgressSeeder;
-  @Autowired private AdditionalSkillSeeder additionalSkillSeeder;
+  @Autowired private DeclaredSkillProgressSeeder declaredSkillProgressSeeder;
+  @Autowired private DeclaredSkillSeeder declaredSkillSeeder;
 
   private List<TraceEntity> traces;
 
@@ -35,11 +35,11 @@ class TraceAttachmentSeederTest extends ContainerConfigurationTest {
     // Seed des utilisateurs
     var users = userSeeder.seed();
     var students = studentSeeder.seed(users);
-    var additionalSkills = additionalSkillSeeder.seed();
-    List<AdditionalSkillProgressEntity> additionalSkillProgresses =
-        additionalSkillProgressSeeder.seed(students, additionalSkills);
+    var declaredSkills = declaredSkillSeeder.seed();
+    List<DeclaredSkillProgressEntity> declaredSkillProgresses =
+        declaredSkillProgressSeeder.seed(students, declaredSkills);
     // Seed des traces pour les utilisateurs
-    this.traces = traceSeeder.seed(users, additionalSkillProgresses);
+    this.traces = traceSeeder.seed(users, declaredSkillProgresses);
   }
 
   @Test

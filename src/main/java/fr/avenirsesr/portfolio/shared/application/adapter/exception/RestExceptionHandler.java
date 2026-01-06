@@ -1,13 +1,13 @@
 package fr.avenirsesr.portfolio.shared.application.adapter.exception;
 
-import fr.avenirsesr.portfolio.additionalskill.domain.exception.AdditionalSkillNotFoundException;
-import fr.avenirsesr.portfolio.additionalskill.domain.exception.DuplicateAdditionalSkillException;
-import fr.avenirsesr.portfolio.additionalskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.common.error.application.adapter.exception.BaseRestExceptionHandler;
 import fr.avenirsesr.portfolio.common.error.application.adapter.response.ErrorResponse;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.declaredskill.domain.exception.DeclaredSkillNotFoundException;
+import fr.avenirsesr.portfolio.declaredskill.domain.exception.DuplicateDeclaredSkillException;
+import fr.avenirsesr.portfolio.declaredskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
@@ -68,16 +68,16 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
-  @ExceptionHandler(DuplicateAdditionalSkillException.class)
-  public ResponseEntity<ErrorResponse> handleDuplicateAdditionalSkillException(
-      DuplicateAdditionalSkillException ex) {
+  @ExceptionHandler(DuplicateDeclaredSkillException.class)
+  public ResponseEntity<ErrorResponse> handleDuplicateDeclaredSkillException(
+      DuplicateDeclaredSkillException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
-  @ExceptionHandler(AdditionalSkillNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleAdditionalSkillNotFoundException(
-      AdditionalSkillNotFoundException ex) {
+  @ExceptionHandler(DeclaredSkillNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleDeclaredSkillNotFoundException(
+      DeclaredSkillNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }

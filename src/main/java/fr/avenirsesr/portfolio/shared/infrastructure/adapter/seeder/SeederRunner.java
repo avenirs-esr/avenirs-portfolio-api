@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.adapter.seeder.AdditionalSkillSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
 import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
+import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.TraceAttachmentSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
@@ -15,7 +15,7 @@ import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfK
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder.DeclaredExperienceSeeder;
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.DeclaredProgramSeeder;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.AdditionalSkillProgressSeeder;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
@@ -45,8 +45,8 @@ public class SeederRunner implements CommandLineRunner {
   private final TrainingPathSeeder trainingPathSeeder;
   private final StudentProgressSeeder studentProgressSeeder;
   private final SkillSeeder skillSeeder;
-  private final AdditionalSkillSeeder additionalSkillSeeder;
-  private final AdditionalSkillProgressSeeder additionalSkillProgressSeeder;
+  private final DeclaredSkillSeeder declaredSkillSeeder;
+  private final DeclaredSkillProgressSeeder declaredSkillProgressSeeder;
   private final SelfKnowledgeElementSeeder selfKnowledgeElementSeeder;
   private final SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder;
   private final DeclaredExperienceSeeder declaredExperienceSeeder;
@@ -77,8 +77,8 @@ public class SeederRunner implements CommandLineRunner {
       TrainingPathSeeder trainingPathSeeder,
       StudentProgressSeeder studentProgressSeeder,
       SkillSeeder skillSeeder,
-      AdditionalSkillSeeder additionalSkillSeeder,
-      AdditionalSkillProgressSeeder additionalSkillProgressSeeder,
+      DeclaredSkillSeeder declaredSkillSeeder,
+      DeclaredSkillProgressSeeder declaredSkillProgressSeeder,
       SelfKnowledgeElementSeeder selfKnowledgeElementSeeder,
       SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder,
       DeclaredExperienceSeeder declaredExperienceSeeder,
@@ -99,8 +99,8 @@ public class SeederRunner implements CommandLineRunner {
     this.trainingPathSeeder = trainingPathSeeder;
     this.studentProgressSeeder = studentProgressSeeder;
     this.skillSeeder = skillSeeder;
-    this.additionalSkillSeeder = additionalSkillSeeder;
-    this.additionalSkillProgressSeeder = additionalSkillProgressSeeder;
+    this.declaredSkillSeeder = declaredSkillSeeder;
+    this.declaredSkillProgressSeeder = declaredSkillProgressSeeder;
     this.selfKnowledgeElementSeeder = selfKnowledgeElementSeeder;
     this.selfKnowledgeCategorySeeder = selfKnowledgeCategorySeeder;
     this.declaredExperienceSeeder = declaredExperienceSeeder;
@@ -110,7 +110,6 @@ public class SeederRunner implements CommandLineRunner {
   @Override
   public void run(String... args) {
     long userCont = userRepository.countAll();
-
     if (seedEnabled && userCont == 0) {
       log.info("Seeding enabled and starting...");
 
@@ -124,9 +123,9 @@ public class SeederRunner implements CommandLineRunner {
       var savedStudents = studentSeeder.seed(savedUsers, savedSelfKnowledgeMandatoryCategories);
       declaredExperienceSeeder.seed(savedStudents);
       var savedUserPhotos = userPhotoSeeder.seed(savedStudents, savedTeachers);
-      var savedAdditionalSkills = additionalSkillSeeder.seed();
-      var savedStudentAdditionalSkills =
-          additionalSkillProgressSeeder.seed(savedStudents, savedAdditionalSkills);
+      var savedDeclaredSkills = declaredSkillSeeder.seed();
+      var savedStudentDeclaredSkills =
+          declaredSkillProgressSeeder.seed(savedStudents, savedDeclaredSkills);
       var savedInstitutions = institutionSeeder.seed();
       var savedPrograms = programSeeder.seed(savedInstitutions);
       var savedSkillLevels = skillSeeder.seed(savedPrograms);
@@ -138,7 +137,7 @@ public class SeederRunner implements CommandLineRunner {
       var savedSkillLevelProgresses =
           savedStudentProgresses.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
       var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
-      var savedTraces = traceSeeder.seed(savedUsers, savedStudentAdditionalSkills);
+      var savedTraces = traceSeeder.seed(savedUsers, savedStudentDeclaredSkills);
       var savedTracesAttachment = traceAttachmentSeeder.seed(savedTraces);
       var savedAmses =
           amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);

@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.ETraceAssociationType;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TraceAssociationSearchResult;
@@ -20,11 +20,11 @@ public interface TraceAssociationSearchResultMapper {
         skillLevelProgress.getSkillLevel().getName());
   }
 
-  static TraceAssociationSearchResult toDTO(AdditionalSkillProgress additionalSkillProgress) {
+  static TraceAssociationSearchResult toDTO(DeclaredSkillProgress declaredSkillProgress) {
     return new TraceAssociationSearchResult(
-        ETraceAssociationType.ADDITIONAL_SKILL,
-        additionalSkillProgress.getId(),
-        additionalSkillProgress.getSkill().getLibelle(),
-        additionalSkillProgress.getSkill().getType().name());
+        ETraceAssociationType.DECLARED_SKILL,
+        declaredSkillProgress.getId(),
+        declaredSkillProgress.getSkill().getLibelle(),
+        declaredSkillProgress.getSkill().getType().name());
   }
 }

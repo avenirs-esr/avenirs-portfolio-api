@@ -14,7 +14,7 @@ public enum ETraceStatus {
   ASSOCIATED_NOT_EVALUATED(
       List.of(EAmsStatus.NOT_STARTED, EAmsStatus.IN_PROGRESS),
       List.of(ESkillLevelStatus.NOT_STARTED, ESkillLevelStatus.TO_BE_EVALUATED)),
-  ASSOCIATED_WITH_ADDITIONAL_SKILL(List.of(), List.of()),
+  ASSOCIATED_WITH_DECLARED_SKILL(List.of(), List.of()),
   ;
 
   private final List<EAmsStatus> amsStatuses;

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.additionalskill.infrastructure.fixture.AdditionalSkillProgressFixture;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
@@ -18,6 +17,7 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.declaredskill.infrastructure.fixture.DeclaredSkillProgressFixture;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
@@ -26,10 +26,10 @@ import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.AdditionalSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.AdditionalSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
@@ -68,7 +68,7 @@ public class TraceServiceImplTest {
   @Mock private StudentProgressRepository studentProgressRepository;
   @Mock private AMSRepository amsRepository;
   @Mock private SkillLevelProgressRepository skillLevelProgressRepository;
-  @Mock private AdditionalSkillProgressRepository additionalSkillProgressRepository;
+  @Mock private DeclaredSkillProgressRepository declaredSkillProgressRepository;
 
   @Mock private TraceConfigurationClient traceConfigurationClient;
 
@@ -523,34 +523,34 @@ public class TraceServiceImplTest {
   @Test
   void givenValidTraceAndIds_shouldAssociateAllAndSave() {
     BddLogger.given(
-        "a trace belonging to the student and valid AMS, skillLevels and additional skills");
+        "a trace belonging to the student and valid AMS, skillLevels and declared skills");
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
 
     AMS ams = AMSFixture.create().toModel();
     SkillLevelProgress skillLevel =
         SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel()).toModel();
-    AdditionalSkillProgress additional = AdditionalSkillProgressFixture.create().toModel();
+    DeclaredSkillProgress declared = DeclaredSkillProgressFixture.create().toModel();
 
     when(amsRepository.findAllByStudent(any(Student.class))).thenReturn(List.of(ams));
     when(skillLevelProgressRepository.findAllByStudent(any(Student.class)))
         .thenReturn(List.of(skillLevel));
-    when(additionalSkillProgressRepository.findAllByStudent(any(Student.class)))
-        .thenReturn(List.of(additional));
+    when(declaredSkillProgressRepository.findAllByStudent(any(Student.class)))
+        .thenReturn(List.of(declared));
     when(studentService.getStudentById(any(UUID.class))).thenReturn(student);
 
-    BddLogger.when("associating AMS, SkillLevels and AdditionalSkills");
+    BddLogger.when("associating AMS, SkillLevels and DeclaredSkills");
     traceService.associateTrace(
         trace.getId(),
         List.of(ams.getId()),
         List.of(skillLevel.getId()),
-        List.of(additional.getId()));
+        List.of(declared.getId()));
 
     BddLogger.then("trace should be associated and saved");
     verify(traceRepository).save(trace);
     assertTrue(trace.getAmses().contains(ams));
     assertTrue(trace.getSkillLevels().contains(skillLevel));
-    assertTrue(trace.getAdditionalSkillProgresses().contains(additional));
+    assertTrue(trace.getDeclaredSkillProgresses().contains(declared));
   }
 
   @Test
@@ -619,38 +619,38 @@ public class TraceServiceImplTest {
   @Test
   void givenValidTraceAndIds_shouldUnassociateAllAndSave() {
     BddLogger.given(
-        "a trace belonging to the student with AMS, SkillLevels and AdditionalSkills associated");
+        "a trace belonging to the student with AMS, SkillLevels and DeclaredSkills associated");
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
     AMS ams = AMSFixture.create().toModel();
     SkillLevelProgress skillLevel =
         SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel()).toModel();
-    AdditionalSkillProgress additional = AdditionalSkillProgressFixture.create().toModel();
+    DeclaredSkillProgress declared = DeclaredSkillProgressFixture.create().toModel();
 
     trace.add(ams);
     trace.add(skillLevel);
-    trace.add(additional);
+    trace.add(declared);
 
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
     when(amsRepository.findAllByStudent(any(Student.class))).thenReturn(List.of(ams));
     when(skillLevelProgressRepository.findAllByStudent(any(Student.class)))
         .thenReturn(List.of(skillLevel));
-    when(additionalSkillProgressRepository.findAllByStudent(any(Student.class)))
-        .thenReturn(List.of(additional));
+    when(declaredSkillProgressRepository.findAllByStudent(any(Student.class)))
+        .thenReturn(List.of(declared));
     when(studentService.getStudentById(any(UUID.class))).thenReturn(student);
 
-    BddLogger.when("unassociating AMS, SkillLevels and AdditionalSkills");
+    BddLogger.when("unassociating AMS, SkillLevels and DeclaredSkills");
     traceService.unassociateTrace(
         trace.getId(),
         List.of(ams.getId()),
         List.of(skillLevel.getId()),
-        List.of(additional.getId()));
+        List.of(declared.getId()));
 
     BddLogger.then("trace should be unassociated and saved");
     verify(traceRepository).save(trace);
     assertFalse(trace.getAmses().contains(ams));
     assertFalse(trace.getSkillLevels().contains(skillLevel));
-    assertFalse(trace.getAdditionalSkillProgresses().contains(additional));
+    assertFalse(trace.getDeclaredSkillProgresses().contains(declared));
   }
 
   @Test
@@ -728,77 +728,76 @@ public class TraceServiceImplTest {
   }
 
   @Test
-  void givenTraceWithoutMatchingAdditionalSkill_shouldThrowUserNotAuthorizedException() {
-    BddLogger.given("a trace that does not have the given AdditionalSkill associated");
+  void givenTraceWithoutMatchingDeclaredSkill_shouldThrowUserNotAuthorizedException() {
+    BddLogger.given("a trace that does not have the given DeclaredSkill associated");
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
     when(studentService.getStudentById(any(UUID.class))).thenReturn(student);
 
-    UUID fakeAdditionalId = UUID.randomUUID();
-    when(additionalSkillProgressRepository.findAllByStudent(any(Student.class)))
-        .thenReturn(List.of(AdditionalSkillProgressFixture.create().toModel()));
+    UUID fakeDeclaredId = UUID.randomUUID();
+    when(declaredSkillProgressRepository.findAllByStudent(any(Student.class)))
+        .thenReturn(List.of(DeclaredSkillProgressFixture.create().toModel()));
 
-    BddLogger.when("unassociating a non-associated AdditionalSkill");
+    BddLogger.when("unassociating a non-associated DeclaredSkill");
     assertThrows(
         UserNotAuthorizedException.class,
         () ->
             traceService.unassociateTrace(
-                trace.getId(), List.of(), List.of(), List.of(fakeAdditionalId)));
+                trace.getId(), List.of(), List.of(), List.of(fakeDeclaredId)));
   }
 
   @Test
-  void givenAssociatedAdditionalSkillProgress_shouldReturnTraces() {
-    BddLogger.given("two traces associated to the given additionalSkillProgress");
-    AdditionalSkillProgress additionalSkillProgress =
-        AdditionalSkillProgressFixture.create().withStudent(student).toModel();
+  void givenAssociatedDeclaredSkillProgress_shouldReturnTraces() {
+    BddLogger.given("two traces associated to the given declaredSkillProgress");
+    DeclaredSkillProgress declaredSkillProgress =
+        DeclaredSkillProgressFixture.create().withStudent(student).toModel();
     Trace trace1 =
         TraceFixture.create()
             .withUser(student.getUser())
-            .withAdditionalSkillProgresses(List.of(additionalSkillProgress))
+            .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
             .toModel();
     Trace trace2 =
         TraceFixture.create()
             .withUser(student.getUser())
-            .withAdditionalSkillProgresses(List.of(additionalSkillProgress))
+            .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
             .toModel();
-    when(traceRepository.linkedWith(additionalSkillProgress)).thenReturn(List.of(trace1, trace2));
+    when(traceRepository.linkedWith(declaredSkillProgress)).thenReturn(List.of(trace1, trace2));
 
-    BddLogger.when("getting two traces associated to AdditionalSkillProgress");
+    BddLogger.when("getting two traces associated to DeclaredSkillProgress");
     List<Trace> traces =
-        traceService.getTracesLinkedWithAdditionalSkillProgress(
-            student.getUser(), additionalSkillProgress);
+        traceService.getTracesLinkedWithDeclaredSkillProgress(
+            student.getUser(), declaredSkillProgress);
 
     BddLogger.then(
-        "it should return two traces associated to AdditionalSkillProgress and right user");
+        "it should return two traces associated to DeclaredSkillProgress and right user");
     assertEquals(2, traces.size());
     assertEquals(trace1, traces.getFirst());
     assertEquals(trace2, traces.getLast());
   }
 
   @Test
-  void givenAssociatedAdditionalSkillProgress_shouldThrowUserNotAuthorizedException() {
-    BddLogger.given("two traces associated to the given additionalSkillProgress");
+  void givenAssociatedDeclaredSkillProgress_shouldThrowUserNotAuthorizedException() {
+    BddLogger.given("two traces associated to the given declaredSkillProgress");
     Student anotherStudent = StudentFixture.create().toModel();
-    AdditionalSkillProgress additionalSkillProgress =
-        AdditionalSkillProgressFixture.create().withStudent(student).toModel();
+    DeclaredSkillProgress declaredSkillProgress =
+        DeclaredSkillProgressFixture.create().withStudent(student).toModel();
     Trace trace1 =
         TraceFixture.create()
             .withUser(student.getUser())
-            .withAdditionalSkillProgresses(List.of(additionalSkillProgress))
+            .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
             .toModel();
     Trace trace2 =
         TraceFixture.create()
             .withUser(student.getUser())
-            .withAdditionalSkillProgresses(List.of(additionalSkillProgress))
+            .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
             .toModel();
-    when(traceRepository.linkedWith(additionalSkillProgress)).thenReturn(List.of(trace1, trace2));
+    when(traceRepository.linkedWith(declaredSkillProgress)).thenReturn(List.of(trace1, trace2));
 
-    BddLogger.when(
-        "getting two traces associated to AdditionalSkillProgress but to another student");
+    BddLogger.when("getting two traces associated to DeclaredSkillProgress but to another student");
     assertThrows(
         UserNotAuthorizedException.class,
         () ->
-            traceService.getTracesLinkedWithAdditionalSkillProgress(
-                anotherStudent.getUser(), additionalSkillProgress));
+            traceService.getTracesLinkedWithDeclaredSkillProgress(
+                anotherStudent.getUser(), declaredSkillProgress));
   }
 }
