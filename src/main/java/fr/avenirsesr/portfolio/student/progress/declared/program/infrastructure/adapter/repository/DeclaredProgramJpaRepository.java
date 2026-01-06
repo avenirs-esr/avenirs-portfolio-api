@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface DeclaredProgramJpaRepository
     extends JpaRepository<DeclaredProgramEntity, UUID>,
-        JpaSpecificationExecutor<DeclaredProgramEntity> {}
+        JpaSpecificationExecutor<DeclaredProgramEntity> {
+  void deleteAllByStudentId(UUID studentId);
+}

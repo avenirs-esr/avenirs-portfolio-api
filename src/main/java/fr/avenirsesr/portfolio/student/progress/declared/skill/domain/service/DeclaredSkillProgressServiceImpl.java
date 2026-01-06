@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
@@ -32,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressService {
-  public static final int DESCRIPTION_LENGTH_MAX = 400;
   private final TraceService traceService;
   private final DeclaredSkillSyncService declaredSkillSyncService;
   private final DeclaredSkillProgressRepository declaredSkillProgressRepository;
@@ -158,13 +158,13 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   }
 
   private static void checkDescriptionField(String description) {
-    if (description != null && description.length() > DESCRIPTION_LENGTH_MAX) {
+    if (description != null && description.length() > DESCRIPTION_LENGTH) {
       log.error(
-          "Description too long: {} characters (max = " + DESCRIPTION_LENGTH_MAX + ")",
+          "Description too long: {} characters (max = " + DESCRIPTION_LENGTH + ")",
           description.length());
       throw new InvalidDescriptionException(
           "Description exceeds "
-              + DESCRIPTION_LENGTH_MAX
+              + DESCRIPTION_LENGTH
               + " characters (actual: "
               + description.length()
               + ")");

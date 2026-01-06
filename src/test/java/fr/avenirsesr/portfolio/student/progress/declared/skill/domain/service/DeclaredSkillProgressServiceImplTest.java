@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service;
 
-import static fr.avenirsesr.portfolio.student.progress.imported.domain.service.StudentProgressServiceImpl.DESCRIPTION_LENGTH_MAX;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -310,7 +310,7 @@ public class DeclaredSkillProgressServiceImplTest {
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
         String description =
             random
-                .ints(DESCRIPTION_LENGTH_MAX + 1, 0, CHARSET.length())
+                .ints(DESCRIPTION_LENGTH + 1, 0, CHARSET.length())
                 .mapToObj(CHARSET::charAt)
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
