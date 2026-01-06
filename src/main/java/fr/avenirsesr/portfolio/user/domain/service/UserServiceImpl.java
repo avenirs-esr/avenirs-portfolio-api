@@ -84,4 +84,11 @@ public class UserServiceImpl implements UserService {
       case TEACHER -> teacherService.updateProfile(user, bio);
     }
   }
+
+  @Override
+  public User createUser(UUID id, String firstname, String lastname, String email) {
+    var user = User.create(id, firstname, lastname, email);
+    userRepository.save(user);
+    return user;
+  }
 }
