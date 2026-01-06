@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
 import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.TraceAttachmentSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
@@ -39,7 +38,6 @@ public class SeederRunner implements CommandLineRunner {
   private final CohortSeeder cohortSeeder;
   private final AMSSeeder amsSeeder;
   private final TraceSeeder traceSeeder;
-  private final TraceAttachmentSeeder traceAttachmentSeeder;
   private final InstitutionSeeder institutionSeeder;
   private final ProgramSeeder programSeeder;
   private final TrainingPathSeeder trainingPathSeeder;
@@ -71,7 +69,6 @@ public class SeederRunner implements CommandLineRunner {
       CohortSeeder cohortSeeder,
       AMSSeeder amsSeeder,
       TraceSeeder traceSeeder,
-      TraceAttachmentSeeder traceAttachmentSeeder,
       InstitutionSeeder institutionSeeder,
       ProgramSeeder programSeeder,
       TrainingPathSeeder trainingPathSeeder,
@@ -93,7 +90,6 @@ public class SeederRunner implements CommandLineRunner {
     this.amsSeeder = amsSeeder;
     this.traceSeeder = traceSeeder;
     this.userSeeder = userSeeder;
-    this.traceAttachmentSeeder = traceAttachmentSeeder;
     this.institutionSeeder = institutionSeeder;
     this.programSeeder = programSeeder;
     this.trainingPathSeeder = trainingPathSeeder;
@@ -138,7 +134,6 @@ public class SeederRunner implements CommandLineRunner {
           savedStudentProgresses.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
       var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
       var savedTraces = traceSeeder.seed(savedUsers, savedStudentDeclaredSkills);
-      var savedTracesAttachment = traceAttachmentSeeder.seed(savedTraces);
       var savedAmses =
           amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
       var savedSelfKnowledgeElements = selfKnowledgeElementSeeder.seed(savedStudents);

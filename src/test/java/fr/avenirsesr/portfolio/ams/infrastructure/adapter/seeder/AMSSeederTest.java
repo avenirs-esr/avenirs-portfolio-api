@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.AMSDatabaseRepository;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.CohortDatabaseRepository;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
@@ -18,10 +17,8 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.repository.SkillLevelProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -57,9 +54,6 @@ class AMSSeederTest extends ContainerConfigurationTest {
   @Autowired private DeclaredSkillSeeder declaredSkillSeeder;
 
   @Mock private AMSDatabaseRepository amsRepository;
-  @Mock private SkillLevelProgressDatabaseRepository skillLevelProgressRepository;
-  @Mock private TraceDatabaseRepository traceRepository;
-  @Mock private CohortDatabaseRepository cohortRepository;
 
   @InjectMocks private AMSSeeder amsSeeder;
 

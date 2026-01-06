@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.trace.domain.service.TraceServiceImpl;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 @AllArgsConstructor
 public class TraceServiceConfig {
   private final TraceDatabaseRepository traceRepository;
+  private final UserRepository userRepository;
   private final StudentProgressDatabaseRepository studentProgressRepository;
 
   private final DeclaredSkillProgressRepository declaredSkillProgressRepository;
@@ -33,6 +35,7 @@ public class TraceServiceConfig {
   public TraceService traceService() {
     return new TraceServiceImpl(
         traceRepository,
+        userRepository,
         studentProgressRepository,
         declaredSkillProgressRepository,
         amsRepository,

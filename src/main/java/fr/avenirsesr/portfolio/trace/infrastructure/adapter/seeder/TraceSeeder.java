@@ -1,17 +1,30 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
+import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeTraceAttachment;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceAttachementCreationData;
+import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceCreationData;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +35,13 @@ public class TraceSeeder {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
       new DataGeneratorProvider<SharedDataGenerator>()
           .init(TraceSeeder.class, SharedDataGenerator.class);
+  private static final String PATH_FILE = "seeder/traces.json";
+  private final FileReader fileReader;
+  private final TraceService traceService;
+  private final TraceAttachmentService traceAttachmentService;
 
-  private final TraceDatabaseRepository traceRepository;
+  @Value("${seeder.source}")
+  private ESeederSource seederSource;
 
   @Transactional
   public List<TraceEntity> seed(
@@ -32,40 +50,87 @@ public class TraceSeeder {
 
     log.info("Seeding Traces...");
 
-    List<TraceEntity> traceList = new ArrayList<>();
+    List<TraceCreationData> creationData =
+        switch (seederSource) {
+          case CSV ->
+              fileReader.readJSON(PATH_FILE, new TypeReference<List<TraceCreationData>>() {});
+          case FAKER -> buildFakeTraces(users, declaredSkillsProgresses);
+        };
 
-    for (UserEntity user : users) {
-      for (int i = 0;
-          i
-              < dataGenerator
-                  .with("nb-traces")
-                  .number(SeederConfig.TRACES_NB_MIN, SeederConfig.TRACES_NB_MAX);
-          i++) {
-        var fakeTrace = FakeTrace.of(user);
+    List<Trace> traces = new ArrayList<>();
 
-        if (dataGenerator.with("withAiUseJustification").bool())
-          fakeTrace = fakeTrace.withAiUseJustification();
-        if (dataGenerator.with("withPersonalNote").bool()) fakeTrace = fakeTrace.withPersonalNote();
-        if (dataGenerator.with("isGroup").bool()) fakeTrace = fakeTrace.isGroup();
+    creationData.forEach(
+        data -> {
+          var trace =
+              traceService.createTrace(
+                  data.userId(),
+                  data.title(),
+                  data.language(),
+                  data.isGroup(),
+                  data.personalNote(),
+                  data.aiJustification());
+          traces.add(trace);
 
-        fakeTrace =
-            fakeTrace.withDeclaredSkillsProgress(
-                declaredSkillsProgresses.subList(
-                    0,
-                    dataGenerator
-                        .with("nb-declared-skills")
-                        .number(
-                            SeederConfig.MIN_TRACES_DECLARED_SKILL_PROGRESS,
-                            SeederConfig.MAX_TRACES_DECLARED_SKILL_PROGRESS)));
+          data.attachements()
+              .forEach(
+                  attachment -> {
+                    try {
+                      traceAttachmentService.uploadTraceAttachment(
+                          trace.getId(),
+                          attachment.title(),
+                          attachment.fileType().getMimeType(),
+                          attachment.size(),
+                          null,
+                          data.userId());
+                    } catch (IOException e) {
+                      throw new RuntimeException(e);
+                    }
+                  });
+        });
 
-        var trace = fakeTrace.toEntity();
-        traceList.add(trace);
-      }
-    }
-    traceRepository.saveAllEntities(traceList);
+    log.info("✔ {} traces created", creationData.size());
+    return traces.stream().map(TraceMapper.INSTANCE::fromDomain).toList();
+  }
 
-    log.info("✔ {} traces created", traceList.size());
-
-    return traceList;
+  private List<TraceCreationData> buildFakeTraces(
+      List<UserEntity> users, List<DeclaredSkillProgressEntity> declaredSkillsProgresses) {
+    return IntStream.range(0, SeederConfig.TRACES_NB_MAX)
+        .mapToObj(i -> users.get(new Random().nextInt(users.size())))
+        .map(
+            u ->
+                FakeTrace.of(u)
+                    .withDeclaredSkillsProgress(
+                        declaredSkillsProgresses.subList(
+                            0,
+                            dataGenerator
+                                .with("nb-declared-skills")
+                                .number(
+                                    SeederConfig.MIN_TRACES_DECLARED_SKILL_PROGRESS,
+                                    SeederConfig.MAX_TRACES_DECLARED_SKILL_PROGRESS)))
+                    .toEntity())
+        .map(
+            entity ->
+                new TraceCreationData(
+                    entity.getUser().getId(),
+                    entity.getTitle(),
+                    entity.isGroup(),
+                    entity.getLanguage(),
+                    entity.getAiUseJustification(),
+                    entity.getPersonalNote(),
+                    IntStream.range(
+                            1,
+                            dataGenerator
+                                .with("number")
+                                .number(SeederConfig.MAX_ATTACHMENT_PER_TRACE))
+                        .mapToObj(i -> FakeTraceAttachment.of(entity).toEntity())
+                        .map(
+                            attachmentEntity ->
+                                new TraceAttachementCreationData(
+                                    attachmentEntity.getName(),
+                                    attachmentEntity.getFileType(),
+                                    attachmentEntity.getSize(),
+                                    attachmentEntity.getUploadedAt()))
+                        .toList()))
+        .toList();
   }
 }

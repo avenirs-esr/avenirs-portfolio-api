@@ -7,4 +7,8 @@ import java.util.UUID;
 public interface TraceAttachmentService {
   TraceAttachment uploadTraceAttachment(
       UUID traceId, String fileName, String mimeType, long size, byte[] content) throws IOException;
+
+  TraceAttachment uploadTraceAttachment(
+      UUID traceId, String fileName, String mimeType, long size, byte[] content, UUID uploadedById)
+      throws IOException;
 }

@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -29,16 +30,31 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
   private final FileStorageService fileStorageService;
   private final TraceService traceService;
   private final LoggedInUserService loggedInUserService;
+  private final StudentRepository studentRepository;
+
+  @Override
+  public TraceAttachment uploadTraceAttachment(
+      UUID traceId, String fileName, String mimeType, long size, byte[] content, UUID uploadedById)
+      throws IOException {
+    var student = studentRepository.findById(uploadedById).orElseThrow();
+    return uploadTraceAttachmentForStudent(traceId, fileName, mimeType, size, content, student);
+  }
 
   @Override
   public TraceAttachment uploadTraceAttachment(
       UUID traceId, String fileName, String mimeType, long size, byte[] content)
       throws IOException {
-    Student student = loggedInUserService.getLoggedInStudent();
+    return uploadTraceAttachmentForStudent(
+        traceId, fileName, mimeType, size, content, loggedInUserService.getLoggedInStudent());
+  }
+
+  private TraceAttachment uploadTraceAttachmentForStudent(
+      UUID traceId, String fileName, String mimeType, long size, byte[] content, Student uploadedBy)
+      throws IOException {
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     var allTraceAttachments = traceAttachmentRepository.findByTrace(trace);
 
-    if (!trace.getUser().equals(student.getUser())) {
+    if (!trace.getUser().equals(uploadedBy.getUser())) {
       throw new UserNotAuthorizedException();
     }
 
@@ -49,9 +65,13 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
       }
 
       var fileResource = new FileResource(UUID.randomUUID(), fileName, fileType, size, content);
-      var uri = fileStorageService.upload(fileResource);
+      var uri =
+          content != null
+              ? fileStorageService.upload(fileResource)
+              : ""; // mock the upload when seeding
 
-      var newAttachment = createAttachment(student, allTraceAttachments, fileResource, trace, uri);
+      var newAttachment =
+          createAttachment(uploadedBy, allTraceAttachments, fileResource, trace, uri);
 
       traceAttachmentRepository.saveAll(
           Stream.concat(allTraceAttachments.stream(), Stream.of(newAttachment)).toList());

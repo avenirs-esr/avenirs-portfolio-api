@@ -1,0 +1,100 @@
+[
+  {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "title": "Compte rendu",
+    "isGroup": true,
+    "language": "FRENCH",
+    "aiJustification": "J'ai utilisé l'IA pour vérifier la grammaire.",
+    "personalNote": "J'ai passé beaucoup de temps dessus.",
+    "attachements": [
+      {
+        "title": "evaluation_2152.pdf",
+        "fileType": "PDF",
+        "size": 1766618,
+        "uploadedAt": "2026-01-05T13:53:40.601295Z"
+      }
+    ]
+  },
+  {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "title": "Rapport de stage – Analyse organisationnelle",
+    "isGroup": false,
+    "language": "FRENCH",
+    "aiJustification": "Utilisation de l’IA pour reformuler certaines parties et améliorer la clarté.",
+    "personalNote": "Rapport réalisé durant mon stage de M1.",
+    "attachements": [
+      {
+        "title": "rapport_stage_final.pdf",
+        "fileType": "PDF",
+        "size": 3245120,
+        "uploadedAt": "2026-01-03T09:12:18.123456Z"
+      },
+      {
+        "title": "annexes_stage.png",
+        "fileType": "PNG",
+        "size": 842331,
+        "uploadedAt": "2026-01-03T09:15:02.654321Z"
+      }
+    ]
+  },
+  {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "title": "Rendu de TD – Chimie organique",
+    "isGroup": true,
+    "language": "FRENCH",
+    "aiJustification": "L’IA m’a aidé à vérifier la cohérence des mécanismes réactionnels.",
+    "personalNote": "Travail en binôme.",
+    "attachements": [
+      {
+        "title": "td_chimie_organique.pdf",
+        "fileType": "PDF",
+        "size": 912345,
+        "uploadedAt": "2026-01-02T14:41:10.000000Z"
+      }
+    ]
+  },
+  {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "title": "Projet tutoré – Audit d’un poste de travail",
+    "isGroup": true,
+    "language": "FRENCH",
+    "aiJustification": "L’IA a été utilisée pour structurer le plan du rapport.",
+    "personalNote": "Projet mené sur plusieurs semaines.",
+    "attachements": [
+      {
+        "title": "audit_poste_travail.pdf",
+        "fileType": "PDF",
+        "size": 2546789,
+        "uploadedAt": "2025-12-18T16:28:45.789012Z"
+      },
+      {
+        "title": "presentation_audit.pptx",
+        "fileType": "PPTX",
+        "size": 1834567,
+        "uploadedAt": "2025-12-18T16:30:01.345678Z"
+      },
+      {
+        "title": "grille_analyse.xlsx",
+        "fileType": "XLSX",
+        "size": 456789,
+        "uploadedAt": "2025-12-18T16:31:22.987654Z"
+      }
+    ]
+  },
+  {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "title": "Rendu final – Mémoire de recherche",
+    "isGroup": false,
+    "language": "FRENCH",
+    "aiJustification": "Utilisation ponctuelle de l’IA pour reformuler certaines transitions.",
+    "personalNote": "Travail personnel de fin d’année.",
+    "attachements": [
+      {
+        "title": "memoire_final.pdf",
+        "fileType": "PDF",
+        "size": 5123456,
+        "uploadedAt": "2025-11-30T10:05:00.000000Z"
+      }
+    ]
+  }
+]

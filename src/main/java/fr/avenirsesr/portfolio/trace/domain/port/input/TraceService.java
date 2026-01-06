@@ -39,6 +39,14 @@ public interface TraceService {
       String personalNote,
       String aiJustification);
 
+  Trace createTrace(
+      UUID userId,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String personalNote,
+      String aiJustification);
+
   TraceDetailData updateTrace(
       UUID traceId,
       String title,

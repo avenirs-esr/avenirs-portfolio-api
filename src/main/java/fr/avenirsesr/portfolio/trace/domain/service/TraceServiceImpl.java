@@ -38,6 +38,7 @@ import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceReposito
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -50,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class TraceServiceImpl implements TraceService {
   private final TraceRepository traceRepository;
+  private final UserRepository userRepository;
   private final StudentProgressRepository studentProgressRepository;
   private final DeclaredSkillProgressRepository declaredSkillProgressRepository;
   private final AMSRepository amsRepository;
@@ -193,22 +195,43 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public Trace createTrace(
+      UUID userId,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String personalNote,
+      String aiJustification) {
+    return createTrace(
+        userRepository.findById(userId).orElseThrow(),
+        title,
+        language,
+        isGroup,
+        personalNote,
+        aiJustification);
+  }
+
+  @Override
+  public Trace createTrace(
       String title,
       ELanguage language,
       boolean isGroup,
       String personalNote,
       String aiJustification) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
+    return createTrace(loggedInUser, title, language, isGroup, personalNote, aiJustification);
+  }
+
+  private Trace createTrace(
+      User user,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String personalNote,
+      String aiJustification) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     var trace =
         Trace.create(
-            UUID.randomUUID(),
-            loggedInUser,
-            title,
-            language,
-            isGroup,
-            aiJustification,
-            personalNote);
+            UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);
 
     return traceRepository.save(trace);
   }

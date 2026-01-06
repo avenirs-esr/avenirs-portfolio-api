@@ -27,21 +27,30 @@ public class FakeTrace {
   }
 
   public static FakeTrace of(UserEntity user) {
-    return new FakeTrace(
-        TraceEntity.of(
-            sharedDataGenerator.with("id").uuid(),
-            user,
-            traceDataGenerator.with("trace-title").traceName(),
-            ELanguage.FALLBACK,
-            List.of(),
-            List.of(),
-            List.of(),
-            false,
-            null,
-            null,
-            Instant.now(),
-            Instant.now(),
-            null));
+    var fakeTrace =
+        new FakeTrace(
+            TraceEntity.of(
+                sharedDataGenerator.with("id").uuid(),
+                user,
+                traceDataGenerator.with("trace-title").traceName(),
+                ELanguage.FALLBACK,
+                List.of(),
+                List.of(),
+                List.of(),
+                false,
+                null,
+                null,
+                Instant.now(),
+                Instant.now(),
+                null));
+
+    if (sharedDataGenerator.with("withAiUseJustification").bool())
+      fakeTrace = fakeTrace.withAiUseJustification();
+    if (sharedDataGenerator.with("withPersonalNote").bool())
+      fakeTrace = fakeTrace.withPersonalNote();
+    if (sharedDataGenerator.with("isGroup").bool()) fakeTrace = fakeTrace.isGroup();
+
+    return fakeTrace;
   }
 
   public FakeTrace withSkillLevel(List<SkillLevelProgressEntity> skillLevels) {

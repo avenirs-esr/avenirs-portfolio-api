@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -10,7 +9,6 @@ import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
@@ -69,18 +67,5 @@ class TraceSeederTest extends ContainerConfigurationTest {
       assertNotNull(trace.getUser());
       assertTrue(users.contains(trace.getUser()));
     }
-  }
-
-  @Test
-  void seed_shouldCallRepositorySaveAll() {
-    BddLogger.given("a trace seeder");
-    TraceDatabaseRepository mockRepo = mock(TraceDatabaseRepository.class);
-    TraceSeeder seederWithMock = new TraceSeeder(mockRepo);
-
-    BddLogger.when("seeding traces");
-    List<TraceEntity> result = seederWithMock.seed(users, declaredSkillProgresses);
-
-    BddLogger.then("it should call repository and save all");
-    verify(mockRepo, times(1)).saveAllEntities(any());
   }
 }
