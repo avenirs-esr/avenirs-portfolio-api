@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.imported.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.MAX_IMPORTED_SKILLS;
+
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -25,8 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class StudentProgressServiceImpl implements StudentProgressService {
-  public static final int DESCRIPTION_LENGTH_MAX = 400;
-  private static final int MAX_SKILLS = 6;
   private final StudentProgressRepository studentProgressRepository;
   private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceRepository traceRepository;
@@ -63,7 +63,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                 Function.identity(),
                 studentProgress ->
                     studentProgress.getCurrentSkillLevels().stream()
-                        .limit(MAX_SKILLS / studentProgresses.size())
+                        .limit(MAX_IMPORTED_SKILLS / studentProgresses.size())
                         .map(
                             skillLevelProgress ->
                                 new SkillLevelProgressWithTraceCountData(

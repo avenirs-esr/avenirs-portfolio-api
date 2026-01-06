@@ -15,9 +15,11 @@ import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.AddDeclaredProgramDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
+import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.repository.DeclaredProgramJpaRepository;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,8 @@ import org.springframework.test.web.servlet.MockMvc;
 class DeclaredProgramControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/declared/programs";
+
+  @Autowired private DeclaredProgramJpaRepository declaredProgramJpaRepository;
 
   @Autowired private MockMvc mockMvc;
 
@@ -48,6 +52,9 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
 
   @Value("${user.student.signature}")
   private String studentSignature;
+
+  @Value("${user.student.id}")
+  private String studentId;
 
   @Value("${user.second.student.signature}")
   private String secondStudentSignature;
@@ -377,6 +384,11 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
 
     @Nested
     class WhenGettingDeclaredPrograms {
+
+      @BeforeEach
+      void cleanDeclaredProgramsForStudent() throws Exception {
+        declaredProgramJpaRepository.deleteAllByStudentId(UUID.fromString(studentId));
+      }
 
       @Test
       void shouldReturn200WhenDeclaredProgramsExistsAndBelongsToLoggedInStudent() throws Exception {
