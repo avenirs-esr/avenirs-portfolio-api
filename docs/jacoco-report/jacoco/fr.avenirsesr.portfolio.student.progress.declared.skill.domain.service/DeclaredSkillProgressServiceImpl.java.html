@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeclaredSkillProgressServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service</a> &gt; <span class="el_source">DeclaredSkillProgressServiceImpl.java</span></div><h1>DeclaredSkillProgressServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
@@ -29,10 +30,9 @@ import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L32">@Slf4j</span>
+<span class="fc" id="L33">@Slf4j</span>
 @AllArgsConstructor
 public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressService {
-  public static final int DESCRIPTION_LENGTH_MAX = 400;
   private final TraceService traceService;
   private final DeclaredSkillSyncService declaredSkillSyncService;
   private final DeclaredSkillProgressRepository declaredSkillProgressRepository;
@@ -158,13 +158,13 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   }
 
   private static void checkDescriptionField(String description) {
-<span class="fc bfc" id="L161" title="All 4 branches covered.">    if (description != null &amp;&amp; description.length() &gt; DESCRIPTION_LENGTH_MAX) {</span>
+<span class="fc bfc" id="L161" title="All 4 branches covered.">    if (description != null &amp;&amp; description.length() &gt; DESCRIPTION_LENGTH) {</span>
 <span class="fc" id="L162">      log.error(</span>
-          &quot;Description too long: {} characters (max = &quot; + DESCRIPTION_LENGTH_MAX + &quot;)&quot;,
+          &quot;Description too long: {} characters (max = &quot; + DESCRIPTION_LENGTH + &quot;)&quot;,
 <span class="fc" id="L164">          description.length());</span>
 <span class="fc" id="L165">      throw new InvalidDescriptionException(</span>
           &quot;Description exceeds &quot;
-              + DESCRIPTION_LENGTH_MAX
+              + DESCRIPTION_LENGTH
               + &quot; characters (actual: &quot;
 <span class="fc" id="L169">              + description.length()</span>
               + &quot;)&quot;);
