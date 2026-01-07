@@ -78,7 +78,7 @@ class TraceAttachmentControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$.id").exists())
         .andExpect(jsonPath("$.fileName").value("test-file.txt"))
         .andExpect(jsonPath("$.fileSize").value(fileContent.length))
-        .andExpect(jsonPath("$.version").value(2));
+        .andExpect(jsonPath("$.version").value(3));
   }
 
   @Test
@@ -108,7 +108,7 @@ class TraceAttachmentControllerIT extends ContainerConfigurationTest {
   @Test
   void shouldReturn403WhenUserNotAuthorized() throws Exception {
     BddLogger.given("the " + BASE_PATH + " endpoint");
-    UUID traceIdNotOwnedByUser = UUID.fromString("e5e328dc-328e-4f22-962b-9a78864e02f5");
+    UUID traceIdNotOwnedByUser = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
 
     MockMultipartFile file =
         new MockMultipartFile(

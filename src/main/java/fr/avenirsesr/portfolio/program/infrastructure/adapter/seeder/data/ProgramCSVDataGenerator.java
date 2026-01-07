@@ -41,35 +41,36 @@ public class ProgramCSVDataGenerator extends DataGenerator implements ProgramDat
   @Override
   public String university() {
     var element = data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
-    data.get(getLanguage()).remove(element);
     return element.university();
   }
 
   @Override
   public String program() {
     var element = data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
-    data.get(getLanguage()).remove(element);
     return element.program();
   }
 
   @Override
   public String skill() {
     var element = data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
-    data.get(getLanguage()).remove(element);
     return element.skill();
   }
 
   @Override
   public String skillLevelName() {
-    var element = data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
-    data.get(getLanguage()).remove(element);
-    return element.skillLevelName();
+    try {
+      var element =
+          data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
+      return element.skillLevelName();
+    } catch (Exception e) {
+      log.error(e.getMessage());
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   public String skillLevelDescription() {
     var element = data.get(getLanguage()).get(getRandom().nextInt(data.get(getLanguage()).size()));
-    data.get(getLanguage()).remove(element);
     return element.SkillLevelDescription();
   }
 }

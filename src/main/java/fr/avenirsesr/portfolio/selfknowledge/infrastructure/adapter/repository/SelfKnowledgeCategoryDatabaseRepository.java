@@ -35,4 +35,9 @@ public class SelfKnowledgeCategoryDatabaseRepository
   public List<SelfKnowledgeCategory> findAllAvailableByStudent(Student student) {
     return findAll(SelfKnowledgeCategorySpecification.hasNotStudent(student));
   }
+
+  @Override
+  public List<SelfKnowledgeCategory> findAllMandatory() {
+    return findAll(SelfKnowledgeCategorySpecification.isMandatory());
+  }
 }

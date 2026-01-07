@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller;
 
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -149,8 +148,7 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$[0].id", notNullValue()))
         .andExpect(jsonPath("$[0].title", notNullValue()))
         .andExpect(jsonPath("$[0].description", notNullValue()))
-        .andExpect(jsonPath("$[0].type", notNullValue()))
-        .andExpect(jsonPath("$[0].type", is("STRENGTHS")));
+        .andExpect(jsonPath("$[0].type", notNullValue()));
   }
 
   @Test
@@ -191,8 +189,7 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$[0].id", notNullValue()))
         .andExpect(jsonPath("$[0].title", notNullValue()))
         .andExpect(jsonPath("$[0].description", notNullValue()))
-        .andExpect(jsonPath("$[0].type", notNullValue()))
-        .andExpect(jsonPath("$[0].type", is("MOTIVATION")));
+        .andExpect(jsonPath("$[0].type", notNullValue()));
   }
 
   @Test

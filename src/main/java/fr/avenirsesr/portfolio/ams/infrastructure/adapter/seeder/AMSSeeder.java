@@ -3,17 +3,13 @@ package fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.CohortEntity;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.AMSDatabaseRepository;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.repository.CohortDatabaseRepository;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.repository.SkillLevelProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,11 +34,6 @@ public class AMSSeeder {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
       new DataGeneratorProvider<SharedDataGenerator>()
           .init(AMSSeeder.class, SharedDataGenerator.class);
-
-  private final AMSDatabaseRepository amsRepository;
-  private final CohortDatabaseRepository cohortRepository;
-  private final SkillLevelProgressDatabaseRepository skillLevelProgressRepository;
-  private final TraceDatabaseRepository traceRepository;
 
   private Set<CohortEntity> getRandomCohorts(List<CohortEntity> savedCohorts) {
     int cohortCount =
@@ -147,10 +138,6 @@ public class AMSSeeder {
       amsList.add(ams);
     }
 
-    amsRepository.saveAllEntities(amsList);
-    cohortRepository.saveAllEntities(cohortList);
-    skillLevelProgressRepository.saveAllEntities(skillLevelProgressList);
-    traceRepository.saveAllEntities(traceList);
     log.info("✔ {} ams created", amsList.size());
 
     return amsList;

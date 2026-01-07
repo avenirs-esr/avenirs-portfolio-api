@@ -165,6 +165,12 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   }
 
   @Override
+  public void initSelfKnowledgeCategoriesMandatory(Student student) {
+    var mandatoryCategories = selfKnowledgeCategoryRepository.findAllMandatory();
+    studentRepository.addSelfKnowledgeCategories(student, mandatoryCategories);
+  }
+
+  @Override
   public void removeSelfKnowledgeCategory(UUID categoryId) {
     Student student = loggedInUserService.getLoggedInStudent();
     SelfKnowledgeCategory selfKnowledgeCategory =

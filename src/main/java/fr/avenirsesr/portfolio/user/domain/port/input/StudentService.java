@@ -10,4 +10,6 @@ public interface StudentService {
   String getBio(User user);
 
   void updateProfile(User user, String bio);
+
+  Student createStudent(UUID userId, String bio);
 }

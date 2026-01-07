@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record TraceCreationData(
+    UUID traceId,
     UUID userId,
     String title,
     boolean isGroup,

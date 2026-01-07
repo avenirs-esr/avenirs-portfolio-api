@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +24,8 @@ public interface SelfKnowledgeService {
   void deleteSelfKnowledgeElements(List<UUID> selfKnowledgeElementIds);
 
   List<SelfKnowledgeCategory> getSelfKnowledgeCategories();
+
+  void initSelfKnowledgeCategoriesMandatory(Student student);
 
   List<SelfKnowledgeCategory> getSelfKnowledgeCategoriesAvailable();
 

@@ -40,6 +40,7 @@ public interface TraceService {
       String aiJustification);
 
   Trace createTrace(
+      UUID traceId,
       UUID userId,
       String title,
       ELanguage language,

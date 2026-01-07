@@ -111,9 +111,9 @@ public class UserControllerIT extends ContainerConfigurationTest {
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.firstname").value("Alexandre"))
-        .andExpect(jsonPath("$.lastname").value("Clément"))
-        .andExpect(jsonPath("$.email").value("alicia.carre@yahoo.fr"))
+        .andExpect(jsonPath("$.firstname").value("Lucas"))
+        .andExpect(jsonPath("$.lastname").value("Tessier"))
+        .andExpect(jsonPath("$.email").value("lucas.tessier@email.com"))
         .andExpect(jsonPath("$.bio").exists());
   }
 

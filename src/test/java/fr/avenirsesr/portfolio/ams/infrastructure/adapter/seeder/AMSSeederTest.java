@@ -121,9 +121,6 @@ class AMSSeederTest extends ContainerConfigurationTest {
       assertNotNull(ams.getTranslations());
       assertTrue(ams.getTranslations().stream().anyMatch(t -> t.getLanguage() != null));
     }
-
-    // Vérifie que le repository a bien été appelé
-    verify(amsRepository, times(1)).saveAllEntities(result);
   }
 
   @Test

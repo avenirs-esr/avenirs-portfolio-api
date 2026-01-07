@@ -63,6 +63,7 @@ public class TraceSeeder {
         data -> {
           var trace =
               traceService.createTrace(
+                  data.traceId(),
                   data.userId(),
                   data.title(),
                   data.language(),
@@ -111,6 +112,7 @@ public class TraceSeeder {
         .map(
             entity ->
                 new TraceCreationData(
+                    entity.getId(),
                     entity.getUser().getId(),
                     entity.getTitle(),
                     entity.isGroup(),

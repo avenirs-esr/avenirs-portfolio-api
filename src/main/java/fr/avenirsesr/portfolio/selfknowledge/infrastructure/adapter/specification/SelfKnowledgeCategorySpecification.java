@@ -19,6 +19,14 @@ public class SelfKnowledgeCategorySpecification {
     };
   }
 
+  public static Specification<SelfKnowledgeCategoryEntity> isMandatory() {
+    return (root, query, criteriaBuilder) -> {
+      assert query != null;
+      query.distinct(true);
+      return criteriaBuilder.isTrue(root.get("mandatory"));
+    };
+  }
+
   public static Specification<SelfKnowledgeCategoryEntity> hasNotStudent(Student student) {
     return (root, query, criteriaBuilder) -> {
       assert query != null;

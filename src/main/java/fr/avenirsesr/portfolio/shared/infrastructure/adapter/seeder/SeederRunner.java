@@ -58,6 +58,9 @@ public class SeederRunner implements CommandLineRunner {
   @Value("${seeder.source:FAKER}")
   private String seederSource;
 
+  @Value("${dependencies-check:false}")
+  private boolean dependenciesCheck;
+
   @Value("${avenirs.interoperability.actuator.health}")
   private String interoperabilityHealthUrl;
 
@@ -113,7 +116,7 @@ public class SeederRunner implements CommandLineRunner {
     if (seedEnabled && userCont == 0) {
       log.info("Seeding enabled and starting...");
 
-      if (!"FAKER".equalsIgnoreCase(seederSource)) {
+      if (dependenciesCheck) {
         dependencyChecker.checkAndWait("Interoperability", interoperabilityHealthUrl);
       }
 
@@ -146,5 +149,13 @@ public class SeederRunner implements CommandLineRunner {
 
       log.info("✔ Seeding successfully finished");
     } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
+  }
+
+  public boolean isDependenciesCheck() {
+    return dependenciesCheck;
+  }
+
+  public void setDependenciesCheck(boolean dependenciesCheck) {
+    this.dependenciesCheck = dependenciesCheck;
   }
 }

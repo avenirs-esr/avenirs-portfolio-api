@@ -10,4 +10,6 @@ public interface SelfKnowledgeCategoryRepository
   List<SelfKnowledgeCategory> findAllByStudent(Student student);
 
   List<SelfKnowledgeCategory> findAllAvailableByStudent(Student student);
+
+  List<SelfKnowledgeCategory> findAllMandatory();
 }

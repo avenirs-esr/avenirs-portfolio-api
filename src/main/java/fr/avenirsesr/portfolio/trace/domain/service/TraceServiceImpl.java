@@ -195,6 +195,7 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public Trace createTrace(
+      UUID traceId,
       UUID userId,
       String title,
       ELanguage language,
@@ -202,6 +203,7 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification) {
     return createTrace(
+        traceId,
         userRepository.findById(userId).orElseThrow(),
         title,
         language,
@@ -218,10 +220,12 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
-    return createTrace(loggedInUser, title, language, isGroup, personalNote, aiJustification);
+    return createTrace(
+        UUID.randomUUID(), loggedInUser, title, language, isGroup, personalNote, aiJustification);
   }
 
   private Trace createTrace(
+      UUID traceId,
       User user,
       String title,
       ELanguage language,
@@ -230,8 +234,7 @@ public class TraceServiceImpl implements TraceService {
       String aiJustification) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     var trace =
-        Trace.create(
-            UUID.randomUUID(), user, title, language, isGroup, aiJustification, personalNote);
+        Trace.create(traceId, user, title, language, isGroup, aiJustification, personalNote);
 
     return traceRepository.save(trace);
   }

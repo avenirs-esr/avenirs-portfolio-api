@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
@@ -65,7 +66,8 @@ class TraceSeederTest extends ContainerConfigurationTest {
     // Vérifie que chaque trace est associée à un utilisateur
     for (TraceEntity trace : traces) {
       assertNotNull(trace.getUser());
-      assertTrue(users.contains(trace.getUser()));
+      assertTrue(
+          users.stream().map(AvenirsBaseEntity::getId).toList().contains(trace.getUser().getId()));
     }
   }
 }

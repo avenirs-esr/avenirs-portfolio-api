@@ -397,34 +397,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             "performing a GET for existing declared programs owned by the logged-in student");
         BddLogger.then("it should return 200 with declared programs dto");
 
-        String declaredProgramId1 =
-            createDeclaredProgramAndReturnId(
-                new AddDeclaredProgramDTO(
-                    "1-Title",
-                    "1-Description",
-                    "1-Organization",
-                    "1-Result",
-                    "1-Source",
-                    "https://link-1.example.com",
-                    LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
-                studentPayload,
-                studentSignature);
-
-        String declaredProgramId2 =
-            createDeclaredProgramAndReturnId(
-                new AddDeclaredProgramDTO(
-                    "2-Title",
-                    "2-Description",
-                    "2-Organization",
-                    "2-Result",
-                    "2-Source",
-                    "https://link-2.example.com",
-                    LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
-                studentPayload,
-                studentSignature);
-
         mockMvc
             .perform(
                 get(BASE_PATH)
@@ -435,16 +407,16 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.data.length()").value(2))
-            .andExpect(jsonPath("$.data[0].id").value(declaredProgramId1))
-            .andExpect(jsonPath("$.data[0].status").value(EProgramStatus.IN_PROGRESS.name()))
-            .andExpect(jsonPath("$.data[0].title").value("1-Title"))
-            .andExpect(jsonPath("$.data[0].organization").value("1-Organization"))
-            .andExpect(jsonPath("$.data[0].result").value("1-Result"))
-            .andExpect(jsonPath("$.data[1].id").value(declaredProgramId2))
-            .andExpect(jsonPath("$.data[1].status").value(EProgramStatus.IN_PROGRESS.name()))
-            .andExpect(jsonPath("$.data[1].title").value("2-Title"))
-            .andExpect(jsonPath("$.data[1].organization").value("2-Organization"))
-            .andExpect(jsonPath("$.data[1].result").value("2-Result"))
+            .andExpect(jsonPath("$.data[0].status").value(EProgramStatus.COMPLETED.name()))
+            .andExpect(jsonPath("$.data[0].title").value("Stage développeur web"))
+            .andExpect(jsonPath("$.data[0].organization").value("TechNova"))
+            .andExpect(
+                jsonPath("$.data[0].result")
+                    .value("Mise en production de plusieurs fonctionnalités."))
+            .andExpect(jsonPath("$.data[1].status").value(EProgramStatus.COMPLETED.name()))
+            .andExpect(jsonPath("$.data[1].title").value("Séminaire leadership et communication"))
+            .andExpect(jsonPath("$.data[1].organization").value("LeadPro"))
+            .andExpect(jsonPath("$.data[1].result").value("Certificat obtenu"))
             .andExpect(jsonPath("$.page.page").value(0))
             .andExpect(jsonPath("$.page.pageSize").value(8))
             .andExpect(jsonPath("$.page.totalElements").value(2))

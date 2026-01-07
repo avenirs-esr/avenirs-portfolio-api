@@ -35,7 +35,7 @@ public class SeederConfig {
   // Cohorts
   public static final int COHORTS_NB = 50;
   public static final int COHORT_NB_USERS_MIN = 1;
-  public static final int COHORT_NB_USERS_MAX = 25;
+  public static final int COHORT_NB_USERS_MAX = 15;
 
   // AMS
   public static final int AMS_NB = 80;
