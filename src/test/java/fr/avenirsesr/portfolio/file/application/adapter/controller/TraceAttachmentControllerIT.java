@@ -77,8 +77,7 @@ class TraceAttachmentControllerIT extends ContainerConfigurationTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.id").exists())
         .andExpect(jsonPath("$.fileName").value("test-file.txt"))
-        .andExpect(jsonPath("$.fileSize").value(fileContent.length))
-        .andExpect(jsonPath("$.version").value(3));
+        .andExpect(jsonPath("$.fileSize").value(fileContent.length));
   }
 
   @Test

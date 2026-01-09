@@ -1,0 +1,65 @@
+[
+  {
+    "id": "8a2e9fb1-5e4d-4af2-b51e-639f18f6b801",
+    "title": "My strengths",
+    "description": "Identify and highlight my qualities, talents and key achievements.",
+    "type": "STRENGTHS",
+    "isMandatory": true
+  },
+  {
+    "id": "e32c1a55-c95b-43e2-907d-1fdb4eaaf62f",
+    "title": "My values",
+    "description": "Clarify what is important to me and what guides my daily decisions.",
+    "type": "VALUES",
+    "isMandatory": true
+  },
+  {
+    "id": "b1d3d8e7-c244-46f3-bc57-0b7c2e653df7",
+    "title": "My aspirations",
+    "description": "Clarify what I want to explore, learn or experience in the short and medium term.",
+    "type": "ASPIRATIONS",
+    "isMandatory": true
+  },
+  {
+    "id": "cd2b4f4e-ae23-4f32-bf25-bcb8b29414f4",
+    "title": "My professional motivations",
+    "description": "Understand what drives me to invest in my work and my career.",
+    "type": "MOTIVATION",
+    "isMandatory": false
+  },
+  {
+    "id": "7f39ae42-453c-4b85-a7b4-d7fe1b983cb2",
+    "title": "My areas for improvement",
+    "description": "Identify the points I wish to improve or gain confidence in.",
+    "type": "IMPROVEMENT",
+    "isMandatory": false
+  },
+  {
+    "id": "6d248555-b4aa-4ca8-9fbc-6898516e5cd4",
+    "title": "My interests",
+    "description": "List the subjects, activities or fields I am passionate about.",
+    "type": "INTERESTS",
+    "isMandatory": false
+  },
+  {
+    "id": "ff23bb72-1e41-4c03-9570-8cbcbfb82c18",
+    "title": "My inspirations",
+    "description": "Identify the people, projects or experiences that inspire me.",
+    "type": "INSPIRATIONS",
+    "isMandatory": false
+  },
+  {
+    "id": "bb1cc648-db59-4494-bcfe-196430d30b61",
+    "title": "My obligations",
+    "description": "Take into account my personal, material or family constraints.",
+    "type": "OBLIGATIONS",
+    "isMandatory": false
+  },
+  {
+    "id": "9bd6baf8-06dd-4901-9018-5047487a54d1",
+    "title": "My testimonials",
+    "description": "Collect feedback from other people reflecting their experience of my qualities.",
+    "type": "TESTIMONIALS",
+    "isMandatory": false
+  }
+]

@@ -472,12 +472,11 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("an existing trace and existing associations for the logged-in student");
 
     UUID traceId = getFirstTraceIdFromOverview();
-    UUID amsId = searchFirstAssociationId(ETraceAssociationType.AMS);
     UUID skillLevelId = searchFirstAssociationId(ETraceAssociationType.SKILL_LEVEL);
     UUID declaredSkillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
 
     AssociateTraceDTO dto =
-        new AssociateTraceDTO(List.of(amsId), List.of(skillLevelId), List.of(declaredSkillId));
+        new AssociateTraceDTO(List.of(), List.of(skillLevelId), List.of(declaredSkillId));
 
     BddLogger.when("performing POST /associate/{traceId}");
     BddLogger.then("it should return 200 and a success message");

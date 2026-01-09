@@ -12,8 +12,17 @@ public class SelfKnowledgeCategoryMapper
 
   @Override
   public SelfKnowledgeCategoryEntity fromDomain(SelfKnowledgeCategory category) {
-    return SelfKnowledgeCategoryEntity.of(
-        category.getId(), category.getType(), category.isMandatory());
+    var entity =
+        SelfKnowledgeCategoryEntity.of(
+            category.getId(), category.getType(), category.isMandatory());
+
+    TranslationUtil.addTranslation(
+        category,
+        entity,
+        SelfKnowledgeCategoryTranslationEntity::create,
+        SelfKnowledgeCategoryTranslationEntity::update);
+
+    return entity;
   }
 
   @Override

@@ -11,8 +11,8 @@ import lombok.Setter;
 @Setter
 public class SelfKnowledgeCategory extends AvenirsBaseModel {
 
-  private final String title;
-  private final String description;
+  private String title;
+  private String description;
   private final ESelfKnowledgeCategoryType type;
   private final boolean mandatory;
 

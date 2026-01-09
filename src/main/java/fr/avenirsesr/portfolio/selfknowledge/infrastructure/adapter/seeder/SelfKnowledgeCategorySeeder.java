@@ -1,11 +1,15 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
+import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
+import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeCategoryMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryTranslationEntity;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository.SelfKnowledgeCategoryDatabaseRepository;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.data.CsvSelfKnowledgeCategoryDto;
-import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.data.SelfKnowledgeCategoryCSVData;
+import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.data.SelfKnowledgeCategoryCreationData;
+import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,66 +20,51 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class SelfKnowledgeCategorySeeder {
-
-  private final SelfKnowledgeCategoryDatabaseRepository repository;
+  private static final String PATH_FILE_FR = "seeder/self-knowledge-categories.fr.json";
+  private static final String PATH_FILE_EN = "seeder/self-knowledge-categories.en.json";
+  private static final String PATH_FILE_ES = "seeder/self-knowledge-categories.es.json";
+  private final FileReader fileReader;
+  private final SelfKnowledgeService selfKnowledgeService;
 
   @Transactional
   public List<SelfKnowledgeCategoryEntity> seed() {
     log.info("Seeding self-knowledge categories from CSV (FR/EN/ES)...");
 
-    Map<ELanguage, List<CsvSelfKnowledgeCategoryDto>> dataByLang =
-        SelfKnowledgeCategoryCSVData.getAllByLanguage();
+    List<SelfKnowledgeCategoryCreationData> creationDataFR =
+        fileReader.readJSON(PATH_FILE_FR, new TypeReference<>() {});
+    List<SelfKnowledgeCategoryCreationData> creationDataEN =
+        fileReader.readJSON(PATH_FILE_EN, new TypeReference<>() {});
+    List<SelfKnowledgeCategoryCreationData> creationDataES =
+        fileReader.readJSON(PATH_FILE_ES, new TypeReference<>() {});
 
-    List<CsvSelfKnowledgeCategoryDto> frRows = dataByLang.get(ELanguage.FRENCH);
-    List<CsvSelfKnowledgeCategoryDto> enRows = dataByLang.get(ELanguage.ENGLISH);
-    List<CsvSelfKnowledgeCategoryDto> esRows = dataByLang.get(ELanguage.SPANISH);
+    List<SelfKnowledgeCategory> categories = new ArrayList<>();
+    creationDataFR.forEach(
+        data -> {
+          RequestContext.set(new RequestData(Optional.empty(), ELanguage.FRENCH));
+          var category =
+              selfKnowledgeService.createSelfKnowledgeCategory(
+                  data.id(), data.title(), data.description(), data.type(), data.isMandatory());
 
-    if (frRows.size() != enRows.size() || frRows.size() != esRows.size()) {
-      throw new IllegalStateException(
-          "CSV self-knowledge categories are misaligned between languages.");
-    }
+          var enData =
+              creationDataEN.stream()
+                  .filter(c -> c.id().equals(data.id()))
+                  .findFirst()
+                  .orElseThrow();
+          RequestContext.set(new RequestData(Optional.empty(), ELanguage.ENGLISH));
+          selfKnowledgeService.updateSelfKnowledgeCategory(
+              enData.id(), enData.title(), enData.description());
 
-    List<SelfKnowledgeCategoryEntity> entities = new ArrayList<>();
+          var esData =
+              creationDataES.stream()
+                  .filter(c -> c.id().equals(data.id()))
+                  .findFirst()
+                  .orElseThrow();
+          RequestContext.set(new RequestData(Optional.empty(), ELanguage.SPANISH));
+          selfKnowledgeService.updateSelfKnowledgeCategory(
+              esData.id(), esData.title(), esData.description());
+          categories.add(category);
+        });
 
-    for (int i = 0; i < frRows.size(); i++) {
-      CsvSelfKnowledgeCategoryDto fr = frRows.get(i);
-      CsvSelfKnowledgeCategoryDto en = enRows.get(i);
-      CsvSelfKnowledgeCategoryDto es = esRows.get(i);
-
-      var categoryEntity =
-          SelfKnowledgeCategoryEntity.of(UUID.randomUUID(), fr.type(), fr.mandatory());
-
-      Set<SelfKnowledgeCategoryTranslationEntity> translations = new HashSet<>();
-
-      translations.add(
-          SelfKnowledgeCategoryTranslationEntity.of(
-              UUID.randomUUID(), ELanguage.FRENCH, fr.title(), fr.description(), categoryEntity));
-
-      translations.add(
-          SelfKnowledgeCategoryTranslationEntity.of(
-              UUID.randomUUID(), ELanguage.ENGLISH, en.title(), en.description(), categoryEntity));
-
-      translations.add(
-          SelfKnowledgeCategoryTranslationEntity.of(
-              UUID.randomUUID(), ELanguage.SPANISH, es.title(), es.description(), categoryEntity));
-
-      categoryEntity.setTranslations(translations);
-
-      entities.add(categoryEntity);
-    }
-
-    repository.saveAllEntities(entities);
-
-    List<SelfKnowledgeCategoryEntity> mandatoryCategories =
-        entities.stream().filter(SelfKnowledgeCategoryEntity::isMandatory).toList();
-
-    long mandatoryCount = mandatoryCategories.size();
-    log.info(
-        "✔ {} self-knowledge categories created ({} mandatory, {} optional)",
-        entities.size(),
-        mandatoryCount,
-        entities.size() - mandatoryCount);
-
-    return mandatoryCategories;
+    return categories.stream().map(SelfKnowledgeCategoryMapper.INSTANCE::fromDomain).toList();
   }
 }

@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.TranslatableEntity;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
@@ -22,7 +22,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SelfKnowledgeCategoryEntity extends AvenirsBaseEntity {
+public class SelfKnowledgeCategoryEntity
+    extends TranslatableEntity<SelfKnowledgeCategoryTranslationEntity> {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)

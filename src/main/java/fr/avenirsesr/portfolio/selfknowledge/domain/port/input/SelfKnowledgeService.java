@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import java.util.UUID;
@@ -32,4 +33,14 @@ public interface SelfKnowledgeService {
   void addSelfKnowledgeCategories(List<String> categoriesId);
 
   void removeSelfKnowledgeCategory(UUID categoryId);
+
+  SelfKnowledgeCategory createSelfKnowledgeCategory(
+      UUID id,
+      String title,
+      String description,
+      ESelfKnowledgeCategoryType type,
+      boolean isMandatory);
+
+  SelfKnowledgeCategory updateSelfKnowledgeCategory(
+      UUID categoryId, String title, String description);
 }

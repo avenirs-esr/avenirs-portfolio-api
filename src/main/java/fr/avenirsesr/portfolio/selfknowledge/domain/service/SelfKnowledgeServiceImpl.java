@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDet
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.*;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeCategoryRepository;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
@@ -182,6 +183,31 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
     }
     selfKnowledgeElementRepository.deleteAllByStudentAndCategory(student, selfKnowledgeCategory);
     studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);
+  }
+
+  @Override
+  public SelfKnowledgeCategory createSelfKnowledgeCategory(
+      UUID id,
+      String title,
+      String description,
+      ESelfKnowledgeCategoryType type,
+      boolean isMandatory) {
+    var category = SelfKnowledgeCategory.create(id, title, description, type, isMandatory);
+    selfKnowledgeCategoryRepository.save(category);
+    return category;
+  }
+
+  @Override
+  public SelfKnowledgeCategory updateSelfKnowledgeCategory(
+      UUID categoryId, String title, String description) {
+    var category =
+        selfKnowledgeCategoryRepository
+            .findById(categoryId)
+            .orElseThrow(SelfKnowledgeCategoryNotFoundException::new);
+    category.setTitle(title);
+    category.setDescription(description);
+    selfKnowledgeCategoryRepository.save(category);
+    return category;
   }
 
   private List<SelfKnowledgeCategory> getAvailableCategoriesToAdd(
