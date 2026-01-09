@@ -16,9 +16,9 @@ public class StudentServiceImpl implements StudentService {
 
   @Override
   public Student getStudentById(UUID studentId) {
-<span class="nc" id="L19">    return studentRepository</span>
-<span class="nc" id="L20">        .findById(studentId)</span>
-<span class="nc" id="L21">        .orElseThrow(</span>
+<span class="fc" id="L19">    return studentRepository</span>
+<span class="fc" id="L20">        .findById(studentId)</span>
+<span class="fc" id="L21">        .orElseThrow(</span>
             () -&gt; {
 <span class="nc" id="L23">              log.error(&quot;Student {} not found&quot;, studentId);</span>
 <span class="nc" id="L24">              return new UserIsNotStudentException();</span>

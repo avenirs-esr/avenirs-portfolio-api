@@ -17,9 +17,9 @@ import org.springframework.data.jpa.domain.Specification;
   }
 
   public static Specification&lt;DeclaredSkillProgressEntity&gt; search(String keyword) {
-<span class="nc" id="L20">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L21" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="nc" id="L22">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L20">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L21" title="1 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="fc" id="L22">        return criteriaBuilder.conjunction();</span>
       }
 <span class="nc" id="L24">      return criteriaBuilder.like(</span>
 <span class="nc" id="L25">          criteriaBuilder.lower(root.get(&quot;declaredSkill&quot;).get(&quot;libelle&quot;)),</span>

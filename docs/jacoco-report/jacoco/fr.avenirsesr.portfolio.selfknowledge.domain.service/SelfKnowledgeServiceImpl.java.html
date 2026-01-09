@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SelfKnowledgeServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.selfknowledge.domain.service</a> &gt; <span class="el_source">SelfKnowledgeServiceImpl.java</span></div><h1>SelfKnowledgeServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.selfknowledge.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RATING_MAX;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RATING_MIN;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
+
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -21,18 +26,13 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L29">@Slf4j</span>
 @AllArgsConstructor
 public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   private final StudentRepository studentRepository;
   private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
   private final LoggedInUserService loggedInUserService;
-
-  public static final int TITLE_LENGTH_MAX = 80;
-  public static final int DESCRIPTION_LENGTH_MAX = 400;
-  public static final int RATING_MIN = 1;
-  public static final int RATING_MAX = 5;
 
   @Override
   public PagedResult&lt;SelfKnowledgeElement&gt; getSelfKnowledgeElements(
@@ -56,8 +56,8 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 <span class="fc" id="L56">            .findById(selfKnowledgeElementId)</span>
 <span class="fc" id="L57">            .orElseThrow(SelfKnowledgeElementNotFoundException::new);</span>
 
-<span class="pc bpc" id="L59" title="1 of 2 branches missed.">    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {</span>
-<span class="nc" id="L60">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {</span>
+<span class="fc" id="L60">      throw new UserNotAuthorizedException();</span>
     }
 
 <span class="fc" id="L63">    return new SelfKnowledgeElementDetails(selfKnowledgeElement);</span>
@@ -97,14 +97,14 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 <span class="fc" id="L97">            .findById(selfKnowledgeElementId)</span>
 <span class="fc" id="L98">            .orElseThrow(SelfKnowledgeElementNotFoundException::new);</span>
 
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {</span>
-<span class="nc" id="L101">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">    if (!student.getId().equals(selfKnowledgeElement.getStudent().getId())) {</span>
+<span class="fc" id="L101">      throw new UserNotAuthorizedException();</span>
     }
 
 <span class="fc" id="L104">    selfKnowledgeElement.setTitle(title);</span>
 <span class="fc" id="L105">    selfKnowledgeElement.setDescription(description);</span>
 
-<span class="pc bpc" id="L107" title="1 of 2 branches missed.">    if (rating != null) {</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">    if (rating != null) {</span>
 <span class="fc" id="L108">      selfKnowledgeElement.setRating(rating);</span>
     }
 
@@ -117,17 +117,17 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 <span class="fc" id="L117">    List&lt;SelfKnowledgeElement&gt; selfKnowledgeElements =</span>
 <span class="fc" id="L118">        selfKnowledgeElementRepository.findAllById(selfKnowledgeElementIds);</span>
 
-<span class="pc bpc" id="L120" title="1 of 2 branches missed.">    if (!selfKnowledgeElements.stream().allMatch(e -&gt; e.getStudent().equals(student))) {</span>
-<span class="nc" id="L121">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">    if (!selfKnowledgeElements.stream().allMatch(e -&gt; e.getStudent().equals(student))) {</span>
+<span class="fc" id="L121">      throw new UserNotAuthorizedException();</span>
     }
 
 <span class="fc" id="L124">    List&lt;SelfKnowledgeCategory&gt; categories =</span>
 <span class="fc" id="L125">        selfKnowledgeElements.stream().map(element -&gt; element.getSelfKnowledgeCategory()).toList();</span>
 
-<span class="pc bpc" id="L127" title="3 of 4 branches missed.">    boolean allEqual = categories.size() &lt;= 1 || categories.stream().distinct().count() == 1;</span>
+<span class="pc bpc" id="L127" title="1 of 4 branches missed.">    boolean allEqual = categories.size() &lt;= 1 || categories.stream().distinct().count() == 1;</span>
 
-<span class="pc bpc" id="L129" title="1 of 2 branches missed.">    if (!allEqual) {</span>
-<span class="nc" id="L130">      throw new SelfKnowledgeElementsAreNotInSameCategoryException();</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">    if (!allEqual) {</span>
+<span class="fc" id="L130">      throw new SelfKnowledgeElementsAreNotInSameCategoryException();</span>
     }
 
 <span class="fc" id="L133">    selfKnowledgeElementRepository.removeAllFromDatabase(selfKnowledgeElements);</span>
@@ -196,33 +196,33 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   }
 
   private static void checkTitleField(String title) {
-<span class="pc bpc" id="L199" title="2 of 4 branches missed.">    if (title != null &amp;&amp; title.length() &gt; TITLE_LENGTH_MAX) {</span>
-<span class="nc" id="L200">      log.error(&quot;Title too long: {} characters (max = &quot; + TITLE_LENGTH_MAX + &quot;)&quot;, title.length());</span>
-<span class="nc" id="L201">      throw new SelfKnowledgeInvalidTitleException(</span>
-<span class="nc" id="L202">          &quot;Title exceeds &quot; + TITLE_LENGTH_MAX + &quot; characters (actual: &quot; + title.length() + &quot;)&quot;);</span>
+<span class="pc bpc" id="L199" title="1 of 4 branches missed.">    if (title != null &amp;&amp; title.length() &gt; TITLE_LENGTH) {</span>
+<span class="fc" id="L200">      log.error(&quot;Title too long: {} characters (max = &quot; + TITLE_LENGTH + &quot;)&quot;, title.length());</span>
+<span class="fc" id="L201">      throw new SelfKnowledgeInvalidTitleException(</span>
+<span class="fc" id="L202">          &quot;Title exceeds &quot; + TITLE_LENGTH + &quot; characters (actual: &quot; + title.length() + &quot;)&quot;);</span>
     }
 <span class="fc" id="L204">  }</span>
 
   private static void checkDescriptionField(String description) {
-<span class="pc bpc" id="L207" title="2 of 4 branches missed.">    if (description != null &amp;&amp; description.length() &gt; DESCRIPTION_LENGTH_MAX) {</span>
-<span class="nc" id="L208">      log.error(</span>
-          &quot;Description too long: {} characters (max = &quot; + DESCRIPTION_LENGTH_MAX + &quot;)&quot;,
-<span class="nc" id="L210">          description.length());</span>
-<span class="nc" id="L211">      throw new SelfKnowledgeInvalidDescriptionException(</span>
+<span class="pc bpc" id="L207" title="1 of 4 branches missed.">    if (description != null &amp;&amp; description.length() &gt; DESCRIPTION_LENGTH) {</span>
+<span class="fc" id="L208">      log.error(</span>
+          &quot;Description too long: {} characters (max = &quot; + DESCRIPTION_LENGTH + &quot;)&quot;,
+<span class="fc" id="L210">          description.length());</span>
+<span class="fc" id="L211">      throw new SelfKnowledgeInvalidDescriptionException(</span>
           &quot;Description exceeds &quot;
-              + DESCRIPTION_LENGTH_MAX
+              + DESCRIPTION_LENGTH
               + &quot; characters (actual: &quot;
-<span class="nc" id="L215">              + description.length()</span>
+<span class="fc" id="L215">              + description.length()</span>
               + &quot;)&quot;);
     }
 <span class="fc" id="L218">  }</span>
 
   private static void checkRating(Integer rating) {
-<span class="pc bpc" id="L221" title="3 of 6 branches missed.">    if (rating != null &amp;&amp; (rating &lt; RATING_MIN || rating &gt; RATING_MAX)) {</span>
-<span class="nc" id="L222">      log.error(</span>
+<span class="pc bpc" id="L221" title="1 of 6 branches missed.">    if (rating != null &amp;&amp; (rating &lt; RATING_MIN || rating &gt; RATING_MAX)) {</span>
+<span class="fc" id="L222">      log.error(</span>
           &quot;Rating is out of bounce: {} (min = &quot; + RATING_MIN + &quot;, max = &quot; + RATING_MAX + &quot;)&quot;,
           rating);
-<span class="nc" id="L225">      throw new SelfKnowledgeInvalidRatingException(</span>
+<span class="fc" id="L225">      throw new SelfKnowledgeInvalidRatingException(</span>
           &quot;Rating is out of bounce [&quot;
               + RATING_MIN
               + &quot;,&quot;

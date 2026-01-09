@@ -32,9 +32,9 @@ public class AMSDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;AM
   @Override
   public PagedResult&lt;AMS&gt; findByStudent(
       Student student, PageCriteria pageCriteria, String keyword) {
-<span class="nc" id="L35">    return findAllBy(</span>
-<span class="nc" id="L36">        hasStudent(student)</span>
-<span class="nc" id="L37">            .and(AMSSpecification.search(keyword, TranslationUtil.getRequestLanguage())),</span>
+<span class="fc" id="L35">    return findAllBy(</span>
+<span class="fc" id="L36">        hasStudent(student)</span>
+<span class="fc" id="L37">            .and(AMSSpecification.search(keyword, TranslationUtil.getRequestLanguage())),</span>
         pageCriteria);
   }
 
@@ -50,7 +50,7 @@ public class AMSDatabaseRepository extends GenericUserJpaRepositoryAdapter&lt;AM
 
   @Override
   public List&lt;AMS&gt; findAllByStudent(Student student) {
-<span class="nc" id="L53">    return findAll(hasStudent(student));</span>
+<span class="fc" id="L53">    return findAll(hasStudent(student));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

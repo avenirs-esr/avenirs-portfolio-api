@@ -26,8 +26,8 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="nc" id="L26">      case STATUS -&gt; status((List&lt;ETraceStatus&gt;) value);</span>
       case IS_ASSOCIATED -&gt; {
 <span class="pc bpc" id="L28" title="1 of 2 branches missed.">        if (value == null) yield null;</span>
-<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        yield ((Boolean) value)</span>
-<span class="nc" id="L30">            ? TraceSpecification.associated()</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        yield ((Boolean) value)</span>
+<span class="fc" id="L30">            ? TraceSpecification.associated()</span>
 <span class="fc" id="L31">            : TraceSpecification.unassociated();</span>
       }
     };

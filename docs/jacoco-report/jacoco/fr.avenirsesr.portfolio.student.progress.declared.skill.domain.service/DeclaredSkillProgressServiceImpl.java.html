@@ -153,8 +153,8 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   @Override
   public PagedResult&lt;DeclaredSkillProgress&gt; searchDeclaredSkill(
       String keyword, PageCriteria pageCriteria) {
-<span class="nc" id="L156">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L157">    return declaredSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);</span>
+<span class="fc" id="L156">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L157">    return declaredSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);</span>
   }
 
   private static void checkDescriptionField(String description) {

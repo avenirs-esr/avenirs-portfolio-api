@@ -67,17 +67,17 @@ public class TraceDatabaseRepository
 <span class="fc" id="L67">      specification = specification.and(dateFilterSpecification);</span>
     }
 
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">    if (keyword != null) {</span>
-<span class="nc" id="L71">      specification =</span>
-<span class="nc" id="L72">          specification.and(</span>
-<span class="nc" id="L73">              TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">    if (keyword != null) {</span>
+<span class="fc" id="L71">      specification =</span>
+<span class="fc" id="L72">          specification.and(</span>
+<span class="fc" id="L73">              TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));</span>
     }
 
     Sort sort =
-<span class="pc bpc" id="L77" title="2 of 4 branches missed.">        filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
+<span class="pc bpc" id="L77" title="1 of 4 branches missed.">        filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
 <span class="fc" id="L78">            ? Sort.by(Sort.Direction.ASC, &quot;createdAt&quot;)</span>
-<span class="nc" id="L79">            : Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
-<span class="pc" id="L80">                .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
+<span class="fc" id="L79">            : Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
+<span class="fc" id="L80">                .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
 
 <span class="fc" id="L82">    return findAll(</span>
 <span class="fc" id="L83">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>

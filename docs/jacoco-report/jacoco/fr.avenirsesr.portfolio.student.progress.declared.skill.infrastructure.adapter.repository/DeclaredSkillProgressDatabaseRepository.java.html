@@ -42,7 +42,7 @@ public class DeclaredSkillProgressDatabaseRepository
 
   @Override
   public List&lt;DeclaredSkillProgress&gt; findAllByStudent(Student student) {
-<span class="nc" id="L45">    return findAll(hasStudent(student));</span>
+<span class="fc" id="L45">    return findAll(hasStudent(student));</span>
   }
 
   @Override
@@ -58,13 +58,13 @@ public class DeclaredSkillProgressDatabaseRepository
   @Override
   public PagedResult&lt;DeclaredSkillProgress&gt; findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword) {
-<span class="nc" id="L61">    var specification = hasStudent(student).and(DeclaredSkillProgressSpecification.search(keyword));</span>
-<span class="nc" id="L62">    return findAllByStudent(specification, pageCriteria);</span>
+<span class="fc" id="L61">    var specification = hasStudent(student).and(DeclaredSkillProgressSpecification.search(keyword));</span>
+<span class="fc" id="L62">    return findAllByStudent(specification, pageCriteria);</span>
   }
 
   private PagedResult&lt;DeclaredSkillProgress&gt; findAllByStudent(
       Specification&lt;DeclaredSkillProgressEntity&gt; specification, PageCriteria pageCriteria) {
-<span class="nc" id="L67">    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
+<span class="fc" id="L67">    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
