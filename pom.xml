@@ -242,6 +242,9 @@
                         <exclude>**/request/**</exclude>
                         <exclude>**/response/**</exclude>
                         <exclude>**/model/**</exclude>
+                        <exclude>**/infrastructure/adapter/openapi/**</exclude>
+                        <exclude>**/infrastructure/adapter/service/**</exclude>
+                        <exclude>fr/avenirsesr/portfolio/common/**</exclude>
                     </excludes>
                     <outputDirectory>${project.build.directory}/site/jacoco</outputDirectory>
                 </configuration>

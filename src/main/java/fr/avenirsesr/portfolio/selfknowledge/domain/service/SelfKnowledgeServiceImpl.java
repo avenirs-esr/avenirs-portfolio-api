@@ -1,5 +1,10 @@
 package fr.avenirsesr.portfolio.selfknowledge.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RATING_MAX;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RATING_MIN;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
+
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -28,11 +33,6 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
   private final LoggedInUserService loggedInUserService;
-
-  public static final int TITLE_LENGTH_MAX = 80;
-  public static final int DESCRIPTION_LENGTH_MAX = 400;
-  public static final int RATING_MIN = 1;
-  public static final int RATING_MAX = 5;
 
   @Override
   public PagedResult<SelfKnowledgeElement> getSelfKnowledgeElements(
@@ -196,21 +196,21 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
   }
 
   private static void checkTitleField(String title) {
-    if (title != null && title.length() > TITLE_LENGTH_MAX) {
-      log.error("Title too long: {} characters (max = " + TITLE_LENGTH_MAX + ")", title.length());
+    if (title != null && title.length() > TITLE_LENGTH) {
+      log.error("Title too long: {} characters (max = " + TITLE_LENGTH + ")", title.length());
       throw new SelfKnowledgeInvalidTitleException(
-          "Title exceeds " + TITLE_LENGTH_MAX + " characters (actual: " + title.length() + ")");
+          "Title exceeds " + TITLE_LENGTH + " characters (actual: " + title.length() + ")");
     }
   }
 
   private static void checkDescriptionField(String description) {
-    if (description != null && description.length() > DESCRIPTION_LENGTH_MAX) {
+    if (description != null && description.length() > DESCRIPTION_LENGTH) {
       log.error(
-          "Description too long: {} characters (max = " + DESCRIPTION_LENGTH_MAX + ")",
+          "Description too long: {} characters (max = " + DESCRIPTION_LENGTH + ")",
           description.length());
       throw new SelfKnowledgeInvalidDescriptionException(
           "Description exceeds "
-              + DESCRIPTION_LENGTH_MAX
+              + DESCRIPTION_LENGTH
               + " characters (actual: "
               + description.length()
               + ")");

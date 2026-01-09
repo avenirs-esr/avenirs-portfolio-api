@@ -43,21 +43,21 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private ELanguage language;
 
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   @JoinTable(
       name = "trace_skill_level_progress",
       joinColumns = @JoinColumn(name = "trace_id"),
       inverseJoinColumns = @JoinColumn(name = "skill_level_progress_id"))
   private List<SkillLevelProgressEntity> skillLevels;
 
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   @JoinTable(
       name = "trace_ams",
       joinColumns = @JoinColumn(name = "trace_id"),
       inverseJoinColumns = @JoinColumn(name = "ams_id"))
   private List<AMSEntity> amses;
 
-  @ManyToMany(cascade = CascadeType.ALL)
+  @ManyToMany
   @JoinTable(
       name = "trace_declared_skill_progress",
       joinColumns = @JoinColumn(name = "trace_id"),
