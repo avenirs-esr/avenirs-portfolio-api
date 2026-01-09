@@ -1,8 +1,7 @@
 package fr.avenirsesr.portfolio.trace.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
@@ -14,17 +13,22 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
+import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.fixture.DeclaredSkillProgressFixture;
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
+import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
+import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
@@ -33,7 +37,9 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentPro
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
+import fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -49,9 +55,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -81,7 +85,6 @@ public class TraceServiceImplTest {
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
-
     when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
   }
 
@@ -169,7 +172,6 @@ public class TraceServiceImplTest {
     int pageNumber = 1;
     int pageSize = 8;
     int totalElement = 13;
-    TraceConfiguration traceConfiguration = new TraceConfiguration(90, 30, 5);
 
     List<Trace> traces =
         List.of(
@@ -220,8 +222,18 @@ public class TraceServiceImplTest {
   void givenTraceWithAmsAndSkillLevels_shouldDeleteTraceAndLinksToAmsAndSkillLevels() {
     BddLogger.given("a TraceServiceImpl service and a trace with AMS and skill levels");
     AMS ams = AMSFixture.create().toModel();
+    DeclaredSkillProgress dsp =
+        DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+    SkillLevelProgress slp =
+        SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel()).toModel();
+
     Trace trace =
-        TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
+        TraceFixture.create()
+            .withUser(student.getUser())
+            .withAmses(List.of(ams))
+            .withDeclaredSkillProgresses(List.of(dsp))
+            .withSkillLevels(List.of(slp))
+            .toModel();
 
     BddLogger.when("deleting the trace");
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
@@ -230,6 +242,9 @@ public class TraceServiceImplTest {
     BddLogger.then("it should delete the trace and its links to AMS and skill levels");
     verify(traceRepository).save(trace);
     assertTrue(trace.getDeletedAt().isPresent());
+    assertTrue(trace.getAmses().isEmpty());
+    assertTrue(trace.getSkillLevels().isEmpty());
+    assertTrue(trace.getDeclaredSkillProgresses().isEmpty());
   }
 
   @Test
@@ -350,7 +365,6 @@ public class TraceServiceImplTest {
   @Test
   void shouldCreateTraceWithNullFields() {
     BddLogger.given("a TraceServiceImpl service");
-    User user = student.getUser();
     String title = "Trace with null fields";
 
     BddLogger.when("creating a new trace with null fields");
@@ -366,6 +380,17 @@ public class TraceServiceImplTest {
     assertEquals(ELanguage.FRENCH, trace.getLanguage());
     assertTrue(trace.getPersonalNote().isEmpty());
     assertTrue(trace.getAiUseJustification().isEmpty());
+  }
+
+  @Test
+  void shouldThrowExceptionWhenCreatingTraceWithBlankTitle() {
+    BddLogger.given("a TraceServiceImpl service");
+    BddLogger.when("creating a new trace with a blank title");
+    assertThrows(
+        Exception.class,
+        () -> traceService.createTrace("   ", ELanguage.FRENCH, false, null, null));
+    BddLogger.then("it should throw a validation exception");
+    verify(traceRepository, never()).save(any());
   }
 
   @Test
@@ -470,6 +495,57 @@ public class TraceServiceImplTest {
   }
 
   @Test
+  void shouldThrowTraceNotFoundWhenUpdatingUnknownTrace() {
+    BddLogger.given("a TraceServiceImpl service");
+    UUID unknownId = UUID.randomUUID();
+    when(traceRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+    BddLogger.when("updating an unknown trace");
+    TraceNotFoundException ex =
+        assertThrows(
+            TraceNotFoundException.class,
+            () -> traceService.updateTrace(unknownId, "t", ELanguage.FRENCH, false, null, null));
+
+    BddLogger.then("it should throw TRACE_NOT_FOUND");
+    assertEquals(EErrorCode.TRACE_NOT_FOUND, ex.getErrorCode());
+  }
+
+  @Test
+  void shouldThrowUserNotAuthorizedWhenUpdatingTraceOfAnotherUser() {
+    BddLogger.given("a TraceServiceImpl service and a trace owned by another user");
+    User otherUser = UserFixture.create().toModel();
+    Trace trace = TraceFixture.create().withUser(otherUser).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    BddLogger.when("updating the trace");
+    UserNotAuthorizedException ex =
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () ->
+                traceService.updateTrace(trace.getId(), "x", ELanguage.FRENCH, false, null, null));
+
+    BddLogger.then("it should throw USER_NOT_AUTHORIZED");
+    assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
+    verify(traceRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldThrowFileNotFoundWhenUpdatingTraceAndNoActiveAttachment() {
+    BddLogger.given("a TraceServiceImpl service and a trace without active attachment");
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+    when(traceRepository.save(any())).thenReturn(trace);
+    when(traceAttachmentRepository.findByTrace(any())).thenReturn(List.of());
+
+    BddLogger.when("updating the trace");
+    assertThrows(
+        FileNotFoundException.class,
+        () -> traceService.updateTrace(trace.getId(), "x", ELanguage.FRENCH, false, null, null));
+
+    BddLogger.then("it should throw FileNotFoundException");
+  }
+
+  @Test
   void givenUnassociatedTrace_shouldReturnWillBeDeletedAt() {
     BddLogger.given("a TraceServiceImpl service and an unassociated trace");
     TraceConfiguration config = new TraceConfiguration(90, 30, 5);
@@ -479,8 +555,9 @@ public class TraceServiceImplTest {
     Trace trace =
         TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
 
-    // Mock isUnassociated() à true
-    trace.setSkillLevels(List.of()); // pour simuler une trace non associée
+    trace.setSkillLevels(List.of());
+    trace.setAmses(List.of());
+    trace.setDeclaredSkillProgresses(List.of());
     assertTrue(trace.isUnassociated());
 
     BddLogger.when("getting willBeDeletedAt");
@@ -506,7 +583,6 @@ public class TraceServiceImplTest {
     Trace trace =
         TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
 
-    // Simule une trace associée → isUnassociated() == false
     SkillLevelProgress skillLevelProgress =
         SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel()).toModel();
     trace.setSkillLevels(List.of(skillLevelProgress));
@@ -518,6 +594,113 @@ public class TraceServiceImplTest {
 
     BddLogger.then("it should return empty");
     assertTrue(willBeDeletedAt.isEmpty());
+  }
+
+  @Test
+  void givenLoggedInUser_shouldReturnLastTracesOverview() {
+    BddLogger.given("a TraceServiceImpl service");
+    List<Trace> traces =
+        List.of(
+            TraceFixture.create().withUser(student.getUser()).toModel(),
+            TraceFixture.create().withUser(student.getUser()).toModel());
+
+    BddLogger.when("getting last traces overview");
+    when(traceRepository.findLastsOf(eq(student.getUser()), anyInt())).thenReturn(traces);
+    List<Trace> result = traceService.lastTracesOf();
+
+    BddLogger.then("it should return last traces and call repository with logged user");
+    assertEquals(2, result.size());
+    verify(traceRepository).findLastsOf(eq(student.getUser()), anyInt());
+  }
+
+  @Test
+  void givenExistingTrace_shouldReturnTraceDetailData_withAssociations() {
+    BddLogger.given(
+        "a TraceServiceImpl service and a trace with associations and an active attachment");
+    AMS ams = AMSFixture.create().toModel();
+
+    Skill skill = SkillFixture.create().withName("Skill name").toModel();
+    SkillLevel level = SkillLevelFixture.create().withSkill(skill).withName("Level name").toModel();
+
+    SkillLevelProgress slpWithNoAms = mock(SkillLevelProgress.class);
+    when(slpWithNoAms.getId()).thenReturn(UUID.randomUUID());
+    when(slpWithNoAms.getSkillLevel()).thenReturn(level);
+    when(slpWithNoAms.getStatus()).thenReturn(ESkillLevelStatus.TO_BE_EVALUATED);
+    when(slpWithNoAms.getAmses()).thenReturn(null);
+
+    SkillLevelProgress slpWithAms = mock(SkillLevelProgress.class);
+    when(slpWithAms.getId()).thenReturn(UUID.randomUUID());
+    when(slpWithAms.getSkillLevel()).thenReturn(level);
+    when(slpWithAms.getStatus()).thenReturn(ESkillLevelStatus.TO_BE_EVALUATED);
+    when(slpWithAms.getAmses()).thenReturn(List.of(ams));
+
+    DeclaredSkillProgress dsp = mock(DeclaredSkillProgress.class);
+    when(dsp.getId()).thenReturn(UUID.randomUUID());
+    var declaredSkill =
+        mock(fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill.class);
+    when(declaredSkill.getLibelle()).thenReturn("Lib");
+    when(declaredSkill.getPathSegments()).thenReturn(null);
+    when(declaredSkill.getType()).thenReturn(EExternalSkillType.valueOf("ROME4"));
+    when(dsp.getSkill()).thenReturn(declaredSkill);
+    when(dsp.getLevel()).thenReturn(EDeclaredSkillLevel.valueOf("BEGINNER"));
+
+    Trace trace =
+        TraceFixture.create()
+            .withUser(student.getUser())
+            .withTitle("Trace title")
+            .withLanguage(ELanguage.FRENCH)
+            .withGroup(true)
+            .withSkillLevels(List.of(slpWithNoAms, slpWithAms))
+            .withDeclaredSkillProgresses(List.of(dsp))
+            .toModel();
+
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
+        .thenReturn(List.of());
+
+    var activeAttachment = TraceAttachmentFixture.create().toModel();
+    when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of(activeAttachment));
+
+    BddLogger.when("getting trace detail");
+    TraceDetailData detail = traceService.getTraceDetail(trace.getId());
+
+    BddLogger.then("it should return detail with associations and attachment");
+    assertEquals(trace.getId(), detail.id());
+    assertEquals("Trace title", detail.title());
+    assertEquals(EPortfolioType.LIFE_PROJECT.name(), detail.programName());
+    assertNotNull(detail.attachment());
+    assertNotNull(detail.traceAssociations());
+    assertEquals(2, detail.traceAssociations().skillLevelAssociations().size());
+    assertEquals(1, detail.traceAssociations().declaredSkillAssociations().size());
+  }
+
+  @Test
+  void givenTraceWithoutActiveAttachment_shouldThrowFileNotFoundException_onGetTraceDetail() {
+    BddLogger.given("a TraceServiceImpl service and a trace without active attachment");
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+    when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
+
+    BddLogger.when("getting trace detail");
+    assertThrows(FileNotFoundException.class, () -> traceService.getTraceDetail(trace.getId()));
+
+    BddLogger.then("it should throw FileNotFoundException");
+  }
+
+  @Test
+  void givenTraceOfAnotherUser_shouldThrowUserNotAuthorizedException_onGetTraceDetail() {
+    BddLogger.given("a TraceServiceImpl service and a trace owned by another user");
+    User otherUser = UserFixture.create().toModel();
+    Trace trace = TraceFixture.create().withUser(otherUser).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    BddLogger.when("getting trace detail");
+    UserNotAuthorizedException ex =
+        assertThrows(
+            UserNotAuthorizedException.class, () -> traceService.getTraceDetail(trace.getId()));
+
+    BddLogger.then("it should throw USER_NOT_AUTHORIZED");
+    assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
   }
 
   @Test
@@ -551,6 +734,15 @@ public class TraceServiceImplTest {
     assertTrue(trace.getAmses().contains(ams));
     assertTrue(trace.getSkillLevels().contains(skillLevel));
     assertTrue(trace.getDeclaredSkillProgresses().contains(declared));
+  }
+
+  @Test
+  void givenNullArgs_shouldThrowException_whenAssociating() {
+    BddLogger.given("a TraceServiceImpl service");
+    BddLogger.when("associating with null arguments");
+    assertThrows(Exception.class, () -> traceService.associateTrace(null, null, null, null));
+    BddLogger.then("it should throw a validation exception");
+    verify(traceRepository, never()).save(any());
   }
 
   @Test
@@ -651,6 +843,15 @@ public class TraceServiceImplTest {
     assertFalse(trace.getAmses().contains(ams));
     assertFalse(trace.getSkillLevels().contains(skillLevel));
     assertFalse(trace.getDeclaredSkillProgresses().contains(declared));
+  }
+
+  @Test
+  void givenNullArgs_shouldThrowException_whenUnassociating() {
+    BddLogger.given("a TraceServiceImpl service");
+    BddLogger.when("unassociating with null arguments");
+    assertThrows(Exception.class, () -> traceService.unassociateTrace(null, null, null, null));
+    BddLogger.then("it should throw a validation exception");
+    verify(traceRepository, never()).save(any());
   }
 
   @Test
@@ -799,5 +1000,79 @@ public class TraceServiceImplTest {
         () ->
             traceService.getTracesLinkedWithDeclaredSkillProgress(
                 anotherStudent.getUser(), declaredSkillProgress));
+  }
+
+  @Test
+  void givenTracesAssociatedToDeclaredSkillProgress_shouldUnassociateAndSaveAll() {
+    BddLogger.given("a declaredSkillProgress and traces associated to it");
+    DeclaredSkillProgress declaredSkillProgress =
+        DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+
+    Trace trace1 =
+        TraceFixture.create()
+            .withUser(student.getUser())
+            .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
+            .toModel();
+    Trace trace2 =
+        TraceFixture.create()
+            .withUser(student.getUser())
+            .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
+            .toModel();
+
+    List<UUID> ids = List.of(trace1.getId(), trace2.getId());
+    when(traceRepository.findAllById(ids)).thenReturn(List.of(trace1, trace2));
+
+    BddLogger.when("unassociating traces");
+    traceService.unassociateTraces(declaredSkillProgress, ids);
+
+    BddLogger.then("it should remove association and save all");
+    verify(traceRepository).saveAll(anyList());
+    assertFalse(trace1.getDeclaredSkillProgresses().contains(declaredSkillProgress));
+    assertFalse(trace2.getDeclaredSkillProgresses().contains(declaredSkillProgress));
+  }
+
+  @Test
+  void givenSomeTraceIdsNotFound_shouldThrowTraceNotFoundException_inUnassociateTraces() {
+    BddLogger.given("a list of traceIds where at least one does not exist");
+    DeclaredSkillProgress declaredSkillProgress =
+        DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+
+    UUID t1 = UUID.randomUUID();
+    UUID t2 = UUID.randomUUID();
+    when(traceRepository.findAllById(List.of(t1, t2)))
+        .thenReturn(List.of(TraceFixture.create().withUser(student.getUser()).toModel()));
+
+    BddLogger.when("unassociating traces");
+    TraceNotFoundException ex =
+        assertThrows(
+            TraceNotFoundException.class,
+            () -> traceService.unassociateTraces(declaredSkillProgress, List.of(t1, t2)));
+
+    BddLogger.then("it should throw TRACE_NOT_FOUND");
+    assertEquals(EErrorCode.TRACE_NOT_FOUND, ex.getErrorCode());
+    verify(traceRepository, never()).saveAll(anyList());
+  }
+
+  @Test
+  void
+      givenTraceNotAssociatedToDeclaredSkillProgress_shouldThrowAssociationDoesNotExistException() {
+    BddLogger.given("a trace that is not associated to the given declaredSkillProgress");
+    DeclaredSkillProgress declaredSkillProgress =
+        DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+
+    Trace trace =
+        TraceFixture.create()
+            .withUser(student.getUser())
+            .withDeclaredSkillProgresses(List.of())
+            .toModel();
+    when(traceRepository.findAllById(List.of(trace.getId()))).thenReturn(List.of(trace));
+
+    BddLogger.when("unassociating traces");
+    assertThrows(
+        AssociationDoesNotExistException.class,
+        () -> traceService.unassociateTraces(declaredSkillProgress, List.of(trace.getId())));
+
+    BddLogger.then("it should throw AssociationDoesNotExistException");
+    verify(traceRepository, never()).saveAll(anyList());
   }
 }

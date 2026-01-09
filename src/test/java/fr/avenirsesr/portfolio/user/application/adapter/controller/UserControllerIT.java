@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.user.application.adapter.controller;
 
 import static fr.avenirsesr.portfolio.common.testutils.infrastructure.adapter.util.TestResourceUtils.loadJson;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 public class UserControllerIT extends ContainerConfigurationTest {
@@ -112,5 +115,79 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$.lastname").value("Clément"))
         .andExpect(jsonPath("$.email").value("alicia.carre@yahoo.fr"))
         .andExpect(jsonPath("$.bio").exists());
+  }
+
+  @Test
+  void shouldBuildOriginFromReferer_withPort() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.setScheme("http");
+    request.setServerName("localhost");
+    request.setServerPort(10000);
+    request.setRequestURI("/me/users/STUDENT/overview");
+    request.addHeader("Referer", "https://front.example.com:8443/some/page");
+
+    String origin =
+        ReflectionTestUtils.invokeMethod(UserController.class, "extractOrigin", request);
+
+    assertThat(origin).isEqualTo("https://front.example.com:8443/apim");
+  }
+
+  @Test
+  void shouldBuildOriginFromReferer_withoutPort() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.setScheme("http");
+    request.setServerName("localhost");
+    request.setServerPort(10000);
+    request.setRequestURI("/me/users/STUDENT/overview");
+    request.addHeader("Referer", "https://front.example.com/some/page");
+
+    String origin =
+        ReflectionTestUtils.invokeMethod(UserController.class, "extractOrigin", request);
+
+    assertThat(origin).isEqualTo("https://front.example.com/apim");
+  }
+
+  @Test
+  void shouldFallbackToRequestSchemeHostPort_whenRefererHasNoSchemeOrHost() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.setScheme("http");
+    request.setServerName("localhost");
+    request.setServerPort(10000);
+    request.setRequestURI("/me/users/STUDENT/overview");
+    request.addHeader("Referer", "/relative/path");
+
+    String origin =
+        ReflectionTestUtils.invokeMethod(UserController.class, "extractOrigin", request);
+
+    assertThat(origin).isEqualTo("http://localhost:10000/apim");
+  }
+
+  @Test
+  void shouldReturnNull_whenRefererIsMissing() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.setScheme("http");
+    request.setServerName("localhost");
+    request.setServerPort(10000);
+    request.setRequestURI("/me/users/STUDENT/overview");
+
+    String origin =
+        ReflectionTestUtils.invokeMethod(UserController.class, "extractOrigin", request);
+
+    assertThat(origin).isNull();
+  }
+
+  @Test
+  void shouldReturnNull_whenRefererIsInvalid() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.setScheme("http");
+    request.setServerName("localhost");
+    request.setServerPort(10000);
+    request.setRequestURI("/me/users/STUDENT/overview");
+    request.addHeader("Referer", "ht!tp://bad");
+
+    String origin =
+        ReflectionTestUtils.invokeMethod(UserController.class, "extractOrigin", request);
+
+    assertThat(origin).isNull();
   }
 }

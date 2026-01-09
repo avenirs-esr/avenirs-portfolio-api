@@ -8,6 +8,8 @@ import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
+import fr.avenirsesr.portfolio.user.domain.exception.FirstnameIsNullException;
+import fr.avenirsesr.portfolio.user.domain.exception.LastnameIsNullException;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.TeacherService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -66,10 +68,10 @@ public class UserServiceImpl implements UserService {
     user.setFirstName(firstname);
     user.setLastName(lastname);
     if (firstname == null) {
-      throw new IllegalArgumentException("Firstname is null");
+      throw new FirstnameIsNullException();
     }
     if (lastname == null) {
-      throw new IllegalArgumentException("Lastname is null");
+      throw new LastnameIsNullException();
     }
 
     if (email != null) {
@@ -78,10 +80,8 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
 
     switch (userCategory) {
-      case STUDENT:
-        studentService.updateProfile(user, bio);
-      case TEACHER:
-        teacherService.updateProfile(user, bio);
+      case STUDENT -> studentService.updateProfile(user, bio);
+      case TEACHER -> teacherService.updateProfile(user, bio);
     }
   }
 }

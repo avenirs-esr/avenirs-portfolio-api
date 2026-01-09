@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.CommonLimits.MAX_TRACES_OVERVIEW;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
@@ -11,10 +12,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
 import fr.avenirsesr.portfolio.file.domain.model.shared.File;
@@ -50,7 +49,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class TraceServiceImpl implements TraceService {
-  private static final int MAX_TRACES_OVERVIEW = 3;
   private final TraceRepository traceRepository;
   private final StudentProgressRepository studentProgressRepository;
   private final DeclaredSkillProgressRepository declaredSkillProgressRepository;
@@ -413,7 +411,7 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public void unassociateTraces(DeclaredSkillProgress declaredSkillProgress, List<UUID> traceIds) {
-    User loggedInUser = RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);
+    User loggedInUser = loggedInUserService.getLoggedInUser();
 
     List<Trace> traces = traceRepository.findAllById(traceIds);
 

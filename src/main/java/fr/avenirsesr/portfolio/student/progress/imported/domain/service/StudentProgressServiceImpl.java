@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.imported.domain.service;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.MAX_IMPORTED_SKILLS;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.CommonLimits.MAX_IMPORTED_SKILLS;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;

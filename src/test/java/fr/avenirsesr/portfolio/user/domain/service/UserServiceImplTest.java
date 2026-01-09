@@ -12,6 +12,8 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
+import fr.avenirsesr.portfolio.user.domain.exception.FirstnameIsNullException;
+import fr.avenirsesr.portfolio.user.domain.exception.LastnameIsNullException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
@@ -68,7 +70,6 @@ public class UserServiceImplTest {
     BddLogger.when("it should update firstname, lastname, email and bio");
     ArgumentCaptor<User> captorUser = ArgumentCaptor.forClass(User.class);
     verify(userRepository).save(captorUser.capture());
-    ArgumentCaptor<Student> captorStudent = ArgumentCaptor.forClass(Student.class);
 
     User savedUser = captorUser.getValue();
     assertEquals("RandomFirstname", savedUser.getFirstName());
@@ -82,11 +83,10 @@ public class UserServiceImplTest {
   void shouldUpdateUserFirstNameLastNameProfileAndCoverOnly() {
     BddLogger.given("a UserServiceImpl service");
     String saveEmail = student.getUser().getEmail();
-    String saveBio = student.getBio();
 
     BddLogger.when("only updating firstname and lastname");
     userService.updateProfile(
-        EUserCategory.STUDENT, "RandomFirstname", "RandomLastname", null, null);
+        EUserCategory.TEACHER, "RandomFirstname", "RandomLastname", null, null);
 
     BddLogger.then("it should only update firstname and lastname");
     ArgumentCaptor<User> captorUser = ArgumentCaptor.forClass(User.class);
@@ -97,7 +97,33 @@ public class UserServiceImplTest {
     assertEquals("RandomLastname", savedUser.getLastName());
     assertEquals(saveEmail, savedUser.getEmail());
 
-    verify(studentService).updateProfile(any(User.class), isNull());
+    verify(teacherService).updateProfile(any(User.class), isNull());
+  }
+
+  @Test
+  void shouldUpdateUserWithNullFirstname() {
+    BddLogger.given("a UserServiceImpl service");
+    BddLogger.when("updating with null firstname");
+    BddLogger.then("it should throw FirstnameIsNullException");
+    assertThrows(
+        FirstnameIsNullException.class,
+        () -> {
+          userService.updateProfile(
+              EUserCategory.STUDENT, null, "RandomLastname", "RandomEmail", "RandomBio");
+        });
+  }
+
+  @Test
+  void shouldUpdateUserWithNullLastname() {
+    BddLogger.given("a UserServiceImpl service");
+    BddLogger.when("updating with null firstname");
+    BddLogger.then("it should throw FirstnameIsNullException");
+    assertThrows(
+        LastnameIsNullException.class,
+        () -> {
+          userService.updateProfile(
+              EUserCategory.STUDENT, "RandomFirstname", null, "RandomEmail", "RandomBio");
+        });
   }
 
   @Test

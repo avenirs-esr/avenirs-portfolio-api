@@ -2,13 +2,14 @@ package fr.avenirsesr.portfolio.selfknowledge.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.selfknowledge.domain.data.SelfKnowledgeElementDetails;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryIsMandatoryException;
@@ -16,6 +17,10 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCateg
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotAvailableException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeCategoryNotFoundException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeElementNotFoundException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeElementsAreNotInSameCategoryException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidRatingException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
@@ -32,8 +37,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -125,97 +131,6 @@ class SelfKnowledgeServiceImplTest {
             assertThat(result.get(2).getType()).isEqualTo(ESelfKnowledgeCategoryType.ASPIRATIONS);
 
             verify(selfKnowledgeCategoryRepository).findAllByStudent(eq(student));
-          }
-        }
-      }
-
-      @Nested
-      class AndUnknownCategory {
-
-        private UUID unknownId;
-
-        @BeforeEach
-        void setupAnd() {
-          unknownId = UUID.randomUUID();
-
-          when(selfKnowledgeCategoryRepository.findById(eq(unknownId)))
-              .thenReturn(Optional.empty());
-        }
-
-        @Nested
-        class WhenGettingSelfKnowledgeElementsPaginated {
-
-          @Test
-          void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
-            BddLogger.when("getting self knowledge elements paginated with unknown category");
-            BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
-
-            assertThrows(
-                SelfKnowledgeCategoryNotFoundException.class,
-                () ->
-                    selfKnowledgeService.getSelfKnowledgeElements(
-                        unknownId, new PageCriteria(0, 8)));
-          }
-        }
-
-        @Nested
-        class WhenCreatingSelfKnowledgeElement {
-
-          @Test
-          void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
-            BddLogger.when("creating self knowledge element with unknown category");
-            BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
-
-            assertThrows(
-                SelfKnowledgeCategoryNotFoundException.class,
-                () ->
-                    selfKnowledgeService.createSelfKnowledgeElement(
-                        unknownId, "Title", "Description", 1));
-          }
-        }
-      }
-
-      @Nested
-      class AndUnknownElements {
-
-        private UUID unknownId;
-
-        @BeforeEach
-        void setupAnd() {
-          unknownId = UUID.randomUUID();
-
-          when(selfKnowledgeElementRepository.findById(eq(unknownId))).thenReturn(Optional.empty());
-          when(selfKnowledgeElementRepository.findAllById(eq(List.of(unknownId))))
-              .thenReturn(Collections.emptyList());
-        }
-
-        @Nested
-        class WhenGettingSelfKnowledgeElementDetails {
-
-          @Test
-          void thenItShouldThrowSelfKnowledgeElementNotFoundException() {
-            BddLogger.when("getting self knowledge elements details with unknown element");
-            BddLogger.then("it should throw SelfKnowledgeElementNotFoundException");
-
-            assertThrows(
-                SelfKnowledgeElementNotFoundException.class,
-                () -> selfKnowledgeService.getSelfKnowledgeElementDetails(unknownId));
-          }
-        }
-
-        @Nested
-        class WhenUpdatingSelfKnowledgeElement {
-
-          @Test
-          void thenItShouldThrowSelfKnowledgeElementNotFoundException() {
-            BddLogger.when("updating self knowledge element with unknown element");
-            BddLogger.then("it should throw SelfKnowledgeElementNotFoundException");
-
-            assertThrows(
-                SelfKnowledgeElementNotFoundException.class,
-                () ->
-                    selfKnowledgeService.updateSelfKnowledgeElement(
-                        unknownId, "Title", "Description", 1));
           }
         }
       }
@@ -330,6 +245,557 @@ class SelfKnowledgeServiceImplTest {
       }
 
       @Nested
+      class AndUnknownCategory {
+
+        private UUID unknownId;
+
+        @BeforeEach
+        void setupAnd() {
+          unknownId = UUID.randomUUID();
+
+          when(selfKnowledgeCategoryRepository.findById(eq(unknownId)))
+              .thenReturn(Optional.empty());
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeElementsPaginated {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
+            BddLogger.when("getting self knowledge elements paginated with unknown category");
+            BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
+
+            assertThrows(
+                SelfKnowledgeCategoryNotFoundException.class,
+                () ->
+                    selfKnowledgeService.getSelfKnowledgeElements(
+                        unknownId, new PageCriteria(0, 8)));
+          }
+        }
+
+        @Nested
+        class WhenCreatingSelfKnowledgeElement {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
+            BddLogger.when("creating self knowledge element with unknown category");
+            BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
+
+            assertThrows(
+                SelfKnowledgeCategoryNotFoundException.class,
+                () ->
+                    selfKnowledgeService.createSelfKnowledgeElement(
+                        unknownId, "Title", "Description", 1));
+          }
+        }
+      }
+
+      @Nested
+      class AndSelfKnowledgeElement {
+
+        private SelfKnowledgeElement selfKnowledgeElement;
+        private SelfKnowledgeCategory selfKnowledgeCategory;
+        private UUID selfKnowledgeElementId;
+        private UUID selfKnowledgeCategoryId;
+        private PageCriteria pageCriteria;
+
+        @BeforeEach
+        void setupAnd() {
+          selfKnowledgeElement =
+              SelfKnowledgeElementFixture.create().withStudent(student).toModel();
+          selfKnowledgeCategory = selfKnowledgeElement.getSelfKnowledgeCategory();
+          selfKnowledgeElementId = selfKnowledgeElement.getId();
+          selfKnowledgeCategoryId = selfKnowledgeCategory.getId();
+          pageCriteria = new PageCriteria(0, 8);
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeElementsPaginated {
+
+          @Test
+          void thenItShouldGetSelfKnowledgeElementsPaginated() {
+            PagedResult<SelfKnowledgeElement> expectedResult =
+                new PagedResult<>(List.of(selfKnowledgeElement), new PageInfo(0, 8, 1));
+
+            when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
+                .thenReturn(Optional.of(selfKnowledgeCategory));
+            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
+                    student.getId(), selfKnowledgeCategoryId, pageCriteria))
+                .thenReturn(expectedResult);
+
+            BddLogger.when("getting self knowledge elements paginated");
+            PagedResult<SelfKnowledgeElement> actualResult =
+                selfKnowledgeService.getSelfKnowledgeElements(
+                    selfKnowledgeCategoryId, pageCriteria);
+
+            BddLogger.then("it should retrieve self knowledge elements paginated");
+            assertThat(actualResult).isEqualTo(expectedResult);
+
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(selfKnowledgeCategoryRepository).findById(selfKnowledgeCategoryId);
+            verify(selfKnowledgeElementRepository)
+                .findAllByStudentIdAndCategoryId(
+                    student.getId(), selfKnowledgeCategoryId, pageCriteria);
+          }
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeElementDetails {
+
+          @Test
+          void thenItShouldGetSelfKnowledgeElementDetails() {
+            when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
+                .thenReturn(Optional.of(selfKnowledgeElement));
+
+            BddLogger.when("getting self knowledge elements details");
+            SelfKnowledgeElementDetails actualResult =
+                selfKnowledgeService.getSelfKnowledgeElementDetails(selfKnowledgeElement.getId());
+
+            BddLogger.then("it should retrieve self knowledge elements details");
+            assertThat(actualResult.selfKnowledgeElement()).isEqualTo(selfKnowledgeElement);
+
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(selfKnowledgeElementRepository).findById(selfKnowledgeElementId);
+          }
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeElementDetailsButNotOwnedByStudent {
+
+          @Test
+          void thenItShouldThrowUserNotAuthorizedException() {
+            BddLogger.when("getting element details but element belongs to another student");
+
+            Student otherStudent = StudentFixture.create().toModel();
+            SelfKnowledgeElement elementOfAnotherStudent =
+                SelfKnowledgeElementFixture.create().withStudent(otherStudent).toModel();
+
+            when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
+                .thenReturn(Optional.of(elementOfAnotherStudent));
+
+            assertThrows(
+                UserNotAuthorizedException.class,
+                () -> selfKnowledgeService.getSelfKnowledgeElementDetails(selfKnowledgeElementId));
+
+            verify(selfKnowledgeElementRepository).findById(selfKnowledgeElementId);
+          }
+        }
+
+        @Nested
+        class WhenUpdatingSelfKnowledgeElement {
+
+          @Test
+          void thenItShouldUpdateSelfKnowledgeElement() {
+            String newTitle = "Titre Mis à jour";
+            String newDescription = "Description Mise à jour";
+            Integer newRating = 4;
+
+            when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
+                .thenReturn(Optional.of(selfKnowledgeElement));
+            when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+            BddLogger.when("updating self knowledge element");
+            SelfKnowledgeElement result =
+                selfKnowledgeService.updateSelfKnowledgeElement(
+                    selfKnowledgeElementId, newTitle, newDescription, newRating);
+
+            BddLogger.then("it should update self knowledge element");
+
+            assertThat(result.getTitle()).isEqualTo(newTitle);
+            assertThat(result.getDescription()).isEqualTo(newDescription);
+            assertThat(result.getRating()).isEqualTo(newRating);
+
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(selfKnowledgeElementRepository).findById(selfKnowledgeElementId);
+            verify(selfKnowledgeElementRepository).save(selfKnowledgeElement);
+          }
+        }
+
+        @Nested
+        class WhenUpdatingSelfKnowledgeElementWithNullRating {
+
+          @Test
+          void thenItShouldNotOverrideExistingRating() {
+            BddLogger.when("updating element with null rating");
+
+            Integer existingRating = selfKnowledgeElement.getRating();
+            when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
+                .thenReturn(Optional.of(selfKnowledgeElement));
+            when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+            selfKnowledgeService.updateSelfKnowledgeElement(
+                selfKnowledgeElementId, "New title", "New desc", null);
+
+            BddLogger.then("it should keep previous rating");
+            assertThat(selfKnowledgeElement.getRating()).isEqualTo(existingRating);
+
+            verify(selfKnowledgeElementRepository).save(selfKnowledgeElement);
+          }
+        }
+
+        @Nested
+        class WhenUpdatingSelfKnowledgeElementButNotOwnedByStudent {
+
+          @Test
+          void thenItShouldThrowUserNotAuthorizedException() {
+            BddLogger.when("updating element but element belongs to another student");
+
+            Student otherStudent = StudentFixture.create().toModel();
+            SelfKnowledgeElement elementOfAnotherStudent =
+                SelfKnowledgeElementFixture.create().withStudent(otherStudent).toModel();
+
+            when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
+                .thenReturn(Optional.of(elementOfAnotherStudent));
+
+            assertThrows(
+                UserNotAuthorizedException.class,
+                () ->
+                    selfKnowledgeService.updateSelfKnowledgeElement(
+                        selfKnowledgeElementId, "Title", "Description", 1));
+
+            verify(selfKnowledgeElementRepository).findById(selfKnowledgeElementId);
+            verify(selfKnowledgeElementRepository, never()).save(any());
+          }
+        }
+
+        @Nested
+        class WhenUpdatingSelfKnowledgeElementWithInvalidTitle {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeInvalidTitleException() {
+            BddLogger.when("updating with an invalid title length");
+            String tooLong = "T".repeat(500);
+
+            assertThrows(
+                SelfKnowledgeInvalidTitleException.class,
+                () ->
+                    selfKnowledgeService.updateSelfKnowledgeElement(
+                        selfKnowledgeElementId, tooLong, "Description", 1));
+
+            verifyNoInteractions(selfKnowledgeElementRepository);
+          }
+        }
+
+        @Nested
+        class WhenUpdatingSelfKnowledgeElementWithInvalidDescription {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeInvalidDescriptionException() {
+            BddLogger.when("updating with an invalid description length");
+            String tooLong = "D".repeat(5000);
+
+            assertThrows(
+                SelfKnowledgeInvalidDescriptionException.class,
+                () ->
+                    selfKnowledgeService.updateSelfKnowledgeElement(
+                        selfKnowledgeElementId, "Title", tooLong, 1));
+
+            verifyNoInteractions(selfKnowledgeElementRepository);
+          }
+        }
+
+        @Nested
+        class WhenUpdatingSelfKnowledgeElementWithInvalidRating {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeInvalidRatingException() {
+            BddLogger.when("updating with invalid rating");
+            Integer invalid = -999;
+
+            assertThrows(
+                SelfKnowledgeInvalidRatingException.class,
+                () ->
+                    selfKnowledgeService.updateSelfKnowledgeElement(
+                        selfKnowledgeElementId, "Title", "Description", invalid));
+
+            verifyNoInteractions(selfKnowledgeElementRepository);
+          }
+        }
+
+        @Nested
+        class WhenDeletingSelfKnowledgeElement {
+
+          @Test
+          void thenItShouldDeleteSelfKnowledgeElement() {
+            List<UUID> idsToDelete = List.of(selfKnowledgeElementId);
+
+            when(selfKnowledgeElementRepository.findAllById(idsToDelete))
+                .thenReturn(List.of(selfKnowledgeElement));
+
+            BddLogger.when("deleting self knowledge element");
+            selfKnowledgeService.deleteSelfKnowledgeElements(idsToDelete);
+
+            BddLogger.then("it should delete self knowledge element");
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(selfKnowledgeElementRepository).findAllById(idsToDelete);
+            verify(selfKnowledgeElementRepository)
+                .removeAllFromDatabase(List.of(selfKnowledgeElement));
+          }
+        }
+
+        @Nested
+        class WhenDeletingSelfKnowledgeElementsButNotOwnedByStudent {
+
+          @Test
+          void thenItShouldThrowUserNotAuthorizedException() {
+            BddLogger.when("deleting elements but at least one belongs to another student");
+
+            Student otherStudent = StudentFixture.create().toModel();
+            SelfKnowledgeElement elementOfAnotherStudent =
+                SelfKnowledgeElementFixture.create().withStudent(otherStudent).toModel();
+
+            List<UUID> ids = List.of(selfKnowledgeElementId);
+
+            when(selfKnowledgeElementRepository.findAllById(ids))
+                .thenReturn(List.of(elementOfAnotherStudent));
+
+            assertThrows(
+                UserNotAuthorizedException.class,
+                () -> selfKnowledgeService.deleteSelfKnowledgeElements(ids));
+
+            verify(selfKnowledgeElementRepository, never()).removeAllFromDatabase(anyList());
+          }
+        }
+
+        @Nested
+        class WhenDeletingSelfKnowledgeElementsFromDifferentCategories {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeElementsAreNotInSameCategoryException() {
+            BddLogger.when("deleting elements from different categories");
+
+            SelfKnowledgeCategory cat1 =
+                SelfKnowledgeCategoryFixture.create()
+                    .withType(ESelfKnowledgeCategoryType.STRENGTHS)
+                    .toModel();
+            SelfKnowledgeCategory cat2 =
+                SelfKnowledgeCategoryFixture.create()
+                    .withType(ESelfKnowledgeCategoryType.VALUES)
+                    .toModel();
+
+            SelfKnowledgeElement e1 =
+                SelfKnowledgeElementFixture.create()
+                    .withStudent(student)
+                    .withSelfKnowledgeCategory(cat1)
+                    .toModel();
+
+            SelfKnowledgeElement e2 =
+                SelfKnowledgeElementFixture.create()
+                    .withStudent(student)
+                    .withSelfKnowledgeCategory(cat2)
+                    .toModel();
+
+            List<UUID> ids = List.of(e1.getId(), e2.getId());
+            when(selfKnowledgeElementRepository.findAllById(ids)).thenReturn(List.of(e1, e2));
+
+            assertThrows(
+                SelfKnowledgeElementsAreNotInSameCategoryException.class,
+                () -> selfKnowledgeService.deleteSelfKnowledgeElements(ids));
+
+            verify(selfKnowledgeElementRepository, never()).removeAllFromDatabase(anyList());
+          }
+        }
+      }
+
+      @Nested
+      class AndUnknownElements {
+
+        private UUID unknownId;
+
+        @BeforeEach
+        void setupAnd() {
+          unknownId = UUID.randomUUID();
+
+          when(selfKnowledgeElementRepository.findById(eq(unknownId))).thenReturn(Optional.empty());
+          when(selfKnowledgeElementRepository.findAllById(eq(List.of(unknownId))))
+              .thenReturn(Collections.emptyList());
+        }
+
+        @Nested
+        class WhenGettingSelfKnowledgeElementDetails {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeElementNotFoundException() {
+            BddLogger.when("getting self knowledge elements details with unknown element");
+            BddLogger.then("it should throw SelfKnowledgeElementNotFoundException");
+
+            assertThrows(
+                SelfKnowledgeElementNotFoundException.class,
+                () -> selfKnowledgeService.getSelfKnowledgeElementDetails(unknownId));
+          }
+        }
+
+        @Nested
+        class WhenUpdatingSelfKnowledgeElement {
+
+          @Test
+          void thenItShouldThrowSelfKnowledgeElementNotFoundException() {
+            BddLogger.when("updating self knowledge element with unknown element");
+            BddLogger.then("it should throw SelfKnowledgeElementNotFoundException");
+
+            assertThrows(
+                SelfKnowledgeElementNotFoundException.class,
+                () ->
+                    selfKnowledgeService.updateSelfKnowledgeElement(
+                        unknownId, "Title", "Description", 1));
+          }
+        }
+      }
+
+      @Nested
+      class WhenCreatingSelfKnowledgeElement {
+
+        @Test
+        void thenItShouldCreateSelfKnowledgeElement() {
+          SelfKnowledgeCategory selfKnowledgeCategory =
+              SelfKnowledgeCategoryFixture.create().toModel();
+          UUID selfKnowledgeCategoryId = selfKnowledgeCategory.getId();
+          String title = "Empathie";
+          String description = "J’ai une bonne capacité à écouter et comprendre les autres.";
+          Integer rating = 5;
+
+          when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
+              .thenReturn(Optional.of(selfKnowledgeCategory));
+          when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
+              .thenAnswer(invocation -> invocation.getArgument(0));
+
+          BddLogger.when("creating self knowledge element");
+          SelfKnowledgeElement result =
+              selfKnowledgeService.createSelfKnowledgeElement(
+                  selfKnowledgeCategoryId, title, description, rating);
+
+          BddLogger.then("it should create self knowledge element");
+
+          assertThat(result).isNotNull();
+          assertThat(result.getId()).isNotNull();
+          assertThat(result.getTitle()).isEqualTo(title);
+          assertThat(result.getDescription()).isEqualTo(description);
+          assertThat(result.getRating()).isEqualTo(rating);
+          assertThat(result.getStudent()).isEqualTo(student);
+          assertThat(result.getSelfKnowledgeCategory()).isEqualTo(selfKnowledgeCategory);
+
+          verify(loggedInUserService).getLoggedInStudent();
+          verify(selfKnowledgeCategoryRepository).findById(selfKnowledgeCategoryId);
+          verify(selfKnowledgeElementRepository).save(any(SelfKnowledgeElement.class));
+        }
+      }
+
+      @Nested
+      class WhenCreatingSelfKnowledgeElementWithInvalidTitle {
+
+        @Test
+        void thenItShouldThrowSelfKnowledgeInvalidTitleException() {
+          BddLogger.when("creating self knowledge element with invalid title");
+          SelfKnowledgeCategory selfKnowledgeCategory =
+              SelfKnowledgeCategoryFixture.create().toModel();
+
+          when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategory.getId()))
+              .thenReturn(Optional.of(selfKnowledgeCategory));
+
+          String tooLongTitle = "T".repeat(500);
+
+          assertThrows(
+              SelfKnowledgeInvalidTitleException.class,
+              () ->
+                  selfKnowledgeService.createSelfKnowledgeElement(
+                      selfKnowledgeCategory.getId(), tooLongTitle, "Description", 1));
+
+          verify(selfKnowledgeElementRepository, never()).save(any());
+        }
+      }
+
+      @Nested
+      class WhenCreatingSelfKnowledgeElementWithInvalidDescription {
+
+        @Test
+        void thenItShouldThrowSelfKnowledgeInvalidDescriptionException() {
+          BddLogger.when("creating self knowledge element with invalid description");
+          SelfKnowledgeCategory selfKnowledgeCategory =
+              SelfKnowledgeCategoryFixture.create().toModel();
+
+          when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategory.getId()))
+              .thenReturn(Optional.of(selfKnowledgeCategory));
+
+          String tooLongDescription = "D".repeat(5000);
+
+          assertThrows(
+              SelfKnowledgeInvalidDescriptionException.class,
+              () ->
+                  selfKnowledgeService.createSelfKnowledgeElement(
+                      selfKnowledgeCategory.getId(), "Title", tooLongDescription, 1));
+
+          verify(selfKnowledgeElementRepository, never()).save(any());
+        }
+      }
+
+      @Nested
+      class WhenCreatingSelfKnowledgeElementWithInvalidRating {
+
+        @Test
+        void thenItShouldThrowSelfKnowledgeInvalidRatingException() {
+          BddLogger.when("creating self knowledge element with invalid rating");
+          SelfKnowledgeCategory selfKnowledgeCategory =
+              SelfKnowledgeCategoryFixture.create().toModel();
+
+          when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategory.getId()))
+              .thenReturn(Optional.of(selfKnowledgeCategory));
+
+          assertThrows(
+              SelfKnowledgeInvalidRatingException.class,
+              () ->
+                  selfKnowledgeService.createSelfKnowledgeElement(
+                      selfKnowledgeCategory.getId(), "Title", "Description", -999));
+
+          verify(selfKnowledgeElementRepository, never()).save(any());
+        }
+      }
+
+      @Nested
+      class WhenAddingSelfKnowledgeCategoriesWithEmptyList {
+
+        @Test
+        void thenItShouldThrowSelfKnowledgeCategoryListIsEmptyException() {
+          BddLogger.when("adding self knowledge categories with an empty list");
+          BddLogger.then("it should throw SelfKnowledgeCategoryListIsEmptyException");
+
+          assertThrows(
+              SelfKnowledgeCategoryListIsEmptyException.class,
+              () -> selfKnowledgeService.addSelfKnowledgeCategories(List.of()));
+
+          verifyNoInteractions(selfKnowledgeCategoryRepository);
+        }
+      }
+
+      @Nested
+      class WhenAddingSelfKnowledgeCategoriesAndNoneSelectedFromAvailable {
+
+        @Test
+        void thenItShouldThrowSelfKnowledgeCategoryNotFoundException() {
+          BddLogger.when("adding self knowledge categories but none match the available list");
+          BddLogger.then("it should throw SelfKnowledgeCategoryNotFoundException");
+
+          SelfKnowledgeCategory strengthsCategory =
+              SelfKnowledgeCategoryFixture.create()
+                  .withType(ESelfKnowledgeCategoryType.STRENGTHS)
+                  .toModel();
+
+          when(selfKnowledgeCategoryRepository.findAllAvailableByStudent(eq(student)))
+              .thenReturn(List.of(strengthsCategory));
+
+          List<String> requestedIdsAsString = List.of(UUID.randomUUID().toString());
+
+          assertThrows(
+              SelfKnowledgeCategoryNotAvailableException.class,
+              () -> selfKnowledgeService.addSelfKnowledgeCategories(requestedIdsAsString));
+
+          verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
+          verify(studentRepository, never()).addSelfKnowledgeCategories(any(), anyList());
+        }
+      }
+
+      @Nested
       class AndAValidSelfKnowledgeCategoryList {
 
         private SelfKnowledgeCategory strengthsCategory;
@@ -376,45 +842,6 @@ class SelfKnowledgeServiceImplTest {
                 .addSelfKnowledgeCategories(
                     eq(student), eq(List.of(strengthsCategory, valuesCategory)));
           }
-        }
-      }
-
-      @Nested
-      class WhenAddingSelfKnowledgeCategoriesWithEmptyList {
-
-        @Test
-        void thenItShouldThrowSelfKnowledgeCategoryListIsEmptyException() {
-          BddLogger.when("adding self knowledge categories with an empty list");
-          BddLogger.then("it should throw SelfKnowledgeCategoryListIsEmptyException");
-
-          assertThrows(
-              SelfKnowledgeCategoryListIsEmptyException.class,
-              () -> selfKnowledgeService.addSelfKnowledgeCategories(List.of()));
-
-          verifyNoInteractions(selfKnowledgeCategoryRepository);
-        }
-      }
-
-      @Nested
-      class WhenAddingSelfKnowledgeCategoriesWithUnavailableIds {
-
-        @Test
-        void thenItShouldThrowSelfKnowledgeCategoryNotAvailableException() {
-          BddLogger.when("adding self knowledge categories with ids not in available list");
-          BddLogger.then("it should throw SelfKnowledgeCategoryNotAvailableException");
-
-          when(selfKnowledgeCategoryRepository.findAllAvailableByStudent(eq(student)))
-              .thenReturn(List.of());
-
-          List<String> categoryIdsAsString =
-              List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString());
-
-          assertThrows(
-              SelfKnowledgeCategoryNotAvailableException.class,
-              () -> selfKnowledgeService.addSelfKnowledgeCategories(categoryIdsAsString));
-
-          verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
-          verifyNoMoreInteractions(studentRepository);
         }
       }
 
@@ -510,168 +937,6 @@ class SelfKnowledgeServiceImplTest {
           verifyNoInteractions(selfKnowledgeElementRepository);
           verify(studentRepository, never())
               .removeSelfKnowledgeCategory(eq(student), any(SelfKnowledgeCategory.class));
-        }
-      }
-
-      @Nested
-      class AndSelfKnowledgeElement {
-
-        private SelfKnowledgeElement selfKnowledgeElement;
-        private SelfKnowledgeCategory selfKnowledgeCategory;
-        private UUID selfKnowledgeElementId;
-        private UUID selfKnowledgeCategoryId;
-        private PageCriteria pageCriteria;
-
-        @BeforeEach
-        void setupAnd() {
-          selfKnowledgeElement =
-              SelfKnowledgeElementFixture.create().withStudent(student).toModel();
-          selfKnowledgeCategory = selfKnowledgeElement.getSelfKnowledgeCategory();
-          selfKnowledgeElementId = selfKnowledgeElement.getId();
-          selfKnowledgeCategoryId = selfKnowledgeCategory.getId();
-          pageCriteria = new PageCriteria(0, 8);
-        }
-
-        @Nested
-        class WhenGettingSelfKnowledgeElementsPaginated {
-
-          @Test
-          void thenItShouldGetSelfKnowledgeElementsPaginated() {
-            PagedResult<SelfKnowledgeElement> expectedResult =
-                new PagedResult<>(List.of(selfKnowledgeElement), new PageInfo(0, 8, 1));
-
-            when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
-                .thenReturn(Optional.of(selfKnowledgeCategory));
-            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
-                    student.getId(), selfKnowledgeCategoryId, pageCriteria))
-                .thenReturn(expectedResult);
-
-            BddLogger.when("getting self knowledge elements paginated");
-            PagedResult<SelfKnowledgeElement> actualResult =
-                selfKnowledgeService.getSelfKnowledgeElements(
-                    selfKnowledgeCategoryId, pageCriteria);
-
-            BddLogger.then("it should retrieve self knowledge elements paginated");
-            assertThat(actualResult).isEqualTo(expectedResult);
-
-            verify(loggedInUserService).getLoggedInStudent();
-            verify(selfKnowledgeCategoryRepository).findById(selfKnowledgeCategoryId);
-            verify(selfKnowledgeElementRepository)
-                .findAllByStudentIdAndCategoryId(
-                    student.getId(), selfKnowledgeCategoryId, pageCriteria);
-          }
-        }
-
-        @Nested
-        class WhenGettingSelfKnowledgeElementDetails {
-
-          @Test
-          void thenItShouldGetSelfKnowledgeElementDetails() {
-            when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
-                .thenReturn(Optional.of(selfKnowledgeElement));
-
-            BddLogger.when("getting self knowledge elements details");
-            SelfKnowledgeElementDetails actualResult =
-                selfKnowledgeService.getSelfKnowledgeElementDetails(selfKnowledgeElement.getId());
-
-            BddLogger.then("it should retrieve self knowledge elements details");
-            assertThat(actualResult.selfKnowledgeElement()).isEqualTo(selfKnowledgeElement);
-
-            verify(loggedInUserService).getLoggedInStudent();
-            verify(selfKnowledgeElementRepository).findById(selfKnowledgeElementId);
-          }
-        }
-
-        @Nested
-        class WhenUpdatingSelfKnowledgeElement {
-
-          @Test
-          void thenItShouldUpdateSelfKnowledgeElement() {
-            String newTitle = "Titre Mis à jour";
-            String newDescription = "Description Mise à jour";
-            Integer newRating = 4;
-
-            when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
-                .thenReturn(Optional.of(selfKnowledgeElement));
-            when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-            BddLogger.when("updating self knowledge element");
-            SelfKnowledgeElement result =
-                selfKnowledgeService.updateSelfKnowledgeElement(
-                    selfKnowledgeElementId, newTitle, newDescription, newRating);
-
-            BddLogger.then("it should update self knowledge element");
-
-            assertThat(result.getTitle()).isEqualTo(newTitle);
-            assertThat(result.getDescription()).isEqualTo(newDescription);
-            assertThat(result.getRating()).isEqualTo(newRating);
-
-            assertThat(selfKnowledgeElement.getTitle()).isEqualTo(newTitle);
-
-            verify(loggedInUserService).getLoggedInStudent();
-            verify(selfKnowledgeElementRepository).findById(selfKnowledgeElementId);
-            verify(selfKnowledgeElementRepository).save(selfKnowledgeElement);
-          }
-        }
-
-        @Nested
-        class WhenDeletingSelfKnowledgeElement {
-
-          @Test
-          void thenItShouldDeleteSelfKnowledgeElement() {
-            List<UUID> idsToDelete = List.of(selfKnowledgeElementId);
-
-            when(selfKnowledgeElementRepository.findAllById(idsToDelete))
-                .thenReturn(List.of(selfKnowledgeElement));
-
-            BddLogger.when("deleting self knowledge element");
-            selfKnowledgeService.deleteSelfKnowledgeElements(idsToDelete);
-
-            BddLogger.then("it should delete self knowledge element");
-            verify(loggedInUserService).getLoggedInStudent();
-            verify(selfKnowledgeElementRepository).findAllById(idsToDelete);
-            verify(selfKnowledgeElementRepository)
-                .removeAllFromDatabase(List.of(selfKnowledgeElement));
-          }
-        }
-      }
-
-      @Nested
-      class WhenCreatingSelfKnowledgeElement {
-
-        @Test
-        void thenItShouldCreateSelfKnowledgeElement() {
-          SelfKnowledgeCategory selfKnowledgeCategory =
-              SelfKnowledgeCategoryFixture.create().toModel();
-          UUID selfKnowledgeCategoryId = selfKnowledgeCategory.getId();
-          String title = "Empathie";
-          String description = "J’ai une bonne capacité à écouter et comprendre les autres.";
-          Integer rating = 5;
-
-          when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
-              .thenReturn(Optional.of(selfKnowledgeCategory));
-          when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
-              .thenAnswer(invocation -> invocation.getArgument(0));
-
-          BddLogger.when("creating self knowledge element");
-          SelfKnowledgeElement result =
-              selfKnowledgeService.createSelfKnowledgeElement(
-                  selfKnowledgeCategoryId, title, description, rating);
-
-          BddLogger.then("it should create self knowledge element");
-
-          assertThat(result).isNotNull();
-          assertThat(result.getId()).isNotNull();
-          assertThat(result.getTitle()).isEqualTo(title);
-          assertThat(result.getDescription()).isEqualTo(description);
-          assertThat(result.getRating()).isEqualTo(rating);
-          assertThat(result.getStudent()).isEqualTo(student);
-          assertThat(result.getSelfKnowledgeCategory()).isEqualTo(selfKnowledgeCategory);
-
-          verify(loggedInUserService).getLoggedInStudent();
-          verify(selfKnowledgeCategoryRepository).findById(selfKnowledgeCategoryId);
-          verify(selfKnowledgeElementRepository).save(any(SelfKnowledgeElement.class));
         }
       }
     }
