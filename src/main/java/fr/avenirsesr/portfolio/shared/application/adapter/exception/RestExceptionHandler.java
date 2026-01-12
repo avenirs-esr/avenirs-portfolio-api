@@ -1,8 +1,10 @@
 package fr.avenirsesr.portfolio.shared.application.adapter.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import fr.avenirsesr.portfolio.common.error.application.adapter.exception.BaseRestExceptionHandler;
 import fr.avenirsesr.portfolio.common.error.application.adapter.response.ErrorResponse;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
+import fr.avenirsesr.portfolio.common.error.domain.exception.InvalidDateFormatException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.declaredskill.domain.exception.DeclaredSkillNotFoundException;
@@ -23,6 +25,7 @@ import fr.avenirsesr.portfolio.user.domain.exception.UserCategoryNotRecognizedEx
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -155,5 +158,22 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
       DeclaredProgramNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException ex) {
+    Throwable cause = ex.getCause();
+
+    if (cause instanceof InvalidFormatException) {
+      InvalidDateFormatException invalidDateFormatException = new InvalidDateFormatException();
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(
+              new ErrorResponse(
+                  invalidDateFormatException.getErrorCode().name(),
+                  invalidDateFormatException.getMessage()));
+    }
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ErrorResponse("MESSAGE_NOT_READABLE", ex.getMessage()));
   }
 }
