@@ -87,15 +87,15 @@ public class UserController {
 
   private static String extractOrigin(HttpServletRequest request) {
     try {
-<span class="nc" id="L90">      URI referer = URI.create(request.getHeader(&quot;Referer&quot;));</span>
+<span class="fc" id="L90">      URI referer = URI.create(request.getHeader(&quot;Referer&quot;));</span>
 
-<span class="nc" id="L92">      return ServletUriComponentsBuilder.fromRequestUri(request)</span>
-<span class="nc" id="L93">          .replacePath(&quot;/apim&quot;)</span>
-<span class="nc bnc" id="L94" title="All 2 branches missed.">          .scheme(referer.getScheme() != null ? referer.getScheme() : request.getScheme())</span>
-<span class="nc bnc" id="L95" title="All 2 branches missed.">          .host(referer.getHost() != null ? referer.getHost() : request.getServerName())</span>
-<span class="nc bnc" id="L96" title="All 2 branches missed.">          .port(referer.getHost() != null ? referer.getPort() : request.getServerPort())</span>
-<span class="nc" id="L97">          .build()</span>
-<span class="nc" id="L98">          .toUriString();</span>
+<span class="fc" id="L92">      return ServletUriComponentsBuilder.fromRequestUri(request)</span>
+<span class="fc" id="L93">          .replacePath(&quot;/apim&quot;)</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">          .scheme(referer.getScheme() != null ? referer.getScheme() : request.getScheme())</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">          .host(referer.getHost() != null ? referer.getHost() : request.getServerName())</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">          .port(referer.getHost() != null ? referer.getPort() : request.getServerPort())</span>
+<span class="fc" id="L97">          .build()</span>
+<span class="fc" id="L98">          .toUriString();</span>
 <span class="fc" id="L99">    } catch (Exception e) {</span>
 <span class="fc" id="L100">      return null;</span>
     }

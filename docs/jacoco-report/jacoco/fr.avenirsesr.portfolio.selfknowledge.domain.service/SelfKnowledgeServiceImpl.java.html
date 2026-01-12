@@ -124,7 +124,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 <span class="fc" id="L124">    List&lt;SelfKnowledgeCategory&gt; categories =</span>
 <span class="fc" id="L125">        selfKnowledgeElements.stream().map(element -&gt; element.getSelfKnowledgeCategory()).toList();</span>
 
-<span class="pc bpc" id="L127" title="1 of 4 branches missed.">    boolean allEqual = categories.size() &lt;= 1 || categories.stream().distinct().count() == 1;</span>
+<span class="fc bfc" id="L127" title="All 4 branches covered.">    boolean allEqual = categories.size() &lt;= 1 || categories.stream().distinct().count() == 1;</span>
 
 <span class="fc bfc" id="L129" title="All 2 branches covered.">    if (!allEqual) {</span>
 <span class="fc" id="L130">      throw new SelfKnowledgeElementsAreNotInSameCategoryException();</span>

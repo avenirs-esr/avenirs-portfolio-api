@@ -15,10 +15,10 @@ import java.util.UUID;
   public Map&lt;ETraceFilterKey, Object&gt; toMap() {
 <span class="fc" id="L16">    var map = new HashMap&lt;ETraceFilterKey, Object&gt;();</span>
 <span class="fc" id="L17">    map.put(ETraceFilterKey.IS_ASSOCIATED, isAssociated);</span>
-<span class="pc bpc" id="L18" title="3 of 4 branches missed.">    if (statuses != null &amp;&amp; !statuses.isEmpty()) map.put(ETraceFilterKey.STATUS, statuses);</span>
-<span class="pc bpc" id="L19" title="3 of 4 branches missed.">    if (fileTypes != null &amp;&amp; !fileTypes.isEmpty()) map.put(ETraceFilterKey.FILE_TYPE, fileTypes);</span>
-<span class="pc bpc" id="L20" title="3 of 4 branches missed.">    if (skillIds != null &amp;&amp; !skillIds.isEmpty()) {</span>
-<span class="nc" id="L21">      map.put(ETraceFilterKey.SKILL, skillIds);</span>
+<span class="fc bfc" id="L18" title="All 4 branches covered.">    if (statuses != null &amp;&amp; !statuses.isEmpty()) map.put(ETraceFilterKey.STATUS, statuses);</span>
+<span class="fc bfc" id="L19" title="All 4 branches covered.">    if (fileTypes != null &amp;&amp; !fileTypes.isEmpty()) map.put(ETraceFilterKey.FILE_TYPE, fileTypes);</span>
+<span class="fc bfc" id="L20" title="All 4 branches covered.">    if (skillIds != null &amp;&amp; !skillIds.isEmpty()) {</span>
+<span class="fc" id="L21">      map.put(ETraceFilterKey.SKILL, skillIds);</span>
     }
 <span class="fc" id="L23">    return map;</span>
   }

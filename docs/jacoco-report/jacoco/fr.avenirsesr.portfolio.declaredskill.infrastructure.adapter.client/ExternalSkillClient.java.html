@@ -98,23 +98,23 @@ public class ExternalSkillClient {
 
   public List&lt;ExternalSkillDTO&gt; getRandomSkills(int count) {
     try {
-<span class="nc" id="L101">      log.debug(&quot;Fetching {} random external skills from interoperability&quot;, count);</span>
-<span class="nc" id="L102">      List&lt;ExternalSkillDTO&gt; result =</span>
+<span class="fc" id="L101">      log.debug(&quot;Fetching {} random external skills from interoperability&quot;, count);</span>
+<span class="fc" id="L102">      List&lt;ExternalSkillDTO&gt; result =</span>
           webClient
-<span class="nc" id="L104">              .get()</span>
-<span class="nc" id="L105">              .uri(externalSkillEndpoint + &quot;/random?count=&quot; + count)</span>
-<span class="nc" id="L106">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="nc" id="L107">              .retrieve()</span>
-<span class="nc" id="L108">              .bodyToMono(new ParameterizedTypeReference&lt;List&lt;ExternalSkillDTO&gt;&gt;() {})</span>
-<span class="nc" id="L109">              .block();</span>
-<span class="nc bnc" id="L110" title="All 2 branches missed.">      return result != null ? result : List.of();</span>
-<span class="nc" id="L111">    } catch (Exception e) {</span>
-<span class="nc" id="L112">      log.error(</span>
+<span class="fc" id="L104">              .get()</span>
+<span class="fc" id="L105">              .uri(externalSkillEndpoint + &quot;/random?count=&quot; + count)</span>
+<span class="fc" id="L106">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L107">              .retrieve()</span>
+<span class="fc" id="L108">              .bodyToMono(new ParameterizedTypeReference&lt;List&lt;ExternalSkillDTO&gt;&gt;() {})</span>
+<span class="fc" id="L109">              .block();</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">      return result != null ? result : List.of();</span>
+<span class="fc" id="L111">    } catch (Exception e) {</span>
+<span class="fc" id="L112">      log.error(</span>
           &quot;Failed to fetch random external skills from interoperability at '{}'. Error: {}&quot;,
           externalSkillEndpoint,
-<span class="nc" id="L115">          e.getMessage());</span>
-<span class="nc" id="L116">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="nc" id="L117">      return List.of();</span>
+<span class="fc" id="L115">          e.getMessage());</span>
+<span class="fc" id="L116">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L117">      return List.of();</span>
     }
   }
 
@@ -132,14 +132,14 @@ public class ExternalSkillClient {
 
 <span class="fc" id="L133">      PagedResponse&lt;ExternalSkillDTO&gt; result =</span>
           webClient
-<span class="nc" id="L135">              .get()</span>
-<span class="nc" id="L136">              .uri(uri)</span>
-<span class="nc" id="L137">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
-<span class="nc" id="L138">              .retrieve()</span>
-<span class="nc" id="L139">              .bodyToMono(new ParameterizedTypeReference&lt;PagedResponse&lt;ExternalSkillDTO&gt;&gt;() {})</span>
-<span class="nc" id="L140">              .block();</span>
+<span class="fc" id="L135">              .get()</span>
+<span class="fc" id="L136">              .uri(uri)</span>
+<span class="fc" id="L137">              .header(AvenirsSecurityHeaders.API_KEY, apiKey)</span>
+<span class="fc" id="L138">              .retrieve()</span>
+<span class="fc" id="L139">              .bodyToMono(new ParameterizedTypeReference&lt;PagedResponse&lt;ExternalSkillDTO&gt;&gt;() {})</span>
+<span class="fc" id="L140">              .block();</span>
 
-<span class="nc bnc" id="L142" title="All 2 branches missed.">      return result != null ? result : emptyPagedResponse(pageCriteria);</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">      return result != null ? result : emptyPagedResponse(pageCriteria);</span>
 <span class="fc" id="L143">    } catch (Exception e) {</span>
 <span class="fc" id="L144">      log.error(</span>
           &quot;Failed to search external skills from interoperability at '{}'. Error: {}&quot;,
@@ -152,19 +152,19 @@ public class ExternalSkillClient {
 
   public boolean checkInteroperabilityMicroservice() {
     try {
-<span class="nc" id="L155">      log.debug(&quot;Checking interoperability microservice health at: {}&quot;, healthEndpoint);</span>
-<span class="nc" id="L156">      String response =</span>
-<span class="nc" id="L157">          webClient.get().uri(healthEndpoint).retrieve().bodyToMono(String.class).block();</span>
+<span class="fc" id="L155">      log.debug(&quot;Checking interoperability microservice health at: {}&quot;, healthEndpoint);</span>
+<span class="fc" id="L156">      String response =</span>
+<span class="fc" id="L157">          webClient.get().uri(healthEndpoint).retrieve().bodyToMono(String.class).block();</span>
 
-<span class="nc" id="L159">      log.info(&quot;Interoperability microservice is UP&quot;);</span>
-<span class="nc bnc" id="L160" title="All 4 branches missed.">      return response != null &amp;&amp; response.contains(&quot;\&quot;status\&quot;:\&quot;UP\&quot;&quot;);</span>
-<span class="nc" id="L161">    } catch (Exception e) {</span>
-<span class="nc" id="L162">      log.error(</span>
+<span class="fc" id="L159">      log.info(&quot;Interoperability microservice is UP&quot;);</span>
+<span class="fc bfc" id="L160" title="All 4 branches covered.">      return response != null &amp;&amp; response.contains(&quot;\&quot;status\&quot;:\&quot;UP\&quot;&quot;);</span>
+<span class="fc" id="L161">    } catch (Exception e) {</span>
+<span class="fc" id="L162">      log.error(</span>
           &quot;Interoperability microservice health check failed at '{}'. Error: {}&quot;,
           healthEndpoint,
-<span class="nc" id="L165">          e.getMessage());</span>
-<span class="nc" id="L166">      log.debug(&quot;Full error details:&quot;, e);</span>
-<span class="nc" id="L167">      return false;</span>
+<span class="fc" id="L165">          e.getMessage());</span>
+<span class="fc" id="L166">      log.debug(&quot;Full error details:&quot;, e);</span>
+<span class="fc" id="L167">      return false;</span>
     }
   }
 

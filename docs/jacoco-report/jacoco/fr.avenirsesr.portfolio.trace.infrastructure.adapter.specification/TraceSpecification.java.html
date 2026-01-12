@@ -30,7 +30,7 @@ import org.springframework.data.jpa.domain.Specification;
 
   public static Specification&lt;TraceEntity&gt; associated() {
 <span class="fc" id="L32">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L33" title="1 of 2 branches missed.">      if (query == null) return null;</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">      if (query == null) return null;</span>
 
 <span class="fc" id="L35">      Subquery&lt;SkillLevelEntity&gt; skillLevelSubquery = query.subquery(SkillLevelEntity.class);</span>
 <span class="fc" id="L36">      Root&lt;TraceEntity&gt; skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);</span>
@@ -92,8 +92,8 @@ import org.springframework.data.jpa.domain.Specification;
 
   public static Specification&lt;TraceEntity&gt; search(String keyword, ELanguage language) {
 <span class="fc" id="L94">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L95" title="3 of 6 branches missed.">      if (keyword == null || keyword.trim().isEmpty() || query == null) {</span>
-<span class="nc" id="L96">        return criteriaBuilder.conjunction();</span>
+<span class="fc bfc" id="L95" title="All 6 branches covered.">      if (keyword == null || keyword.trim().isEmpty() || query == null) {</span>
+<span class="fc" id="L96">        return criteriaBuilder.conjunction();</span>
       }
 
 <span class="fc" id="L99">      query.distinct(true);</span>

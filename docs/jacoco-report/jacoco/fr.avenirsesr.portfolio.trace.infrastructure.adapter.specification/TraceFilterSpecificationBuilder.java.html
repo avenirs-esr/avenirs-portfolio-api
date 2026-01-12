@@ -20,12 +20,12 @@ import org.springframework.data.jpa.domain.Specification;
 
   @Override
   public Specification&lt;TraceEntity&gt; getSpecification(ETraceFilterKey key, Object value) {
-<span class="pc bpc" id="L23" title="3 of 4 branches missed.">    return switch (key) {</span>
-<span class="nc" id="L24">      case FILE_TYPE -&gt; fileType((List&lt;EFileType&gt;) value);</span>
-<span class="nc" id="L25">      case SKILL -&gt; skill((List&lt;UUID&gt;) value);</span>
-<span class="nc" id="L26">      case STATUS -&gt; status((List&lt;ETraceStatus&gt;) value);</span>
+<span class="fc bfc" id="L23" title="All 4 branches covered.">    return switch (key) {</span>
+<span class="fc" id="L24">      case FILE_TYPE -&gt; fileType((List&lt;EFileType&gt;) value);</span>
+<span class="fc" id="L25">      case SKILL -&gt; skill((List&lt;UUID&gt;) value);</span>
+<span class="fc" id="L26">      case STATUS -&gt; status((List&lt;ETraceStatus&gt;) value);</span>
       case IS_ASSOCIATED -&gt; {
-<span class="pc bpc" id="L28" title="1 of 2 branches missed.">        if (value == null) yield null;</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        if (value == null) yield null;</span>
 <span class="fc bfc" id="L29" title="All 2 branches covered.">        yield ((Boolean) value)</span>
 <span class="fc" id="L30">            ? TraceSpecification.associated()</span>
 <span class="fc" id="L31">            : TraceSpecification.unassociated();</span>
@@ -34,23 +34,23 @@ import org.springframework.data.jpa.domain.Specification;
   }
 
   private Specification&lt;TraceEntity&gt; fileType(List&lt;EFileType&gt; fileTypes) {
-<span class="nc" id="L37">    return (root, query, cb) -&gt; {</span>
-<span class="nc bnc" id="L38" title="All 6 branches missed.">      if (fileTypes == null || fileTypes.isEmpty() || query == null) return null;</span>
+<span class="fc" id="L37">    return (root, query, cb) -&gt; {</span>
+<span class="fc bfc" id="L38" title="All 6 branches covered.">      if (fileTypes == null || fileTypes.isEmpty() || query == null) return null;</span>
 
-<span class="nc" id="L40">      Subquery&lt;TraceAttachmentEntity&gt; attachSub = query.subquery(TraceAttachmentEntity.class);</span>
-<span class="nc" id="L41">      Root&lt;TraceAttachmentEntity&gt; attachRoot = attachSub.from(TraceAttachmentEntity.class);</span>
-<span class="nc" id="L42">      Predicate fileTypePredicate = attachRoot.get(&quot;fileType&quot;).in(fileTypes);</span>
-<span class="nc" id="L43">      Predicate belongsToTrace = cb.equal(attachRoot.get(&quot;trace&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;));</span>
-<span class="nc" id="L44">      Predicate isActive = cb.isTrue(attachRoot.get(&quot;isActiveVersion&quot;));</span>
-<span class="nc" id="L45">      attachSub.where(cb.and(belongsToTrace, isActive, fileTypePredicate));</span>
+<span class="fc" id="L40">      Subquery&lt;TraceAttachmentEntity&gt; attachSub = query.subquery(TraceAttachmentEntity.class);</span>
+<span class="fc" id="L41">      Root&lt;TraceAttachmentEntity&gt; attachRoot = attachSub.from(TraceAttachmentEntity.class);</span>
+<span class="fc" id="L42">      Predicate fileTypePredicate = attachRoot.get(&quot;fileType&quot;).in(fileTypes);</span>
+<span class="fc" id="L43">      Predicate belongsToTrace = cb.equal(attachRoot.get(&quot;trace&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;));</span>
+<span class="fc" id="L44">      Predicate isActive = cb.isTrue(attachRoot.get(&quot;isActiveVersion&quot;));</span>
+<span class="fc" id="L45">      attachSub.where(cb.and(belongsToTrace, isActive, fileTypePredicate));</span>
 
-<span class="nc" id="L47">      return cb.exists(attachSub);</span>
+<span class="fc" id="L47">      return cb.exists(attachSub);</span>
     };
   }
 
   private Specification&lt;TraceEntity&gt; skill(List&lt;UUID&gt; values) {
-<span class="nc" id="L52">    return (root, query, cb) -&gt; {</span>
-<span class="nc bnc" id="L53" title="All 6 branches missed.">      if (values == null || values.isEmpty() || query == null) return null;</span>
+<span class="fc" id="L52">    return (root, query, cb) -&gt; {</span>
+<span class="pc bpc" id="L53" title="3 of 6 branches missed.">      if (values == null || values.isEmpty() || query == null) return null;</span>
 <span class="nc" id="L54">      var skill =</span>
 <span class="nc" id="L55">          root.join(&quot;skillLevels&quot;, JoinType.LEFT)</span>
 <span class="nc" id="L56">              .join(&quot;skillLevel&quot;, JoinType.LEFT)</span>
@@ -61,31 +61,31 @@ import org.springframework.data.jpa.domain.Specification;
   }
 
   private Specification&lt;TraceEntity&gt; status(List&lt;ETraceStatus&gt; traceStatus) {
-<span class="nc" id="L64">    return (root, query, cb) -&gt; {</span>
-<span class="nc bnc" id="L65" title="All 4 branches missed.">      if (traceStatus == null || query == null) return null;</span>
+<span class="fc" id="L64">    return (root, query, cb) -&gt; {</span>
+<span class="pc bpc" id="L65" title="1 of 4 branches missed.">      if (traceStatus == null || query == null) return null;</span>
 
-<span class="nc" id="L67">      query.distinct(true);</span>
-<span class="nc" id="L68">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L69" title="All 2 branches missed.">      for (ETraceStatus status : traceStatus) {</span>
-<span class="nc" id="L70">        var amsJoin = root.join(&quot;amses&quot;, JoinType.LEFT);</span>
-<span class="nc" id="L71">        var skillLevelJoin = root.join(&quot;skillLevels&quot;, JoinType.LEFT);</span>
+<span class="fc" id="L67">      query.distinct(true);</span>
+<span class="fc" id="L68">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">      for (ETraceStatus status : traceStatus) {</span>
+<span class="fc" id="L70">        var amsJoin = root.join(&quot;amses&quot;, JoinType.LEFT);</span>
+<span class="fc" id="L71">        var skillLevelJoin = root.join(&quot;skillLevels&quot;, JoinType.LEFT);</span>
 
-<span class="nc" id="L73">        Predicate amsPredicate = null;</span>
-<span class="nc" id="L74">        Predicate skillPredicate = null;</span>
+<span class="fc" id="L73">        Predicate amsPredicate = null;</span>
+<span class="fc" id="L74">        Predicate skillPredicate = null;</span>
 
-<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (!status.getAmsStatuses().isEmpty()) {</span>
-<span class="nc" id="L77">          amsPredicate = amsJoin.get(&quot;status&quot;).in(status.getAmsStatuses());</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (!status.getAmsStatuses().isEmpty()) {</span>
+<span class="fc" id="L77">          amsPredicate = amsJoin.get(&quot;status&quot;).in(status.getAmsStatuses());</span>
         }
 
-<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (!status.getSkillLevelStatuses().isEmpty()) {</span>
-<span class="nc" id="L81">          skillPredicate = skillLevelJoin.get(&quot;status&quot;).in(status.getSkillLevelStatuses());</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (!status.getSkillLevelStatuses().isEmpty()) {</span>
+<span class="fc" id="L81">          skillPredicate = skillLevelJoin.get(&quot;status&quot;).in(status.getSkillLevelStatuses());</span>
         }
 
-<span class="nc bnc" id="L84" title="All 2 branches missed.">        if (amsPredicate != null) predicates.add(amsPredicate);</span>
-<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (skillPredicate != null) predicates.add(skillPredicate);</span>
-<span class="nc" id="L86">      }</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (amsPredicate != null) predicates.add(amsPredicate);</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (skillPredicate != null) predicates.add(skillPredicate);</span>
+<span class="fc" id="L86">      }</span>
 
-<span class="nc" id="L88">      return cb.or(predicates.toArray(new Predicate[0]));</span>
+<span class="fc" id="L88">      return cb.or(predicates.toArray(new Predicate[0]));</span>
     };
   }
 }
