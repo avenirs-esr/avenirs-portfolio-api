@@ -70,8 +70,8 @@ import org.springframework.data.jpa.domain.Specification;
   }
 
   public static Specification&lt;TraceEntity&gt; ofAms(AMS ams) {
-<span class="fc" id="L73">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L74">        criteriaBuilder.isMember(AMSMapper.INSTANCE.fromDomain(ams), root.get(&quot;amses&quot;));</span>
+<span class="nc" id="L73">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="nc" id="L74">        criteriaBuilder.isMember(AMSMapper.INSTANCE.fromDomain(ams), root.get(&quot;amses&quot;));</span>
   }
 
   public static Specification&lt;TraceEntity&gt; ofSkillLevelProgress(

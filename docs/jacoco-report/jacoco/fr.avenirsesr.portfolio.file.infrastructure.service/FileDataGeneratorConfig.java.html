@@ -16,8 +16,8 @@ import org.springframework.context.annotation.Configuration;
   @Bean
   public FileDataGenerator fileDataGenerator() {
 <span class="pc bpc" id="L18" title="1 of 2 branches missed.">    return switch (seederSource) {</span>
-<span class="nc" id="L19">      case CSV -&gt; new FileCSVDataGenerator();</span>
-<span class="fc" id="L20">      case FAKER -&gt; new FileFakerDataGenerator();</span>
+<span class="fc" id="L19">      case CSV -&gt; new FileCSVDataGenerator();</span>
+<span class="nc" id="L20">      case FAKER -&gt; new FileFakerDataGenerator();</span>
     };
   }
 }

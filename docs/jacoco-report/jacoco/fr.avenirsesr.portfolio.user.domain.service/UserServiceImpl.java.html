@@ -84,5 +84,12 @@ public class UserServiceImpl implements UserService {
 <span class="fc" id="L84">      case TEACHER -&gt; teacherService.updateProfile(user, bio);</span>
     }
 <span class="fc" id="L86">  }</span>
+
+  @Override
+  public User createUser(UUID id, String firstname, String lastname, String email) {
+<span class="fc" id="L90">    var user = User.create(id, firstname, lastname, email);</span>
+<span class="fc" id="L91">    userRepository.save(user);</span>
+<span class="fc" id="L92">    return user;</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 
   public static Specification&lt;AMSEntity&gt; search(String keyword, ELanguage language) {
 <span class="fc" id="L10">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L11" title="1 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="pc bpc" id="L11" title="2 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
 <span class="fc" id="L12">        return criteriaBuilder.conjunction();</span>
       }
 
