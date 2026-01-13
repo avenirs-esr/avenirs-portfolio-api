@@ -1,8 +1,5 @@
 package fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client;
 
-import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
-import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDTO;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
@@ -118,38 +115,6 @@ public class ExternalSkillClient {
     }
   }
 
-  @Cacheable(
-      value = "external-skill-search",
-      key = "#keyword + '-' + #pageCriteria.page() + '-' + #pageCriteria.pageSize()")
-  public PagedResponse<ExternalSkillDTO> search(String keyword, PageCriteria pageCriteria) {
-    try {
-      log.debug("Searching external skills from interoperability: {}", keyword);
-
-      String uri =
-          String.format(
-              "%s/search?keyword=%s&page=%d&pageSize=%d",
-              externalSkillEndpoint, keyword, pageCriteria.page(), pageCriteria.pageSize());
-
-      PagedResponse<ExternalSkillDTO> result =
-          webClient
-              .get()
-              .uri(uri)
-              .header(AvenirsSecurityHeaders.API_KEY, apiKey)
-              .retrieve()
-              .bodyToMono(new ParameterizedTypeReference<PagedResponse<ExternalSkillDTO>>() {})
-              .block();
-
-      return result != null ? result : emptyPagedResponse(pageCriteria);
-    } catch (Exception e) {
-      log.error(
-          "Failed to search external skills from interoperability at '{}'. Error: {}",
-          externalSkillEndpoint,
-          e.getMessage());
-      log.debug("Full error details:", e);
-      return emptyPagedResponse(pageCriteria);
-    }
-  }
-
   public boolean checkInteroperabilityMicroservice() {
     try {
       log.debug("Checking interoperability microservice health at: {}", healthEndpoint);
@@ -166,10 +131,5 @@ public class ExternalSkillClient {
       log.debug("Full error details:", e);
       return false;
     }
-  }
-
-  private PagedResponse<ExternalSkillDTO> emptyPagedResponse(PageCriteria pageCriteria) {
-    return new PagedResponse<>(
-        List.of(), new PageInfoDTO(pageCriteria.page(), pageCriteria.pageSize(), 0L, 0));
   }
 }
