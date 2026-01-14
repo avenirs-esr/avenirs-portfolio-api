@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillCategoryType;
@@ -360,6 +361,136 @@ public class DeclaredSkillProgressServiceImplTest {
             () ->
                 declaredSkillProgressService.updateDeclaredSkillProgress(
                     declaredSkillProgress.getId(), level, description));
+      }
+    }
+
+    @Nested
+    class WhenDeletingDeclaredSkillsProgresses {
+
+      @Test
+      void deleteDeclaredSkillProgresses_shouldDeleteDeclaredSkillProgresses() {
+        BddLogger.given("the method deleteDeclaredSkillProgresses");
+
+        Student studentLoggedIn = student;
+        User userLoggedIn = student.getUser();
+        UUID declaredSkillProgressId1 = UUID.randomUUID();
+        UUID declaredSkillProgressId2 = UUID.randomUUID();
+        DeclaredSkillProgress declaredSkillProgress1 = mock(DeclaredSkillProgress.class);
+        DeclaredSkillProgress declaredSkillProgress2 = mock(DeclaredSkillProgress.class);
+        Trace trace1 =
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withDeclaredSkillProgresses(List.of(declaredSkillProgress1))
+                .toModel();
+        Trace trace2 =
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withDeclaredSkillProgresses(List.of(declaredSkillProgress2))
+                .toModel();
+
+        BddLogger.when("calling the method with a given student");
+
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(studentLoggedIn);
+        when(declaredSkillProgress1.getStudent()).thenReturn(studentLoggedIn);
+        when(declaredSkillProgress2.getStudent()).thenReturn(studentLoggedIn);
+        when(declaredSkillProgress1.getId()).thenReturn(declaredSkillProgressId1);
+        when(declaredSkillProgress2.getId()).thenReturn(declaredSkillProgressId2);
+        when(declaredSkillProgressRepository.findAllById(
+                List.of(declaredSkillProgressId1, declaredSkillProgressId2)))
+            .thenReturn(List.of(declaredSkillProgress1, declaredSkillProgress2));
+        when(traceService.getTracesLinkedWithDeclaredSkillProgress(
+                userLoggedIn, declaredSkillProgress1))
+            .thenReturn(List.of(trace1));
+        when(traceService.getTracesLinkedWithDeclaredSkillProgress(
+                userLoggedIn, declaredSkillProgress2))
+            .thenReturn(List.of(trace2));
+        doNothing()
+            .when(traceService)
+            .unassociateTraces(declaredSkillProgress1, List.of(trace1.getId()));
+        doNothing()
+            .when(traceService)
+            .unassociateTraces(declaredSkillProgress2, List.of(trace2.getId()));
+
+        declaredSkillProgressService.deleteDeclaredSkillProgresses(
+            List.of(declaredSkillProgressId1, declaredSkillProgressId2));
+
+        BddLogger.then("it should delete declared skill progresses and delete traces");
+
+        verify(declaredSkillProgressRepository)
+            .findAllById(List.of(declaredSkillProgressId1, declaredSkillProgressId2));
+        verify(traceService)
+            .getTracesLinkedWithDeclaredSkillProgress(userLoggedIn, declaredSkillProgress1);
+        verify(traceService)
+            .getTracesLinkedWithDeclaredSkillProgress(userLoggedIn, declaredSkillProgress2);
+        verify(traceService).unassociateTraces(declaredSkillProgress1, List.of(trace1.getId()));
+        verify(traceService).unassociateTraces(declaredSkillProgress2, List.of(trace1.getId()));
+        verify(declaredSkillProgressRepository)
+            .removeAllFromDatabase(List.of(declaredSkillProgress1, declaredSkillProgress2));
+      }
+
+      @Test
+      void deleteDeclaredSkillProgresses_shouldThrowUserNotAuthorizedException() {
+        BddLogger.given("the method deleteDeclaredSkillProgresses");
+
+        Student studentLoggedIn = student;
+        Student anotherStudent = StudentFixture.create().toModel();
+        UUID declaredSkillProgressId1 = UUID.randomUUID();
+        UUID declaredSkillProgressId2 = UUID.randomUUID();
+        DeclaredSkillProgress declaredSkillProgress1 = mock(DeclaredSkillProgress.class);
+        DeclaredSkillProgress declaredSkillProgress2 = mock(DeclaredSkillProgress.class);
+
+        BddLogger.when("calling the method with an unauthorized student");
+
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(studentLoggedIn);
+        when(declaredSkillProgress1.getStudent()).thenReturn(anotherStudent);
+        when(declaredSkillProgress2.getStudent()).thenReturn(anotherStudent);
+
+        BddLogger.then("it should throw user not authorized exception");
+
+        verify(declaredSkillProgressRepository)
+            .findAllById(List.of(declaredSkillProgressId1, declaredSkillProgressId2));
+
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () ->
+                declaredSkillProgressService.deleteDeclaredSkillProgresses(
+                    List.of(declaredSkillProgressId1, declaredSkillProgressId2)));
+      }
+
+      @Test
+      void deleteDeclaredSkillProgresses_shouldThrowDeclaredSkillProgressNotFoundException() {
+        BddLogger.given("the method deleteDeclaredSkillProgresses");
+
+        Student studentLoggedIn = student;
+        UUID declaredSkillProgressId1 = UUID.randomUUID();
+        UUID declaredSkillProgressId2 = UUID.randomUUID();
+        DeclaredSkillProgress declaredSkillProgress1 = mock(DeclaredSkillProgress.class);
+        DeclaredSkillProgress declaredSkillProgress2 = mock(DeclaredSkillProgress.class);
+
+        BddLogger.when("calling the method with non existing declared skill progress ids");
+
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(studentLoggedIn);
+        when(declaredSkillProgress1.getStudent()).thenReturn(studentLoggedIn);
+        when(declaredSkillProgress2.getStudent()).thenReturn(studentLoggedIn);
+        when(declaredSkillProgress1.getId()).thenReturn(declaredSkillProgressId1);
+        when(declaredSkillProgress2.getId()).thenReturn(declaredSkillProgressId2);
+        when(declaredSkillProgressRepository.findAllById(
+                List.of(declaredSkillProgressId1, declaredSkillProgressId2)))
+            .thenReturn(List.of(declaredSkillProgress1, declaredSkillProgress2));
+
+        declaredSkillProgressService.deleteDeclaredSkillProgresses(
+            List.of(declaredSkillProgressId1, declaredSkillProgressId2));
+
+        BddLogger.then("it should throw declared skill not found exception");
+
+        verify(declaredSkillProgressRepository)
+            .findAllById(List.of(declaredSkillProgressId1, declaredSkillProgressId2));
+
+        assertThrows(
+            DeclaredSkillProgressNotFoundException.class,
+            () ->
+                declaredSkillProgressService.deleteDeclaredSkillProgresses(
+                    List.of(declaredSkillProgressId1, declaredSkillProgressId2)));
       }
     }
   }

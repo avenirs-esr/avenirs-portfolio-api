@@ -21,6 +21,8 @@ public interface DeclaredSkillProgressService {
 
   DeclaredSkillProgressDetails getDeclaredSkillProgressDetails(UUID declaredSkillProgressId);
 
+  void deleteDeclaredSkillProgresses(List<UUID> declaredSkillProgressIds);
+
   PagedResult<DeclaredSkillProgress> searchDeclaredSkill(String keyword, PageCriteria pageCriteria);
 
   void unassociateTraces(UUID declaredSkillProgressId, List<UUID> traceIds);
