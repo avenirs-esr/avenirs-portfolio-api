@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.shared.application.adapter.exception;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import fr.avenirsesr.portfolio.common.error.application.adapter.exception.BaseRestExceptionHandler;
 import fr.avenirsesr.portfolio.common.error.application.adapter.response.ErrorResponse;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
@@ -23,6 +22,7 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.exception.Studen
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserCategoryNotRecognizedException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
+import java.time.format.DateTimeParseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -164,7 +164,9 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException ex) {
     Throwable cause = ex.getCause();
 
-    if (cause instanceof InvalidFormatException) {
+    if (cause != null
+        && (cause.getCause() instanceof InvalidDateFormatException
+            || cause.getCause() instanceof DateTimeParseException)) {
       InvalidDateFormatException invalidDateFormatException = new InvalidDateFormatException();
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(
