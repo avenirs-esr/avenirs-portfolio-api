@@ -4,8 +4,8 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.AddDeclaredProgramDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.DeclaredProgramDetailedDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.DeclaredProgramRequestDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.DeclaredProgramViewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.mapper.DeclaredProgramDetailedMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.mapper.DeclaredProgramViewMapper;
@@ -48,44 +48,26 @@ public class DeclaredProgramController {
 
   @PostMapping
   public ResponseEntity&lt;DeclaredProgramViewDTO&gt; createDeclaredProgram(
-      @Valid @RequestBody DeclaredProgramRequestDTO declaredProgramRequestDTO) {
+      @Valid @RequestBody AddDeclaredProgramDTO addDeclaredProgramDTO) {
 <span class="fc" id="L52">    DeclaredProgram declaredProgram =</span>
 <span class="fc" id="L53">        declaredProgramService.create(</span>
-<span class="fc" id="L54">            declaredProgramRequestDTO.title(),</span>
-<span class="fc" id="L55">            declaredProgramRequestDTO.description(),</span>
-<span class="fc" id="L56">            declaredProgramRequestDTO.organization(),</span>
-<span class="fc" id="L57">            declaredProgramRequestDTO.result(),</span>
-<span class="fc" id="L58">            declaredProgramRequestDTO.sourceOfInformation(),</span>
-<span class="fc" id="L59">            declaredProgramRequestDTO.link(),</span>
-<span class="fc" id="L60">            declaredProgramRequestDTO.startDate(),</span>
-<span class="fc" id="L61">            declaredProgramRequestDTO.endDate());</span>
+<span class="fc" id="L54">            addDeclaredProgramDTO.title(),</span>
+<span class="fc" id="L55">            addDeclaredProgramDTO.description(),</span>
+<span class="fc" id="L56">            addDeclaredProgramDTO.organization(),</span>
+<span class="fc" id="L57">            addDeclaredProgramDTO.result(),</span>
+<span class="fc" id="L58">            addDeclaredProgramDTO.sourceOfInformation(),</span>
+<span class="fc" id="L59">            addDeclaredProgramDTO.link(),</span>
+<span class="fc" id="L60">            addDeclaredProgramDTO.startDate(),</span>
+<span class="fc" id="L61">            addDeclaredProgramDTO.endDate());</span>
 <span class="fc" id="L62">    return ResponseEntity.created(URI.create(&quot;/me/declared/programs/&quot; + declaredProgram.getId()))</span>
 <span class="fc" id="L63">        .body(DeclaredProgramViewMapper.toDTO(declaredProgram));</span>
-  }
-
-  @PutMapping(&quot;/{declaredProgramId}&quot;)
-  public ResponseEntity&lt;DeclaredProgramDetailedDTO&gt; updateDeclaredProgram(
-      @PathVariable(&quot;declaredProgramId&quot;) UUID declaredProgramId,
-      @Valid @RequestBody DeclaredProgramRequestDTO declaredProgramRequestDTO) {
-<span class="fc" id="L70">    DeclaredProgram declaredProgram =</span>
-<span class="fc" id="L71">        declaredProgramService.update(</span>
-            declaredProgramId,
-<span class="fc" id="L73">            declaredProgramRequestDTO.title(),</span>
-<span class="fc" id="L74">            declaredProgramRequestDTO.description(),</span>
-<span class="fc" id="L75">            declaredProgramRequestDTO.organization(),</span>
-<span class="fc" id="L76">            declaredProgramRequestDTO.result(),</span>
-<span class="fc" id="L77">            declaredProgramRequestDTO.sourceOfInformation(),</span>
-<span class="fc" id="L78">            declaredProgramRequestDTO.link(),</span>
-<span class="fc" id="L79">            declaredProgramRequestDTO.startDate(),</span>
-<span class="fc" id="L80">            declaredProgramRequestDTO.endDate());</span>
-<span class="fc" id="L81">    return ResponseEntity.ok(DeclaredProgramDetailedMapper.toDTO(declaredProgram));</span>
   }
 
   @GetMapping(&quot;/{declaredProgramId}&quot;)
   public ResponseEntity&lt;DeclaredProgramDetailedDTO&gt; getDeclaredProgram(
       @PathVariable(&quot;declaredProgramId&quot;) UUID declaredProgramId) {
-<span class="fc" id="L87">    DeclaredProgram declaredProgram = declaredProgramService.getById(declaredProgramId);</span>
-<span class="fc" id="L88">    return ResponseEntity.ok(DeclaredProgramDetailedMapper.toDTO(declaredProgram));</span>
+<span class="fc" id="L69">    DeclaredProgram declaredProgram = declaredProgramService.getById(declaredProgramId);</span>
+<span class="fc" id="L70">    return ResponseEntity.ok(DeclaredProgramDetailedMapper.toDTO(declaredProgram));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
