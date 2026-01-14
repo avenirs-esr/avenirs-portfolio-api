@@ -33,4 +33,15 @@ public interface DeclaredProgramService {
   DeclaredProgram getById(UUID declaredProgramId);
 
   PagedResult<DeclaredProgram> getDeclaredPrograms(PageCriteria pageCriteria);
+
+  DeclaredProgram update(
+      UUID declaredProgramId,
+      String title,
+      String description,
+      String organization,
+      String result,
+      String sourceOfInformation,
+      String link,
+      LocalDate startDate,
+      LocalDate endDate);
 }

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -456,6 +457,358 @@ class DeclaredProgramServiceImplTest {
 
         verify(loggedInUserService).getLoggedInStudent();
         verify(declaredProgramRepository).findAllByStudent(loggedStudent, pageCriteria);
+      }
+    }
+
+    @Nested
+    class WhenUpdateIsCalled {
+
+      private UUID declaredProgramId;
+
+      private String title;
+      private String description;
+      private String organization;
+      private String result;
+      private String sourceOfInformation;
+      private String link;
+      private LocalDate startDate;
+      private LocalDate endDate;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("update(UUID declaredProgramId, ...) is called");
+        declaredProgramId = UUID.randomUUID();
+
+        title = "Updated title";
+        description = "Updated description";
+        organization = "Updated organization";
+        result = "Updated result";
+        sourceOfInformation = "Updated source";
+        link = "https://example.com/updated";
+
+        startDate = LocalDate.now().minusDays(10);
+        endDate = LocalDate.now().plusDays(10);
+      }
+
+      @Nested
+      class AndLoggedInStudentIsAvailable {
+
+        private Student loggedStudent;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("a logged in student is available");
+          loggedStudent = mock(Student.class);
+          when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedStudent);
+        }
+
+        @Nested
+        class AndDeclaredProgramDoesNotExist {
+
+          @BeforeEach
+          void setupAnd2() {
+            BddLogger.and("declared program does not exist in repository");
+            when(declaredProgramRepository.findById(declaredProgramId))
+                .thenReturn(Optional.empty());
+          }
+
+          @Test
+          void thenItShouldThrowDeclaredProgramNotFoundException() {
+            BddLogger.then("it should throw DeclaredProgramNotFoundException");
+
+            assertThrows(
+                DeclaredProgramNotFoundException.class,
+                () ->
+                    declaredProgramService.update(
+                        declaredProgramId,
+                        title,
+                        description,
+                        organization,
+                        result,
+                        sourceOfInformation,
+                        link,
+                        startDate,
+                        endDate));
+
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(declaredProgramRepository).findById(declaredProgramId);
+            verify(declaredProgramRepository, never()).save(any());
+          }
+        }
+
+        @Nested
+        class AndDeclaredProgramExists {
+
+          private DeclaredProgram declaredProgram;
+
+          @BeforeEach
+          void setupAnd2() {
+            BddLogger.and("declared program exists in repository");
+            declaredProgram = mock(DeclaredProgram.class);
+            when(declaredProgramRepository.findById(declaredProgramId))
+                .thenReturn(Optional.of(declaredProgram));
+          }
+
+          @Nested
+          class AndItDoesNotBelongToLoggedInStudent {
+
+            private Student otherStudent;
+
+            @BeforeEach
+            void setupAnd3() {
+              BddLogger.and("declared program does not belong to logged in student");
+              otherStudent = mock(Student.class);
+              when(declaredProgram.getStudent()).thenReturn(otherStudent);
+            }
+
+            @Test
+            void thenItShouldThrowUserNotAuthorizedException() {
+              BddLogger.then("it should throw UserNotAuthorizedException");
+
+              assertThrows(
+                  UserNotAuthorizedException.class,
+                  () ->
+                      declaredProgramService.update(
+                          declaredProgramId,
+                          title,
+                          description,
+                          organization,
+                          result,
+                          sourceOfInformation,
+                          link,
+                          startDate,
+                          endDate));
+
+              verify(loggedInUserService).getLoggedInStudent();
+              verify(declaredProgramRepository).findById(declaredProgramId);
+              verify(declaredProgram).getStudent();
+              verify(declaredProgramRepository, never()).save(any());
+              verifyNoMoreInteractions(declaredProgram);
+            }
+          }
+
+          @Nested
+          class AndItBelongsToLoggedInStudent {
+
+            @BeforeEach
+            void setupAnd3() {
+              BddLogger.and("declared program belongs to logged in student");
+              when(declaredProgram.getStudent()).thenReturn(loggedStudent);
+            }
+
+            @Test
+            void thenItShouldUpdateFieldsAndSaveAndReturnSavedProgram() {
+              BddLogger.then("it should update fields, save and return saved program");
+
+              DeclaredProgram savedProgram = mock(DeclaredProgram.class);
+              when(declaredProgramRepository.save(declaredProgram)).thenReturn(savedProgram);
+
+              DeclaredProgram resultProgram =
+                  declaredProgramService.update(
+                      declaredProgramId,
+                      title,
+                      description,
+                      organization,
+                      result,
+                      sourceOfInformation,
+                      link,
+                      startDate,
+                      endDate);
+
+              assertNotNull(resultProgram);
+              assertEquals(savedProgram, resultProgram);
+
+              verify(loggedInUserService).getLoggedInStudent();
+              verify(declaredProgramRepository).findById(declaredProgramId);
+              verify(declaredProgram).getStudent();
+
+              verify(declaredProgram).setTitle(title);
+              verify(declaredProgram).setDescription(description);
+              verify(declaredProgram).setOrganization(organization);
+              verify(declaredProgram).setResult(result);
+              verify(declaredProgram).setSourceOfInformation(sourceOfInformation);
+              verify(declaredProgram).setLink(link);
+              verify(declaredProgram).setStartDate(startDate);
+              verify(declaredProgram).setEndDate(endDate);
+
+              verify(declaredProgram).setStatus(EProgramStatus.IN_PROGRESS);
+
+              verify(declaredProgramRepository).save(declaredProgram);
+            }
+
+            @Test
+            void thenItShouldSetStatusNotStartedWhenPeriodIsBefore() {
+              BddLogger.then("it should set status NOT_STARTED when startDate is in the future");
+
+              LocalDate futureStartDate = LocalDate.now().plusDays(10);
+              LocalDate futureEndDate = futureStartDate.plusDays(30);
+
+              declaredProgramService.update(
+                  declaredProgramId,
+                  title,
+                  description,
+                  organization,
+                  result,
+                  sourceOfInformation,
+                  link,
+                  futureStartDate,
+                  futureEndDate);
+
+              verify(declaredProgram).setStatus(EProgramStatus.NOT_STARTED);
+              verify(declaredProgramRepository).save(declaredProgram);
+            }
+
+            @Test
+            void thenItShouldSetStatusCompletedWhenPeriodIsAfter() {
+              BddLogger.then("it should set status COMPLETED when endDate is in the past");
+
+              LocalDate pastStartDate = LocalDate.now().minusDays(30);
+              LocalDate pastEndDate = LocalDate.now().minusDays(10);
+
+              declaredProgramService.update(
+                  declaredProgramId,
+                  title,
+                  description,
+                  organization,
+                  result,
+                  sourceOfInformation,
+                  link,
+                  pastStartDate,
+                  pastEndDate);
+
+              verify(declaredProgram).setStatus(EProgramStatus.COMPLETED);
+              verify(declaredProgramRepository).save(declaredProgram);
+            }
+
+            @Nested
+            class AndValidationFails {
+
+              @Test
+              void thenItShouldThrowWhenTitleIsBlank() {
+                BddLogger.then("it should throw when title is blank");
+
+                assertThrows(
+                    FieldValidationException.class,
+                    () ->
+                        declaredProgramService.update(
+                            declaredProgramId,
+                            "   ",
+                            description,
+                            organization,
+                            result,
+                            sourceOfInformation,
+                            link,
+                            startDate,
+                            endDate));
+
+                verify(declaredProgramRepository, never()).save(any());
+                verify(declaredProgram, never()).setTitle(any());
+              }
+
+              @Test
+              void thenItShouldThrowWhenOrganizationIsBlank() {
+                BddLogger.then("it should throw when organization is blank");
+
+                assertThrows(
+                    FieldValidationException.class,
+                    () ->
+                        declaredProgramService.update(
+                            declaredProgramId,
+                            title,
+                            description,
+                            " ",
+                            result,
+                            sourceOfInformation,
+                            link,
+                            startDate,
+                            endDate));
+
+                verify(declaredProgramRepository, never()).save(any());
+                verify(declaredProgram, never()).setOrganization(any());
+              }
+
+              @Test
+              void thenItShouldThrowWhenStartDateIsNull() {
+                BddLogger.then("it should throw when startDate is null");
+
+                assertThrows(
+                    FieldValidationException.class,
+                    () ->
+                        declaredProgramService.update(
+                            declaredProgramId,
+                            title,
+                            description,
+                            organization,
+                            result,
+                            sourceOfInformation,
+                            link,
+                            null,
+                            endDate));
+
+                verify(declaredProgramRepository, never()).save(any());
+                verify(declaredProgram, never()).setStartDate(any());
+              }
+
+              @Test
+              void thenItShouldThrowWhenEndDateIsBeforeStartDate() {
+                BddLogger.then("it should throw when endDate is before startDate");
+
+                LocalDate s = LocalDate.now();
+                LocalDate e = s.minusDays(1);
+
+                assertThrows(
+                    FieldValidationException.class,
+                    () ->
+                        declaredProgramService.update(
+                            declaredProgramId,
+                            title,
+                            description,
+                            organization,
+                            result,
+                            sourceOfInformation,
+                            link,
+                            s,
+                            e));
+
+                verify(declaredProgramRepository, never()).save(any());
+                verify(declaredProgram, never()).setEndDate(any());
+              }
+            }
+          }
+        }
+      }
+
+      @Nested
+      class AndLoggedInUserServiceFails {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("loggedInUserService fails to provide a logged in student");
+          when(loggedInUserService.getLoggedInStudent())
+              .thenThrow(new RuntimeException("no logged user"));
+        }
+
+        @Test
+        void thenItShouldPropagateExceptionAndNotCallRepository() {
+          BddLogger.then("it should propagate exception and not call repository");
+
+          assertThrows(
+              RuntimeException.class,
+              () ->
+                  declaredProgramService.update(
+                      declaredProgramId,
+                      title,
+                      description,
+                      organization,
+                      result,
+                      sourceOfInformation,
+                      link,
+                      startDate,
+                      endDate));
+
+          verify(declaredProgramRepository, never()).findById(any());
+          verify(declaredProgramRepository, never()).save(any());
+        }
       }
     }
   }
