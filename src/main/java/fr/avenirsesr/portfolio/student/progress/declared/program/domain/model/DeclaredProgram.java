@@ -7,8 +7,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class DeclaredProgram extends AvenirsBaseModel {
   private final Student student;
   private EProgramStatus status;

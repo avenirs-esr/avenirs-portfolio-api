@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Schema(requiredProperties = {"title", "organization", "startDate"})
-public record AddDeclaredProgramDTO(
+public record DeclaredProgramRequestDTO(
     @NotBlank @Size(max = TITLE_LENGTH) String title,
     @Size(max = DESCRIPTION_LENGTH) String description,
     @NotBlank @Size(max = ORGANIZATION_LENGTH) String organization,

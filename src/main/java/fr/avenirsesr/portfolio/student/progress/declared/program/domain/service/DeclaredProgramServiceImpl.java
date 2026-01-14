@@ -39,14 +39,8 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       LocalDate startDate,
       LocalDate endDate) {
 
-    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
-    requireNotBlankAndMaxLength("organization", organization, ORGANIZATION_LENGTH);
-    validateOptionalTextMaxLength("description", description, DESCRIPTION_LENGTH);
-    validateOptionalTextMaxLength("result", result, RESULT_LENGTH);
-    validateOptionalTextMaxLength(
-        "sourceOfInformation", sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
-    requireNotNull("startDate", startDate);
-    validateDateOrder(startDate, endDate);
+    fieldsValidation(
+        title, description, organization, result, sourceOfInformation, link, startDate, endDate);
 
     DeclaredProgram declaredProgram =
         DeclaredProgram.create(
@@ -62,6 +56,26 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
             endDate);
 
     return declaredProgramRepository.save(declaredProgram);
+  }
+
+  private static void fieldsValidation(
+      String title,
+      String description,
+      String organization,
+      String result,
+      String sourceOfInformation,
+      String link,
+      LocalDate startDate,
+      LocalDate endDate) {
+    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
+    requireNotBlankAndMaxLength("organization", organization, ORGANIZATION_LENGTH);
+    validateOptionalTextMaxLength("description", description, DESCRIPTION_LENGTH);
+    validateOptionalTextMaxLength("result", result, RESULT_LENGTH);
+    validateOptionalTextMaxLength(
+        "sourceOfInformation", sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
+    requireNotNull("startDate", startDate);
+    validateDateOrder(startDate, endDate);
+    validateUrl(link);
   }
 
   @Override
@@ -134,12 +148,46 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
     return declaredProgramRepository.findAllByStudent(student, pageCriteria);
   }
 
+  @Override
+  public DeclaredProgram update(
+      UUID declaredProgramId,
+      String title,
+      String description,
+      String organization,
+      String result,
+      String sourceOfInformation,
+      String link,
+      LocalDate startDate,
+      LocalDate endDate) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    log.info("Update declaredProgramId {} by {}", declaredProgramId, student);
+    DeclaredProgram declaredProgram =
+        declaredProgramRepository
+            .findById(declaredProgramId)
+            .orElseThrow(DeclaredProgramNotFoundException::new);
+    if (!declaredProgram.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
+    fieldsValidation(
+        title, description, organization, result, sourceOfInformation, link, startDate, endDate);
+    declaredProgram.setTitle(title);
+    declaredProgram.setDescription(description);
+    declaredProgram.setOrganization(organization);
+    declaredProgram.setResult(result);
+    declaredProgram.setSourceOfInformation(sourceOfInformation);
+    declaredProgram.setLink(link);
+    declaredProgram.setStartDate(startDate);
+    declaredProgram.setEndDate(endDate);
+    declaredProgram.setStatus(getProgramStatus(startDate, endDate));
+    return declaredProgramRepository.save(declaredProgram);
+  }
+
   private EProgramStatus getProgramStatus(LocalDate startDate, LocalDate endDate) {
     EPeriodStatus periodStatus = EPeriodStatus.of(startDate, endDate);
     return switch (periodStatus) {
+      case EPeriodStatus.BEFORE -> EProgramStatus.NOT_STARTED;
       case EPeriodStatus.DURING -> EProgramStatus.IN_PROGRESS;
-      case EPeriodStatus.AFTER -> EProgramStatus.NOT_STARTED;
-      case EPeriodStatus.BEFORE -> EProgramStatus.COMPLETED;
+      case EPeriodStatus.AFTER -> EProgramStatus.COMPLETED;
     };
   }
 }
