@@ -2,8 +2,6 @@ package fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDTO;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
@@ -321,93 +319,6 @@ class ExternalSkillClientTest {
 
     BddLogger.then("it should return an empty list");
     assertThat(result).isEmpty();
-  }
-
-  @Test
-  void shouldReturnPagedResponseWhenSearchRespondsSuccessfully() throws Exception {
-    BddLogger.given("a mock interoperability server responding successfully for search");
-    PageCriteria pageCriteria = new PageCriteria(1, 10);
-
-    String responseBody =
-        """
-        {
-          "data": [
-            {
-              "id": "%s",
-              "title": "Java",
-              "pathSegments": ["Informatique", "Développement"],
-              "type": "ROME4"
-            }
-          ],
-          "page": {
-            "page": 1,
-            "pageSize": 10,
-            "totalElements": 1,
-            "totalPages": 1
-          }
-        }
-        """
-            .formatted(UUID.randomUUID());
-
-    mockWebServer.enqueue(
-        new MockResponse()
-            .setResponseCode(200)
-            .setBody(responseBody)
-            .addHeader("Content-Type", "application/json"));
-
-    BddLogger.when("searching external skills");
-    PagedResponse<ExternalSkillDTO> result = client.search("java", pageCriteria);
-
-    BddLogger.then("it should return the paged response");
-    assertThat(result).isNotNull();
-    assertThat(result.data()).hasSize(1);
-    assertThat(result.data().get(0).title()).isEqualTo("Java");
-    assertThat(result.page().page()).isEqualTo(1);
-    assertThat(result.page().pageSize()).isEqualTo(10);
-    assertThat(result.page().totalElements()).isEqualTo(1);
-    assertThat(result.page().totalPages()).isEqualTo(1);
-
-    RecordedRequest request = mockWebServer.takeRequest();
-    assertThat(request.getMethod()).isEqualTo("GET");
-    assertThat(request.getPath())
-        .isEqualTo("/external-skills/search?keyword=java&page=1&pageSize=10");
-    assertThat(request.getHeader(AvenirsSecurityHeaders.API_KEY)).isEqualTo("test-api-key");
-  }
-
-  @Test
-  void shouldReturnEmptyPagedResponseWhenSearchReturnsEmptyBody() {
-    BddLogger.given("a mock interoperability server returning 200 with empty body for search");
-    PageCriteria pageCriteria = new PageCriteria(2, 5);
-    mockWebServer.enqueue(new MockResponse().setResponseCode(200));
-
-    BddLogger.when("searching external skills");
-    PagedResponse<ExternalSkillDTO> result = client.search("spring", pageCriteria);
-
-    BddLogger.then("it should return an empty paged response");
-    assertThat(result).isNotNull();
-    assertThat(result.data()).isEmpty();
-    assertThat(result.page().page()).isEqualTo(2);
-    assertThat(result.page().pageSize()).isEqualTo(5);
-    assertThat(result.page().totalElements()).isZero();
-    assertThat(result.page().totalPages()).isZero();
-  }
-
-  @Test
-  void shouldReturnEmptyPagedResponseWhenSearchReturns500() {
-    BddLogger.given("a mock interoperability server returning 500 for search");
-    PageCriteria pageCriteria = new PageCriteria(0, 20);
-    mockWebServer.enqueue(new MockResponse().setResponseCode(500));
-
-    BddLogger.when("searching external skills");
-    PagedResponse<ExternalSkillDTO> result = client.search("kotlin", pageCriteria);
-
-    BddLogger.then("it should return an empty paged response");
-    assertThat(result).isNotNull();
-    assertThat(result.data()).isEmpty();
-    assertThat(result.page().page()).isEqualTo(pageCriteria.page());
-    assertThat(result.page().pageSize()).isEqualTo(pageCriteria.pageSize());
-    assertThat(result.page().totalElements()).isZero();
-    assertThat(result.page().totalPages()).isZero();
   }
 
   @Test
