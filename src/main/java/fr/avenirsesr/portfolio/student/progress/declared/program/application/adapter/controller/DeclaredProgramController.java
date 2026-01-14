@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.De
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.input.DeclaredProgramService;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -86,5 +87,11 @@ public class DeclaredProgramController {
       @PathVariable("declaredProgramId") UUID declaredProgramId) {
     DeclaredProgram declaredProgram = declaredProgramService.getById(declaredProgramId);
     return ResponseEntity.ok(DeclaredProgramDetailedMapper.toDTO(declaredProgram));
+  }
+
+  @DeleteMapping
+  public ResponseEntity<String> deleteDeclaredProgram(@RequestBody List<UUID> declaredProgramIds) {
+    declaredProgramService.delete(declaredProgramIds);
+    return ResponseEntity.ok("Declared programs deleted successfully.");
   }
 }

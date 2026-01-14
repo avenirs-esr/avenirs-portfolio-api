@@ -16,6 +16,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.application.ada
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.repository.DeclaredProgramJpaRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -732,6 +733,169 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .andExpect(status().isNotFound())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+      }
+    }
+
+    @Nested
+    class WhenDeletingDeclaredPrograms {
+
+      @Test
+      void shouldDeleteDeclaredProgramsSuccessfully() throws Exception {
+        BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
+        BddLogger.when("performing a DELETE with ids owned by the logged-in student");
+        BddLogger.then("it should return 200 and the programs should be deleted");
+
+        String id1 =
+            createDeclaredProgramAndReturnId(
+                new DeclaredProgramRequestDTO(
+                    "Prog 1",
+                    "Desc",
+                    "Org",
+                    "Result",
+                    "Source",
+                    "https://example.com",
+                    LocalDate.now().minusMonths(1),
+                    LocalDate.now()),
+                studentPayload,
+                studentSignature);
+
+        String id2 =
+            createDeclaredProgramAndReturnId(
+                new DeclaredProgramRequestDTO(
+                    "Prog 2",
+                    "Desc",
+                    "Org",
+                    "Result",
+                    "Source",
+                    "https://example.com",
+                    LocalDate.now().minusMonths(2),
+                    LocalDate.now().minusMonths(1)),
+                studentPayload,
+                studentSignature);
+
+        mockMvc
+            .perform(
+                delete(BASE_PATH)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        objectMapper.writeValueAsString(
+                            List.of(UUID.fromString(id1), UUID.fromString(id2))))
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isOk())
+            .andExpect(content().string("Declared programs deleted successfully."));
+
+        // Assert deletion: each GET should now be 404
+        mockMvc
+            .perform(
+                get(BASE_PATH + "/" + id1)
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.code").value("DECLARED_PROGRAM_NOT_FOUND"));
+
+        mockMvc
+            .perform(
+                get(BASE_PATH + "/" + id2)
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.code").value("DECLARED_PROGRAM_NOT_FOUND"));
+      }
+
+      @Test
+      void shouldReturn403WhenTryingToDeleteProgramsOfAnotherStudent() throws Exception {
+        BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
+        BddLogger.when("performing a DELETE including an id owned by another student");
+        BddLogger.then("it should return 403 and not delete anything");
+
+        String ownedByOtherStudent =
+            createDeclaredProgramAndReturnId(
+                new DeclaredProgramRequestDTO(
+                    "Other student program",
+                    "Desc",
+                    "Org",
+                    "Result",
+                    "Source",
+                    "https://example.com",
+                    LocalDate.now().minusMonths(1),
+                    LocalDate.now()),
+                secondStudentPayload,
+                secondStudentSignature);
+
+        mockMvc
+            .perform(
+                delete(BASE_PATH)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        objectMapper.writeValueAsString(
+                            List.of(UUID.fromString(ownedByOtherStudent))))
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isForbidden());
+      }
+
+      @Test
+      void shouldReturn404WhenUserNotFound() throws Exception {
+        BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
+        BddLogger.when("performing a DELETE with an unknown user");
+        BddLogger.then("it should return 404 USER_NOT_FOUND");
+
+        mockMvc
+            .perform(
+                delete(BASE_PATH)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(List.of(UUID.randomUUID())))
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+      }
+
+      @Test
+      void shouldReturn400WhenBodyContainsInvalidUUID() throws Exception {
+        BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
+        BddLogger.when("performing a DELETE with invalid UUID in body");
+        BddLogger.then("it should return 400");
+
+        mockMvc
+            .perform(
+                delete(BASE_PATH)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("[\"not-a-uuid\"]")
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isBadRequest());
+      }
+
+      @Test
+      void shouldReturn400WhenBodyIsMissing() throws Exception {
+        BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
+        BddLogger.when("performing a DELETE without body");
+        BddLogger.then("it should return 400");
+
+        mockMvc
+            .perform(
+                delete(BASE_PATH)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isBadRequest());
       }
     }
   }

@@ -16,6 +16,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.out
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -180,6 +181,18 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
     declaredProgram.setEndDate(endDate);
     declaredProgram.setStatus(getProgramStatus(startDate, endDate));
     return declaredProgramRepository.save(declaredProgram);
+  }
+
+  @Override
+  public void delete(List<UUID> declaredProgramIds) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    List<DeclaredProgram> declaredPrograms =
+        declaredProgramRepository.findAllById(declaredProgramIds);
+
+    if (!declaredPrograms.stream().allMatch(p -> p.getStudent().equals(student))) {
+      throw new UserNotAuthorizedException();
+    }
+    declaredProgramRepository.removeAllFromDatabase(declaredPrograms);
   }
 
   private EProgramStatus getProgramStatus(LocalDate startDate, LocalDate endDate) {

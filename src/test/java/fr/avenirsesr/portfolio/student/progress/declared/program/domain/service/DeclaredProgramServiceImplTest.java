@@ -18,6 +18,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.out
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -808,6 +809,132 @@ class DeclaredProgramServiceImplTest {
 
           verify(declaredProgramRepository, never()).findById(any());
           verify(declaredProgramRepository, never()).save(any());
+        }
+      }
+    }
+
+    @Nested
+    class WhenDeleteIsCalled {
+
+      private List<UUID> declaredProgramIds;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("delete(List<UUID> declaredProgramIds) is called");
+        declaredProgramIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+      }
+
+      @Nested
+      class AndLoggedInStudentIsAvailable {
+
+        private Student loggedStudent;
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("a logged in student is available");
+          loggedStudent = mock(Student.class);
+          when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedStudent);
+        }
+
+        @Nested
+        class AndAllProgramsBelongToLoggedInStudent {
+
+          private List<DeclaredProgram> programs;
+
+          @BeforeEach
+          void setupAnd2() {
+            BddLogger.and("all declared programs belong to logged in student");
+            DeclaredProgram p1 = mock(DeclaredProgram.class);
+            DeclaredProgram p2 = mock(DeclaredProgram.class);
+
+            when(p1.getStudent()).thenReturn(loggedStudent);
+            when(p2.getStudent()).thenReturn(loggedStudent);
+
+            programs = List.of(p1, p2);
+            when(declaredProgramRepository.findAllById(declaredProgramIds)).thenReturn(programs);
+          }
+
+          @Test
+          void thenItShouldRemoveAllProgramsFromDatabase() {
+            BddLogger.then("it should remove all declared programs from database");
+
+            declaredProgramService.delete(declaredProgramIds);
+
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(declaredProgramRepository).findAllById(declaredProgramIds);
+            verify(declaredProgramRepository).removeAllFromDatabase(programs);
+          }
+        }
+
+        @Nested
+        class AndAtLeastOneProgramDoesNotBelongToLoggedInStudent {
+
+          @BeforeEach
+          void setupAnd2() {
+            BddLogger.and("at least one declared program does not belong to logged in student");
+            DeclaredProgram p1 = mock(DeclaredProgram.class);
+            DeclaredProgram p2 = mock(DeclaredProgram.class);
+
+            when(p1.getStudent()).thenReturn(loggedStudent);
+            when(p2.getStudent()).thenReturn(mock(Student.class));
+
+            when(declaredProgramRepository.findAllById(declaredProgramIds))
+                .thenReturn(List.of(p1, p2));
+          }
+
+          @Test
+          void thenItShouldThrowUserNotAuthorizedExceptionAndNotDelete() {
+            BddLogger.then("it should throw UserNotAuthorizedException and not delete");
+
+            assertThrows(
+                UserNotAuthorizedException.class,
+                () -> declaredProgramService.delete(declaredProgramIds));
+
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(declaredProgramRepository).findAllById(declaredProgramIds);
+            verify(declaredProgramRepository, never()).removeAllFromDatabase(any());
+          }
+        }
+
+        @Nested
+        class AndProgramIdsListIsEmpty {
+
+          @Test
+          void thenItShouldCallRepositoryWithEmptyListAndRemoveNothing() {
+            BddLogger.then("it should call repository with empty list and remove nothing");
+
+            List<UUID> emptyIds = Collections.emptyList();
+            when(declaredProgramRepository.findAllById(emptyIds))
+                .thenReturn(Collections.emptyList());
+
+            declaredProgramService.delete(emptyIds);
+
+            verify(loggedInUserService).getLoggedInStudent();
+            verify(declaredProgramRepository).findAllById(emptyIds);
+            verify(declaredProgramRepository).removeAllFromDatabase(Collections.emptyList());
+          }
+        }
+      }
+
+      @Nested
+      class AndLoggedInUserServiceFails {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("loggedInUserService fails");
+          when(loggedInUserService.getLoggedInStudent())
+              .thenThrow(new RuntimeException("no logged user"));
+        }
+
+        @Test
+        void thenItShouldPropagateExceptionAndNotCallRepository() {
+          BddLogger.then("it should propagate exception and not call repository");
+
+          assertThrows(
+              RuntimeException.class, () -> declaredProgramService.delete(declaredProgramIds));
+
+          verify(declaredProgramRepository, never()).findAllById(any());
+          verify(declaredProgramRepository, never()).removeAllFromDatabase(any());
         }
       }
     }
