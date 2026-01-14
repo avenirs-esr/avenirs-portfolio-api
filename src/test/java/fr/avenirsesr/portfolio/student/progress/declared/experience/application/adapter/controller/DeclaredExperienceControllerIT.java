@@ -30,6 +30,12 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.signature}")
   private String studentSignature;
 
+  @Value("${user.second.student.payload}")
+  private String otherStudentPayload;
+
+  @Value("${user.second.student.signature}")
+  private String otherStudentSignature;
+
   private final String notFoundDeclaredExperienceId = "00000000-0000-0000-0000-000000000000";
 
   @BeforeAll
@@ -90,7 +96,6 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
             .andExpect(status().isCreated())
             .andReturn();
 
-    // Extract ID from creation response
     String responseBody = result.getResponse().getContentAsString();
     String createdId =
         responseBody.substring(responseBody.indexOf(":") + 2, responseBody.indexOf(",") - 1);
@@ -295,5 +300,116 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidUpdateJson))
         .andExpect(status().isBadRequest());
+  }
+
+  @Transactional
+  @Test
+  void shouldDeleteDeclaredExperiences() throws Exception {
+    BddLogger.given("an existing declared experience");
+    var result =
+        mockMvc
+            .perform(
+                post(BASE_PATH + "/")
+                    .header("X-Signed-Context", studentPayload)
+                    .header("X-Context-Kid", secretKey)
+                    .header("X-Context-Signature", studentSignature)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(buildCreateExperienceJson()))
+            .andExpect(status().isCreated())
+            .andReturn();
+
+    String createdId =
+        result
+            .getResponse()
+            .getContentAsString()
+            .substring(
+                result.getResponse().getContentAsString().indexOf(":") + 2,
+                result.getResponse().getContentAsString().indexOf(",") - 1);
+
+    BddLogger.when("performing DELETE on that declared experience");
+    BddLogger.then("it should delete successfully");
+
+    String deleteJson = "[\"" + createdId + "\"]";
+
+    mockMvc
+        .perform(
+            delete(BASE_PATH + "/")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(deleteJson))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("successfully deleted")));
+
+    BddLogger.then("trying to GET the deleted experience should return 404");
+
+    mockMvc
+        .perform(
+            get(BASE_PATH + "/" + createdId)
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void shouldReturnNotFoundWhenDeletingNonExistingExperience() throws Exception {
+    BddLogger.given("a non existing declared experience id");
+    BddLogger.when("performing DELETE with unknown id");
+    BddLogger.then("it should return not found");
+
+    String deleteJson = "[\"" + notFoundDeclaredExperienceId + "\"]";
+
+    mockMvc
+        .perform(
+            delete(BASE_PATH + "/")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(deleteJson))
+        .andExpect(status().isNotFound());
+  }
+
+  @Transactional
+  @Test
+  void shouldReturnUnauthorizedWhenDeletingOtherStudentsExperience() throws Exception {
+    BddLogger.given("an existing declared experience for another student");
+
+    var result =
+        mockMvc
+            .perform(
+                post(BASE_PATH + "/")
+                    .header("X-Signed-Context", otherStudentPayload)
+                    .header("X-Context-Kid", secretKey)
+                    .header("X-Context-Signature", otherStudentSignature)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(buildCreateExperienceJson()))
+            .andExpect(status().isCreated())
+            .andReturn();
+
+    String otherId =
+        result
+            .getResponse()
+            .getContentAsString()
+            .substring(
+                result.getResponse().getContentAsString().indexOf(":") + 2,
+                result.getResponse().getContentAsString().indexOf(",") - 1);
+
+    BddLogger.when("performing DELETE on that experience as another student");
+    BddLogger.then("it should return unauthorized");
+
+    String deleteJson = "[\"" + otherId + "\"]";
+
+    mockMvc
+        .perform(
+            delete(BASE_PATH + "/")
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(deleteJson))
+        .andExpect(status().isForbidden());
   }
 }

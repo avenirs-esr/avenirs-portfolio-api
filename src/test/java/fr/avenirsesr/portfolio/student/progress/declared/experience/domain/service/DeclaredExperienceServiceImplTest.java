@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -825,5 +826,86 @@ class DeclaredExperienceServiceImplTest {
     verify(experience).setEndDate(end);
 
     verify(experienceRepository).save(experience);
+  }
+
+  @Test
+  void shouldDeleteExperiencesWhenStudentIsOwner() {
+    Student loggedIn = student;
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    DeclaredExperience exp1 = mock(DeclaredExperience.class);
+    DeclaredExperience exp2 = mock(DeclaredExperience.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(exp1.getStudent()).thenReturn(loggedIn);
+    when(exp2.getStudent()).thenReturn(loggedIn);
+    when(exp1.getId()).thenReturn(id1);
+    when(exp2.getId()).thenReturn(id2);
+    when(experienceRepository.findAllById(List.of(id1, id2))).thenReturn(List.of(exp1, exp2));
+
+    service.delete(List.of(id1, id2));
+
+    verify(experienceRepository).findAllById(List.of(id1, id2));
+    verify(experienceRepository).removeAllFromDatabase(List.of(exp1, exp2));
+  }
+
+  @Test
+  void shouldThrowWhenExperienceNotFoundOnDelete() {
+    Student loggedIn = student;
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    DeclaredExperience exp1 = mock(DeclaredExperience.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(exp1.getStudent()).thenReturn(loggedIn);
+
+    when(experienceRepository.findAllById(List.of(id1, id2))).thenReturn(List.of(exp1));
+
+    assertThrows(
+        DeclaredExperienceNotFoundException.class, () -> service.delete(List.of(id1, id2)));
+  }
+
+  @Test
+  void shouldThrowWhenOneExperienceBelongsToAnotherStudent() {
+    Student loggedIn = student;
+    Student other = StudentFixture.create().withId(UUID.randomUUID()).toModel();
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+    DeclaredExperience exp1 = mock(DeclaredExperience.class);
+    DeclaredExperience exp2 = mock(DeclaredExperience.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(exp1.getStudent()).thenReturn(loggedIn);
+    when(exp2.getStudent()).thenReturn(other);
+
+    when(experienceRepository.findAllById(List.of(id1, id2))).thenReturn(List.of(exp1, exp2));
+
+    assertThrows(UserNotAuthorizedException.class, () -> service.delete(List.of(id1, id2)));
+  }
+
+  @Test
+  void shouldThrowWhenNoExperienceFoundAtAll() {
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(experienceRepository.findAllById(anyList())).thenReturn(List.of());
+
+    assertThrows(
+        DeclaredExperienceNotFoundException.class,
+        () -> service.delete(List.of(UUID.randomUUID())));
+  }
+
+  @Test
+  void shouldHandleSingleIdDeletion() {
+    Student loggedIn = student;
+    UUID id = UUID.randomUUID();
+    DeclaredExperience exp = mock(DeclaredExperience.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(exp.getStudent()).thenReturn(loggedIn);
+    when(exp.getId()).thenReturn(id);
+    when(experienceRepository.findAllById(List.of(id))).thenReturn(List.of(exp));
+
+    service.delete(List.of(id));
+
+    verify(experienceRepository).removeAllFromDatabase(List.of(exp));
   }
 }

@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public interface DeclaredExperienceService {
@@ -48,6 +49,8 @@ public interface DeclaredExperienceService {
       String externalLink,
       LocalDate startDate,
       LocalDate endDate);
+
+  void delete(List<UUID> experienceIds);
 
   DeclaredExperience get(UUID experienceId);
 

@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.serv
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -15,6 +16,8 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -208,6 +211,26 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
     requireNotNull("startDate", startDate);
     validateDateOrder(startDate, endDate);
     validateUrl(externalLink);
+  }
+
+  @Override
+  public void delete(List<UUID> experienceIds) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    log.info("Deleting experienceIds {} by {}", experienceIds, student);
+
+    var experiences = experienceRepository.findAllById(experienceIds);
+
+    if (experiences.stream().anyMatch(experience -> !experience.getStudent().equals(student))) {
+      throw new UserNotAuthorizedException();
+    }
+
+    if (!new HashSet<>(experiences.stream().map(AvenirsBaseModel::getId).toList())
+        .containsAll(experienceIds)) {
+      throw new DeclaredExperienceNotFoundException();
+    }
+
+    experienceRepository.removeAllFromDatabase(experiences);
+    log.info("ExperienceIds {} successfully deleted", experienceIds);
   }
 
   @Override

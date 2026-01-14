@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -86,5 +87,11 @@ public class DeclaredExperienceController {
             request.endDate());
 
     return ResponseEntity.ok(DeclaredExperienceMapper.toDTO(experience));
+  }
+
+  @DeleteMapping("/")
+  public ResponseEntity<String> deleteDeclaredExperiences(@RequestBody List<UUID> experienceIds) {
+    declaredExperienceService.delete(experienceIds);
+    return ResponseEntity.ok("Declared experiences successfully deleted");
   }
 }
