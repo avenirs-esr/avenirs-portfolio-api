@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public interface DeclaredProgramService {
@@ -44,4 +45,6 @@ public interface DeclaredProgramService {
       String link,
       LocalDate startDate,
       LocalDate endDate);
+
+  void delete(List<UUID> declaredProgramIds);
 }
