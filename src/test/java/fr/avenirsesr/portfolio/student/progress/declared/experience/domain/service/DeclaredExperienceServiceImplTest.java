@@ -417,4 +417,413 @@ class DeclaredExperienceServiceImplTest {
 
     assertThrows(UserNotAuthorizedException.class, () -> service.get(UUID.randomUUID()));
   }
+
+  @Test
+  void shouldUpdateExperienceWhenStudentIsOwner() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    DeclaredExperience saved = mock(DeclaredExperience.class);
+    UUID expId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(expId)).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+    when(experienceRepository.save(any())).thenReturn(saved);
+
+    DeclaredExperience result =
+        service.update(
+            expId,
+            "Titre",
+            EExperienceType.PROFESSIONAL,
+            "Org",
+            "Sector",
+            "Paris",
+            "Desc",
+            "Source",
+            "Summary",
+            "https://test.fr",
+            start,
+            end);
+
+    assertNotNull(result);
+    verify(loggedInUserService).getLoggedInStudent();
+    verify(experienceRepository).findById(expId);
+    verify(experienceRepository).save(any());
+  }
+
+  @Test
+  void shouldThrowWhenExperienceNotFoundOnUpdate() {
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(experienceRepository.findById(any())).thenReturn(Optional.empty());
+
+    assertThrows(
+        DeclaredExperienceNotFoundException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                "Org",
+                "Sector",
+                "Paris",
+                "Desc",
+                "Source",
+                "Summary",
+                "https://test.fr",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldThrowWhenStudentIsNotOwnerOnUpdate() {
+    Student loggedIn = student;
+    Student other = StudentFixture.create().withId(UUID.randomUUID()).toModel();
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(other);
+
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                "Org",
+                "Sector",
+                "Paris",
+                "Desc",
+                "Source",
+                "Summary",
+                "https://test.fr",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldThrowOnUpdateWhenInvalidFields() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    assertThrows(
+        FieldValidationException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "", // invalid blank title
+                EExperienceType.PROFESSIONAL,
+                "Org",
+                "Sector",
+                "Paris",
+                "Desc",
+                "Source",
+                "Summary",
+                "https://test.fr",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldThrowOnUpdateWhenDatesAreInvalid() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    LocalDate wrongEnd = start.minusDays(1);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    assertThrows(
+        FieldValidationException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                "Org",
+                "Sector",
+                "Paris",
+                "Desc",
+                "Source",
+                "Summary",
+                "https://test.fr",
+                start,
+                wrongEnd));
+  }
+
+  @Test
+  void shouldThrowOnUpdateWhenOrganizationMissing() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    assertThrows(
+        FieldValidationException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                "",
+                "Sector",
+                "Paris",
+                "Desc",
+                "Source",
+                "Summary",
+                "https://test.fr",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldThrowOnUpdateWhenOrganizationTooLong() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    String tooLong = "A".repeat(81);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    assertThrows(
+        FieldValidationException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                tooLong,
+                "Sector",
+                "Paris",
+                "Desc",
+                "Source",
+                "Summary",
+                "https://test.fr",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldThrowOnUpdateWhenActivitySectorTooLong() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    String tooLong = "A".repeat(51);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    assertThrows(
+        FieldValidationException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                "Org",
+                tooLong,
+                "Paris",
+                "Desc",
+                "Source",
+                "Summary",
+                "https://test.fr",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldThrowOnUpdateWhenLocationTooLong() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    String tooLong = "A".repeat(51);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    assertThrows(
+        FieldValidationException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                "Org",
+                "Sector",
+                tooLong,
+                "Desc",
+                "Source",
+                "Summary",
+                "https://test.fr",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldThrowOnUpdateWhenSourceTooLong() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    String tooLong = "A".repeat(201);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    assertThrows(
+        FieldValidationException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                "Org",
+                "Sector",
+                "Paris",
+                "Desc",
+                tooLong,
+                "Summary",
+                "https://test.fr",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldThrowOnUpdateWhenDescriptionTooLong() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    String tooLong = "A".repeat(401);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    assertThrows(
+        FieldValidationException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                "Org",
+                "Sector",
+                "Paris",
+                tooLong,
+                "Source",
+                "Summary",
+                "https://test.fr",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldThrowOnUpdateWhenSummaryTooLong() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    String tooLong = "A".repeat(401);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    assertThrows(
+        FieldValidationException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                "Org",
+                "Sector",
+                "Paris",
+                "Desc",
+                "Source",
+                tooLong,
+                "https://test.fr",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldThrowOnUpdateWhenInvalidUrl() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(any())).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    assertThrows(
+        FieldValidationException.class,
+        () ->
+            service.update(
+                UUID.randomUUID(),
+                "Titre",
+                EExperienceType.PROFESSIONAL,
+                "Org",
+                "Sector",
+                "Paris",
+                "Desc",
+                "Source",
+                "Summary",
+                "not-an-url",
+                start,
+                end));
+  }
+
+  @Test
+  void shouldUpdateAllFieldsOnExperience() {
+    // GIVEN
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    DeclaredExperience saved = mock(DeclaredExperience.class);
+    UUID expId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(expId)).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+    when(experienceRepository.save(any())).thenReturn(saved);
+
+    // WHEN
+    DeclaredExperience result =
+        service.update(
+            expId,
+            "New Title",
+            EExperienceType.PROFESSIONAL,
+            "New Org",
+            "New Sector",
+            "New City",
+            "New Description",
+            "New Source",
+            "New Summary",
+            "https://new.link",
+            start,
+            end);
+
+    // THEN
+    assertNotNull(result);
+
+    // Verify all values are set on the existing entity
+    verify(experience).setTitle("New Title");
+    verify(experience).setExperienceType(EExperienceType.PROFESSIONAL);
+    verify(experience).setOrganization("New Org");
+    verify(experience).setActivitySector("New Sector");
+    verify(experience).setLocation("New City");
+    verify(experience).setDescription("New Description");
+    verify(experience).setSourceOfInformation("New Source");
+    verify(experience).setSummary("New Summary");
+    verify(experience).setExternalLink("https://new.link");
+    verify(experience).setStartDate(start);
+    verify(experience).setEndDate(end);
+
+    verify(experienceRepository).save(experience);
+  }
 }

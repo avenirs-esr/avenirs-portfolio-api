@@ -168,4 +168,132 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$.page.page").value(0))
         .andExpect(jsonPath("$.page.pageSize").value(5));
   }
+
+  @Transactional
+  @Test
+  void shouldUpdateDeclaredExperience() throws Exception {
+    BddLogger.given("an existing declared experience");
+    var result =
+        mockMvc
+            .perform(
+                post(BASE_PATH + "/")
+                    .header("X-Signed-Context", studentPayload)
+                    .header("X-Context-Kid", secretKey)
+                    .header("X-Context-Signature", studentSignature)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(buildCreateExperienceJson()))
+            .andExpect(status().isCreated())
+            .andReturn();
+
+    String createdId =
+        result
+            .getResponse()
+            .getContentAsString()
+            .substring(
+                result.getResponse().getContentAsString().indexOf(":") + 2,
+                result.getResponse().getContentAsString().indexOf(",") - 1);
+
+    String updateJson =
+        "{\n"
+            + "  \"title\": \"Updated Experience\",\n"
+            + "  \"experienceType\": \"PERSONAL\",\n"
+            + "  \"organization\": \"New Org\",\n"
+            + "  \"activitySector\": \"Science\",\n"
+            + "  \"location\": \"Lyon\",\n"
+            + "  \"description\": \"Updated description\",\n"
+            + "  \"sourceOfInformation\": \"SELF_DECLARED\",\n"
+            + "  \"summary\": \"Updated summary\",\n"
+            + "  \"externalLink\": \"https://updated.com\",\n"
+            + "  \"startDate\": \"2024-02-01\",\n"
+            + "  \"endDate\": \"2024-04-01\"\n"
+            + "}";
+
+    BddLogger.when("performing PUT on that declared experience");
+    BddLogger.then("it should update and return the new values");
+
+    mockMvc
+        .perform(
+            put(BASE_PATH + "/" + createdId)
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updateJson))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(createdId))
+        .andExpect(jsonPath("$.title").value("Updated Experience"))
+        .andExpect(jsonPath("$.organization").value("New Org"))
+        .andExpect(jsonPath("$.location").value("Lyon"))
+        .andExpect(jsonPath("$.externalLink").value("https://updated.com"));
+  }
+
+  @Test
+  void shouldReturnNotFoundWhenUpdatingNonExistingExperience() throws Exception {
+    BddLogger.given("a non existing declared experience id");
+    BddLogger.when("performing PUT with unknown id");
+    BddLogger.then("it should return not found");
+
+    mockMvc
+        .perform(
+            put(BASE_PATH + "/" + notFoundDeclaredExperienceId)
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(buildCreateExperienceJson()))
+        .andExpect(status().isNotFound());
+  }
+
+  @Transactional
+  @Test
+  void shouldReturnBadRequestWhenUpdatingWithInvalidData() throws Exception {
+    BddLogger.given("an existing declared experience");
+    var result =
+        mockMvc
+            .perform(
+                post(BASE_PATH + "/")
+                    .header("X-Signed-Context", studentPayload)
+                    .header("X-Context-Kid", secretKey)
+                    .header("X-Context-Signature", studentSignature)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(buildCreateExperienceJson()))
+            .andExpect(status().isCreated())
+            .andReturn();
+
+    String createdId =
+        result
+            .getResponse()
+            .getContentAsString()
+            .substring(
+                result.getResponse().getContentAsString().indexOf(":") + 2,
+                result.getResponse().getContentAsString().indexOf(",") - 1);
+
+    String invalidUpdateJson =
+        "{\n"
+            + "  \"title\": \"\",\n"
+            + "  \"experienceType\": \"PROFESSIONAL\",\n"
+            + "  \"organization\": \"ACME Inc\",\n"
+            + "  \"activitySector\": \"IT\",\n"
+            + "  \"location\": \"Paris\",\n"
+            + "  \"description\": \"Some description\",\n"
+            + "  \"sourceOfInformation\": \"SELF_DECLARED\",\n"
+            + "  \"summary\": \"Summary\",\n"
+            + "  \"externalLink\": \"https://example.com\",\n"
+            + "  \"startDate\": \"2024-01-01\",\n"
+            + "  \"endDate\": \"2024-03-01\"\n"
+            + "}";
+
+    BddLogger.when("performing PUT with invalid payload");
+    BddLogger.then("it should return 400");
+
+    mockMvc
+        .perform(
+            put(BASE_PATH + "/" + createdId)
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(invalidUpdateJson))
+        .andExpect(status().isBadRequest());
+  }
 }

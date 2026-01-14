@@ -101,16 +101,17 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       LocalDate endDate) {
     log.info("DeclaredExperience creation for {}", student);
 
-    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
-    requireNotBlankAndMaxLength("organization", organization, ORGANIZATION_LENGTH);
-    validateOptionalTextMaxLength("activitySector", activitySector, ACTIVITY_SECTOR_LENGTH);
-    validateOptionalTextMaxLength("location", location, LOCATION_LENGTH);
-    validateOptionalTextMaxLength(
-        "sourceOfInformation", sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
-    validateOptionalTextMaxLength("description", description, DESCRIPTION_LENGTH);
-    validateOptionalTextMaxLength("summary", summary, SUMMARY_LENGTH);
-    requireNotNull("startDate", startDate);
-    validateDateOrder(startDate, endDate);
+    checkDeclaredExperienceDataValidity(
+        title,
+        organization,
+        activitySector,
+        location,
+        description,
+        sourceOfInformation,
+        summary,
+        externalLink,
+        startDate,
+        endDate);
 
     var experience =
         DeclaredExperience.create(
@@ -130,6 +131,83 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
     experience = experienceRepository.save(experience);
     log.info("{} has been created", experience);
     return experience;
+  }
+
+  @Override
+  public DeclaredExperience update(
+      UUID experienceId,
+      String title,
+      EExperienceType experienceType,
+      String organization,
+      String activitySector,
+      String location,
+      String description,
+      String sourceOfInformation,
+      String summary,
+      String externalLink,
+      LocalDate startDate,
+      LocalDate endDate) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    log.info("Update experienceId {} by {}", experienceId, student);
+
+    var experience =
+        experienceRepository
+            .findById(experienceId)
+            .orElseThrow(DeclaredExperienceNotFoundException::new);
+    if (!experience.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
+    checkDeclaredExperienceDataValidity(
+        title,
+        organization,
+        activitySector,
+        location,
+        description,
+        sourceOfInformation,
+        summary,
+        externalLink,
+        startDate,
+        endDate);
+
+    experience.setTitle(title);
+    experience.setExperienceType(experienceType);
+    experience.setOrganization(organization);
+    experience.setActivitySector(activitySector);
+    experience.setLocation(location);
+    experience.setDescription(description);
+    experience.setSourceOfInformation(sourceOfInformation);
+    experience.setSummary(summary);
+    experience.setExternalLink(externalLink);
+    experience.setStartDate(startDate);
+    experience.setEndDate(endDate);
+    experience = experienceRepository.save(experience);
+
+    log.info("{} updated successfully", experience);
+    return experience;
+  }
+
+  private void checkDeclaredExperienceDataValidity(
+      String title,
+      String organization,
+      String activitySector,
+      String location,
+      String description,
+      String sourceOfInformation,
+      String summary,
+      String externalLink,
+      LocalDate startDate,
+      LocalDate endDate) {
+    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
+    requireNotBlankAndMaxLength("organization", organization, ORGANIZATION_LENGTH);
+    validateOptionalTextMaxLength("activitySector", activitySector, ACTIVITY_SECTOR_LENGTH);
+    validateOptionalTextMaxLength("location", location, LOCATION_LENGTH);
+    validateOptionalTextMaxLength(
+        "sourceOfInformation", sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
+    validateOptionalTextMaxLength("description", description, DESCRIPTION_LENGTH);
+    validateOptionalTextMaxLength("summary", summary, SUMMARY_LENGTH);
+    requireNotNull("startDate", startDate);
+    validateDateOrder(startDate, endDate);
+    validateUrl(externalLink);
   }
 
   @Override

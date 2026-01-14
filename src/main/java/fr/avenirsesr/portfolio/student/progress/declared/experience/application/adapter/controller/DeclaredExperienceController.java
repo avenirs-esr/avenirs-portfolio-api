@@ -65,4 +65,26 @@ public class DeclaredExperienceController {
             pagedExperiences.content().stream().map(DeclaredExperienceMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(pagedExperiences.pageInfo())));
   }
+
+  @PutMapping("/{experienceId}")
+  public ResponseEntity<DeclaredExperienceViewDTO> updateDeclaredExperience(
+      @Valid @PathVariable UUID experienceId,
+      @Valid @RequestBody DeclaredExperienceRequest request) {
+    var experience =
+        declaredExperienceService.update(
+            experienceId,
+            request.title(),
+            request.experienceType(),
+            request.organization(),
+            request.activitySector(),
+            request.location(),
+            request.description(),
+            request.sourceOfInformation(),
+            request.summary(),
+            request.externalLink(),
+            request.startDate(),
+            request.endDate());
+
+    return ResponseEntity.ok(DeclaredExperienceMapper.toDTO(experience));
+  }
 }
