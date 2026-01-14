@@ -1,6 +1,6 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.data,UserPhotoData,0,12,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.controller,DeclaredProgramController,0,75,0,0,0,26,0,4,0,4
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.controller,DeclaredProgramController,0,107,0,0,0,39,0,6,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.domain.data,SelfKnowledgeElementDetails,0,6,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,23,1092,5,33,4,273,5,63,0,49
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.client,TraceConfigurationClient,0,57,0,0,0,17,0,3,0,3
@@ -80,7 +80,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.domain.d
 avenirs-portfolio-api,fr.avenirsesr.portfolio,AvenirsPortfolioApiApplication,5,3,0,0,2,1,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository,SelfKnowledgeCategoryDatabaseRepository,0,26,0,0,0,6,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository,SelfKnowledgeElementDatabaseRepository,0,37,0,0,0,12,0,3,0,3
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.domain.service,DeclaredProgramServiceImpl,0,137,0,5,0,31,0,10,0,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.domain.service,DeclaredProgramServiceImpl,0,249,0,9,0,59,0,16,0,11
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.repository,DeclaredProgramDatabaseRepository,0,20,0,0,0,4,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.application.adapter.controller,SkillLevelProgressController,30,71,0,0,6,27,3,4,3,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.application.adapter.controller,StudentProgressController,0,48,0,0,0,14,0,6,0,6
