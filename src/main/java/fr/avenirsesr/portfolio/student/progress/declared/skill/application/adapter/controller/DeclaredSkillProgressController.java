@@ -93,8 +93,15 @@ public class DeclaredSkillProgressController {
             declaredSkillProgressDetails));
   }
 
-  @DeleteMapping()
+  @DeleteMapping("/{declaredSkillProgressId}")
   public ResponseEntity<String> deleteDeclaredSkillProgress(
+      @PathVariable UUID declaredSkillProgressId) {
+    declaredSkillProgressService.deleteDeclaredSkillProgresses(List.of(declaredSkillProgressId));
+    return ResponseEntity.ok("Declared skill progress successfully deleted");
+  }
+
+  @DeleteMapping()
+  public ResponseEntity<String> deleteDeclaredSkillProgresses(
       @RequestBody List<UUID> declaredSkillProgressIds) {
     declaredSkillProgressService.deleteDeclaredSkillProgresses(declaredSkillProgressIds);
     return ResponseEntity.ok("Declared skill progresses successfully deleted");

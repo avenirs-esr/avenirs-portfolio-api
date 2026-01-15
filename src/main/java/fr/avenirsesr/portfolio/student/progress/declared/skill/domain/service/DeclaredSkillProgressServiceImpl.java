@@ -115,8 +115,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     }
 
     List<Trace> traces =
-        traceService.getTracesLinkedWithDeclaredSkillProgress(
-            student.getUser(), declaredSkillProgress);
+        traceService.getTracesLinkedWithDeclaredSkillProgress(declaredSkillProgress);
 
     UUID externalSkillId = declaredSkillProgress.getSkill().getExternalSkillId();
     ExternalSkillDetailsDTO externalSkillDetails =
@@ -141,28 +140,18 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     List<DeclaredSkillProgress> declaredSkillProgressList =
         declaredSkillProgressRepository.findAllById(declaredSkillProgressIds);
 
-    if (declaredSkillProgressList.stream()
-        .anyMatch(declaredSkillProgress -> !declaredSkillProgress.getStudent().equals(student))) {
-      throw new UserNotAuthorizedException();
-    }
-
     if (!new HashSet<>(
             declaredSkillProgressList.stream().map(DeclaredSkillProgress::getId).toList())
         .containsAll(declaredSkillProgressIds)) {
       throw new DeclaredSkillProgressNotFoundException();
     }
 
-    declaredSkillProgressList.forEach(
-        declaredSkillProgress -> {
-          List<UUID> traceIds =
-              traceService
-                  .getTracesLinkedWithDeclaredSkillProgress(
-                      student.getUser(), declaredSkillProgress)
-                  .stream()
-                  .map(Trace::getId)
-                  .toList();
-          traceService.unassociateTraces(declaredSkillProgress, traceIds);
-        });
+    if (declaredSkillProgressList.stream()
+        .anyMatch(declaredSkillProgress -> !declaredSkillProgress.getStudent().equals(student))) {
+      throw new UserNotAuthorizedException();
+    }
+
+    declaredSkillProgressList.forEach(traceService::unassociateTraces);
 
     declaredSkillProgressRepository.removeAllFromDatabase(declaredSkillProgressList);
     log.info("DeclaredSkillProgressIds {} successfully deleted", declaredSkillProgressIds);

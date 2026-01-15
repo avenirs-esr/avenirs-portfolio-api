@@ -81,9 +81,10 @@ public class TraceServiceImpl implements TraceService {
 
   @Override
   public List<Trace> getTracesLinkedWithDeclaredSkillProgress(
-      User user, DeclaredSkillProgress declaredSkillProgress) {
+      DeclaredSkillProgress declaredSkillProgress) {
+    User loggedInUser = loggedInUserService.getLoggedInUser();
     List<Trace> traces = traceRepository.linkedWith(declaredSkillProgress);
-    traces.forEach(trace -> checkIfUserIsAuthorizedOnTrace(user, trace));
+    traces.forEach(trace -> checkIfUserIsAuthorizedOnTrace(loggedInUser, trace));
     return traces;
   }
 
@@ -433,6 +434,13 @@ public class TraceServiceImpl implements TraceService {
         amsIds,
         skillLevelIds,
         declaredSkillProgressIds);
+  }
+
+  @Override
+  public void unassociateTraces(DeclaredSkillProgress declaredSkillProgress) {
+    List<Trace> traces = traceRepository.linkedWith(declaredSkillProgress);
+    traces.forEach(trace -> trace.remove(declaredSkillProgress));
+    traceRepository.saveAll(traces);
   }
 
   @Override

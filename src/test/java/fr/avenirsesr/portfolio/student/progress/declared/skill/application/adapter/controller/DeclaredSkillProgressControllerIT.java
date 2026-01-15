@@ -10,7 +10,7 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.declaredskill.domain.port.output.repository.DeclaredSkillRepository;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,8 +30,6 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   @Autowired private ObjectMapper objectMapper;
 
   @Autowired private DeclaredSkillRepository declaredSkillRepository;
-
-  @Autowired private DeclaredSkillProgressRepository declaredSkillProgressRepository;
 
   @Value("${hmac.secret-key}")
   private String secretKey;
@@ -141,56 +139,68 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
 
   @Test
   void shouldDeleteDeclaredSkillProgress() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " DELETE enpoint");
+    BddLogger.given("the " + BASE_PATH + "/{declaredSkillProgressId} DELETE enpoint");
     BddLogger.when("performing a DELETE with student's declared skill progress");
     BddLogger.then("it should delete the declared skill progress");
 
     String declaredSkillProgressId = extractId(createElement());
-    String deleteJson = "[\"" + declaredSkillProgressId + "\"]";
 
     mockMvc
         .perform(
-            delete(BASE_PATH)
+            delete(BASE_PATH + "/{declaredSkillProgressId}", declaredSkillProgressId)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(deleteJson))
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(content().string("Declared skill progresses successfully deleted"));
+        .andExpect(content().string("Declared skill progress successfully deleted"));
   }
 
   @Test
   void shouldReturn404WhenUserNotAuthorized() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " DELETE enpoint");
+    BddLogger.given("the " + BASE_PATH + "/{declaredSkillProgressId} DELETE enpoint");
     BddLogger.when("performing a DELETE with an unauthorized user");
-    BddLogger.then("it should return a 404 USER_NOT_AUTHORIZED");
+    BddLogger.then("it should return a 403 USER_NOT_AUTHORIZED");
 
-    var declaredSkillProgress = declaredSkillProgressRepository.findAll().getFirst();
-    String deleteJson = "[\"" + declaredSkillProgress.getId() + "\"]";
+    UUID existingDeclaredSkillProgressId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
 
     mockMvc
         .perform(
-            delete(BASE_PATH)
+            delete(BASE_PATH + "/{declaredSkillProgressId}", existingDeclaredSkillProgressId)
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(deleteJson))
-        .andExpect(status().isUnauthorized())
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("User not authorized"))
         .andExpect(jsonPath("$.code").value("USER_NOT_AUTHORIZED"));
   }
 
   @Test
   void shouldReturn404WhenDeclaredSkillProgressNotFound() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " DELETE enpoint");
+    BddLogger.given("the " + BASE_PATH + "/{declaredSkillProgressId} DELETE enpoint");
     BddLogger.when("performing a DELETE with an unknown declared skill progress id");
     BddLogger.then("it should return a 404 DECLARED_SKILL_PROGRESS_NOT_FOUND");
 
     String unknownDeclaredSkillProgressId = UUID.randomUUID().toString();
-    String deleteJson = "[\"" + unknownDeclaredSkillProgressId + "\"]";
+
+    mockMvc
+        .perform(
+            delete(BASE_PATH + "/{declaredSkillProgressId}", unknownDeclaredSkillProgressId)
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code").value("DECLARED_SKILL_PROGRESS_NOT_FOUND"));
+  }
+
+  @Test
+  void shouldDeleteDeclaredSkillProgresses() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " DELETE enpoint");
+    BddLogger.when("performing a DELETE with student's declared skill progress");
+    BddLogger.then("it should delete the declared skill progress");
+
+    String declaredSkillProgressId = extractId(createElement());
 
     mockMvc
         .perform(
@@ -199,10 +209,51 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(deleteJson))
-        .andExpect(status().isNotFound())
+                .content(
+                    objectMapper.writeValueAsString(
+                        List.of(UUID.fromString(declaredSkillProgressId)))))
+        .andExpect(status().isOk())
+        .andExpect(content().string("Declared skill progresses successfully deleted"));
+  }
+
+  @Test
+  void shouldReturn404WhenUserNotAuthorizedOnDeclaredSkillProgresses() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " DELETE enpoint");
+    BddLogger.when("performing a DELETE with an unauthorized user");
+    BddLogger.then("it should return a 403 USER_NOT_AUTHORIZED");
+
+    UUID existingDeclaredSkillProgressId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+
+    mockMvc
+        .perform(
+            delete(BASE_PATH)
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(List.of(existingDeclaredSkillProgressId))))
+        .andExpect(status().isForbidden())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("Declared skill progress not found"))
+        .andExpect(jsonPath("$.code").value("USER_NOT_AUTHORIZED"));
+  }
+
+  @Test
+  void shouldReturn404WhenDeclaredSkillProgressesNotFound() throws Exception {
+    BddLogger.given("the " + BASE_PATH + " DELETE enpoint");
+    BddLogger.when("performing a DELETE with an unknown declared skill progress id");
+    BddLogger.then("it should return a 404 DECLARED_SKILL_PROGRESS_NOT_FOUND");
+
+    String unknownDeclaredSkillProgressId = UUID.randomUUID().toString();
+
+    mockMvc
+        .perform(
+            delete(BASE_PATH)
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(List.of(unknownDeclaredSkillProgressId))))
+        .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.code").value("DECLARED_SKILL_PROGRESS_NOT_FOUND"));
   }
 

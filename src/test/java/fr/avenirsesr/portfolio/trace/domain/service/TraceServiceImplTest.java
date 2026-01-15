@@ -962,12 +962,12 @@ public class TraceServiceImplTest {
             .withUser(student.getUser())
             .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
             .toModel();
+    when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
     when(traceRepository.linkedWith(declaredSkillProgress)).thenReturn(List.of(trace1, trace2));
 
     BddLogger.when("getting two traces associated to DeclaredSkillProgress");
     List<Trace> traces =
-        traceService.getTracesLinkedWithDeclaredSkillProgress(
-            student.getUser(), declaredSkillProgress);
+        traceService.getTracesLinkedWithDeclaredSkillProgress(declaredSkillProgress);
 
     BddLogger.then(
         "it should return two traces associated to DeclaredSkillProgress and right user");
@@ -992,14 +992,41 @@ public class TraceServiceImplTest {
             .withUser(student.getUser())
             .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
             .toModel();
+    when(loggedInUserService.getLoggedInUser()).thenReturn(anotherStudent.getUser());
     when(traceRepository.linkedWith(declaredSkillProgress)).thenReturn(List.of(trace1, trace2));
 
     BddLogger.when("getting two traces associated to DeclaredSkillProgress but to another student");
     assertThrows(
         UserNotAuthorizedException.class,
-        () ->
-            traceService.getTracesLinkedWithDeclaredSkillProgress(
-                anotherStudent.getUser(), declaredSkillProgress));
+        () -> traceService.getTracesLinkedWithDeclaredSkillProgress(declaredSkillProgress));
+  }
+
+  @Test
+  void givenDeclaredSkillProgress_shouldUnassociateTracesAndSaveAll() {
+    BddLogger.given("a declaredSkillProgress");
+    DeclaredSkillProgress declaredSkillProgress =
+        DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+
+    Trace trace1 =
+        TraceFixture.create()
+            .withUser(student.getUser())
+            .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
+            .toModel();
+    Trace trace2 =
+        TraceFixture.create()
+            .withUser(student.getUser())
+            .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
+            .toModel();
+
+    when(traceRepository.linkedWith(declaredSkillProgress)).thenReturn(List.of(trace1, trace2));
+
+    BddLogger.when("unassociating traces");
+    traceService.unassociateTraces(declaredSkillProgress);
+
+    BddLogger.then("it should remove association and save all");
+    verify(traceRepository).saveAll(anyList());
+    assertFalse(trace1.getDeclaredSkillProgresses().contains(declaredSkillProgress));
+    assertFalse(trace2.getDeclaredSkillProgresses().contains(declaredSkillProgress));
   }
 
   @Test
