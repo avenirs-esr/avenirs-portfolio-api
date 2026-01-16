@@ -84,10 +84,10 @@ import org.springframework.data.jpa.domain.Specification;
 
   public static Specification&lt;TraceEntity&gt; ofDeclaredSkillProgress(
       DeclaredSkillProgress declaredSkillProgress) {
-<span class="nc" id="L87">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="nc" id="L88">        criteriaBuilder.isMember(</span>
-<span class="nc" id="L89">            DeclaredSkillProgressMapper.INSTANCE.fromDomain(declaredSkillProgress),</span>
-<span class="nc" id="L90">            root.get(&quot;declaredSkillsProgresses&quot;));</span>
+<span class="fc" id="L87">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="fc" id="L88">        criteriaBuilder.isMember(</span>
+<span class="fc" id="L89">            DeclaredSkillProgressMapper.INSTANCE.fromDomain(declaredSkillProgress),</span>
+<span class="fc" id="L90">            root.get(&quot;declaredSkillsProgresses&quot;));</span>
   }
 
   public static Specification&lt;TraceEntity&gt; search(String keyword, ELanguage language) {

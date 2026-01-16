@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 <span class="fc" id="L23">@Slf4j</span>
 @AllArgsConstructor
 @RestController
-@RequestMapping(&quot;/me/declared-skill-progress&quot;)
+@RequestMapping(&quot;/me/declared/skill-progress&quot;)
 public class DeclaredSkillProgressController {
   private final DeclaredSkillProgressService declaredSkillProgressService;
 
@@ -58,7 +58,7 @@ public class DeclaredSkillProgressController {
 <span class="fc" id="L58">            declaredSkill.getLevel(),</span>
 <span class="fc" id="L59">            declaredSkill.getDescription());</span>
 <span class="fc" id="L60">    return ResponseEntity.created(</span>
-<span class="fc" id="L61">            URI.create(&quot;/me/declared-skills-progress/&quot; + declaredSkill.getId()))</span>
+<span class="fc" id="L61">            URI.create(&quot;/me/declared/skill-progress/&quot; + declaredSkill.getId()))</span>
 <span class="fc" id="L62">        .body(DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));</span>
   }
 
@@ -93,21 +93,35 @@ public class DeclaredSkillProgressController {
             declaredSkillProgressDetails));
   }
 
+  @DeleteMapping(&quot;/{declaredSkillProgressId}&quot;)
+  public ResponseEntity&lt;String&gt; deleteDeclaredSkillProgress(
+      @PathVariable UUID declaredSkillProgressId) {
+<span class="fc" id="L99">    declaredSkillProgressService.deleteDeclaredSkillProgresses(List.of(declaredSkillProgressId));</span>
+<span class="fc" id="L100">    return ResponseEntity.ok(&quot;Declared skill progress successfully deleted&quot;);</span>
+  }
+
+  @DeleteMapping()
+  public ResponseEntity&lt;String&gt; deleteDeclaredSkillProgresses(
+      @RequestBody List&lt;UUID&gt; declaredSkillProgressIds) {
+<span class="fc" id="L106">    declaredSkillProgressService.deleteDeclaredSkillProgresses(declaredSkillProgressIds);</span>
+<span class="fc" id="L107">    return ResponseEntity.ok(&quot;Declared skill progresses successfully deleted&quot;);</span>
+  }
+
   @PostMapping(&quot;/{declaredSkillProgressId}/unassociate/traces&quot;)
   public ResponseEntity&lt;String&gt; unassociateTraces(
       Principal principal,
       @PathVariable UUID declaredSkillProgressId,
       @RequestBody List&lt;UUID&gt; traceIds) {
-<span class="nc" id="L101">    log.debug(</span>
+<span class="nc" id="L115">    log.debug(</span>
         &quot;Received request to unassociate traces [{}] to declared skill progress [{}] for student&quot;
             + &quot; [{}]&quot;,
         traceIds,
         declaredSkillProgressId,
-<span class="nc" id="L106">        principal.getName());</span>
+<span class="nc" id="L120">        principal.getName());</span>
 
-<span class="nc" id="L108">    declaredSkillProgressService.unassociateTraces(declaredSkillProgressId, traceIds);</span>
+<span class="nc" id="L122">    declaredSkillProgressService.unassociateTraces(declaredSkillProgressId, traceIds);</span>
 
-<span class="nc" id="L110">    return ResponseEntity.ok(&quot;Trace successfully unassociated.&quot;);</span>
+<span class="nc" id="L124">    return ResponseEntity.ok(&quot;Trace successfully unassociated.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
