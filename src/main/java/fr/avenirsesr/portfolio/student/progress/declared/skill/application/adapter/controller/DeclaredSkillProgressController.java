@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @AllArgsConstructor
 @RestController
-@RequestMapping("/me/declared-skill-progress")
+@RequestMapping("/me/declared/skill-progress")
 public class DeclaredSkillProgressController {
   private final DeclaredSkillProgressService declaredSkillProgressService;
 
@@ -58,7 +58,7 @@ public class DeclaredSkillProgressController {
             declaredSkill.getLevel(),
             declaredSkill.getDescription());
     return ResponseEntity.created(
-            URI.create("/me/declared-skills-progress/" + declaredSkill.getId()))
+            URI.create("/me/declared/skill-progress/" + declaredSkill.getId()))
         .body(DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));
   }
 
@@ -91,6 +91,20 @@ public class DeclaredSkillProgressController {
     return ResponseEntity.ok(
         DeclaredSkillProgressMapper.toDeclaredSkillProgressDetailsDTO(
             declaredSkillProgressDetails));
+  }
+
+  @DeleteMapping("/{declaredSkillProgressId}")
+  public ResponseEntity<String> deleteDeclaredSkillProgress(
+      @PathVariable UUID declaredSkillProgressId) {
+    declaredSkillProgressService.deleteDeclaredSkillProgresses(List.of(declaredSkillProgressId));
+    return ResponseEntity.ok("Declared skill progress successfully deleted");
+  }
+
+  @DeleteMapping()
+  public ResponseEntity<String> deleteDeclaredSkillProgresses(
+      @RequestBody List<UUID> declaredSkillProgressIds) {
+    declaredSkillProgressService.deleteDeclaredSkillProgresses(declaredSkillProgressIds);
+    return ResponseEntity.ok("Declared skill progresses successfully deleted");
   }
 
   @PostMapping("/{declaredSkillProgressId}/unassociate/traces")

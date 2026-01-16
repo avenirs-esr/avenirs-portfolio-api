@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.trace.domain.port.input;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
@@ -20,8 +19,7 @@ public interface TraceService {
 
   List<Trace> lastTracesOf();
 
-  List<Trace> getTracesLinkedWithDeclaredSkillProgress(
-      User user, DeclaredSkillProgress declaredSkillProgress);
+  List<Trace> getTracesLinkedWithDeclaredSkillProgress(DeclaredSkillProgress declaredSkillProgress);
 
   PagedResult<Trace> getTracesView(
       String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria);
@@ -69,6 +67,8 @@ public interface TraceService {
       List<UUID> amsIds,
       List<UUID> skillLevelIds,
       List<UUID> declaredSkillProgressIds);
+
+  void unassociateTraces(DeclaredSkillProgress declaredSkillProgress);
 
   void unassociateTraces(DeclaredSkillProgress declaredSkillProgress, List<UUID> traceIds);
 }

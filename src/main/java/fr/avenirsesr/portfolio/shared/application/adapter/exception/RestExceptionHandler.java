@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInval
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.exception.DeclaredProgramNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.exception.StudentProgressNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
@@ -154,8 +155,15 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   }
 
   @ExceptionHandler(DeclaredProgramNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleDeclaredExperienceNotFoundException(
+  public ResponseEntity<ErrorResponse> handleDeclaredProgramNotFoundException(
       DeclaredProgramNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(DeclaredSkillProgressNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleDeclaredSkillProgressNotFoundException(
+      DeclaredSkillProgressNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
