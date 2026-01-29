@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
 import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.configuration.SeedingState;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
@@ -51,6 +52,7 @@ public class SeederRunner implements CommandLineRunner {
   private final SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder;
   private final DeclaredExperienceSeeder declaredExperienceSeeder;
   private final DeclaredProgramSeeder declaredProgramSeeder;
+  private final SeedingState seedingState;
 
   @Value("${seeder.enabled:false}")
   private boolean seedEnabled;
@@ -85,7 +87,8 @@ public class SeederRunner implements CommandLineRunner {
       SelfKnowledgeElementSeeder selfKnowledgeElementSeeder,
       SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder,
       DeclaredExperienceSeeder declaredExperienceSeeder,
-      DeclaredProgramSeeder declaredProgramSeeder) {
+      DeclaredProgramSeeder declaredProgramSeeder,
+      SeedingState seedingState) {
 
     this.dependencyChecker = dependencyChecker;
     this.userRepository = userRepository;
@@ -108,47 +111,57 @@ public class SeederRunner implements CommandLineRunner {
     this.selfKnowledgeCategorySeeder = selfKnowledgeCategorySeeder;
     this.declaredExperienceSeeder = declaredExperienceSeeder;
     this.declaredProgramSeeder = declaredProgramSeeder;
+    this.seedingState = seedingState;
   }
 
   @Override
   public void run(String... args) {
-    long userCont = userRepository.countAll();
-    if (seedEnabled && userCont == 0) {
-      log.info("Seeding enabled and starting...");
+    try {
+      long userCont = userRepository.countAll();
+      if (seedEnabled && userCont == 0) {
+        log.info("Seeding enabled and starting...");
 
-      if (dependenciesCheck) {
-        dependencyChecker.checkAndWait("Interoperability", interoperabilityHealthUrl);
+        if (dependenciesCheck) {
+          dependencyChecker.checkAndWait("Interoperability", interoperabilityHealthUrl);
+        }
+
+        var savedSelfKnowledgeMandatoryCategories = selfKnowledgeCategorySeeder.seed();
+        var savedUsers = userSeeder.seed();
+        externalUserSeeder.seed(savedUsers);
+        var savedTeachers = teacherSeeder.seed(savedUsers);
+        var savedStudents = studentSeeder.seed(savedUsers, savedSelfKnowledgeMandatoryCategories);
+        declaredExperienceSeeder.seed(savedStudents);
+        var savedUserPhotos = userPhotoSeeder.seed(savedStudents, savedTeachers);
+        var savedDeclaredSkills = declaredSkillSeeder.seed();
+        var savedStudentDeclaredSkills =
+            declaredSkillProgressSeeder.seed(savedStudents, savedDeclaredSkills);
+        var savedInstitutions = institutionSeeder.seed();
+        var savedPrograms = programSeeder.seed(savedInstitutions);
+        var savedSkillLevels = skillSeeder.seed(savedPrograms);
+        var savedSkills =
+            savedSkillLevels.stream().map(SkillLevelEntity::getSkill).distinct().toList();
+        var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
+        var savedStudentProgresses =
+            studentProgressSeeder.seed(savedTrainingPaths, savedStudents, savedSkillLevels);
+        var savedSkillLevelProgresses =
+            savedStudentProgresses.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
+        var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
+        var savedTraces = traceSeeder.seed(savedUsers, savedStudentDeclaredSkills);
+        var savedAmses =
+            amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
+        var savedSelfKnowledgeElements = selfKnowledgeElementSeeder.seed(savedStudents);
+        var savedDeclaredProgramSeeder = declaredProgramSeeder.seed(savedStudents);
+
+        log.info("✔ Seeding successfully finished");
+      } else {
+        log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
       }
-
-      var savedSelfKnowledgeMandatoryCategories = selfKnowledgeCategorySeeder.seed();
-      var savedUsers = userSeeder.seed();
-      externalUserSeeder.seed(savedUsers);
-      var savedTeachers = teacherSeeder.seed(savedUsers);
-      var savedStudents = studentSeeder.seed(savedUsers, savedSelfKnowledgeMandatoryCategories);
-      declaredExperienceSeeder.seed(savedStudents);
-      var savedUserPhotos = userPhotoSeeder.seed(savedStudents, savedTeachers);
-      var savedDeclaredSkills = declaredSkillSeeder.seed();
-      var savedStudentDeclaredSkills =
-          declaredSkillProgressSeeder.seed(savedStudents, savedDeclaredSkills);
-      var savedInstitutions = institutionSeeder.seed();
-      var savedPrograms = programSeeder.seed(savedInstitutions);
-      var savedSkillLevels = skillSeeder.seed(savedPrograms);
-      var savedSkills =
-          savedSkillLevels.stream().map(SkillLevelEntity::getSkill).distinct().toList();
-      var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
-      var savedStudentProgresses =
-          studentProgressSeeder.seed(savedTrainingPaths, savedStudents, savedSkillLevels);
-      var savedSkillLevelProgresses =
-          savedStudentProgresses.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
-      var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
-      var savedTraces = traceSeeder.seed(savedUsers, savedStudentDeclaredSkills);
-      var savedAmses =
-          amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
-      var savedSelfKnowledgeElements = selfKnowledgeElementSeeder.seed(savedStudents);
-      var savedDeclaredProgramSeeder = declaredProgramSeeder.seed(savedStudents);
-
-      log.info("✔ Seeding successfully finished");
-    } else log.info("{} users found. Seeder is disabled: seeding skipped", userCont);
+      seedingState.markCompleted();
+    } catch (Exception e) {
+      seedingState.markFailed(e);
+      log.error("✘ Seeding failed", e);
+      throw e;
+    }
   }
 
   public boolean isDependenciesCheck() {
