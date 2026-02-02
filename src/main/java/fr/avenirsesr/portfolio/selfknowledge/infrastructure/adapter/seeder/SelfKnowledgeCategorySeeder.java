@@ -28,7 +28,7 @@ public class SelfKnowledgeCategorySeeder {
 
   @Transactional
   public List<SelfKnowledgeCategoryEntity> seed() {
-    log.info("Seeding self-knowledge categories from CSV (FR/EN/ES)...");
+    log.info("Seeding self-knowledge categories from file (FR/EN/ES)...");
 
     List<SelfKnowledgeCategoryCreationData> creationDataFR =
         fileReader.readJSON(PATH_FILE_FR, new TypeReference<>() {});
