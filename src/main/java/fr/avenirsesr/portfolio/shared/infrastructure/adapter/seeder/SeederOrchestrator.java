@@ -113,7 +113,7 @@ public class SeederOrchestrator {
 
       amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
 
-      selfKnowledgeElementSeeder.seed(savedStudents);
+      selfKnowledgeElementSeeder.seed();
 
       declaredProgramSeeder.seed(savedStudents);
 
