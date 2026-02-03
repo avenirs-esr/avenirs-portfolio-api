@@ -25,7 +25,7 @@ public class FakeUserPhoto {
     this.userPhoto = userPhoto;
   }
 
-  public static FakeUserPhoto of(UserEntity user, EUserCategory category) {
+  public static FakeUserPhoto of(UserEntity user) {
     var fileType = dataGenerator.with("file-type").pickIn(List.of(EFileType.PNG, EFileType.JPEG));
     var id = dataGenerator.with("id").uuid();
     return new FakeUserPhoto(
@@ -33,8 +33,8 @@ public class FakeUserPhoto {
             id,
             fileDataGenerator.with("file-name").fileName(EFileType.PNG),
             user,
-            category,
-            EUserPhotoType.PROFILE,
+            dataGenerator.with("category").pickIn(EUserCategory.class),
+            dataGenerator.with("file-type").pickIn(EUserPhotoType.class),
             fileType,
             dataGenerator.with("size").number((int) fileType.getSizeLimit().bytes()),
             1,
@@ -46,41 +46,6 @@ public class FakeUserPhoto {
                     fileType.name().toLowerCase()),
             user,
             Instant.now()));
-  }
-
-  public FakeUserPhoto withUserPhotoType(EUserPhotoType type) {
-    userPhoto.setUserPhotoType(type);
-    return this;
-  }
-
-  public FakeUserPhoto withIsActiveVersion(boolean isActiveVersion) {
-    userPhoto.setActiveVersion(isActiveVersion);
-    return this;
-  }
-
-  public FakeUserPhoto withVersion(int version) {
-    userPhoto.setVersion(version);
-    return this;
-  }
-
-  public FakeUserPhoto withUploadedAt(Instant uploadedAt) {
-    userPhoto.setUploadedAt(uploadedAt);
-    return this;
-  }
-
-  public FakeUserPhoto withUri(String uri) {
-    userPhoto.setUri(uri);
-    return this;
-  }
-
-  public FakeUserPhoto withSize(long size) {
-    userPhoto.setSize(size);
-    return this;
-  }
-
-  public FakeUserPhoto withFileType(EFileType type) {
-    userPhoto.setFileType(type);
-    return this;
   }
 
   public UserPhotoEntity toEntity() {

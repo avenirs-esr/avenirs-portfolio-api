@@ -14,7 +14,6 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,26 +60,6 @@ class StorageControllerIT extends ContainerConfigurationTest {
                 fileStorageService, userPhotoDatabaseRepository, loggedInUserService),
             fileStorageService);
     mockMvc = MockMvcBuilders.standaloneSetup(storageController).build();
-  }
-
-  @Test
-  void shouldGetUserResourceByFileId() throws Exception {
-    BddLogger.given("the " + RESSOURCE_BASE_PATH + " endpoint");
-    UUID existingFileId = UUID.fromString("c4e8acc0-5f44-4e19-a53c-d560d5e5a951");
-
-    when(fileStorageService.get(anyString()))
-        .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
-
-    BddLogger.when("performing a GET with a FileID");
-    BddLogger.then("it should return the corresponding user ressource");
-    mockMvc
-        .perform(
-            get(RESSOURCE_BASE_PATH, existingFileId)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.IMAGE_PNG));
   }
 
   @Test

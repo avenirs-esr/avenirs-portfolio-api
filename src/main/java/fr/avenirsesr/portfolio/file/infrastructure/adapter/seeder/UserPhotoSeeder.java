@@ -1,95 +1,105 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
-import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
-import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
+import com.fasterxml.jackson.core.type.TypeReference;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
-import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
-import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepository;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
+import fr.avenirsesr.portfolio.file.domain.model.UserPhoto;
+import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.UserPhotoMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data.UserPhotoCreationData;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeUserPhoto;
-import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class UserPhotoSeeder {
-  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
-      new DataGeneratorProvider<SharedDataGenerator>()
-          .init(UserPhotoSeeder.class, SharedDataGenerator.class);
-  private final UserPhotoRepository userPhotoRepository;
+  private static final String PATH_FILE = "seeder/user-photos.json";
+  private final FileReader fileReader;
+  private final UserRepository userRepository;
+  private final UserResourceService userResourceService;
 
-  private List<UserPhotoEntity> generatePhotosOf(
-      UserEntity user, EUserPhotoType type, EUserCategory userCategory, int maxNumber) {
-    List<UserPhotoEntity> photos = new ArrayList<>();
-    var nbOfProfileVersions = dataGenerator.with("random-number").number(1, maxNumber);
-    for (int j = 1; j <= nbOfProfileVersions; j++) {
-      photos.add(
-          FakeUserPhoto.of(user, userCategory)
-              .withVersion(j)
-              .withIsActiveVersion(j == nbOfProfileVersions)
-              .withUserPhotoType(type)
-              .toEntity());
-    }
+  @Value("${seeder.source}")
+  private ESeederSource seederSource;
 
-    return photos;
+  public UserPhotoSeeder(
+      FileReader fileReader,
+      UserRepository userRepository,
+      @Qualifier("MockUserResourceService") UserResourceService userResourceService) {
+    this.fileReader = fileReader;
+    this.userRepository = userRepository;
+    this.userResourceService = userResourceService;
   }
 
   @Transactional
   public List<UserPhotoEntity> seed(List<StudentEntity> students, List<TeacherEntity> teachers) {
     ValidationUtils.requireNonEmpty(students, "students cannot be empty");
     ValidationUtils.requireNonEmpty(teachers, "teachers cannot be empty");
-
     log.info("Seeding user photos...");
 
-    List<UserPhotoEntity> userPhotoEntities = new ArrayList<>();
-    for (StudentEntity student : students) {
-      userPhotoEntities.addAll(
-          generatePhotosOf(
-              student.getUser(),
-              EUserPhotoType.PROFILE,
-              EUserCategory.STUDENT,
-              SeederConfig.MAX_PROFILE_PHOTO_PER_USER));
+    List<UserPhotoCreationData> creationData =
+        switch (seederSource) {
+          case CSV -> fileReader.readJSON(PATH_FILE, new TypeReference<>() {});
+          case FAKER ->
+              buildFakePhotos(
+                  Stream.concat(
+                          students.stream().map(StudentEntity::getUser),
+                          teachers.stream().map(TeacherEntity::getUser))
+                      .toList());
+        };
 
-      userPhotoEntities.addAll(
-          generatePhotosOf(
-              student.getUser(),
-              EUserPhotoType.COVER,
-              EUserCategory.STUDENT,
-              SeederConfig.MAX_COVER_PHOTO_PER_USER));
-    }
+    List<UserPhoto> userPhotos = new ArrayList<>();
 
-    for (TeacherEntity teacher : teachers) {
-      if (dataGenerator.with("has-photo").bool()) {
-        userPhotoEntities.addAll(
-            generatePhotosOf(
-                teacher.getUser(),
-                EUserPhotoType.PROFILE,
-                EUserCategory.TEACHER,
-                SeederConfig.MAX_PROFILE_PHOTO_PER_USER));
-
-        userPhotoEntities.addAll(
-            generatePhotosOf(
-                teacher.getUser(),
-                EUserPhotoType.COVER,
-                EUserCategory.TEACHER,
-                SeederConfig.MAX_COVER_PHOTO_PER_USER));
+    for (UserPhotoCreationData data : creationData) {
+      try {
+        var user = userRepository.findById(data.userId());
+        RequestContext.set(new RequestData(user, ELanguage.FRENCH));
+        userPhotos.add(
+            userResourceService.uploadPhoto(
+                data.userCategory(),
+                data.photoType(),
+                data.fileName(),
+                data.fileType().getMimeType(),
+                data.fileSize(),
+                null));
+      } catch (IOException e) {
+        log.error("Error uploading user photo", e);
       }
     }
 
-    userPhotoRepository.saveAll(
-        userPhotoEntities.stream().map(UserPhotoMapper.INSTANCE::toDomain).toList());
-    log.info("✔ {} user photos created", userPhotoEntities.size());
-    return userPhotoEntities;
+    log.info("✔ {} user photos created", userPhotos.size());
+    return userPhotos.stream().map(UserPhotoMapper.INSTANCE::fromDomain).toList();
+  }
+
+  private List<UserPhotoCreationData> buildFakePhotos(List<UserEntity> users) {
+    List<UserPhotoCreationData> fakePhotos = new ArrayList<>();
+    for (UserEntity user : users) {
+      var fakePhoto = FakeUserPhoto.of(user).toEntity();
+      fakePhotos.add(
+          new UserPhotoCreationData(
+              fakePhoto.getUser().getId(),
+              fakePhoto.getUserCategory(),
+              fakePhoto.getUserPhotoType(),
+              fakePhoto.getName(),
+              fakePhoto.getFileType(),
+              fakePhoto.getSize()));
+    }
+    return fakePhotos;
   }
 }

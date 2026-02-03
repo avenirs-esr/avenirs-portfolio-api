@@ -1,0 +1,26 @@
+[
+  {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "userCategory": "STUDENT",
+    "photoType": "COVER",
+    "fileName": "cover-picture.png",
+    "fileType": "PNG",
+    "fileSize": 4276564
+  },
+  {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "userCategory": "STUDENT",
+    "photoType": "COVER",
+    "fileName": "cover-picture-2.png",
+    "fileType": "PNG",
+    "fileSize": 4276564
+  },
+  {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "userCategory": "STUDENT",
+    "photoType": "PROFILE",
+    "fileName": "cover-picture.png",
+    "fileType": "PNG",
+    "fileSize": 4276564
+  }
+]

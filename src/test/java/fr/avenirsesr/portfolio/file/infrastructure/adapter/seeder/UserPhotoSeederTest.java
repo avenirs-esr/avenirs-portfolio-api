@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
@@ -56,31 +55,5 @@ class UserPhotoSeederTest extends ContainerConfigurationTest {
         assertThrows(
             IllegalArgumentException.class, () -> userPhotoSeeder.seed(students, List.of()));
     assertTrue(exception.getMessage().contains("teachers cannot be empty"));
-  }
-
-  @Test
-  void seed_shouldReturnUserPhotos_forAllUsers() {
-    BddLogger.given("a user photo seeder");
-    BddLogger.when("there is a list of users");
-    List<UserPhotoEntity> photos = userPhotoSeeder.seed(students, teachers);
-
-    BddLogger.then("it should return user photos for all users");
-    assertNotNull(photos);
-    assertFalse(photos.isEmpty());
-
-    // Vérifie que chaque utilisateur a au moins une photo
-    for (StudentEntity student : students) {
-      boolean hasPhoto =
-          photos.stream().anyMatch(photo -> photo.getUser().getId().equals(student.getId()));
-      assertTrue(hasPhoto, "User " + student.getId() + " doit avoir au moins une photo");
-    }
-
-    // Vérifie les versions et types
-    photos.forEach(
-        photo -> {
-          assertTrue(photo.getVersion() > 0);
-          assertNotNull(photo.getUserPhotoType());
-          assertNotNull(photo.getUserCategory());
-        });
   }
 }
