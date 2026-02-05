@@ -45,23 +45,25 @@ public class SelfKnowledgeCategorySeeder {
               selfKnowledgeService.createSelfKnowledgeCategory(
                   data.id(), data.title(), data.description(), data.type(), data.isMandatory());
 
-          var enData =
-              creationDataEN.stream()
-                  .filter(c -> c.id().equals(data.id()))
-                  .findFirst()
-                  .orElseThrow();
-          RequestContext.set(new RequestData(Optional.empty(), ELanguage.ENGLISH));
-          selfKnowledgeService.updateSelfKnowledgeCategory(
-              enData.id(), enData.title(), enData.description());
+          creationDataEN.stream()
+              .filter(c -> c.id().equals(data.id()))
+              .findFirst()
+              .ifPresent(
+                  en -> {
+                    RequestContext.set(new RequestData(Optional.empty(), ELanguage.ENGLISH));
+                    selfKnowledgeService.updateSelfKnowledgeCategory(
+                        en.id(), en.title(), en.description());
+                  });
 
-          var esData =
-              creationDataES.stream()
-                  .filter(c -> c.id().equals(data.id()))
-                  .findFirst()
-                  .orElseThrow();
-          RequestContext.set(new RequestData(Optional.empty(), ELanguage.SPANISH));
-          selfKnowledgeService.updateSelfKnowledgeCategory(
-              esData.id(), esData.title(), esData.description());
+          creationDataES.stream()
+              .filter(c -> c.id().equals(data.id()))
+              .findFirst()
+              .ifPresent(
+                  es -> {
+                    RequestContext.set(new RequestData(Optional.empty(), ELanguage.SPANISH));
+                    selfKnowledgeService.updateSelfKnowledgeCategory(
+                        es.id(), es.title(), es.description());
+                  });
           categories.add(category);
         });
 

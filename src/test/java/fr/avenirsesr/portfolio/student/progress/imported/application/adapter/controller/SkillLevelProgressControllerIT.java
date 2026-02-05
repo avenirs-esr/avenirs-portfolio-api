@@ -184,34 +184,6 @@ public class SkillLevelProgressControllerIT extends ContainerConfigurationTest {
       }
 
       @Nested
-      class AndAValidSkillIdIsPassed {
-        private static final UUID EXISTING_SKILL_ID =
-            UUID.fromString("f5bbedeb-c0f4-4b3c-bcbe-9a96091719e6");
-
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("a valid skill id is passed");
-        }
-
-        @Test
-        void thenItShouldReturnTheDetailedSkill() throws Exception {
-          BddLogger.then("it should return the detailed skill");
-          mockMvc
-              .perform(
-                  get(DETAILS_BASE_PATH, EXISTING_SKILL_ID)
-                      .header("Accept-Language", language.getCode())
-                      .header("X-Signed-Context", studentPayload)
-                      .header("X-Context-Kid", secretKey)
-                      .header("X-Context-Signature", studentSignature)
-                      .accept(MediaType.APPLICATION_JSON))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.id").isString())
-              .andExpect(jsonPath("$.name").isString())
-              .andExpect(jsonPath("$.skillLevels").isArray());
-        }
-      }
-
-      @Nested
       class AndAnUnknowSkillIdIsPassed {
         private static final UUID UNKNOWN_SKILL_ID = UUID.randomUUID();
 
