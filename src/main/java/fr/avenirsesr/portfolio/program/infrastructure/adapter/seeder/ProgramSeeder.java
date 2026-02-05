@@ -47,7 +47,7 @@ public class ProgramSeeder {
         institution -> {
           for (int i = 0; i < SeederConfig.PROGRAM_BY_INSTITUTION; i++) {
             fakePrograms.add(
-                createFakeProgram(institutionEntities.get(i), i < SeederConfig.PROGRAM_NB_APC));
+                createFakeProgram(institutionEntities.getFirst(), i < SeederConfig.PROGRAM_NB_APC));
           }
         });
 

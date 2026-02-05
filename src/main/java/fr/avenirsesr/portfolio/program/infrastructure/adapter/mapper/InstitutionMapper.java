@@ -11,7 +11,13 @@ public class InstitutionMapper implements Mapper<InstitutionEntity, Institution>
 
   @Override
   public InstitutionEntity fromDomain(Institution institution) {
-    return InstitutionEntity.of(institution.getId());
+    var entity = InstitutionEntity.of(institution.getId());
+    TranslationUtil.addTranslation(
+        institution,
+        entity,
+        InstitutionTranslationEntity::create,
+        InstitutionTranslationEntity::update);
+    return entity;
   }
 
   @Override

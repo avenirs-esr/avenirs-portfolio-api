@@ -9,7 +9,7 @@ public class SeederConfig {
   public static final int MAX_COVER_PHOTO_PER_USER = 1;
 
   // Institutions
-  private static final int INSTITUTIONS_NB = 4;
+  public static final int INSTITUTIONS_NB = 4;
   public static final int INSTITUTIONS_NB_OF_APC = (int) (0.5 * INSTITUTIONS_NB);
   public static final int INSTITUTIONS_NB_OF_LIFE_PROJECT = (int) (0.25 * INSTITUTIONS_NB);
   public static final int INSTITUTIONS_NB_OF_BOTH = (int) (0.25 * INSTITUTIONS_NB);

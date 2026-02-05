@@ -1,13 +1,16 @@
 package fr.avenirsesr.portfolio.program.domain.service;
 
 import fr.avenirsesr.portfolio.common.configuration.domain.model.InstitutionConfigurationElements;
+import fr.avenirsesr.portfolio.program.domain.model.Institution;
 import fr.avenirsesr.portfolio.program.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.program.domain.port.output.client.InstitutionConfigClient;
+import fr.avenirsesr.portfolio.program.domain.port.output.repository.InstitutionRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,6 +20,7 @@ public class InstitutionServiceImpl implements InstitutionService {
   private final StudentProgressRepository studentProgressRepository;
   private final LoggedInUserService loggedInUserService;
   private final InstitutionConfigClient institutionConfigClient;
+  private final InstitutionRepository institutionRepository;
 
   @Override
   public InstitutionConfigurationElements getInstitutionConfiguration() {
@@ -36,5 +40,10 @@ public class InstitutionServiceImpl implements InstitutionService {
         configs.stream().anyMatch(InstitutionConfigurationElements::lifeProjectEnabled);
 
     return new InstitutionConfigurationElements(apcEnabled, lifeProjectEnabled);
+  }
+
+  @Override
+  public Institution createInstitution(String name) {
+    return institutionRepository.save(Institution.create(UUID.randomUUID(), name));
   }
 }

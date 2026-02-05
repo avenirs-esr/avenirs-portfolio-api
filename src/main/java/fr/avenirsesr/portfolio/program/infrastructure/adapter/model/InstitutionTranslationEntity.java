@@ -1,7 +1,11 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.error.domain.exception.WrongClassTypeArgumentException;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.model.TranslationEntity;
+import fr.avenirsesr.portfolio.program.domain.model.Institution;
 import jakarta.persistence.*;
 import java.util.UUID;
 import lombok.Getter;
@@ -39,5 +43,25 @@ public class InstitutionTranslationEntity extends TranslationEntity {
   public static InstitutionTranslationEntity of(
       UUID id, ELanguage language, String name, InstitutionEntity institutionEntity) {
     return new InstitutionTranslationEntity(id, language, name, institutionEntity);
+  }
+
+  public static InstitutionTranslationEntity create(
+      AvenirsBaseModel model, AvenirsBaseEntity baseEntity, ELanguage language) {
+    if (!(model instanceof Institution domain)
+        || !(baseEntity instanceof InstitutionEntity entity)) {
+      throw new WrongClassTypeArgumentException("domain and entity should be of type Institution");
+    }
+    return of(UUID.randomUUID(), language, domain.getName(), entity);
+  }
+
+  public static InstitutionTranslationEntity update(
+      TranslationEntity translation, AvenirsBaseModel model) {
+    if (!(model instanceof Institution domain)
+        || !(translation instanceof InstitutionTranslationEntity translationEntity)) {
+      throw new WrongClassTypeArgumentException(
+          "domain and translation should be of type Institution");
+    }
+    translationEntity.setName(domain.getName());
+    return translationEntity;
   }
 }

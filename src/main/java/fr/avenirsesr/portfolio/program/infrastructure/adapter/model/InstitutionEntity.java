@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.TranslatableEntity;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class InstitutionEntity extends AvenirsBaseEntity {
+public class InstitutionEntity extends TranslatableEntity<InstitutionTranslationEntity> {
   @OneToMany(
       mappedBy = "institution",
       cascade = CascadeType.ALL,

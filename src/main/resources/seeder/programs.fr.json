@@ -1,0 +1,82 @@
+[
+  {
+    "institution": "Polytech Lyon",
+    "skillReferential": [
+      {
+        "id": "3f2c9a8e-6c44-4b3e-9c7a-8f5d2e9a1c42",
+        "name": "Programmer des algorithmes",
+        "levels" : [
+          {
+            "name": "Niveau 1",
+            "description": "Concevoir des algorithmes de base en apprentissage supervisé"
+          },
+          {
+            "name": "Niveau 2",
+            "description": "Anticiper les évolutions des algorithmes"
+          },
+          {
+            "name": "Niveau 3",
+            "description": "Développer des algorithmes d apprentissage automatique"
+          }
+        ]
+      },
+      {
+        "id": "c2e9a6b4-7d1f-4e83-9b5c-6a0f1d8e42a7",
+        "name": "Étudier les particules élémentaires",
+        "levels" : [
+          {
+            "name": "Niveau 1",
+            "description": "Développer des indicateurs environnementaux"
+          },
+          {
+            "name": "Niveau 2",
+            "description": "Intégrer les facteurs climatiques dans les modèles"
+          },
+          {
+            "name": "Niveau 3",
+            "description": "Appliquer les règles de calcul aux matériaux"
+          }
+        ]
+      },
+      {
+        "id": "8f1a3c2e-5b7d-4e9a-92c6-d1b4a0f83e57",
+        "name": "Apprendre la programmation orientée objet",
+        "levels" : [
+          {
+            "name": "Niveau 1",
+            "description": "Développer des applications Java simples"
+          },
+          {
+            "name": "Niveau 2",
+            "description": "Programmer en Java et Python"
+          },
+          {
+            "name": "Niveau 3",
+            "description": "Intégrer des APIs tierces et des bases de données"
+          }
+        ]
+      }
+    ],
+    "programs": [
+      {
+        "name": "Master Data Science",
+        "durationUnit": "SEMESTER",
+        "durationCount": 4,
+        "isAPC": true,
+        "skills": [
+          "3f2c9a8e-6c44-4b3e-9c7a-8f5d2e9a1c42",
+          "8f1a3c2e-5b7d-4e9a-92c6-d1b4a0f83e57"
+        ]
+      },
+      {
+        "name": "Master Physique",
+        "durationUnit": "SEMESTER",
+        "durationCount": 4,
+        "isAPC": true,
+        "skills": [
+          "c2e9a6b4-7d1f-4e83-9b5c-6a0f1d8e42a7"
+        ]
+      }
+    ]
+  }
+]

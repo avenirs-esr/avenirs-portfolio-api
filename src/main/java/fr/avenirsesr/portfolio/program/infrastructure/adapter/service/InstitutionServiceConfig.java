@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.program.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.program.domain.port.input.InstitutionService;
 import fr.avenirsesr.portfolio.program.domain.port.output.client.InstitutionConfigClient;
+import fr.avenirsesr.portfolio.program.domain.port.output.repository.InstitutionRepository;
 import fr.avenirsesr.portfolio.program.domain.service.InstitutionServiceImpl;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
@@ -17,10 +18,14 @@ public class InstitutionServiceConfig {
   private final StudentProgressRepository studentProgressRepository;
   private final LoggedInUserService loggedInUserService;
   private final InstitutionConfigClient institutionConfigClient;
+  private final InstitutionRepository institutionRepository;
 
   @Bean
   public InstitutionService institutionService() {
     return new InstitutionServiceImpl(
-        studentProgressRepository, loggedInUserService, institutionConfigClient);
+        studentProgressRepository,
+        loggedInUserService,
+        institutionConfigClient,
+        institutionRepository);
   }
 }
