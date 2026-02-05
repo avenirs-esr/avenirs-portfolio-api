@@ -1,59 +1,96 @@
 [
   {
+    "id": "9b4f2e6a-3c8d-4f91-a7b2-1d6e5c9a8f42",
     "institution": "Polytech Lyon",
     "skillReferential": [
       {
         "id": "3f2c9a8e-6c44-4b3e-9c7a-8f5d2e9a1c42",
-        "name": "Programmer des algorithmes",
-        "levels" : [
-          {
-            "name": "Niveau 1",
-            "description": "Concevoir des algorithmes de base en apprentissage supervisé"
-          },
-          {
-            "name": "Niveau 2",
-            "description": "Anticiper les évolutions des algorithmes"
-          },
-          {
-            "name": "Niveau 3",
-            "description": "Développer des algorithmes d apprentissage automatique"
-          }
-        ]
-      },
-      {
-        "id": "c2e9a6b4-7d1f-4e83-9b5c-6a0f1d8e42a7",
-        "name": "Étudier les particules élémentaires",
-        "levels" : [
-          {
-            "name": "Niveau 1",
-            "description": "Développer des indicateurs environnementaux"
-          },
-          {
-            "name": "Niveau 2",
-            "description": "Intégrer les facteurs climatiques dans les modèles"
-          },
-          {
-            "name": "Niveau 3",
-            "description": "Appliquer les règles de calcul aux matériaux"
-          }
+        "name": "Programmation d’algorithmes",
+        "levels": [
+          { "name": "Niveau 1", "description": "Concevoir des algorithmes simples" },
+          { "name": "Niveau 2", "description": "Optimiser et structurer des algorithmes" },
+          { "name": "Niveau 3", "description": "Développer des algorithmes avancés et performants" }
         ]
       },
       {
         "id": "8f1a3c2e-5b7d-4e9a-92c6-d1b4a0f83e57",
-        "name": "Apprendre la programmation orientée objet",
-        "levels" : [
-          {
-            "name": "Niveau 1",
-            "description": "Développer des applications Java simples"
-          },
-          {
-            "name": "Niveau 2",
-            "description": "Programmer en Java et Python"
-          },
-          {
-            "name": "Niveau 3",
-            "description": "Intégrer des APIs tierces et des bases de données"
-          }
+        "name": "Programmation orientée objet",
+        "levels": [
+          { "name": "Niveau 1", "description": "Utiliser les concepts fondamentaux de l’OOP" },
+          { "name": "Niveau 2", "description": "Concevoir des architectures orientées objet" },
+          { "name": "Niveau 3", "description": "Maintenir et faire évoluer des systèmes complexes" }
+        ]
+      },
+      {
+        "id": "c2e9a6b4-7d1f-4e83-9b5c-6a0f1d8e42a7",
+        "name": "Physique et modélisation",
+        "levels": [
+          { "name": "Niveau 1", "description": "Comprendre les lois physiques fondamentales" },
+          { "name": "Niveau 2", "description": "Modéliser des phénomènes physiques simples" },
+          { "name": "Niveau 3", "description": "Appliquer des modèles physiques avancés" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-1111-4aaa-9bbb-123456789001",
+        "name": "Analyse de données",
+        "levels": [
+          { "name": "Niveau 1", "description": "Manipuler et nettoyer des données" },
+          { "name": "Niveau 2", "description": "Analyser et visualiser des jeux de données" },
+          { "name": "Niveau 3", "description": "Interpréter et exploiter des analyses complexes" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-2222-4aaa-9bbb-123456789002",
+        "name": "Machine Learning",
+        "levels": [
+          { "name": "Niveau 1", "description": "Utiliser des modèles supervisés simples" },
+          { "name": "Niveau 2", "description": "Optimiser et comparer des modèles" },
+          { "name": "Niveau 3", "description": "Concevoir des pipelines ML avancés" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-3333-4aaa-9bbb-123456789003",
+        "name": "Bases de données",
+        "levels": [
+          { "name": "Niveau 1", "description": "Interroger une base de données relationnelle" },
+          { "name": "Niveau 2", "description": "Concevoir des schémas optimisés" },
+          { "name": "Niveau 3", "description": "Optimiser les performances et la scalabilité" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-4444-4aaa-9bbb-123456789004",
+        "name": "Développement web",
+        "levels": [
+          { "name": "Niveau 1", "description": "Créer des interfaces web simples" },
+          { "name": "Niveau 2", "description": "Développer des applications web complètes" },
+          { "name": "Niveau 3", "description": "Concevoir des architectures web complexes" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-5555-4aaa-9bbb-123456789005",
+        "name": "Systèmes et réseaux",
+        "levels": [
+          { "name": "Niveau 1", "description": "Comprendre les bases des systèmes informatiques" },
+          { "name": "Niveau 2", "description": "Configurer des réseaux et services" },
+          { "name": "Niveau 3", "description": "Administrer des infrastructures complexes" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-6666-4aaa-9bbb-123456789006",
+        "name": "Gestion de projet",
+        "levels": [
+          { "name": "Niveau 1", "description": "Planifier des tâches simples" },
+          { "name": "Niveau 2", "description": "Piloter un projet avec des méthodes agiles" },
+          { "name": "Niveau 3", "description": "Gérer des projets complexes et multi-équipes" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-7777-4aaa-9bbb-123456789007",
+        "name": "Cybersécurité",
+        "levels": [
+          { "name": "Niveau 1", "description": "Identifier les risques de sécurité" },
+          { "name": "Niveau 2", "description": "Mettre en place des mécanismes de protection" },
+          { "name": "Niveau 3", "description": "Auditer et sécuriser des systèmes complexes" }
         ]
       }
     ],
@@ -65,16 +102,37 @@
         "isAPC": true,
         "skills": [
           "3f2c9a8e-6c44-4b3e-9c7a-8f5d2e9a1c42",
+          "a1b2c3d4-1111-4aaa-9bbb-123456789001",
+          "a1b2c3d4-2222-4aaa-9bbb-123456789002",
+          "a1b2c3d4-3333-4aaa-9bbb-123456789003",
           "8f1a3c2e-5b7d-4e9a-92c6-d1b4a0f83e57"
         ]
       },
       {
-        "name": "Master Physique",
+        "name": "Master Informatique",
         "durationUnit": "SEMESTER",
         "durationCount": 4,
         "isAPC": true,
         "skills": [
-          "c2e9a6b4-7d1f-4e83-9b5c-6a0f1d8e42a7"
+          "3f2c9a8e-6c44-4b3e-9c7a-8f5d2e9a1c42",
+          "8f1a3c2e-5b7d-4e9a-92c6-d1b4a0f83e57",
+          "a1b2c3d4-3333-4aaa-9bbb-123456789003",
+          "a1b2c3d4-4444-4aaa-9bbb-123456789004",
+          "a1b2c3d4-5555-4aaa-9bbb-123456789005",
+          "a1b2c3d4-7777-4aaa-9bbb-123456789007"
+        ]
+      },
+      {
+        "name": "Master Physique Appliquée",
+        "durationUnit": "SEMESTER",
+        "durationCount": 4,
+        "isAPC": true,
+        "skills": [
+          "c2e9a6b4-7d1f-4e83-9b5c-6a0f1d8e42a7",
+          "3f2c9a8e-6c44-4b3e-9c7a-8f5d2e9a1c42",
+          "a1b2c3d4-1111-4aaa-9bbb-123456789001",
+          "a1b2c3d4-6666-4aaa-9bbb-123456789006",
+          "a1b2c3d4-5555-4aaa-9bbb-123456789005"
         ]
       }
     ]

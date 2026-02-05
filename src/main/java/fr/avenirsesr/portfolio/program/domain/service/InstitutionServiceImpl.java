@@ -43,7 +43,14 @@ public class InstitutionServiceImpl implements InstitutionService {
   }
 
   @Override
-  public Institution createInstitution(String name) {
-    return institutionRepository.save(Institution.create(UUID.randomUUID(), name));
+  public Institution createInstitution(UUID institutionId, String name) {
+    return institutionRepository.save(Institution.create(institutionId, name));
+  }
+
+  @Override
+  public Institution updateInstitution(UUID institutionId, String name) {
+    var institution = institutionRepository.findById(institutionId).orElseThrow();
+    institution.setName(name);
+    return institutionRepository.save(institution);
   }
 }

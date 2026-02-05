@@ -69,11 +69,9 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value("96c16cc8-4ae8-4ffe-bb37-d55d0832c36b"))
-        .andExpect(jsonPath("$[0].programTitle").value("Master Histoire de l Art"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("f5bbedeb-c0f4-4b3c-bcbe-9a96091719e6"))
-        .andExpect(
-            jsonPath("$[0].skills[0].name")
-                .value("Développer des algorithmes d apprentissage automatique"))
+        .andExpect(jsonPath("$[0].programTitle").value("Master Chimie des Matériaux"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("9dbdbdbf-a4a5-45e7-ab28-5582eb16e0be"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Analyser les révolutions politiques"))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
   }
 
@@ -133,11 +131,9 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value("96c16cc8-4ae8-4ffe-bb37-d55d0832c36b"))
-        .andExpect(jsonPath("$[0].programTitle").value("Master Histoire de l Art"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("f5bbedeb-c0f4-4b3c-bcbe-9a96091719e6"))
-        .andExpect(
-            jsonPath("$[0].skills[0].name")
-                .value("Développer des algorithmes d apprentissage automatique"))
+        .andExpect(jsonPath("$[0].programTitle").value("Master Chimie des Matériaux"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("9dbdbdbf-a4a5-45e7-ab28-5582eb16e0be"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Analyser les révolutions politiques"))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists());
   }
 
@@ -158,9 +154,9 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value("96c16cc8-4ae8-4ffe-bb37-d55d0832c36b"))
-        .andExpect(jsonPath("$[0].name").value("Master Histoire de l Art"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("610093b8-7cc3-46dc-8a2e-4de8cf235089"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Analyser les œuvres picturales"))
+        .andExpect(jsonPath("$[0].name").value("Master Chimie des Matériaux"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("9dbdbdbf-a4a5-45e7-ab28-5582eb16e0be"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Analyser les révolutions politiques"))
         .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists())
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.traceCount").value(0));
@@ -221,9 +217,9 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value("96c16cc8-4ae8-4ffe-bb37-d55d0832c36b"))
-        .andExpect(jsonPath("$[0].name").value("Master Histoire de l Art"))
-        .andExpect(jsonPath("$[0].skills[0].id").value("610093b8-7cc3-46dc-8a2e-4de8cf235089"))
-        .andExpect(jsonPath("$[0].skills[0].name").value("Analyser les œuvres picturales"))
+        .andExpect(jsonPath("$[0].name").value("Master Chimie des Matériaux"))
+        .andExpect(jsonPath("$[0].skills[0].id").value("9dbdbdbf-a4a5-45e7-ab28-5582eb16e0be"))
+        .andExpect(jsonPath("$[0].skills[0].name").value("Analyser les révolutions politiques"))
         .andExpect(jsonPath("$[0].skills[0].levelCount").value(3))
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel").exists())
         .andExpect(jsonPath("$[0].skills[0].currentSkillLevel.traceCount").value(0));
@@ -247,10 +243,10 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value("96c16cc8-4ae8-4ffe-bb37-d55d0832c36b"))
         .andExpect(jsonPath("$[0].studentId").value("0a8700ab-90b6-4a38-8338-acbdd4fbcd3d"))
-        .andExpect(jsonPath("$[0].trainingPath.id").value("3f5fc3e7-40f4-4471-a7c3-e9189dbc45f7"))
-        .andExpect(jsonPath("$[0].trainingPath.name").value("Master Histoire de l Art"))
-        .andExpect(jsonPath("$[0].trainingPath.durationUnit").value("TRIMESTER"))
-        .andExpect(jsonPath("$[0].trainingPath.durationCount").value(4));
+        .andExpect(jsonPath("$[0].trainingPath.id").value("9c1bf1a0-85cc-4e28-9f56-845032d2450f"))
+        .andExpect(jsonPath("$[0].trainingPath.name").value("Master Chimie des Matériaux"))
+        .andExpect(jsonPath("$[0].trainingPath.durationUnit").value("WEEK"))
+        .andExpect(jsonPath("$[0].trainingPath.durationCount").value(2));
   }
 
   @Test
@@ -310,9 +306,9 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$").isArray())
         .andExpect(jsonPath("$[0].id").value("96c16cc8-4ae8-4ffe-bb37-d55d0832c36b"))
         .andExpect(jsonPath("$[0].studentId").value("0a8700ab-90b6-4a38-8338-acbdd4fbcd3d"))
-        .andExpect(jsonPath("$[0].trainingPath.id").value("3f5fc3e7-40f4-4471-a7c3-e9189dbc45f7"))
-        .andExpect(jsonPath("$[0].trainingPath.name").value("Master Histoire de l Art"))
-        .andExpect(jsonPath("$[0].trainingPath.durationUnit").value("TRIMESTER"))
-        .andExpect(jsonPath("$[0].trainingPath.durationCount").value(4));
+        .andExpect(jsonPath("$[0].trainingPath.id").value("9c1bf1a0-85cc-4e28-9f56-845032d2450f"))
+        .andExpect(jsonPath("$[0].trainingPath.name").value("Master Chimie des Matériaux"))
+        .andExpect(jsonPath("$[0].trainingPath.durationUnit").value("WEEK"))
+        .andExpect(jsonPath("$[0].trainingPath.durationCount").value(2));
   }
 }

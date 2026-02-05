@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Institution extends AvenirsBaseModel {
-  private final String name;
+  private String name;
 
   private Institution(UUID id, String name, Instant createdAt, Instant updatedAt) {
     super(id, createdAt, updatedAt);

@@ -1,0 +1,140 @@
+[
+  {
+    "id": "9b4f2e6a-3c8d-4f91-a7b2-1d6e5c9a8f42",
+    "institution": "Polytech Lyon",
+    "skillReferential": [
+      {
+        "id": "3f2c9a8e-6c44-4b3e-9c7a-8f5d2e9a1c42",
+        "name": "Algorithm Programming",
+        "levels": [
+          { "name": "Level 1", "description": "Design simple algorithms" },
+          { "name": "Level 2", "description": "Optimize and structure algorithms" },
+          { "name": "Level 3", "description": "Develop advanced and high-performance algorithms" }
+        ]
+      },
+      {
+        "id": "8f1a3c2e-5b7d-4e9a-92c6-d1b4a0f83e57",
+        "name": "Object-Oriented Programming",
+        "levels": [
+          { "name": "Level 1", "description": "Use fundamental OOP concepts" },
+          { "name": "Level 2", "description": "Design object-oriented architectures" },
+          { "name": "Level 3", "description": "Maintain and evolve complex systems" }
+        ]
+      },
+      {
+        "id": "c2e9a6b4-7d1f-4e83-9b5c-6a0f1d8e42a7",
+        "name": "Physics and Modeling",
+        "levels": [
+          { "name": "Level 1", "description": "Understand fundamental physical laws" },
+          { "name": "Level 2", "description": "Model simple physical phenomena" },
+          { "name": "Level 3", "description": "Apply advanced physical models" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-1111-4aaa-9bbb-123456789001",
+        "name": "Data Analysis",
+        "levels": [
+          { "name": "Level 1", "description": "Manipulate and clean data" },
+          { "name": "Level 2", "description": "Analyze and visualize datasets" },
+          { "name": "Level 3", "description": "Interpret and leverage complex analyses" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-2222-4aaa-9bbb-123456789002",
+        "name": "Machine Learning",
+        "levels": [
+          { "name": "Level 1", "description": "Use simple supervised models" },
+          { "name": "Level 2", "description": "Optimize and compare models" },
+          { "name": "Level 3", "description": "Design advanced ML pipelines" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-3333-4aaa-9bbb-123456789003",
+        "name": "Databases",
+        "levels": [
+          { "name": "Level 1", "description": "Query a relational database" },
+          { "name": "Level 2", "description": "Design optimized schemas" },
+          { "name": "Level 3", "description": "Optimize performance and scalability" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-4444-4aaa-9bbb-123456789004",
+        "name": "Web Development",
+        "levels": [
+          { "name": "Level 1", "description": "Build simple web interfaces" },
+          { "name": "Level 2", "description": "Develop full web applications" },
+          { "name": "Level 3", "description": "Design complex web architectures" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-5555-4aaa-9bbb-123456789005",
+        "name": "Systems and Networks",
+        "levels": [
+          { "name": "Level 1", "description": "Understand computer systems fundamentals" },
+          { "name": "Level 2", "description": "Configure networks and services" },
+          { "name": "Level 3", "description": "Administer complex infrastructures" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-6666-4aaa-9bbb-123456789006",
+        "name": "Project Management",
+        "levels": [
+          { "name": "Level 1", "description": "Plan simple tasks" },
+          { "name": "Level 2", "description": "Manage a project using agile methods" },
+          { "name": "Level 3", "description": "Lead complex multi-team projects" }
+        ]
+      },
+      {
+        "id": "a1b2c3d4-7777-4aaa-9bbb-123456789007",
+        "name": "Cybersecurity",
+        "levels": [
+          { "name": "Level 1", "description": "Identify security risks" },
+          { "name": "Level 2", "description": "Implement protection mechanisms" },
+          { "name": "Level 3", "description": "Audit and secure complex systems" }
+        ]
+      }
+    ],
+    "programs": [
+      {
+        "name": "Master in Data Science",
+        "durationUnit": "SEMESTER",
+        "durationCount": 4,
+        "isAPC": true,
+        "skills": [
+          "3f2c9a8e-6c44-4b3e-9c7a-8f5d2e9a1c42",
+          "a1b2c3d4-1111-4aaa-9bbb-123456789001",
+          "a1b2c3d4-2222-4aaa-9bbb-123456789002",
+          "a1b2c3d4-3333-4aaa-9bbb-123456789003",
+          "8f1a3c2e-5b7d-4e9a-92c6-d1b4a0f83e57"
+        ]
+      },
+      {
+        "name": "Master in Computer Science",
+        "durationUnit": "SEMESTER",
+        "durationCount": 4,
+        "isAPC": true,
+        "skills": [
+          "3f2c9a8e-6c44-4b3e-9c7a-8f5d2e9a1c42",
+          "8f1a3c2e-5b7d-4e9a-92c6-d1b4a0f83e57",
+          "a1b2c3d4-3333-4aaa-9bbb-123456789003",
+          "a1b2c3d4-4444-4aaa-9bbb-123456789004",
+          "a1b2c3d4-5555-4aaa-9bbb-123456789005",
+          "a1b2c3d4-7777-4aaa-9bbb-123456789007"
+        ]
+      },
+      {
+        "name": "Master in Applied Physics",
+        "durationUnit": "SEMESTER",
+        "durationCount": 4,
+        "isAPC": true,
+        "skills": [
+          "c2e9a6b4-7d1f-4e83-9b5c-6a0f1d8e42a7",
+          "3f2c9a8e-6c44-4b3e-9c7a-8f5d2e9a1c42",
+          "a1b2c3d4-1111-4aaa-9bbb-123456789001",
+          "a1b2c3d4-6666-4aaa-9bbb-123456789006",
+          "a1b2c3d4-5555-4aaa-9bbb-123456789005"
+        ]
+      }
+    ]
+  }
+]
