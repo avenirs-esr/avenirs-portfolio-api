@@ -46,9 +46,9 @@ public class SkillLevelProgressDatabaseRepository
 
   @Override
   public List&lt;SkillLevelProgress&gt; findAllByStudentAndSkillId(Student student, UUID skillId) {
-<span class="fc" id="L49">    return Optional.of(findAll(SkillLevelProgressSpecification.with(student, skillId)))</span>
-<span class="fc bfc" id="L50" title="All 2 branches covered.">        .filter(list -&gt; !list.isEmpty())</span>
-<span class="fc" id="L51">        .orElseThrow(() -&gt; new SkillLevelNotFoundException(skillId.toString()));</span>
+<span class="pc" id="L49">    return Optional.of(findAll(SkillLevelProgressSpecification.with(student, skillId)))</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        .filter(list -&gt; !list.isEmpty())</span>
+<span class="pc" id="L51">        .orElseThrow(() -&gt; new SkillLevelNotFoundException(skillId.toString()));</span>
   }
 
   @Override

@@ -142,7 +142,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   @Override
   public List&lt;SkillLevelProgress&gt; getSkillLevelsBySkillId(UUID skillId) {
 <span class="fc" id="L144">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L145">    return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);</span>
+<span class="nc" id="L145">    return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);</span>
   }
 
   @Override
