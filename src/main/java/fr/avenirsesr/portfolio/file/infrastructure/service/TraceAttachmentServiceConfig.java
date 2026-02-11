@@ -20,7 +20,6 @@ public class TraceAttachmentServiceConfig {
   private final FileStorageService fileStorageService;
   private final TraceService traceService;
   private final LoggedInUserService loggedInUserService;
-  private final StudentRepository studentRepository;
 
   @Bean
   public TraceAttachmentService traceAttachmentService() {
@@ -29,7 +28,6 @@ public class TraceAttachmentServiceConfig {
         traceRepository,
         fileStorageService,
         traceService,
-        loggedInUserService,
-        studentRepository);
+        loggedInUserService);
   }
 }

@@ -74,7 +74,6 @@ class AMSSeederTest extends ContainerConfigurationTest {
         declaredSkillProgressSeeder.seed(savedStudents, declaredSkills);
     var savedInstitutions = institutionSeeder.seed();
     var savedPrograms = programSeeder.seed(savedInstitutions);
-    var savedTraces = traceSeeder.seed(savedUsers, declaredSkillProgresses);
     var savedSkillLevels = skillSeeder.seed(savedPrograms);
     var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
     var savedStudentProgresses =
@@ -82,6 +81,7 @@ class AMSSeederTest extends ContainerConfigurationTest {
     var savedSkillLevelProgresses =
         savedStudentProgresses.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
     var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
+    var savedTraces = traceSeeder.seed(savedUsers, declaredSkillProgresses);
 
     users = savedUsers;
     students = savedStudents;

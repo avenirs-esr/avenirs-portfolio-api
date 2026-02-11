@@ -30,31 +30,16 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
   private final FileStorageService fileStorageService;
   private final TraceService traceService;
   private final LoggedInUserService loggedInUserService;
-  private final StudentRepository studentRepository;
-
-  @Override
-  public TraceAttachment uploadTraceAttachment(
-      UUID traceId, String fileName, String mimeType, long size, byte[] content, UUID uploadedById)
-      throws IOException {
-    var student = studentRepository.findById(uploadedById).orElseThrow();
-    return uploadTraceAttachmentForStudent(traceId, fileName, mimeType, size, content, student);
-  }
 
   @Override
   public TraceAttachment uploadTraceAttachment(
       UUID traceId, String fileName, String mimeType, long size, byte[] content)
       throws IOException {
-    return uploadTraceAttachmentForStudent(
-        traceId, fileName, mimeType, size, content, loggedInUserService.getLoggedInStudent());
-  }
-
-  private TraceAttachment uploadTraceAttachmentForStudent(
-      UUID traceId, String fileName, String mimeType, long size, byte[] content, Student uploadedBy)
-      throws IOException {
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     var allTraceAttachments = traceAttachmentRepository.findByTrace(trace);
 
-    if (!trace.getUser().equals(uploadedBy.getUser())) {
+    if (!trace.getUser().equals(loggedInStudent.getUser())) {
       throw new UserNotAuthorizedException();
     }
 
@@ -71,7 +56,7 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
               : ""; // mock the upload when seeding
 
       var newAttachment =
-          createAttachment(uploadedBy, allTraceAttachments, fileResource, trace, uri);
+          createAttachment(loggedInStudent, allTraceAttachments, fileResource, trace, uri);
 
       traceAttachmentRepository.saveAll(
           Stream.concat(allTraceAttachments.stream(), Stream.of(newAttachment)).toList());

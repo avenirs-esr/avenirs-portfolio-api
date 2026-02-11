@@ -1,10 +1,13 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeTraceAttachment;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
@@ -16,10 +19,12 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceAttachementCreationData;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceCreationData;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +77,8 @@ public class TraceSeeder {
                   data.aiJustification());
           traces.add(trace);
 
+          RequestContext.set(
+              new RequestData(Optional.ofNullable(trace.getUser()), ELanguage.FRENCH));
           data.attachements()
               .forEach(
                   attachment -> {
@@ -81,8 +88,7 @@ public class TraceSeeder {
                           attachment.title(),
                           attachment.fileType().getMimeType(),
                           attachment.size(),
-                          null,
-                          data.userId());
+                          null);
                     } catch (IOException e) {
                       throw new RuntimeException(e);
                     }
