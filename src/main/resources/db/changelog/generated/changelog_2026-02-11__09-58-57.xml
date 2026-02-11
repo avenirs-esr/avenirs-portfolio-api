@@ -1,0 +1,88 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1770803942465-1">
+        <createTable tableName="activity">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activityPK"/>
+            </column>
+            <column name="title" type="VARCHAR(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="thematic" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="summary" type="VARCHAR(400)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="execution_period_info" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803942465-2">
+        <createTable tableName="activity_banner">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_bannerPK"/>
+            </column>
+            <column name="activity_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active_version" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="size" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uri" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_by" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803942465-3">
+        <createIndex indexName="idx_activity_banner_activity" tableName="activity_banner">
+            <column name="activity_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803942465-4">
+        <createIndex indexName="idx_activity_banner_activity_active" tableName="activity_banner">
+            <column name="activity_id"/>
+            <column name="is_active_version"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803942465-5">
+        <createIndex indexName="idx_activity_banner_activity_version" tableName="activity_banner">
+            <column name="activity_id"/>
+            <column descending="true" name="version"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803942465-6">
+        <addForeignKeyConstraint baseColumnNames="activity_id" baseTableName="activity_banner" constraintName="FK2yhp57odyt6yr48gxbrvxi4g4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803942465-7">
+        <addForeignKeyConstraint baseColumnNames="uploaded_by" baseTableName="activity_banner" constraintName="FKhdkm0x7mf9w2i3fgl4d5knnli" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

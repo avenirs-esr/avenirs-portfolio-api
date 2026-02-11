@@ -1,0 +1,42 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-14">
+        <createIndex indexName="IX_ams_skill_level_progressPK" tableName="ams_skill_level_progress" unique="true">
+            <column name="skill_level_progress_id"/>
+            <column name="ams_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-1">
+        <modifyDataType columnName="activity_sector" newDataType="varchar(255)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-2">
+        <modifyDataType columnName="ai_use_justification" newDataType="varchar(255)" tableName="trace"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-3">
+        <modifyDataType columnName="description" newDataType="varchar(255)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-4">
+        <modifyDataType columnName="location" newDataType="varchar(255)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-5">
+        <modifyDataType columnName="organization" newDataType="varchar(255)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-6">
+        <modifyDataType columnName="personal_note" newDataType="varchar(255)" tableName="trace"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-7">
+        <modifyDataType columnName="source_of_information" newDataType="varchar(255)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-8">
+        <modifyDataType columnName="summary" newDataType="varchar(255)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-9">
+        <modifyDataType columnName="title" newDataType="varchar(255)" tableName="declared_experience"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-10">
+        <dropPrimaryKey tableName="ams_skill_level_progress"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1770803352941-11">
+        <addPrimaryKey columnNames="skill_level_progress_id, ams_id" constraintName="ams_skill_level_progressPK" tableName="ams_skill_level_progress"/>
+    </changeSet>
+</databaseChangeLog>
