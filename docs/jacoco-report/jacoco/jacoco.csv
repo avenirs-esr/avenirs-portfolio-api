@@ -38,7 +38,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.specif
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.specification,ActivityBannerSpecification,0,19,0,0,0,4,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client,ExternalSkillClient.new ParameterizedTypeReference() {...},0,3,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client,ExternalSkillClient,0,247,0,8,0,63,0,10,0,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.service,ActivityServiceImpl,0,18,0,0,0,4,0,2,0,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.service,ActivityServiceImpl,0,33,0,0,0,8,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.data,UserProfileOverviewData,0,15,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.data,UserPhotosData,0,21,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,TraceAttachmentServiceConfig,0,14,0,0,0,1,0,1,0,1
