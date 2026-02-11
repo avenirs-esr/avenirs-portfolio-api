@@ -14,7 +14,6 @@ import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -50,10 +49,7 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
       }
 
       var fileResource = new FileResource(UUID.randomUUID(), fileName, fileType, size, content);
-      var uri =
-          content != null
-              ? fileStorageService.upload(fileResource)
-              : ""; // mock the upload when seeding
+      var uri = fileStorageService.upload(fileResource);
 
       var newAttachment =
           createAttachment(loggedInStudent, allTraceAttachments, fileResource, trace, uri);

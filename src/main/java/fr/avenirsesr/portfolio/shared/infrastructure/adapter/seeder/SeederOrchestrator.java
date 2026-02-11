@@ -19,6 +19,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.ExternalUserSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.TeacherSeeder;
@@ -111,7 +112,10 @@ public class SeederOrchestrator {
 
       var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
 
-      var savedTraces = traceSeeder.seed(savedUsers, savedStudentDeclaredSkills);
+      var savedTraces =
+          traceSeeder.seed(
+              savedStudents.stream().map(StudentEntity::getUser).toList(),
+              savedStudentDeclaredSkills);
 
       amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
 

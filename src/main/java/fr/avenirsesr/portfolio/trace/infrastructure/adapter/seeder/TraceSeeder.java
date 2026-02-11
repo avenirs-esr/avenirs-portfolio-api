@@ -19,7 +19,6 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceAttachementCreationData;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceCreationData;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,15 +26,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.IntStream;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class TraceSeeder {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
       new DataGeneratorProvider<SharedDataGenerator>()
@@ -47,6 +45,15 @@ public class TraceSeeder {
 
   @Value("${seeder.source}")
   private ESeederSource seederSource;
+
+  public TraceSeeder(
+      FileReader fileReader,
+      TraceService traceService,
+      @Qualifier("MockTraceAttachmentService") TraceAttachmentService traceAttachmentService) {
+    this.fileReader = fileReader;
+    this.traceService = traceService;
+    this.traceAttachmentService = traceAttachmentService;
+  }
 
   @Transactional
   public List<TraceEntity> seed(
