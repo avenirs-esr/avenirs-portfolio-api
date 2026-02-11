@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.ActivitySeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
 import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
@@ -64,6 +65,7 @@ public class SeederOrchestrator {
   private final CohortSeeder cohortSeeder;
   private final TraceSeeder traceSeeder;
   private final AMSSeeder amsSeeder;
+  private final ActivitySeeder activitySeeder;
 
   private final SeedingState seedingState;
 
@@ -116,6 +118,8 @@ public class SeederOrchestrator {
       selfKnowledgeElementSeeder.seed();
 
       declaredProgramSeeder.seed(savedStudents);
+
+      activitySeeder.seed(savedUsers.getFirst());
 
       log.info("✔ Seeding successfully finished");
       seedingState.markCompleted();

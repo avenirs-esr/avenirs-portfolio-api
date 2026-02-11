@@ -15,7 +15,7 @@ public class Activity extends AvenirsBaseModel {
   private String summary;
   private String executionPeriodInfo;
 
-  public Activity(
+  private Activity(
       UUID id,
       String title,
       EActivityThematic thematic,

@@ -61,4 +61,7 @@ public class SeederConfig {
 
   // Declared Programs
   public static final int NB_OF_DECLARED_PROGRAMS = 3;
+
+  // Activities
+  public static final int NB_OF_ACTIVITIES = 50;
 }

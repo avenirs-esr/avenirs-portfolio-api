@@ -28,6 +28,7 @@ class ActivityBannerMapperTest {
   private final UUID userId = UUID.randomUUID();
 
   private final EFileType fileType = EFileType.PNG;
+  private final String fileName = "filename.png";
   private final long size = 2048L;
   private final int version = 1;
   private final boolean activeVersion = true;
@@ -54,6 +55,7 @@ class ActivityBannerMapperTest {
     banner =
         ActivityBanner.toDomain(
             id,
+            fileName,
             fileType,
             size,
             version,
@@ -95,6 +97,7 @@ class ActivityBannerMapperTest {
         ActivityBannerEntity.of(
             id,
             ActivityMapper.INSTANCE.fromDomain(activity),
+            fileName,
             fileType,
             size,
             version,

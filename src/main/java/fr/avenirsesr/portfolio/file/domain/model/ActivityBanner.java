@@ -13,9 +13,11 @@ import lombok.Setter;
 @Setter
 public class ActivityBanner extends File {
   private final Activity activity;
+  private final String fileName;
 
   private ActivityBanner(
       UUID id,
+      String fileName,
       EFileType fileType,
       long size,
       int version,
@@ -38,10 +40,12 @@ public class ActivityBanner extends File {
         createdAt,
         updatedAt);
     this.activity = activity;
+    this.fileName = fileName;
   }
 
   public static ActivityBanner create(
       UUID id,
+      String fileName,
       EFileType fileType,
       long size,
       int version,
@@ -50,11 +54,12 @@ public class ActivityBanner extends File {
       Activity activity) {
     Instant now = Instant.now();
     return new ActivityBanner(
-        id, fileType, size, version, true, uri, uploadedBy, now, activity, now, now);
+        id, fileName, fileType, size, version, true, uri, uploadedBy, now, activity, now, now);
   }
 
   public static ActivityBanner toDomain(
       UUID id,
+      String fileName,
       EFileType fileType,
       long size,
       int version,
@@ -67,6 +72,7 @@ public class ActivityBanner extends File {
       Instant updatedAt) {
     return new ActivityBanner(
         id,
+        fileName,
         fileType,
         size,
         version,

@@ -31,9 +31,13 @@ public class ActivityBannerEntity extends FileEntity {
   @JoinColumn(name = "activity_id", nullable = false)
   private ActivityEntity activity;
 
+  @Column(nullable = false, name = "file_name")
+  private String fileName;
+
   private ActivityBannerEntity(
       UUID id,
       ActivityEntity activity,
+      String fileName,
       EFileType fileType,
       long size,
       int version,
@@ -43,6 +47,7 @@ public class ActivityBannerEntity extends FileEntity {
       Instant uploadedAt) {
     this.setId(id);
     this.activity = activity;
+    this.fileName = fileName;
     this.setFileType(fileType);
     this.setSize(size);
     this.setVersion(version);
@@ -55,6 +60,7 @@ public class ActivityBannerEntity extends FileEntity {
   public static ActivityBannerEntity of(
       UUID id,
       ActivityEntity activity,
+      String fileName,
       EFileType fileType,
       long size,
       int version,
@@ -63,6 +69,15 @@ public class ActivityBannerEntity extends FileEntity {
       UserEntity uploadedBy,
       Instant uploadedAt) {
     return new ActivityBannerEntity(
-        id, activity, fileType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
+        id,
+        activity,
+        fileName,
+        fileType,
+        size,
+        version,
+        isActiveVersion,
+        uri,
+        uploadedBy,
+        uploadedAt);
   }
 }

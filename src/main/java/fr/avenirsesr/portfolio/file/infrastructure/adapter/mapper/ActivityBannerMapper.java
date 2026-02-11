@@ -15,6 +15,7 @@ public class ActivityBannerMapper implements Mapper<ActivityBannerEntity, Activi
     return ActivityBannerEntity.of(
         domain.getId(),
         ActivityMapper.INSTANCE.fromDomain(domain.getActivity()),
+        domain.getFileName(),
         domain.getFileType(),
         domain.getSize(),
         domain.getVersion(),
@@ -28,6 +29,7 @@ public class ActivityBannerMapper implements Mapper<ActivityBannerEntity, Activi
   public ActivityBanner toDomain(ActivityBannerEntity entity) {
     return ActivityBanner.toDomain(
         entity.getId(),
+        entity.getFileName(),
         entity.getFileType(),
         entity.getSize(),
         entity.getVersion(),
@@ -45,6 +47,7 @@ public class ActivityBannerMapper implements Mapper<ActivityBannerEntity, Activi
     var attributes = graph.attributes();
     return ActivityBanner.toDomain(
         entity.getId(),
+        entity.getFileName(),
         entity.getFileType(),
         entity.getSize(),
         entity.getVersion(),
