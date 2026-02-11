@@ -7,30 +7,29 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.TraceAttac
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
-@RequiredArgsConstructor
 @Configuration
+@RequiredArgsConstructor
 public class TraceAttachmentServiceConfig {
   private final TraceAttachmentDatabaseRepository traceAttachmentRepository;
   private final TraceDatabaseRepository traceRepository;
   private final FileStorageService fileStorageService;
   private final TraceService traceService;
   private final LoggedInUserService loggedInUserService;
-  private final StudentRepository studentRepository;
 
   @Bean
+  @Primary
   public TraceAttachmentService traceAttachmentService() {
 <span class="fc" id="L27">    return new TraceAttachmentServiceImpl(</span>
         traceAttachmentRepository,
         traceRepository,
         fileStorageService,
         traceService,
-        loggedInUserService,
-        studentRepository);
+        loggedInUserService);
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
