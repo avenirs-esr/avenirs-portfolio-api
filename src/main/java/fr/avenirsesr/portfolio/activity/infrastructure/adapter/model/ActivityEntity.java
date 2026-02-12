@@ -14,7 +14,7 @@ import lombok.Setter;
 @Entity
 @Table(
     name = "activity",
-    indexes = {@Index(name = "idx_activity_thematic", columnList = "idx_activity_thematic")})
+    indexes = {@Index(name = "idx_activity_thematic", columnList = "thematic")})
 @NoArgsConstructor
 @Getter
 @Setter

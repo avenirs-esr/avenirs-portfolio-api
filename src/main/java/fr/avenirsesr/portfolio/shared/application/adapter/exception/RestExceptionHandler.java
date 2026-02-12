@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.shared.application.adapter.exception;
 
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.common.error.application.adapter.exception.BaseRestExceptionHandler;
 import fr.avenirsesr.portfolio.common.error.application.adapter.response.ErrorResponse;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
@@ -15,6 +16,8 @@ import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedExcepti
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidDescriptionException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidRatingException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.exception.DeclaredProgramNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
@@ -165,6 +168,27 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   public ResponseEntity<ErrorResponse> handleDeclaredSkillProgressNotFoundException(
       DeclaredSkillProgressNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(ActivityNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleActivityNotFoundException(
+      ActivityNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(DeclaredActivityNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleDeclaredActivityNotFoundException(
+      DeclaredActivityNotFoundException ex) {
+    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(DeclaredActivityAlreadyExistException.class)
+  public ResponseEntity<ErrorResponse> handleDeclaredActivityAlreadyExistException(
+      DeclaredActivityAlreadyExistException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 
