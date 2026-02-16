@@ -41,4 +41,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         DeclaredActivity.create(student, activity, false, null, null, null);
     return declaredActivityRepository.save(declaredActivity);
   }
+
+  @Override
+  public List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student) {
+    var graph = FetchGraph.init().fetch("activity");
+    return declaredActivityRepository.findAllByStudent(student, graph);
+  }
 }
