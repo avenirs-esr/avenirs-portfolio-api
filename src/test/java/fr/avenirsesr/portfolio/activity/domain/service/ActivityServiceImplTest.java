@@ -16,14 +16,10 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.in
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 class ActivityServiceImplTest {
 
@@ -64,6 +60,79 @@ class ActivityServiceImplTest {
     verify(activityRepository).save(captor.capture());
     Activity savedActivity = captor.getValue();
     assertEquals(createdActivity, savedActivity);
+  }
+
+  @Test
+  void getAllActivitiesByThematic_shouldGroupActivitiesByThematic() {
+    // Given
+    Activity a1 =
+        Activity.create(UUID.randomUUID(), "A1", EActivityThematic.EXPERIENCES, "S1", "2026");
+    Activity a2 =
+        Activity.create(UUID.randomUUID(), "A2", EActivityThematic.EXPERIENCES, "S2", "2025");
+    Activity a3 = Activity.create(UUID.randomUUID(), "A3", EActivityThematic.CV, "S3", "2024");
+
+    when(activityRepository.findAll()).thenReturn(List.of(a1, a2, a3));
+
+    // When
+    Map<EActivityThematic, List<Activity>> result = activityService.getAllActivitiesByThematic();
+
+    // Then
+    assertNotNull(result);
+
+    assertEquals(2, result.size());
+    assertTrue(result.containsKey(EActivityThematic.EXPERIENCES));
+    assertTrue(result.containsKey(EActivityThematic.CV));
+
+    List<Activity> experiences = result.get(EActivityThematic.EXPERIENCES);
+    assertNotNull(experiences);
+    assertEquals(2, experiences.size());
+    assertTrue(experiences.contains(a1));
+    assertTrue(experiences.contains(a2));
+
+    List<Activity> cv = result.get(EActivityThematic.CV);
+    assertNotNull(cv);
+    assertEquals(1, cv.size());
+    assertEquals(a3, cv.getFirst());
+
+    verify(activityRepository).findAll();
+    verifyNoMoreInteractions(activityRepository);
+  }
+
+  @Test
+  void getAllActivitiesByThematic_shouldNotIncludeThematicsThatAreNotPresent() {
+    // Given (only CV)
+    Activity a1 = Activity.create(UUID.randomUUID(), "A1", EActivityThematic.CV, "S1", "2026");
+
+    when(activityRepository.findAll()).thenReturn(List.of(a1));
+
+    // When
+    Map<EActivityThematic, List<Activity>> result = activityService.getAllActivitiesByThematic();
+
+    // Then
+    assertNotNull(result);
+    assertEquals(1, result.size());
+    assertTrue(result.containsKey(EActivityThematic.CV));
+    assertFalse(result.containsKey(EActivityThematic.EXPERIENCES));
+    assertFalse(result.containsKey(EActivityThematic.ABOUT_ME)); // si existe dans ton enum
+
+    verify(activityRepository).findAll();
+    verifyNoMoreInteractions(activityRepository);
+  }
+
+  @Test
+  void getAllActivitiesByThematic_shouldReturnEmptyMapWhenNoActivities() {
+    // Given
+    when(activityRepository.findAll()).thenReturn(List.of());
+
+    // When
+    Map<EActivityThematic, List<Activity>> result = activityService.getAllActivitiesByThematic();
+
+    // Then
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+
+    verify(activityRepository).findAll();
+    verifyNoMoreInteractions(activityRepository);
   }
 
   @Test
