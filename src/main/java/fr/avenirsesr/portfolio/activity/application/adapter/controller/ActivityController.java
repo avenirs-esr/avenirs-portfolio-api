@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivitiesByThematicDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityOverviewDTO;
+import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivitiesByThematicMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
@@ -71,4 +73,11 @@ public class ActivityController {
 
     return ResponseEntity.ok(viewResponse);
   }
+  
+  @GetMapping("/navigation")
+  public ResponseEntity<ActivitiesByThematicDTO> getActivitiesByThematic() {
+    return ResponseEntity.ok(
+        ActivitiesByThematicMapper.toActivitiesByThematicDTO(
+            activityService.getAllActivitiesByThematic()));
+}
 }

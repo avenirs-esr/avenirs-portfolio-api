@@ -16,7 +16,11 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.D
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,6 +48,17 @@ public class ActivityServiceImpl implements ActivityService {
     var activity = Activity.create(id, title, thematic, summary, executionPeriodInfo);
     activityRepository.save(activity);
     return activity;
+  }
+
+  @Override
+  public Map<EActivityThematic, List<Activity>> getAllActivitiesByThematic() {
+    List<Activity> activities = activityRepository.findAll();
+    return activities.stream()
+        .collect(
+            Collectors.groupingBy(
+                Activity::getThematic,
+                () -> new EnumMap<>(EActivityThematic.class),
+                Collectors.toList()));
   }
 
   @Override
