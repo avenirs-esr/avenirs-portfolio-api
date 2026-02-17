@@ -4,13 +4,18 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
 
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.file.domain.data.FileData;
+import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
+import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
@@ -19,6 +24,7 @@ import java.time.Instant;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -27,10 +33,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class ActivityServiceImpl implements ActivityService {
+  private static final String ACTIVITY_BANNER_PATH = "/storage/activities/";
+
   private static final Duration DURATION_FOR_LATEST = Duration.ofDays(90);
   private final ActivityRepository activityRepository;
   private final DeclaredActivityService declaredActivityService;
   private final LoggedInUserService loggedInUserService;
+  private final ActivityResourceService activityResourceService;
 
   @Override
   public Activity create(
@@ -48,6 +57,24 @@ public class ActivityServiceImpl implements ActivityService {
     var activity = Activity.create(id, title, thematic, summary, executionPeriodInfo);
     activityRepository.save(activity);
     return activity;
+  }
+
+  @Override
+  public ActivityDetailData getActivityDetail(UUID id) {
+    Activity activity = activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
+    ActivityBanner activityBanner = activityResourceService.getActivityBanner(activity);
+    return new ActivityDetailData(
+        activity.getId(),
+        activity.getTitle(),
+        activity.getThematic(),
+        new FileData(
+            Optional.of(activityBanner.getId()),
+            Optional.of(activityBanner.getFileName()),
+            ACTIVITY_BANNER_PATH + activityBanner.getId()),
+        activity.getSummary(),
+        activity.getExecutionPeriodInfo(),
+        activity.getCreatedAt(),
+        activity.getUpdatedAt());
   }
 
   @Override

@@ -1,9 +1,13 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
+
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDetailDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityNavigationDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityOverviewDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityNavigationMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
@@ -11,15 +15,15 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
+import java.util.UUID;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @AllArgsConstructor
@@ -27,6 +31,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/me/activities")
 public class ActivityController {
   private final ActivityService activityService;
+
+  @GetMapping("/{activityId}")
+  public ResponseEntity<ActivityDetailDTO> getActivityDetail(
+      HttpServletRequest request, @PathVariable UUID activityId) {
+    log.debug("Received request to get activity [{}] detail", activityId);
+
+    ActivityDetailData activityDetail = activityService.getActivityDetail(activityId);
+    String baseUrl = extractOrigin(request);
+    return ResponseEntity.ok(
+        new ActivityDetailDTO(
+            activityDetail.id(),
+            activityDetail.title(),
+            activityDetail.thematic(),
+            new FileDTO(
+                activityDetail.activityBanner().id().orElse(null),
+                activityDetail.activityBanner().name().orElse(null),
+                baseUrl + activityDetail.activityBanner().url()),
+            activityDetail.summary(),
+            activityDetail.executionPeriodInfo(),
+            activityDetail.createdAt(),
+            activityDetail.updatedAt()));
+  }
 
   @GetMapping
   public ResponseEntity<PagedResponse<ActivityOverviewDTO>> getActivitiesView(

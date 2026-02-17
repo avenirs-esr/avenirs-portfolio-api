@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.user.application.adapter.mapper;
 
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
@@ -12,11 +13,11 @@ public interface ProfileOverviewMapper {
         overview.lastName(),
         overview.bio(),
         overview.email(),
-        new ProfileOverviewDTO.PictureDTO(
+        new FileDTO(
             userPhotos.profileFileId().orElse(null),
             userPhotos.profileFileName().orElse(null),
             userPhotos.profileFileUrl()),
-        new ProfileOverviewDTO.PictureDTO(
+        new FileDTO(
             userPhotos.coverFileId().orElse(null),
             userPhotos.coverFileName().orElse(null),
             userPhotos.coverFileUrl()));

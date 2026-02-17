@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.user.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
+
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
@@ -12,7 +14,6 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.net.URI;
 import java.security.Principal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Slf4j
 @AllArgsConstructor
@@ -83,21 +83,5 @@ public class UserController {
         request.getEmail(),
         request.getBio());
     return ResponseEntity.ok("Mise à jour faite.");
-  }
-
-  private static String extractOrigin(HttpServletRequest request) {
-    try {
-      URI referer = URI.create(request.getHeader("Referer"));
-
-      return ServletUriComponentsBuilder.fromRequestUri(request)
-          .replacePath("/apim")
-          .scheme(referer.getScheme() != null ? referer.getScheme() : request.getScheme())
-          .host(referer.getHost() != null ? referer.getHost() : request.getServerName())
-          .port(referer.getHost() != null ? referer.getPort() : request.getServerPort())
-          .build()
-          .toUriString();
-    } catch (Exception e) {
-      return null;
-    }
   }
 }

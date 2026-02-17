@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.file.domain.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.file.domain.data.UserPhotoData;
+import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
@@ -35,12 +35,12 @@ public class UserResourceServiceImpl implements UserResourceService {
   private final LoggedInUserService loggedInUserService;
 
   @Override
-  public UserPhotoData getUserPhotoUrl(User user, EUserCategory userCategory, EUserPhotoType type) {
+  public FileData getUserPhotoUrl(User user, EUserCategory userCategory, EUserPhotoType type) {
 
     Optional<UserPhoto> userPhoto =
         userPhotoRepository.findActiveByUser(user, userCategory, type).stream().findFirst();
 
-    return new UserPhotoData(
+    return new FileData(
         userPhoto.map(UserPhoto::getId),
         userPhoto.map(UserPhoto::getName),
         userPhoto

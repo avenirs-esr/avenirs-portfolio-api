@@ -44,7 +44,7 @@ class ActivityBannerMapperTest {
         Activity.toDomain(
             activityId,
             "Activity Title",
-            EActivityThematic.ABOUT_ME,
+            EActivityThematic.SELF_KNOWLEDGE,
             "Summary",
             "2020 - 2022",
             createdAt,

@@ -12,4 +12,9 @@ public interface ActivityBannerSpecification {
             criteriaBuilder.equal(
                 root.get("activity"), ActivityMapper.INSTANCE.fromDomain(activity)));
   }
+
+  static Specification<ActivityBannerEntity> onlyActiveVersion() {
+    return (root, query, criteriaBuilder) ->
+        criteriaBuilder.equal(root.get("isActiveVersion"), true);
+  }
 }

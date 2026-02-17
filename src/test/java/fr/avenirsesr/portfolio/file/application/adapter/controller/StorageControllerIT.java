@@ -7,7 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.ActivityBannerRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.file.domain.service.ActivityResourceServiceImpl;
 import fr.avenirsesr.portfolio.file.domain.service.UserResourceServiceImpl;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.UserPhotoDatabaseRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -35,6 +37,7 @@ class StorageControllerIT extends ContainerConfigurationTest {
   @Mock private FileStorageService fileStorageService;
   @Autowired private StorageController storageController;
   @Autowired private UserPhotoDatabaseRepository userPhotoDatabaseRepository;
+  @Autowired private ActivityBannerRepository activityBannerRepository;
   @Autowired private LoggedInUserService loggedInUserService;
 
   @Value("${hmac.secret-key}")
@@ -58,6 +61,8 @@ class StorageControllerIT extends ContainerConfigurationTest {
         new StorageController(
             new UserResourceServiceImpl(
                 fileStorageService, userPhotoDatabaseRepository, loggedInUserService),
+            new ActivityResourceServiceImpl(
+                fileStorageService, loggedInUserService, activityBannerRepository),
             fileStorageService);
     mockMvc = MockMvcBuilders.standaloneSetup(storageController).build();
   }

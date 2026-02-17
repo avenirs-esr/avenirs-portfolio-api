@@ -2,13 +2,20 @@ package fr.avenirsesr.portfolio.activity.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
+import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -26,6 +33,7 @@ class ActivityServiceImplTest {
   @Mock private ActivityRepository activityRepository;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private DeclaredActivityService declaredActivityService;
+  @Mock private ActivityResourceService activityResourceService;
 
   @InjectMocks private ActivityServiceImpl activityService;
 
@@ -370,5 +378,64 @@ class ActivityServiceImplTest {
     assertEquals(2, result.content().size());
     assertTrue(result.content().stream().anyMatch(a -> a.activity() == activity1));
     assertTrue(result.content().stream().anyMatch(a -> a.activity() == activity2));
+  }
+
+  @Test
+  void should_return_activity_detail_when_activity_exists() {
+    UUID activityId = UUID.randomUUID();
+    UUID bannerId = UUID.randomUUID();
+
+    BddLogger.given("an activity exists with ID " + activityId);
+
+    Activity activity = mock(Activity.class);
+    ActivityBanner banner = mock(ActivityBanner.class);
+
+    when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+
+    when(activityResourceService.getActivityBanner(activity)).thenReturn(banner);
+
+    when(activity.getId()).thenReturn(activityId);
+    when(activity.getTitle()).thenReturn("Activity");
+    when(activity.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+    when(activity.getSummary()).thenReturn("is a test activity");
+    when(activity.getExecutionPeriodInfo()).thenReturn("2026");
+    when(activity.getCreatedAt()).thenReturn(Instant.now());
+    when(activity.getUpdatedAt()).thenReturn(Instant.now());
+
+    when(banner.getId()).thenReturn(bannerId);
+    when(banner.getFileName()).thenReturn("filename.png");
+
+    BddLogger.when("getActivityDetail is called for the activity ID");
+    ActivityDetailData result = activityService.getActivityDetail(activityId);
+
+    BddLogger.then("the service returns the correct activity detail data");
+    assertNotNull(result);
+    assertEquals(activityId, result.id());
+    assertEquals("Activity", result.title());
+    assertEquals(EActivityThematic.EXPERIENCES, result.thematic());
+    assertEquals("is a test activity", result.summary());
+    assertEquals("2026", result.executionPeriodInfo());
+    assertTrue(result.activityBanner().id().isPresent());
+    assertEquals(bannerId, result.activityBanner().id().get());
+    assertEquals("filename.png", result.activityBanner().name().get());
+
+    verify(activityRepository).findById(activityId);
+    verify(activityResourceService).getActivityBanner(activity);
+  }
+
+  @Test
+  void should_throw_activity_not_found_exception() {
+    UUID activityId = UUID.randomUUID();
+    BddLogger.given("no activity exists with ID " + activityId);
+
+    when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
+
+    BddLogger.when("getActivityDetail is called for the non-existent activity ID");
+    BddLogger.then("the service throws ActivityNotFoundException");
+    assertThrows(
+        ActivityNotFoundException.class, () -> activityService.getActivityDetail(activityId));
+
+    verify(activityRepository).findById(activityId);
+    verifyNoInteractions(activityResourceService);
   }
 }

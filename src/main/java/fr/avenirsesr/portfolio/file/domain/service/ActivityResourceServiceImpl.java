@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.file.domain.service;
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
@@ -64,5 +65,22 @@ public class ActivityResourceServiceImpl implements ActivityResourceService {
     activityBannerRepository.save(banner);
     log.info("New banner {} saved for activity: {}", banner, activity);
     return banner;
+  }
+
+  @Override
+  public ActivityBanner getActivityFile(UUID fileID) {
+    return activityBannerRepository.findById(fileID).orElseThrow(FileNotFoundException::new);
+  }
+
+  @Override
+  public byte[] fetchContent(ActivityBanner activityFile) throws IOException {
+    return fileStorageService.get(activityFile.getUri());
+  }
+
+  @Override
+  public ActivityBanner getActivityBanner(Activity activity) {
+    return activityBannerRepository
+        .findActiveByActivity(activity)
+        .orElseThrow(FileNotFoundException::new);
   }
 }

@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.ActivityBannerE
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.specification.ActivityBannerSpecification;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -26,5 +27,14 @@ public class ActivityBannerDatabaseRepository
         .stream()
         .map(ActivityBannerMapper.INSTANCE::toDomain)
         .toList();
+  }
+
+  @Override
+  public Optional<ActivityBanner> findActiveByActivity(Activity activity) {
+    return jpaSpecificationExecutor
+        .findOne(
+            ActivityBannerSpecification.ofActivity(activity)
+                .and(ActivityBannerSpecification.onlyActiveVersion()))
+        .map(ActivityBannerMapper.INSTANCE::toDomain);
   }
 }

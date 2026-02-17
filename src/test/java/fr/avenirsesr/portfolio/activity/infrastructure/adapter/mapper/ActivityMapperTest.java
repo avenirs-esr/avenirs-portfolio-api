@@ -17,7 +17,7 @@ class ActivityMapperTest {
   private Activity activity;
   private final UUID id = UUID.randomUUID();
   private final String title = "Test Activity";
-  private final EActivityThematic thematic = EActivityThematic.ABOUT_ME;
+  private final EActivityThematic thematic = EActivityThematic.SELF_KNOWLEDGE;
   private final String summary = "Activity summary";
   private final String executionPeriodInfo = "2020 - 2022";
   private final Instant createdAt = Instant.parse("2023-01-01T00:00:00Z");

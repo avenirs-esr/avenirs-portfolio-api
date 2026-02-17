@@ -2,7 +2,7 @@
   {
     "id": "3f7c9a2e-5d44-4b7a-9c6f-2a6e8e91b1a1",
     "title": "Définir ses valeurs",
-    "thematic": "ABOUT_ME",
+    "thematic": "SELF_KNOWLEDGE",
     "summary": "Activité faisant partie de la catégorie Connaissance de soi. Elle permet à l’étudiant.e d’identifier les valeurs essentielles qui orientent ses choix et d’analyser la manière dont elles se traduisent dans ses comportements quotidiens. Cette réflexion constitue une base structurante pour construire un projet personnel et professionnel cohérent.",
     "executionPeriodInfo": "À réaliser en amont d’un entretien avec un.e conseiller/ conseillère d’orientation ou avant d’engager un parcours structuré d’activités Cofolio.",
     "banner": {
@@ -14,7 +14,7 @@
   {
     "id": "9a12e6b4-8c3f-4d22-bf55-6d4c1f2a7e33",
     "title": "Identifier ses motivations profondes",
-    "thematic": "ABOUT_ME",
+    "thematic": "SELF_KNOWLEDGE",
     "summary": "Activité relevant de la connaissance de soi. L’étudiant.e explore ce qui nourrit son engagement et donne du sens à ses actions, afin de mieux comprendre ses aspirations durables. Ce travail favorise une meilleure cohérence entre ses envies personnelles et ses choix d’orientation.",
     "executionPeriodInfo": "À effectuer avant un entretien d’accompagnement ou en introduction d’un parcours d’activités dédié à l’orientation et à la réflexion personnelle.",
     "banner": {
@@ -122,7 +122,7 @@
   {
     "id": "4b9e2c7d-1f6a-4d55-9c3b-2e8f7a1c5d44",
     "title": "Rédiger un CV structuré",
-    "thematic": "CV",
+    "thematic": "RESUMES",
     "summary": "Activité de formalisation du parcours sous forme de curriculum vitae. L’étudiant.e organise ses expériences, formations et compétences de manière claire et cohérente afin de répondre aux attentes du monde professionnel.",
     "executionPeriodInfo": "À réaliser avant toute candidature ou entretien professionnel nécessitant la présentation formelle du parcours.",
     "banner": {
@@ -134,7 +134,7 @@
   {
     "id": "9d3b7a1c-2e6f-4c88-8a5d-7b2f6e9a3c11",
     "title": "Adapter son CV à une offre",
-    "thematic": "CV",
+    "thematic": "RESUMES",
     "summary": "Activité d’adaptation stratégique du CV. L’étudiant.e ajuste la présentation de ses expériences et compétences en fonction d’une offre ciblée afin d’optimiser la pertinence de sa candidature.",
     "executionPeriodInfo": "À effectuer en préparation d’une candidature spécifique ou d’un entretien lié à une offre identifiée.",
     "banner": {
@@ -170,7 +170,7 @@
   {
     "id": "c9d4e1f2-7a21-4f7d-9b44-1a3e8f6c2b10",
     "title": "Clarifier son identité personnelle",
-    "thematic": "ABOUT_ME",
+    "thematic": "SELF_KNOWLEDGE",
     "summary": "Activité de connaissance de soi permettant à l’étudiant.e d’analyser les éléments constitutifs de son identité, ses influences et ses repères personnels. Cette réflexion favorise une meilleure compréhension de soi et une plus grande cohérence dans les choix futurs.",
     "executionPeriodInfo": "À réaliser en amont d’un entretien d’accompagnement ou en introduction d’un parcours Cofolio centré sur la connaissance de soi.",
     "banner": {
@@ -182,7 +182,7 @@
   {
     "id": "1a7f3b29-6c55-4d82-9a33-7e2d1c4f8b90",
     "title": "Identifier ses centres d’intérêt",
-    "thematic": "ABOUT_ME",
+    "thematic": "SELF_KNOWLEDGE",
     "summary": "Activité visant à explorer les domaines, activités et sujets qui suscitent curiosité et engagement. L’étudiant.e met en relation ses centres d’intérêt avec des pistes d’orientation potentielles afin d’enrichir sa réflexion sur l’avenir.",
     "executionPeriodInfo": "À effectuer avant une démarche d’exploration des métiers ou un échange avec un.e conseiller/ conseillère d’orientation.",
     "banner": {
@@ -290,7 +290,7 @@
   {
     "id": "3b7a2c91-6d4e-4f88-8c1a-5e9f2b7d4c66",
     "title": "Structurer son CV",
-    "thematic": "CV",
+    "thematic": "RESUMES",
     "summary": "Activité de mise en forme du parcours sous la forme d’un curriculum vitae clair et structuré. L’étudiant.e organise ses expériences et compétences afin de répondre aux attentes du monde professionnel.",
     "executionPeriodInfo": "À réaliser avant toute candidature nécessitant la transmission d’un CV.",
     "banner": {
@@ -302,7 +302,7 @@
   {
     "id": "8c5d1f77-2a9e-4b33-9f6c-1e4b7a2d9c11",
     "title": "Rédiger une lettre de motivation",
-    "thematic": "CV",
+    "thematic": "RESUMES",
     "summary": "Activité d’élaboration d’une lettre de motivation argumentée. L’étudiant.e met en relation son parcours, ses compétences et l’offre visée afin de démontrer la pertinence de sa candidature.",
     "executionPeriodInfo": "À effectuer en préparation d’une candidature ou d’un entretien de sélection.",
     "banner": {

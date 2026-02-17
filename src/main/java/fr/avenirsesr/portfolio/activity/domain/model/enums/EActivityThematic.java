@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.activity.domain.model.enums;
 
 public enum EActivityThematic {
-  ABOUT_ME,
+  SELF_KNOWLEDGE,
   FUTURE_PLANS,
   PROGRAMS,
   EXPERIENCES,
   TRAJECTORIES,
-  CV,
+  RESUMES,
   TRANSVERSAL
 }
