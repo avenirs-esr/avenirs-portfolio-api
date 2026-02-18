@@ -17,7 +17,7 @@ public interface ActivityService {
       String summary,
       String executionPeriodInfo);
 
-  Map<EActivityThematic, List<Activity>> getAllActivitiesByThematic();
+  Map<EActivityThematic, List<Activity>> getActivityNavigation();
 
   PagedResult<ActivityWithStudentStatusData> activitiesView(
       EActivityThematic thematic, PageCriteria pageCriteria);
