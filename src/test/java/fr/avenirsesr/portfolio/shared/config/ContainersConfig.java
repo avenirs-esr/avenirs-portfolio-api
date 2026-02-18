@@ -10,13 +10,13 @@ import org.testcontainers.utility.DockerImageName;
 @TestConfiguration(proxyBeanMethods = false)
 public class ContainersConfig {
 
-  @Value("${spring.data.redis.port:6379}")
-  private int redisPort;
+  @Value("${testing.valkey.internal-port:6379}")
+  private int valkeyInternalPort;
 
   @Bean
   @ServiceConnection(name = "redis")
   public GenericContainer<?> valkeyContainer() {
     return new GenericContainer<>(DockerImageName.parse("valkey/valkey:8.0"))
-        .withExposedPorts(redisPort);
+        .withExposedPorts(valkeyInternalPort);
   }
 }
