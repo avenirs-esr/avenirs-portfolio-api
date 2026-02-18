@@ -63,7 +63,7 @@ class ActivityServiceImplTest {
   }
 
   @Test
-  void getAllActivitiesByThematic_shouldGroupActivitiesByThematic() {
+  void getActivityNavigation() {
     // Given
     Activity a1 =
         Activity.create(UUID.randomUUID(), "A1", EActivityThematic.EXPERIENCES, "S1", "2026");
@@ -74,7 +74,7 @@ class ActivityServiceImplTest {
     when(activityRepository.findAll()).thenReturn(List.of(a1, a2, a3));
 
     // When
-    Map<EActivityThematic, List<Activity>> result = activityService.getAllActivitiesByThematic();
+    Map<EActivityThematic, List<Activity>> result = activityService.getActivityNavigation();
 
     // Then
     assertNotNull(result);
@@ -99,14 +99,14 @@ class ActivityServiceImplTest {
   }
 
   @Test
-  void getAllActivitiesByThematic_shouldNotIncludeThematicsThatAreNotPresent() {
+  void getActivityNavigation_shouldNotIncludeThematicsThatAreNotPresent() {
     // Given (only CV)
     Activity a1 = Activity.create(UUID.randomUUID(), "A1", EActivityThematic.CV, "S1", "2026");
 
     when(activityRepository.findAll()).thenReturn(List.of(a1));
 
     // When
-    Map<EActivityThematic, List<Activity>> result = activityService.getAllActivitiesByThematic();
+    Map<EActivityThematic, List<Activity>> result = activityService.getActivityNavigation();
 
     // Then
     assertNotNull(result);
@@ -125,7 +125,7 @@ class ActivityServiceImplTest {
     when(activityRepository.findAll()).thenReturn(List.of());
 
     // When
-    Map<EActivityThematic, List<Activity>> result = activityService.getAllActivitiesByThematic();
+    Map<EActivityThematic, List<Activity>> result = activityService.getActivityNavigation();
 
     // Then
     assertNotNull(result);

@@ -49,11 +49,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturnActivitiesNavigationAndValidateItemShapeWhenPresent() throws Exception {
+  void shouldReturnActivitiesNavigationAsMapAndValidateItemShapeWhenPresent() throws Exception {
     BddLogger.given("the " + NAVIGATION_BASE_PATH + " endpoint");
     BddLogger.when("performing a GET");
     BddLogger.then(
-        "it should return a map and validate item shape if at least one activity exists");
+        "it should return a JSON object (map) and validate item shape if at least one activity"
+            + " exists");
 
     var mvcResult =
         mockMvc
@@ -65,23 +66,22 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.activities").exists())
+            .andExpect(jsonPath("$").isMap())
             .andReturn();
 
     JsonNode root = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
-    JsonNode activities = root.get("activities");
 
-    assertNotNull(activities);
-    assertTrue(activities.isObject(), "activities should be a JSON object (map)");
+    assertNotNull(root);
+    assertTrue(root.isObject(), "root should be a JSON object (map)");
 
-    Iterator<String> fieldNames = activities.fieldNames();
+    Iterator<String> fieldNames = root.fieldNames();
     JsonNode firstItem = null;
 
     while (fieldNames.hasNext() && firstItem == null) {
       String thematicKey = fieldNames.next();
-      JsonNode listNode = activities.get(thematicKey);
+      JsonNode listNode = root.get(thematicKey);
 
-      if (listNode != null && listNode.isArray() && listNode.size() > 0) {
+      if (listNode != null && listNode.isArray() && !listNode.isEmpty()) {
         firstItem = listNode.get(0);
       }
     }
@@ -90,10 +90,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       return;
     }
 
-    assertTrue(firstItem.hasNonNull("id"));
-    assertTrue(firstItem.hasNonNull("title"));
-    assertTrue(firstItem.get("id").isTextual());
-    assertTrue(firstItem.get("title").isTextual());
+    assertTrue(firstItem.hasNonNull("id"), "item should have non-null 'id'");
+    assertTrue(firstItem.hasNonNull("title"), "item should have non-null 'title'");
+    assertTrue(firstItem.get("id").isTextual(), "'id' should be a string");
+    assertTrue(firstItem.get("title").isTextual(), "'title' should be a string");
   }
 
   @Test
