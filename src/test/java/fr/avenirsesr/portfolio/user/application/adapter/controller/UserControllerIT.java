@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.application.adapter.Utils;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import org.junit.jupiter.api.BeforeAll;
@@ -126,8 +127,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     request.setRequestURI("/me/users/STUDENT/overview");
     request.addHeader("Referer", "https://front.example.com:8443/some/page");
 
-    String origin =
-        ReflectionTestUtils.invokeMethod(UserController.class, "extractOrigin", request);
+    String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
 
     assertThat(origin).isEqualTo("https://front.example.com:8443/apim");
   }
@@ -141,8 +141,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     request.setRequestURI("/me/users/STUDENT/overview");
     request.addHeader("Referer", "https://front.example.com/some/page");
 
-    String origin =
-        ReflectionTestUtils.invokeMethod(UserController.class, "extractOrigin", request);
+    String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
 
     assertThat(origin).isEqualTo("https://front.example.com/apim");
   }
@@ -156,8 +155,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     request.setRequestURI("/me/users/STUDENT/overview");
     request.addHeader("Referer", "/relative/path");
 
-    String origin =
-        ReflectionTestUtils.invokeMethod(UserController.class, "extractOrigin", request);
+    String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
 
     assertThat(origin).isEqualTo("http://localhost:10000/apim");
   }
@@ -170,8 +168,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     request.setServerPort(10000);
     request.setRequestURI("/me/users/STUDENT/overview");
 
-    String origin =
-        ReflectionTestUtils.invokeMethod(UserController.class, "extractOrigin", request);
+    String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
 
     assertThat(origin).isNull();
   }
@@ -185,8 +182,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
     request.setRequestURI("/me/users/STUDENT/overview");
     request.addHeader("Referer", "ht!tp://bad");
 
-    String origin =
-        ReflectionTestUtils.invokeMethod(UserController.class, "extractOrigin", request);
+    String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
 
     assertThat(origin).isNull();
   }

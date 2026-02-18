@@ -39,14 +39,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.payload}")
   private String studentPayload;
 
-  @Value("${user.unknown.payload}")
-  private String unknownUserPayload;
-
   @Value("${user.student.signature}")
   private String studentSignature;
-
-  @Value("${user.unknown.signature}")
-  private String unknownUserSignature;
 
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {

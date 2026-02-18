@@ -29,7 +29,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 class StorageControllerIT extends ContainerConfigurationTest {
 
-  private static final String RESSOURCE_BASE_PATH = "/storage/users/{fileId}";
   private static final String DEFAULT_BASE_PATH = "/storage/users/default/{photoType}";
 
   @Autowired private MockMvc mockMvc;

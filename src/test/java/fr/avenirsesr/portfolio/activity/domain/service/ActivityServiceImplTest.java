@@ -77,7 +77,7 @@ class ActivityServiceImplTest {
         Activity.create(UUID.randomUUID(), "A1", EActivityThematic.EXPERIENCES, "S1", "2026");
     Activity a2 =
         Activity.create(UUID.randomUUID(), "A2", EActivityThematic.EXPERIENCES, "S2", "2025");
-    Activity a3 = Activity.create(UUID.randomUUID(), "A3", EActivityThematic.CV, "S3", "2024");
+    Activity a3 = Activity.create(UUID.randomUUID(), "A3", EActivityThematic.RESUMES, "S3", "2024");
 
     when(activityRepository.findAll()).thenReturn(List.of(a1, a2, a3));
 
@@ -89,7 +89,7 @@ class ActivityServiceImplTest {
 
     assertEquals(2, result.size());
     assertTrue(result.containsKey(EActivityThematic.EXPERIENCES));
-    assertTrue(result.containsKey(EActivityThematic.CV));
+    assertTrue(result.containsKey(EActivityThematic.RESUMES));
 
     List<Activity> experiences = result.get(EActivityThematic.EXPERIENCES);
     assertNotNull(experiences);
@@ -97,7 +97,7 @@ class ActivityServiceImplTest {
     assertTrue(experiences.contains(a1));
     assertTrue(experiences.contains(a2));
 
-    List<Activity> cv = result.get(EActivityThematic.CV);
+    List<Activity> cv = result.get(EActivityThematic.RESUMES);
     assertNotNull(cv);
     assertEquals(1, cv.size());
     assertEquals(a3, cv.getFirst());
@@ -109,7 +109,7 @@ class ActivityServiceImplTest {
   @Test
   void getActivityNavigation_shouldNotIncludeThematicsThatAreNotPresent() {
     // Given (only CV)
-    Activity a1 = Activity.create(UUID.randomUUID(), "A1", EActivityThematic.CV, "S1", "2026");
+    Activity a1 = Activity.create(UUID.randomUUID(), "A1", EActivityThematic.RESUMES, "S1", "2026");
 
     when(activityRepository.findAll()).thenReturn(List.of(a1));
 
@@ -119,9 +119,9 @@ class ActivityServiceImplTest {
     // Then
     assertNotNull(result);
     assertEquals(1, result.size());
-    assertTrue(result.containsKey(EActivityThematic.CV));
+    assertTrue(result.containsKey(EActivityThematic.RESUMES));
     assertFalse(result.containsKey(EActivityThematic.EXPERIENCES));
-    assertFalse(result.containsKey(EActivityThematic.ABOUT_ME)); // si existe dans ton enum
+    assertFalse(result.containsKey(EActivityThematic.SELF_KNOWLEDGE));
 
     verify(activityRepository).findAll();
     verifyNoMoreInteractions(activityRepository);
