@@ -67,4 +67,21 @@ public class ActivityServiceImpl implements ActivityService {
             .toList(),
         pagedActivities.pageInfo());
   }
+
+  @Override
+  public PagedResult<ActivityWithStudentStatusData> latestActivitiesView(
+      PageCriteria pageCriteria) {
+    var student = loggedInUserService.getLoggedInStudent();
+    var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);
+    var pagedActivities =
+        activityRepository.findLatest(
+            DURATION_FOR_LATEST,
+            subscribedActivities.stream().map(DeclaredActivity::getActivity).toList(),
+            pageCriteria);
+    return new PagedResult<>(
+        pagedActivities.content().stream()
+            .map(activity -> new ActivityWithStudentStatusData(activity, true, null))
+            .toList(),
+        pagedActivities.pageInfo());
+  }
 }

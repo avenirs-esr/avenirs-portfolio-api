@@ -17,4 +17,6 @@ public interface ActivityService {
 
   PagedResult<ActivityWithStudentStatusData> activitiesView(
       EActivityThematic thematic, PageCriteria pageCriteria);
+
+  PagedResult<ActivityWithStudentStatusData> latestActivitiesView(PageCriteria pageCriteria);
 }

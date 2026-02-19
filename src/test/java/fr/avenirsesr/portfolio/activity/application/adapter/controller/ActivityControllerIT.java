@@ -89,4 +89,28 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$.page.pageSize").value(8))
         .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(0)));
   }
+
+  @Test
+  void shouldReturnLatestActivitiesView() throws Exception {
+    BddLogger.given("the /me/activities/latest endpoint");
+    BddLogger.when("performing a GET request for latest activities");
+    BddLogger.then("it should return paged latest activities");
+
+    mockMvc
+        .perform(
+            get("/me/activities/latest")
+                .param("page", "0")
+                .param("pageSize", "10")
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.page").exists())
+        .andExpect(jsonPath("$.page.page").value(0))
+        .andExpect(jsonPath("$.page.pageSize").value(10))
+        .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(0)));
+  }
 }

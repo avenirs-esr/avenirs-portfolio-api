@@ -134,4 +134,117 @@ class ActivityControllerTest {
 
     verify(activityService).activitiesView(any(), any(PageCriteria.class));
   }
+
+  @Test
+  void shouldReturnLatestActivitiesView() {
+    BddLogger.given("an ActivityController for latest activities");
+
+    PageInfo pageInfo = new PageInfo(0, 10, 1);
+
+    ActivityWithStudentStatusData data = new ActivityWithStudentStatusData(activity, false, null);
+
+    PagedResult<ActivityWithStudentStatusData> pagedResult =
+        new PagedResult<>(List.of(data), pageInfo);
+
+    when(activityService.latestActivitiesView(any(PageCriteria.class))).thenReturn(pagedResult);
+
+    BddLogger.when("getting latest activities view");
+    var response = controller.getLatestActivitiesView(principal, 0, 10);
+
+    BddLogger.then("it should return latest activities with correct data");
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().data().size());
+
+    ActivityOverviewDTO dto = response.getBody().data().getFirst();
+    assertEquals(activity.getId(), dto.id());
+    assertNull(dto.status()); // latest activities have no status
+
+    verify(activityService).latestActivitiesView(any(PageCriteria.class));
+  }
+
+  @Test
+  void shouldReturnLatestActivitiesViewWithSingleActivity() {
+    BddLogger.given("an ActivityController for latest activities");
+
+    PageInfo pageInfo = new PageInfo(0, 10, 1);
+
+    ActivityWithStudentStatusData data = new ActivityWithStudentStatusData(activity, false, null);
+
+    PagedResult<ActivityWithStudentStatusData> pagedResult =
+        new PagedResult<>(List.of(data), pageInfo);
+
+    when(activityService.latestActivitiesView(any(PageCriteria.class))).thenReturn(pagedResult);
+
+    BddLogger.when("getting latest activities view");
+    var response = controller.getLatestActivitiesView(principal, 0, 10);
+
+    BddLogger.then("it should return latest activities with correct data");
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().data().size());
+
+    ActivityOverviewDTO dto = response.getBody().data().getFirst();
+    assertEquals(activity.getId(), dto.id());
+    assertNull(dto.status()); // latest activities have no status
+
+    verify(activityService).latestActivitiesView(any(PageCriteria.class));
+  }
+
+  @Test
+  void shouldReturnLatestActivitiesViewWithMultipleActivities() {
+    BddLogger.given("an ActivityController with multiple latest activities");
+
+    PageInfo pageInfo = new PageInfo(0, 10, 2);
+
+    Activity activity2 = ActivityFixture.create().toModel();
+
+    List<ActivityWithStudentStatusData> dataList =
+        List.of(
+            new ActivityWithStudentStatusData(activity, false, null),
+            new ActivityWithStudentStatusData(activity2, false, null));
+
+    PagedResult<ActivityWithStudentStatusData> pagedResult = new PagedResult<>(dataList, pageInfo);
+
+    when(activityService.latestActivitiesView(any(PageCriteria.class))).thenReturn(pagedResult);
+
+    BddLogger.when("getting latest activities view");
+    var response = controller.getLatestActivitiesView(principal, 0, 10);
+
+    BddLogger.then("it should return all latest activities");
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(2, response.getBody().data().size());
+
+    List<UUID> ids = response.getBody().data().stream().map(ActivityOverviewDTO::id).toList();
+    assertTrue(ids.contains(activity.getId()));
+    assertTrue(ids.contains(activity2.getId()));
+
+    verify(activityService).latestActivitiesView(any(PageCriteria.class));
+  }
+
+  @Test
+  void shouldReturnEmptyLatestActivitiesView() {
+    BddLogger.given("an ActivityController with no latest activities");
+
+    PageInfo pageInfo = new PageInfo(0, 10, 0);
+
+    PagedResult<ActivityWithStudentStatusData> pagedResult = new PagedResult<>(List.of(), pageInfo);
+
+    when(activityService.latestActivitiesView(any(PageCriteria.class))).thenReturn(pagedResult);
+
+    BddLogger.when("getting latest activities view with no results");
+    var response = controller.getLatestActivitiesView(principal, 0, 10);
+
+    BddLogger.then("it should return empty content");
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().data().isEmpty());
+
+    verify(activityService).latestActivitiesView(any(PageCriteria.class));
+  }
 }

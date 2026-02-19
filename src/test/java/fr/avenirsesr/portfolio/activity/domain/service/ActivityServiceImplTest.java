@@ -195,4 +195,111 @@ class ActivityServiceImplTest {
     assertFalse(data.isNew());
     assertNull(data.status());
   }
+
+  @Test
+  void latestActivitiesView_shouldReturnEmpty_whenNoActivities() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 10, 0);
+
+    when(activityRepository.findLatest(eq(Duration.ofDays(90)), anyList(), eq(pageCriteria)))
+        .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+    var student = mock(Student.class);
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
+
+    // When
+    var result = activityService.latestActivitiesView(pageCriteria);
+
+    // Then
+    assertNotNull(result);
+    assertTrue(result.content().isEmpty());
+    assertEquals(pageInfo, result.pageInfo());
+  }
+
+  @Test
+  void latestActivitiesView_shouldReturnSingleActivity() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 10, 1);
+
+    var activity = mock(Activity.class);
+    var pagedActivities = new PagedResult<>(List.of(activity), pageInfo);
+
+    when(activityRepository.findLatest(eq(Duration.ofDays(90)), anyList(), eq(pageCriteria)))
+        .thenReturn(pagedActivities);
+
+    var student = mock(Student.class);
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
+
+    // When
+    var result = activityService.latestActivitiesView(pageCriteria);
+
+    // Then
+    assertEquals(1, result.content().size());
+    var data = result.content().get(0);
+    assertEquals(activity, data.activity());
+    assertTrue(data.isNew());
+    assertNull(data.status());
+  }
+
+  @Test
+  void latestActivitiesView_shouldReturnMultipleActivities() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 10, 2);
+
+    var activity1 = mock(Activity.class);
+    var activity2 = mock(Activity.class);
+    var pagedActivities = new PagedResult<>(List.of(activity1, activity2), pageInfo);
+
+    when(activityRepository.findLatest(eq(Duration.ofDays(90)), anyList(), eq(pageCriteria)))
+        .thenReturn(pagedActivities);
+
+    var student = mock(Student.class);
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityService.getAllDeclaredActivitiesOf(student)).thenReturn(List.of());
+
+    // When
+    var result = activityService.latestActivitiesView(pageCriteria);
+
+    // Then
+    assertEquals(2, result.content().size());
+    var activities = result.content().stream().map(a -> a.activity()).toList();
+    assertTrue(activities.contains(activity1));
+    assertTrue(activities.contains(activity2));
+  }
+
+  @Test
+  void latestActivitiesView_shouldExcludeDeclaredActivities() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 10, 2);
+
+    var activity1 = mock(Activity.class);
+    var activity2 = mock(Activity.class);
+    var declaredActivity = mock(DeclaredActivity.class);
+    when(declaredActivity.getActivity()).thenReturn(activity2);
+
+    var pagedActivities = new PagedResult<>(List.of(activity1, activity2), pageInfo);
+
+    // The repository should receive only the activities not declared
+    when(activityRepository.findLatest(eq(Duration.ofDays(90)), anyList(), eq(pageCriteria)))
+        .thenReturn(pagedActivities);
+
+    var student = mock(Student.class);
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityService.getAllDeclaredActivitiesOf(student))
+        .thenReturn(List.of(declaredActivity));
+
+    // When
+    var result = activityService.latestActivitiesView(pageCriteria);
+
+    // Then
+    assertEquals(2, result.content().size());
+    assertTrue(result.content().stream().anyMatch(a -> a.activity() == activity1));
+    assertTrue(result.content().stream().anyMatch(a -> a.activity() == activity2));
+  }
 }

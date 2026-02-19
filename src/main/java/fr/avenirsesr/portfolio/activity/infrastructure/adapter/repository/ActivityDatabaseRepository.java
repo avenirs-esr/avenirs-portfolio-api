@@ -9,6 +9,8 @@ import fr.avenirsesr.portfolio.activity.infrastructure.adapter.specification.Act
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import java.time.Duration;
+import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
@@ -26,6 +28,19 @@ public class ActivityDatabaseRepository
 
     var sort = Sort.by(Sort.Direction.DESC, "createdAt");
 
+    return findAll(
+        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));
+  }
+
+  @Override
+  public PagedResult<Activity> findLatest(
+      Duration durationForLate, List<Activity> activityToExclude, PageCriteria pageCriteria) {
+    var sort = Sort.by(Sort.Direction.DESC, "createdAt");
+    var specification =
+        ActivitySpecification.latest(durationForLate)
+            .and(
+                ActivitySpecification.exclude(
+                    activityToExclude.stream().map(ActivityMapper.INSTANCE::fromDomain).toList()));
     return findAll(
         specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));
   }

@@ -48,4 +48,27 @@ public class ActivityController {
 
     return ResponseEntity.ok(viewResponse);
   }
+
+  @GetMapping("/latest")
+  public ResponseEntity<PagedResponse<ActivityOverviewDTO>> getLatestActivitiesView(
+      Principal principal,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to latest activities view of user [{}] (page= {}, size= {})",
+        principal.getName(),
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<ActivityWithStudentStatusData> pagedResult =
+        activityService.latestActivitiesView(pageCriteria);
+
+    var viewResponse =
+        new PagedResponse<>(
+            pagedResult.content().stream().map(ActivityOverviewDtoMapper::toDTO).toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+
+    return ResponseEntity.ok(viewResponse);
+  }
 }
