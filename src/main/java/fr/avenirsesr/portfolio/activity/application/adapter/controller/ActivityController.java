@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityNavigationDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityOverviewDTO;
+import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityNavigationMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
@@ -11,9 +13,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import java.security.Principal;
 import java.util.List;
-import java.util.Map;
-import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityItemNavigationDTO;
-import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityNavigationMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -75,10 +74,9 @@ public class ActivityController {
 
     return ResponseEntity.ok(viewResponse);
   }
-  
+
   @GetMapping("/navigation")
-  public ResponseEntity<Map<EActivityThematic, List<ActivityItemNavigationDTO>>>
-      getActivityNavigation() {
+  public ResponseEntity<List<ActivityNavigationDTO>> getActivityNavigation() {
     return ResponseEntity.ok(
         ActivityNavigationMapper.toDTO(activityService.getActivityNavigation()));
   }

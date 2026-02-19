@@ -12,7 +12,6 @@ import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.Aven
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
-import java.util.Iterator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,11 +48,11 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturnActivitiesNavigationAsMapAndValidateItemShapeWhenPresent() throws Exception {
+  void shouldReturnActivitiesNavigationAsArrayAndValidateItemShapeWhenPresent() throws Exception {
     BddLogger.given("the " + NAVIGATION_BASE_PATH + " endpoint");
     BddLogger.when("performing a GET");
     BddLogger.then(
-        "it should return a JSON object (map) and validate item shape if at least one activity"
+        "it should return a JSON array of menus and validate item shape if at least one activity"
             + " exists");
 
     var mvcResult =
@@ -66,29 +65,36 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$").isMap())
+            .andExpect(jsonPath("$").isArray())
             .andReturn();
 
     JsonNode root = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
 
     assertNotNull(root);
-    assertTrue(root.isObject(), "root should be a JSON object (map)");
+    assertTrue(root.isArray(), "root should be a JSON array");
 
-    Iterator<String> fieldNames = root.fieldNames();
-    JsonNode firstItem = null;
+    if (root.isEmpty()) {
+      return;
+    }
 
-    while (fieldNames.hasNext() && firstItem == null) {
-      String thematicKey = fieldNames.next();
-      JsonNode listNode = root.get(thematicKey);
-
-      if (listNode != null && listNode.isArray() && !listNode.isEmpty()) {
-        firstItem = listNode.get(0);
+    JsonNode firstMenuWithItems = null;
+    for (JsonNode menu : root) {
+      JsonNode items = menu.get("items");
+      if (items != null && items.isArray() && !items.isEmpty()) {
+        firstMenuWithItems = menu;
+        break;
       }
     }
 
-    if (firstItem == null) {
+    if (firstMenuWithItems == null) {
       return;
     }
+
+    assertTrue(firstMenuWithItems.hasNonNull("title"), "menu should have non-null 'title'");
+    assertTrue(firstMenuWithItems.get("title").isTextual(), "'title' should be a string");
+
+    JsonNode firstItem = firstMenuWithItems.get("items").get(0);
+    assertNotNull(firstItem, "first item should exist");
 
     assertTrue(firstItem.hasNonNull("id"), "item should have non-null 'id'");
     assertTrue(firstItem.hasNonNull("title"), "item should have non-null 'title'");

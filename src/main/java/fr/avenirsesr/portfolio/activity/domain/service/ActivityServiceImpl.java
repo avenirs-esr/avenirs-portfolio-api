@@ -52,8 +52,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public Map<EActivityThematic, List<Activity>> getActivityNavigation() {
-    List<Activity> activities = activityRepository.findAll();
-    return activities.stream()
+    return activityRepository.findAll().stream()
         .collect(
             Collectors.groupingBy(
                 Activity::getThematic,
