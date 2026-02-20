@@ -1,30 +1,56 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
-
   private static final String BASE_PATH = "/me/activity-progress";
+  private static final String UNSUBSCRIBE_PATH = BASE_PATH + "/unsubscribe";
 
-  @Autowired private MockMvc mockMvc;
-
+  private Student student;
+  @Autowired private DeclaredActivityRepository declaredActivityRepository;
   @Autowired private ActivityRepository activityRepository;
+  @Autowired private StudentRepository studentRepository;
+  @Autowired private UserRepository userRepository;
+  @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objectMapper;
+  @Autowired private LoggedInUserService loggedInUserService;
 
   @Value("${hmac.secret-key}")
   private String secretKey;
@@ -34,6 +60,9 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
   @Value("${user.student.signature}")
   private String studentSignature;
+
+  @Value("${user.student.id}")
+  private String studentId;
 
   private final String notFoundActivityId = UUID.randomUUID().toString();
 
@@ -171,5 +200,101 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                 .header("X-Context-Signature", studentSignature)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isConflict());
+  }
+
+  @Nested
+  class WhenUnsubscribeADeclaredActivity {
+
+    @Transactional
+    @Test
+    void shouldUnsubscribeMultipleDeclaredActivities_whenOwnedByStudent() throws Exception {
+
+      BddLogger.given("declared activities belonging to the student");
+      var declaredActivityIds = createDeclaredActivitiesForStudent(2);
+
+      BddLogger.when("performing DELETE on declared activities");
+
+      var result =
+          mockMvc.perform(
+              delete(UNSUBSCRIBE_PATH)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(declaredActivityIds))
+                  .accept(MediaType.APPLICATION_JSON));
+
+      BddLogger.then("the activities should be removed from the database");
+
+      result
+          .andExpect(status().isOk())
+          .andExpect(content().string("Declared activities successfully unsubscribed"));
+
+      var declaredActivities = declaredActivityRepository.findAllById(declaredActivityIds);
+      assertTrue(
+          declaredActivities.isEmpty(), "All declared activities of the student must be deleted");
+    }
+
+    private List<UUID> createDeclaredActivitiesForStudent(int count) {
+
+      return IntStream.range(0, count)
+          .mapToObj(
+              i -> {
+                BddLogger.then("Create and persist user");
+
+                User user =
+                    User.create(
+                        UUID.fromString(studentId),
+                        "other.student@example.com",
+                        "Other",
+                        "Student");
+                user = userRepository.save(user);
+
+                BddLogger.then("Create and persist student");
+
+                student = Student.create(user, "Some bio");
+                studentRepository.save(student);
+
+                BddLogger.then("Create and persist Activity");
+
+                var activity =
+                    Activity.create(
+                        UUID.randomUUID(),
+                        "Activity " + i,
+                        EActivityThematic.EXPERIENCES,
+                        "Test activity " + i,
+                        "2026");
+                activityRepository.save(activity);
+                BddLogger.then("Create and persist DeclaredActivity for student");
+
+                var declaredActivity =
+                    DeclaredActivity.create(student, activity, false, null, null, null, null);
+                declaredActivityRepository.save(declaredActivity);
+
+                return declaredActivity.getId();
+              })
+          .toList();
+    }
+
+    @Transactional
+    @Test
+    void shouldReturn400WhenBodyIsMissing() throws Exception {
+
+      BddLogger.given("the DELETE declared activities endpoint");
+
+      BddLogger.when("performing a DELETE request without body");
+
+      BddLogger.then("it should return 400 Bad Request");
+
+      mockMvc
+          .perform(
+              delete(UNSUBSCRIBE_PATH)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isBadRequest());
+    }
   }
 }

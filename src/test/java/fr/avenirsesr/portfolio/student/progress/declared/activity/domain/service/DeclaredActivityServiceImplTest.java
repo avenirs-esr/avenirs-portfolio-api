@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.servic
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,12 +15,16 @@ import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +40,7 @@ class DeclaredActivityServiceImplTest {
   @Mock private DeclaredActivityRepository declaredActivityRepository;
   @Mock private ActivityRepository activityRepository;
   @Mock private LoggedInUserService loggedInUserService;
+  private DeclaredActivityService declaredActivityService;
 
   @InjectMocks private DeclaredActivityServiceImpl service;
 
@@ -45,6 +51,9 @@ class DeclaredActivityServiceImplTest {
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
+    declaredActivityService =
+        new DeclaredActivityServiceImpl(
+            declaredActivityRepository, activityRepository, loggedInUserService);
   }
 
   @Test
@@ -103,5 +112,45 @@ class DeclaredActivityServiceImplTest {
         .isInstanceOf(DeclaredActivityAlreadyExistException.class);
 
     verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldRemoveDeclaredActivities_whenOwnedByStudent() {
+    var student = mock(Student.class);
+    var declaredActivity1 = mock(DeclaredActivity.class);
+    var declaredActivity2 = mock(DeclaredActivity.class);
+    var idDeclaredActivity1 = UUID.randomUUID();
+    var idDeclaredActivity2 = UUID.randomUUID();
+    var ids = List.of(idDeclaredActivity1, idDeclaredActivity2);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findAllById(anyList()))
+        .thenReturn(List.of(declaredActivity1, declaredActivity2));
+
+    when(declaredActivity1.getStudent()).thenReturn(student);
+    when(declaredActivity2.getStudent()).thenReturn(student);
+
+    when(declaredActivity1.getId()).thenReturn(idDeclaredActivity1);
+    when(declaredActivity2.getId()).thenReturn(idDeclaredActivity2);
+
+    declaredActivityService.unsubscribeMultiple(ids);
+
+    verify(declaredActivityRepository)
+        .removeAllFromDatabase(List.of(declaredActivity1, declaredActivity2));
+  }
+
+  @Test
+  void shouldThrowException_whenDeclaredActivitiesNotFound() {
+    var ids = List.of(UUID.randomUUID());
+    var student = mock(Student.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findAllById(ids)).thenReturn(List.of());
+
+    Assertions.assertThrows(
+        DeclaredActivityNotFoundException.class,
+        () -> declaredActivityService.unsubscribeMultiple(ids));
+
+    verify(declaredActivityRepository, never()).removeAllFromDatabase(any());
   }
 }
