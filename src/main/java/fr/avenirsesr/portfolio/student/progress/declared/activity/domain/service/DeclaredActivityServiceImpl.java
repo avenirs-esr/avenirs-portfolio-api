@@ -8,12 +8,14 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,5 +54,27 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student) {
     var graph = FetchGraph.init().fetch("activity");
     return declaredActivityRepository.findAllByStudent(student, graph);
+  }
+
+  @Override
+  public void unsubscribeMultiple(List<UUID> declaredActivityIds) {
+
+    Student student = loggedInUserService.getLoggedInStudent();
+
+    List<DeclaredActivity> declaredActivities =
+        declaredActivityRepository.findAllById(declaredActivityIds);
+
+    if (!declaredActivities.stream()
+        .map(DeclaredActivity::getId)
+        .collect(Collectors.toSet())
+        .containsAll(declaredActivityIds)) {
+      throw new DeclaredActivityNotFoundException();
+    }
+
+    if (declaredActivities.stream().anyMatch(activity -> !activity.getStudent().equals(student))) {
+      throw new DeclaredActivityNotFoundException();
+    }
+
+    declaredActivityRepository.removeAllFromDatabase(declaredActivities);
   }
 }

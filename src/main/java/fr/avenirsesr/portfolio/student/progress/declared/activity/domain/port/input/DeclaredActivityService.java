@@ -12,5 +12,7 @@ public interface DeclaredActivityService {
 
   DeclaredActivity subscribe(UUID activityId);
 
+  void unsubscribeMultiple(List<UUID> activityIds);
+
   List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student);
 }
