@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRe
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -15,7 +16,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L18">@Slf4j</span>
+<span class="fc" id="L19">@Slf4j</span>
 @AllArgsConstructor
 public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
@@ -24,28 +25,51 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public DeclaredActivity subscribe(UUID activityId) {
-<span class="nc" id="L27">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L28">    Activity activity =</span>
-<span class="nc" id="L29">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="nc" id="L28">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="nc" id="L29">    Activity activity =</span>
+<span class="nc" id="L30">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
 
-<span class="nc" id="L31">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
+<span class="nc" id="L32">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
 
-<span class="nc" id="L33">    List&lt;DeclaredActivity&gt; declaredActivityList =</span>
-<span class="nc" id="L34">        declaredActivityRepository.findAllByStudent(student, graph);</span>
-<span class="nc" id="L35">    if (declaredActivityList.stream()</span>
-<span class="nc bnc" id="L36" title="All 2 branches missed.">        .anyMatch(declaredActivity -&gt; declaredActivity.getActivity().equals(activity))) {</span>
-<span class="nc" id="L37">      throw new DeclaredActivityAlreadyExistException();</span>
+<span class="nc" id="L34">    List&lt;DeclaredActivity&gt; declaredActivityList =</span>
+<span class="nc" id="L35">        declaredActivityRepository.findAllByStudent(student, graph);</span>
+<span class="nc" id="L36">    if (declaredActivityList.stream()</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">        .anyMatch(declaredActivity -&gt; declaredActivity.getActivity().equals(activity))) {</span>
+<span class="nc" id="L38">      throw new DeclaredActivityAlreadyExistException();</span>
     }
 
-<span class="nc" id="L40">    DeclaredActivity declaredActivity =</span>
-<span class="nc" id="L41">        DeclaredActivity.create(student, activity, false, null, null, null);</span>
-<span class="nc" id="L42">    return declaredActivityRepository.save(declaredActivity);</span>
+<span class="nc" id="L41">    DeclaredActivity declaredActivity =</span>
+<span class="nc" id="L42">        DeclaredActivity.create(student, activity, false, null, null, null);</span>
+<span class="nc" id="L43">    return declaredActivityRepository.save(declaredActivity);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; getAllDeclaredActivitiesOf(Student student) {
-<span class="fc" id="L47">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
-<span class="fc" id="L48">    return declaredActivityRepository.findAllByStudent(student, graph);</span>
+<span class="fc" id="L48">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
+<span class="fc" id="L49">    return declaredActivityRepository.findAllByStudent(student, graph);</span>
   }
+
+  @Override
+  public void unsubscribeMultiple(List&lt;UUID&gt; declaredActivityIds) {
+
+<span class="fc" id="L55">    Student student = loggedInUserService.getLoggedInStudent();</span>
+
+<span class="fc" id="L57">    List&lt;DeclaredActivity&gt; declaredActivities =</span>
+<span class="fc" id="L58">        declaredActivityRepository.findAllById(declaredActivityIds);</span>
+
+<span class="fc bfc" id="L60" title="All 2 branches covered.">    if (declaredActivities.isEmpty()) {</span>
+<span class="fc" id="L61">      throw new DeclaredActivityNotFoundException();</span>
+    }
+
+<span class="fc" id="L64">    boolean hasDeclaredActivityNotOwnedByStudent =</span>
+<span class="fc" id="L65">        declaredActivities.stream()</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">            .anyMatch(declaredActivity -&gt; !declaredActivity.getStudent().equals(student));</span>
+
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">    if (hasDeclaredActivityNotOwnedByStudent) {</span>
+<span class="nc" id="L69">      throw new DeclaredActivityNotFoundException();</span>
+    }
+
+<span class="fc" id="L72">    declaredActivityRepository.removeAllFromDatabase(declaredActivities);</span>
+<span class="fc" id="L73">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

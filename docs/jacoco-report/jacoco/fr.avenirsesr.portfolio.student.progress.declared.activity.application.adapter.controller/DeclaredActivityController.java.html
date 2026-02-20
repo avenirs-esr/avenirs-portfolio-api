@@ -3,17 +3,19 @@
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-<span class="fc" id="L16">@Slf4j</span>
+<span class="fc" id="L18">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/activity-progress&quot;)
 public class DeclaredActivityController {
@@ -21,8 +23,16 @@ public class DeclaredActivityController {
 
   @PostMapping(&quot;/subscribe/{activityId}&quot;)
   public ResponseEntity&lt;DeclaredActivity&gt; subscribe(@Valid @PathVariable UUID activityId) {
-<span class="nc" id="L24">    DeclaredActivity declaredActivity = declaredActivityService.subscribe(activityId);</span>
-<span class="nc" id="L25">    return ResponseEntity.ok(declaredActivity);</span>
+<span class="nc" id="L26">    DeclaredActivity declaredActivity = declaredActivityService.subscribe(activityId);</span>
+<span class="nc" id="L27">    return ResponseEntity.ok(declaredActivity);</span>
+  }
+
+  @DeleteMapping(&quot;/unsubscribe&quot;)
+  public ResponseEntity&lt;String&gt; unsubscribe(@RequestBody List&lt;UUID&gt; declaredActivityIds) {
+
+<span class="fc" id="L33">    declaredActivityService.unsubscribeMultiple(declaredActivityIds);</span>
+
+<span class="fc" id="L35">    return ResponseEntity.ok(&quot;Declared activities successfully unsubscribed&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
