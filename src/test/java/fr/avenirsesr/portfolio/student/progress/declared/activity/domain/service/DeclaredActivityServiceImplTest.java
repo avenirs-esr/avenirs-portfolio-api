@@ -12,15 +12,19 @@ import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundExcepti
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -152,5 +156,113 @@ class DeclaredActivityServiceImplTest {
         () -> declaredActivityService.unsubscribeMultiple(ids));
 
     verify(declaredActivityRepository, never()).removeAllFromDatabase(any());
+  }
+
+  @Test
+  void finish_should_update_finishedAt_and_save_when_valid() {
+    BddLogger.given("A logged-in student and his existing started declared activity");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(student, activity, true, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivityRepository.save(any(DeclaredActivity.class)))
+        .thenAnswer(i -> i.getArguments()[0]);
+
+    BddLogger.when("He try to finish this activity");
+    DeclaredActivity result = service.finish(declaredActivityId);
+
+    BddLogger.then("The declared activity is marked as finished and saved");
+    assertThat(result.getFinishedAt()).isPresent();
+    verify(declaredActivityRepository).save(declaredActivity);
+  }
+
+  @Test
+  void finish_should_throw_DeclaredActivityHasNotStartedException_when_not_started() {
+    BddLogger.given("A logged-in student and a declared activity that has not started yet");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(student, activity, false, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He try to finish this activity");
+
+    BddLogger.then("A DeclaredActivityHasNotStartedException is thrown");
+    assertThatThrownBy(() -> service.finish(declaredActivityId))
+        .isInstanceOf(DeclaredActivityHasNotStartedException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void finish_should_throw_DeclaredActivityNotFoundException_when_not_found() {
+    BddLogger.given("A logged-in student and a non-existent declared activity ID");
+    UUID declaredActivityId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId)).thenReturn(Optional.empty());
+
+    BddLogger.when("He try to finish this activity");
+
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown");
+    assertThatThrownBy(() -> service.finish(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void finish_should_throw_UserNotAuthorizedException_when_belonging_to_another_student() {
+    BddLogger.given("A logged-in student and a declared activity belonging to another student");
+    UUID declaredActivityId = UUID.randomUUID();
+
+    Student anotherStudent = StudentFixture.create().toModel();
+    Activity activity = ActivityFixture.create().toModel();
+
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(anotherStudent, activity, false, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He try to finish this activity");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown");
+    assertThatThrownBy(() -> service.finish(declaredActivityId))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void finish_should_throw_DeclaredActivityAlreadyFinishedException_when_already_finished() {
+    BddLogger.given("A logged-in student and his already finished declared activity");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(student, activity, false, null, null, null, null);
+
+    declaredActivity.setHasStarted(true);
+    declaredActivity.setFinishedAt(Instant.now());
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He try to finish this activity again");
+
+    BddLogger.then("A DeclaredActivityAlreadyFinishedException is thrown");
+    assertThatThrownBy(() -> service.finish(declaredActivityId))
+        .isInstanceOf(DeclaredActivityAlreadyFinishedException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
   }
 }

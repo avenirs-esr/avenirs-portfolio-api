@@ -9,12 +9,20 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.application.ad
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
@@ -25,10 +33,15 @@ public class DeclaredActivityController {
 
   @GetMapping
   public ResponseEntity<PagedResponse<DeclaredActivityViewDTO>> getDeclaredActivitiesView(
+      Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
-
+    log.debug(
+        "Received request to get declared activities view of user [{}] (page= {}, size= {})",
+        principal.getName(),
+        pageCriteria.page(),
+        pageCriteria.pageSize());
     PagedResult<DeclaredActivity> pagedResult =
         declaredActivityService.getDeclaredActivities(pageCriteria);
 
@@ -52,5 +65,16 @@ public class DeclaredActivityController {
     declaredActivityService.unsubscribeMultiple(declaredActivityIds);
 
     return ResponseEntity.ok("Declared activities successfully unsubscribed");
+  }
+
+  @PutMapping("/finish/{declaredActivityId}")
+  public ResponseEntity<DeclaredActivity> finish(
+      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
+    log.debug(
+        "Received request to finish declared activity [{}] for student [{}]",
+        declaredActivityId,
+        principal.getName());
+    DeclaredActivity declaredActivity = declaredActivityService.finish(declaredActivityId);
+    return ResponseEntity.ok(declaredActivity);
   }
 }

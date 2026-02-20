@@ -6,13 +6,17 @@ import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRe
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,6 +40,12 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student) {
+    var graph = FetchGraph.init().fetch("activity");
+    return declaredActivityRepository.findAllByStudent(student, graph);
+  }
+
+  @Override
   public DeclaredActivity subscribe(UUID activityId) {
     Student student = loggedInUserService.getLoggedInStudent();
     Activity activity =
@@ -48,12 +58,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     DeclaredActivity declaredActivity =
         DeclaredActivity.create(student, activity, false, null, null, null, null);
     return declaredActivityRepository.save(declaredActivity);
-  }
-
-  @Override
-  public List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student) {
-    var graph = FetchGraph.init().fetch("activity");
-    return declaredActivityRepository.findAllByStudent(student, graph);
   }
 
   @Override
@@ -76,5 +80,30 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     }
 
     declaredActivityRepository.removeAllFromDatabase(declaredActivities);
+  }
+
+  @Override
+  public DeclaredActivity finish(UUID declaredActivityId) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    DeclaredActivity declaredActivity =
+        declaredActivityRepository
+            .findById(declaredActivityId)
+            .orElseThrow(DeclaredActivityNotFoundException::new);
+
+    if (!declaredActivity.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    if (!declaredActivity.isHasStarted()) {
+      throw new DeclaredActivityHasNotStartedException();
+    }
+
+    if (declaredActivity.getFinishedAt().isPresent()) {
+      throw new DeclaredActivityAlreadyFinishedException();
+    }
+
+    declaredActivity.setFinishedAt(Instant.now());
+
+    return declaredActivityRepository.save(declaredActivity);
   }
 }

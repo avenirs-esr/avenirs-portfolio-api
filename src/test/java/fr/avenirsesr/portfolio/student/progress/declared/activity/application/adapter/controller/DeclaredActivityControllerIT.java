@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,6 +22,7 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -37,6 +39,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
@@ -64,7 +67,14 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.id}")
   private String studentId;
 
+  @Value("${user.second.student.payload}")
+  private String otherStudentPayload;
+
+  @Value("${user.second.student.signature}")
+  private String otherStudentSignature;
+
   private final String notFoundActivityId = UUID.randomUUID().toString();
+  private final String notFoundDeclaredActivityId = UUID.randomUUID().toString();
 
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {
@@ -90,6 +100,44 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .andExpect(status().isOk());
 
     return activityId;
+  }
+
+  private String subscribeAndGetDeclaredActivityId(String payload, String signature)
+      throws Exception {
+    Activity activity =
+        activityRepository.findAll().stream()
+            .findFirst()
+            .orElseThrow(
+                () -> new IllegalStateException("No activity found. Did the seeder run properly?"));
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                post(BASE_PATH + "/subscribe/" + activity.getId())
+                    .header("X-Signed-Context", payload)
+                    .header("X-Context-Kid", secretKey)
+                    .header("X-Context-Signature", signature)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    String responseBody = result.getResponse().getContentAsString();
+    int idIndex = responseBody.indexOf("\"id\":\"") + 6;
+    int endIndex = responseBody.indexOf("\"", idIndex);
+    return responseBody.substring(idIndex, endIndex);
+  }
+
+  /**
+   * Helper permettant de simuler l'action "Démarrer une activité" directement en base pour pouvoir
+   * tester le endpoint finish() qui l'exige.
+   */
+  private void markDeclaredActivityAsStartedInDatabase(String declaredActivityId) {
+    DeclaredActivity declaredActivity =
+        declaredActivityRepository
+            .findById(UUID.fromString(declaredActivityId))
+            .orElseThrow(DeclaredActivityNotFoundException::new);
+    declaredActivity.setHasStarted(true);
+    declaredActivityRepository.save(declaredActivity);
   }
 
   @Transactional
@@ -295,6 +343,115 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                   .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
                   .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
           .andExpect(status().isBadRequest());
+    }
+
+    @Transactional
+    @Test
+    void shouldFinishDeclaredActivity() throws Exception {
+      BddLogger.given("an existing STARTED declared activity for the logged-in student");
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+      markDeclaredActivityAsStartedInDatabase(declaredActivityId);
+
+      BddLogger.when("performing a PUT to finish the declared activity");
+      BddLogger.then("it should return OK status and update the finishedAt field");
+
+      mockMvc
+          .perform(
+              put(BASE_PATH + "/finish/" + declaredActivityId)
+                  .header("X-Signed-Context", studentPayload)
+                  .header("X-Context-Kid", secretKey)
+                  .header("X-Context-Signature", studentSignature)
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.id").value(declaredActivityId))
+          .andExpect(jsonPath("$.finishedAt", notNullValue()));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenFinishingNonExistingDeclaredActivity() throws Exception {
+      BddLogger.given("a declared activity id that does not exist");
+      BddLogger.when("performing a PUT to finish with unknown id");
+      BddLogger.then("it should return not found");
+
+      mockMvc
+          .perform(
+              put(BASE_PATH + "/finish/" + notFoundDeclaredActivityId)
+                  .header("X-Signed-Context", studentPayload)
+                  .header("X-Context-Kid", secretKey)
+                  .header("X-Context-Signature", studentSignature)
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isNotFound());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnForbiddenWhenFinishingAnotherStudentsActivity() throws Exception {
+      BddLogger.given("an existing declared activity belonging to another student");
+      String otherDeclaredActivityId =
+          subscribeAndGetDeclaredActivityId(otherStudentPayload, otherStudentSignature);
+
+      BddLogger.when("performing a PUT to finish the activity with the main student's payload");
+      BddLogger.then("it should return forbidden (403)");
+
+      mockMvc
+          .perform(
+              put(BASE_PATH + "/finish/" + otherDeclaredActivityId)
+                  .header("X-Signed-Context", studentPayload)
+                  .header("X-Context-Kid", secretKey)
+                  .header("X-Context-Signature", studentSignature)
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isForbidden());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnConflictWhenFinishingNotStartedActivity() throws Exception {
+      BddLogger.given("an existing declared activity that has not started yet");
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      BddLogger.when("performing a PUT to finish the declared activity");
+      BddLogger.then("it should return conflict or bad request because it hasn't started");
+
+      mockMvc
+          .perform(
+              put(BASE_PATH + "/finish/" + declaredActivityId)
+                  .header("X-Signed-Context", studentPayload)
+                  .header("X-Context-Kid", secretKey)
+                  .header("X-Context-Signature", studentSignature)
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isConflict());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnConflictWhenFinishingAlreadyFinishedActivity() throws Exception {
+      BddLogger.given("an already finished declared activity for the student");
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+      markDeclaredActivityAsStartedInDatabase(declaredActivityId);
+
+      mockMvc
+          .perform(
+              put(BASE_PATH + "/finish/" + declaredActivityId)
+                  .header("X-Signed-Context", studentPayload)
+                  .header("X-Context-Kid", secretKey)
+                  .header("X-Context-Signature", studentSignature)
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk());
+
+      BddLogger.when("performing a new PUT to finish it again");
+      BddLogger.then("it should return conflict/bad request");
+
+      mockMvc
+          .perform(
+              put(BASE_PATH + "/finish/" + declaredActivityId)
+                  .header("X-Signed-Context", studentPayload)
+                  .header("X-Context-Kid", secretKey)
+                  .header("X-Context-Signature", studentSignature)
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isConflict());
     }
   }
 }
