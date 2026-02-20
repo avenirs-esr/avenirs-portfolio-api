@@ -16,12 +16,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L25">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/activity-progress&quot;)
 public class DeclaredActivityController {
@@ -31,23 +32,29 @@ public class DeclaredActivityController {
   public ResponseEntity&lt;PagedResponse&lt;DeclaredActivityViewDTO&gt;&gt; getDeclaredActivitiesView(
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L34">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L35">    var pageCriteria = new PageCriteria(page, pageSize);</span>
 
-<span class="fc" id="L36">    PagedResult&lt;DeclaredActivity&gt; pagedResult =</span>
-<span class="fc" id="L37">        declaredActivityService.getDeclaredActivities(pageCriteria);</span>
+<span class="fc" id="L37">    PagedResult&lt;DeclaredActivity&gt; pagedResult =</span>
+<span class="fc" id="L38">        declaredActivityService.getDeclaredActivities(pageCriteria);</span>
 
-<span class="fc" id="L39">    var viewResponse =</span>
+<span class="fc" id="L40">    var viewResponse =</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L41">            pagedResult.content().stream().map(DeclaredActivityViewDtoMapper::toDTO).toList(),</span>
-<span class="fc" id="L42">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="fc" id="L42">            pagedResult.content().stream().map(DeclaredActivityViewDtoMapper::toDTO).toList(),</span>
+<span class="fc" id="L43">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
 
-<span class="fc" id="L44">    return ResponseEntity.ok(viewResponse);</span>
+<span class="fc" id="L45">    return ResponseEntity.ok(viewResponse);</span>
   }
 
   @PostMapping(&quot;/subscribe/{activityId}&quot;)
   public ResponseEntity&lt;DeclaredActivity&gt; subscribe(@Valid @PathVariable UUID activityId) {
-<span class="fc" id="L49">    DeclaredActivity declaredActivity = declaredActivityService.subscribe(activityId);</span>
-<span class="fc" id="L50">    return ResponseEntity.ok(declaredActivity);</span>
+<span class="fc" id="L50">    DeclaredActivity declaredActivity = declaredActivityService.subscribe(activityId);</span>
+<span class="fc" id="L51">    return ResponseEntity.ok(declaredActivity);</span>
+  }
+
+  @PutMapping(&quot;/finish/{declaredActivityId}&quot;)
+  public ResponseEntity&lt;DeclaredActivity&gt; finish(@Valid @PathVariable UUID declaredActivityId) {
+<span class="fc" id="L56">    DeclaredActivity declaredActivity = declaredActivityService.finish(declaredActivityId);</span>
+<span class="fc" id="L57">    return ResponseEntity.ok(declaredActivity);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
