@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface DeclaredActivityJpaRepository
     extends JpaRepository<DeclaredActivityEntity, UUID>,
-        JpaSpecificationExecutor<DeclaredActivityEntity> {}
+        JpaSpecificationExecutor<DeclaredActivityEntity> {
+  boolean existsByStudentIdAndActivityId(UUID studentId, UUID activityId);
+}

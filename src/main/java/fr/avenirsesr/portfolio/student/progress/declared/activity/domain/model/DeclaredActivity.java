@@ -19,6 +19,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
   private String reflection;
   private LocalDate startDate;
   private LocalDate endDate;
+  private Instant finishedAt;
 
   private DeclaredActivity(
       UUID id,
@@ -28,6 +29,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
       String reflection,
       LocalDate startDate,
       LocalDate endDate,
+      Instant finishedAt,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -37,6 +39,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
     this.reflection = reflection;
     this.startDate = startDate;
     this.endDate = endDate;
+    this.finishedAt = finishedAt;
   }
 
   public EDeclaredActivityStatus getStatus() {
@@ -52,7 +55,8 @@ public class DeclaredActivity extends AvenirsBaseModel {
       boolean hasStarted,
       String reflection,
       LocalDate startDate,
-      LocalDate endDate) {
+      LocalDate endDate,
+      Instant finishedAt) {
     return new DeclaredActivity(
         UUID.randomUUID(),
         student,
@@ -61,6 +65,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
         reflection,
         startDate,
         endDate,
+        finishedAt,
         Instant.now(),
         Instant.now());
   }
@@ -73,9 +78,19 @@ public class DeclaredActivity extends AvenirsBaseModel {
       String reflection,
       LocalDate startDate,
       LocalDate endDate,
+      Instant finishedAt,
       Instant createdAt,
       Instant updatedAt) {
     return new DeclaredActivity(
-        id, student, activity, hasStarted, reflection, startDate, endDate, createdAt, updatedAt);
+        id,
+        student,
+        activity,
+        hasStarted,
+        reflection,
+        startDate,
+        endDate,
+        finishedAt,
+        createdAt,
+        updatedAt);
   }
 }

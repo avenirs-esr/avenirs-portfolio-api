@@ -19,7 +19,8 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         declaredActivity.isHasStarted(),
         declaredActivity.getReflection(),
         declaredActivity.getStartDate(),
-        declaredActivity.getEndDate());
+        declaredActivity.getEndDate(),
+        declaredActivity.getFinishedAt());
   }
 
   @Override
@@ -32,6 +33,7 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         entity.getReflection(),
         entity.getStartDate(),
         entity.getEndDate(),
+        entity.getFinishedAt(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -51,6 +53,7 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         entity.getReflection(),
         entity.getStartDate(),
         entity.getEndDate(),
+        entity.getFinishedAt(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }

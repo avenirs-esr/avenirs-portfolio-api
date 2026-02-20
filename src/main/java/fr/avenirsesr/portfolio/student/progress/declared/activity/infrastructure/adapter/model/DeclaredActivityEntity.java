@@ -15,12 +15,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Formula;
 
 @Entity
 @Table(
@@ -48,6 +50,12 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
   @Size(max = REFLECTION_LENGTH, message = "reflection can not exceed {max} characters")
   private String reflection;
 
+  @Column(name = "finished_at")
+  private Instant finishedAt;
+
+  @Formula("CASE WHEN finished_at IS NULL THEN 0 ELSE 1 END")
+  private Integer isFinishedOrder;
+
   private DeclaredActivityEntity(
       UUID id,
       StudentEntity student,
@@ -55,7 +63,8 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       boolean hasStarted,
       String reflection,
       LocalDate startDate,
-      LocalDate endDate) {
+      LocalDate endDate,
+      Instant finishedAt) {
     setId(id);
     this.student = student;
     this.activity = activity;
@@ -63,6 +72,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
     this.reflection = reflection;
     this.startDate = startDate;
     this.endDate = endDate;
+    this.finishedAt = finishedAt;
   }
 
   public static DeclaredActivityEntity of(
@@ -72,9 +82,10 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       boolean hasStarted,
       String reflection,
       LocalDate startDate,
-      LocalDate endDate) {
+      LocalDate endDate,
+      Instant finishedAt) {
     return new DeclaredActivityEntity(
-        id, student, activity, hasStarted, reflection, startDate, endDate);
+        id, student, activity, hasStarted, reflection, startDate, endDate, finishedAt);
   }
 
   @Override

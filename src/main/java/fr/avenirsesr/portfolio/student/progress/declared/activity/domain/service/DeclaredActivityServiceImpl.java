@@ -4,6 +4,8 @@ import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundExcepti
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -23,22 +25,26 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final LoggedInUserService loggedInUserService;
 
   @Override
+  public PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    var graph = FetchGraph.init().fetch("activity");
+
+    return declaredActivityRepository.findStudentActivitiesByProgressAndDate(
+        student, pageCriteria, graph);
+  }
+
+  @Override
   public DeclaredActivity subscribe(UUID activityId) {
     Student student = loggedInUserService.getLoggedInStudent();
     Activity activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
 
-    var graph = FetchGraph.init().fetch("activity");
-
-    List<DeclaredActivity> declaredActivityList =
-        declaredActivityRepository.findAllByStudent(student, graph);
-    if (declaredActivityList.stream()
-        .anyMatch(declaredActivity -> declaredActivity.getActivity().equals(activity))) {
+    if (declaredActivityRepository.isSubscribedTo(student, activity)) {
       throw new DeclaredActivityAlreadyExistException();
     }
 
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(student, activity, false, null, null, null);
+        DeclaredActivity.create(student, activity, false, null, null, null, null);
     return declaredActivityRepository.save(declaredActivity);
   }
 
