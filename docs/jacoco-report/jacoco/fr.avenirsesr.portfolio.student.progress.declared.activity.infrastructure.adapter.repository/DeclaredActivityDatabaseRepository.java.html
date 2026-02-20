@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeclaredActivityDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository</a> &gt; <span class="el_source">DeclaredActivityDatabaseRepository.java</span></div><h1>DeclaredActivityDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.mapper.DeclaredActivityMapper;
@@ -8,6 +11,8 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -17,17 +22,34 @@ public class DeclaredActivityDatabaseRepository
   private final DeclaredActivityJpaRepository jpaRepository;
 
   public DeclaredActivityDatabaseRepository(DeclaredActivityJpaRepository jpaRepository) {
-<span class="fc" id="L20">    super(</span>
+<span class="fc" id="L25">    super(</span>
         jpaRepository,
         jpaRepository,
         DeclaredActivityEntity.class,
         DeclaredActivityMapper.INSTANCE);
-<span class="fc" id="L25">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L26">  }</span>
+<span class="fc" id="L30">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L31">  }</span>
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllByStudent(Student student, FetchGraph fetchGraph) {
-<span class="fc" id="L30">    return findAll(hasStudent(student), fetchGraph);</span>
+<span class="fc" id="L35">    return findAll(hasStudent(student), fetchGraph);</span>
+  }
+
+  @Override
+  public PagedResult&lt;DeclaredActivity&gt; findStudentActivitiesByProgressAndDate(
+      Student student, PageCriteria pageCriteria, FetchGraph fetchGraph) {
+<span class="fc" id="L41">    var sort =</span>
+<span class="fc" id="L42">        Sort.by(Sort.Direction.ASC, &quot;isFinishedOrder&quot;)</span>
+<span class="fc" id="L43">            .and(Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;));</span>
+<span class="fc" id="L44">    return findAll(</span>
+<span class="fc" id="L45">        hasStudent(student),</span>
+<span class="fc" id="L46">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),</span>
+        fetchGraph);
+  }
+
+  @Override
+  public boolean isSubscribedTo(Student student, Activity activity) {
+<span class="fc" id="L52">    return jpaRepository.existsByStudentIdAndActivityId(student.getId(), activity.getId());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

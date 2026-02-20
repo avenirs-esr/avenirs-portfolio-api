@@ -4,6 +4,8 @@ import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundExcepti
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -15,7 +17,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L18">@Slf4j</span>
+<span class="fc" id="L20">@Slf4j</span>
 @AllArgsConstructor
 public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
@@ -23,29 +25,33 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final LoggedInUserService loggedInUserService;
 
   @Override
+  public PagedResult&lt;DeclaredActivity&gt; getDeclaredActivities(PageCriteria pageCriteria) {
+<span class="fc" id="L29">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L30">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
+
+<span class="fc" id="L32">    return declaredActivityRepository.findStudentActivitiesByProgressAndDate(</span>
+        student, pageCriteria, graph);
+  }
+
+  @Override
   public DeclaredActivity subscribe(UUID activityId) {
-<span class="nc" id="L27">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L28">    Activity activity =</span>
-<span class="nc" id="L29">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc" id="L38">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L39">    Activity activity =</span>
+<span class="fc" id="L40">        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);</span>
 
-<span class="nc" id="L31">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
-
-<span class="nc" id="L33">    List&lt;DeclaredActivity&gt; declaredActivityList =</span>
-<span class="nc" id="L34">        declaredActivityRepository.findAllByStudent(student, graph);</span>
-<span class="nc" id="L35">    if (declaredActivityList.stream()</span>
-<span class="nc bnc" id="L36" title="All 2 branches missed.">        .anyMatch(declaredActivity -&gt; declaredActivity.getActivity().equals(activity))) {</span>
-<span class="nc" id="L37">      throw new DeclaredActivityAlreadyExistException();</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">    if (declaredActivityRepository.isSubscribedTo(student, activity)) {</span>
+<span class="fc" id="L43">      throw new DeclaredActivityAlreadyExistException();</span>
     }
 
-<span class="nc" id="L40">    DeclaredActivity declaredActivity =</span>
-<span class="nc" id="L41">        DeclaredActivity.create(student, activity, false, null, null, null);</span>
-<span class="nc" id="L42">    return declaredActivityRepository.save(declaredActivity);</span>
+<span class="fc" id="L46">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L47">        DeclaredActivity.create(student, activity, false, null, null, null, null);</span>
+<span class="fc" id="L48">    return declaredActivityRepository.save(declaredActivity);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; getAllDeclaredActivitiesOf(Student student) {
-<span class="fc" id="L47">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
-<span class="fc" id="L48">    return declaredActivityRepository.findAllByStudent(student, graph);</span>
+<span class="fc" id="L53">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
+<span class="fc" id="L54">    return declaredActivityRepository.findAllByStudent(student, graph);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
