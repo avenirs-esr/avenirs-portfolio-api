@@ -40,7 +40,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.specif
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.specification,ActivityBannerSpecification,0,19,0,0,0,4,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client,ExternalSkillClient.new ParameterizedTypeReference() {...},0,3,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client,ExternalSkillClient,0,247,0,8,0,63,0,10,0,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.service,ActivityServiceImpl,0,130,0,0,0,34,0,7,0,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.service,ActivityServiceImpl,0,146,0,0,0,39,0,9,0,9
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.data,UserProfileOverviewData,0,15,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.data,UserPhotosData,0,21,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,TraceAttachmentServiceConfig,0,14,0,0,0,1,0,1,0,1
@@ -62,7 +62,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceDetailData,
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceAssociationsData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,DeclaredSkillAssociationData,0,18,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,SkillLevelAssociationData,0,18,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.application.adapter.controller,ActivityController,0,99,0,0,0,23,0,3,0,3
+avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.application.adapter.controller,ActivityController,0,105,0,0,0,25,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification,TraceSpecification,15,392,0,8,3,81,3,18,3,14
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification,TraceFilterSpecificationBuilder,21,197,4,30,6,37,4,22,0,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository,ActivityDatabaseRepository,0,70,0,2,0,14,0,4,0,3
