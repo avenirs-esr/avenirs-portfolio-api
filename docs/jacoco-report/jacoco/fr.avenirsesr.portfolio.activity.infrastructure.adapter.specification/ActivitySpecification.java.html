@@ -2,11 +2,30 @@
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L7">public class ActivitySpecification {</span>
+<span class="nc" id="L10">public class ActivitySpecification {</span>
   public static Specification&lt;ActivityEntity&gt; withThematic(EActivityThematic thematic) {
-<span class="fc" id="L9">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;thematic&quot;), thematic);</span>
+<span class="fc" id="L12">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;thematic&quot;), thematic);</span>
+  }
+
+  public static Specification&lt;ActivityEntity&gt; latest(Duration duration) {
+<span class="fc" id="L16">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc" id="L17">      Instant threshold = Instant.now().minus(duration);</span>
+<span class="fc" id="L18">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
+    };
+  }
+
+  public static Specification&lt;ActivityEntity&gt; exclude(List&lt;ActivityEntity&gt; activities) {
+<span class="fc" id="L23">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L24" title="2 of 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
+<span class="fc" id="L25">        return criteriaBuilder.conjunction();</span>
+      }
+<span class="nc" id="L27">      return root.in(activities).not();</span>
+    };
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
