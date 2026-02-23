@@ -48,5 +48,28 @@ public class ActivityController {
 
 <span class="fc" id="L49">    return ResponseEntity.ok(viewResponse);</span>
   }
+
+  @GetMapping(&quot;/latest&quot;)
+  public ResponseEntity&lt;PagedResponse&lt;ActivityOverviewDTO&gt;&gt; getLatestActivitiesView(
+      Principal principal,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+<span class="fc" id="L57">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L58">    log.debug(</span>
+        &quot;Received request to latest activities view of user [{}] (page= {}, size= {})&quot;,
+<span class="fc" id="L60">        principal.getName(),</span>
+<span class="fc" id="L61">        pageCriteria.page(),</span>
+<span class="fc" id="L62">        pageCriteria.pageSize());</span>
+
+<span class="fc" id="L64">    PagedResult&lt;ActivityWithStudentStatusData&gt; pagedResult =</span>
+<span class="fc" id="L65">        activityService.latestActivitiesView(pageCriteria);</span>
+
+<span class="fc" id="L67">    var viewResponse =</span>
+        new PagedResponse&lt;&gt;(
+<span class="fc" id="L69">            pagedResult.content().stream().map(ActivityOverviewDtoMapper::toDTO).toList(),</span>
+<span class="fc" id="L70">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+
+<span class="fc" id="L72">    return ResponseEntity.ok(viewResponse);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
