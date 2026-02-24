@@ -9,15 +9,23 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.application.ad
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-<span class="fc" id="L20">@Slf4j</span>
+<span class="fc" id="L28">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/activity-progress&quot;)
 public class DeclaredActivityController {
@@ -25,33 +33,49 @@ public class DeclaredActivityController {
 
   @GetMapping
   public ResponseEntity&lt;PagedResponse&lt;DeclaredActivityViewDTO&gt;&gt; getDeclaredActivitiesView(
+      Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L30">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L39">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L40">    log.debug(</span>
+        &quot;Received request to get declared activities view of user [{}] (page= {}, size= {})&quot;,
+<span class="fc" id="L42">        principal.getName(),</span>
+<span class="fc" id="L43">        pageCriteria.page(),</span>
+<span class="fc" id="L44">        pageCriteria.pageSize());</span>
+<span class="fc" id="L45">    PagedResult&lt;DeclaredActivity&gt; pagedResult =</span>
+<span class="fc" id="L46">        declaredActivityService.getDeclaredActivities(pageCriteria);</span>
 
-<span class="fc" id="L32">    PagedResult&lt;DeclaredActivity&gt; pagedResult =</span>
-<span class="fc" id="L33">        declaredActivityService.getDeclaredActivities(pageCriteria);</span>
-
-<span class="fc" id="L35">    var viewResponse =</span>
+<span class="fc" id="L48">    var viewResponse =</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L37">            pagedResult.content().stream().map(DeclaredActivityViewDtoMapper::toDTO).toList(),</span>
-<span class="fc" id="L38">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="fc" id="L50">            pagedResult.content().stream().map(DeclaredActivityViewDtoMapper::toDTO).toList(),</span>
+<span class="fc" id="L51">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
 
-<span class="fc" id="L40">    return ResponseEntity.ok(viewResponse);</span>
+<span class="fc" id="L53">    return ResponseEntity.ok(viewResponse);</span>
   }
 
   @PostMapping(&quot;/subscribe/{activityId}&quot;)
   public ResponseEntity&lt;DeclaredActivity&gt; subscribe(@Valid @PathVariable UUID activityId) {
-<span class="fc" id="L45">    DeclaredActivity declaredActivity = declaredActivityService.subscribe(activityId);</span>
-<span class="fc" id="L46">    return ResponseEntity.ok(declaredActivity);</span>
+<span class="fc" id="L58">    DeclaredActivity declaredActivity = declaredActivityService.subscribe(activityId);</span>
+<span class="fc" id="L59">    return ResponseEntity.ok(declaredActivity);</span>
   }
 
   @DeleteMapping(&quot;/unsubscribe&quot;)
   public ResponseEntity&lt;String&gt; unsubscribe(@RequestBody List&lt;UUID&gt; declaredActivityIds) {
 
-<span class="fc" id="L52">    declaredActivityService.unsubscribeMultiple(declaredActivityIds);</span>
+<span class="fc" id="L65">    declaredActivityService.unsubscribeMultiple(declaredActivityIds);</span>
 
-<span class="fc" id="L54">    return ResponseEntity.ok(&quot;Declared activities successfully unsubscribed&quot;);</span>
+<span class="fc" id="L67">    return ResponseEntity.ok(&quot;Declared activities successfully unsubscribed&quot;);</span>
+  }
+
+  @PutMapping(&quot;/finish/{declaredActivityId}&quot;)
+  public ResponseEntity&lt;DeclaredActivity&gt; finish(
+      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
+<span class="fc" id="L73">    log.debug(</span>
+        &quot;Received request to finish declared activity [{}] for student [{}]&quot;,
+        declaredActivityId,
+<span class="fc" id="L76">        principal.getName());</span>
+<span class="fc" id="L77">    DeclaredActivity declaredActivity = declaredActivityService.finish(declaredActivityId);</span>
+<span class="fc" id="L78">    return ResponseEntity.ok(declaredActivity);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
