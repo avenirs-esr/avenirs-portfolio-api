@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.TrainingPathSeeder;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeCategorySeeder;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.SelfKnowledgeElementSeeder;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder.DeclaredActivitySeeder;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder.DeclaredExperienceSeeder;
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.DeclaredProgramSeeder;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.seeder.DeclaredSkillProgressSeeder;
@@ -67,6 +68,7 @@ public class SeederOrchestrator {
   private final TraceSeeder traceSeeder;
   private final AMSSeeder amsSeeder;
   private final ActivitySeeder activitySeeder;
+  private final DeclaredActivitySeeder declaredActivitySeeder;
 
   private final SeedingState seedingState;
 
@@ -123,7 +125,8 @@ public class SeederOrchestrator {
 
       declaredProgramSeeder.seed(savedStudents);
 
-      activitySeeder.seed(savedUsers.getFirst());
+      var savedActivities = activitySeeder.seed(savedUsers.getFirst());
+      declaredActivitySeeder.seed(savedStudents, savedActivities);
 
       log.info("✔ Seeding successfully finished");
       seedingState.markCompleted();
