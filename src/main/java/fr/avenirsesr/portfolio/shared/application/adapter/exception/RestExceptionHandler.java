@@ -17,6 +17,8 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInval
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidRatingException;
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.exception.DeclaredProgramNotFoundException;
@@ -188,6 +190,20 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   @ExceptionHandler(DeclaredActivityAlreadyExistException.class)
   public ResponseEntity<ErrorResponse> handleDeclaredActivityAlreadyExistException(
       DeclaredActivityAlreadyExistException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(DeclaredActivityAlreadyFinishedException.class)
+  public ResponseEntity<ErrorResponse> handleDeclaredActivityAlreadyFinishedException(
+      DeclaredActivityAlreadyFinishedException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(DeclaredActivityHasNotStartedException.class)
+  public ResponseEntity<ErrorResponse> handleDeclaredActivityHasNotStartedException(
+      DeclaredActivityHasNotStartedException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }

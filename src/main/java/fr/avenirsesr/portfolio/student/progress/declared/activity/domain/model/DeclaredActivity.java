@@ -6,7 +6,9 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.e
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,6 +21,8 @@ public class DeclaredActivity extends AvenirsBaseModel {
   private String reflection;
   private LocalDate startDate;
   private LocalDate endDate;
+
+  @Getter(AccessLevel.NONE)
   private Instant finishedAt;
 
   private DeclaredActivity(
@@ -45,6 +49,8 @@ public class DeclaredActivity extends AvenirsBaseModel {
   public EDeclaredActivityStatus getStatus() {
     if (!hasStarted) {
       return EDeclaredActivityStatus.SUBSCRIBED;
+    } else if (finishedAt != null) {
+      return EDeclaredActivityStatus.COMPLETED;
     }
     return EDeclaredActivityStatus.IN_PROGRESS;
   }
@@ -92,5 +98,9 @@ public class DeclaredActivity extends AvenirsBaseModel {
         finishedAt,
         createdAt,
         updatedAt);
+  }
+
+  public Optional<Instant> getFinishedAt() {
+    return Optional.ofNullable(finishedAt);
   }
 }

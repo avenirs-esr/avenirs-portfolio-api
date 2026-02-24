@@ -10,9 +10,11 @@ import java.util.UUID;
 public interface DeclaredActivityService {
   PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria);
 
+  List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student);
+
   DeclaredActivity subscribe(UUID activityId);
 
   void unsubscribeMultiple(List<UUID> activityIds);
 
-  List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student);
+  DeclaredActivity finish(UUID declaredActivityId);
 }
