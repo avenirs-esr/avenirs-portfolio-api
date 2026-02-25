@@ -12,10 +12,5 @@ public interface ActivityBannerSpecification {
 <span class="fc" id="L12">            criteriaBuilder.equal(</span>
 <span class="fc" id="L13">                root.get(&quot;activity&quot;), ActivityMapper.INSTANCE.fromDomain(activity)));</span>
   }
-
-  static Specification&lt;ActivityBannerEntity&gt; onlyActiveVersion() {
-<span class="fc" id="L17">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L18">        criteriaBuilder.equal(root.get(&quot;isActiveVersion&quot;), true);</span>
-  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
