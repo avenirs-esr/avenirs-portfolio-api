@@ -17,7 +17,10 @@ import lombok.Setter;
 public class DeclaredActivity extends AvenirsBaseModel {
   private final Student student;
   private final Activity activity;
-  private boolean hasStarted;
+
+  @Getter(AccessLevel.NONE)
+  private Instant startedAt;
+
   private String reflection;
   private LocalDate startDate;
   private LocalDate endDate;
@@ -29,7 +32,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
       UUID id,
       Student student,
       Activity activity,
-      boolean hasStarted,
+      Instant startedAt,
       String reflection,
       LocalDate startDate,
       LocalDate endDate,
@@ -39,7 +42,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
     super(id, createdAt, updatedAt);
     this.student = student;
     this.activity = activity;
-    this.hasStarted = hasStarted;
+    this.startedAt = startedAt;
     this.reflection = reflection;
     this.startDate = startDate;
     this.endDate = endDate;
@@ -47,18 +50,19 @@ public class DeclaredActivity extends AvenirsBaseModel {
   }
 
   public EDeclaredActivityStatus getStatus() {
-    if (!hasStarted) {
-      return EDeclaredActivityStatus.SUBSCRIBED;
-    } else if (finishedAt != null) {
+    if (finishedAt != null) {
       return EDeclaredActivityStatus.COMPLETED;
     }
-    return EDeclaredActivityStatus.IN_PROGRESS;
+    if (startedAt != null) {
+      return EDeclaredActivityStatus.IN_PROGRESS;
+    }
+    return EDeclaredActivityStatus.SUBSCRIBED;
   }
 
   public static DeclaredActivity create(
       Student student,
       Activity activity,
-      boolean hasStarted,
+      Instant startedAt,
       String reflection,
       LocalDate startDate,
       LocalDate endDate,
@@ -67,7 +71,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
         UUID.randomUUID(),
         student,
         activity,
-        hasStarted,
+        startedAt,
         reflection,
         startDate,
         endDate,
@@ -80,7 +84,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
       UUID id,
       Student student,
       Activity activity,
-      boolean hasStarted,
+      Instant startedAt,
       String reflection,
       LocalDate startDate,
       LocalDate endDate,
@@ -91,7 +95,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
         id,
         student,
         activity,
-        hasStarted,
+        startedAt,
         reflection,
         startDate,
         endDate,
@@ -102,5 +106,9 @@ public class DeclaredActivity extends AvenirsBaseModel {
 
   public Optional<Instant> getFinishedAt() {
     return Optional.ofNullable(finishedAt);
+  }
+
+  public Optional<Instant> getStartedAt() {
+    return Optional.ofNullable(startedAt);
   }
 }

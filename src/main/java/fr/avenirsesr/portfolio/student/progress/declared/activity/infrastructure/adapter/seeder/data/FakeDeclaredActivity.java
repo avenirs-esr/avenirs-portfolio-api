@@ -25,7 +25,7 @@ public class FakeDeclaredActivity {
             UUID.fromString(faker.internet().uuid()),
             student,
             activity,
-            hasStarted,
+            hasStarted ? Instant.now() : null,
             hasStarted ? faker.lorem().paragraph(3) : null,
             hasDate ? LocalDate.now().minusMonths(2) : null,
             hasDate ? LocalDate.now().minusMonths(1) : null,

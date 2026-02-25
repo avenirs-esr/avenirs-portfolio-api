@@ -1,5 +1,8 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.REFLECTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
+
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
@@ -56,7 +59,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     }
 
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(student, activity, false, null, null, null, null);
+        DeclaredActivity.create(student, activity, null, null, null, null, null);
     return declaredActivityRepository.save(declaredActivity);
   }
 
@@ -89,12 +92,11 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         declaredActivityRepository
             .findById(declaredActivityId)
             .orElseThrow(DeclaredActivityNotFoundException::new);
-
     if (!declaredActivity.getStudent().equals(student)) {
       throw new UserNotAuthorizedException();
     }
 
-    if (!declaredActivity.isHasStarted()) {
+    if (declaredActivity.getStartedAt().isEmpty()) {
       throw new DeclaredActivityHasNotStartedException();
     }
 
@@ -105,5 +107,32 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     declaredActivity.setFinishedAt(Instant.now());
 
     return declaredActivityRepository.save(declaredActivity);
+  }
+
+  private static void fieldsValidation(String reflection) {
+    validateOptionalTextMaxLength("reflection", reflection, REFLECTION_LENGTH);
+  }
+
+  @Override
+  public void updateReflection(UUID declaredActivityId, String reflection) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    DeclaredActivity declaredActivity =
+        declaredActivityRepository
+            .findById(declaredActivityId)
+            .orElseThrow(DeclaredActivityNotFoundException::new);
+    if (!declaredActivity.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
+    fieldsValidation(reflection);
+    if (declaredActivity.getFinishedAt().isPresent()) {
+      throw new DeclaredActivityAlreadyFinishedException();
+    }
+    declaredActivity.setReflection(reflection);
+
+    if (declaredActivity.getStartedAt().isEmpty()) {
+      declaredActivity.setStartedAt(Instant.now());
+
+      declaredActivityRepository.save(declaredActivity);
+    }
   }
 }

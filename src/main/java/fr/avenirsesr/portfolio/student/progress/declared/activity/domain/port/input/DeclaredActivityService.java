@@ -17,4 +17,6 @@ public interface DeclaredActivityService {
   void unsubscribeMultiple(List<UUID> activityIds);
 
   DeclaredActivity finish(UUID declaredActivityId);
+
+  void updateReflection(UUID declaredActivityId, String reflection);
 }

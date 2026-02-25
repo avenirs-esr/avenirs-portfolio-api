@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateReflectionRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDtoMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
@@ -76,5 +77,14 @@ public class DeclaredActivityController {
         principal.getName());
     DeclaredActivity declaredActivity = declaredActivityService.finish(declaredActivityId);
     return ResponseEntity.ok(declaredActivity);
+  }
+
+  @PutMapping("/{activityId}/reflection")
+  public ResponseEntity<String> updateReflection(
+      @PathVariable("activityId") UUID activityId,
+      @Valid @RequestBody UpdateReflectionRequest request) {
+
+    declaredActivityService.updateReflection(activityId, request.reflection());
+    return ResponseEntity.ok("Declared activities successfully updated");
   }
 }
