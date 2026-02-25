@@ -1,8 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller;
 
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,18 +18,20 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   @Autowired private UserRepository userRepository;
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
-  @Autowired private LoggedInUserService loggedInUserService;
 
   @Value("${hmac.secret-key}")
   private String secretKey;
@@ -136,7 +136,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         declaredActivityRepository
             .findById(UUID.fromString(declaredActivityId))
             .orElseThrow(DeclaredActivityNotFoundException::new);
-    declaredActivity.setHasStarted(true);
+    declaredActivity.setStartedAt(Instant.now());
     declaredActivityRepository.save(declaredActivity);
   }
 
@@ -212,7 +212,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", notNullValue()))
         .andExpect(jsonPath("$.activity").exists())
-        .andExpect(jsonPath("$.hasStarted").value(false));
+        .andExpect(jsonPath("$.startedAt").value(nullValue()));
   }
 
   @Test
@@ -250,6 +250,33 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .andExpect(status().isConflict());
   }
 
+  private Student getStudent() {
+    BddLogger.then("Create and persist user");
+
+    User user =
+        User.create(UUID.fromString(studentId), "other.student@example.com", "Other", "Student");
+    user = userRepository.save(user);
+    BddLogger.then("Create and persist student");
+
+    student = Student.create(user, "Some bio");
+    student = studentRepository.save(student);
+    return student;
+  }
+
+  private @NonNull Activity getActivity(int i) {
+    BddLogger.then("Create and persist Activity");
+
+    var activity =
+        Activity.create(
+            UUID.randomUUID(),
+            "Activity " + i,
+            EActivityThematic.EXPERIENCES,
+            "Test activity " + i,
+            "2026");
+    activityRepository.save(activity);
+    return activity;
+  }
+
   @Nested
   class WhenUnsubscribeADeclaredActivity {
 
@@ -258,7 +285,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     void shouldUnsubscribeMultipleDeclaredActivities_whenOwnedByStudent() throws Exception {
 
       BddLogger.given("declared activities belonging to the student");
-      var declaredActivityIds = createDeclaredActivitiesForStudent(2);
+      var declaredActivityIds = createDeclaredActivitiesForStudent();
 
       BddLogger.when("performing DELETE on declared activities");
 
@@ -283,40 +310,18 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
           declaredActivities.isEmpty(), "All declared activities of the student must be deleted");
     }
 
-    private List<UUID> createDeclaredActivitiesForStudent(int count) {
+    private List<UUID> createDeclaredActivitiesForStudent() {
 
-      return IntStream.range(0, count)
+      return IntStream.range(0, 2)
           .mapToObj(
               i -> {
-                BddLogger.then("Create and persist user");
+                student = getStudent();
 
-                User user =
-                    User.create(
-                        UUID.fromString(studentId),
-                        "other.student@example.com",
-                        "Other",
-                        "Student");
-                user = userRepository.save(user);
-
-                BddLogger.then("Create and persist student");
-
-                student = Student.create(user, "Some bio");
-                studentRepository.save(student);
-
-                BddLogger.then("Create and persist Activity");
-
-                var activity =
-                    Activity.create(
-                        UUID.randomUUID(),
-                        "Activity " + i,
-                        EActivityThematic.EXPERIENCES,
-                        "Test activity " + i,
-                        "2026");
-                activityRepository.save(activity);
+                var activity = getActivity(i);
                 BddLogger.then("Create and persist DeclaredActivity for student");
 
                 var declaredActivity =
-                    DeclaredActivity.create(student, activity, false, null, null, null, null);
+                    DeclaredActivity.create(student, activity, null, null, null, null, null);
                 declaredActivityRepository.save(declaredActivity);
 
                 return declaredActivity.getId();
@@ -453,5 +458,89 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                   .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isConflict());
     }
+  }
+
+  @Test
+  void shouldUpdateReflectionAndSetStatusToInProgress() throws Exception {
+
+    // Given
+    BddLogger.given("Un étudiant et une activité");
+    student = getStudent();
+    var activity = getActivity(1);
+
+    BddLogger.and("Une DeclaredActivity persistée pour cet étudiant");
+    var declaredActivity = DeclaredActivity.create(student, activity, null, null, null, null, null);
+    declaredActivityRepository.save(declaredActivity);
+
+    String reflection = "Nouvelle prise de recul sur mon activité";
+    String body =
+        """
+        {
+              "reflection": "%s"
+        }
+        """
+            .formatted(reflection);
+    BddLogger.and("Un body JSON contenant la reflection");
+    // When
+    BddLogger.when("On appelle le endpoint PUT /{activityId}/reflection");
+
+    mockMvc
+        .perform(
+            put(BASE_PATH + "/" + declaredActivity.getId() + "/reflection")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isOk());
+
+    // Then
+    BddLogger.then("La reflection est mise à jour en base");
+    DeclaredActivity updated =
+        declaredActivityRepository.findById(declaredActivity.getId()).orElseThrow();
+
+    assertEquals(reflection, updated.getReflection());
+
+    BddLogger.and("Le statut passe automatiquement à IN_PROGRESS");
+    assertEquals(EDeclaredActivityStatus.IN_PROGRESS, updated.getStatus());
+  }
+
+  @Test
+  void shouldReturnValidationMessageWhenReflectionExceeds4000Characters() throws Exception {
+
+    // Given
+    BddLogger.given("Un étudiant et une activité");
+    student = getStudent();
+    var activity = getActivity(1);
+
+    var declaredActivity = DeclaredActivity.create(student, activity, null, null, null, null, null);
+    declaredActivityRepository.save(declaredActivity);
+
+    BddLogger.and("Une reflection de plus de 4000 caractères");
+    String reflection = "a".repeat(4001);
+    String body =
+        """
+        {
+              "reflection": "%s"
+        }
+        """
+            .formatted(reflection);
+
+    // When
+    BddLogger.when("On appelle le endpoint avec une reflection trop longue");
+
+    mockMvc
+        .perform(
+            put(BASE_PATH + "/" + declaredActivity.getId() + "/reflection")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.code").value("TOO_LONG"))
+        .andExpect(
+            jsonPath("$.message").value("The field reflection exceeds the maximum allowed length"));
   }
 }

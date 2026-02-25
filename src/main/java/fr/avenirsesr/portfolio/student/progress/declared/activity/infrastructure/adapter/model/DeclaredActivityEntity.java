@@ -44,8 +44,8 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
   @JoinColumn(name = "activity_id")
   private ActivityEntity activity;
 
-  @Column(name = "has_started", nullable = false)
-  private boolean hasStarted;
+  @Column(name = "started_at")
+  private Instant startedAt;
 
   @Size(max = REFLECTION_LENGTH, message = "reflection can not exceed {max} characters")
   private String reflection;
@@ -60,7 +60,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       UUID id,
       StudentEntity student,
       ActivityEntity activity,
-      boolean hasStarted,
+      Instant startedAt,
       String reflection,
       LocalDate startDate,
       LocalDate endDate,
@@ -68,7 +68,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
     setId(id);
     this.student = student;
     this.activity = activity;
-    this.hasStarted = hasStarted;
+    this.startedAt = startedAt;
     this.reflection = reflection;
     this.startDate = startDate;
     this.endDate = endDate;
@@ -79,13 +79,13 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       UUID id,
       StudentEntity student,
       ActivityEntity activity,
-      boolean hasStarted,
+      Instant startedAt,
       String reflection,
       LocalDate startDate,
       LocalDate endDate,
       Instant finishedAt) {
     return new DeclaredActivityEntity(
-        id, student, activity, hasStarted, reflection, startDate, endDate, finishedAt);
+        id, student, activity, startedAt, reflection, startDate, endDate, finishedAt);
   }
 
   @Override

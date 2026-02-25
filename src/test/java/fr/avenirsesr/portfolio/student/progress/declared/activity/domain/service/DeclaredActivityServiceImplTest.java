@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.never;
@@ -20,6 +19,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.excepti
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -79,7 +79,7 @@ class DeclaredActivityServiceImplTest {
 
     assertThat(savedActivity.getStudent()).isEqualTo(student);
     assertThat(savedActivity.getActivity()).isEqualTo(activity);
-    assertThat(savedActivity.isHasStarted()).isFalse();
+    assertThat(savedActivity.getStartedAt()).isEmpty();
   }
 
   @Test
@@ -164,7 +164,7 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(student, activity, true, null, null, null, null);
+        DeclaredActivity.create(student, activity, Instant.now(), null, null, null, null);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
@@ -186,7 +186,7 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(student, activity, false, null, null, null, null);
+        DeclaredActivity.create(student, activity, null, null, null, null, null);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
@@ -227,7 +227,7 @@ class DeclaredActivityServiceImplTest {
     Activity activity = ActivityFixture.create().toModel();
 
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(anotherStudent, activity, false, null, null, null, null);
+        DeclaredActivity.create(anotherStudent, activity, null, null, null, null, null);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
@@ -248,9 +248,9 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(student, activity, false, null, null, null, null);
+        DeclaredActivity.create(student, activity, null, null, null, null, null);
 
-    declaredActivity.setHasStarted(true);
+    declaredActivity.setStartedAt(Instant.now());
     declaredActivity.setFinishedAt(Instant.now());
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
@@ -264,5 +264,38 @@ class DeclaredActivityServiceImplTest {
         .isInstanceOf(DeclaredActivityAlreadyFinishedException.class);
 
     verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldUpdateReflectionSuccessfully() {
+
+    BddLogger.given("Un DeclaredActivity existant récupéré depuis le repository");
+
+    UUID activityId = UUID.randomUUID();
+
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+    Student student = mock(Student.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivity.getStudent()).thenReturn(student);
+
+    when(declaredActivityRepository.findById(activityId)).thenReturn(Optional.of(declaredActivity));
+
+    String reflection = "Nouvelle réflexion";
+    BddLogger.and("Un body reflection contenant : " + reflection);
+
+    when(declaredActivity.getStartedAt()).thenReturn(Optional.empty());
+    BddLogger.when("Le service updateReflection est appelé");
+    declaredActivityService.updateReflection(activityId, reflection);
+
+    BddLogger.then("La reflection doit être mise à jour");
+    verify(declaredActivity).setReflection(reflection);
+
+    BddLogger.and("La DeclaredActivity doit être persistée via le repository");
+    verify(declaredActivityRepository).save(declaredActivity);
+
+    BddLogger.and("Le statut doit être IN_PROGRESS");
+    when(declaredActivity.getStatus()).thenReturn(EDeclaredActivityStatus.IN_PROGRESS);
+    Assertions.assertEquals(EDeclaredActivityStatus.IN_PROGRESS, declaredActivity.getStatus());
   }
 }

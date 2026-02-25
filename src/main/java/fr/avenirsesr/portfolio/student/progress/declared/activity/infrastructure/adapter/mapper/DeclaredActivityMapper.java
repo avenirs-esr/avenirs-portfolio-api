@@ -16,7 +16,7 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         declaredActivity.getId(),
         StudentMapper.INSTANCE.fromDomain(declaredActivity.getStudent()),
         ActivityMapper.INSTANCE.fromDomain(declaredActivity.getActivity()),
-        declaredActivity.isHasStarted(),
+        declaredActivity.getStartedAt().orElse(null),
         declaredActivity.getReflection(),
         declaredActivity.getStartDate(),
         declaredActivity.getEndDate(),
@@ -29,7 +29,7 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         entity.getId(),
         StudentMapper.INSTANCE.toDomain(entity.getStudent()),
         ActivityMapper.INSTANCE.toDomain(entity.getActivity()),
-        entity.isHasStarted(),
+        entity.getStartedAt(),
         entity.getReflection(),
         entity.getStartDate(),
         entity.getEndDate(),
@@ -49,7 +49,7 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         attributs.contains("activity")
             ? ActivityMapper.INSTANCE.toDomain(entity.getActivity(), graph.from("activity"))
             : null,
-        entity.isHasStarted(),
+        entity.getStartedAt(),
         entity.getReflection(),
         entity.getStartDate(),
         entity.getEndDate(),
