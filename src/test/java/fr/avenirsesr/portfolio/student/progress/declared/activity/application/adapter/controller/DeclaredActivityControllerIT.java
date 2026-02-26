@@ -28,6 +28,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
@@ -192,14 +193,14 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
   @Transactional
   @Test
-  void shouldSubscribeToActivity() throws Exception {
+  void shouldSubscribeToActivityWithoutDates() throws Exception {
     BddLogger.given("the " + BASE_PATH + "/subscribe endpoint and a valid activity id");
     Activity activity =
         activityRepository.findAll().stream()
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("No activity found"));
 
-    BddLogger.when("performing a POST to subscribe to an activity");
+    BddLogger.when("performing a POST to subscribe to an activity without body");
     BddLogger.then("it should return OK status and the declared activity");
 
     mockMvc
@@ -213,6 +214,62 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$.id", notNullValue()))
         .andExpect(jsonPath("$.activity").exists())
         .andExpect(jsonPath("$.startedAt").value(nullValue()));
+  }
+
+  @Transactional
+  @Test
+  void shouldSubscribeToActivityWithValidDates() throws Exception {
+    BddLogger.given("the subscribe endpoint and a valid activity id with dates");
+    Activity activity =
+        activityRepository.findAll().stream()
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No activity found"));
+
+    String tomorrow = LocalDate.now().plusDays(1).toString();
+    String nextWeek = LocalDate.now().plusDays(7).toString();
+    String requestBody =
+        String.format("{\"startDate\": \"%s\", \"endDate\": \"%s\"}", tomorrow, nextWeek);
+
+    BddLogger.when("performing a POST to subscribe with valid dates");
+    BddLogger.then("it should return OK status and the dates are saved");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/subscribe/" + activity.getId())
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id", notNullValue()))
+        .andExpect(jsonPath("$.startDate").value(tomorrow))
+        .andExpect(jsonPath("$.endDate").value(nextWeek));
+  }
+
+  @Transactional
+  @Test
+  void shouldReturnBadRequestWhenSubscribingWithMissingDate() throws Exception {
+    BddLogger.given("the subscribe endpoint and a request body missing endDate");
+    Activity activity =
+        activityRepository.findAll().stream()
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No activity found"));
+
+    String requestBody = "{\"startDate\": \"2026-01-01\"}";
+
+    BddLogger.when("performing a POST to subscribe with incomplete body");
+    BddLogger.then("it should return Bad Request status");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/subscribe/" + activity.getId())
+                .header("X-Signed-Context", studentPayload)
+                .header("X-Context-Kid", secretKey)
+                .header("X-Context-Signature", studentSignature)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -349,6 +406,10 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                   .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
           .andExpect(status().isBadRequest());
     }
+  }
+
+  @Nested
+  class WhenFinishADeclaredActivity {
 
     @Transactional
     @Test

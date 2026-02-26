@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ public interface DeclaredActivityService {
 
   List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student);
 
-  DeclaredActivity subscribe(UUID activityId);
+  DeclaredActivity subscribe(UUID activityId, LocalDate startDate, LocalDate endDate);
 
   void unsubscribeMultiple(List<UUID> activityIds);
 

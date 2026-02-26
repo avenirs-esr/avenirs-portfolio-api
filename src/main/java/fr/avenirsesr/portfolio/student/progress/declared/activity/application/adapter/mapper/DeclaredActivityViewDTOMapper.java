@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.application.a
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 
-public interface DeclaredActivityViewDtoMapper {
+public interface DeclaredActivityViewDTOMapper {
   static DeclaredActivityViewDTO toDTO(DeclaredActivity declaredActivity) {
     return new DeclaredActivityViewDTO(
         declaredActivity.getId(),

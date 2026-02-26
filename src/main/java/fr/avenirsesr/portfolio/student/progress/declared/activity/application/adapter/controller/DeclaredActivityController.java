@@ -5,12 +5,14 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.SubscribeDeclaredActivityRequestDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateReflectionRequest;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDtoMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -48,20 +50,26 @@ public class DeclaredActivityController {
 
     var viewResponse =
         new PagedResponse<>(
-            pagedResult.content().stream().map(DeclaredActivityViewDtoMapper::toDTO).toList(),
+            pagedResult.content().stream().map(DeclaredActivityViewDTOMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
     return ResponseEntity.ok(viewResponse);
   }
 
   @PostMapping("/subscribe/{activityId}")
-  public ResponseEntity<DeclaredActivity> subscribe(@Valid @PathVariable UUID activityId) {
-    DeclaredActivity declaredActivity = declaredActivityService.subscribe(activityId);
+  public ResponseEntity<DeclaredActivity> subscribeActivityProgress(
+      @Valid @PathVariable UUID activityId,
+      @Valid @RequestBody(required = false) SubscribeDeclaredActivityRequestDTO requestDTO) {
+    LocalDate startDate = requestDTO != null ? requestDTO.startDate() : null;
+    LocalDate endDate = requestDTO != null ? requestDTO.endDate() : null;
+    DeclaredActivity declaredActivity =
+        declaredActivityService.subscribe(activityId, startDate, endDate);
     return ResponseEntity.ok(declaredActivity);
   }
 
   @DeleteMapping("/unsubscribe")
-  public ResponseEntity<String> unsubscribe(@RequestBody List<UUID> declaredActivityIds) {
+  public ResponseEntity<String> unsubscribeActivitiesProgresses(
+      @RequestBody List<UUID> declaredActivityIds) {
 
     declaredActivityService.unsubscribeMultiple(declaredActivityIds);
 
