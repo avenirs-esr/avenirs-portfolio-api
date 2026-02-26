@@ -23,4 +23,6 @@ public interface DeclaredActivityService {
   DeclaredActivity finish(UUID declaredActivityId);
 
   void updateReflection(UUID declaredActivityId, String reflection);
+
+  DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId);
 }
