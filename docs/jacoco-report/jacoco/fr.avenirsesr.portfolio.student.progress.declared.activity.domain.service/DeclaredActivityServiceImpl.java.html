@@ -125,14 +125,15 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     }
 <span class="fc" id="L126">    fieldsValidation(reflection);</span>
 <span class="pc bpc" id="L127" title="1 of 2 branches missed.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
-<span class="fc" id="L128">      declaredActivity.setReflection(reflection);</span>
-
-<span class="pc bpc" id="L130" title="1 of 2 branches missed.">      if (declaredActivity.getStartedAt().isEmpty()) {</span>
-<span class="fc" id="L131">        declaredActivity.setStartedAt(Instant.now());</span>
-      }
-
-<span class="fc" id="L134">      declaredActivityRepository.save(declaredActivity);</span>
+<span class="nc" id="L128">      throw new DeclaredActivityAlreadyFinishedException();</span>
     }
-<span class="fc" id="L136">  }</span>
+<span class="fc" id="L130">    declaredActivity.setReflection(reflection);</span>
+
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">    if (declaredActivity.getStartedAt().isEmpty()) {</span>
+<span class="fc" id="L133">      declaredActivity.setStartedAt(Instant.now());</span>
+
+<span class="fc" id="L135">      declaredActivityRepository.save(declaredActivity);</span>
+    }
+<span class="fc" id="L137">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
