@@ -16,6 +16,8 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder.data.FakeDeclaredActivity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -46,9 +48,12 @@ public class DeclaredActivitySeeder {
 
     List<DeclaredActivityCreationData> creationData =
         switch (seederSource) {
-          case CSV ->
-              fileReader.readJSON(
-                  PATH_FILE, new TypeReference<List<DeclaredActivityCreationData>>() {});
+          case CSV -> {
+            List<DeclaredActivityCreationData> rawData =
+                fileReader.readJSON(PATH_FILE, new TypeReference<>() {});
+            LocalDate today = LocalDate.now();
+            yield rawData.stream().map(data -> adjustDates(data, today)).toList();
+          }
           case FAKER ->
               savedStudents.stream()
                   .map(
@@ -87,9 +92,36 @@ public class DeclaredActivitySeeder {
               new RequestData(
                   Optional.ofNullable(UserMapper.INSTANCE.toDomain(student.getUser())),
                   ELanguage.FRENCH));
-          declaredActivityService.subscribe(data.activityId());
+          declaredActivityService.subscribe(data.activityId(), data.startDate(), data.endDate());
         });
 
     log.info("✔ {} declared activities created", creationData.size());
+  }
+
+  private DeclaredActivityCreationData adjustDates(
+      DeclaredActivityCreationData data, LocalDate today) {
+    LocalDate originalStart = data.startDate();
+    LocalDate originalEnd = data.endDate();
+
+    if (originalStart == null || originalEnd == null) {
+      return data;
+    }
+
+    long durationInDays = ChronoUnit.DAYS.between(originalStart, originalEnd);
+
+    LocalDate currentYearStart = originalStart.withYear(today.getYear());
+
+    LocalDate adjustedStart =
+        currentYearStart.isBefore(today) ? currentYearStart.plusYears(1) : currentYearStart;
+
+    LocalDate adjustedEnd = adjustedStart.plusDays(durationInDays);
+
+    return new DeclaredActivityCreationData(
+        data.studentId(),
+        data.activityId(),
+        data.reflection(),
+        adjustedStart,
+        adjustedEnd,
+        data.finishedAt());
   }
 }

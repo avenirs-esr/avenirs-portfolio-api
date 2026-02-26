@@ -2,9 +2,10 @@ package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
 
-import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDetailDTO;
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDetailsDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityNavigationDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityOverviewDTO;
+import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityDetailsDtoMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityNavigationMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
@@ -15,7 +16,6 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.List;
@@ -33,25 +33,13 @@ public class ActivityController {
   private final ActivityService activityService;
 
   @GetMapping("/{activityId}")
-  public ResponseEntity<ActivityDetailDTO> getActivityDetail(
+  public ResponseEntity<ActivityDetailsDTO> getActivityDetail(
       HttpServletRequest request, @PathVariable UUID activityId) {
     log.debug("Received request to get activity [{}] detail", activityId);
 
     ActivityDetailData activityDetail = activityService.getActivityDetail(activityId);
     String baseUrl = extractOrigin(request);
-    return ResponseEntity.ok(
-        new ActivityDetailDTO(
-            activityDetail.id(),
-            activityDetail.title(),
-            activityDetail.thematic(),
-            new FileDTO(
-                activityDetail.activityBanner().id().orElse(null),
-                activityDetail.activityBanner().name().orElse(null),
-                baseUrl + activityDetail.activityBanner().url()),
-            activityDetail.summary(),
-            activityDetail.executionPeriodInfo(),
-            activityDetail.createdAt(),
-            activityDetail.updatedAt()));
+    return ResponseEntity.ok(ActivityDetailsDtoMapper.toDTO(activityDetail, baseUrl));
   }
 
   @GetMapping

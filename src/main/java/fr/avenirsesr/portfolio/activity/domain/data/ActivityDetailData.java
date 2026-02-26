@@ -9,6 +9,7 @@ public record ActivityDetailData(
     UUID id,
     String title,
     EActivityThematic thematic,
+    boolean isSubscribed,
     FileData activityBanner,
     String summary,
     String executionPeriodInfo,
