@@ -72,10 +72,11 @@ public class DeclaredActivitySeeder {
                                       new DeclaredActivityCreationData(
                                           fakeDeclaredActivity.getStudent().getId(),
                                           fakeDeclaredActivity.getActivity().getId(),
-                                          fakeDeclaredActivity.getReflection(),
-                                          fakeDeclaredActivity.getStartDate(),
-                                          fakeDeclaredActivity.getEndDate(),
-                                          fakeDeclaredActivity.getFinishedAt()))
+                                          Optional.ofNullable(fakeDeclaredActivity.getReflection()),
+                                          Optional.ofNullable(fakeDeclaredActivity.getStartDate()),
+                                          Optional.ofNullable(fakeDeclaredActivity.getEndDate()),
+                                          Optional.ofNullable(
+                                              fakeDeclaredActivity.getFinishedAt())))
                               .toList())
                   .flatMap(List::stream)
                   .toList();
@@ -92,7 +93,19 @@ public class DeclaredActivitySeeder {
               new RequestData(
                   Optional.ofNullable(UserMapper.INSTANCE.toDomain(student.getUser())),
                   ELanguage.FRENCH));
-          declaredActivityService.subscribe(data.activityId(), data.startDate(), data.endDate());
+          var declaredActivity =
+              declaredActivityService.subscribe(
+                  data.activityId(), data.startDate().orElse(null), data.endDate().orElse(null));
+          if (data.reflection().isPresent())
+            declaredActivityService.updateReflection(
+                declaredActivity.getId(), data.reflection().get());
+
+          if (data.finishedAt().isPresent()) {
+            if (data.reflection().isEmpty()) {
+              declaredActivityService.updateReflection(declaredActivity.getId(), null);
+            }
+            declaredActivityService.finish(declaredActivity.getId());
+          }
         });
 
     log.info("✔ {} declared activities created", creationData.size());
@@ -100,8 +113,8 @@ public class DeclaredActivitySeeder {
 
   private DeclaredActivityCreationData adjustDates(
       DeclaredActivityCreationData data, LocalDate today) {
-    LocalDate originalStart = data.startDate();
-    LocalDate originalEnd = data.endDate();
+    LocalDate originalStart = data.startDate().orElse(null);
+    LocalDate originalEnd = data.endDate().orElse(null);
 
     if (originalStart == null || originalEnd == null) {
       return data;
@@ -120,8 +133,8 @@ public class DeclaredActivitySeeder {
         data.studentId(),
         data.activityId(),
         data.reflection(),
-        adjustedStart,
-        adjustedEnd,
+        Optional.of(adjustedStart),
+        Optional.of(adjustedEnd),
         data.finishedAt());
   }
 }

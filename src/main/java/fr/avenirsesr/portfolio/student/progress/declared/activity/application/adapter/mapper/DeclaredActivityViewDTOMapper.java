@@ -12,6 +12,7 @@ public interface DeclaredActivityViewDTOMapper {
         declaredActivity.getActivity().getSummary(),
         declaredActivity.getStatus(),
         declaredActivity.getStartDate(),
-        declaredActivity.getEndDate());
+        declaredActivity.getEndDate(),
+        declaredActivity.getUpdatedAt());
   }
 }

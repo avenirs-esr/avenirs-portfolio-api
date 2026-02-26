@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.application.a
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -14,4 +15,5 @@ public record DeclaredActivityViewDTO(
     String summary,
     @Schema(ref = "#/components/schemas/EDeclaredActivityStatus") EDeclaredActivityStatus status,
     LocalDate startDate,
-    LocalDate endDate) {}
+    LocalDate endDate,
+    Instant updatedAt) {}

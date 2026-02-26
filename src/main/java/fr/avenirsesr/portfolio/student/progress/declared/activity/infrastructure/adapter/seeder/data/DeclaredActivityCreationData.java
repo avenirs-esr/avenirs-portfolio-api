@@ -2,12 +2,13 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructur
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 public record DeclaredActivityCreationData(
     UUID studentId,
     UUID activityId,
-    String reflection,
-    LocalDate startDate,
-    LocalDate endDate,
-    Instant finishedAt) {}
+    Optional<String> reflection,
+    Optional<LocalDate> startDate,
+    Optional<LocalDate> endDate,
+    Optional<Instant> finishedAt) {}

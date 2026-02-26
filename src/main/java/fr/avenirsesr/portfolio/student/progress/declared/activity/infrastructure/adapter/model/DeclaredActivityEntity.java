@@ -48,6 +48,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
   private Instant startedAt;
 
   @Size(max = REFLECTION_LENGTH, message = "reflection can not exceed {max} characters")
+  @Column(columnDefinition = "TEXT")
   private String reflection;
 
   @Column(name = "finished_at")

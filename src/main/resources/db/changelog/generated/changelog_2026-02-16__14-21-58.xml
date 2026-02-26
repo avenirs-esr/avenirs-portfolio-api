@@ -16,7 +16,7 @@
             <column name="has_started" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>
-            <column name="reflection" type="VARCHAR(255)"/>
+            <column name="reflection" type="TEXT"/>
             <column name="activity_id" type="UUID"/>
             <column name="student_id" type="UUID"/>
         </createTable>
