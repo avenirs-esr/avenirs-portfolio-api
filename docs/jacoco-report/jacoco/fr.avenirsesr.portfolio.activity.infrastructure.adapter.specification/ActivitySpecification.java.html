@@ -13,16 +13,16 @@ import org.springframework.data.jpa.domain.Specification;
   }
 
   public static Specification&lt;ActivityEntity&gt; latest(Duration duration) {
-<span class="fc" id="L16">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc" id="L17">      Instant threshold = Instant.now().minus(duration);</span>
-<span class="fc" id="L18">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
+<span class="nc" id="L16">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc" id="L17">      Instant threshold = Instant.now().minus(duration);</span>
+<span class="nc" id="L18">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
     };
   }
 
   public static Specification&lt;ActivityEntity&gt; exclude(List&lt;ActivityEntity&gt; activities) {
-<span class="fc" id="L23">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L24" title="2 of 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
-<span class="fc" id="L25">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L23">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L24" title="All 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
+<span class="nc" id="L25">        return criteriaBuilder.conjunction();</span>
       }
 <span class="nc" id="L27">      return root.in(activities).not();</span>
     };

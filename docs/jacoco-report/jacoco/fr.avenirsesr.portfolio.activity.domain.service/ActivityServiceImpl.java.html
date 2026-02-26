@@ -4,13 +4,18 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
 
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.file.domain.data.FileData;
+import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
+import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
@@ -19,18 +24,22 @@ import java.time.Instant;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L27">@Slf4j</span>
+<span class="fc" id="L33">@Slf4j</span>
 @AllArgsConstructor
 public class ActivityServiceImpl implements ActivityService {
-<span class="fc" id="L30">  private static final Duration DURATION_FOR_LATEST = Duration.ofDays(90);</span>
+  private static final String ACTIVITY_BANNER_PATH = &quot;/storage/activities/&quot;;
+
+<span class="fc" id="L38">  private static final Duration DURATION_FOR_LATEST = Duration.ofDays(90);</span>
   private final ActivityRepository activityRepository;
   private final DeclaredActivityService declaredActivityService;
   private final LoggedInUserService loggedInUserService;
+  private final ActivityResourceService activityResourceService;
 
   @Override
   public Activity create(
@@ -39,64 +48,82 @@ public class ActivityServiceImpl implements ActivityService {
       EActivityThematic thematic,
       String summary,
       String executionPeriodInfo) {
-<span class="fc" id="L42">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
-<span class="fc" id="L43">    requireNotNull(&quot;thematic&quot;, thematic);</span>
-<span class="fc" id="L44">    requireNotBlankAndMaxLength(&quot;summary&quot;, summary, DESCRIPTION_LENGTH);</span>
-<span class="fc" id="L45">    requireNotBlankAndMaxLength(</span>
+<span class="fc" id="L51">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
+<span class="fc" id="L52">    requireNotNull(&quot;thematic&quot;, thematic);</span>
+<span class="fc" id="L53">    requireNotBlankAndMaxLength(&quot;summary&quot;, summary, DESCRIPTION_LENGTH);</span>
+<span class="fc" id="L54">    requireNotBlankAndMaxLength(</span>
         &quot;executionPeriodInfo&quot;, executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
 
-<span class="fc" id="L48">    var activity = Activity.create(id, title, thematic, summary, executionPeriodInfo);</span>
-<span class="fc" id="L49">    activityRepository.save(activity);</span>
-<span class="fc" id="L50">    return activity;</span>
+<span class="fc" id="L57">    var activity = Activity.create(id, title, thematic, summary, executionPeriodInfo);</span>
+<span class="fc" id="L58">    activityRepository.save(activity);</span>
+<span class="fc" id="L59">    return activity;</span>
+  }
+
+  @Override
+  public ActivityDetailData getActivityDetail(UUID id) {
+<span class="fc" id="L64">    Activity activity = activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);</span>
+<span class="fc" id="L65">    ActivityBanner activityBanner = activityResourceService.getActivityBanner(activity);</span>
+<span class="fc" id="L66">    return new ActivityDetailData(</span>
+<span class="fc" id="L67">        activity.getId(),</span>
+<span class="fc" id="L68">        activity.getTitle(),</span>
+<span class="fc" id="L69">        activity.getThematic(),</span>
+        new FileData(
+<span class="fc" id="L71">            Optional.of(activityBanner.getId()),</span>
+<span class="fc" id="L72">            Optional.of(activityBanner.getFileName()),</span>
+<span class="fc" id="L73">            ACTIVITY_BANNER_PATH + activityBanner.getId()),</span>
+<span class="fc" id="L74">        activity.getSummary(),</span>
+<span class="fc" id="L75">        activity.getExecutionPeriodInfo(),</span>
+<span class="fc" id="L76">        activity.getCreatedAt(),</span>
+<span class="fc" id="L77">        activity.getUpdatedAt());</span>
   }
 
   @Override
   public Map&lt;EActivityThematic, List&lt;Activity&gt;&gt; getActivityNavigation() {
-<span class="fc" id="L55">    return activityRepository.findAll().stream()</span>
-<span class="fc" id="L56">        .collect(</span>
-<span class="fc" id="L57">            Collectors.groupingBy(</span>
+<span class="fc" id="L82">    return activityRepository.findAll().stream()</span>
+<span class="fc" id="L83">        .collect(</span>
+<span class="fc" id="L84">            Collectors.groupingBy(</span>
                 Activity::getThematic,
-<span class="fc" id="L59">                () -&gt; new EnumMap&lt;&gt;(EActivityThematic.class),</span>
-<span class="fc" id="L60">                Collectors.toList()));</span>
+<span class="fc" id="L86">                () -&gt; new EnumMap&lt;&gt;(EActivityThematic.class),</span>
+<span class="fc" id="L87">                Collectors.toList()));</span>
   }
 
   @Override
   public PagedResult&lt;ActivityWithStudentStatusData&gt; activitiesView(
       EActivityThematic thematic, PageCriteria pageCriteria) {
-<span class="fc" id="L66">    var pagedActivities = activityRepository.findAll(thematic, pageCriteria);</span>
-<span class="fc" id="L67">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L68">    var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);</span>
-<span class="fc" id="L69">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L70">        pagedActivities.content().stream()</span>
-<span class="fc" id="L71">            .map(</span>
+<span class="fc" id="L93">    var pagedActivities = activityRepository.findAll(thematic, pageCriteria);</span>
+<span class="fc" id="L94">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L95">    var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);</span>
+<span class="fc" id="L96">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L97">        pagedActivities.content().stream()</span>
+<span class="fc" id="L98">            .map(</span>
                 activity -&gt;
-<span class="fc" id="L73">                    new ActivityWithStudentStatusData(</span>
+<span class="fc" id="L100">                    new ActivityWithStudentStatusData(</span>
                         activity,
-<span class="fc" id="L75">                        activity.getCreatedAt().isAfter(Instant.now().minus(DURATION_FOR_LATEST)),</span>
-<span class="fc" id="L76">                        subscribedActivities.stream()</span>
-<span class="fc" id="L77">                            .filter(a -&gt; a.getActivity().equals(activity))</span>
-<span class="fc" id="L78">                            .map(DeclaredActivity::getStatus)</span>
-<span class="fc" id="L79">                            .findFirst()</span>
-<span class="fc" id="L80">                            .orElse(null)))</span>
-<span class="fc" id="L81">            .toList(),</span>
-<span class="fc" id="L82">        pagedActivities.pageInfo());</span>
+<span class="fc" id="L102">                        activity.getCreatedAt().isAfter(Instant.now().minus(DURATION_FOR_LATEST)),</span>
+<span class="fc" id="L103">                        subscribedActivities.stream()</span>
+<span class="fc" id="L104">                            .filter(a -&gt; a.getActivity().equals(activity))</span>
+<span class="fc" id="L105">                            .map(DeclaredActivity::getStatus)</span>
+<span class="fc" id="L106">                            .findFirst()</span>
+<span class="fc" id="L107">                            .orElse(null)))</span>
+<span class="fc" id="L108">            .toList(),</span>
+<span class="fc" id="L109">        pagedActivities.pageInfo());</span>
   }
 
   @Override
   public PagedResult&lt;ActivityWithStudentStatusData&gt; latestActivitiesView(
       PageCriteria pageCriteria) {
-<span class="fc" id="L88">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L89">    var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);</span>
-<span class="fc" id="L90">    var pagedActivities =</span>
-<span class="fc" id="L91">        activityRepository.findLatest(</span>
+<span class="fc" id="L115">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L116">    var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);</span>
+<span class="fc" id="L117">    var pagedActivities =</span>
+<span class="fc" id="L118">        activityRepository.findLatest(</span>
             DURATION_FOR_LATEST,
-<span class="fc" id="L93">            subscribedActivities.stream().map(DeclaredActivity::getActivity).toList(),</span>
+<span class="fc" id="L120">            subscribedActivities.stream().map(DeclaredActivity::getActivity).toList(),</span>
             pageCriteria);
-<span class="fc" id="L95">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L96">        pagedActivities.content().stream()</span>
-<span class="fc" id="L97">            .map(activity -&gt; new ActivityWithStudentStatusData(activity, true, null))</span>
-<span class="fc" id="L98">            .toList(),</span>
-<span class="fc" id="L99">        pagedActivities.pageInfo());</span>
+<span class="fc" id="L122">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L123">        pagedActivities.content().stream()</span>
+<span class="fc" id="L124">            .map(activity -&gt; new ActivityWithStudentStatusData(activity, true, null))</span>
+<span class="fc" id="L125">            .toList(),</span>
+<span class="fc" id="L126">        pagedActivities.pageInfo());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

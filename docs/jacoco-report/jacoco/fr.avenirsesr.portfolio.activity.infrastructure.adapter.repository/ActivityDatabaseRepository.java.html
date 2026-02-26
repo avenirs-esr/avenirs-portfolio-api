@@ -35,14 +35,14 @@ public class ActivityDatabaseRepository
   @Override
   public PagedResult&lt;Activity&gt; findLatest(
       Duration durationForLate, List&lt;Activity&gt; activityToExclude, PageCriteria pageCriteria) {
-<span class="fc" id="L38">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
-<span class="fc" id="L39">    var specification =</span>
-<span class="fc" id="L40">        ActivitySpecification.latest(durationForLate)</span>
-<span class="fc" id="L41">            .and(</span>
-<span class="fc" id="L42">                ActivitySpecification.exclude(</span>
-<span class="fc" id="L43">                    activityToExclude.stream().map(ActivityMapper.INSTANCE::fromDomain).toList()));</span>
-<span class="fc" id="L44">    return findAll(</span>
-<span class="fc" id="L45">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+<span class="nc" id="L38">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
+<span class="nc" id="L39">    var specification =</span>
+<span class="nc" id="L40">        ActivitySpecification.latest(durationForLate)</span>
+<span class="nc" id="L41">            .and(</span>
+<span class="nc" id="L42">                ActivitySpecification.exclude(</span>
+<span class="nc" id="L43">                    activityToExclude.stream().map(ActivityMapper.INSTANCE::fromDomain).toList()));</span>
+<span class="nc" id="L44">    return findAll(</span>
+<span class="nc" id="L45">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
