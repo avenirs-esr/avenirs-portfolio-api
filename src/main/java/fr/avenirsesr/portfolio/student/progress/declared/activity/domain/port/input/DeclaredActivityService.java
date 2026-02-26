@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input;
 
+import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -12,6 +13,8 @@ public interface DeclaredActivityService {
   PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria);
 
   List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student);
+
+  boolean isSubscribedTo(Activity activity);
 
   DeclaredActivity subscribe(UUID activityId, LocalDate startDate, LocalDate endDate);
 

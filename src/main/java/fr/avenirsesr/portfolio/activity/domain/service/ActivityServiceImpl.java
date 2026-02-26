@@ -67,6 +67,7 @@ public class ActivityServiceImpl implements ActivityService {
         activity.getId(),
         activity.getTitle(),
         activity.getThematic(),
+        declaredActivityService.isSubscribedTo(activity),
         new FileData(
             Optional.of(activityBanner.getId()),
             Optional.of(activityBanner.getFileName()),

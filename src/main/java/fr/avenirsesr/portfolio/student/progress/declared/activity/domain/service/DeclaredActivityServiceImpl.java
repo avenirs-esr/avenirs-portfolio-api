@@ -53,6 +53,12 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public boolean isSubscribedTo(Activity activity) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    return declaredActivityRepository.isSubscribedTo(student, activity);
+  }
+
+  @Override
   public DeclaredActivity subscribe(UUID activityId, LocalDate startDate, LocalDate endDate) {
     Student student = loggedInUserService.getLoggedInStudent();
     Activity activity =

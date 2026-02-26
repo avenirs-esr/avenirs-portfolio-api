@@ -213,7 +213,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", notNullValue()))
         .andExpect(jsonPath("$.activity").exists())
-        .andExpect(jsonPath("$.startedAt").value(nullValue()));
+        .andExpect(jsonPath("$.status").value(EDeclaredActivityStatus.SUBSCRIBED.name()));
   }
 
   @Transactional

@@ -27,8 +27,8 @@ public class FakeDeclaredActivity {
             activity,
             hasStarted ? Instant.now() : null,
             hasStarted ? faker.lorem().paragraph(3) : null,
-            hasDate ? LocalDate.now().minusMonths(2) : null,
-            hasDate ? LocalDate.now().minusMonths(1) : null,
+            hasDate ? LocalDate.now().plusMonths(1) : null,
+            hasDate ? LocalDate.now().plusMonths(2) : null,
             hasFinished ? Instant.now() : null));
   }
 

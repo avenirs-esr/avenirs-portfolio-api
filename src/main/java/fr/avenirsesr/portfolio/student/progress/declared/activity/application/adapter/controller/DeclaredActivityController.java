@@ -4,9 +4,11 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.SubscribeDeclaredActivityRequestDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateReflectionRequest;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
@@ -57,14 +59,14 @@ public class DeclaredActivityController {
   }
 
   @PostMapping("/subscribe/{activityId}")
-  public ResponseEntity<DeclaredActivity> subscribeActivityProgress(
+  public ResponseEntity<DeclaredActivityDetailsDTO> subscribeActivity(
       @Valid @PathVariable UUID activityId,
       @Valid @RequestBody(required = false) SubscribeDeclaredActivityRequestDTO requestDTO) {
     LocalDate startDate = requestDTO != null ? requestDTO.startDate() : null;
     LocalDate endDate = requestDTO != null ? requestDTO.endDate() : null;
     DeclaredActivity declaredActivity =
         declaredActivityService.subscribe(activityId, startDate, endDate);
-    return ResponseEntity.ok(declaredActivity);
+    return ResponseEntity.ok(DeclaredActivityDetailsDTOMapper.toDTO(declaredActivity));
   }
 
   @DeleteMapping("/unsubscribe")
@@ -77,14 +79,14 @@ public class DeclaredActivityController {
   }
 
   @PutMapping("/finish/{declaredActivityId}")
-  public ResponseEntity<DeclaredActivity> finish(
+  public ResponseEntity<DeclaredActivityDetailsDTO> finish(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
     log.debug(
         "Received request to finish declared activity [{}] for student [{}]",
         declaredActivityId,
         principal.getName());
     DeclaredActivity declaredActivity = declaredActivityService.finish(declaredActivityId);
-    return ResponseEntity.ok(declaredActivity);
+    return ResponseEntity.ok(DeclaredActivityDetailsDTOMapper.toDTO(declaredActivity));
   }
 
   @PutMapping("/{activityId}/reflection")
