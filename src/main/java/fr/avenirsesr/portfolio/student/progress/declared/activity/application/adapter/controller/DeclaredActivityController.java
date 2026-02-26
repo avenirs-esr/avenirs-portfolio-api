@@ -97,4 +97,16 @@ public class DeclaredActivityController {
     declaredActivityService.updateReflection(activityId, request.reflection());
     return ResponseEntity.ok("Declared activities successfully updated");
   }
+
+  @GetMapping("/{declaredActivityId}")
+  public ResponseEntity<DeclaredActivityDetailsDTO> getDeclaredActivityDetails(
+      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
+    log.debug(
+        "Received request to get declared activity [{}] detailed for student [{}]",
+        declaredActivityId,
+        principal.getName());
+    return ResponseEntity.ok(
+        DeclaredActivityDetailsDTOMapper.toDTO(
+            declaredActivityService.getDeclaredActivityDetails(declaredActivityId)));
+  }
 }

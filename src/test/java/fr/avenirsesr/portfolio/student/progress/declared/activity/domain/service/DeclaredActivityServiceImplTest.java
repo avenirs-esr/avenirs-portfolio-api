@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundExcepti
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
+import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -46,9 +47,9 @@ class DeclaredActivityServiceImplTest {
   @Mock private ActivityRepository activityRepository;
   @Mock private LoggedInUserService loggedInUserService;
 
-  private DeclaredActivityService declaredActivityService;
-
   @InjectMocks private DeclaredActivityServiceImpl service;
+
+  private DeclaredActivityService declaredActivityService;
 
   @Captor private ArgumentCaptor<DeclaredActivity> activityCaptor;
 
@@ -336,7 +337,6 @@ class DeclaredActivityServiceImplTest {
 
   @Test
   void shouldUpdateReflectionSuccessfully() {
-
     BddLogger.given("Un DeclaredActivity existant récupéré depuis le repository");
 
     UUID activityId = UUID.randomUUID();
@@ -365,5 +365,70 @@ class DeclaredActivityServiceImplTest {
     BddLogger.and("Le statut doit être IN_PROGRESS");
     when(declaredActivity.getStatus()).thenReturn(EDeclaredActivityStatus.IN_PROGRESS);
     Assertions.assertEquals(EDeclaredActivityStatus.IN_PROGRESS, declaredActivity.getStatus());
+  }
+
+  @Test
+  void getDeclaredActivityDetails_should_return_declared_activity_when_owned_by_student() {
+    BddLogger.given("A logged-in student and an existing declared activity belonging to him");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He requests declared activity details");
+    DeclaredActivity result = service.getDeclaredActivityDetails(declaredActivityId);
+
+    BddLogger.then("The declared activity is returned and no save is performed");
+    assertThat(result).isSameAs(declaredActivity);
+    verify(declaredActivityRepository).findById(eq(declaredActivityId), any(FetchGraph.class));
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void getDeclaredActivityDetails_should_throw_DeclaredActivityNotFoundException_when_not_found() {
+    BddLogger.given("A logged-in student and a non-existent declared activity ID");
+    UUID declaredActivityId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.empty());
+
+    BddLogger.when("He requests declared activity details");
+
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown");
+    assertThatThrownBy(() -> service.getDeclaredActivityDetails(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+    verify(declaredActivityRepository).findById(eq(declaredActivityId), any(FetchGraph.class));
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void
+      getDeclaredActivityDetails_should_throw_UserNotAuthorizedException_when_belonging_to_another_student() {
+    BddLogger.given("A logged-in student and a declared activity belonging to another student");
+    UUID declaredActivityId = UUID.randomUUID();
+
+    Student anotherStudent = StudentFixture.create().toModel();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(anotherStudent, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He requests declared activity details");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown");
+    assertThatThrownBy(() -> service.getDeclaredActivityDetails(declaredActivityId))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(declaredActivityRepository).findById(eq(declaredActivityId), any(FetchGraph.class));
+    verify(declaredActivityRepository, never()).save(any());
   }
 }

@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
@@ -80,6 +81,17 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {
     seederRunner.run();
+  }
+
+  private String getFirstDeclaredActivityIdForStudent(Student student, FetchGraph fetchGraph) {
+    return declaredActivityRepository.findAllByStudent(student, fetchGraph).stream()
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new IllegalStateException(
+                    "No declared activity found for the student. Did the seeder run properly?"))
+        .getId()
+        .toString();
   }
 
   private String subscribeToFirstAvailableActivity() throws Exception {
@@ -604,5 +616,68 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .andExpect(jsonPath("$.code").value("TOO_LONG"))
         .andExpect(
             jsonPath("$.message").value("The field reflection exceeds the maximum allowed length"));
+  }
+
+  @Nested
+  class WhenGettingDeclaredActivityDetails {
+
+    @Transactional
+    @Test
+    void shouldGetDeclaredActivityDetails() throws Exception {
+      BddLogger.given("an existing declared activity id for the logged-in student");
+
+      BddLogger.when("performing a GET on /me/activity-progress/{declaredActivityId}");
+      BddLogger.then("it should return the declared activity details DTO");
+
+      FetchGraph graph = FetchGraph.init().fetch("activity");
+      Student student = studentRepository.findById(UUID.fromString(studentId)).orElseThrow();
+      String declaredActivityId = getFirstDeclaredActivityIdForStudent(student, graph);
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + declaredActivityId)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.status").value("SUBSCRIBED"))
+          .andExpect(jsonPath("$.activity.title").isNotEmpty());
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenDeclaredActivityDetailsDoesNotExist() throws Exception {
+      BddLogger.given("a declared activity id that does not exist");
+      BddLogger.when("performing a GET on details endpoint with unknown id");
+      BddLogger.then("it should return 404 not found");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + notFoundDeclaredActivityId)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isNotFound());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnForbiddenWhenGettingAnotherStudentsDeclaredActivityDetails() throws Exception {
+      BddLogger.given("an existing declared activity belonging to another student");
+      String otherDeclaredActivityId =
+          subscribeAndGetDeclaredActivityId(otherStudentPayload, otherStudentSignature);
+
+      BddLogger.when("performing a GET on details endpoint with the main student's payload");
+      BddLogger.then("it should return forbidden (403)");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + otherDeclaredActivityId)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isForbidden());
+    }
   }
 }

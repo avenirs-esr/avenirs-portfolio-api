@@ -77,7 +77,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public void unsubscribeMultiple(List<UUID> declaredActivityIds) {
-
     Student student = loggedInUserService.getLoggedInStudent();
 
     List<DeclaredActivity> declaredActivities =
@@ -104,6 +103,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         declaredActivityRepository
             .findById(declaredActivityId)
             .orElseThrow(DeclaredActivityNotFoundException::new);
+
     if (!declaredActivity.getStudent().equals(student)) {
       throw new UserNotAuthorizedException();
     }
@@ -143,9 +143,25 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     if (declaredActivity.getStartedAt().isEmpty()) {
       declaredActivity.setStartedAt(Instant.now());
-
       declaredActivityRepository.save(declaredActivity);
     }
+  }
+
+  @Override
+  public DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    var graph = FetchGraph.init().fetch("activity").add("student").fetch("user");
+
+    DeclaredActivity declaredActivity =
+        declaredActivityRepository
+            .findById(declaredActivityId, graph)
+            .orElseThrow(DeclaredActivityNotFoundException::new);
+
+    if (!declaredActivity.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    return declaredActivity;
   }
 
   private void validateActivityDates(LocalDate startDate, LocalDate endDate) {
