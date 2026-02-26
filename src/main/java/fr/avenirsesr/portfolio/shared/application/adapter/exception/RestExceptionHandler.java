@@ -18,8 +18,10 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInval
 import fr.avenirsesr.portfolio.selfknowledge.domain.exception.SelfKnowledgeInvalidTitleException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityStartDateBeforeSubscriptionException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.exception.DeclaredProgramNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
@@ -205,6 +207,20 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   public ResponseEntity<ErrorResponse> handleDeclaredActivityHasNotStartedException(
       DeclaredActivityHasNotStartedException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(DeclaredActivityDatesException.class)
+  public ResponseEntity<ErrorResponse> handleDeclaredActivityDatesException(
+      DeclaredActivityDatesException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
+  }
+
+  @ExceptionHandler(DeclaredActivityStartDateBeforeSubscriptionException.class)
+  public ResponseEntity<ErrorResponse> handleDeclaredActivityStartDateBeforeSubscriptionException(
+      DeclaredActivityStartDateBeforeSubscriptionException ex) {
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 

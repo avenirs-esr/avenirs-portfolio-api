@@ -3,21 +3,21 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.servic
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
+import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityStartDateBeforeSubscriptionException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
@@ -25,6 +25,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.ou
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,6 +45,7 @@ class DeclaredActivityServiceImplTest {
   @Mock private DeclaredActivityRepository declaredActivityRepository;
   @Mock private ActivityRepository activityRepository;
   @Mock private LoggedInUserService loggedInUserService;
+
   private DeclaredActivityService declaredActivityService;
 
   @InjectMocks private DeclaredActivityServiceImpl service;
@@ -70,16 +72,18 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivityRepository.isSubscribedTo(student, activity)).thenReturn(false);
     when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
 
-    BddLogger.when("He try to subscribe to this activity");
-    service.subscribe(activityId);
+    BddLogger.when("He tries to subscribe to this activity without dates");
+    service.subscribe(activityId, null, null);
 
-    BddLogger.then("A new DeclaredActivity is created and saved");
+    BddLogger.then("The student subscribed to the activity");
     verify(declaredActivityRepository).save(activityCaptor.capture());
     DeclaredActivity savedActivity = activityCaptor.getValue();
 
     assertThat(savedActivity.getStudent()).isEqualTo(student);
     assertThat(savedActivity.getActivity()).isEqualTo(activity);
     assertThat(savedActivity.getStartedAt()).isEmpty();
+    assertThat(savedActivity.getStartDate()).isNull();
+    assertThat(savedActivity.getEndDate()).isNull();
   }
 
   @Test
@@ -90,10 +94,10 @@ class DeclaredActivityServiceImplTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
 
-    BddLogger.when("He try to subscribe to this activity");
+    BddLogger.when("He tries to subscribe to this activity");
 
     BddLogger.then("An ActivityNotFoundException is thrown and nothing is saved");
-    assertThatThrownBy(() -> service.subscribe(activityId))
+    assertThatThrownBy(() -> service.subscribe(activityId, null, null))
         .isInstanceOf(ActivityNotFoundException.class);
 
     verify(declaredActivityRepository, never()).isSubscribedTo(any(), any());
@@ -109,18 +113,78 @@ class DeclaredActivityServiceImplTest {
     when(activityRepository.findById(activity.getId())).thenReturn(Optional.of(activity));
     when(declaredActivityRepository.isSubscribedTo(student, activity)).thenReturn(true);
 
-    BddLogger.when("He try to subscribe to it again");
+    BddLogger.when("He tries to subscribe to it again");
 
     BddLogger.then("A DeclaredActivityAlreadyExistException is thrown");
-    assertThatThrownBy(() -> service.subscribe(activity.getId()))
+    assertThatThrownBy(() -> service.subscribe(activity.getId(), null, null))
         .isInstanceOf(DeclaredActivityAlreadyExistException.class);
 
     verify(declaredActivityRepository, never()).save(any());
   }
 
   @Test
+  void subscribe_should_throw_DeclaredActivityDatesException_when_only_one_date_provided() {
+    BddLogger.given("A logged-in student and a valid activity, but only startDate is provided");
+    UUID activityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    LocalDate startDate = LocalDate.now();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+
+    BddLogger.when("He tries to subscribe with incomplete dates");
+
+    BddLogger.then("A DeclaredActivityDatesException is thrown");
+    assertThatThrownBy(() -> service.subscribe(activityId, startDate, null))
+        .isInstanceOf(DeclaredActivityDatesException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void subscribe_should_throw_FieldValidationException_when_endDate_before_startDate() {
+    BddLogger.given("A logged-in student and dates where endDate is before startDate");
+    UUID activityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    LocalDate startDate = LocalDate.now().plusDays(5);
+    LocalDate endDate = LocalDate.now().plusDays(2);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+
+    BddLogger.when("He tries to subscribe with inconsistent dates");
+
+    BddLogger.then("A FieldValidationException is thrown");
+    assertThatThrownBy(() -> service.subscribe(activityId, startDate, endDate))
+        .isInstanceOf(FieldValidationException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void
+      subscribe_should_throw_DeclaredActivityStartDateBeforeSubscriptionException_when_startDate_is_in_past() {
+    BddLogger.given("A logged-in student and a startDate that is before today");
+    UUID activityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    LocalDate startDate = LocalDate.now().minusDays(10);
+    LocalDate endDate = LocalDate.now().plusDays(5);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+
+    BddLogger.when("He tries to subscribe with a past startDate");
+
+    BddLogger.then("A DeclaredActivityStartDateBeforeSubscriptionException is thrown");
+    assertThatThrownBy(() -> service.subscribe(activityId, startDate, endDate))
+        .isInstanceOf(DeclaredActivityStartDateBeforeSubscriptionException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
   void shouldRemoveDeclaredActivities_whenOwnedByStudent() {
-    var student = mock(Student.class);
+    BddLogger.given("Valid declared activities owned by the student");
     var declaredActivity1 = mock(DeclaredActivity.class);
     var declaredActivity2 = mock(DeclaredActivity.class);
     var idDeclaredActivity1 = UUID.randomUUID();
@@ -137,20 +201,24 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity1.getId()).thenReturn(idDeclaredActivity1);
     when(declaredActivity2.getId()).thenReturn(idDeclaredActivity2);
 
+    BddLogger.when("He requests to unsubscribe from these activities");
     declaredActivityService.unsubscribeMultiple(ids);
 
+    BddLogger.then("The student is removed from all activities.");
     verify(declaredActivityRepository)
         .removeAllFromDatabase(List.of(declaredActivity1, declaredActivity2));
   }
 
   @Test
   void shouldThrowException_whenDeclaredActivitiesNotFound() {
+    BddLogger.given("A list of declared activity IDs that do not exist");
     var ids = List.of(UUID.randomUUID());
-    var student = mock(Student.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findAllById(ids)).thenReturn(List.of());
 
+    BddLogger.when("He requests to unsubscribe from these non-existent activities");
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown");
     Assertions.assertThrows(
         DeclaredActivityNotFoundException.class,
         () -> declaredActivityService.unsubscribeMultiple(ids));
@@ -172,7 +240,7 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivityRepository.save(any(DeclaredActivity.class)))
         .thenAnswer(i -> i.getArguments()[0]);
 
-    BddLogger.when("He try to finish this activity");
+    BddLogger.when("He tries to finish this activity");
     DeclaredActivity result = service.finish(declaredActivityId);
 
     BddLogger.then("The declared activity is marked as finished and saved");
@@ -192,7 +260,7 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
 
-    BddLogger.when("He try to finish this activity");
+    BddLogger.when("He tries to finish this activity");
 
     BddLogger.then("A DeclaredActivityHasNotStartedException is thrown");
     assertThatThrownBy(() -> service.finish(declaredActivityId))
@@ -209,7 +277,7 @@ class DeclaredActivityServiceImplTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId)).thenReturn(Optional.empty());
 
-    BddLogger.when("He try to finish this activity");
+    BddLogger.when("He tries to finish this activity");
 
     BddLogger.then("A DeclaredActivityNotFoundException is thrown");
     assertThatThrownBy(() -> service.finish(declaredActivityId))
@@ -233,7 +301,7 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
 
-    BddLogger.when("He try to finish this activity");
+    BddLogger.when("He tries to finish this activity");
 
     BddLogger.then("A UserNotAuthorizedException is thrown");
     assertThatThrownBy(() -> service.finish(declaredActivityId))
@@ -257,7 +325,7 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivityRepository.findById(declaredActivityId))
         .thenReturn(Optional.of(declaredActivity));
 
-    BddLogger.when("He try to finish this activity again");
+    BddLogger.when("He tries to finish this activity again");
 
     BddLogger.then("A DeclaredActivityAlreadyFinishedException is thrown");
     assertThatThrownBy(() -> service.finish(declaredActivityId))
