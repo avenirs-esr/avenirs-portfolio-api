@@ -99,67 +99,78 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public DeclaredActivity finish(UUID declaredActivityId) {
-<span class="fc" id="L102">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L103">    DeclaredActivity declaredActivity =</span>
-        declaredActivityRepository
-<span class="fc" id="L105">            .findById(declaredActivityId)</span>
-<span class="fc" id="L106">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
-<span class="fc bfc" id="L107" title="All 2 branches covered.">    if (!declaredActivity.getStudent().equals(student)) {</span>
-<span class="fc" id="L108">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L102">    DeclaredActivity declaredActivity = findDeclaredActivity(declaredActivityId);</span>
+
+<span class="fc bfc" id="L104" title="All 2 branches covered.">    if (declaredActivity.getStartedAt().isEmpty()) {</span>
+<span class="fc" id="L105">      throw new DeclaredActivityHasNotStartedException();</span>
     }
 
-<span class="fc bfc" id="L111" title="All 2 branches covered.">    if (declaredActivity.getStartedAt().isEmpty()) {</span>
-<span class="fc" id="L112">      throw new DeclaredActivityHasNotStartedException();</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
+<span class="fc" id="L109">      throw new DeclaredActivityAlreadyFinishedException();</span>
     }
 
-<span class="fc bfc" id="L115" title="All 2 branches covered.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
-<span class="fc" id="L116">      throw new DeclaredActivityAlreadyFinishedException();</span>
-    }
+<span class="fc" id="L112">    declaredActivity.setFinishedAt(Instant.now());</span>
 
-<span class="fc" id="L119">    declaredActivity.setFinishedAt(Instant.now());</span>
-
-<span class="fc" id="L121">    return declaredActivityRepository.save(declaredActivity);</span>
+<span class="fc" id="L114">    return declaredActivityRepository.save(declaredActivity);</span>
   }
 
   private static void fieldsValidation(String reflection) {
-<span class="fc" id="L125">    validateOptionalTextMaxLength(&quot;reflection&quot;, reflection, REFLECTION_LENGTH);</span>
-<span class="fc" id="L126">  }</span>
+<span class="fc" id="L118">    validateOptionalTextMaxLength(&quot;reflection&quot;, reflection, REFLECTION_LENGTH);</span>
+<span class="fc" id="L119">  }</span>
 
   @Override
   public void updateReflection(UUID declaredActivityId, String reflection) {
-<span class="fc" id="L130">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L131">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L123">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L124">    DeclaredActivity declaredActivity =</span>
         declaredActivityRepository
-<span class="fc" id="L133">            .findById(declaredActivityId)</span>
-<span class="fc" id="L134">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
-<span class="pc bpc" id="L135" title="1 of 2 branches missed.">    if (!declaredActivity.getStudent().equals(student)) {</span>
-<span class="nc" id="L136">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L126">            .findById(declaredActivityId)</span>
+<span class="fc" id="L127">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">    if (!declaredActivity.getStudent().equals(student)) {</span>
+<span class="nc" id="L129">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L138">    fieldsValidation(reflection);</span>
-<span class="pc bpc" id="L139" title="1 of 2 branches missed.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
-<span class="nc" id="L140">      throw new DeclaredActivityAlreadyFinishedException();</span>
+<span class="fc" id="L131">    fieldsValidation(reflection);</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
+<span class="nc" id="L133">      throw new DeclaredActivityAlreadyFinishedException();</span>
     }
-<span class="fc" id="L142">    declaredActivity.setReflection(reflection);</span>
+<span class="fc" id="L135">    declaredActivity.setReflection(reflection);</span>
 
-<span class="pc bpc" id="L144" title="1 of 2 branches missed.">    if (declaredActivity.getStartedAt().isEmpty()) {</span>
-<span class="fc" id="L145">      declaredActivity.setStartedAt(Instant.now());</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">    if (declaredActivity.getStartedAt().isEmpty()) {</span>
+<span class="fc" id="L138">      declaredActivity.setStartedAt(Instant.now());</span>
 
-<span class="fc" id="L147">      declaredActivityRepository.save(declaredActivity);</span>
+<span class="fc" id="L140">      declaredActivityRepository.save(declaredActivity);</span>
     }
-<span class="fc" id="L149">  }</span>
+<span class="fc" id="L142">  }</span>
+
+  @Override
+  public DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId) {
+<span class="fc" id="L146">    return findDeclaredActivity(declaredActivityId);</span>
+  }
+
+  private DeclaredActivity findDeclaredActivity(UUID declaredActivityId) {
+<span class="fc" id="L150">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L151">    DeclaredActivity declaredActivity =</span>
+        declaredActivityRepository
+<span class="fc" id="L153">            .findById(declaredActivityId)</span>
+<span class="fc" id="L154">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
+
+<span class="fc bfc" id="L156" title="All 2 branches covered.">    if (!declaredActivity.getStudent().equals(student)) {</span>
+<span class="fc" id="L157">      throw new UserNotAuthorizedException();</span>
+    }
+<span class="fc" id="L159">    return declaredActivity;</span>
+  }
 
   private void validateActivityDates(LocalDate startDate, LocalDate endDate) {
-<span class="fc bfc" id="L152" title="All 6 branches covered.">    if ((startDate == null) != (endDate == null)) {</span>
-<span class="fc" id="L153">      throw new DeclaredActivityDatesException();</span>
+<span class="fc bfc" id="L163" title="All 6 branches covered.">    if ((startDate == null) != (endDate == null)) {</span>
+<span class="fc" id="L164">      throw new DeclaredActivityDatesException();</span>
     }
 
-<span class="fc bfc" id="L156" title="All 2 branches covered.">    if (startDate != null) {</span>
-<span class="fc" id="L157">      validateDateOrder(startDate, endDate);</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">    if (startDate != null) {</span>
+<span class="fc" id="L168">      validateDateOrder(startDate, endDate);</span>
 
-<span class="fc bfc" id="L159" title="All 2 branches covered.">      if (startDate.isBefore(LocalDate.now())) {</span>
-<span class="fc" id="L160">        throw new DeclaredActivityStartDateBeforeSubscriptionException();</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">      if (startDate.isBefore(LocalDate.now())) {</span>
+<span class="fc" id="L171">        throw new DeclaredActivityStartDateBeforeSubscriptionException();</span>
       }
     }
-<span class="fc" id="L163">  }</span>
+<span class="fc" id="L174">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
