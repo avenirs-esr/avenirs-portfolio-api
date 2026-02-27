@@ -2,6 +2,8 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.servic
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
@@ -184,26 +186,35 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void shouldRemoveDeclaredActivities_whenOwnedByStudent() {
-    BddLogger.given("Valid declared activities owned by the student");
+  void
+      unsubscribeMultiple_shouldRemoveDeclaredActivities_whenOwnedByStudent_and_all_activityIds_found() {
+    BddLogger.given("Valid declared activities (found by activityIds) owned by the student");
+
     var declaredActivity1 = mock(DeclaredActivity.class);
     var declaredActivity2 = mock(DeclaredActivity.class);
-    var idDeclaredActivity1 = UUID.randomUUID();
-    var idDeclaredActivity2 = UUID.randomUUID();
-    var ids = List.of(idDeclaredActivity1, idDeclaredActivity2);
+
+    var activity1 = mock(Activity.class);
+    var activity2 = mock(Activity.class);
+
+    var idActivity1 = UUID.randomUUID();
+    var idActivity2 = UUID.randomUUID();
+    var activityIds = List.of(idActivity1, idActivity2);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findAllById(anyList()))
+
+    // repository returns declared activities found by (activityIds + student + graph)
+    when(declaredActivityRepository.findAllByActivityIdAndStudent(
+            eq(activityIds), eq(student), any(FetchGraph.class)))
         .thenReturn(List.of(declaredActivity1, declaredActivity2));
 
-    when(declaredActivity1.getStudent()).thenReturn(student);
-    when(declaredActivity2.getStudent()).thenReturn(student);
-
-    when(declaredActivity1.getId()).thenReturn(idDeclaredActivity1);
-    when(declaredActivity2.getId()).thenReturn(idDeclaredActivity2);
+    // each declared activity has an activity with an id
+    when(declaredActivity1.getActivity()).thenReturn(activity1);
+    when(declaredActivity2.getActivity()).thenReturn(activity2);
+    when(activity1.getId()).thenReturn(idActivity1);
+    when(activity2.getId()).thenReturn(idActivity2);
 
     BddLogger.when("He requests to unsubscribe from these activities");
-    declaredActivityService.unsubscribeMultiple(ids);
+    declaredActivityService.unsubscribeMultiple(activityIds);
 
     BddLogger.then("The student is removed from all activities.");
     verify(declaredActivityRepository)
@@ -211,20 +222,33 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void shouldThrowException_whenDeclaredActivitiesNotFound() {
-    BddLogger.given("A list of declared activity IDs that do not exist");
-    var ids = List.of(UUID.randomUUID());
+  void
+      unsubscribeMultiple_shouldThrowDeclaredActivityNotFoundException_when_some_activityIds_not_found_for_student() {
+    BddLogger.given("Some activityIds are not subscribed by the student");
+
+    var declaredActivity1 = mock(DeclaredActivity.class);
+    var activity1 = mock(Activity.class);
+
+    var idActivity1 = UUID.randomUUID();
+    var idActivity2Missing = UUID.randomUUID();
+    var activityIds = List.of(idActivity1, idActivity2Missing);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.findAllById(ids)).thenReturn(List.of());
 
-    BddLogger.when("He requests to unsubscribe from these non-existent activities");
-    BddLogger.then("A DeclaredActivityNotFoundException is thrown");
-    Assertions.assertThrows(
-        DeclaredActivityNotFoundException.class,
-        () -> declaredActivityService.unsubscribeMultiple(ids));
+    when(declaredActivityRepository.findAllByActivityIdAndStudent(
+            eq(activityIds), eq(student), any(FetchGraph.class)))
+        .thenReturn(List.of(declaredActivity1));
 
-    verify(declaredActivityRepository, never()).removeAllFromDatabase(any());
+    when(declaredActivity1.getActivity()).thenReturn(activity1);
+    when(activity1.getId()).thenReturn(idActivity1);
+
+    BddLogger.when("He requests to unsubscribe from these activities");
+
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown and nothing is removed");
+    assertThatThrownBy(() -> declaredActivityService.unsubscribeMultiple(activityIds))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+    verify(declaredActivityRepository, never()).removeAllFromDatabase(anyList());
   }
 
   @Test

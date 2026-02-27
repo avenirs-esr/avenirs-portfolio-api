@@ -71,9 +71,9 @@ public class DeclaredActivityController {
 
   @DeleteMapping("/unsubscribe")
   public ResponseEntity<String> unsubscribeActivitiesProgresses(
-      @RequestBody List<UUID> declaredActivityIds) {
+      @RequestBody List<UUID> activityIds) {
 
-    declaredActivityService.unsubscribeMultiple(declaredActivityIds);
+    declaredActivityService.unsubscribeMultiple(activityIds);
 
     return ResponseEntity.ok("Declared activities successfully unsubscribed");
   }
