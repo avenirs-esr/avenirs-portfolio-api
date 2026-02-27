@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.data;
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import java.util.Optional;
 import java.util.UUID;
 
 public record ActivityCreationData(
@@ -9,4 +10,5 @@ public record ActivityCreationData(
     EActivityThematic thematic,
     String summary,
     String executionPeriodInfo,
+    Optional<String> executionPeriodInfoSummary,
     ActivityBannerCreationData banner) {}

@@ -69,6 +69,7 @@ public class ActivitySeeder {
                             fakeActivity.getThematic(),
                             fakeActivity.getSummary(),
                             fakeActivity.getExecutionPeriodInfo(),
+                            Optional.ofNullable(fakeActivity.getExecutionPeriodInfoSummary()),
                             new ActivityBannerCreationData(
                                 banner.getFileName(), banner.getFileType(), banner.getSize()));
                       })
@@ -88,7 +89,8 @@ public class ActivitySeeder {
                   data.title(),
                   data.thematic(),
                   data.summary(),
-                  data.executionPeriodInfo());
+                  data.executionPeriodInfo(),
+                  data.executionPeriodInfoSummary().orElse(null));
           try {
             activityResourceService.uploadBannerFor(
                 activity,

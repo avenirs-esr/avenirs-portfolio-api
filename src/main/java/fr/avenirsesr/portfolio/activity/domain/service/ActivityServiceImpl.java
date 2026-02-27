@@ -1,8 +1,7 @@
 package fr.avenirsesr.portfolio.activity.domain.service;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
-import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
-import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
@@ -47,14 +46,19 @@ public class ActivityServiceImpl implements ActivityService {
       String title,
       EActivityThematic thematic,
       String summary,
-      String executionPeriodInfo) {
+      String executionPeriodInfo,
+      String executionPeriodInfoSummary) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     requireNotNull("thematic", thematic);
     requireNotBlankAndMaxLength("summary", summary, DESCRIPTION_LENGTH);
     requireNotBlankAndMaxLength(
         "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
+    validateOptionalTextMaxLength(
+        "executionPeriodInfoSummary", executionPeriodInfoSummary, TITLE_LENGTH);
 
-    var activity = Activity.create(id, title, thematic, summary, executionPeriodInfo);
+    var activity =
+        Activity.create(
+            id, title, thematic, summary, executionPeriodInfo, executionPeriodInfoSummary);
     activityRepository.save(activity);
     return activity;
   }

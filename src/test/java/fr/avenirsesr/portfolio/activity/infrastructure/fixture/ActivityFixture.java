@@ -7,11 +7,12 @@ import java.util.UUID;
 
 public class ActivityFixture {
 
-  private UUID id = UUID.randomUUID(); // On garde l'id comme dans le modèle
+  private UUID id = UUID.randomUUID();
   private String title = "Default Title";
   private EActivityThematic thematic = EActivityThematic.EXPERIENCES;
   private String summary = "Default Summary";
   private String executionPeriodInfo = "Default Execution Period Info";
+  private String executionPeriodInfoSummary = "Short Execution Period Info";
   private Instant createdAt = Instant.now();
   private Instant updatedAt = Instant.now();
 
@@ -44,6 +45,11 @@ public class ActivityFixture {
     return this;
   }
 
+  public ActivityFixture withExecutionPeriodInfoSummary(String executionPeriodInfoSummary) {
+    this.executionPeriodInfoSummary = executionPeriodInfoSummary;
+    return this;
+  }
+
   public ActivityFixture withCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
     return this;
@@ -56,6 +62,13 @@ public class ActivityFixture {
 
   public Activity toModel() {
     return Activity.toDomain(
-        id, title, thematic, summary, executionPeriodInfo, createdAt, updatedAt);
+        id,
+        title,
+        thematic,
+        summary,
+        executionPeriodInfo,
+        executionPeriodInfoSummary,
+        createdAt,
+        updatedAt);
   }
 }

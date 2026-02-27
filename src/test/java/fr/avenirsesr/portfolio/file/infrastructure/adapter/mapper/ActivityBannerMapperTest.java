@@ -47,6 +47,7 @@ class ActivityBannerMapperTest {
             EActivityThematic.SELF_KNOWLEDGE,
             "Summary",
             "2020 - 2022",
+            "label 2020",
             createdAt,
             updatedAt);
 

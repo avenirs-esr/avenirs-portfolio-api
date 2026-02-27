@@ -50,10 +50,12 @@ class ActivityServiceImplTest {
     EActivityThematic thematic = EActivityThematic.EXPERIENCES;
     String summary = "This is a test activity";
     String executionPeriodInfo = "2026";
+    String executionPeriodInfoSummary = "Short label";
 
     // When
     Activity createdActivity =
-        activityService.create(id, title, thematic, summary, executionPeriodInfo);
+        activityService.create(
+            id, title, thematic, summary, executionPeriodInfo, executionPeriodInfoSummary);
 
     // Then
     assertNotNull(createdActivity);
@@ -74,10 +76,11 @@ class ActivityServiceImplTest {
   void getActivityNavigation() {
     // Given
     Activity a1 =
-        Activity.create(UUID.randomUUID(), "A1", EActivityThematic.EXPERIENCES, "S1", "2026");
+        Activity.create(UUID.randomUUID(), "A1", EActivityThematic.EXPERIENCES, "S1", "2026", "");
     Activity a2 =
-        Activity.create(UUID.randomUUID(), "A2", EActivityThematic.EXPERIENCES, "S2", "2025");
-    Activity a3 = Activity.create(UUID.randomUUID(), "A3", EActivityThematic.RESUMES, "S3", "2024");
+        Activity.create(UUID.randomUUID(), "A2", EActivityThematic.EXPERIENCES, "S2", "2025", null);
+    Activity a3 =
+        Activity.create(UUID.randomUUID(), "A3", EActivityThematic.RESUMES, "S3", "2024", null);
 
     when(activityRepository.findAll()).thenReturn(List.of(a1, a2, a3));
 
@@ -109,7 +112,8 @@ class ActivityServiceImplTest {
   @Test
   void getActivityNavigation_shouldNotIncludeThematicsThatAreNotPresent() {
     // Given (only CV)
-    Activity a1 = Activity.create(UUID.randomUUID(), "A1", EActivityThematic.RESUMES, "S1", "2026");
+    Activity a1 =
+        Activity.create(UUID.randomUUID(), "A1", EActivityThematic.RESUMES, "S1", "2026", null);
 
     when(activityRepository.findAll()).thenReturn(List.of(a1));
 

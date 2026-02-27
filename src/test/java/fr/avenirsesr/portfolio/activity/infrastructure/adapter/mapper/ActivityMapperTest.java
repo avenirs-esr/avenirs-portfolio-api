@@ -20,13 +20,22 @@ class ActivityMapperTest {
   private final EActivityThematic thematic = EActivityThematic.SELF_KNOWLEDGE;
   private final String summary = "Activity summary";
   private final String executionPeriodInfo = "2020 - 2022";
+  private final String executionPeriodInfoSummary = "label 2020";
   private final Instant createdAt = Instant.parse("2023-01-01T00:00:00Z");
   private final Instant updatedAt = Instant.parse("2023-12-31T23:59:59Z");
 
   @BeforeEach
   void setUp() {
     activity =
-        Activity.toDomain(id, title, thematic, summary, executionPeriodInfo, createdAt, updatedAt);
+        Activity.toDomain(
+            id,
+            title,
+            thematic,
+            summary,
+            executionPeriodInfo,
+            executionPeriodInfoSummary,
+            createdAt,
+            updatedAt);
   }
 
   @Test

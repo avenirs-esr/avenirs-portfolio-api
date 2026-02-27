@@ -16,6 +16,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         domain.getThematic(),
         domain.getSummary(),
         domain.getExecutionPeriodInfo(),
+        domain.getExecutionPeriodInfoSummary().orElse(null),
         domain.getCreatedAt(),
         domain.getUpdatedAt());
   }
@@ -28,6 +29,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         entity.getThematic(),
         entity.getSummary(),
         entity.getExecutionPeriodInfo(),
+        entity.getExecutionPeriodInfoSummary(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -41,6 +43,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         entity.getThematic(),
         entity.getSummary(),
         entity.getExecutionPeriodInfo(),
+        entity.getExecutionPeriodInfoSummary(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }

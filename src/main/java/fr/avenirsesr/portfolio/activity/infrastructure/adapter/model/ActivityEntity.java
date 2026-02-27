@@ -33,12 +33,16 @@ public class ActivityEntity extends AvenirsBaseEntity {
   @Column(name = "execution_period_info", nullable = false, length = ACTIVITY_EXECUTION_PERIOD_INFO)
   private String executionPeriodInfo;
 
+  @Column(name = "execution_period_info_summary", length = TITLE_LENGTH)
+  private String executionPeriodInfoSummary;
+
   private ActivityEntity(
       UUID id,
       String title,
       EActivityThematic thematic,
       String summary,
       String executionPeriodInfo,
+      String executionPeriodInfoSummary,
       Instant createdAt,
       Instant updatedAt) {
 
@@ -47,6 +51,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
     this.thematic = thematic;
     this.summary = summary;
     this.executionPeriodInfo = executionPeriodInfo;
+    this.executionPeriodInfoSummary = executionPeriodInfoSummary;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
   }
@@ -57,10 +62,18 @@ public class ActivityEntity extends AvenirsBaseEntity {
       EActivityThematic thematic,
       String summary,
       String executionPeriodInfo,
+      String executionPeriodInfoSummary,
       Instant createdAt,
       Instant updatedAt) {
 
     return new ActivityEntity(
-        id, title, thematic, summary, executionPeriodInfo, createdAt, updatedAt);
+        id,
+        title,
+        thematic,
+        summary,
+        executionPeriodInfo,
+        executionPeriodInfoSummary,
+        createdAt,
+        updatedAt);
   }
 }

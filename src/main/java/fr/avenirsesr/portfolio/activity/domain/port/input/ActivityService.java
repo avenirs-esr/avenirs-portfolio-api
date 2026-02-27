@@ -16,7 +16,8 @@ public interface ActivityService {
       String title,
       EActivityThematic thematic,
       String summary,
-      String executionPeriodInfo);
+      String executionPeriodInfo,
+      String executionPeriodInfoSummary);
 
   ActivityDetailData getActivityDetail(UUID id);
 

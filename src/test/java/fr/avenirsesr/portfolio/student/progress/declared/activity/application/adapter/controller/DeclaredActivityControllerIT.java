@@ -329,7 +329,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
             "Activity " + i,
             EActivityThematic.EXPERIENCES,
             "Test activity " + i,
-            "2026");
+            "2026",
+            "Short label");
     activityRepository.save(activity);
     return activity;
   }

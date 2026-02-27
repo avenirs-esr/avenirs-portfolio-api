@@ -5,11 +5,8 @@
     "thematic": "SELF_KNOWLEDGE",
     "summary": "Activité faisant partie de la catégorie Connaissance de soi. Elle permet à l’étudiant.e d’identifier les valeurs essentielles qui orientent ses choix et d’analyser la manière dont elles se traduisent dans ses comportements quotidiens. Cette réflexion constitue une base structurante pour construire un projet personnel et professionnel cohérent.",
     "executionPeriodInfo": "À réaliser en amont d’un entretien avec un.e conseiller/ conseillère d’orientation ou avant d’engager un parcours structuré d’activités Cofolio.",
-    "banner": {
-      "fileName": "definir-ses-valeurs-banner.png",
-      "fileType": "PNG",
-      "fileSize": 4276564
-    }
+    "executionPeriodInfoSummary": "Avant entretien ou parcours Cofolio",
+    "banner": { "fileName": "definir-ses-valeurs-banner.png", "fileType": "PNG", "fileSize": 4276564 }
   },
   {
     "id": "9a12e6b4-8c3f-4d22-bf55-6d4c1f2a7e33",
@@ -17,11 +14,8 @@
     "thematic": "SELF_KNOWLEDGE",
     "summary": "Activité relevant de la connaissance de soi. L’étudiant.e explore ce qui nourrit son engagement et donne du sens à ses actions, afin de mieux comprendre ses aspirations durables. Ce travail favorise une meilleure cohérence entre ses envies personnelles et ses choix d’orientation.",
     "executionPeriodInfo": "À effectuer avant un entretien d’accompagnement ou en introduction d’un parcours d’activités dédié à l’orientation et à la réflexion personnelle.",
-    "banner": {
-      "fileName": "identifier-ses-motivations-profondes-banner.png",
-      "fileType": "PNG",
-      "fileSize": 4276564
-    }
+    "executionPeriodInfoSummary": "Avant entretien d’accompagnement",
+    "banner": { "fileName": "identifier-ses-motivations-profondes-banner.png", "fileType": "PNG", "fileSize": 4276564 }
   },
   {
     "id": "c1e8b9a7-2d55-4f1a-8b5f-3c7e4a9d6f20",
@@ -29,11 +23,8 @@
     "thematic": "FUTURE_PLANS",
     "summary": "Activité centrée sur l’exploration des futurs possibles. L’étudiant.e identifie différents domaines professionnels susceptibles de correspondre à son profil et analyse les conditions d’accès, les environnements de travail et les perspectives d’évolution associées.",
     "executionPeriodInfo": "À réaliser avant un rendez-vous d’orientation ou dans la phase exploratoire d’un parcours Cofolio consacré au projet professionnel.",
-    "banner": {
-      "fileName": "explorer-ses-pistes-d-orientation-banner.png",
-      "fileType": "PNG",
-      "fileSize": 4276564
-    }
+    "executionPeriodInfoSummary": "Avant rendez-vous d’orientation",
+    "banner": { "fileName": "explorer-ses-pistes-d-orientation-banner.png", "fileType": "PNG", "fileSize": 4276564 }
   },
   {
     "id": "7b3d4e91-6f2a-4c88-9a1e-5d3f7b2c8e44",
@@ -41,11 +32,8 @@
     "thematic": "FUTURE_PLANS",
     "summary": "Activité d’élaboration de projet. L’étudiant.e formalise une première hypothèse de projet professionnel en tenant compte de ses compétences, de ses intérêts et des réalités du marché. Cette étape permet de structurer sa réflexion et d’identifier les prochaines actions à engager.",
     "executionPeriodInfo": "À effectuer en amont d’un échange avec un.e conseiller/ conseillère afin de consolider et ajuster un projet d’orientation.",
-    "banner": {
-      "fileName": "formuler-un-projet-professionnel-provisoire-banner.png",
-      "fileType": "PNG",
-      "fileSize": 4276564
-    }
+    "executionPeriodInfoSummary": null,
+    "banner": { "fileName": "formuler-un-projet-professionnel-provisoire-banner.png", "fileType": "PNG", "fileSize": 4276564 }
   },
   {
     "id": "e4a2c7f8-1b9d-4a77-8c6f-9e3b2a5d1c66",
@@ -53,47 +41,38 @@
     "thematic": "PROGRAMS",
     "summary": "Activité portant sur l’analyse de son parcours académique. L’étudiant.e examine les enseignements suivis, les compétences développées et les acquis méthodologiques afin de mieux comprendre la cohérence et la progression de sa formation.",
     "executionPeriodInfo": "À réaliser avant un bilan pédagogique ou un entretien d’accompagnement lié à la construction du parcours de formation.",
-    "banner": {
-      "fileName": "analyser-son-parcours-de-formation-banner.png",
-      "fileType": "PNG",
-      "fileSize": 4276564
-    }
+    "executionPeriodInfoSummary": "Avant bilan pédagogique",
+    "banner": { "fileName": "analyser-son-parcours-de-formation-banner.png", "fileType": "PNG", "fileSize": 4276564 }
   },
+
   {
     "id": "5c8f2a91-3d7b-4e66-9b2f-1a4c8e7d9f55",
     "title": "Identifier les compétences acquises en formation",
     "thematic": "PROGRAMS",
     "summary": "Activité d’identification des compétences développées au sein des enseignements suivis. L’étudiant.e met en évidence les savoirs, savoir-faire et méthodes acquis afin de valoriser son parcours et d’envisager leurs applications dans différents contextes.",
     "executionPeriodInfo": "À effectuer avant la rédaction d’un dossier académique ou un entretien portant sur la valorisation des acquis de formation.",
-    "banner": {
-      "fileName": "identifier-les-competences-acquises-en-formation-banner.png",
-      "fileType": "PNG",
-      "fileSize": 4276564
-    }
+    "executionPeriodInfoSummary": "Avant dossier académique",
+    "banner": { "fileName": "identifier-les-competences-acquises-en-formation-banner.png", "fileType": "PNG", "fileSize": 4276564 }
   },
+
   {
     "id": "2d6a9b4f-7c3e-4a11-8f5b-6e2c9d7a3b12",
     "title": "Analyser une expérience significative",
     "thematic": "EXPERIENCES",
     "summary": "Activité centrée sur l’analyse réflexive d’une expérience marquante, académique ou professionnelle. L’étudiant.e identifie les missions réalisées, les compétences mobilisées et les apprentissages tirés de cette situation.",
     "executionPeriodInfo": "À réaliser avant un entretien de valorisation d’expérience ou dans un parcours Cofolio consacré au retour réflexif.",
-    "banner": {
-      "fileName": "analyser-une-experience-significative-banner.png",
-      "fileType": "PNG",
-      "fileSize": 4276564
-    }
+    "executionPeriodInfoSummary": "Avant entretien de valorisation",
+    "banner": { "fileName": "analyser-une-experience-significative-banner.png", "fileType": "PNG", "fileSize": 4276564 }
   },
+
   {
     "id": "8f3c1e7a-2b6d-4c55-9a4e-7d2b6f9c8a33",
     "title": "Valoriser une expérience professionnelle",
     "thematic": "EXPERIENCES",
     "summary": "Activité visant à structurer et formaliser les acquis issus d’une expérience professionnelle. L’étudiant.e met en lumière les responsabilités assumées, les compétences développées et les résultats obtenus afin de mieux les présenter.",
     "executionPeriodInfo": "À effectuer avant la préparation d’un CV ou d’un entretien lié à une candidature professionnelle.",
-    "banner": {
-      "fileName": "valoriser-une-experience-professionnelle-banner.png",
-      "fileType": "PNG",
-      "fileSize": 4276564
-    }
+    "executionPeriodInfoSummary": "Avant préparation de CV",
+    "banner": { "fileName": "valoriser-une-experience-professionnelle-banner.png", "fileType": "PNG", "fileSize": 4276564 }
   },
   {
     "id": "6a1f9c2e-4b7d-4d99-8c2f-3e7b5a1d8c21",
@@ -101,6 +80,7 @@
     "thematic": "TRAJECTORIES",
     "summary": "Activité d’analyse de trajectoire. L’étudiant.e retrace les étapes clés de son parcours académique et personnel afin d’identifier les continuités, les ruptures et les évolutions significatives.",
     "executionPeriodInfo": "À réaliser avant un entretien d’accompagnement ou pour structurer un travail global sur la cohérence du parcours.",
+    "executionPeriodInfoSummary": "Avant entretien d’accompagnement",
     "banner": {
       "fileName": "cartographier-son-parcours-banner.png",
       "fileType": "PNG",
@@ -113,6 +93,7 @@
     "thematic": "TRAJECTORIES",
     "summary": "Activité réflexive permettant d’identifier les moments clés ayant influencé le parcours. L’étudiant.e analyse les décisions prises et leurs impacts sur son évolution personnelle et professionnelle.",
     "executionPeriodInfo": "À effectuer dans le cadre d’un bilan de parcours ou avant un échange approfondi sur l’évolution professionnelle.",
+    "executionPeriodInfoSummary": null,
     "banner": {
       "fileName": "identifier-les-tournants-decisifs-banner.png",
       "fileType": "PNG",
@@ -125,6 +106,7 @@
     "thematic": "RESUMES",
     "summary": "Activité de formalisation du parcours sous forme de curriculum vitae. L’étudiant.e organise ses expériences, formations et compétences de manière claire et cohérente afin de répondre aux attentes du monde professionnel.",
     "executionPeriodInfo": "À réaliser avant toute candidature ou entretien professionnel nécessitant la présentation formelle du parcours.",
+    "executionPeriodInfoSummary": "Avant candidature ou entretien",
     "banner": {
       "fileName": "rediger-un-cv-structure-banner.png",
       "fileType": "PNG",
@@ -137,6 +119,7 @@
     "thematic": "RESUMES",
     "summary": "Activité d’adaptation stratégique du CV. L’étudiant.e ajuste la présentation de ses expériences et compétences en fonction d’une offre ciblée afin d’optimiser la pertinence de sa candidature.",
     "executionPeriodInfo": "À effectuer en préparation d’une candidature spécifique ou d’un entretien lié à une offre identifiée.",
+    "executionPeriodInfoSummary": "Avant candidature spécifique",
     "banner": {
       "fileName": "adapter-son-cv-a-une-offre-banner.png",
       "fileType": "PNG",
@@ -149,6 +132,7 @@
     "thematic": "TRANSVERSAL",
     "summary": "Activité consacrée à l’identification et au développement des compétences transversales telles que la communication, l’organisation ou le travail en équipe. L’étudiant.e analyse leur mobilisation dans différents contextes.",
     "executionPeriodInfo": "À réaliser avant un bilan de compétences ou dans un parcours global visant à renforcer l’employabilité.",
+    "executionPeriodInfoSummary": "Avant bilan de compétences",
     "banner": {
       "fileName": "developper-ses-competences-transversales-banner.png",
       "fileType": "PNG",
@@ -161,6 +145,7 @@
     "thematic": "TRANSVERSAL",
     "summary": "Activité visant à analyser sa capacité à s’adapter à des contextes variés et à gérer les changements. L’étudiant.e identifie des situations concrètes illustrant sa flexibilité et sa résilience.",
     "executionPeriodInfo": "À effectuer avant un entretien professionnel ou dans le cadre d’un travail sur les compétences comportementales.",
+    "executionPeriodInfoSummary": "Avant entretien professionnel",
     "banner": {
       "fileName": "renforcer-sa-capacite-d-adaptation-banner.png",
       "fileType": "PNG",
@@ -173,6 +158,7 @@
     "thematic": "SELF_KNOWLEDGE",
     "summary": "Activité de connaissance de soi permettant à l’étudiant.e d’analyser les éléments constitutifs de son identité, ses influences et ses repères personnels. Cette réflexion favorise une meilleure compréhension de soi et une plus grande cohérence dans les choix futurs.",
     "executionPeriodInfo": "À réaliser en amont d’un entretien d’accompagnement ou en introduction d’un parcours Cofolio centré sur la connaissance de soi.",
+    "executionPeriodInfoSummary": "Avant entretien d’accompagnement",
     "banner": {
       "fileName": "clarifier-son-identite-personnelle-banner.png",
       "fileType": "PNG",
@@ -185,6 +171,7 @@
     "thematic": "SELF_KNOWLEDGE",
     "summary": "Activité visant à explorer les domaines, activités et sujets qui suscitent curiosité et engagement. L’étudiant.e met en relation ses centres d’intérêt avec des pistes d’orientation potentielles afin d’enrichir sa réflexion sur l’avenir.",
     "executionPeriodInfo": "À effectuer avant une démarche d’exploration des métiers ou un échange avec un.e conseiller/ conseillère d’orientation.",
+    "executionPeriodInfoSummary": null,
     "banner": {
       "fileName": "identifier-ses-centres-d-interet-banner.png",
       "fileType": "PNG",
@@ -197,6 +184,7 @@
     "thematic": "FUTURE_PLANS",
     "summary": "Activité d’exploration des environnements professionnels liés à un secteur donné. L’étudiant.e analyse les missions, compétences attendues et conditions d’exercice afin d’identifier les correspondances avec son profil.",
     "executionPeriodInfo": "À réaliser avant un entretien d’orientation ou dans la phase exploratoire d’un parcours Cofolio dédié au projet professionnel.",
+    "executionPeriodInfoSummary": "Avant entretien d’orientation",
     "banner": {
       "fileName": "explorer-les-metiers-d-un-secteur-banner.png",
       "fileType": "PNG",
@@ -209,6 +197,7 @@
     "thematic": "FUTURE_PLANS",
     "summary": "Activité de mise en perspective de différents scénarios professionnels. L’étudiant.e analyse les avantages, contraintes et perspectives de chaque option afin d’orienter ses décisions de manière éclairée.",
     "executionPeriodInfo": "À effectuer avant un choix d’orientation ou un entretien visant à valider une hypothèse de projet.",
+    "executionPeriodInfoSummary": null,
     "banner": {
       "fileName": "comparer-plusieurs-projets-possibles-banner.png",
       "fileType": "PNG",
@@ -221,6 +210,7 @@
     "thematic": "PROGRAMS",
     "summary": "Activité d’analyse du parcours académique visant à comprendre la progression des enseignements suivis et leur articulation. L’étudiant.e identifie les compétences développées et leur contribution au projet envisagé.",
     "executionPeriodInfo": "À réaliser avant un bilan pédagogique ou un entretien lié à la construction du parcours de formation.",
+    "executionPeriodInfoSummary": "Avant bilan pédagogique",
     "banner": {
       "fileName": "analyser-la-coherence-de-sa-formation-banner.png",
       "fileType": "PNG",
@@ -233,6 +223,7 @@
     "thematic": "PROGRAMS",
     "summary": "Activité permettant de repérer les savoirs et méthodes acquis au cours de la formation. L’étudiant.e met en évidence les acquis transférables et leur pertinence dans différents contextes professionnels.",
     "executionPeriodInfo": "À effectuer avant la rédaction d’un dossier académique ou d’un échange portant sur la valorisation des acquis.",
+    "executionPeriodInfoSummary": null,
     "banner": {
       "fileName": "identifier-les-competences-academiques-cles-banner.png",
       "fileType": "PNG",
@@ -245,6 +236,7 @@
     "thematic": "EXPERIENCES",
     "summary": "Activité de retour réflexif sur un stage ou une expérience pratique. L’étudiant.e identifie les missions accomplies, les compétences mobilisées et les apprentissages retirés de cette immersion professionnelle.",
     "executionPeriodInfo": "À réaliser avant un entretien professionnel ou dans le cadre d’un travail de valorisation d’expérience.",
+    "executionPeriodInfoSummary": "Avant entretien professionnel",
     "banner": {
       "fileName": "analyser-un-stage-realise-banner.png",
       "fileType": "PNG",
@@ -257,6 +249,7 @@
     "thematic": "EXPERIENCES",
     "summary": "Activité visant à mettre en lumière des réussites académiques, professionnelles ou personnelles. L’étudiant.e analyse les facteurs de succès et les compétences mobilisées afin de renforcer la confiance en ses capacités.",
     "executionPeriodInfo": "À effectuer avant une candidature ou un entretien nécessitant la mise en avant de réalisations concrètes.",
+    "executionPeriodInfoSummary": "Avant candidature ou entretien",
     "banner": {
       "fileName": "identifier-ses-reussites-marquantes-banner.png",
       "fileType": "PNG",
@@ -269,6 +262,7 @@
     "thematic": "TRAJECTORIES",
     "summary": "Activité de cartographie du parcours personnel et académique. L’étudiant.e identifie les moments déterminants et analyse leur impact sur ses choix et orientations actuels.",
     "executionPeriodInfo": "À réaliser avant un bilan de parcours ou un entretien d’accompagnement approfondi.",
+    "executionPeriodInfoSummary": "Avant bilan de parcours",
     "banner": {
       "fileName": "retracer-les-etapes-cles-de-son-parcours-banner.png",
       "fileType": "PNG",
@@ -281,6 +275,7 @@
     "thematic": "TRAJECTORIES",
     "summary": "Activité de réflexion sur un changement de direction académique ou professionnelle. L’étudiant.e identifie les motivations de cette décision et les apprentissages qui en découlent.",
     "executionPeriodInfo": "À effectuer avant un entretien d’orientation ou dans un parcours Cofolio consacré à l’évolution du projet.",
+    "executionPeriodInfoSummary": null,
     "banner": {
       "fileName": "analyser-une-reorientation-banner.png",
       "fileType": "PNG",
@@ -293,6 +288,7 @@
     "thematic": "RESUMES",
     "summary": "Activité de mise en forme du parcours sous la forme d’un curriculum vitae clair et structuré. L’étudiant.e organise ses expériences et compétences afin de répondre aux attentes du monde professionnel.",
     "executionPeriodInfo": "À réaliser avant toute candidature nécessitant la transmission d’un CV.",
+    "executionPeriodInfoSummary": "Avant transmission CV",
     "banner": {
       "fileName": "structurer-son-cv-banner.png",
       "fileType": "PNG",
@@ -305,6 +301,7 @@
     "thematic": "RESUMES",
     "summary": "Activité d’élaboration d’une lettre de motivation argumentée. L’étudiant.e met en relation son parcours, ses compétences et l’offre visée afin de démontrer la pertinence de sa candidature.",
     "executionPeriodInfo": "À effectuer en préparation d’une candidature ou d’un entretien de sélection.",
+    "executionPeriodInfoSummary": "Avant rédaction lettre motivation",
     "banner": {
       "fileName": "rediger-une-lettre-de-motivation-banner.png",
       "fileType": "PNG",
@@ -317,6 +314,7 @@
     "thematic": "TRANSVERSAL",
     "summary": "Activité consacrée à l’analyse de sa capacité à collaborer efficacement. L’étudiant.e identifie des situations de travail collectif et évalue sa contribution au sein d’un groupe.",
     "executionPeriodInfo": "À réaliser avant un entretien professionnel ou un bilan de compétences transversales.",
+    "executionPeriodInfoSummary": "Avant bilan compétences transversales",
     "banner": {
       "fileName": "developper-son-esprit-d-equipe-banner.png",
       "fileType": "PNG",
@@ -329,6 +327,7 @@
     "thematic": "TRANSVERSAL",
     "summary": "Activité visant à analyser et améliorer sa capacité à s’exprimer à l’oral dans différents contextes. L’étudiant.e identifie ses points forts et axes d’amélioration afin de gagner en aisance.",
     "executionPeriodInfo": "À effectuer avant un entretien ou une prise de parole importante.",
+    "executionPeriodInfoSummary": null,
     "banner": {
       "fileName": "renforcer-sa-communication-orale-banner.png",
       "fileType": "PNG",
