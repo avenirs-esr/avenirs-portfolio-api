@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input;
 
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityPeriodRequest;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -25,4 +26,6 @@ public interface DeclaredActivityService {
   void updateReflection(UUID declaredActivityId, String reflection);
 
   DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId);
+
+  void updatePeriod(UUID declaredActivityId, ActivityPeriodRequest request);
 }

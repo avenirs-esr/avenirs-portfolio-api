@@ -8,9 +8,13 @@ import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.Generic
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
+import java.util.UUID;
 
 public interface DeclaredActivityRepository extends GenericRepositoryPort<DeclaredActivity> {
   List<DeclaredActivity> findAllByStudent(Student student, FetchGraph fetchGraph);
+
+  List<DeclaredActivity> findAllByActivityIdAndStudent(
+      List<UUID> activityIds, Student student, FetchGraph fetchGraph);
 
   PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
       Student student, PageCriteria pageCriteria, FetchGraph fetchGraph);

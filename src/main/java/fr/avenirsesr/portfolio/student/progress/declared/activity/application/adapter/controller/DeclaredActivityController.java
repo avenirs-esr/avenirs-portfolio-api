@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityPeriodRequest;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -71,11 +72,19 @@ public class DeclaredActivityController {
 
   @DeleteMapping("/unsubscribe")
   public ResponseEntity<String> unsubscribeActivitiesProgresses(
-      @RequestBody List<UUID> declaredActivityIds) {
+      @RequestBody List<UUID> activityIds) {
 
-    declaredActivityService.unsubscribeMultiple(declaredActivityIds);
+    declaredActivityService.unsubscribeMultiple(activityIds);
 
     return ResponseEntity.ok("Declared activities successfully unsubscribed");
+  }
+
+  @PutMapping("/{declaredActivityId}/period")
+  public ResponseEntity<String> updatePeriod(
+      @Valid @PathVariable UUID declaredActivityId,
+      @Valid @RequestBody ActivityPeriodRequest request) {
+    declaredActivityService.updatePeriod(declaredActivityId, request);
+    return ResponseEntity.ok("Declared activities dates successfully updated");
   }
 
   @PutMapping("/finish/{declaredActivityId}")

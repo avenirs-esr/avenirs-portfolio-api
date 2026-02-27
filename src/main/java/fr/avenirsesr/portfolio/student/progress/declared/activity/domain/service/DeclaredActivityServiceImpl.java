@@ -4,6 +4,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateDateOrder;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityPeriodRequest;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
@@ -11,6 +12,7 @@ import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
@@ -24,6 +26,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.ou
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -76,20 +79,17 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public void unsubscribeMultiple(List<UUID> declaredActivityIds) {
+  public void unsubscribeMultiple(List<UUID> activityIds) {
     Student student = loggedInUserService.getLoggedInStudent();
 
     List<DeclaredActivity> declaredActivities =
-        declaredActivityRepository.findAllById(declaredActivityIds);
+        declaredActivityRepository.findAllByActivityIdAndStudent(
+            activityIds, student, FetchGraph.init().fetch("activity").add("student").fetch("user"));
 
     if (!declaredActivities.stream()
-        .map(DeclaredActivity::getId)
+        .map(declaredActivity -> declaredActivity.getActivity().getId())
         .collect(Collectors.toSet())
-        .containsAll(declaredActivityIds)) {
-      throw new DeclaredActivityNotFoundException();
-    }
-
-    if (declaredActivities.stream().anyMatch(activity -> !activity.getStudent().equals(student))) {
+        .containsAll(activityIds)) {
       throw new DeclaredActivityNotFoundException();
     }
 
@@ -162,6 +162,57 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     }
 
     return declaredActivity;
+  }
+
+  @Override
+  public void updatePeriod(UUID declaredActivityId, ActivityPeriodRequest request) {
+    BddLogger.given("Un étudiant connecté souhaite modifier les dates de son activité");
+
+    var student = loggedInUserService.getLoggedInStudent();
+    BddLogger.and("Une DeclaredActivity existante avec l'id : " + declaredActivityId);
+
+    var declaredActivity =
+        declaredActivityRepository
+            .findById(declaredActivityId)
+            .orElseThrow(() -> new DeclaredActivityNotFoundException("Activity not found"));
+
+    if (!declaredActivity.getStudent().equals(student)) {
+      BddLogger.then("L'étudiant n'est pas autorisé à modifier cette activité");
+      throw new UserNotAuthorizedException();
+    }
+
+    BddLogger.when("Les dates sont validées selon les règles métier");
+    validateDates(request, declaredActivity.getCreatedAt());
+
+    BddLogger.then("Les dates de début et de fin sont mises à jour");
+    declaredActivity.setStartDate(request.startDate());
+    declaredActivity.setEndDate(request.endDate());
+
+    declaredActivityRepository.save(declaredActivity);
+  }
+
+  private void validateDates(ActivityPeriodRequest request, Instant subscribeDate) {
+
+    var startDate = request.startDate();
+    var endDate = request.endDate();
+
+    BddLogger.given("Vérification que startDate et endDate sont cohérentes");
+
+    if ((startDate == null) != (endDate == null)) {
+      throw new DeclaredActivityDatesException();
+    }
+
+    if (startDate != null) {
+      BddLogger.and("Validation de l'ordre des dates");
+      validateDateOrder(startDate, endDate);
+
+      LocalDate inscriptionDate = subscribeDate.atZone(ZoneId.systemDefault()).toLocalDate();
+
+      if (startDate.isBefore(inscriptionDate)) {
+        BddLogger.then("La date de début est antérieure à la date d'inscription");
+        throw new DeclaredActivityStartDateBeforeSubscriptionException();
+      }
+    }
   }
 
   private void validateActivityDates(LocalDate startDate, LocalDate endDate) {
