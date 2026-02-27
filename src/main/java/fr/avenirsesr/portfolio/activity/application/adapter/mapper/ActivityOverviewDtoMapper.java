@@ -11,6 +11,7 @@ public interface ActivityOverviewDtoMapper {
         activityStatus.activity().getThematic(),
         activityStatus.status(),
         activityStatus.activity().getSummary(),
+        activityStatus.activity().getExecutionPeriodInfoSummary().orElse(null),
         activityStatus.isNew());
   }
 }
