@@ -97,5 +97,17 @@ public class DeclaredActivityController {
 <span class="fc" id="L97">    declaredActivityService.updateReflection(activityId, request.reflection());</span>
 <span class="fc" id="L98">    return ResponseEntity.ok(&quot;Declared activities successfully updated&quot;);</span>
   }
+
+  @GetMapping(&quot;/{declaredActivityId}&quot;)
+  public ResponseEntity&lt;DeclaredActivityDetailsDTO&gt; getDeclaredActivityDetails(
+      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
+<span class="fc" id="L104">    log.debug(</span>
+        &quot;Received request to get declared activity [{}] detailed for student [{}]&quot;,
+        declaredActivityId,
+<span class="fc" id="L107">        principal.getName());</span>
+<span class="fc" id="L108">    return ResponseEntity.ok(</span>
+<span class="fc" id="L109">        DeclaredActivityDetailsDTOMapper.toDTO(</span>
+<span class="fc" id="L110">            declaredActivityService.getDeclaredActivityDetails(declaredActivityId)));</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
