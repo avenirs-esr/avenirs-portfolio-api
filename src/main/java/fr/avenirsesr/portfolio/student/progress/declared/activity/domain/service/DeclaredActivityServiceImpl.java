@@ -76,20 +76,17 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public void unsubscribeMultiple(List<UUID> declaredActivityIds) {
+  public void unsubscribeMultiple(List<UUID> activityIds) {
     Student student = loggedInUserService.getLoggedInStudent();
 
     List<DeclaredActivity> declaredActivities =
-        declaredActivityRepository.findAllById(declaredActivityIds);
+        declaredActivityRepository.findAllByActivityIdAndStudent(
+            activityIds, student, FetchGraph.init().fetch("activity").add("student").fetch("user"));
 
     if (!declaredActivities.stream()
-        .map(DeclaredActivity::getId)
+        .map(declaredActivity -> declaredActivity.getActivity().getId())
         .collect(Collectors.toSet())
-        .containsAll(declaredActivityIds)) {
-      throw new DeclaredActivityNotFoundException();
-    }
-
-    if (declaredActivities.stream().anyMatch(activity -> !activity.getStudent().equals(student))) {
+        .containsAll(activityIds)) {
       throw new DeclaredActivityNotFoundException();
     }
 

@@ -7,6 +7,7 @@ public interface DeclaredActivityViewDTOMapper {
   static DeclaredActivityViewDTO toDTO(DeclaredActivity declaredActivity) {
     return new DeclaredActivityViewDTO(
         declaredActivity.getId(),
+        declaredActivity.getActivity().getId(),
         declaredActivity.getActivity().getTitle(),
         declaredActivity.getActivity().getThematic(),
         declaredActivity.getActivity().getSummary(),

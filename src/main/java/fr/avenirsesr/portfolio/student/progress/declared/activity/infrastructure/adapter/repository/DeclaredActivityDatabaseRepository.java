@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository;
 
+import static fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.specification.DeclaredActivitySpecification.hasActivityIdInAndStudent;
+
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -11,6 +13,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
@@ -33,6 +36,16 @@ public class DeclaredActivityDatabaseRepository
   @Override
   public List<DeclaredActivity> findAllByStudent(Student student, FetchGraph fetchGraph) {
     return findAll(hasStudent(student), fetchGraph);
+  }
+
+  @Override
+  public List<DeclaredActivity> findAllByActivityIdAndStudent(
+      List<UUID> activityIds, Student student, FetchGraph fetchGraph) {
+    if (activityIds == null || activityIds.isEmpty()) {
+      return List.of();
+    }
+
+    return findAll(hasActivityIdInAndStudent(activityIds, student), fetchGraph);
   }
 
   @Override

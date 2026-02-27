@@ -353,11 +353,10 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     @Transactional
     @Test
     void shouldUnsubscribeMultipleDeclaredActivities_whenOwnedByStudent() throws Exception {
-
       BddLogger.given("declared activities belonging to the student");
-      var declaredActivityIds = createDeclaredActivitiesForStudent();
+      var activityIds = createDeclaredActivitiesForStudentAndReturnActivityIds();
 
-      BddLogger.when("performing DELETE on declared activities");
+      BddLogger.when("performing DELETE on declared activities (by activityIds)");
 
       var result =
           mockMvc.perform(
@@ -366,7 +365,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                   .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
                   .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
                   .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(declaredActivityIds))
+                  .content(objectMapper.writeValueAsString(activityIds))
                   .accept(MediaType.APPLICATION_JSON));
 
       BddLogger.then("the activities should be removed from the database");
@@ -375,18 +374,20 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
           .andExpect(status().isOk())
           .andExpect(content().string("Declared activities successfully unsubscribed"));
 
-      var declaredActivities = declaredActivityRepository.findAllById(declaredActivityIds);
-      assertTrue(
-          declaredActivities.isEmpty(), "All declared activities of the student must be deleted");
+      var remaining =
+          declaredActivityRepository.findAllByActivityIdAndStudent(
+              activityIds, student, FetchGraph.init().fetch("activity"));
+
+      assertTrue(remaining.isEmpty(), "All declared activities of the student must be deleted");
     }
 
-    private List<UUID> createDeclaredActivitiesForStudent() {
+    private List<UUID> createDeclaredActivitiesForStudentAndReturnActivityIds() {
+      // Important: create ONE student for ALL declared activities (ownership must be consistent)
+      student = getStudent();
 
       return IntStream.range(0, 2)
           .mapToObj(
               i -> {
-                student = getStudent();
-
                 var activity = getActivity(i);
                 BddLogger.then("Create and persist DeclaredActivity for student");
 
@@ -394,7 +395,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                     DeclaredActivity.create(student, activity, null, null, null, null, null);
                 declaredActivityRepository.save(declaredActivity);
 
-                return declaredActivity.getId();
+                return activity.getId(); // controller expects activityIds
               })
           .toList();
     }
@@ -402,11 +403,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     @Transactional
     @Test
     void shouldReturn400WhenBodyIsMissing() throws Exception {
-
       BddLogger.given("the DELETE declared activities endpoint");
-
       BddLogger.when("performing a DELETE request without body");
-
       BddLogger.then("it should return 400 Bad Request");
 
       mockMvc
@@ -418,6 +416,27 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                   .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
                   .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
           .andExpect(status().isBadRequest());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturn404WhenUnsubscribingUnknownActivityIds() throws Exception {
+      BddLogger.given("a list of activityIds that the student is not subscribed to");
+      var unknownActivityIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+
+      BddLogger.when("performing DELETE on unsubscribe endpoint with unknown ids");
+      BddLogger.then("it should return 404 Not Found");
+
+      mockMvc
+          .perform(
+              delete(UNSUBSCRIBE_PATH)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(unknownActivityIds))
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isNotFound());
     }
   }
 
