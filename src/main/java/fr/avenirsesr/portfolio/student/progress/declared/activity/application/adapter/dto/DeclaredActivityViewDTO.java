@@ -13,6 +13,7 @@ public record DeclaredActivityViewDTO(
     String title,
     @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
     String summary,
+    String executionPeriodInfoSummary,
     @Schema(ref = "#/components/schemas/EDeclaredActivityStatus") EDeclaredActivityStatus status,
     LocalDate startDate,
     LocalDate endDate,
