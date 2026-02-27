@@ -6,13 +6,15 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.SubscribeDeclaredActivityRequestDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateReflectionRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDtoMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -28,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-<span class="fc" id="L31">@Slf4j</span>
+<span class="fc" id="L33">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/activity-progress&quot;)
 public class DeclaredActivityController {
@@ -39,46 +41,52 @@ public class DeclaredActivityController {
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L42">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L43">    log.debug(</span>
+<span class="fc" id="L44">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L45">    log.debug(</span>
         &quot;Received request to get declared activities view of user [{}] (page= {}, size= {})&quot;,
-<span class="fc" id="L45">        principal.getName(),</span>
-<span class="fc" id="L46">        pageCriteria.page(),</span>
-<span class="fc" id="L47">        pageCriteria.pageSize());</span>
-<span class="fc" id="L48">    PagedResult&lt;DeclaredActivity&gt; pagedResult =</span>
-<span class="fc" id="L49">        declaredActivityService.getDeclaredActivities(pageCriteria);</span>
+<span class="fc" id="L47">        principal.getName(),</span>
+<span class="fc" id="L48">        pageCriteria.page(),</span>
+<span class="fc" id="L49">        pageCriteria.pageSize());</span>
+<span class="fc" id="L50">    PagedResult&lt;DeclaredActivity&gt; pagedResult =</span>
+<span class="fc" id="L51">        declaredActivityService.getDeclaredActivities(pageCriteria);</span>
 
-<span class="fc" id="L51">    var viewResponse =</span>
+<span class="fc" id="L53">    var viewResponse =</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L53">            pagedResult.content().stream().map(DeclaredActivityViewDtoMapper::toDTO).toList(),</span>
-<span class="fc" id="L54">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="fc" id="L55">            pagedResult.content().stream().map(DeclaredActivityViewDTOMapper::toDTO).toList(),</span>
+<span class="fc" id="L56">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
 
-<span class="fc" id="L56">    return ResponseEntity.ok(viewResponse);</span>
+<span class="fc" id="L58">    return ResponseEntity.ok(viewResponse);</span>
   }
 
   @PostMapping(&quot;/subscribe/{activityId}&quot;)
-  public ResponseEntity&lt;DeclaredActivity&gt; subscribe(@Valid @PathVariable UUID activityId) {
-<span class="fc" id="L61">    DeclaredActivity declaredActivity = declaredActivityService.subscribe(activityId);</span>
-<span class="fc" id="L62">    return ResponseEntity.ok(declaredActivity);</span>
+  public ResponseEntity&lt;DeclaredActivityDetailsDTO&gt; subscribeActivity(
+      @Valid @PathVariable UUID activityId,
+      @Valid @RequestBody(required = false) SubscribeDeclaredActivityRequestDTO requestDTO) {
+<span class="fc bfc" id="L65" title="All 2 branches covered.">    LocalDate startDate = requestDTO != null ? requestDTO.startDate() : null;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">    LocalDate endDate = requestDTO != null ? requestDTO.endDate() : null;</span>
+<span class="fc" id="L67">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L68">        declaredActivityService.subscribe(activityId, startDate, endDate);</span>
+<span class="fc" id="L69">    return ResponseEntity.ok(DeclaredActivityDetailsDTOMapper.toDTO(declaredActivity));</span>
   }
 
   @DeleteMapping(&quot;/unsubscribe&quot;)
-  public ResponseEntity&lt;String&gt; unsubscribe(@RequestBody List&lt;UUID&gt; declaredActivityIds) {
+  public ResponseEntity&lt;String&gt; unsubscribeActivitiesProgresses(
+      @RequestBody List&lt;UUID&gt; declaredActivityIds) {
 
-<span class="fc" id="L68">    declaredActivityService.unsubscribeMultiple(declaredActivityIds);</span>
+<span class="fc" id="L76">    declaredActivityService.unsubscribeMultiple(declaredActivityIds);</span>
 
-<span class="fc" id="L70">    return ResponseEntity.ok(&quot;Declared activities successfully unsubscribed&quot;);</span>
+<span class="fc" id="L78">    return ResponseEntity.ok(&quot;Declared activities successfully unsubscribed&quot;);</span>
   }
 
   @PutMapping(&quot;/finish/{declaredActivityId}&quot;)
-  public ResponseEntity&lt;DeclaredActivity&gt; finish(
+  public ResponseEntity&lt;DeclaredActivityDetailsDTO&gt; finish(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L76">    log.debug(</span>
+<span class="fc" id="L84">    log.debug(</span>
         &quot;Received request to finish declared activity [{}] for student [{}]&quot;,
         declaredActivityId,
-<span class="fc" id="L79">        principal.getName());</span>
-<span class="fc" id="L80">    DeclaredActivity declaredActivity = declaredActivityService.finish(declaredActivityId);</span>
-<span class="fc" id="L81">    return ResponseEntity.ok(declaredActivity);</span>
+<span class="fc" id="L87">        principal.getName());</span>
+<span class="fc" id="L88">    DeclaredActivity declaredActivity = declaredActivityService.finish(declaredActivityId);</span>
+<span class="fc" id="L89">    return ResponseEntity.ok(DeclaredActivityDetailsDTOMapper.toDTO(declaredActivity));</span>
   }
 
   @PutMapping(&quot;/{activityId}/reflection&quot;)
@@ -86,20 +94,8 @@ public class DeclaredActivityController {
       @PathVariable(&quot;activityId&quot;) UUID activityId,
       @Valid @RequestBody UpdateReflectionRequest request) {
 
-<span class="fc" id="L89">    declaredActivityService.updateReflection(activityId, request.reflection());</span>
-<span class="fc" id="L90">    return ResponseEntity.ok(&quot;Declared activities successfully updated&quot;);</span>
-  }
-
-  @GetMapping(&quot;/{declaredActivityId}&quot;)
-  public ResponseEntity&lt;DeclaredActivityDetailsDTO&gt; getDeclaredActivityDetails(
-      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L96">    log.debug(</span>
-        &quot;Received request to get declared activity [{}] detailed for student [{}]&quot;,
-        declaredActivityId,
-<span class="fc" id="L99">        principal.getName());</span>
-<span class="fc" id="L100">    return ResponseEntity.ok(</span>
-<span class="fc" id="L101">        DeclaredActivityDetailsDTOMapper.toDTO(</span>
-<span class="fc" id="L102">            declaredActivityService.getDeclaredActivityDetails(declaredActivityId)));</span>
+<span class="fc" id="L97">    declaredActivityService.updateReflection(activityId, request.reflection());</span>
+<span class="fc" id="L98">    return ResponseEntity.ok(&quot;Declared activities successfully updated&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
