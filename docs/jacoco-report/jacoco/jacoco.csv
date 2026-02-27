@@ -95,7 +95,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio,AvenirsPortfolioApiApplication,5,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository,SelfKnowledgeCategoryDatabaseRepository,0,26,0,0,0,6,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.repository,SelfKnowledgeElementDatabaseRepository,0,37,0,0,0,12,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.domain.service,DeclaredProgramServiceImpl,0,249,0,9,0,59,0,16,0,11
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service,DeclaredActivityServiceImpl,14,284,5,27,3,72,5,25,0,14
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service,DeclaredActivityServiceImpl,14,272,5,27,3,69,5,23,0,12
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.repository,DeclaredProgramDatabaseRepository,0,20,0,0,0,4,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.application.adapter.controller,SkillLevelProgressController,54,47,0,0,16,17,3,4,3,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.application.adapter.controller,StudentProgressController,0,48,0,0,0,14,0,6,0,6
