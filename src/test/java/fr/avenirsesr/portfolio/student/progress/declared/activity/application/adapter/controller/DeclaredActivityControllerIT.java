@@ -30,6 +30,7 @@ import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentReposit
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
@@ -48,6 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   private static final String BASE_PATH = "/me/activity-progress";
   private static final String UNSUBSCRIBE_PATH = BASE_PATH + "/unsubscribe";
+  private static final String EMPTY_BODY = "{}";
 
   private Student student;
   @Autowired private DeclaredActivityRepository declaredActivityRepository;
@@ -83,15 +85,14 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     seederRunner.run();
   }
 
-  private String getFirstDeclaredActivityIdForStudent(Student student, FetchGraph fetchGraph) {
+  private DeclaredActivity getFirstDeclaredActivityForStudent(
+      Student student, FetchGraph fetchGraph) {
     return declaredActivityRepository.findAllByStudent(student, fetchGraph).stream()
         .findFirst()
         .orElseThrow(
             () ->
                 new IllegalStateException(
-                    "No declared activity found for the student. Did the seeder run properly?"))
-        .getId()
-        .toString();
+                    "No declared activity found for the student. Did the seeder run properly?"));
   }
 
   private String subscribeToFirstAvailableActivity() throws Exception {
@@ -109,7 +110,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(EMPTY_BODY))
         .andExpect(status().isOk());
 
     return activityId;
@@ -130,7 +132,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                     .header("X-Signed-Context", payload)
                     .header("X-Context-Kid", secretKey)
                     .header("X-Context-Signature", signature)
-                    .contentType(MediaType.APPLICATION_JSON))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(EMPTY_BODY))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -221,7 +224,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(EMPTY_BODY))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", notNullValue()))
         .andExpect(jsonPath("$.activity").exists())
@@ -240,7 +244,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     String tomorrow = LocalDate.now().plusDays(1).toString();
     String nextWeek = LocalDate.now().plusDays(7).toString();
     String requestBody =
-        String.format("{\"startDate\": \"%s\", \"endDate\": \"%s\"}", tomorrow, nextWeek);
+        String.format(
+            "{\"period\": {\"startDate\": \"%s\", \"endDate\": \"%s\"} }", tomorrow, nextWeek);
 
     BddLogger.when("performing a POST to subscribe with valid dates");
     BddLogger.then("it should return OK status and the dates are saved");
@@ -268,7 +273,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("No activity found"));
 
-    String requestBody = "{\"startDate\": \"2026-01-01\"}";
+    String requestBody = "{\"period\": {\"startDate\": \"2026-01-01\"} }";
 
     BddLogger.when("performing a POST to subscribe with incomplete body");
     BddLogger.then("it should return Bad Request status");
@@ -296,7 +301,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(EMPTY_BODY))
         .andExpect(status().isNotFound());
   }
 
@@ -315,7 +321,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                 .header("X-Signed-Context", studentPayload)
                 .header("X-Context-Kid", secretKey)
                 .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(EMPTY_BODY))
         .andExpect(status().isConflict());
   }
 
@@ -650,16 +657,17 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
       FetchGraph graph = FetchGraph.init().fetch("activity");
       Student student = studentRepository.findById(UUID.fromString(studentId)).orElseThrow();
-      String declaredActivityId = getFirstDeclaredActivityIdForStudent(student, graph);
+      DeclaredActivity declaredActivity = getFirstDeclaredActivityForStudent(student, graph);
       mockMvc
           .perform(
-              get(BASE_PATH + "/" + declaredActivityId)
+              get(BASE_PATH + "/" + declaredActivity.getId())
                   .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
                   .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
                   .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
                   .accept(MediaType.APPLICATION_JSON))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.activity.title").isNotEmpty());
+          .andExpect(jsonPath("$.status").value(declaredActivity.getStatus().name()))
+          .andExpect(jsonPath("$.activity.title").value(declaredActivity.getActivity().getTitle()));
     }
 
     @Test
@@ -696,6 +704,92 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                   .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
                   .accept(MediaType.APPLICATION_JSON))
           .andExpect(status().isForbidden());
+    }
+  }
+
+  @Nested
+  class whenUpdateDatesDeclaredActivity {
+    @Test
+    void shouldUpdatePeriodSuccessfully() throws Exception {
+
+      student = getStudent();
+      var activity = getActivity(1);
+
+      BddLogger.and("A persisted DeclaredActivity.");
+      var declaredActivity =
+          DeclaredActivity.create(student, activity, null, null, null, null, null);
+
+      declaredActivityRepository.save(declaredActivity);
+
+      LocalDate startDate = LocalDate.now().plusDays(1);
+      LocalDate endDate = LocalDate.now().plusDays(10);
+      String body =
+          """
+          {
+                "period": {
+                  "startDate": "%s",
+                  "endDate": "%s"
+                }
+          }
+          """
+              .formatted(startDate, endDate);
+      BddLogger.when("On appelle PUT /{declaredActivityId}/period");
+
+      mockMvc
+          .perform(
+              put(BASE_PATH + "/" + declaredActivity.getId() + "/period")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(body)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isOk());
+
+      BddLogger.then("The dates are updated.");
+
+      var updated = declaredActivityRepository.findById(declaredActivity.getId()).orElseThrow();
+
+      assertEquals(startDate, updated.getStartDate());
+      assertEquals(endDate, updated.getEndDate());
+    }
+
+    @Test
+    void shouldReturn400WhenStartDateBeforeInscriptionDate() throws Exception {
+
+      student = getStudent();
+      var activity = getActivity(1);
+
+      var declaredActivity =
+          DeclaredActivity.create(student, activity, null, null, null, null, null);
+
+      declaredActivityRepository.save(declaredActivity);
+
+      LocalDate startDate =
+          declaredActivity.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDate().minusDays(1);
+
+      LocalDate endDate = startDate.plusDays(5);
+      String body =
+          """
+          {
+                "period": {
+                  "startDate": "%s",
+                  "endDate": "%s"
+                }
+          }
+          """
+              .formatted(startDate, endDate);
+
+      BddLogger.when("send a start date that is earlier than the registration date.");
+
+      mockMvc
+          .perform(
+              put(BASE_PATH + "/" + declaredActivity.getId() + "/period")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(body)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isBadRequest());
     }
   }
 }

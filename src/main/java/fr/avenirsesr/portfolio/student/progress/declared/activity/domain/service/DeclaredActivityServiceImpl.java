@@ -24,6 +24,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.ou
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,7 +70,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityAlreadyExistException();
     }
 
-    validateActivityDates(startDate, endDate);
+    validateActivityDates(startDate, endDate, Instant.now());
 
     DeclaredActivity declaredActivity =
         DeclaredActivity.create(student, activity, null, null, startDate, endDate, null);
@@ -162,17 +163,48 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     return declaredActivity;
   }
 
-  private void validateActivityDates(LocalDate startDate, LocalDate endDate) {
+  private void validateActivityDates(LocalDate startDate, LocalDate endDate, Instant subscribedAt) {
+
     if ((startDate == null) != (endDate == null)) {
       throw new DeclaredActivityDatesException();
     }
 
     if (startDate != null) {
+
       validateDateOrder(startDate, endDate);
 
-      if (startDate.isBefore(LocalDate.now())) {
+      LocalDate subscriptionDate = subscribedAt.atZone(ZoneId.systemDefault()).toLocalDate();
+
+      if (startDate.isBefore(subscriptionDate)) {
         throw new DeclaredActivityStartDateBeforeSubscriptionException();
       }
     }
+  }
+
+  @Override
+  public void updateDeclaredActivityDates(
+      UUID declaredActivityId, LocalDate startDate, LocalDate endDate) {
+
+    var student = loggedInUserService.getLoggedInStudent();
+    log.debug("Authenticated student id: {}", student.getId());
+
+    log.debug("Fetching DeclaredActivity with id: {}", declaredActivityId);
+    var declaredActivity =
+        declaredActivityRepository
+            .findById(declaredActivityId)
+            .orElseThrow(
+                () ->
+                    new DeclaredActivityNotFoundException(
+                        "DeclaredActivity not found with id: " + declaredActivityId));
+    if (!declaredActivity.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    validateActivityDates(startDate, endDate, declaredActivity.getCreatedAt());
+
+    declaredActivity.setStartDate(startDate);
+    declaredActivity.setEndDate(endDate);
+
+    declaredActivityRepository.save(declaredActivity);
   }
 }

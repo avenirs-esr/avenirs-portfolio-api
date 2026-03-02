@@ -4,10 +4,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.SubscribeDeclaredActivityRequestDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateReflectionRequest;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -61,9 +58,15 @@ public class DeclaredActivityController {
   @PostMapping("/subscribe/{activityId}")
   public ResponseEntity<DeclaredActivityDetailsDTO> subscribeActivity(
       @Valid @PathVariable UUID activityId,
-      @Valid @RequestBody(required = false) SubscribeDeclaredActivityRequestDTO requestDTO) {
-    LocalDate startDate = requestDTO != null ? requestDTO.startDate() : null;
-    LocalDate endDate = requestDTO != null ? requestDTO.endDate() : null;
+      @Valid @RequestBody SubscribeDeclaredActivityRequest subscribeDeclaredActivityRequest) {
+    LocalDate startDate =
+        subscribeDeclaredActivityRequest.period() != null
+            ? subscribeDeclaredActivityRequest.period().startDate()
+            : null;
+    LocalDate endDate =
+        subscribeDeclaredActivityRequest.period() != null
+            ? subscribeDeclaredActivityRequest.period().endDate()
+            : null;
     DeclaredActivity declaredActivity =
         declaredActivityService.subscribe(activityId, startDate, endDate);
     return ResponseEntity.ok(DeclaredActivityDetailsDTOMapper.toDTO(declaredActivity));
@@ -108,5 +111,21 @@ public class DeclaredActivityController {
     return ResponseEntity.ok(
         DeclaredActivityDetailsDTOMapper.toDTO(
             declaredActivityService.getDeclaredActivityDetails(declaredActivityId)));
+  }
+
+  @PutMapping("/{declaredActivityId}/period")
+  public ResponseEntity<String> updatePeriod(
+      @Valid @RequestBody DeclaredActivityPeriodRequest declaredActivityPeriodRequest,
+      @PathVariable UUID declaredActivityId) {
+    LocalDate startDate =
+        declaredActivityPeriodRequest.period() != null
+            ? declaredActivityPeriodRequest.period().startDate()
+            : null;
+    LocalDate endDate =
+        declaredActivityPeriodRequest.period() != null
+            ? declaredActivityPeriodRequest.period().endDate()
+            : null;
+    declaredActivityService.updateDeclaredActivityDates(declaredActivityId, startDate, endDate);
+    return ResponseEntity.ok("Declared activities dates successfully updated");
   }
 }

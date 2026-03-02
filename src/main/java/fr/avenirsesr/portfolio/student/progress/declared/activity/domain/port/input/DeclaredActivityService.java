@@ -26,4 +26,6 @@ public interface DeclaredActivityService {
   void updateReflection(UUID declaredActivityId, String reflection);
 
   DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId);
+
+  void updateDeclaredActivityDates(UUID declaredActivityId, LocalDate startDate, LocalDate endDate);
 }
