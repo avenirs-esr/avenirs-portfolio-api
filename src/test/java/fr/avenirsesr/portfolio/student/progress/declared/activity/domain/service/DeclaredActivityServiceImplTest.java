@@ -11,7 +11,9 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
+import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
+import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -456,5 +458,86 @@ class DeclaredActivityServiceImplTest {
 
     verify(declaredActivityRepository).findById(eq(declaredActivityId), any(FetchGraph.class));
     verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldUpdatePeriodSuccessfully() {
+    // Given
+    UUID declaredActivityId = UUID.randomUUID();
+    var student = mock(Student.class);
+    var declaredActivity = mock(DeclaredActivity.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivity.getStudent()).thenReturn(student);
+    when(declaredActivity.getCreatedAt()).thenReturn(Instant.now());
+
+    LocalDate startDate = LocalDate.now().plusDays(1);
+    LocalDate endDate = LocalDate.now().plusDays(10);
+
+    // When
+    BddLogger.when("The service is called with valid dates.");
+    declaredActivityService.updateDeclaredActivityDates(declaredActivityId, startDate, endDate);
+
+    // Then
+    BddLogger.then("The DeclaredActivity receives the new dates.");
+    verify(declaredActivity).setStartDate(startDate);
+    verify(declaredActivity).setEndDate(endDate);
+
+    verify(declaredActivityRepository).save(declaredActivity);
+  }
+
+  @Test
+  void shouldThrowWhenEndDateBeforeStartDate() {
+    UUID declaredActivityId = UUID.randomUUID();
+    var student = mock(Student.class);
+    var declaredActivity = mock(DeclaredActivity.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivity.getStudent()).thenReturn(student);
+    when(declaredActivity.getCreatedAt()).thenReturn(Instant.now());
+
+    LocalDate startDate = LocalDate.now().plusDays(10);
+    LocalDate endDate = LocalDate.now().plusDays(1);
+
+    FieldValidationException ex =
+        Assertions.assertThrows(
+            FieldValidationException.class,
+            () ->
+                declaredActivityService.updateDeclaredActivityDates(
+                    declaredActivityId, startDate, endDate));
+
+    Assertions.assertEquals(EErrorCode.END_DATE_BEFORE_START_DATE, ex.getErrorCode());
+  }
+
+  @Test
+  void shouldThrowWhenStartDateBeforeInscriptionDate() {
+    UUID declaredActivityId = UUID.randomUUID();
+    var student = mock(Student.class);
+    var declaredActivity = mock(DeclaredActivity.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivity.getStudent()).thenReturn(student);
+    when(declaredActivity.getCreatedAt()).thenReturn(Instant.now());
+
+    LocalDate startDate = LocalDate.now().minusDays(1);
+    LocalDate endDate = startDate.plusDays(5);
+
+    BddLogger.when("The service is called with a startDate before the registration date.");
+
+    BusinessException ex =
+        Assertions.assertThrows(
+            BusinessException.class,
+            () ->
+                declaredActivityService.updateDeclaredActivityDates(
+                    declaredActivityId, startDate, endDate));
+
+    Assertions.assertEquals(
+        EErrorCode.DECLARED_ACTIVITY_START_DATE_BEFORE_SUBSCRIPTION, ex.getErrorCode());
   }
 }
