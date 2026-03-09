@@ -7,20 +7,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Schema(
-    requiredProperties = {
-      "id",
-      "title",
-      "thematic",
-      "isSubscribed",
-      "banner",
-      "summary",
-      "executionPeriodInfo"
-    })
+    requiredProperties = {"id", "title", "thematic", "banner", "summary", "executionPeriodInfo"})
 public record ActivityDetailsDTO(
     UUID id,
     String title,
     @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
-    boolean isSubscribed,
+    UUID subscribedDeclaredActivity,
     FileDTO banner,
     String summary,
     String executionPeriodInfo,

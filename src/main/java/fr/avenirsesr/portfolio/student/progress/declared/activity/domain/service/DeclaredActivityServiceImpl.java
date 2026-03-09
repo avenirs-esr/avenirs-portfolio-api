@@ -25,6 +25,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -53,9 +54,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public boolean isSubscribedTo(Activity activity) {
+  public Optional<DeclaredActivity> getByActivity(Activity activity) {
     Student student = loggedInUserService.getLoggedInStudent();
-    return declaredActivityRepository.isSubscribedTo(student, activity);
+    return declaredActivityRepository.findByActivity(student, activity);
   }
 
   @Override
@@ -64,7 +65,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     Activity activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
 
-    if (declaredActivityRepository.isSubscribedTo(student, activity)) {
+    if (declaredActivityRepository.findByActivity(student, activity).isPresent()) {
       throw new DeclaredActivityAlreadyExistException();
     }
 

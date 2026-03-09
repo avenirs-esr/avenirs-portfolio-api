@@ -398,7 +398,7 @@ class ActivityServiceImplTest {
 
     when(activityResourceService.getActivityBanner(activity)).thenReturn(banner);
 
-    when(declaredActivityService.isSubscribedTo(activity)).thenReturn(false);
+    when(declaredActivityService.getByActivity(activity)).thenReturn(Optional.empty());
 
     when(activity.getId()).thenReturn(activityId);
     when(activity.getTitle()).thenReturn("Activity");

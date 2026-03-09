@@ -10,7 +10,7 @@ public interface ActivityDetailsDtoMapper {
         activityDetail.id(),
         activityDetail.title(),
         activityDetail.thematic(),
-        activityDetail.isSubscribed(),
+        activityDetail.subscribedDeclaredActivity().orElse(null),
         new FileDTO(
             activityDetail.activityBanner().id().orElse(null),
             activityDetail.activityBanner().name().orElse(null),

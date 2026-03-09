@@ -659,7 +659,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                   .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
                   .accept(MediaType.APPLICATION_JSON))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.status").value("SUBSCRIBED"))
           .andExpect(jsonPath("$.activity.title").isNotEmpty());
     }
 

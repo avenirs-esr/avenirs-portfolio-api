@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.D
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface DeclaredActivityService {
@@ -14,7 +15,7 @@ public interface DeclaredActivityService {
 
   List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student);
 
-  boolean isSubscribedTo(Activity activity);
+  Optional<DeclaredActivity> getByActivity(Activity activity);
 
   DeclaredActivity subscribe(UUID activityId, LocalDate startDate, LocalDate endDate);
 

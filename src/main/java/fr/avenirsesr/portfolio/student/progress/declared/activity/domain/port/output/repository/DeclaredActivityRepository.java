@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.Generic
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface DeclaredActivityRepository extends GenericRepositoryPort<DeclaredActivity> {
@@ -19,5 +20,5 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
   PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
       Student student, PageCriteria pageCriteria, FetchGraph fetchGraph);
 
-  boolean isSubscribedTo(Student student, Activity activity);
+  Optional<DeclaredActivity> findByActivity(Student student, Activity activity);
 }

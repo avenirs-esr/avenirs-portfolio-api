@@ -72,7 +72,7 @@ class DeclaredActivityServiceImplTest {
     Activity activity = ActivityFixture.create().toModel();
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(declaredActivityRepository.isSubscribedTo(student, activity)).thenReturn(false);
+    when(declaredActivityRepository.findByActivity(student, activity)).thenReturn(Optional.empty());
     when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
 
     BddLogger.when("He tries to subscribe to this activity without dates");
@@ -103,7 +103,7 @@ class DeclaredActivityServiceImplTest {
     assertThatThrownBy(() -> service.subscribe(activityId, null, null))
         .isInstanceOf(ActivityNotFoundException.class);
 
-    verify(declaredActivityRepository, never()).isSubscribedTo(any(), any());
+    verify(declaredActivityRepository, never()).findByActivity(any(), any());
     verify(declaredActivityRepository, never()).save(any());
   }
 
@@ -111,10 +111,12 @@ class DeclaredActivityServiceImplTest {
   void subscribe_should_throw_DeclaredActivityAlreadyExistException_when_already_subscribed() {
     BddLogger.given("A logged-in student already subscribed to an existing activity");
     Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(activityRepository.findById(activity.getId())).thenReturn(Optional.of(activity));
-    when(declaredActivityRepository.isSubscribedTo(student, activity)).thenReturn(true);
+    when(declaredActivityRepository.findByActivity(student, activity))
+        .thenReturn(Optional.of(declaredActivity));
 
     BddLogger.when("He tries to subscribe to it again");
 

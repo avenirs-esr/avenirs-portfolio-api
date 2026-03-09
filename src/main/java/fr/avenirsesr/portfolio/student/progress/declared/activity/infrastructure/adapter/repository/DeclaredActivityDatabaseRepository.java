@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -61,7 +62,9 @@ public class DeclaredActivityDatabaseRepository
   }
 
   @Override
-  public boolean isSubscribedTo(Student student, Activity activity) {
-    return jpaRepository.existsByStudentIdAndActivityId(student.getId(), activity.getId());
+  public Optional<DeclaredActivity> findByActivity(Student student, Activity activity) {
+    return jpaRepository
+        .findByStudentIdAndActivityId(student.getId(), activity.getId())
+        .map(DeclaredActivityMapper.INSTANCE::toDomain);
   }
 }
