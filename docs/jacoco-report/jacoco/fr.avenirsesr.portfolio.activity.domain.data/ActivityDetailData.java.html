@@ -3,13 +3,14 @@
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
-<span class="fc" id="L8">public record ActivityDetailData(</span>
+<span class="fc" id="L9">public record ActivityDetailData(</span>
     UUID id,
     String title,
     EActivityThematic thematic,
-    boolean isSubscribed,
+    Optional&lt;UUID&gt; subscribedDeclaredActivity,
     FileData activityBanner,
     String summary,
     String executionPeriodInfo,

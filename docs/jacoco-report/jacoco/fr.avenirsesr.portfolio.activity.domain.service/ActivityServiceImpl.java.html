@@ -71,7 +71,7 @@ public class ActivityServiceImpl implements ActivityService {
 <span class="fc" id="L71">        activity.getId(),</span>
 <span class="fc" id="L72">        activity.getTitle(),</span>
 <span class="fc" id="L73">        activity.getThematic(),</span>
-<span class="fc" id="L74">        declaredActivityService.isSubscribedTo(activity),</span>
+<span class="fc" id="L74">        declaredActivityService.getByActivity(activity).map(DeclaredActivity::getId),</span>
         new FileData(
 <span class="fc" id="L76">            Optional.of(activityBanner.getId()),</span>
 <span class="fc" id="L77">            Optional.of(activityBanner.getFileName()),</span>
