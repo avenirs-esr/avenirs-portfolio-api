@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.association.domain.port.input.ActivityTraceAssociationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -17,10 +18,14 @@ public class DeclaredActivityServiceConfig {
   private final DeclaredActivityRepository declaredActivityRepository;
   private final ActivityRepository activityRepository;
   private final LoggedInUserService loggedInUserService;
+  private final ActivityTraceAssociationService activityTraceAssociationService;
 
   @Bean
   public DeclaredActivityService declaredActivityService() {
     return new DeclaredActivityServiceImpl(
-        declaredActivityRepository, activityRepository, loggedInUserService);
+        declaredActivityRepository,
+        activityRepository,
+        activityTraceAssociationService,
+        loggedInUserService);
   }
 }

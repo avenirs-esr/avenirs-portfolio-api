@@ -797,4 +797,147 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
           .andExpect(status().isBadRequest());
     }
   }
+
+  @Nested
+  class WhenAssociateDeclaredActivityWithTraces {
+
+    @Transactional
+    @Test
+    void shouldAssociateTraceToDeclaredActivity() throws Exception {
+
+      BddLogger.given("an existing declared activity for the student");
+
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      BddLogger.and("an existing trace belonging to the student");
+
+      UUID traceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
+
+      String body =
+          """
+          {
+            "idsToAssociate": ["%s"]
+          }
+          """
+              .formatted(traceId);
+
+      BddLogger.when("performing POST /associate/trace/{declaredActivityId}");
+
+      mockMvc
+          .perform(
+              post(BASE_PATH + "/" + declaredActivityId + "/associate/trace")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(body)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isOk())
+          .andExpect(content().string("Declared activities associated successfully"));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenDeclaredActivityDoesNotExist() throws Exception {
+
+      BddLogger.given("a declaredActivityId that does not exist");
+
+      UUID traceId = UUID.randomUUID();
+
+      String body =
+          """
+          {
+            "idsToAssociate": ["%s"]
+          }
+          """
+              .formatted(traceId);
+
+      BddLogger.when("calling associate endpoint");
+
+      mockMvc
+          .perform(
+              post(BASE_PATH + "/" + notFoundDeclaredActivityId + "/associate/trace")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(body)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isNotFound());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnForbiddenWhenAssociatingAnotherStudentsActivity() throws Exception {
+
+      BddLogger.given("a declared activity belonging to another student");
+
+      String otherDeclaredActivityId =
+          subscribeAndGetDeclaredActivityId(otherStudentPayload, otherStudentSignature);
+
+      UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
+
+      String body =
+          """
+          {
+            "idsToAssociate": ["%s"]
+          }
+          """
+              .formatted(traceId);
+
+      BddLogger.when("associating with main student payload");
+
+      mockMvc
+          .perform(
+              post(BASE_PATH + "/" + otherDeclaredActivityId + "/associate/trace")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(body)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isForbidden());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnConflictWhenAssociationAlreadyExists() throws Exception {
+
+      BddLogger.given("an existing declared activity");
+
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      UUID traceId = UUID.fromString("4453f884-9081-43cb-95c6-d76c2bb59fd7");
+
+      String body =
+          """
+          {
+            "idsToAssociate": ["%s"]
+          }
+          """
+              .formatted(traceId);
+
+      BddLogger.when("associate first time");
+
+      mockMvc
+          .perform(
+              post(BASE_PATH + "/" + declaredActivityId + "/associate/trace")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(body)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isOk());
+
+      BddLogger.when("associate second time");
+
+      mockMvc
+          .perform(
+              post(BASE_PATH + "/" + declaredActivityId + "/associate/trace")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(body)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isBadRequest());
+    }
+  }
 }

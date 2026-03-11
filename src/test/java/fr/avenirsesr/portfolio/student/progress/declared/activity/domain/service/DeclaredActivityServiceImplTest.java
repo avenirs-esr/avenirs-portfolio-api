@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundExcepti
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
+import fr.avenirsesr.portfolio.association.domain.port.input.ActivityTraceAssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
@@ -49,6 +50,7 @@ class DeclaredActivityServiceImplTest {
 
   @Mock private DeclaredActivityRepository declaredActivityRepository;
   @Mock private ActivityRepository activityRepository;
+  @Mock private ActivityTraceAssociationService activityTraceAssociationService;
   @Mock private LoggedInUserService loggedInUserService;
 
   @InjectMocks private DeclaredActivityServiceImpl service;
@@ -64,7 +66,10 @@ class DeclaredActivityServiceImplTest {
     student = StudentFixture.create().toModel();
     declaredActivityService =
         new DeclaredActivityServiceImpl(
-            declaredActivityRepository, activityRepository, loggedInUserService);
+            declaredActivityRepository,
+            activityRepository,
+            activityTraceAssociationService,
+            loggedInUserService);
   }
 
   @Test
