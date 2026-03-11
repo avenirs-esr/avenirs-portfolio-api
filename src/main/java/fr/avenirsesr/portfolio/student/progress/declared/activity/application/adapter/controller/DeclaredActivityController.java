@@ -128,4 +128,18 @@ public class DeclaredActivityController {
     declaredActivityService.updateDeclaredActivityDates(declaredActivityId, startDate, endDate);
     return ResponseEntity.ok("Declared activities dates successfully updated");
   }
+
+  @PostMapping("/{declaredActivityId}/associate/trace")
+  public ResponseEntity<String> associateActivityWithTraces(
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId,
+      @Valid @RequestBody DeclaredActivityAssociationRequest body) {
+    log.debug(
+        "Received request to associate declared activity [{}] with traces [{}] by student [{}]",
+        declaredActivityId,
+        body.idsToAssociate(),
+        principal.getName());
+    declaredActivityService.associateActivityWithTraces(declaredActivityId, body.idsToAssociate());
+    return ResponseEntity.ok("Declared activities associated successfully");
+  }
 }

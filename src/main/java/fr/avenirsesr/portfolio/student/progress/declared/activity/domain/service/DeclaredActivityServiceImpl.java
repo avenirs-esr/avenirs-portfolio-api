@@ -7,6 +7,8 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.association.domain.data.ActivityTraceAssociationData;
+import fr.avenirsesr.portfolio.association.domain.port.input.ActivityTraceAssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -37,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
   private final ActivityRepository activityRepository;
+  private final ActivityTraceAssociationService activityTraceAssociationService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
@@ -213,5 +216,13 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     declaredActivity.setEndDate(endDate);
 
     declaredActivityRepository.save(declaredActivity);
+  }
+
+  @Override
+  public void associateActivityWithTraces(UUID declaredActivityId, List<UUID> traceIds) {
+    activityTraceAssociationService.createAll(
+        traceIds.stream()
+            .map(traceId -> new ActivityTraceAssociationData(declaredActivityId, traceId))
+            .toList());
   }
 }

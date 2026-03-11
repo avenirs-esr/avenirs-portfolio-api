@@ -31,4 +31,6 @@ public interface DeclaredActivityService {
   DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId);
 
   void updateDeclaredActivityDates(UUID declaredActivityId, LocalDate startDate, LocalDate endDate);
+
+  void associateActivityWithTraces(UUID declaredActivityId, List<UUID> traceIds);
 }
