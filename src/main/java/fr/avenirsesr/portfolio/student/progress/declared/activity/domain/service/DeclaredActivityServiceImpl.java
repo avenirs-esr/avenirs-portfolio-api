@@ -62,6 +62,12 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public DeclaredActivity subscribe(UUID activityId, LocalDate startDate, LocalDate endDate) {
+    return subscribe(UUID.randomUUID(), activityId, startDate, endDate);
+  }
+
+  @Override
+  public DeclaredActivity subscribe(
+      UUID declaredActivityId, UUID activityId, LocalDate startDate, LocalDate endDate) {
     Student student = loggedInUserService.getLoggedInStudent();
     Activity activity =
         activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
@@ -73,7 +79,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     validateActivityDates(startDate, endDate, Instant.now());
 
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(student, activity, null, null, startDate, endDate, null);
+        DeclaredActivity.create(
+            declaredActivityId, student, activity, null, null, startDate, endDate, null);
     return declaredActivityRepository.save(declaredActivity);
   }
 

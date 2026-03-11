@@ -60,6 +60,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
   }
 
   public static DeclaredActivity create(
+      UUID id,
       Student student,
       Activity activity,
       Instant startedAt,
@@ -68,7 +69,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
       LocalDate endDate,
       Instant finishedAt) {
     return new DeclaredActivity(
-        UUID.randomUUID(),
+        id,
         student,
         activity,
         startedAt,

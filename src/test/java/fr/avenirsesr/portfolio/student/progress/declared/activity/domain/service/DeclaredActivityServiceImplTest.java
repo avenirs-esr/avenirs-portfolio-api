@@ -261,7 +261,8 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(student, activity, Instant.now(), null, null, null, null);
+        DeclaredActivity.create(
+            UUID.randomUUID(), student, activity, Instant.now(), null, null, null, null);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
@@ -283,7 +284,7 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(student, activity, null, null, null, null, null);
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
@@ -324,7 +325,8 @@ class DeclaredActivityServiceImplTest {
     Activity activity = ActivityFixture.create().toModel();
 
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(anotherStudent, activity, null, null, null, null, null);
+        DeclaredActivity.create(
+            UUID.randomUUID(), anotherStudent, activity, null, null, null, null, null);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(declaredActivityId))
@@ -345,7 +347,7 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(student, activity, null, null, null, null, null);
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
 
     declaredActivity.setStartedAt(Instant.now());
     declaredActivity.setFinishedAt(Instant.now());
@@ -401,7 +403,7 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(student, activity, null, null, null, null, null);
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
@@ -444,7 +446,8 @@ class DeclaredActivityServiceImplTest {
     Student anotherStudent = StudentFixture.create().toModel();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
-        DeclaredActivity.create(anotherStudent, activity, null, null, null, null, null);
+        DeclaredActivity.create(
+            UUID.randomUUID(), anotherStudent, activity, null, null, null, null, null);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))

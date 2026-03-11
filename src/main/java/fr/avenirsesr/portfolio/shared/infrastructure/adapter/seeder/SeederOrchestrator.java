@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.ActivitySeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
+import fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder.ActivityTraceAssociationSeeder;
 import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.configuration.SeedingState;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
@@ -78,6 +79,7 @@ public class SeederOrchestrator {
   private final AMSSeeder amsSeeder;
   private final ActivitySeeder activitySeeder;
   private final DeclaredActivitySeeder declaredActivitySeeder;
+  private final ActivityTraceAssociationSeeder activityTraceAssociationSeeder;
 
   private final SeedingState seedingState;
 
@@ -135,7 +137,8 @@ public class SeederOrchestrator {
       declaredProgramSeeder.seed(savedStudents);
 
       var savedActivities = activitySeeder.seed(savedUsers.getFirst());
-      declaredActivitySeeder.seed(savedStudents, savedActivities);
+      var declaredActivities = declaredActivitySeeder.seed(savedStudents, savedActivities);
+      activityTraceAssociationSeeder.seed(declaredActivities, savedTraces);
 
       log.info("✔ Seeding successfully finished");
       seedingState.markCompleted();

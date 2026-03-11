@@ -399,7 +399,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                 BddLogger.then("Create and persist DeclaredActivity for student");
 
                 var declaredActivity =
-                    DeclaredActivity.create(student, activity, null, null, null, null, null);
+                    DeclaredActivity.create(
+                        UUID.randomUUID(), student, activity, null, null, null, null, null);
                 declaredActivityRepository.save(declaredActivity);
 
                 return activity.getId(); // controller expects activityIds
@@ -569,7 +570,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     var activity = getActivity(1);
 
     BddLogger.and("Une DeclaredActivity persistée pour cet étudiant");
-    var declaredActivity = DeclaredActivity.create(student, activity, null, null, null, null, null);
+    var declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
     declaredActivityRepository.save(declaredActivity);
 
     String reflection = "Nouvelle prise de recul sur mon activité";
@@ -613,7 +615,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     student = getStudent();
     var activity = getActivity(1);
 
-    var declaredActivity = DeclaredActivity.create(student, activity, null, null, null, null, null);
+    var declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
     declaredActivityRepository.save(declaredActivity);
 
     BddLogger.and("Une reflection de plus de 4000 caractères");
@@ -717,7 +720,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
       BddLogger.and("A persisted DeclaredActivity.");
       var declaredActivity =
-          DeclaredActivity.create(student, activity, null, null, null, null, null);
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
 
       declaredActivityRepository.save(declaredActivity);
 
@@ -760,7 +764,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
       var activity = getActivity(1);
 
       var declaredActivity =
-          DeclaredActivity.create(student, activity, null, null, null, null, null);
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
 
       declaredActivityRepository.save(declaredActivity);
 

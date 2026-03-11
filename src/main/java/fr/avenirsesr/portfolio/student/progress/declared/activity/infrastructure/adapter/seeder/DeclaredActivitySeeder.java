@@ -11,15 +11,20 @@ import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.mapper.DeclaredActivityMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder.data.DeclaredActivityCreationData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder.data.FakeDeclaredActivity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +47,8 @@ public class DeclaredActivitySeeder {
   private ESeederSource seederSource;
 
   @Transactional
-  public void seed(List<StudentEntity> savedStudents, List<ActivityEntity> savedActivities) {
+  public List<DeclaredActivityEntity> seed(
+      List<StudentEntity> savedStudents, List<ActivityEntity> savedActivities) {
     ValidationUtils.requireNonEmpty(savedStudents, "savedStudents cannot be empty");
     ValidationUtils.requireNonEmpty(savedActivities, "savedActivities cannot be empty");
 
@@ -70,6 +76,7 @@ public class DeclaredActivitySeeder {
                               .map(
                                   fakeDeclaredActivity ->
                                       new DeclaredActivityCreationData(
+                                          UUID.randomUUID(),
                                           fakeDeclaredActivity.getStudent().getId(),
                                           fakeDeclaredActivity.getActivity().getId(),
                                           Optional.ofNullable(fakeDeclaredActivity.getReflection()),
@@ -81,6 +88,8 @@ public class DeclaredActivitySeeder {
                   .flatMap(List::stream)
                   .toList();
         };
+
+    List<DeclaredActivity> declaredActivities = new ArrayList<>();
 
     creationData.forEach(
         data -> {
@@ -95,7 +104,10 @@ public class DeclaredActivitySeeder {
                   ELanguage.FRENCH));
           var declaredActivity =
               declaredActivityService.subscribe(
-                  data.activityId(), data.startDate().orElse(null), data.endDate().orElse(null));
+                  data.id(),
+                  data.activityId(),
+                  data.startDate().orElse(null),
+                  data.endDate().orElse(null));
           if (data.reflection().isPresent())
             declaredActivityService.updateReflection(
                 declaredActivity.getId(), data.reflection().get());
@@ -106,9 +118,11 @@ public class DeclaredActivitySeeder {
             }
             declaredActivityService.finish(declaredActivity.getId());
           }
+          declaredActivities.add(declaredActivity);
         });
 
     log.info("✔ {} declared activities created", creationData.size());
+    return declaredActivities.stream().map(DeclaredActivityMapper.INSTANCE::fromDomain).toList();
   }
 
   private DeclaredActivityCreationData adjustDates(
@@ -130,6 +144,7 @@ public class DeclaredActivitySeeder {
     LocalDate adjustedEnd = adjustedStart.plusDays(durationInDays);
 
     return new DeclaredActivityCreationData(
+        data.id(),
         data.studentId(),
         data.activityId(),
         data.reflection(),

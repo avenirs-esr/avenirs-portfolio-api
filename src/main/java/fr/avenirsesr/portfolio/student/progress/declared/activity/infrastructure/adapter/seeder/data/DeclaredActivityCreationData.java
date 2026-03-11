@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public record DeclaredActivityCreationData(
+    UUID id,
     UUID studentId,
     UUID activityId,
     Optional<String> reflection,

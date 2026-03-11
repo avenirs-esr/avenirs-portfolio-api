@@ -19,6 +19,9 @@ public interface DeclaredActivityService {
 
   DeclaredActivity subscribe(UUID activityId, LocalDate startDate, LocalDate endDate);
 
+  DeclaredActivity subscribe(
+      UUID declaredActivityId, UUID activityId, LocalDate startDate, LocalDate endDate);
+
   void unsubscribeMultiple(List<UUID> activityIds);
 
   DeclaredActivity finish(UUID declaredActivityId);
