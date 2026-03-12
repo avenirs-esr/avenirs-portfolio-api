@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.i
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociations;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
@@ -30,7 +31,10 @@ public interface DeclaredActivityService {
 
   DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId);
 
+  DeclaredActivityAssociations getDeclaredActivityAssociations(UUID declaredActivityId);
+
   void updateDeclaredActivityDates(UUID declaredActivityId, LocalDate startDate, LocalDate endDate);
 
-  void associateActivityWithTraces(UUID declaredActivityId, List<UUID> traceIds);
+  DeclaredActivityAssociations associateActivityWithTraces(
+      UUID declaredActivityId, List<UUID> traceIds);
 }
