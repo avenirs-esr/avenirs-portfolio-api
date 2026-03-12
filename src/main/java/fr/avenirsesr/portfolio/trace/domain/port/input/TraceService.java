@@ -56,18 +56,6 @@ public interface TraceService {
 
   Optional<LocalDate> getWillBeDeletedAt(Trace trace);
 
-  void associateTrace(
-      UUID traceId,
-      List<UUID> amsIds,
-      List<UUID> skillLevelIds,
-      List<UUID> declaredSkillProgressIds);
-
-  void unassociateTrace(
-      UUID traceId,
-      List<UUID> amsIds,
-      List<UUID> skillLevelIds,
-      List<UUID> declaredSkillProgressIds);
-
   void unassociateTraces(DeclaredSkillProgress declaredSkillProgress);
 
   void unassociateTraces(DeclaredSkillProgress declaredSkillProgress, List<UUID> traceIds);

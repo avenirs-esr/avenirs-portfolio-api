@@ -117,38 +117,6 @@ public class TraceController {
     return ResponseEntity.ok(TraceDetailMapper.toDTO(traceDetail));
   }
 
-  @PostMapping("/associate/{traceId}")
-  public ResponseEntity<String> associate(
-      Principal principal,
-      @PathVariable UUID traceId,
-      @RequestBody AssociateTraceDTO associateTraceDTO) {
-    log.info("User [{}] request to associate trace [{}]", principal.getName(), traceId);
-
-    traceService.associateTrace(
-        traceId,
-        associateTraceDTO.amsIds(),
-        associateTraceDTO.skillLevelIds(),
-        associateTraceDTO.declaredSkillProgressIds());
-
-    return ResponseEntity.ok("Trace successfully associated.");
-  }
-
-  @PostMapping("/unassociate/{traceId}")
-  public ResponseEntity<String> unassociate(
-      Principal principal,
-      @PathVariable UUID traceId,
-      @RequestBody AssociateTraceDTO associateTraceDTO) {
-    log.info("User [{}] request to unassociate trace [{}]", principal.getName(), traceId);
-
-    traceService.unassociateTrace(
-        traceId,
-        associateTraceDTO.amsIds(),
-        associateTraceDTO.skillLevelIds(),
-        associateTraceDTO.declaredSkillProgressIds());
-
-    return ResponseEntity.ok("Trace successfully unassociated.");
-  }
-
   @GetMapping("/search-association/{associationType}")
   public ResponseEntity<PagedResponse<TraceAssociationSearchResult>> getAssociatedTraces(
       @PathVariable ETraceAssociationType associationType,

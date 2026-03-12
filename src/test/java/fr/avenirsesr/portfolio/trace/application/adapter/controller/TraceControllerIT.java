@@ -466,44 +466,4 @@ class TraceControllerIT extends ContainerConfigurationTest {
           .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(0)));
     }
   }
-
-  @Test
-  void shouldAssociateAndUnassociateTrace() throws Exception {
-    BddLogger.given("an existing trace and existing associations for the logged-in student");
-
-    UUID traceId = getFirstTraceIdFromOverview();
-    UUID skillLevelId = searchFirstAssociationId(ETraceAssociationType.SKILL_LEVEL);
-    UUID declaredSkillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
-
-    AssociateTraceDTO dto =
-        new AssociateTraceDTO(List.of(), List.of(skillLevelId), List.of(declaredSkillId));
-
-    BddLogger.when("performing POST /associate/{traceId}");
-    BddLogger.then("it should return 200 and a success message");
-
-    mockMvc
-        .perform(
-            post(ASSOCIATE_BASE_PATH, traceId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().string("Trace successfully associated."));
-
-    BddLogger.when("performing POST /unassociate/{traceId}");
-    BddLogger.then("it should return 200 and a success message");
-
-    mockMvc
-        .perform(
-            post(UNASSOCIATE_BASE_PATH, traceId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().string("Trace successfully unassociated."));
-  }
 }
