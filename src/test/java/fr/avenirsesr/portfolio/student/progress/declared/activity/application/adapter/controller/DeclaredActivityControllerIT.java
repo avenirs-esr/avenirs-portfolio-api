@@ -940,4 +940,69 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
           .andExpect(status().isBadRequest());
     }
   }
+
+  @Nested
+  class WhenGettingDeclaredActivityAssociations {
+
+    @Transactional
+    @Test
+    void shouldGetDeclaredActivityAssociations() throws Exception {
+
+      BddLogger.given("an existing declared activity id for the logged-in student");
+
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      BddLogger.when("performing GET /{declaredActivityId}/associations");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + declaredActivityId + "/associations")
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$").exists());
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenDeclaredActivityAssociationsDoesNotExist() throws Exception {
+
+      BddLogger.given("a declared activity id that does not exist");
+
+      BddLogger.when("performing GET on associations endpoint with unknown id");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + notFoundDeclaredActivityId + "/associations")
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isNotFound());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnForbiddenWhenGettingAnotherStudentsDeclaredActivityAssociations()
+        throws Exception {
+
+      BddLogger.given("an existing declared activity belonging to another student");
+
+      String otherDeclaredActivityId =
+          subscribeAndGetDeclaredActivityId(otherStudentPayload, otherStudentSignature);
+
+      BddLogger.when("performing GET /associations with the main student's payload");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + otherDeclaredActivityId + "/associations")
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isForbidden());
+    }
+  }
 }

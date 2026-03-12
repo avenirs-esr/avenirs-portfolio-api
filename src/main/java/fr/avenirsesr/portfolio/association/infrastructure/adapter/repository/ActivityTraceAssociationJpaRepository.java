@@ -9,5 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface ActivityTraceAssociationJpaRepository
     extends JpaRepository<ActivityTraceAssociationEntity, UUID>,
         JpaSpecificationExecutor<ActivityTraceAssociationEntity> {
-  List<ActivityTraceAssociationEntity> findAllByActivityIdAndTraceId(UUID activityId, UUID traceId);
+  List<ActivityTraceAssociationEntity> findAllByTraceId(UUID traceId);
+
+  List<ActivityTraceAssociationEntity> findAllByActivityId(UUID activityId);
 }

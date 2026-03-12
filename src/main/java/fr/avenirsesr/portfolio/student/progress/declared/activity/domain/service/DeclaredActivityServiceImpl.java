@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociations;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
@@ -158,17 +159,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId) {
-    Student student = loggedInUserService.getLoggedInStudent();
-    var graph = FetchGraph.init().fetch("activity").add("student").fetch("user");
-
     DeclaredActivity declaredActivity =
-        declaredActivityRepository
-            .findById(declaredActivityId, graph)
-            .orElseThrow(DeclaredActivityNotFoundException::new);
-
-    if (!declaredActivity.getStudent().equals(student)) {
-      throw new UserNotAuthorizedException();
-    }
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
     return declaredActivity;
   }
@@ -224,5 +216,31 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         traceIds.stream()
             .map(traceId -> new ActivityTraceAssociationData(declaredActivityId, traceId))
             .toList());
+  }
+
+  @Override
+  public DeclaredActivityAssociations getDeclaredActivityAssociations(UUID declaredActivityId) {
+    DeclaredActivity declaredActivity =
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+
+    var associations = activityTraceAssociationService.getAllOf(declaredActivity);
+
+    return new DeclaredActivityAssociations(associations);
+  }
+
+  private DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(
+      UUID declaredActivityId) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    var graph = FetchGraph.init().fetch("activity").add("student").fetch("user");
+
+    DeclaredActivity declaredActivity =
+        declaredActivityRepository
+            .findById(declaredActivityId, graph)
+            .orElseThrow(DeclaredActivityNotFoundException::new);
+
+    if (!declaredActivity.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
+    return declaredActivity;
   }
 }

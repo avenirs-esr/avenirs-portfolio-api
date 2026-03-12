@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.*;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityAssociationsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -105,12 +106,24 @@ public class DeclaredActivityController {
   public ResponseEntity<DeclaredActivityDetailsDTO> getDeclaredActivityDetails(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
     log.debug(
-        "Received request to get declared activity [{}] detailed for student [{}]",
+        "Received request to get declared activity [{}] details for student [{}]",
         declaredActivityId,
         principal.getName());
     return ResponseEntity.ok(
         DeclaredActivityDetailsDTOMapper.toDTO(
             declaredActivityService.getDeclaredActivityDetails(declaredActivityId)));
+  }
+
+  @GetMapping("/{declaredActivityId}/associations")
+  public ResponseEntity<DeclaredActivityAssociationsDTO> getDeclaredActivityAssociations(
+      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
+    log.debug(
+        "Received request to get declared activity [{}] association for student [{}]",
+        declaredActivityId,
+        principal.getName());
+    return ResponseEntity.ok(
+        DeclaredActivityAssociationsDTOMapper.toDTO(
+            declaredActivityService.getDeclaredActivityAssociations(declaredActivityId)));
   }
 
   @PutMapping("/{declaredActivityId}/period")

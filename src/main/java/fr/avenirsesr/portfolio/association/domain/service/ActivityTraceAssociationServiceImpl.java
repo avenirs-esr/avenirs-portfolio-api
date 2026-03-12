@@ -76,4 +76,14 @@ public class ActivityTraceAssociationServiceImpl implements ActivityTraceAssocia
 
     return activityTraceAssociationRepository.saveAll(associations);
   }
+
+  @Override
+  public List<ActivityTraceAssociation> getAllOf(DeclaredActivity declaredActivity) {
+    return activityTraceAssociationRepository.findAllOf(declaredActivity);
+  }
+
+  @Override
+  public List<ActivityTraceAssociation> getAllOf(Trace trace) {
+    return activityTraceAssociationRepository.findAllOf(trace);
+  }
 }
