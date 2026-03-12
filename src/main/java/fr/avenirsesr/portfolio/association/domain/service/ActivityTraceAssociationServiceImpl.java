@@ -10,11 +10,13 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -85,5 +87,17 @@ public class ActivityTraceAssociationServiceImpl implements ActivityTraceAssocia
   @Override
   public List<ActivityTraceAssociation> getAllOf(Trace trace) {
     return activityTraceAssociationRepository.findAllOf(trace);
+  }
+
+  @Override
+  public void deleteAllByIds(List<UUID> ids) {
+    var activities = activityTraceAssociationRepository.findAllById(ids);
+
+    if (!new HashSet<>(activities.stream().map(ActivityTraceAssociation::getId).toList())
+        .containsAll(ids)) {
+      throw new AssociationDoesNotExistException();
+    }
+
+    activityTraceAssociationRepository.removeAllFromDatabase(activities);
   }
 }

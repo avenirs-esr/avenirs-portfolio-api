@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -172,5 +173,55 @@ class ActivityTraceAssociationServiceImplTest {
 
     assertThatThrownBy(() -> service.createAll(data))
         .isInstanceOf(AssociationAlreadyExistException.class);
+  }
+
+  @Test
+  void deleteAllByIds_should_delete_when_all_ids_exist() {
+
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+
+    ActivityTraceAssociation a1 = mock(ActivityTraceAssociation.class);
+    ActivityTraceAssociation a2 = mock(ActivityTraceAssociation.class);
+
+    when(a1.getId()).thenReturn(id1);
+    when(a2.getId()).thenReturn(id2);
+
+    when(associationRepository.findAllById(List.of(id1, id2))).thenReturn(List.of(a1, a2));
+
+    service.deleteAllByIds(List.of(id1, id2));
+
+    verify(associationRepository).removeAllFromDatabase(List.of(a1, a2));
+  }
+
+  @Test
+  void deleteAllByIds_should_throw_when_one_id_not_found() {
+
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
+
+    ActivityTraceAssociation a1 = mock(ActivityTraceAssociation.class);
+
+    when(a1.getId()).thenReturn(id1);
+
+    when(associationRepository.findAllById(List.of(id1, id2))).thenReturn(List.of(a1));
+
+    assertThatThrownBy(() -> service.deleteAllByIds(List.of(id1, id2)))
+        .isInstanceOf(AssociationDoesNotExistException.class);
+
+    verify(associationRepository, never()).removeAllFromDatabase(anyList());
+  }
+
+  @Test
+  void deleteAllByIds_should_throw_when_none_found() {
+
+    UUID id1 = UUID.randomUUID();
+
+    when(associationRepository.findAllById(List.of(id1))).thenReturn(List.of());
+
+    assertThatThrownBy(() -> service.deleteAllByIds(List.of(id1)))
+        .isInstanceOf(AssociationDoesNotExistException.class);
+
+    verify(associationRepository, never()).removeAllFromDatabase(anyList());
   }
 }

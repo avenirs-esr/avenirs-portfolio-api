@@ -33,6 +33,8 @@ public interface DeclaredActivityService {
 
   DeclaredActivityAssociations getDeclaredActivityAssociations(UUID declaredActivityId);
 
+  void deleteAssociations(UUID declaredActivityId, List<UUID> idsToDelete);
+
   void updateDeclaredActivityDates(UUID declaredActivityId, LocalDate startDate, LocalDate endDate);
 
   DeclaredActivityAssociations associateActivityWithTraces(

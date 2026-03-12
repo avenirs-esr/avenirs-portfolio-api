@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundExcepti
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
+import fr.avenirsesr.portfolio.association.domain.model.ActivityTraceAssociation;
 import fr.avenirsesr.portfolio.association.domain.port.input.ActivityTraceAssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
@@ -28,6 +29,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.D
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
@@ -547,5 +549,137 @@ class DeclaredActivityServiceImplTest {
 
     Assertions.assertEquals(
         EErrorCode.DECLARED_ACTIVITY_START_DATE_BEFORE_SUBSCRIPTION, ex.getErrorCode());
+  }
+
+  @Test
+  void deleteAssociations_should_delete_when_associations_belong_to_declaredActivity() {
+
+    BddLogger.given("A logged-in student and a declared activity with associated traces");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    UUID traceId1 = UUID.randomUUID();
+    UUID traceId2 = UUID.randomUUID();
+
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+    Trace trace1 = mock(Trace.class);
+    Trace trace2 = mock(Trace.class);
+
+    ActivityTraceAssociation association1 = mock(ActivityTraceAssociation.class);
+    ActivityTraceAssociation association2 = mock(ActivityTraceAssociation.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    when(declaredActivity.getStudent()).thenReturn(student);
+
+    when(activityTraceAssociationService.getAllOf(declaredActivity))
+        .thenReturn(List.of(association1, association2));
+
+    when(association1.getTrace()).thenReturn(trace1);
+    when(association2.getTrace()).thenReturn(trace2);
+
+    when(trace1.getId()).thenReturn(traceId1);
+    when(trace2.getId()).thenReturn(traceId2);
+
+    BddLogger.when("deleteAssociations is called");
+
+    service.deleteAssociations(declaredActivityId, List.of(traceId1, traceId2));
+
+    BddLogger.then("deleteAllByIds should be called");
+
+    verify(activityTraceAssociationService).deleteAllByIds(List.of(traceId1, traceId2));
+  }
+
+  @Test
+  void deleteAssociations_should_throw_when_declaredActivity_not_found() {
+
+    BddLogger.given("DeclaredActivity does not exist");
+
+    UUID declaredActivityId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.empty());
+
+    BddLogger.when("deleteAssociations is called");
+
+    BddLogger.then("DeclaredActivityNotFoundException is thrown");
+
+    assertThatThrownBy(
+            () -> service.deleteAssociations(declaredActivityId, List.of(UUID.randomUUID())))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+    verify(activityTraceAssociationService, never()).deleteAllByIds(anyList());
+  }
+
+  @Test
+  void deleteAssociations_should_throw_when_activity_belongs_to_other_student() {
+
+    BddLogger.given("DeclaredActivity belongs to another student");
+
+    UUID declaredActivityId = UUID.randomUUID();
+
+    Student otherStudent = mock(Student.class);
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    when(declaredActivity.getStudent()).thenReturn(otherStudent);
+
+    BddLogger.when("deleteAssociations is called");
+
+    BddLogger.then("UserNotAuthorizedException is thrown");
+
+    assertThatThrownBy(
+            () -> service.deleteAssociations(declaredActivityId, List.of(UUID.randomUUID())))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(activityTraceAssociationService, never()).deleteAllByIds(anyList());
+  }
+
+  @Test
+  void deleteAssociations_should_throw_when_ids_not_associated() {
+
+    BddLogger.given("Trace ids not associated to declaredActivity");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    UUID traceId1 = UUID.randomUUID();
+    UUID traceIdNotAssociated = UUID.randomUUID();
+
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+    Trace trace1 = mock(Trace.class);
+
+    ActivityTraceAssociation association1 = mock(ActivityTraceAssociation.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    when(declaredActivity.getStudent()).thenReturn(student);
+
+    when(activityTraceAssociationService.getAllOf(declaredActivity))
+        .thenReturn(List.of(association1));
+
+    when(association1.getTrace()).thenReturn(trace1);
+    when(trace1.getId()).thenReturn(traceId1);
+
+    BddLogger.when("deleteAssociations is called with non associated id");
+
+    BddLogger.then("UserNotAuthorizedException is thrown");
+
+    assertThatThrownBy(
+            () ->
+                service.deleteAssociations(
+                    declaredActivityId, List.of(traceId1, traceIdNotAssociated)))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(activityTraceAssociationService, never()).deleteAllByIds(anyList());
   }
 }
