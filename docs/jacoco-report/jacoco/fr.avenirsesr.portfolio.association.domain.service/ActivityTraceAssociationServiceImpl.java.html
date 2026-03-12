@@ -10,13 +10,11 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
-import fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -29,76 +27,54 @@ public class ActivityTraceAssociationServiceImpl implements ActivityTraceAssocia
   @Override
   public List&lt;ActivityTraceAssociation&gt; createAll(
       List&lt;ActivityTraceAssociationData&gt; associationsData) {
-<span class="fc" id="L32">    var loggedInStudent = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L30">    var loggedInStudent = loggedInUserService.getLoggedInStudent();</span>
 
-<span class="fc" id="L34">    var traces =</span>
-<span class="fc" id="L35">        traceRepository.findAllById(</span>
-<span class="fc" id="L36">            associationsData.stream().map(ActivityTraceAssociationData::traceId).toList());</span>
-<span class="fc" id="L37">    var activities =</span>
-<span class="fc" id="L38">        declaredActivityRepository.findAllById(</span>
-<span class="fc" id="L39">            associationsData.stream()</span>
-<span class="fc" id="L40">                .map(ActivityTraceAssociationData::declaredActivityId)</span>
-<span class="fc" id="L41">                .toList());</span>
+<span class="fc" id="L32">    var traces =</span>
+<span class="fc" id="L33">        traceRepository.findAllById(</span>
+<span class="fc" id="L34">            associationsData.stream().map(ActivityTraceAssociationData::traceId).toList());</span>
+<span class="fc" id="L35">    var activities =</span>
+<span class="fc" id="L36">        declaredActivityRepository.findAllById(</span>
+<span class="fc" id="L37">            associationsData.stream()</span>
+<span class="fc" id="L38">                .map(ActivityTraceAssociationData::declaredActivityId)</span>
+<span class="fc" id="L39">                .toList());</span>
 
-<span class="fc" id="L43">    if (!new HashSet&lt;&gt;(activities.stream().map(DeclaredActivity::getId).toList())</span>
-<span class="fc bfc" id="L44" title="All 2 branches covered.">        .containsAll(</span>
-<span class="fc" id="L45">            associationsData.stream()</span>
-<span class="fc" id="L46">                .map(ActivityTraceAssociationData::declaredActivityId)</span>
-<span class="fc" id="L47">                .toList())) throw new DeclaredActivityNotFoundException();</span>
+<span class="fc" id="L41">    if (!new HashSet&lt;&gt;(activities.stream().map(DeclaredActivity::getId).toList())</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        .containsAll(</span>
+<span class="fc" id="L43">            associationsData.stream()</span>
+<span class="fc" id="L44">                .map(ActivityTraceAssociationData::declaredActivityId)</span>
+<span class="fc" id="L45">                .toList())) throw new DeclaredActivityNotFoundException();</span>
 
-<span class="fc" id="L49">    if (!new HashSet&lt;&gt;(traces.stream().map(Trace::getId).toList())</span>
-<span class="fc bfc" id="L50" title="All 2 branches covered.">        .containsAll(associationsData.stream().map(ActivityTraceAssociationData::traceId).toList()))</span>
-<span class="fc" id="L51">      throw new TraceNotFoundException();</span>
+<span class="fc" id="L47">    if (!new HashSet&lt;&gt;(traces.stream().map(Trace::getId).toList())</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        .containsAll(associationsData.stream().map(ActivityTraceAssociationData::traceId).toList()))</span>
+<span class="fc" id="L49">      throw new TraceNotFoundException();</span>
 
-<span class="fc bfc" id="L53" title="All 4 branches covered.">    if (activities.stream().anyMatch(a -&gt; !a.getStudent().equals(loggedInStudent))</span>
-<span class="pc bpc" id="L54" title="2 of 4 branches missed.">        || traces.stream().anyMatch(t -&gt; !t.getUser().equals(loggedInStudent.getUser())))</span>
-<span class="fc" id="L55">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L51" title="All 4 branches covered.">    if (activities.stream().anyMatch(a -&gt; !a.getStudent().equals(loggedInStudent))</span>
+<span class="pc bpc" id="L52" title="2 of 4 branches missed.">        || traces.stream().anyMatch(t -&gt; !t.getUser().equals(loggedInStudent.getUser())))</span>
+<span class="fc" id="L53">      throw new UserNotAuthorizedException();</span>
 
-<span class="fc bfc" id="L57" title="All 2 branches covered.">    if (!activityTraceAssociationRepository.findAllIn(associationsData).isEmpty()) {</span>
-<span class="fc" id="L58">      throw new AssociationAlreadyExistException();</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">    if (!activityTraceAssociationRepository.findAllIn(associationsData).isEmpty()) {</span>
+<span class="fc" id="L56">      throw new AssociationAlreadyExistException();</span>
     }
 
-<span class="fc" id="L61">    var associations =</span>
-<span class="fc" id="L62">        associationsData.stream()</span>
-<span class="fc" id="L63">            .map(</span>
+<span class="fc" id="L59">    var associations =</span>
+<span class="fc" id="L60">        associationsData.stream()</span>
+<span class="fc" id="L61">            .map(</span>
                 association -&gt; {
-<span class="fc" id="L65">                  var activity =</span>
-<span class="fc" id="L66">                      activities.stream()</span>
-<span class="fc" id="L67">                          .filter(a -&gt; a.getId().equals(association.declaredActivityId()))</span>
-<span class="fc" id="L68">                          .findAny()</span>
-<span class="fc" id="L69">                          .orElseThrow();</span>
-<span class="fc" id="L70">                  var trace =</span>
-<span class="fc" id="L71">                      traces.stream()</span>
-<span class="fc" id="L72">                          .filter(t -&gt; t.getId().equals(association.traceId()))</span>
-<span class="fc" id="L73">                          .findAny()</span>
-<span class="fc" id="L74">                          .orElseThrow();</span>
-<span class="fc" id="L75">                  return ActivityTraceAssociation.create(activity, trace);</span>
+<span class="fc" id="L63">                  var activity =</span>
+<span class="fc" id="L64">                      activities.stream()</span>
+<span class="fc" id="L65">                          .filter(a -&gt; a.getId().equals(association.declaredActivityId()))</span>
+<span class="fc" id="L66">                          .findAny()</span>
+<span class="fc" id="L67">                          .orElseThrow();</span>
+<span class="fc" id="L68">                  var trace =</span>
+<span class="fc" id="L69">                      traces.stream()</span>
+<span class="fc" id="L70">                          .filter(t -&gt; t.getId().equals(association.traceId()))</span>
+<span class="fc" id="L71">                          .findAny()</span>
+<span class="fc" id="L72">                          .orElseThrow();</span>
+<span class="fc" id="L73">                  return ActivityTraceAssociation.create(activity, trace);</span>
                 })
-<span class="fc" id="L77">            .toList();</span>
+<span class="fc" id="L75">            .toList();</span>
 
-<span class="fc" id="L79">    return activityTraceAssociationRepository.saveAll(associations);</span>
+<span class="fc" id="L77">    return activityTraceAssociationRepository.saveAll(associations);</span>
   }
-
-  @Override
-  public List&lt;ActivityTraceAssociation&gt; getAllOf(DeclaredActivity declaredActivity) {
-<span class="fc" id="L84">    return activityTraceAssociationRepository.findAllOf(declaredActivity);</span>
-  }
-
-  @Override
-  public List&lt;ActivityTraceAssociation&gt; getAllOf(Trace trace) {
-<span class="nc" id="L89">    return activityTraceAssociationRepository.findAllOf(trace);</span>
-  }
-
-  @Override
-  public void deleteAllByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L94">    var activities = activityTraceAssociationRepository.findAllById(ids);</span>
-
-<span class="fc" id="L96">    if (!new HashSet&lt;&gt;(activities.stream().map(ActivityTraceAssociation::getId).toList())</span>
-<span class="fc bfc" id="L97" title="All 2 branches covered.">        .containsAll(ids)) {</span>
-<span class="fc" id="L98">      throw new AssociationDoesNotExistException();</span>
-    }
-
-<span class="fc" id="L101">    activityTraceAssociationRepository.removeAllFromDatabase(activities);</span>
-<span class="fc" id="L102">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
