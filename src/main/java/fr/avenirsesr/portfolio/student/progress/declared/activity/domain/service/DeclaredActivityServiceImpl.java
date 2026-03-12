@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundExcepti
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.association.domain.data.ActivityTraceAssociationData;
+import fr.avenirsesr.portfolio.association.domain.model.ActivityTraceAssociation;
 import fr.avenirsesr.portfolio.association.domain.port.input.ActivityTraceAssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -24,10 +25,12 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.excepti
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -226,6 +229,24 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     var associations = activityTraceAssociationService.getAllOf(declaredActivity);
 
     return new DeclaredActivityAssociations(associations);
+  }
+
+  @Override
+  public void deleteAssociations(UUID declaredActivityId, List<UUID> idsToDelete) {
+    DeclaredActivity declaredActivity =
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+
+    var associatedTracesIds =
+        activityTraceAssociationService.getAllOf(declaredActivity).stream()
+            .map(ActivityTraceAssociation::getTrace)
+            .map(Trace::getId)
+            .toList();
+
+    if (!new HashSet<>(associatedTracesIds).containsAll(idsToDelete)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    activityTraceAssociationService.deleteAllByIds(idsToDelete);
   }
 
   private DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(
