@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
@@ -55,6 +56,8 @@ public interface TraceService {
       String aiJustification);
 
   Optional<LocalDate> getWillBeDeletedAt(Trace trace);
+
+  TraceAssociationsData associateTraceWithActivities(UUID traceId, List<UUID> activityIds);
 
   void unassociateTraces(DeclaredSkillProgress declaredSkillProgress);
 

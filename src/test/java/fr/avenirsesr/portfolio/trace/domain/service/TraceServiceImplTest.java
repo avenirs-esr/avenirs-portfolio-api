@@ -39,7 +39,6 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repo
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
-import fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;

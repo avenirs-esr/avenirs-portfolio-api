@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfigurat
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
@@ -37,8 +38,6 @@ class TraceControllerIT extends ContainerConfigurationTest {
   private static final String VIEW_BASE_PATH = BASE_PATH + "/view";
   private static final String SUMMARY_BASE_PATH = BASE_PATH + "/summary";
   private static final String DETAIL_BASE_PATH = BASE_PATH + "/{traceId}/detail";
-  private static final String ASSOCIATE_BASE_PATH = BASE_PATH + "/associate/{traceId}";
-  private static final String UNASSOCIATE_BASE_PATH = BASE_PATH + "/unassociate/{traceId}";
   private static final String SEARCH_ASSOCIATION_BASE_PATH =
       BASE_PATH + "/search-association/{type}";
 
@@ -465,5 +464,29 @@ class TraceControllerIT extends ContainerConfigurationTest {
           .andExpect(jsonPath("$.page.pageSize").value(8))
           .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(0)));
     }
+  }
+
+  @Test
+  void shouldReturn404WhenUnknownUserAssociatesTrace() throws Exception {
+    BddLogger.given("unknown user context");
+
+    UUID traceId = getFirstTraceIdFromOverview();
+    UUID activityId = UUID.randomUUID();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(activityId));
+
+    BddLogger.when("performing POST with unknown user");
+    BddLogger.then("it should return 404 USER_NOT_FOUND");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/activities")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
   }
 }

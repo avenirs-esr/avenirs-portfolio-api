@@ -3,10 +3,12 @@ package fr.avenirsesr.portfolio.trace.domain.service;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.CommonLimits.MAX_TRACES_OVERVIEW;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
-import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.association.domain.model.Association;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -22,11 +24,12 @@ import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException;
@@ -36,8 +39,6 @@ import fr.avenirsesr.portfolio.trace.domain.model.*;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import java.time.Duration;
 import java.time.Instant;
@@ -53,13 +54,11 @@ public class TraceServiceImpl implements TraceService {
   private final TraceRepository traceRepository;
   private final UserRepository userRepository;
   private final StudentProgressRepository studentProgressRepository;
-  private final DeclaredSkillProgressRepository declaredSkillProgressRepository;
-  private final AMSRepository amsRepository;
-  private final SkillLevelProgressRepository skillLevelProgressRepository;
   private final TraceAttachmentRepository traceAttachmentRepository;
-  private final StudentService studentService;
+  private final DeclaredActivityRepository declaredActivityRepository;
   private final TraceConfigurationClient traceConfigurationClient;
   private final LoggedInUserService loggedInUserService;
+  private final AssociationService associationService;
 
   @Override
   public String programNameOfTrace(Trace trace) {
@@ -191,7 +190,10 @@ public class TraceServiceImpl implements TraceService {
       declaredSkillAssociations.add(toDeclaredSkillAssociation(declaredSkillProgress));
     }
 
-    return new TraceAssociationsData(skillLevelAssociations, declaredSkillAssociations);
+    return new TraceAssociationsData(
+        skillLevelAssociations,
+        declaredSkillAssociations,
+        List.of()); // todo -> to be implemented with get endpoint
   }
 
   @Override
@@ -299,6 +301,46 @@ public class TraceServiceImpl implements TraceService {
         : Optional.empty();
   }
 
+  @Override
+  public TraceAssociationsData associateTraceWithActivities(UUID traceId, List<UUID> activityIds) {
+    User loggedInUser = loggedInUserService.getLoggedInUser();
+    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
+    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+
+    var activities = declaredActivityRepository.findAllById(activityIds);
+
+    if (!new HashSet<>(activities.stream().map(DeclaredActivity::getId).toList())
+        .containsAll(activityIds)) {
+      throw new DeclaredActivityNotFoundException();
+    }
+
+    if (!activities.stream().allMatch(a -> a.getStudent().getUser().equals(loggedInUser))) {
+      throw new UserNotAuthorizedException();
+    }
+
+    List<Association> associations =
+        associationService.createAll(
+            activityIds.stream()
+                .map(
+                    activityId ->
+                        new AssociationData(
+                            activityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE))
+                .toList());
+
+    return new TraceAssociationsData(
+        List.of(),
+        List.of(), // todo replace after refactor of declared skill associations
+        associations.stream()
+            .map(
+                a ->
+                    new TraceAssociationsData.DeclaredActivityAssociationData(
+                        a.getId(),
+                        activities.stream()
+                            .filter(activity -> activity.getId().equals(a.getId1()))
+                            .findAny()
+                            .orElseThrow(DeclaredActivityNotFoundException::new)))
+            .toList());
+  }
 
   @Override
   public void unassociateTraces(DeclaredSkillProgress declaredSkillProgress) {
