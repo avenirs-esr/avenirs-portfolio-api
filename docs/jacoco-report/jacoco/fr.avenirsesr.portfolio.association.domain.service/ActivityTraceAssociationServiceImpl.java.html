@@ -76,5 +76,15 @@ public class ActivityTraceAssociationServiceImpl implements ActivityTraceAssocia
 
 <span class="fc" id="L77">    return activityTraceAssociationRepository.saveAll(associations);</span>
   }
+
+  @Override
+  public List&lt;ActivityTraceAssociation&gt; getAllOf(DeclaredActivity declaredActivity) {
+<span class="fc" id="L82">    return activityTraceAssociationRepository.findAllOf(declaredActivity);</span>
+  }
+
+  @Override
+  public List&lt;ActivityTraceAssociation&gt; getAllOf(Trace trace) {
+<span class="nc" id="L87">    return activityTraceAssociationRepository.findAllOf(trace);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
