@@ -156,7 +156,7 @@ public class DeclaredActivityController {
   }
 
   @PostMapping(&quot;/{declaredActivityId}/associate/trace&quot;)
-  public ResponseEntity&lt;String&gt; associateActivity(
+  public ResponseEntity&lt;String&gt; associateActivityWithTraces(
       Principal principal,
       @Valid @PathVariable UUID declaredActivityId,
       @Valid @RequestBody DeclaredActivityAssociationRequest body) {
