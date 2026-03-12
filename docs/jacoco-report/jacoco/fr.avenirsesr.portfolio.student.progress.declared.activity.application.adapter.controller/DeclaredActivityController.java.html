@@ -128,5 +128,19 @@ public class DeclaredActivityController {
 <span class="fc" id="L128">    declaredActivityService.updateDeclaredActivityDates(declaredActivityId, startDate, endDate);</span>
 <span class="fc" id="L129">    return ResponseEntity.ok(&quot;Declared activities dates successfully updated&quot;);</span>
   }
+
+  @PostMapping(&quot;/{declaredActivityId}/associate/trace&quot;)
+  public ResponseEntity&lt;String&gt; associateActivity(
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId,
+      @Valid @RequestBody DeclaredActivityAssociationRequest body) {
+<span class="fc" id="L137">    log.debug(</span>
+        &quot;Received request to associate declared activity [{}] with traces [{}] by student [{}]&quot;,
+        declaredActivityId,
+<span class="fc" id="L140">        body.idsToAssociate(),</span>
+<span class="fc" id="L141">        principal.getName());</span>
+<span class="fc" id="L142">    declaredActivityService.associateActivityWithTraces(declaredActivityId, body.idsToAssociate());</span>
+<span class="fc" id="L143">    return ResponseEntity.ok(&quot;Declared activities associated successfully&quot;);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
