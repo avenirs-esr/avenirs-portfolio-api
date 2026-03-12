@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.association.domain.port.output.repository.ActivityTraceAssociationRepository;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
@@ -826,7 +827,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
       mockMvc
           .perform(
-              post(BASE_PATH + "/" + declaredActivityId + "/associate/trace")
+              post(BASE_PATH + "/" + declaredActivityId + "/associate/traces")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(body)
                   .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
@@ -854,7 +855,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
       mockMvc
           .perform(
-              post(BASE_PATH + "/" + notFoundDeclaredActivityId + "/associate/trace")
+              post(BASE_PATH + "/" + notFoundDeclaredActivityId + "/associate/traces")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(body)
                   .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
@@ -886,7 +887,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
       mockMvc
           .perform(
-              post(BASE_PATH + "/" + otherDeclaredActivityId + "/associate/trace")
+              post(BASE_PATH + "/" + otherDeclaredActivityId + "/associate/traces")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(body)
                   .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
@@ -918,7 +919,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
       mockMvc
           .perform(
-              post(BASE_PATH + "/" + declaredActivityId + "/associate/trace")
+              post(BASE_PATH + "/" + declaredActivityId + "/associate/traces")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(body)
                   .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
@@ -930,7 +931,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
       mockMvc
           .perform(
-              post(BASE_PATH + "/" + declaredActivityId + "/associate/trace")
+              post(BASE_PATH + "/" + declaredActivityId + "/associate/traces")
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(body)
                   .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
@@ -1001,6 +1002,96 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
                   .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
                   .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
                   .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isForbidden());
+    }
+  }
+
+  @Nested
+  class WhenDeletingDeclaredActivityAssociations {
+
+    @Test
+    void shouldReturnNotFoundWhenDeclaredActivityDoesNotExist() throws Exception {
+
+      BddLogger.given("a declaredActivityId that does not exist");
+
+      UUID traceId = UUID.randomUUID();
+
+      String deleteBody =
+          """
+          {
+            "idsToDelete": ["%s"]
+          }
+          """
+              .formatted(traceId);
+
+      mockMvc
+          .perform(
+              delete(BASE_PATH + "/" + notFoundDeclaredActivityId + "/associations")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(deleteBody)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isNotFound());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnForbiddenWhenDeletingAnotherStudentsAssociations() throws Exception {
+
+      BddLogger.given("a declared activity belonging to another student");
+
+      String otherDeclaredActivityId =
+          subscribeAndGetDeclaredActivityId(otherStudentPayload, otherStudentSignature);
+
+      UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
+
+      String deleteBody =
+          """
+          {
+            "idsToDelete": ["%s"]
+          }
+          """
+              .formatted(traceId);
+
+      mockMvc
+          .perform(
+              delete(BASE_PATH + "/" + otherDeclaredActivityId + "/associations")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(deleteBody)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isForbidden());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnBadRequestWhenDeletingNonAssociatedTrace() throws Exception {
+
+      BddLogger.given("an existing declared activity");
+
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      UUID traceId = UUID.randomUUID();
+
+      String deleteBody =
+          """
+          {
+            "idsToDelete": ["%s"]
+          }
+          """
+              .formatted(traceId);
+
+      mockMvc
+          .perform(
+              delete(BASE_PATH + "/" + declaredActivityId + "/associations")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(deleteBody)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
           .andExpect(status().isForbidden());
     }
   }

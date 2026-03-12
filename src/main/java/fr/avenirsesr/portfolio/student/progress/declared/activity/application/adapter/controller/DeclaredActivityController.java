@@ -4,6 +4,8 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityAssociationsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
@@ -118,12 +120,25 @@ public class DeclaredActivityController {
   public ResponseEntity<DeclaredActivityAssociationsDTO> getDeclaredActivityAssociations(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
     log.debug(
-        "Received request to get declared activity [{}] association for student [{}]",
+        "Received request to get declared activity [{}] associations for student [{}]",
         declaredActivityId,
         principal.getName());
     return ResponseEntity.ok(
         DeclaredActivityAssociationsDTOMapper.toDTO(
             declaredActivityService.getDeclaredActivityAssociations(declaredActivityId)));
+  }
+
+  @DeleteMapping("/{declaredActivityId}/associations")
+  public ResponseEntity<String> deleteDeclaredActivityAssociations(
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId,
+      @Valid @RequestBody AssociationsDeleteRequest body) {
+    log.debug(
+        "Received request to delete declared activity [{}] associations for student [{}]",
+        declaredActivityId,
+        principal.getName());
+    declaredActivityService.deleteAssociations(declaredActivityId, body.idsToDelete());
+    return ResponseEntity.ok("Declared activities associations successfully deleted");
   }
 
   @PutMapping("/{declaredActivityId}/period")
@@ -142,11 +157,11 @@ public class DeclaredActivityController {
     return ResponseEntity.ok("Declared activities dates successfully updated");
   }
 
-  @PostMapping("/{declaredActivityId}/associate/trace")
+  @PostMapping("/{declaredActivityId}/associate/traces")
   public ResponseEntity<DeclaredActivityAssociationsDTO> associateActivityWithTraces(
       Principal principal,
       @Valid @PathVariable UUID declaredActivityId,
-      @Valid @RequestBody DeclaredActivityAssociationRequest body) {
+      @Valid @RequestBody AssociationsCreationRequest body) {
     log.debug(
         "Received request to associate declared activity [{}] with traces [{}] by student [{}]",
         declaredActivityId,
