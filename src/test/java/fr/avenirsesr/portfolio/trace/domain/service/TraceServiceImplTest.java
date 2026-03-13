@@ -35,6 +35,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
@@ -74,6 +75,7 @@ public class TraceServiceImplTest {
   @Mock private StudentProgressRepository studentProgressRepository;
   @Mock private AssociationService associationService;
   @Mock private DeclaredActivityRepository declaredActivityRepository;
+  @Mock private DeclaredSkillProgressRepository declaredSkillProgressRepository;
 
   @Mock private TraceConfigurationClient traceConfigurationClient;
 
@@ -821,5 +823,130 @@ public class TraceServiceImplTest {
         UserNotAuthorizedException.class, () -> traceService.getTraceAssociations(traceId));
 
     BddLogger.then("it should throw UserNotAuthorizedException");
+  }
+
+  @Test
+  void givenTraceAndDeclaredSkills_shouldAssociateTraceWithDeclaredSkills() {
+    BddLogger.given("a trace and declared skills");
+
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+
+    Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+    DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
+    when(skill.getId()).thenReturn(skillId);
+    when(skill.getStudent()).thenReturn(student);
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    when(declaredSkillProgressRepository.findAllById(List.of(skillId))).thenReturn(List.of(skill));
+
+    when(associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+        .thenReturn(List.of());
+
+    when(declaredSkillProgressRepository.findAllById(any())).thenReturn(List.of(skill));
+
+    BddLogger.when("associating trace with declared skills");
+
+    TraceAssociationsData result =
+        traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId));
+
+    BddLogger.then("association should be created");
+
+    verify(associationService).createAll(any());
+
+    assertNotNull(result);
+  }
+
+  @Test
+  void givenUnknownTrace_shouldThrowTraceNotFound_whenAssociateTraceWithDeclaredSkill() {
+    BddLogger.given("unknown trace");
+
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+    BddLogger.when("associating");
+
+    assertThrows(
+        TraceNotFoundException.class,
+        () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
+
+    BddLogger.then("it should throw TraceNotFoundException");
+  }
+
+  @Test
+  void givenTraceOfAnotherUser_shouldThrowUserNotAuthorized_whenAssociateTraceWithDeclaredSkill() {
+    BddLogger.given("trace of another user");
+
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+
+    User otherUser = UserFixture.create().toModel();
+
+    Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    BddLogger.when("associating");
+
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
+
+    BddLogger.then("should throw UserNotAuthorizedException");
+  }
+
+  @Test
+  void givenMissingSkill_shouldThrowDeclaredSkillProgressNotFound() {
+    BddLogger.given("missing skill");
+
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+
+    Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    when(declaredSkillProgressRepository.findAllById(List.of(skillId))).thenReturn(List.of());
+
+    BddLogger.when("associating");
+
+    assertThrows(
+        fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception
+            .DeclaredSkillProgressNotFoundException.class,
+        () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
+
+    BddLogger.then("should throw DeclaredSkillProgressNotFoundException");
+  }
+
+  @Test
+  void givenSkillOfAnotherUser_shouldThrowUserNotAuthorized() {
+    BddLogger.given("skill of another user");
+
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+
+    Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+    Student otherStudent = StudentFixture.create().toModel();
+
+    DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
+    when(skill.getId()).thenReturn(skillId);
+    when(skill.getStudent()).thenReturn(otherStudent);
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    when(declaredSkillProgressRepository.findAllById(List.of(skillId))).thenReturn(List.of(skill));
+
+    BddLogger.when("associating");
+
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
+
+    BddLogger.then("should throw UserNotAuthorizedException");
   }
 }

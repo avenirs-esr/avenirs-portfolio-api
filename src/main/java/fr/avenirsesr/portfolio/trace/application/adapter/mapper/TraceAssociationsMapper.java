@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.AmsAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.DeclaredSkillAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.SkillLevelAssociationDTO;
@@ -19,6 +20,14 @@ public interface TraceAssociationsMapper {
                     new TraceAssociationsDTO.DeclaredActivityAssociationDTO(
                         association.associationId(),
                         DeclaredActivityViewDTOMapper.toDTO(association.declaredActivity())))
+            .toList(),
+        traceAssociations.declaredSkillAssociations().stream()
+            .map(
+                association ->
+                    new TraceAssociationsDTO.DeclaredSkillAssociationDTO(
+                        association.associationId(),
+                        DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(
+                            association.declaredSkill())))
             .toList());
   }
 
