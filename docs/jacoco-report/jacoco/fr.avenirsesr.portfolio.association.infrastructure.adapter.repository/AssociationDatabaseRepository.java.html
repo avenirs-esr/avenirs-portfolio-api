@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.Gen
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -19,41 +20,57 @@ public class AssociationDatabaseRepository
     implements AssociationRepository {
   private final AssociationJpaRepository jpaRepository;
 
-<span class="fc" id="L22">  private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
+<span class="fc" id="L23">  private static final Sort DEFAULT_SORT = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
 
   protected AssociationDatabaseRepository(AssociationJpaRepository jpaRepository) {
-<span class="fc" id="L25">    super(jpaRepository, jpaRepository, AssociationEntity.class, AssociationMapper.INSTANCE);</span>
-<span class="fc" id="L26">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L27">  }</span>
+<span class="fc" id="L26">    super(jpaRepository, jpaRepository, AssociationEntity.class, AssociationMapper.INSTANCE);</span>
+<span class="fc" id="L27">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L28">  }</span>
 
   @Override
   public List&lt;Association&gt; findAllIn(List&lt;AssociationData&gt; associations) {
-<span class="fc" id="L31">    return jpaRepository.findAll(AssociationSpecification.in(associations), DEFAULT_SORT).stream()</span>
-<span class="fc" id="L32">        .map(AssociationMapper.INSTANCE::toDomain)</span>
-<span class="fc" id="L33">        .toList();</span>
+<span class="fc" id="L32">    return jpaRepository.findAll(AssociationSpecification.in(associations), DEFAULT_SORT).stream()</span>
+<span class="fc" id="L33">        .map(AssociationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L34">        .toList();</span>
   }
 
   @Override
   public List&lt;Association&gt; findAllOf(List&lt;EAssociationType&gt; associationTypes) {
-<span class="nc" id="L38">    return jpaRepository</span>
-<span class="nc" id="L39">        .findAll(AssociationSpecification.withTypeIn(associationTypes), DEFAULT_SORT)</span>
-<span class="nc" id="L40">        .stream()</span>
-<span class="nc" id="L41">        .map(AssociationMapper.INSTANCE::toDomain)</span>
-<span class="nc" id="L42">        .toList();</span>
+<span class="nc" id="L39">    return jpaRepository</span>
+<span class="nc" id="L40">        .findAll(AssociationSpecification.withTypeIn(associationTypes), DEFAULT_SORT)</span>
+<span class="nc" id="L41">        .stream()</span>
+<span class="nc" id="L42">        .map(AssociationMapper.INSTANCE::toDomain)</span>
+<span class="nc" id="L43">        .toList();</span>
   }
 
   @Override
-  public List&lt;Association&gt; findAllOf(UUID id, Class&lt;?&gt; clazz, EAssociationType associationType) {
-<span class="fc" id="L47">    var specification = AssociationSpecification.withTypeIn(List.of(associationType));</span>
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (associationType.getKey1().equals(clazz))</span>
-<span class="fc" id="L49">      specification = specification.and(AssociationSpecification.key1(id));</span>
-<span class="nc bnc" id="L50" title="All 2 branches missed.">    else if (associationType.getKey2().equals(clazz))</span>
-<span class="nc" id="L51">      specification = specification.and(AssociationSpecification.key2(id));</span>
-<span class="nc" id="L52">    else throw new IllegalArgumentException();</span>
+  public List&lt;Association&gt; findAllOf(
+      UUID id, Class&lt;?&gt; clazz, List&lt;EAssociationType&gt; associationTypes) {
+<span class="fc" id="L49">    Specification&lt;AssociationEntity&gt; specification = null;</span>
 
-<span class="fc" id="L54">    return jpaRepository.findAll(specification, DEFAULT_SORT).stream()</span>
-<span class="fc" id="L55">        .map(AssociationMapper.INSTANCE::toDomain)</span>
-<span class="fc" id="L56">        .toList();</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    for (EAssociationType type : associationTypes) {</span>
+<span class="fc" id="L52">      Specification&lt;AssociationEntity&gt; typeSpec =</span>
+<span class="fc" id="L53">          AssociationSpecification.withTypeIn(List.of(type));</span>
+
+<span class="fc bfc" id="L55" title="All 2 branches covered.">      if (type.getKey1().equals(clazz)) {</span>
+<span class="fc" id="L56">        typeSpec = typeSpec.and(AssociationSpecification.key1(id));</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">      } else if (type.getKey2().equals(clazz)) {</span>
+<span class="fc" id="L58">        typeSpec = typeSpec.and(AssociationSpecification.key2(id));</span>
+      } else {
+<span class="nc" id="L60">        throw new IllegalArgumentException(</span>
+            &quot;Class &quot; + clazz + &quot; not compatible with association type &quot; + type);
+      }
+
+<span class="fc bfc" id="L64" title="All 2 branches covered.">      if (specification == null) {</span>
+<span class="fc" id="L65">        specification = typeSpec;</span>
+      } else {
+<span class="fc" id="L67">        specification = specification.or(typeSpec);</span>
+      }
+<span class="fc" id="L69">    }</span>
+
+<span class="fc" id="L71">    return jpaRepository.findAll(specification, DEFAULT_SORT).stream()</span>
+<span class="fc" id="L72">        .map(AssociationMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L73">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -34,19 +34,20 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
-  public List&lt;Association&gt; getAllOf(UUID id, Class&lt;?&gt; clazz, EAssociationType associationType) {
-<span class="fc" id="L38">    return associationRepository.findAllOf(id, clazz, associationType);</span>
+  public List&lt;Association&gt; getAllOf(
+      UUID id, Class&lt;?&gt; clazz, List&lt;EAssociationType&gt; associationTypes) {
+<span class="fc" id="L39">    return associationRepository.findAllOf(id, clazz, associationTypes);</span>
   }
 
   @Override
   public void deleteAllByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L43">    var activities = associationRepository.findAllById(ids);</span>
+<span class="fc" id="L44">    var activities = associationRepository.findAllById(ids);</span>
 
-<span class="fc bfc" id="L45" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(activities.stream().map(Association::getId).toList()).containsAll(ids)) {</span>
-<span class="fc" id="L46">      throw new AssociationDoesNotExistException();</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(activities.stream().map(Association::getId).toList()).containsAll(ids)) {</span>
+<span class="fc" id="L47">      throw new AssociationDoesNotExistException();</span>
     }
 
-<span class="fc" id="L49">    associationRepository.removeAllFromDatabase(activities);</span>
-<span class="fc" id="L50">  }</span>
+<span class="fc" id="L50">    associationRepository.removeAllFromDatabase(activities);</span>
+<span class="fc" id="L51">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -260,7 +260,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 <span class="fc" id="L260">        associationService.getAllOf(</span>
 <span class="fc" id="L261">            declaredActivity.getId(),</span>
             DeclaredActivity.class,
-            EAssociationType.DECLARED_ACTIVITY_TRACE);
+<span class="fc" id="L263">            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));</span>
 
 <span class="fc" id="L265">    var traces =</span>
 <span class="fc" id="L266">        traceRepository.findAllById(traceAssociations.stream().map(Association::getId2).toList());</span>
@@ -288,7 +288,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 <span class="fc" id="L288">            .getAllOf(</span>
 <span class="fc" id="L289">                declaredActivity.getId(),</span>
                 DeclaredActivity.class,
-                EAssociationType.DECLARED_ACTIVITY_TRACE)
+<span class="fc" id="L291">                List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))</span>
 <span class="fc" id="L292">            .stream()</span>
 <span class="fc" id="L293">            .map(Association::getId)</span>
 <span class="fc" id="L294">            .toList();</span>
