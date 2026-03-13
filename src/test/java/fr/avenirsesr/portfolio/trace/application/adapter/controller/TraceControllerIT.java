@@ -577,4 +577,101 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
   }
+
+  @Test
+  void shouldAssociateTraceWithDeclaredSkill() throws Exception {
+    BddLogger.given("an existing trace and a declared skill");
+
+    UUID traceId = getFirstTraceIdFromOverview();
+    UUID skillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
+
+    BddLogger.when("performing POST /associate/declared-skill");
+    BddLogger.then("it should associate the trace with declared skill");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.declaredSkillAssociations").exists());
+  }
+
+  @Test
+  void shouldReturn404WhenAssociateDeclaredSkillTraceNotFound() throws Exception {
+    BddLogger.given("unknown trace id");
+
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
+
+    BddLogger.when("performing POST /associate/declared-skill");
+    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
+  }
+
+  @Test
+  void shouldReturn404WhenUnknownUserAssociatesDeclaredSkill() throws Exception {
+    BddLogger.given("unknown user context");
+
+    UUID traceId = getFirstTraceIdFromOverview();
+    UUID skillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
+
+    BddLogger.when("performing POST with unknown user");
+    BddLogger.then("it should return 404 USER_NOT_FOUND");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
+  }
+
+  @Test
+  void shouldReturn403WhenUserNotOwnerAssociatesDeclaredSkill() throws Exception {
+    BddLogger.given("a trace not owned by the logged-in user");
+
+    UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
+    UUID skillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
+
+    BddLogger.when("performing POST /associate/declared-skill");
+    BddLogger.then("it should return 403 USER_NOT_AUTHORIZED");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
+  }
 }

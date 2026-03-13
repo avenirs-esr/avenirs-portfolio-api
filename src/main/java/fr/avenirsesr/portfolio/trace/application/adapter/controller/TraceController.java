@@ -206,6 +206,21 @@ public class TraceController {
     return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));
   }
 
+  @PostMapping("/{traceId}/associate/declared-skill")
+  public ResponseEntity<TraceAssociationsDTO> associateTraceWithDeclaredSkill(
+      Principal principal,
+      @Valid @PathVariable UUID traceId,
+      @Valid @RequestBody AssociationsCreationRequest body) {
+    log.debug(
+        "Received request to associate Trace[{}] with declared skill [{}] by student [{}]",
+        traceId,
+        body.idsToAssociate(),
+        principal.getName());
+    var traceAssociations =
+        traceService.associateTraceWithDeclaredSkill(traceId, body.idsToAssociate());
+    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));
+  }
+
   @GetMapping("/{traceId}/associations")
   public ResponseEntity<TraceAssociationsDTO> getTraceAssociations(
       Principal principal, @Valid @PathVariable UUID traceId) {
