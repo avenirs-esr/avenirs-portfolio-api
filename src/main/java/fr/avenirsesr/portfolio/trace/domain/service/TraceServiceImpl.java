@@ -152,7 +152,6 @@ public class TraceServiceImpl implements TraceService {
 
     TraceAttachment traceAttachment = getTraceAttachment(trace);
 
-    TraceAssociationsData traceAssociations = getTraceAssociations(trace);
     return new TraceDetailData(
         trace.getId(),
         trace.getTitle(),
@@ -162,7 +161,6 @@ public class TraceServiceImpl implements TraceService {
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
         traceAttachment,
-        traceAssociations,
         trace.getCreatedAt(),
         trace.getUpdatedAt());
   }
@@ -264,8 +262,6 @@ public class TraceServiceImpl implements TraceService {
 
     TraceAttachment traceAttachment = getTraceAttachment(savedTrace);
 
-    TraceAssociationsData traceAssociations = getTraceAssociations(trace);
-
     return new TraceDetailData(
         savedTrace.getId(),
         savedTrace.getTitle(),
@@ -275,7 +271,6 @@ public class TraceServiceImpl implements TraceService {
         savedTrace.getAiUseJustification().orElse(null),
         savedTrace.getPersonalNote().orElse(null),
         traceAttachment,
-        traceAssociations,
         savedTrace.getCreatedAt(),
         savedTrace.getUpdatedAt());
   }
