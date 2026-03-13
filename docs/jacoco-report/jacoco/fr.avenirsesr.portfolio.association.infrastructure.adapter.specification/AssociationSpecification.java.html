@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AssociationSpecification.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.association.infrastructure.adapter.specification</a> &gt; <span class="el_source">AssociationSpecification.java</span></div><h1>AssociationSpecification.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.association.infrastructure.adapter.specification;
+
+import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.AssociationEntity;
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.data.jpa.domain.Specification;
+
+<span class="nc" id="L12">public class AssociationSpecification {</span>
+  public static Specification&lt;AssociationEntity&gt; in(List&lt;AssociationData&gt; associations) {
+<span class="fc" id="L14">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L15" title="2 of 4 branches missed.">      if (associations == null || associations.isEmpty()) {</span>
+<span class="nc" id="L16">        return criteriaBuilder.disjunction();</span>
+      }
+
+<span class="fc" id="L19">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L21" title="All 2 branches covered.">      for (AssociationData association : associations) {</span>
+<span class="fc" id="L22">        Predicate id1Match = criteriaBuilder.equal(root.get(&quot;id1&quot;), association.id1());</span>
+<span class="fc" id="L23">        Predicate id2Match = criteriaBuilder.equal(root.get(&quot;id2&quot;), association.id2());</span>
+<span class="fc" id="L24">        Predicate associationTypeMatch =</span>
+<span class="fc" id="L25">            criteriaBuilder.equal(root.get(&quot;associationType&quot;), association.associationType());</span>
+
+<span class="fc" id="L27">        predicates.add(criteriaBuilder.and(id1Match, id2Match, associationTypeMatch));</span>
+<span class="fc" id="L28">      }</span>
+
+<span class="fc" id="L30">      return criteriaBuilder.or(predicates.toArray(new Predicate[0]));</span>
+    };
+  }
+
+  public static Specification&lt;AssociationEntity&gt; withTypeIn(
+      List&lt;EAssociationType&gt; associationTypes) {
+<span class="fc" id="L36">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L37" title="2 of 4 branches missed.">      if (associationTypes == null || associationTypes.isEmpty()) {</span>
+<span class="nc" id="L38">        return criteriaBuilder.disjunction();</span>
+      }
+
+<span class="fc" id="L41">      return criteriaBuilder.or(</span>
+<span class="fc" id="L42">          associationTypes.stream()</span>
+<span class="fc" id="L43">              .map(type -&gt; criteriaBuilder.equal(root.get(&quot;associationType&quot;), type))</span>
+<span class="fc" id="L44">              .toList()</span>
+<span class="fc" id="L45">              .toArray(new Predicate[0]));</span>
+    };
+  }
+
+  public static Specification&lt;AssociationEntity&gt; key1(UUID id1) {
+<span class="fc" id="L50">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc" id="L51">      return criteriaBuilder.equal(root.get(&quot;id1&quot;), id1);</span>
+    };
+  }
+
+  public static Specification&lt;AssociationEntity&gt; key2(UUID id2) {
+<span class="nc" id="L56">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc" id="L57">      return criteriaBuilder.equal(root.get(&quot;id2&quot;), id2);</span>
+    };
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
