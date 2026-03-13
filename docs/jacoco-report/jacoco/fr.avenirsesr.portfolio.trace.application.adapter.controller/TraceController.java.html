@@ -206,16 +206,31 @@ public class TraceController {
 <span class="nc" id="L206">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 
+  @PostMapping(&quot;/{traceId}/associate/declared-skill&quot;)
+  public ResponseEntity&lt;TraceAssociationsDTO&gt; associateTraceWithDeclaredSkill(
+      Principal principal,
+      @Valid @PathVariable UUID traceId,
+      @Valid @RequestBody AssociationsCreationRequest body) {
+<span class="fc" id="L214">    log.debug(</span>
+        &quot;Received request to associate Trace[{}] with declared skill [{}] by student [{}]&quot;,
+        traceId,
+<span class="fc" id="L217">        body.idsToAssociate(),</span>
+<span class="fc" id="L218">        principal.getName());</span>
+<span class="fc" id="L219">    var traceAssociations =</span>
+<span class="fc" id="L220">        traceService.associateTraceWithDeclaredSkill(traceId, body.idsToAssociate());</span>
+<span class="fc" id="L221">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
+  }
+
   @GetMapping(&quot;/{traceId}/associations&quot;)
   public ResponseEntity&lt;TraceAssociationsDTO&gt; getTraceAssociations(
       Principal principal, @Valid @PathVariable UUID traceId) {
-<span class="fc" id="L212">    log.debug(</span>
+<span class="fc" id="L227">    log.debug(</span>
         &quot;Received request to get associate Trace[{}] associations by student [{}]&quot;,
         traceId,
-<span class="fc" id="L215">        principal.getName());</span>
+<span class="fc" id="L230">        principal.getName());</span>
 
-<span class="fc" id="L217">    var traceAssociations = traceService.getTraceAssociations(traceId);</span>
-<span class="fc" id="L218">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
+<span class="fc" id="L232">    var traceAssociations = traceService.getTraceAssociations(traceId);</span>
+<span class="fc" id="L233">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
