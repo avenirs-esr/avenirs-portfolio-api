@@ -1,0 +1,40 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1773401388395-3">
+        <dropForeignKeyConstraint baseTableName="activity_trace_association" constraintName="FK61m9gt1ppq3dv69kj2tuxk2xd"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1773401388395-4">
+        <dropForeignKeyConstraint baseTableName="activity_trace_association" constraintName="FKmkb4uo4o87v8rseoujhdius4e"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1773401388395-1">
+        <createTable tableName="association">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="associationPK"/>
+            </column>
+            <column name="id1" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id2" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="association_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1773401388395-2">
+        <addUniqueConstraint columnNames="id1, id2" constraintName="UK4jt4jx4mc1xw2uw1u6fwh6lvx" tableName="association"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1773401388395-5">
+        <dropUniqueConstraint constraintName="UKtnuc87lkdm6by5a16m8p2386c" tableName="activity_trace_association"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1773401388395-6">
+        <dropTable tableName="activity_trace_association"/>
+    </changeSet>
+</databaseChangeLog>

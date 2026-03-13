@@ -7,15 +7,16 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
-import fr.avenirsesr.portfolio.association.domain.data.ActivityTraceAssociationData;
-import fr.avenirsesr.portfolio.association.domain.model.ActivityTraceAssociation;
-import fr.avenirsesr.portfolio.association.domain.port.input.ActivityTraceAssociationService;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.association.domain.model.Association;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociations;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
@@ -25,7 +26,9 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.excepti
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -43,7 +46,8 @@ import lombok.extern.slf4j.Slf4j;
 public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
   private final ActivityRepository activityRepository;
-  private final ActivityTraceAssociationService activityTraceAssociationService;
+  private final TraceRepository traceRepository;
+  private final AssociationService associationService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
@@ -162,10 +166,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId) {
-    DeclaredActivity declaredActivity =
-        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
-
-    return declaredActivity;
+    return fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
   }
 
   private void validateActivityDates(LocalDate startDate, LocalDate endDate, Instant subscribedAt) {
@@ -214,25 +215,67 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public DeclaredActivityAssociations associateActivityWithTraces(
+  public DeclaredActivityAssociationsData associateActivityWithTraces(
       UUID declaredActivityId, List<UUID> traceIds) {
-    List<ActivityTraceAssociation> associations =
-        activityTraceAssociationService.createAll(
+    Student student = loggedInUserService.getLoggedInStudent();
+    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    var traces = traceRepository.findAllById(traceIds);
+
+    if (!new HashSet<>(traces.stream().map(Trace::getId).toList()).containsAll(traceIds)) {
+      throw new TraceNotFoundException();
+    }
+
+    if (!traces.stream().allMatch(trace -> trace.getUser().equals(student.getUser()))) {
+      throw new UserNotAuthorizedException();
+    }
+
+    List<Association> associations =
+        associationService.createAll(
             traceIds.stream()
-                .map(traceId -> new ActivityTraceAssociationData(declaredActivityId, traceId))
+                .map(
+                    traceId ->
+                        new AssociationData(
+                            declaredActivityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE))
                 .toList());
 
-    return new DeclaredActivityAssociations(associations);
+    return new DeclaredActivityAssociationsData(
+        associations.stream()
+            .map(
+                a ->
+                    new DeclaredActivityAssociationsData.DeclaredActivityTraceAssociationData(
+                        a.getId(),
+                        traces.stream()
+                            .filter(t -> t.getId().equals(a.getId2()))
+                            .findAny()
+                            .orElseThrow(TraceNotFoundException::new)))
+            .toList());
   }
 
   @Override
-  public DeclaredActivityAssociations getDeclaredActivityAssociations(UUID declaredActivityId) {
+  public DeclaredActivityAssociationsData getDeclaredActivityAssociations(UUID declaredActivityId) {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
-    var associations = activityTraceAssociationService.getAllOf(declaredActivity);
+    var traceAssociations =
+        associationService.getAllOf(
+            declaredActivity.getId(),
+            DeclaredActivity.class,
+            EAssociationType.DECLARED_ACTIVITY_TRACE);
 
-    return new DeclaredActivityAssociations(associations);
+    var traces =
+        traceRepository.findAllById(traceAssociations.stream().map(Association::getId2).toList());
+
+    return new DeclaredActivityAssociationsData(
+        traceAssociations.stream()
+            .map(
+                a ->
+                    new DeclaredActivityAssociationsData.DeclaredActivityTraceAssociationData(
+                        a.getId(),
+                        traces.stream()
+                            .filter(t -> t.getId().equals(a.getId2()))
+                            .findAny()
+                            .orElseThrow(TraceNotFoundException::new)))
+            .toList());
   }
 
   @Override
@@ -241,16 +284,20 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
     var associatedTracesIds =
-        activityTraceAssociationService.getAllOf(declaredActivity).stream()
-            .map(ActivityTraceAssociation::getTrace)
-            .map(Trace::getId)
+        associationService
+            .getAllOf(
+                declaredActivity.getId(),
+                DeclaredActivity.class,
+                EAssociationType.DECLARED_ACTIVITY_TRACE)
+            .stream()
+            .map(Association::getId)
             .toList();
 
     if (!new HashSet<>(associatedTracesIds).containsAll(idsToDelete)) {
       throw new UserNotAuthorizedException();
     }
 
-    activityTraceAssociationService.deleteAllByIds(idsToDelete);
+    associationService.deleteAllByIds(idsToDelete);
   }
 
   private DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(
