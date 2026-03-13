@@ -10,8 +10,9 @@ import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundExcepti
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
-import fr.avenirsesr.portfolio.association.domain.model.ActivityTraceAssociation;
-import fr.avenirsesr.portfolio.association.domain.port.input.ActivityTraceAssociationService;
+import fr.avenirsesr.portfolio.association.domain.model.Association;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
@@ -30,6 +31,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.e
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
@@ -52,7 +54,8 @@ class DeclaredActivityServiceImplTest {
 
   @Mock private DeclaredActivityRepository declaredActivityRepository;
   @Mock private ActivityRepository activityRepository;
-  @Mock private ActivityTraceAssociationService activityTraceAssociationService;
+  @Mock private TraceRepository traceRepository;
+  @Mock private AssociationService associationService;
   @Mock private LoggedInUserService loggedInUserService;
 
   @InjectMocks private DeclaredActivityServiceImpl service;
@@ -70,7 +73,8 @@ class DeclaredActivityServiceImplTest {
         new DeclaredActivityServiceImpl(
             declaredActivityRepository,
             activityRepository,
-            activityTraceAssociationService,
+            traceRepository,
+            associationService,
             loggedInUserService);
   }
 
@@ -557,15 +561,15 @@ class DeclaredActivityServiceImplTest {
     BddLogger.given("A logged-in student and a declared activity with associated traces");
 
     UUID declaredActivityId = UUID.randomUUID();
-    UUID traceId1 = UUID.randomUUID();
-    UUID traceId2 = UUID.randomUUID();
+    UUID associationId1 = UUID.randomUUID();
+    UUID associationId2 = UUID.randomUUID();
 
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
     Trace trace1 = mock(Trace.class);
     Trace trace2 = mock(Trace.class);
 
-    ActivityTraceAssociation association1 = mock(ActivityTraceAssociation.class);
-    ActivityTraceAssociation association2 = mock(ActivityTraceAssociation.class);
+    Association association1 = mock(Association.class);
+    Association association2 = mock(Association.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
 
@@ -574,22 +578,22 @@ class DeclaredActivityServiceImplTest {
 
     when(declaredActivity.getStudent()).thenReturn(student);
 
-    when(activityTraceAssociationService.getAllOf(declaredActivity))
+    when(associationService.getAllOf(
+            declaredActivity.getId(),
+            DeclaredActivity.class,
+            EAssociationType.DECLARED_ACTIVITY_TRACE))
         .thenReturn(List.of(association1, association2));
 
-    when(association1.getTrace()).thenReturn(trace1);
-    when(association2.getTrace()).thenReturn(trace2);
-
-    when(trace1.getId()).thenReturn(traceId1);
-    when(trace2.getId()).thenReturn(traceId2);
+    when(association1.getId()).thenReturn(associationId1);
+    when(association2.getId()).thenReturn(associationId2);
 
     BddLogger.when("deleteAssociations is called");
 
-    service.deleteAssociations(declaredActivityId, List.of(traceId1, traceId2));
+    service.deleteAssociations(declaredActivityId, List.of(associationId1, associationId1));
 
     BddLogger.then("deleteAllByIds should be called");
 
-    verify(activityTraceAssociationService).deleteAllByIds(List.of(traceId1, traceId2));
+    verify(associationService).deleteAllByIds(List.of(associationId1, associationId1));
   }
 
   @Test
@@ -612,7 +616,7 @@ class DeclaredActivityServiceImplTest {
             () -> service.deleteAssociations(declaredActivityId, List.of(UUID.randomUUID())))
         .isInstanceOf(DeclaredActivityNotFoundException.class);
 
-    verify(activityTraceAssociationService, never()).deleteAllByIds(anyList());
+    verify(associationService, never()).deleteAllByIds(anyList());
   }
 
   @Test
@@ -640,7 +644,7 @@ class DeclaredActivityServiceImplTest {
             () -> service.deleteAssociations(declaredActivityId, List.of(UUID.randomUUID())))
         .isInstanceOf(UserNotAuthorizedException.class);
 
-    verify(activityTraceAssociationService, never()).deleteAllByIds(anyList());
+    verify(associationService, never()).deleteAllByIds(anyList());
   }
 
   @Test
@@ -655,7 +659,7 @@ class DeclaredActivityServiceImplTest {
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
     Trace trace1 = mock(Trace.class);
 
-    ActivityTraceAssociation association1 = mock(ActivityTraceAssociation.class);
+    Association association1 = mock(Association.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
 
@@ -664,11 +668,11 @@ class DeclaredActivityServiceImplTest {
 
     when(declaredActivity.getStudent()).thenReturn(student);
 
-    when(activityTraceAssociationService.getAllOf(declaredActivity))
+    when(associationService.getAllOf(
+            declaredActivity.getId(),
+            DeclaredActivity.class,
+            EAssociationType.DECLARED_ACTIVITY_TRACE))
         .thenReturn(List.of(association1));
-
-    when(association1.getTrace()).thenReturn(trace1);
-    when(trace1.getId()).thenReturn(traceId1);
 
     BddLogger.when("deleteAssociations is called with non associated id");
 
@@ -680,6 +684,6 @@ class DeclaredActivityServiceImplTest {
                     declaredActivityId, List.of(traceId1, traceIdNotAssociated)))
         .isInstanceOf(UserNotAuthorizedException.class);
 
-    verify(activityTraceAssociationService, never()).deleteAllByIds(anyList());
+    verify(associationService, never()).deleteAllByIds(anyList());
   }
 }

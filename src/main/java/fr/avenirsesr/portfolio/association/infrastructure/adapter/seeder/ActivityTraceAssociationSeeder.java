@@ -1,12 +1,13 @@
 package fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import fr.avenirsesr.portfolio.association.domain.data.ActivityTraceAssociationData;
-import fr.avenirsesr.portfolio.association.domain.model.ActivityTraceAssociation;
-import fr.avenirsesr.portfolio.association.domain.port.input.ActivityTraceAssociationService;
-import fr.avenirsesr.portfolio.association.infrastructure.adapter.mapper.ActivityTraceAssociationMapper;
-import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.ActivityTraceAssociationEntity;
-import fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder.data.ActivityTraceAssociationCreationData;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.association.domain.model.Association;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.infrastructure.adapter.mapper.AssociationMapper;
+import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.AssociationEntity;
+import fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder.data.AssociationCreationData;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
@@ -25,23 +26,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class ActivityTraceAssociationSeeder {
-  private static final String PATH_FILE = "seeder/activitiy-trace-associations.json";
+  private static final String PATH_FILE = "seeder/associations.json";
   private final FileReader fileReader;
-  private final ActivityTraceAssociationService activityTraceAssociationService;
+  private final AssociationService associationService;
 
   @Value("${seeder.source}")
   private ESeederSource seederSource;
 
   @Transactional
-  public List<ActivityTraceAssociationEntity> seed(
+  public List<AssociationEntity> seed(
       List<DeclaredActivityEntity> savedActivities, List<TraceEntity> savedTraces) {
     log.info("Seeding activity / trace associations...");
 
-    List<ActivityTraceAssociationCreationData> creationData =
+    List<AssociationCreationData> creationData =
         switch (seederSource) {
           case CSV ->
-              fileReader.readJSON(
-                  PATH_FILE, new TypeReference<List<ActivityTraceAssociationCreationData>>() {});
+              fileReader.readJSON(PATH_FILE, new TypeReference<List<AssociationCreationData>>() {});
           case FAKER ->
               savedActivities.stream()
                   .flatMap(
@@ -49,8 +49,10 @@ public class ActivityTraceAssociationSeeder {
                           savedTraces.stream()
                               .map(
                                   t ->
-                                      new ActivityTraceAssociationCreationData(
-                                          a.getId(), t.getId())))
+                                      new AssociationCreationData(
+                                          a.getId(),
+                                          t.getId(),
+                                          EAssociationType.DECLARED_ACTIVITY_TRACE)))
                   .distinct()
                   .collect(
                       Collectors.collectingAndThen(
@@ -63,13 +65,13 @@ public class ActivityTraceAssociationSeeder {
                           }));
         };
 
-    List<ActivityTraceAssociation> associations =
-        activityTraceAssociationService.createAll(
+    List<Association> associations =
+        associationService.createAll(
             creationData.stream()
-                .map(data -> new ActivityTraceAssociationData(data.activityId(), data.traceId()))
+                .map(data -> new AssociationData(data.id1(), data.id2(), data.associationType()))
                 .toList());
 
     log.info("✔ {} activity / trace associations created", associations.size());
-    return associations.stream().map(ActivityTraceAssociationMapper.INSTANCE::fromDomain).toList();
+    return associations.stream().map(AssociationMapper.INSTANCE::fromDomain).toList();
   }
 }

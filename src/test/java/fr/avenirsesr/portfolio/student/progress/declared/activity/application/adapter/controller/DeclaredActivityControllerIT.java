@@ -14,7 +14,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
-import fr.avenirsesr.portfolio.association.domain.port.output.repository.ActivityTraceAssociationRepository;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
@@ -942,7 +941,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   }
 
   @Nested
-  class WhenGettingDeclaredActivityAssociations {
+  class WhenGettingDeclaredActivityAssociationsData {
 
     @Transactional
     @Test
@@ -1007,7 +1006,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   }
 
   @Nested
-  class WhenDeletingDeclaredActivityAssociations {
+  class WhenDeletingDeclaredActivityAssociationsData {
 
     @Test
     void shouldReturnNotFoundWhenDeclaredActivityDoesNotExist() throws Exception {
