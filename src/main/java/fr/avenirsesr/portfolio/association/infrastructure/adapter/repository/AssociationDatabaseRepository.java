@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.Gen
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -43,13 +44,29 @@ public class AssociationDatabaseRepository
   }
 
   @Override
-  public List<Association> findAllOf(UUID id, Class<?> clazz, EAssociationType associationType) {
-    var specification = AssociationSpecification.withTypeIn(List.of(associationType));
-    if (associationType.getKey1().equals(clazz))
-      specification = specification.and(AssociationSpecification.key1(id));
-    else if (associationType.getKey2().equals(clazz))
-      specification = specification.and(AssociationSpecification.key2(id));
-    else throw new IllegalArgumentException();
+  public List<Association> findAllOf(
+      UUID id, Class<?> clazz, List<EAssociationType> associationTypes) {
+    Specification<AssociationEntity> specification = null;
+
+    for (EAssociationType type : associationTypes) {
+      Specification<AssociationEntity> typeSpec =
+          AssociationSpecification.withTypeIn(List.of(type));
+
+      if (type.getKey1().equals(clazz)) {
+        typeSpec = typeSpec.and(AssociationSpecification.key1(id));
+      } else if (type.getKey2().equals(clazz)) {
+        typeSpec = typeSpec.and(AssociationSpecification.key2(id));
+      } else {
+        throw new IllegalArgumentException(
+            "Class " + clazz + " not compatible with association type " + type);
+      }
+
+      if (specification == null) {
+        specification = typeSpec;
+      } else {
+        specification = specification.or(typeSpec);
+      }
+    }
 
     return jpaRepository.findAll(specification, DEFAULT_SORT).stream()
         .map(AssociationMapper.INSTANCE::toDomain)

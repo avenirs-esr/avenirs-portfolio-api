@@ -34,8 +34,9 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
-  public List<Association> getAllOf(UUID id, Class<?> clazz, EAssociationType associationType) {
-    return associationRepository.findAllOf(id, clazz, associationType);
+  public List<Association> getAllOf(
+      UUID id, Class<?> clazz, List<EAssociationType> associationTypes) {
+    return associationRepository.findAllOf(id, clazz, associationTypes);
   }
 
   @Override

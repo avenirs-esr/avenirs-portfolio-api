@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface AssociationRepository extends GenericRepositoryPort<Association> {
   List<Association> findAllIn(List<AssociationData> associations);
 
-  List<Association> findAllOf(UUID id, Class<?> clazz, EAssociationType associationType);
+  List<Association> findAllOf(UUID id, Class<?> clazz, List<EAssociationType> associationTypes);
 
   List<Association> findAllOf(List<EAssociationType> associationTypes);
 }

@@ -489,4 +489,92 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
   }
+
+  @Test
+  void shouldGetTraceAssociations() throws Exception {
+    BddLogger.given("an existing trace created by the logged-in student");
+    UUID traceId = UUID.fromString("4453f884-9081-43cb-95c6-d76c2bb59fd7");
+
+    BddLogger.when("performing GET /{traceId}/associations");
+    BddLogger.then("it should return trace associations");
+
+    var mvcResult =
+        mockMvc
+            .perform(
+                get(BASE_PATH + "/" + traceId + "/associations")
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                    .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.declaredActivityAssociations").exists())
+            .andReturn();
+
+    JsonNode json = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
+    JsonNode data = json.get("declaredActivityAssociations");
+
+    if (data == null || !data.isArray() || data.size() != 1) {
+      throw new IllegalStateException("No association data returned");
+    }
+  }
+
+  @Test
+  void shouldReturn404WhenTraceAssociationsTraceNotFound() throws Exception {
+    BddLogger.given("unknown trace id");
+    UUID unknownId = UUID.randomUUID();
+
+    BddLogger.when("performing GET /{traceId}/associations");
+    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
+
+    mockMvc
+        .perform(
+            get(BASE_PATH + "/" + unknownId + "/associations")
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
+  }
+
+  @Test
+  void shouldReturn404WhenUnknownUserGetsTraceAssociations() throws Exception {
+    BddLogger.given("unknown user context");
+
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    BddLogger.when("performing GET with unknown user");
+    BddLogger.then("it should return 404 USER_NOT_FOUND");
+
+    mockMvc
+        .perform(
+            get(BASE_PATH + "/" + traceId + "/associations")
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
+  }
+
+  @Test
+  void shouldReturn403WhenUserNotOwnerGetsTraceAssociations() throws Exception {
+    BddLogger.given("a trace not owned by the logged-in user");
+
+    UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
+
+    BddLogger.when("performing GET /associations");
+    BddLogger.then("it should return 403 USER_NOT_AUTHORIZED");
+
+    mockMvc
+        .perform(
+            get(BASE_PATH + "/" + traceId + "/associations")
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
+  }
 }

@@ -20,9 +20,9 @@ public enum EAssociationType {
     this.key2 = key2;
   }
 
-  List<EAssociationType> getAllBy(Class<?> clazz) {
+  public static List<EAssociationType> getAllBy(Class<?> clazz) {
     return Arrays.stream(values())
-        .filter(type -> key1.equals(clazz) || key2.equals(clazz))
+        .filter(type -> type.key1.equals(clazz) || type.key2.equals(clazz))
         .toList();
   }
 }

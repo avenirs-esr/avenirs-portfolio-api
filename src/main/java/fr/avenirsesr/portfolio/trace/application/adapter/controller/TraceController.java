@@ -11,11 +11,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreati
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceAssociationSearchResultMapper;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceDetailMapper;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceViewMapper;
-import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TracesSummaryMapper;
+import fr.avenirsesr.portfolio.trace.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TraceAssociationSearchResult;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
@@ -196,16 +192,29 @@ public class TraceController {
   }
 
   @PostMapping("/{traceId}/associate/activities")
-  public ResponseEntity<String> associateTraceWithActivities(
+  public ResponseEntity<TraceAssociationsDTO> associateTraceWithActivities(
       Principal principal,
       @Valid @PathVariable UUID traceId,
       @Valid @RequestBody AssociationsCreationRequest body) {
     log.debug(
-        "Received request to associate traceId [{}] with activities [{}] by student [{}]",
+        "Received request to associate Trace[{}] with activities [{}] by student [{}]",
         traceId,
         body.idsToAssociate(),
         principal.getName());
-    traceService.associateTraceWithActivities(traceId, body.idsToAssociate());
-    return ResponseEntity.ok("trace associated successfully");
+    var traceAssociations =
+        traceService.associateTraceWithActivities(traceId, body.idsToAssociate());
+    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));
+  }
+
+  @GetMapping("/{traceId}/associations")
+  public ResponseEntity<TraceAssociationsDTO> getTraceAssociations(
+      Principal principal, @Valid @PathVariable UUID traceId) {
+    log.debug(
+        "Received request to get associate Trace[{}] associations by student [{}]",
+        traceId,
+        principal.getName());
+
+    var traceAssociations = traceService.getTraceAssociations(traceId);
+    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));
   }
 }

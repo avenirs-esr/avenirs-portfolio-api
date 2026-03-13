@@ -5,8 +5,10 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
+import fr.avenirsesr.portfolio.association.domain.model.Association;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
@@ -30,13 +32,14 @@ import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
@@ -69,9 +72,8 @@ public class TraceServiceImplTest {
   @Mock private TraceRepository traceRepository;
   @Mock private TraceAttachmentRepository traceAttachmentRepository;
   @Mock private StudentProgressRepository studentProgressRepository;
-  @Mock private AMSRepository amsRepository;
-  @Mock private SkillLevelProgressRepository skillLevelProgressRepository;
-  @Mock private DeclaredSkillProgressRepository declaredSkillProgressRepository;
+  @Mock private AssociationService associationService;
+  @Mock private DeclaredActivityRepository declaredActivityRepository;
 
   @Mock private TraceConfigurationClient traceConfigurationClient;
 
@@ -668,9 +670,6 @@ public class TraceServiceImplTest {
     assertEquals("Trace title", detail.title());
     assertEquals(EPortfolioType.LIFE_PROJECT.name(), detail.programName());
     assertNotNull(detail.attachment());
-    assertNotNull(detail.traceAssociations());
-    assertEquals(2, detail.traceAssociations().skillLevelAssociations().size());
-    assertEquals(1, detail.traceAssociations().declaredSkillAssociations().size());
   }
 
   @Test
@@ -754,5 +753,73 @@ public class TraceServiceImplTest {
     assertThrows(
         UserNotAuthorizedException.class,
         () -> traceService.getTracesLinkedWithDeclaredSkillProgress(declaredSkillProgress));
+  }
+
+  @Test
+  void givenTraceWithDeclaredActivityAssociation_shouldReturnTraceAssociations() {
+    BddLogger.given("a trace with declared activity associations");
+
+    UUID traceId = UUID.randomUUID();
+
+    Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+    UUID activityId = UUID.randomUUID();
+
+    Association association = mock(Association.class);
+    when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
+    when(association.getId1()).thenReturn(activityId);
+
+    DeclaredActivity activity = mock(DeclaredActivity.class);
+    when(activity.getId()).thenReturn(activityId);
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    when(associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+        .thenReturn(List.of(association));
+
+    when(declaredActivityRepository.findAllById(List.of(activityId))).thenReturn(List.of(activity));
+
+    BddLogger.when("getting trace associations");
+
+    TraceAssociationsData result = traceService.getTraceAssociations(traceId);
+
+    BddLogger.then("it should return declared activity associations");
+
+    assertEquals(1, result.declaredActivityAssociations().size());
+  }
+
+  @Test
+  void givenUnknownTrace_shouldThrowTraceNotFoundException_onGetTraceAssociations() {
+    BddLogger.given("unknown trace id");
+
+    UUID traceId = UUID.randomUUID();
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+    BddLogger.when("getting trace associations");
+
+    assertThrows(TraceNotFoundException.class, () -> traceService.getTraceAssociations(traceId));
+
+    BddLogger.then("it should throw TraceNotFoundException");
+  }
+
+  @Test
+  void givenTraceOfAnotherUser_shouldThrowUserNotAuthorized_onGetTraceAssociations() {
+    BddLogger.given("a trace owned by another user");
+
+    UUID traceId = UUID.randomUUID();
+
+    User otherUser = UserFixture.create().toModel();
+
+    Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    BddLogger.when("getting trace associations");
+
+    assertThrows(
+        UserNotAuthorizedException.class, () -> traceService.getTraceAssociations(traceId));
+
+    BddLogger.then("it should throw UserNotAuthorizedException");
   }
 }

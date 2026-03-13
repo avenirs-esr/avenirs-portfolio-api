@@ -581,7 +581,7 @@ class DeclaredActivityServiceImplTest {
     when(associationService.getAllOf(
             declaredActivity.getId(),
             DeclaredActivity.class,
-            EAssociationType.DECLARED_ACTIVITY_TRACE))
+            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
         .thenReturn(List.of(association1, association2));
 
     when(association1.getId()).thenReturn(associationId1);
@@ -671,7 +671,7 @@ class DeclaredActivityServiceImplTest {
     when(associationService.getAllOf(
             declaredActivity.getId(),
             DeclaredActivity.class,
-            EAssociationType.DECLARED_ACTIVITY_TRACE))
+            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
         .thenReturn(List.of(association1));
 
     BddLogger.when("deleteAssociations is called with non associated id");

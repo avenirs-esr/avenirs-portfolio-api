@@ -165,33 +165,31 @@ public class TraceServiceImpl implements TraceService {
         trace.getUpdatedAt());
   }
 
-  private TraceAssociationsData getTraceAssociations(Trace trace) {
-    List<SkillLevelAssociationData> skillLevelAssociations = new ArrayList<>();
-    List<DeclaredSkillAssociationData> declaredSkillAssociations = new ArrayList<>();
+  @Override
+  public TraceAssociationsData getTraceAssociations(UUID traceId) {
+    var userLoggedIn = loggedInUserService.getLoggedInUser();
+    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
 
-    for (SkillLevelProgress skillLevelProgress : trace.getSkillLevels()) {
-      var skillLevel = skillLevelProgress.getSkillLevel();
-      var skill = skillLevel.getSkill();
-
-      if (skillLevelProgress.getAmses() == null || skillLevelProgress.getAmses().isEmpty()) {
-        skillLevelAssociations.add(
-            toSkillLevelAssociation(skillLevelProgress, skillLevel, skill, null));
-      } else {
-        for (AMS ams : skillLevelProgress.getAmses()) {
-          skillLevelAssociations.add(
-              toSkillLevelAssociation(skillLevelProgress, skillLevel, skill, ams));
-        }
-      }
+    if (!trace.getUser().equals(userLoggedIn)) {
+      throw new UserNotAuthorizedException();
     }
 
-    for (DeclaredSkillProgress declaredSkillProgress : trace.getDeclaredSkillProgresses()) {
-      declaredSkillAssociations.add(toDeclaredSkillAssociation(declaredSkillProgress));
-    }
+    var associations =
+        associationService.getAllOf(
+            trace.getId(), Trace.class, EAssociationType.getAllBy(Trace.class));
+
+    var declaredActivityAssociations =
+        associations.stream()
+            .filter(a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
+            .toList();
+    var activities =
+        declaredActivityRepository.findAllById(
+            declaredActivityAssociations.stream().map(Association::getId1).toList());
 
     return new TraceAssociationsData(
-        skillLevelAssociations,
-        declaredSkillAssociations,
-        List.of()); // todo -> to be implemented with get endpoint
+        declaredActivityAssociations.stream()
+            .map(a -> declaredActivityMapper(a, activities))
+            .toList());
   }
 
   @Override
@@ -323,18 +321,17 @@ public class TraceServiceImpl implements TraceService {
                 .toList());
 
     return new TraceAssociationsData(
-        List.of(),
-        List.of(), // todo replace after refactor of declared skill associations
-        associations.stream()
-            .map(
-                a ->
-                    new TraceAssociationsData.DeclaredActivityAssociationData(
-                        a.getId(),
-                        activities.stream()
-                            .filter(activity -> activity.getId().equals(a.getId1()))
-                            .findAny()
-                            .orElseThrow(DeclaredActivityNotFoundException::new)))
-            .toList());
+        associations.stream().map(a -> declaredActivityMapper(a, activities)).toList());
+  }
+
+  private TraceAssociationsData.DeclaredActivityAssociationData declaredActivityMapper(
+      Association association, List<DeclaredActivity> activities) {
+    return new TraceAssociationsData.DeclaredActivityAssociationData(
+        association.getId(),
+        activities.stream()
+            .filter(activity -> activity.getId().equals(association.getId1()))
+            .findAny()
+            .orElseThrow(DeclaredActivityNotFoundException::new));
   }
 
   @Override

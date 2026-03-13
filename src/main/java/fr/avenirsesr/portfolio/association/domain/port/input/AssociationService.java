@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface AssociationService {
   List<Association> createAll(List<AssociationData> associationsData);
 
-  List<Association> getAllOf(UUID id, Class<?> clazz, EAssociationType associationType);
+  List<Association> getAllOf(UUID id, Class<?> clazz, List<EAssociationType> associationTypes);
 
   void deleteAllByIds(List<UUID> ids);
 }
