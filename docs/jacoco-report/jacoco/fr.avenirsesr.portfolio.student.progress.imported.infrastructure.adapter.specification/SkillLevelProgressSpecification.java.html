@@ -29,7 +29,7 @@ import org.springframework.data.jpa.domain.Specification;
 
   public static Specification&lt;SkillLevelProgressEntity&gt; search(String keyword, ELanguage language) {
 <span class="fc" id="L31">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L32" title="1 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="pc bpc" id="L32" title="2 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
 <span class="fc" id="L33">        return criteriaBuilder.conjunction();</span>
       }
 
