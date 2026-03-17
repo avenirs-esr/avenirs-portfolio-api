@@ -160,8 +160,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
 <span class="pc bpc" id="L161" title="1 of 2 branches missed.">    if (declaredActivity.getStartedAt().isEmpty()) {</span>
 <span class="fc" id="L162">      declaredActivity.setStartedAt(Instant.now());</span>
-<span class="fc" id="L163">      declaredActivityRepository.save(declaredActivity);</span>
     }
+<span class="fc" id="L164">    declaredActivityRepository.save(declaredActivity);</span>
 <span class="fc" id="L165">  }</span>
 
   @Override
