@@ -160,8 +160,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     if (declaredActivity.getStartedAt().isEmpty()) {
       declaredActivity.setStartedAt(Instant.now());
-      declaredActivityRepository.save(declaredActivity);
     }
+    declaredActivityRepository.save(declaredActivity);
   }
 
   @Override
