@@ -8,6 +8,6 @@ import java.util.UUID;
 @Schema(requiredProperties = {"traceAssociations"})
 public record DeclaredActivityAssociationsDTO(
     List<DeclaredActivityTraceAssociationDTO> traceAssociations) {
-  @Schema(requiredProperties = {"associationId, trace"})
+  @Schema(requiredProperties = {"associationId", "trace"})
   public record DeclaredActivityTraceAssociationDTO(UUID associationId, TraceOverviewDTO trace) {}
 }
