@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.TraceInfoData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
@@ -27,16 +28,15 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.D
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +48,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final ActivityRepository activityRepository;
   private final TraceRepository traceRepository;
   private final AssociationService associationService;
+  private final TraceService traceService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
@@ -252,6 +253,31 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public PagedResult<TraceInfoData> searchTracesForAssociation(
+      UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated) {
+
+    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+
+    var alreadyAssociatedTraceIds = getAlreadyAssociatedTraceIds(declaredActivityId);
+
+    var tracePagedResult =
+        traceService.getTracesView(
+            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria);
+
+    var mappedContent =
+        tracePagedResult.content().stream()
+            .map(
+                trace ->
+                    new TraceInfoData(
+                        trace.getId(),
+                        trace.getTitle(),
+                        alreadyAssociatedTraceIds.contains(trace.getId())))
+            .toList();
+
+    return new PagedResult<>(mappedContent, tracePagedResult.pageInfo());
+  }
+
+  @Override
   public DeclaredActivityAssociationsData getDeclaredActivityAssociations(UUID declaredActivityId) {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
@@ -298,6 +324,17 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     }
 
     associationService.deleteAllByIds(idsToDelete);
+  }
+
+  private Set<UUID> getAlreadyAssociatedTraceIds(UUID declaredActivityId) {
+    return associationService
+        .getAllOf(
+            declaredActivityId,
+            DeclaredActivity.class,
+            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))
+        .stream()
+        .map(Association::getId2)
+        .collect(Collectors.toSet());
   }
 
   private DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(

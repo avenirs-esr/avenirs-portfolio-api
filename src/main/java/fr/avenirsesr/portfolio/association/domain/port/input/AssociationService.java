@@ -4,12 +4,16 @@ import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface AssociationService {
   List<Association> createAll(List<AssociationData> associationsData);
 
   List<Association> getAllOf(UUID id, Class<?> clazz, List<EAssociationType> associationTypes);
+
+  List<Association> getAllByIds(
+      Set<UUID> ids, Class<?> clazz, List<EAssociationType> associationTypes);
 
   void deleteAllByIds(List<UUID> ids);
 }

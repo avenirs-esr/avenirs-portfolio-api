@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.Associat
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.specification.AssociationSpecification;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -66,6 +67,34 @@ public class AssociationDatabaseRepository
       } else {
         specification = specification.or(typeSpec);
       }
+    }
+
+    return jpaRepository.findAll(specification, DEFAULT_SORT).stream()
+        .map(AssociationMapper.INSTANCE::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<Association> findAllByIds(
+      Set<UUID> ids, Class<?> clazz, List<EAssociationType> associationTypes) {
+    if (ids == null || ids.isEmpty()) return List.of();
+
+    Specification<AssociationEntity> specification = null;
+
+    for (EAssociationType type : associationTypes) {
+      Specification<AssociationEntity> typeSpec =
+          AssociationSpecification.withTypeIn(List.of(type));
+
+      if (type.getKey1().equals(clazz)) {
+        typeSpec = typeSpec.and(AssociationSpecification.key1In(ids));
+      } else if (type.getKey2().equals(clazz)) {
+        typeSpec = typeSpec.and(AssociationSpecification.key2In(ids));
+      } else {
+        throw new IllegalArgumentException(
+            "Class " + clazz + " not compatible with association type " + type);
+      }
+
+      specification = specification == null ? typeSpec : specification.or(typeSpec);
     }
 
     return jpaRepository.findAll(specification, DEFAULT_SORT).stream()

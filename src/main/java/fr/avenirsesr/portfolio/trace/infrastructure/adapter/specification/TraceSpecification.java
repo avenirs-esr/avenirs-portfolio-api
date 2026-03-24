@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import jakarta.persistence.criteria.*;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -54,6 +55,14 @@ public class TraceSpecification {
 
   public static Specification<TraceEntity> notDeleted() {
     return (root, query, cb) -> cb.isNull(root.get("deletedAt"));
+  }
+
+  public static Specification<TraceEntity> excludeIds(Set<UUID> excludedIds) {
+    return (root, query, cb) -> cb.not(root.get("id").in(excludedIds));
+  }
+
+  public static Specification<TraceEntity> idsIn(Set<UUID> idsIn) {
+    return (root, query, cb) -> cb.in(root.get("id").in(idsIn));
   }
 
   public static Specification<TraceEntity> ofAms(AMS ams) {

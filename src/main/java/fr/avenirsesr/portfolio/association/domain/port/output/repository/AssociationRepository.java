@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface AssociationRepository extends GenericRepositoryPort<Association> {
@@ -13,4 +14,7 @@ public interface AssociationRepository extends GenericRepositoryPort<Association
   List<Association> findAllOf(UUID id, Class<?> clazz, List<EAssociationType> associationTypes);
 
   List<Association> findAllOf(List<EAssociationType> associationTypes);
+
+  List<Association> findAllByIds(
+      Set<UUID> ids, Class<?> clazz, List<EAssociationType> associationTypes);
 }

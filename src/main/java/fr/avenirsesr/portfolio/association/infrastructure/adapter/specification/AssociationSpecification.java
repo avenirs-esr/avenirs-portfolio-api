@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.Associat
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -56,5 +57,13 @@ public class AssociationSpecification {
     return (root, query, criteriaBuilder) -> {
       return criteriaBuilder.equal(root.get("id2"), id2);
     };
+  }
+
+  public static Specification<AssociationEntity> key1In(Set<UUID> ids) {
+    return (root, query, cb) -> root.get("id1").in(ids);
+  }
+
+  public static Specification<AssociationEntity> key2In(Set<UUID> ids) {
+    return (root, query, cb) -> root.get("id2").in(ids);
   }
 }

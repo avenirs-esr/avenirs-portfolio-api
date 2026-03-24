@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.association.domain.port.output.repository.Associa
 import fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +38,12 @@ public class AssociationServiceImpl implements AssociationService {
   public List<Association> getAllOf(
       UUID id, Class<?> clazz, List<EAssociationType> associationTypes) {
     return associationRepository.findAllOf(id, clazz, associationTypes);
+  }
+
+  @Override
+  public List<Association> getAllByIds(
+      Set<UUID> ids, Class<?> clazz, List<EAssociationType> associationTypes) {
+    return associationRepository.findAllByIds(ids, clazz, associationTypes);
   }
 
   @Override
