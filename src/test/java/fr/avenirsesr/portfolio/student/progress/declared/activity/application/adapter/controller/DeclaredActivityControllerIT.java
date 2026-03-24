@@ -1006,6 +1006,223 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   }
 
   @Nested
+  class WhenSearchingTracesForAssociation {
+
+    private static final String SEARCH_TRACES_PATH_SUFFIX = "/search-for-association/traces";
+
+    @Transactional
+    @Test
+    void shouldReturnPagedTracesWithNoFilters() throws Exception {
+
+      BddLogger.given("an existing declared activity for the logged-in student");
+
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      BddLogger.when(
+          "performing GET /{declaredActivityId}/search-for-association/traces without filters");
+      BddLogger.then("it should return 200 with a paged list of trace infos");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + declaredActivityId + SEARCH_TRACES_PATH_SUFFIX)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.data").isArray())
+          .andExpect(jsonPath("$.page.page").value(0))
+          .andExpect(jsonPath("$.page.pageSize").exists())
+          .andExpect(jsonPath("$.page.totalElements").exists())
+          .andExpect(jsonPath("$.page.totalPages").exists());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnPagedTracesWithPaginationParams() throws Exception {
+
+      BddLogger.given("an existing declared activity for the logged-in student");
+
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      BddLogger.when("performing GET with page=0 and pageSize=5");
+      BddLogger.then("it should return 200 with at most 5 results");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + declaredActivityId + SEARCH_TRACES_PATH_SUFFIX)
+                  .param("page", "0")
+                  .param("pageSize", "5")
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.data").isArray())
+          .andExpect(jsonPath("$.data.length()").value(lessThanOrEqualTo(5)))
+          .andExpect(jsonPath("$.page.page").value(0))
+          .andExpect(jsonPath("$.page.pageSize").value(5));
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnOnlyAssociatedTracesWhenIsAssociatedIsTrue() throws Exception {
+
+      BddLogger.given("an existing declared activity with an associated trace");
+
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      UUID traceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
+
+      mockMvc
+          .perform(
+              post(BASE_PATH + "/" + declaredActivityId + "/associate/traces")
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(
+                      """
+                      { "idsToAssociate": ["%s"] }
+                      """
+                          .formatted(traceId))
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+          .andExpect(status().isOk());
+
+      BddLogger.when("performing GET search-for-association/traces with isAssociated=true");
+      BddLogger.then("it should return only traces that are already associated (disabled=true)");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + declaredActivityId + SEARCH_TRACES_PATH_SUFFIX)
+                  .param("isAssociated", "true")
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.data").isArray());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnOnlyNonAssociatedTracesWhenIsAssociatedIsFalse() throws Exception {
+
+      BddLogger.given("an existing declared activity for the logged-in student");
+
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      BddLogger.when("performing GET search-for-association/traces with isAssociated=false");
+      BddLogger.then("it should return only traces not yet associated (disabled=false)");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + declaredActivityId + SEARCH_TRACES_PATH_SUFFIX)
+                  .param("isAssociated", "false")
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.data").isArray())
+          .andExpect(jsonPath("$.data[*].disabled", everyItem(is(false))));
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnTracesMatchingKeyword() throws Exception {
+
+      BddLogger.given("an existing declared activity for the logged-in student");
+
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      BddLogger.when("performing GET search-for-association/traces with a keyword");
+      BddLogger.then("it should return 200 (even if the result set is empty)");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + declaredActivityId + SEARCH_TRACES_PATH_SUFFIX)
+                  .param("keyword", "trace")
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.data").isArray())
+          .andExpect(jsonPath("$.page.totalElements").exists());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnTraceItemsWithExpectedFields() throws Exception {
+
+      BddLogger.given(
+          "an existing declared activity for the logged-in student with traces in the seeder");
+
+      String declaredActivityId =
+          subscribeAndGetDeclaredActivityId(studentPayload, studentSignature);
+
+      BddLogger.when("performing GET search-for-association/traces");
+      BddLogger.then("each item in data should have id, title and disabled fields");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + declaredActivityId + SEARCH_TRACES_PATH_SUFFIX)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.data[0].id").exists())
+          .andExpect(jsonPath("$.data[0].title").exists())
+          .andExpect(jsonPath("$.data[0].disabled").isBoolean());
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenDeclaredActivityDoesNotExist() throws Exception {
+
+      BddLogger.given("a declaredActivityId that does not exist");
+      BddLogger.when("performing GET search-for-association/traces with unknown id");
+      BddLogger.then("it should return 404");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + notFoundDeclaredActivityId + SEARCH_TRACES_PATH_SUFFIX)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isNotFound());
+    }
+
+    @Transactional
+    @Test
+    void shouldReturnForbiddenWhenSearchingAnotherStudentsActivity() throws Exception {
+
+      BddLogger.given("a declared activity belonging to another student");
+
+      String otherDeclaredActivityId =
+          subscribeAndGetDeclaredActivityId(otherStudentPayload, otherStudentSignature);
+
+      BddLogger.when("performing GET search-for-association/traces with main student's payload");
+      BddLogger.then("it should return 403 Forbidden");
+
+      mockMvc
+          .perform(
+              get(BASE_PATH + "/" + otherDeclaredActivityId + SEARCH_TRACES_PATH_SUFFIX)
+                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                  .accept(MediaType.APPLICATION_JSON))
+          .andExpect(status().isForbidden());
+    }
+  }
+
+  @Nested
   class WhenDeletingDeclaredActivityAssociationsData {
 
     @Test
