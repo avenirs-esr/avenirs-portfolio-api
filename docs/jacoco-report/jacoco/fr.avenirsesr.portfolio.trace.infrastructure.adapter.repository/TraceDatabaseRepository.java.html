@@ -61,7 +61,7 @@ public class TraceDatabaseRepository
 <span class="fc" id="L61">            .and(TraceSpecification.notDeleted())</span>
 <span class="fc" id="L62">            .and(filterSpecification);</span>
 
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">    if (dateFilter != null) {</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">    if (dateFilter != null) {</span>
 <span class="fc" id="L65">      Specification&lt;TraceEntity&gt; dateFilterSpecification =</span>
 <span class="fc" id="L66">          new DateFilterSpecificationBuilder&lt;TraceEntity&gt;().build(dateFilter.toMap());</span>
 <span class="fc" id="L67">      specification = specification.and(dateFilterSpecification);</span>
@@ -74,7 +74,7 @@ public class TraceDatabaseRepository
     }
 
     Sort sort =
-<span class="pc bpc" id="L77" title="1 of 4 branches missed.">        filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
+<span class="fc bfc" id="L77" title="All 4 branches covered.">        filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
 <span class="fc" id="L78">            ? Sort.by(Sort.Direction.ASC, &quot;createdAt&quot;)</span>
 <span class="fc" id="L79">            : Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
 <span class="fc" id="L80">                .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
