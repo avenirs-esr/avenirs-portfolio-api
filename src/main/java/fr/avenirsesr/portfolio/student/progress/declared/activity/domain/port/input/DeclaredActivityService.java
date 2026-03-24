@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.TraceAssociationSearchInfoData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
@@ -39,4 +40,7 @@ public interface DeclaredActivityService {
 
   DeclaredActivityAssociationsData associateActivityWithTraces(
       UUID declaredActivityId, List<UUID> traceIds);
+
+  PagedResult<TraceAssociationSearchInfoData> searchTracesForAssociation(
+      UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated);
 }

@@ -14,12 +14,16 @@ import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.TraceAssociationSearchInfoData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
@@ -30,8 +34,11 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.D
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
@@ -56,6 +63,7 @@ class DeclaredActivityServiceImplTest {
   @Mock private ActivityRepository activityRepository;
   @Mock private TraceRepository traceRepository;
   @Mock private AssociationService associationService;
+  @Mock private TraceService traceService;
   @Mock private LoggedInUserService loggedInUserService;
 
   @InjectMocks private DeclaredActivityServiceImpl service;
@@ -75,6 +83,7 @@ class DeclaredActivityServiceImplTest {
             activityRepository,
             traceRepository,
             associationService,
+            traceService,
             loggedInUserService);
   }
 
@@ -645,6 +654,194 @@ class DeclaredActivityServiceImplTest {
         .isInstanceOf(UserNotAuthorizedException.class);
 
     verify(associationService, never()).deleteAllByIds(anyList());
+  }
+
+  @Test
+  void searchTracesForAssociation_should_return_traces_with_correct_disabled_status() {
+
+    BddLogger.given(
+        "A logged-in student, a declared activity owned by him, 2 already-associated traces and 1"
+            + " not");
+
+    UUID declaredActivityId = UUID.randomUUID();
+
+    Trace alreadyAssociatedTrace1 = TraceFixture.create().withUser(student.getUser()).toModel();
+    Trace alreadyAssociatedTrace2 = TraceFixture.create().withUser(student.getUser()).toModel();
+    Trace notAssociatedTrace = TraceFixture.create().withUser(student.getUser()).toModel();
+
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+    Association assoc1 = mock(Association.class);
+    Association assoc2 = mock(Association.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivity.getStudent()).thenReturn(student);
+
+    when(associationService.getAllOf(
+            declaredActivityId,
+            DeclaredActivity.class,
+            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
+        .thenReturn(List.of(assoc1, assoc2));
+    when(assoc1.getId2()).thenReturn(alreadyAssociatedTrace1.getId());
+    when(assoc2.getId2()).thenReturn(alreadyAssociatedTrace2.getId());
+
+    var pageInfo = new PageInfo(0, 10, 3);
+    var pageCriteria = new PageCriteria(0, 10);
+    when(traceService.getTracesView(
+            eq("keyword"), any(TraceFilter.class), eq(null), eq(pageCriteria)))
+        .thenReturn(
+            new PagedResult<>(
+                List.of(alreadyAssociatedTrace1, alreadyAssociatedTrace2, notAssociatedTrace),
+                pageInfo));
+
+    BddLogger.when("searchTracesForAssociation is called");
+    PagedResult<TraceAssociationSearchInfoData> result =
+        service.searchTracesForAssociation(declaredActivityId, "keyword", pageCriteria, null);
+
+    BddLogger.then(
+        "The result contains 3 TraceInfoData: 2 with disabled=true, 1 with disabled=false");
+    assertThat(result.content()).hasSize(3);
+    assertThat(result.pageInfo()).isEqualTo(pageInfo);
+
+    assertThat(result.content())
+        .filteredOn(t -> t.id().equals(alreadyAssociatedTrace1.getId()))
+        .singleElement()
+        .satisfies(t -> assertThat(t.disabled()).isTrue());
+
+    assertThat(result.content())
+        .filteredOn(t -> t.id().equals(alreadyAssociatedTrace2.getId()))
+        .singleElement()
+        .satisfies(t -> assertThat(t.disabled()).isTrue());
+
+    assertThat(result.content())
+        .filteredOn(t -> t.id().equals(notAssociatedTrace.getId()))
+        .singleElement()
+        .satisfies(t -> assertThat(t.disabled()).isFalse());
+  }
+
+  @Test
+  void searchTracesForAssociation_should_return_empty_result_when_no_traces() {
+
+    BddLogger.given("A logged-in student and a declared activity with no traces returned");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivity.getStudent()).thenReturn(student);
+
+    when(associationService.getAllOf(
+            declaredActivityId,
+            DeclaredActivity.class,
+            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
+        .thenReturn(List.of());
+
+    var pageInfo = new PageInfo(0, 10, 0);
+    var pageCriteria = new PageCriteria(0, 10);
+    when(traceService.getTracesView(any(), any(TraceFilter.class), eq(null), eq(pageCriteria)))
+        .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+    BddLogger.when("searchTracesForAssociation is called");
+    PagedResult<TraceAssociationSearchInfoData> result =
+        service.searchTracesForAssociation(declaredActivityId, null, pageCriteria, null);
+
+    BddLogger.then("The result is empty");
+    assertThat(result.content()).isEmpty();
+    assertThat(result.pageInfo()).isEqualTo(pageInfo);
+  }
+
+  @Test
+  void searchTracesForAssociation_should_throw_DeclaredActivityNotFoundException_when_not_found() {
+
+    BddLogger.given("A logged-in student and a non-existent declared activity");
+
+    UUID declaredActivityId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.empty());
+
+    BddLogger.when("searchTracesForAssociation is called");
+
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown");
+    assertThatThrownBy(
+            () ->
+                service.searchTracesForAssociation(
+                    declaredActivityId, null, new PageCriteria(0, 10), null))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+    verify(traceService, never()).getTracesView(any(), any(), any(), any());
+  }
+
+  @Test
+  void
+      searchTracesForAssociation_should_throw_UserNotAuthorizedException_when_belonging_to_another_student() {
+
+    BddLogger.given("A logged-in student and a declared activity belonging to another student");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    Student anotherStudent = StudentFixture.create().toModel();
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivity.getStudent()).thenReturn(anotherStudent);
+
+    BddLogger.when("searchTracesForAssociation is called");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown");
+    assertThatThrownBy(
+            () ->
+                service.searchTracesForAssociation(
+                    declaredActivityId, null, new PageCriteria(0, 10), null))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(traceService, never()).getTracesView(any(), any(), any(), any());
+  }
+
+  @Test
+  void searchTracesForAssociation_should_pass_isAssociated_filter_and_keyword_to_traceService() {
+
+    BddLogger.given("A logged-in student and a declared activity owned by him");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivity.getStudent()).thenReturn(student);
+
+    when(associationService.getAllOf(
+            declaredActivityId,
+            DeclaredActivity.class,
+            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
+        .thenReturn(List.of());
+
+    var pageCriteria = new PageCriteria(1, 5);
+    when(traceService.getTracesView(any(), any(), any(), any()))
+        .thenReturn(new PagedResult<>(List.of(), new PageInfo(1, 5, 0)));
+
+    BddLogger.when(
+        "searchTracesForAssociation is called with keyword='java' and isAssociated=true");
+    service.searchTracesForAssociation(declaredActivityId, "java", pageCriteria, true);
+
+    BddLogger.then(
+        "traceService.getTracesView is called with the keyword, isAssociated=true in the filter,"
+            + " null dateFilter and correct pageCriteria");
+    var traceFilterCaptor = ArgumentCaptor.forClass(TraceFilter.class);
+    verify(traceService)
+        .getTracesView(eq("java"), traceFilterCaptor.capture(), eq(null), eq(pageCriteria));
+
+    assertThat(traceFilterCaptor.getValue().isAssociated()).isTrue();
+    assertThat(traceFilterCaptor.getValue().fileTypes()).isNull();
+    assertThat(traceFilterCaptor.getValue().skillIds()).isNull();
+    assertThat(traceFilterCaptor.getValue().statuses()).isNull();
   }
 
   @Test

@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service.DeclaredActivityServiceImpl;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ public class DeclaredActivityServiceConfig {
   private final TraceRepository traceRepository;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
+  private final TraceService traceService;
 
   @Bean
   public DeclaredActivityService declaredActivityService() {
@@ -29,6 +31,7 @@ public class DeclaredActivityServiceConfig {
         activityRepository,
         traceRepository,
         associationService,
+        traceService,
         loggedInUserService);
   }
 }
