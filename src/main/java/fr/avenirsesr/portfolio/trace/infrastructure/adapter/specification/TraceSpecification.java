@@ -2,19 +2,20 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
-import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.mapper.DeclaredSkillProgressMapper;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper.SkillLevelProgressMapper;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import jakarta.persistence.criteria.*;
+import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TraceSpecification {
@@ -29,39 +30,25 @@ public class TraceSpecification {
   }
 
   public static Specification<TraceEntity> associated() {
-    return (root, query, criteriaBuilder) -> {
+    return (root, query, cb) -> {
       if (query == null) return null;
 
-      Subquery<SkillLevelEntity> skillLevelSubquery = query.subquery(SkillLevelEntity.class);
-      Root<TraceEntity> skillLevelSubRoot = skillLevelSubquery.from(TraceEntity.class);
-      Join<TraceEntity, SkillLevelEntity> skillLevelJoin = skillLevelSubRoot.join("skillLevels");
-      skillLevelSubquery
-          .select(skillLevelJoin)
-          .where(criteriaBuilder.equal(skillLevelSubRoot.get("id"), root.get("id")));
+      Subquery<UUID> subquery = query.subquery(UUID.class);
+      Root<AssociationEntity> associationRoot = subquery.from(AssociationEntity.class);
 
-      Subquery<AMSEntity> amsSubquery = query.subquery(AMSEntity.class);
-      Root<TraceEntity> amsSubRoot = amsSubquery.from(TraceEntity.class);
-      Join<TraceEntity, AMSEntity> amsJoin = amsSubRoot.join("amses");
-      amsSubquery
-          .select(amsJoin)
-          .where(criteriaBuilder.equal(amsSubRoot.get("id"), root.get("id")));
+      var traceId = root.get("id");
 
-      Subquery<DeclaredSkillProgressEntity> addSkillSubquery =
-          query.subquery(DeclaredSkillProgressEntity.class);
-      Root<TraceEntity> addSkillSubRoot = addSkillSubquery.from(TraceEntity.class);
-      Join<TraceEntity, DeclaredSkillProgressEntity> addSkillJoin =
-          addSkillSubRoot.join("declaredSkillsProgresses");
-      addSkillSubquery
-          .select(addSkillJoin)
-          .where(criteriaBuilder.equal(addSkillSubRoot.get("id"), root.get("id")));
+      var id1Match = cb.equal(associationRoot.get("id1"), traceId);
+      var id2Match = cb.equal(associationRoot.get("id2"), traceId);
 
-      Predicate hasSkillLevels = criteriaBuilder.exists(skillLevelSubquery);
-      Predicate hasAmses = criteriaBuilder.exists(amsSubquery);
-      Predicate noDeclaredSkills = criteriaBuilder.exists(addSkillSubquery);
+      var typeIn =
+          associationRoot.get("associationType").in(EAssociationType.getAllBy(Trace.class));
+
+      subquery.select(associationRoot.get("id")).where(cb.and(cb.or(id1Match, id2Match), typeIn));
 
       query.distinct(true);
 
-      return criteriaBuilder.or(hasSkillLevels, hasAmses, noDeclaredSkills);
+      return cb.exists(subquery);
     };
   }
 

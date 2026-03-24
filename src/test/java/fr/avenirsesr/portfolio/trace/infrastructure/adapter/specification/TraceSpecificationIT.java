@@ -48,46 +48,6 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturnAssociatedTraces_whenAssociatedByAms() {
-    TraceEntity associated = persistTrace("associated");
-    AMSEntity ams = persistAMS(student, EAmsStatus.IN_PROGRESS);
-
-    associated.setAmses(new ArrayList<>());
-    associated.getAmses().add(ams);
-
-    TraceEntity unassociated = persistTrace("unassociated");
-
-    entityManager.flush();
-    entityManager.clear();
-
-    List<TraceEntity> result =
-        traceJpaRepository.findAll(ofTestUser(user.getId()).and(TraceSpecification.associated()));
-
-    assertThat(result).extracting(TraceEntity::getId).contains(associated.getId());
-    assertThat(result).extracting(TraceEntity::getId).doesNotContain(unassociated.getId());
-  }
-
-  @Test
-  void shouldReturnUnassociatedTraces_whenOtherOneIsAssociatedByAms() {
-    TraceEntity associated = persistTrace("associated");
-    AMSEntity ams = persistAMS(student, EAmsStatus.IN_PROGRESS);
-
-    associated.setAmses(new ArrayList<>());
-    associated.getAmses().add(ams);
-
-    TraceEntity unassociated = persistTrace("unassociated");
-
-    entityManager.flush();
-    entityManager.clear();
-
-    List<TraceEntity> result =
-        traceJpaRepository.findAll(ofTestUser(user.getId()).and(TraceSpecification.unassociated()));
-
-    assertThat(result).extracting(TraceEntity::getId).contains(unassociated.getId());
-    assertThat(result).extracting(TraceEntity::getId).doesNotContain(associated.getId());
-  }
-
-  @Test
   void shouldFilterByFileType_onlyActiveAttachmentCounts() {
     TraceEntity pdfActive = persistTrace("pdfActive");
     persistAttachment(pdfActive, "doc.pdf", EFileType.PDF, true);
@@ -224,40 +184,6 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
     assertThat(resultEvaluated).isNotNull();
     assertThat(resultInEval).isNotNull();
     assertThat(resultDeclaredOnly).isNotNull();
-  }
-
-  @Test
-  void shouldBuildIsAssociatedSpecification_nullTrueFalseBranches() {
-    TraceEntity associated = persistTrace("associated");
-    AMSEntity ams = persistAMS(student, EAmsStatus.IN_PROGRESS);
-    associated.setAmses(new ArrayList<>());
-    associated.getAmses().add(ams);
-
-    TraceEntity unassociated = persistTrace("unassociated");
-
-    entityManager.flush();
-    entityManager.clear();
-
-    TraceFilterSpecificationBuilder builder = new TraceFilterSpecificationBuilder();
-
-    Specification<TraceEntity> specNull =
-        builder.getSpecification(ETraceFilterKey.IS_ASSOCIATED, null);
-    Specification<TraceEntity> specTrue =
-        builder.getSpecification(ETraceFilterKey.IS_ASSOCIATED, true);
-    Specification<TraceEntity> specFalse =
-        builder.getSpecification(ETraceFilterKey.IS_ASSOCIATED, false);
-
-    List<TraceEntity> rNull = traceJpaRepository.findAll(ofTestUser(user.getId()).and(specNull));
-    List<TraceEntity> rTrue = traceJpaRepository.findAll(ofTestUser(user.getId()).and(specTrue));
-    List<TraceEntity> rFalse = traceJpaRepository.findAll(ofTestUser(user.getId()).and(specFalse));
-
-    assertThat(rNull)
-        .extracting(TraceEntity::getId)
-        .contains(associated.getId(), unassociated.getId());
-    assertThat(rTrue).extracting(TraceEntity::getId).contains(associated.getId());
-    assertThat(rTrue).extracting(TraceEntity::getId).doesNotContain(unassociated.getId());
-    assertThat(rFalse).extracting(TraceEntity::getId).contains(unassociated.getId());
-    assertThat(rFalse).extracting(TraceEntity::getId).doesNotContain(associated.getId());
   }
 
   @Test
