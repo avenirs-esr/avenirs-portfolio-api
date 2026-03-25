@@ -411,10 +411,28 @@ public class TraceServiceImpl implements TraceService {
 <span class="nc" id="L411">    traceRepository.saveAll(traces);</span>
 <span class="nc" id="L412">  }</span>
 
-  private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
-<span class="fc bfc" id="L415" title="All 2 branches covered.">    if (!trace.getUser().equals(user)) {</span>
-<span class="fc" id="L416">      throw new UserNotAuthorizedException(&quot;%s does not own this %s&quot;.formatted(user, trace));</span>
+  @Override
+  public void unassociate(UUID traceId, List&lt;UUID&gt; associationIds) {
+<span class="fc" id="L416">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L417">    Trace trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+
+<span class="fc" id="L419">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
+
+<span class="fc" id="L421">    List&lt;Association&gt; associationList =</span>
+<span class="fc" id="L422">        associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class));</span>
+
+<span class="fc" id="L424">    if (!new HashSet&lt;&gt;(associationList.stream().map(Association::getId).toList())</span>
+<span class="fc bfc" id="L425" title="All 2 branches covered.">        .containsAll(associationIds)) {</span>
+<span class="fc" id="L426">      throw new AssociationDoesNotExistException();</span>
     }
-<span class="fc" id="L418">  }</span>
+
+<span class="fc" id="L429">    associationService.deleteAllByIds(associationIds);</span>
+<span class="fc" id="L430">  }</span>
+
+  private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
+<span class="fc bfc" id="L433" title="All 2 branches covered.">    if (!trace.getUser().equals(user)) {</span>
+<span class="fc" id="L434">      throw new UserNotAuthorizedException(&quot;%s does not own this %s&quot;.formatted(user, trace));</span>
+    }
+<span class="fc" id="L436">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

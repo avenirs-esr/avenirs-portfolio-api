@@ -232,5 +232,21 @@ public class TraceController {
 <span class="fc" id="L232">    var traceAssociations = traceService.getTraceAssociations(traceId);</span>
 <span class="fc" id="L233">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
   }
+
+  @DeleteMapping(&quot;/unassociate/{traceId}&quot;)
+  public ResponseEntity&lt;String&gt; unassociate(
+      Principal principal,
+      @Valid @PathVariable UUID traceId,
+      @RequestBody List&lt;UUID&gt; associationIds) {
+<span class="fc" id="L241">    log.debug(</span>
+        &quot;Received request to unassociate associations [{}] to trace [{}] for student [{}]&quot;,
+        associationIds,
+        traceId,
+<span class="fc" id="L245">        principal.getName());</span>
+
+<span class="fc" id="L247">    traceService.unassociate(traceId, associationIds);</span>
+
+<span class="fc" id="L249">    return ResponseEntity.ok(&quot;Associations successfully deleted.&quot;);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
