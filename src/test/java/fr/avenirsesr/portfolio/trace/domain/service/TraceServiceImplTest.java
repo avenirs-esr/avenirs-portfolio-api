@@ -949,4 +949,155 @@ public class TraceServiceImplTest {
 
     BddLogger.then("should throw UserNotAuthorizedException");
   }
+
+  @Test
+  void givenValidTraceAndAssociations_shouldUnassociateSuccessfully() {
+    BddLogger.given("a TraceServiceImpl service, a valid trace and valid association IDs");
+    UUID traceId = UUID.randomUUID();
+    UUID associationId1 = UUID.randomUUID();
+    UUID associationId2 = UUID.randomUUID();
+    List<UUID> idsToDelete = List.of(associationId1, associationId2);
+
+    Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    Association assoc1 = mock(Association.class);
+    when(assoc1.getId()).thenReturn(associationId1);
+    Association assoc2 = mock(Association.class);
+    when(assoc2.getId()).thenReturn(associationId2);
+
+    when(associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+        .thenReturn(List.of(assoc1, assoc2));
+
+    BddLogger.when("unassociating traces");
+    traceService.unassociate(traceId, idsToDelete);
+
+    BddLogger.then("it should call the association service to delete the associations");
+    verify(associationService).deleteAllByIds(idsToDelete);
+  }
+
+  @Test
+  void givenUnknownTrace_shouldThrowTraceNotFound_whenUnassociating() {
+    BddLogger.given("an unknown trace id");
+    UUID traceId = UUID.randomUUID();
+    List<UUID> idsToDelete = List.of(UUID.randomUUID());
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+    BddLogger.when("unassociating");
+    assertThrows(
+        TraceNotFoundException.class, () -> traceService.unassociate(traceId, idsToDelete));
+
+    BddLogger.then("it should throw TraceNotFoundException and never delete");
+    verify(associationService, never()).deleteAllByIds(any());
+  }
+
+  @Test
+  void givenTraceOfAnotherUser_shouldThrowUserNotAuthorized_whenUnassociating() {
+    BddLogger.given("a trace owned by another user");
+    UUID traceId = UUID.randomUUID();
+    List<UUID> idsToDelete = List.of(UUID.randomUUID());
+
+    User otherUser = UserFixture.create().toModel();
+    Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    BddLogger.when("unassociating");
+    assertThrows(
+        UserNotAuthorizedException.class, () -> traceService.unassociate(traceId, idsToDelete));
+
+    BddLogger.then("it should throw UserNotAuthorizedException and never delete");
+    verify(associationService, never()).deleteAllByIds(any());
+  }
+
+  @Test
+  void unassociate_should_delete_associations_when_they_belong_to_trace() {
+    BddLogger.given("A logged-in user, an existing trace, and valid association IDs");
+    UUID traceId = UUID.randomUUID();
+    UUID associationId1 = UUID.randomUUID();
+    UUID associationId2 = UUID.randomUUID();
+    List<UUID> idsToDelete = List.of(associationId1, associationId2);
+
+    Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    Association assoc1 = mock(Association.class);
+    when(assoc1.getId()).thenReturn(associationId1);
+    Association assoc2 = mock(Association.class);
+    when(assoc2.getId()).thenReturn(associationId2);
+
+    when(associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+        .thenReturn(List.of(assoc1, assoc2));
+
+    BddLogger.when("unassociate is called");
+    traceService.unassociate(traceId, idsToDelete);
+
+    BddLogger.then("associationService.deleteAllByIds should be called");
+    verify(associationService).deleteAllByIds(idsToDelete);
+  }
+
+  @Test
+  void unassociate_should_throw_TraceNotFoundException_when_trace_not_found() {
+    BddLogger.given("An unknown trace id");
+    UUID traceId = UUID.randomUUID();
+    List<UUID> idsToDelete = List.of(UUID.randomUUID());
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+    BddLogger.when("unassociate is called");
+    BddLogger.then("TraceNotFoundException is thrown");
+
+    assertThrows(
+        TraceNotFoundException.class, () -> traceService.unassociate(traceId, idsToDelete));
+
+    verify(associationService, never()).deleteAllByIds(any());
+  }
+
+  @Test
+  void unassociate_should_throw_UserNotAuthorizedException_when_trace_belongs_to_other_user() {
+    BddLogger.given("A trace owned by another user");
+    List<UUID> idsToDelete = List.of(UUID.randomUUID());
+
+    User otherUser = UserFixture.create().toModel();
+    Trace trace = TraceFixture.create().withUser(otherUser).toModel();
+
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    BddLogger.when("unassociate is called");
+    BddLogger.then("UserNotAuthorizedException is thrown");
+
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () -> traceService.unassociate(trace.getId(), idsToDelete));
+
+    verify(associationService, never()).deleteAllByIds(any());
+  }
+
+  @Test
+  void unassociate_should_throw_AssociationDoesNotExistException_when_ids_not_linked_to_trace() {
+    BddLogger.given("A valid trace but association IDs not linked to it");
+    UUID linkedAssocId = UUID.randomUUID();
+    UUID unlinkedAssocId = UUID.randomUUID();
+    List<UUID> idsToDelete = List.of(linkedAssocId, unlinkedAssocId);
+
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+    Association assoc1 = mock(Association.class);
+    when(assoc1.getId()).thenReturn(linkedAssocId);
+
+    when(associationService.getAllOf(
+            trace.getId(), Trace.class, EAssociationType.getAllBy(Trace.class)))
+        .thenReturn(List.of(assoc1));
+
+    BddLogger.when("unassociate is called with unlinked id");
+    BddLogger.then("AssociationDoesNotExistException is thrown");
+
+    assertThrows(
+        fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException.class,
+        () -> traceService.unassociate(trace.getId(), idsToDelete));
+
+    verify(associationService, never()).deleteAllByIds(any());
+  }
 }

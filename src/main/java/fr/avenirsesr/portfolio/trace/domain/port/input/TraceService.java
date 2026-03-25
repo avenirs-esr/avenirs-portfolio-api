@@ -66,4 +66,6 @@ public interface TraceService {
   void unassociateTraces(DeclaredSkillProgress declaredSkillProgress);
 
   void unassociateTraces(DeclaredSkillProgress declaredSkillProgress, List<UUID> traceIds);
+
+  void unassociate(UUID traceId, List<UUID> associationIds);
 }
