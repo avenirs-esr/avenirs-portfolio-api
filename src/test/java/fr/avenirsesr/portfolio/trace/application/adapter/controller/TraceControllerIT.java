@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
+import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -673,5 +674,108 @@ class TraceControllerIT extends ContainerConfigurationTest {
                 .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
+  }
+
+  @Test
+  void shouldUnassociateTraceAssociationsSuccessfully() throws Exception {
+    BddLogger.given("An existing trace and an active association");
+
+    UUID traceId = getFirstTraceIdFromOverview();
+    UUID skillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
+
+    AssociationsCreationRequest associateBody = new AssociationsCreationRequest(List.of(skillId));
+    var associateResult =
+        mockMvc
+            .perform(
+                post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(associateBody))
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    JsonNode json = objectMapper.readTree(associateResult.getResponse().getContentAsString());
+    UUID associationId =
+        UUID.fromString(json.get("declaredSkillAssociations").get(0).get("associationId").asText());
+
+    BddLogger.when("performing DELETE /{traceId}/associations");
+    List<UUID> idsToDelete = List.of(associationId);
+
+    BddLogger.then("it should unassociate and return success message");
+    mockMvc
+        .perform(
+            delete(BASE_PATH + "/" + traceId + "/associations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(idsToDelete))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isOk())
+        .andExpect(content().string("Associations successfully deleted."));
+  }
+
+  @Test
+  void shouldReturn404WhenUnassociatingUnknownTrace() throws Exception {
+    BddLogger.given("an unknown trace id");
+    UUID unknownId = UUID.randomUUID();
+    List<UUID> idsToDelete = List.of(UUID.randomUUID());
+
+    BddLogger.when("performing DELETE /{traceId}/associations");
+    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
+
+    mockMvc
+        .perform(
+            delete(BASE_PATH + "/" + unknownId + "/associations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(idsToDelete))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
+  }
+
+  @Test
+  void shouldReturn403WhenUserNotOwnerTriesToUnassociate() throws Exception {
+    BddLogger.given("a trace not owned by the logged-in user");
+    UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
+    List<UUID> idsToDelete = List.of(UUID.randomUUID());
+
+    BddLogger.when("performing DELETE /{traceId}/associations");
+    BddLogger.then("it should return 403 USER_NOT_AUTHORIZED");
+
+    mockMvc
+        .perform(
+            delete(BASE_PATH + "/" + traceId + "/associations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(idsToDelete))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
+  }
+
+  @Test
+  void shouldReturnErrorWhenAssociationDoesNotExist() throws Exception {
+    BddLogger.given("a valid trace but an association id that does not exist on it");
+    UUID traceId = getFirstTraceIdFromOverview();
+    List<UUID> invalidIdsToDelete = List.of(UUID.randomUUID());
+
+    BddLogger.when("performing DELETE /{traceId}/associations");
+    BddLogger.then("it should return an error");
+
+    mockMvc
+        .perform(
+            delete(BASE_PATH + "/" + traceId + "/associations")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidIdsToDelete))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().is4xxClientError())
+        .andExpect(jsonPath("$.code", is(EErrorCode.ASSOCIATION_NOT_FOUND.name())));
   }
 }

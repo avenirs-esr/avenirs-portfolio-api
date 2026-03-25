@@ -411,6 +411,24 @@ public class TraceServiceImpl implements TraceService {
     traceRepository.saveAll(traces);
   }
 
+  @Override
+  public void unassociate(UUID traceId, List<UUID> associationIds) {
+    User loggedInUser = loggedInUserService.getLoggedInUser();
+    Trace trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
+
+    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+
+    List<Association> associationList =
+        associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class));
+
+    if (!new HashSet<>(associationList.stream().map(Association::getId).toList())
+        .containsAll(associationIds)) {
+      throw new AssociationDoesNotExistException();
+    }
+
+    associationService.deleteAllByIds(associationIds);
+  }
+
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
     if (!trace.getUser().equals(user)) {
       throw new UserNotAuthorizedException("%s does not own this %s".formatted(user, trace));

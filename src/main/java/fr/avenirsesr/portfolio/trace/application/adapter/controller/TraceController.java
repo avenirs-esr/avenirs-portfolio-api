@@ -232,4 +232,20 @@ public class TraceController {
     var traceAssociations = traceService.getTraceAssociations(traceId);
     return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));
   }
+
+  @DeleteMapping("/{traceId}/associations")
+  public ResponseEntity<String> deleteTraceAssociations(
+      Principal principal,
+      @Valid @PathVariable UUID traceId,
+      @RequestBody List<UUID> associationIds) {
+    log.debug(
+        "Received request to unassociate associations [{}] to trace [{}] for student [{}]",
+        associationIds,
+        traceId,
+        principal.getName());
+
+    traceService.unassociate(traceId, associationIds);
+
+    return ResponseEntity.ok("Associations successfully deleted.");
+  }
 }
