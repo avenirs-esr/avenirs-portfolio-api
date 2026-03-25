@@ -233,8 +233,8 @@ public class TraceController {
 <span class="fc" id="L233">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 
-  @DeleteMapping(&quot;/unassociate/{traceId}&quot;)
-  public ResponseEntity&lt;String&gt; unassociate(
+  @DeleteMapping(&quot;/{traceId}/associations&quot;)
+  public ResponseEntity&lt;String&gt; deleteTraceAssociations(
       Principal principal,
       @Valid @PathVariable UUID traceId,
       @RequestBody List&lt;UUID&gt; associationIds) {
