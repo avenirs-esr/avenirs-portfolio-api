@@ -7,9 +7,9 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="nc" id="L7">public class AMSSpecification {</span>
 
   public static Specification&lt;AMSEntity&gt; search(String keyword, ELanguage language) {
-<span class="fc" id="L10">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L11" title="2 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="fc" id="L12">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L10">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L11" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L12">        return criteriaBuilder.conjunction();</span>
       }
 
 <span class="nc" id="L15">      var translationJoin = root.join(&quot;translations&quot;);</span>

@@ -48,8 +48,8 @@ public class AMSServiceImpl implements AMSService {
 
   @Override
   public PagedResult&lt;AMS&gt; search(String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L51">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L52">    return amsRepository.findByStudent(student, pageCriteria, keyword);</span>
+<span class="nc" id="L51">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="nc" id="L52">    return amsRepository.findByStudent(student, pageCriteria, keyword);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

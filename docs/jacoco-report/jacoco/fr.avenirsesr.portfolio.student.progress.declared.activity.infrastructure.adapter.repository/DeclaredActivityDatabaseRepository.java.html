@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.D
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.mapper.DeclaredActivityMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.specification.DeclaredActivitySpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
@@ -26,46 +27,53 @@ public class DeclaredActivityDatabaseRepository
   private final DeclaredActivityJpaRepository jpaRepository;
 
   public DeclaredActivityDatabaseRepository(DeclaredActivityJpaRepository jpaRepository) {
-<span class="fc" id="L29">    super(</span>
+<span class="fc" id="L30">    super(</span>
         jpaRepository,
         jpaRepository,
         DeclaredActivityEntity.class,
         DeclaredActivityMapper.INSTANCE);
-<span class="fc" id="L34">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L35">  }</span>
+<span class="fc" id="L35">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L36">  }</span>
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllByStudent(Student student, FetchGraph fetchGraph) {
-<span class="fc" id="L39">    return findAll(hasStudent(student), fetchGraph);</span>
+<span class="fc" id="L40">    return findAll(hasStudent(student), fetchGraph);</span>
+  }
+
+  @Override
+  public PagedResult&lt;DeclaredActivity&gt; findAllByStudent(
+      Student student, String keyword, PageCriteria pageCriteria, FetchGraph fetchGraph) {
+<span class="fc" id="L46">    var specification = hasStudent(student).and(DeclaredActivitySpecification.search(keyword));</span>
+<span class="fc" id="L47">    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllByActivityIdAndStudent(
       List&lt;UUID&gt; activityIds, Student student, FetchGraph fetchGraph) {
-<span class="pc bpc" id="L45" title="2 of 4 branches missed.">    if (activityIds == null || activityIds.isEmpty()) {</span>
-<span class="nc" id="L46">      return List.of();</span>
+<span class="pc bpc" id="L53" title="2 of 4 branches missed.">    if (activityIds == null || activityIds.isEmpty()) {</span>
+<span class="nc" id="L54">      return List.of();</span>
     }
 
-<span class="fc" id="L49">    return findAll(hasActivityIdInAndStudent(activityIds, student), fetchGraph);</span>
+<span class="fc" id="L57">    return findAll(hasActivityIdInAndStudent(activityIds, student), fetchGraph);</span>
   }
 
   @Override
   public PagedResult&lt;DeclaredActivity&gt; findStudentActivitiesByProgressAndDate(
       Student student, PageCriteria pageCriteria, FetchGraph fetchGraph) {
-<span class="fc" id="L55">    var sort =</span>
-<span class="fc" id="L56">        Sort.by(Sort.Direction.ASC, &quot;isFinishedOrder&quot;)</span>
-<span class="fc" id="L57">            .and(Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;));</span>
-<span class="fc" id="L58">    return findAll(</span>
-<span class="fc" id="L59">        hasStudent(student),</span>
-<span class="fc" id="L60">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),</span>
+<span class="fc" id="L63">    var sort =</span>
+<span class="fc" id="L64">        Sort.by(Sort.Direction.ASC, &quot;isFinishedOrder&quot;)</span>
+<span class="fc" id="L65">            .and(Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;));</span>
+<span class="fc" id="L66">    return findAll(</span>
+<span class="fc" id="L67">        hasStudent(student),</span>
+<span class="fc" id="L68">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),</span>
         fetchGraph);
   }
 
   @Override
   public Optional&lt;DeclaredActivity&gt; findByActivity(Student student, Activity activity) {
-<span class="fc" id="L66">    return jpaRepository</span>
-<span class="fc" id="L67">        .findByStudentIdAndActivityId(student.getId(), activity.getId())</span>
-<span class="fc" id="L68">        .map(DeclaredActivityMapper.INSTANCE::toDomain);</span>
+<span class="fc" id="L74">    return jpaRepository</span>
+<span class="fc" id="L75">        .findByStudentIdAndActivityId(student.getId(), activity.getId())</span>
+<span class="fc" id="L76">        .map(DeclaredActivityMapper.INSTANCE::toDomain);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
