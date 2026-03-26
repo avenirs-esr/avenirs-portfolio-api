@@ -20,4 +20,15 @@ public final class DeclaredActivitySpecification {
     return Specification.where(StudentSpecification.<DeclaredActivityEntity>hasStudent(student))
         .and(hasActivityIdIn(activityIds));
   }
+
+  public static Specification<DeclaredActivityEntity> search(String keyword) {
+    return (root, query, criteriaBuilder) -> {
+      if (keyword == null || keyword.trim().isEmpty()) {
+        return criteriaBuilder.conjunction();
+      }
+      return criteriaBuilder.like(
+          criteriaBuilder.lower(root.get("activity").get("title")),
+          "%" + keyword.toLowerCase() + "%");
+    };
+  }
 }

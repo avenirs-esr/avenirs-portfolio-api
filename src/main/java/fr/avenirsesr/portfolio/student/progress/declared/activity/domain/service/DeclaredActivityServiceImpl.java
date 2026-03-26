@@ -216,6 +216,14 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public PagedResult<DeclaredActivity> searchDeclaredActivity(
+      String keyword, PageCriteria pageCriteria) {
+    var student = loggedInUserService.getLoggedInStudent();
+    var graph = FetchGraph.init().fetch("activity");
+    return declaredActivityRepository.findAllByStudent(student, keyword, pageCriteria, graph);
+  }
+
+  @Override
   public DeclaredActivityAssociationsData associateActivityWithTraces(
       UUID declaredActivityId, List<UUID> traceIds) {
     Student student = loggedInUserService.getLoggedInStudent();

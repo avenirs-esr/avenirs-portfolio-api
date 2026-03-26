@@ -3,7 +3,9 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.service;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.repository.StudentProgressDatabaseRepository;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
@@ -27,6 +29,8 @@ public class TraceServiceConfig {
   private final DeclaredSkillProgressRepository declaredSkillProgressRepository;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
+  private final DeclaredActivityService declaredActivityService;
+  private final DeclaredSkillProgressService declaredSkillProgressService;
 
   @Bean
   public TraceService traceService() {
@@ -39,6 +43,8 @@ public class TraceServiceConfig {
         declaredSkillProgressRepository,
         traceConfigurationClient,
         loggedInUserService,
-        associationService);
+        associationService,
+        declaredActivityService,
+        declaredSkillProgressService);
   }
 }

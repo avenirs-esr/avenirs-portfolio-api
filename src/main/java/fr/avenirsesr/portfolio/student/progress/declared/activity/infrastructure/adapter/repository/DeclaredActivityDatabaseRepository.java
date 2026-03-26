@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.D
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.mapper.DeclaredActivityMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.specification.DeclaredActivitySpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.GenericUserJpaRepositoryAdapter;
 import java.util.List;
@@ -37,6 +38,14 @@ public class DeclaredActivityDatabaseRepository
   @Override
   public List<DeclaredActivity> findAllByStudent(Student student, FetchGraph fetchGraph) {
     return findAll(hasStudent(student), fetchGraph);
+  }
+
+  @Override
+  public PagedResult<DeclaredActivity> findAllByStudent(
+      Student student, String keyword, PageCriteria pageCriteria, FetchGraph fetchGraph) {
+    var specification = hasStudent(student).and(DeclaredActivitySpecification.search(keyword));
+    return findAll(
+        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()), fetchGraph);
   }
 
   @Override

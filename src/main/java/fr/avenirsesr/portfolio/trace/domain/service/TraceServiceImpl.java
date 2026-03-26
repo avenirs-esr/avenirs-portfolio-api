@@ -23,9 +23,11 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
@@ -43,6 +45,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -58,6 +62,8 @@ public class TraceServiceImpl implements TraceService {
   private final TraceConfigurationClient traceConfigurationClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
+  private final DeclaredActivityService declaredActivityService;
+  private final DeclaredSkillProgressService declaredSkillProgressService;
 
   @Override
   public String programNameOfTrace(Trace trace) {
@@ -429,9 +435,72 @@ public class TraceServiceImpl implements TraceService {
     associationService.deleteAllByIds(associationIds);
   }
 
+  @Override
+  public PagedResult<DeclaredActivityAssociationSearchInfoData>
+      searchDeclaredActivityForAssociation(
+          UUID traceId, String keyword, PageCriteria pageCriteria) {
+
+    var alreadyAssociatedIds =
+        getAlreadyAssociatedIdsForTrace(
+            traceId, EAssociationType.DECLARED_ACTIVITY_TRACE, Association::getId1);
+
+    var declaredActivityPagedResult =
+        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria);
+
+    var mappedContent =
+        declaredActivityPagedResult.content().stream()
+            .map(
+                declaredActivity ->
+                    new DeclaredActivityAssociationSearchInfoData(
+                        declaredActivity.getId(),
+                        declaredActivity.getActivity().getTitle(),
+                        declaredActivity.getActivity().getThematic(),
+                        alreadyAssociatedIds.contains(declaredActivity.getId())))
+            .toList();
+
+    return new PagedResult<>(mappedContent, declaredActivityPagedResult.pageInfo());
+  }
+
+  @Override
+  public PagedResult<DeclaredSkillAssociationSearchInfoData> searchDeclaredSkillForAssociation(
+      UUID traceId, String keyword, PageCriteria pageCriteria) {
+
+    var alreadyAssociatedIds =
+        getAlreadyAssociatedIdsForTrace(
+            traceId, EAssociationType.TRACE_DECLARED_SKILL, Association::getId2);
+
+    var declaredSkillPagedResult =
+        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria);
+
+    var mappedContent =
+        declaredSkillPagedResult.content().stream()
+            .map(
+                declaredSkillProgress ->
+                    new DeclaredSkillAssociationSearchInfoData(
+                        declaredSkillProgress.getId(),
+                        declaredSkillProgress.getSkill().getLibelle(),
+                        declaredSkillProgress.getSkill().getType(),
+                        alreadyAssociatedIds.contains(declaredSkillProgress.getId())))
+            .toList();
+
+    return new PagedResult<>(mappedContent, declaredSkillPagedResult.pageInfo());
+  }
+
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
     if (!trace.getUser().equals(user)) {
       throw new UserNotAuthorizedException("%s does not own this %s".formatted(user, trace));
     }
+  }
+
+  private Set<UUID> getAlreadyAssociatedIdsForTrace(
+      UUID traceId, EAssociationType associationType, Function<Association, UUID> idExtractor) {
+    var loggedInUser = loggedInUserService.getLoggedInUser();
+    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
+
+    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+
+    return associationService.getAllOf(traceId, Trace.class, List.of(associationType)).stream()
+        .map(idExtractor)
+        .collect(Collectors.toSet());
   }
 }

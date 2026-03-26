@@ -5,9 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
-import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
-import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
+import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.time.LocalDate;
@@ -68,4 +66,10 @@ public interface TraceService {
   void unassociateTraces(DeclaredSkillProgress declaredSkillProgress, List<UUID> traceIds);
 
   void unassociate(UUID traceId, List<UUID> associationIds);
+
+  PagedResult<DeclaredActivityAssociationSearchInfoData> searchDeclaredActivityForAssociation(
+      UUID traceId, String keyword, PageCriteria pageCriteria);
+
+  PagedResult<DeclaredSkillAssociationSearchInfoData> searchDeclaredSkillForAssociation(
+      UUID traceId, String keyword, PageCriteria pageCriteria);
 }

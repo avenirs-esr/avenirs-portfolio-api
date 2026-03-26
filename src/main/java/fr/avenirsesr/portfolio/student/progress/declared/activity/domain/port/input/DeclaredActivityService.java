@@ -38,6 +38,8 @@ public interface DeclaredActivityService {
 
   void updateDeclaredActivityDates(UUID declaredActivityId, LocalDate startDate, LocalDate endDate);
 
+  PagedResult<DeclaredActivity> searchDeclaredActivity(String keyword, PageCriteria pageCriteria);
+
   DeclaredActivityAssociationsData associateActivityWithTraces(
       UUID declaredActivityId, List<UUID> traceIds);
 
