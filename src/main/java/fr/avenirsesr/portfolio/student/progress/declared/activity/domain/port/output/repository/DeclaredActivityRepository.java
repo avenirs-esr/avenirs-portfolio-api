@@ -14,6 +14,9 @@ import java.util.UUID;
 public interface DeclaredActivityRepository extends GenericRepositoryPort<DeclaredActivity> {
   List<DeclaredActivity> findAllByStudent(Student student, FetchGraph fetchGraph);
 
+  PagedResult<DeclaredActivity> findAllByStudent(
+      Student student, String keyword, PageCriteria pageCriteria, FetchGraph fetchGraph);
+
   List<DeclaredActivity> findAllByActivityIdAndStudent(
       List<UUID> activityIds, Student student, FetchGraph fetchGraph);
 

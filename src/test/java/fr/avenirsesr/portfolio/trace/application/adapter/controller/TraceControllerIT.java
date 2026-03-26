@@ -39,8 +39,11 @@ class TraceControllerIT extends ContainerConfigurationTest {
   private static final String VIEW_BASE_PATH = BASE_PATH + "/view";
   private static final String SUMMARY_BASE_PATH = BASE_PATH + "/summary";
   private static final String DETAIL_BASE_PATH = BASE_PATH + "/{traceId}/detail";
-  private static final String SEARCH_ASSOCIATION_BASE_PATH =
-      BASE_PATH + "/search-association/{type}";
+
+  private static final String SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH =
+      BASE_PATH + "/{traceId}/search-for-association/declared-skills";
+  private static final String SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH =
+      BASE_PATH + "/{traceId}/search-for-association/declared-activities";
 
   @Autowired private MockMvc mockMvc;
   @Autowired private ObjectMapper objectMapper;
@@ -102,11 +105,12 @@ class TraceControllerIT extends ContainerConfigurationTest {
     return UUID.fromString(json.get(0).get("traceId").asText());
   }
 
-  private UUID searchFirstAssociationId(ETraceAssociationType type) throws Exception {
+  private UUID searchFirstAssociationDeclaredSkillId() throws Exception {
+    var traceId = getFirstTraceIdFromOverview();
     var mvcResult =
         mockMvc
             .perform(
-                get(SEARCH_ASSOCIATION_BASE_PATH, type.name())
+                get(SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH, traceId)
                     .param("page", "0")
                     .param("pageSize", "8")
                     .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
@@ -122,7 +126,36 @@ class TraceControllerIT extends ContainerConfigurationTest {
     JsonNode data = json.get("data");
 
     if (data == null || !data.isArray() || data.size() == 0) {
-      throw new IllegalStateException("No association data returned for type " + type);
+      throw new IllegalStateException(
+          "No declared skill association data returned for trace " + traceId);
+    }
+
+    return UUID.fromString(data.get(0).get("id").asText());
+  }
+
+  private UUID searchFirstAssociationDeclaredActivityId() throws Exception {
+    var traceId = getFirstTraceIdFromOverview();
+    var mvcResult =
+        mockMvc
+            .perform(
+                get(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH, traceId)
+                    .param("page", "0")
+                    .param("pageSize", "8")
+                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                    .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.data", isA(List.class)))
+            .andReturn();
+
+    JsonNode json = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
+    JsonNode data = json.get("data");
+
+    if (data == null || !data.isArray() || data.size() == 0) {
+      throw new IllegalStateException(
+          "No declared activity association data returned for trace " + traceId);
     }
 
     return UUID.fromString(data.get(0).get("id").asText());
@@ -442,41 +475,116 @@ class TraceControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldSearchAssociationsForEachType() throws Exception {
-    BddLogger.given("the " + SEARCH_ASSOCIATION_BASE_PATH + " endpoint");
-    BddLogger.when("performing GET search for AMS, SKILL_LEVEL and DECLARED_SKILL");
-    BddLogger.then("it should return paged responses");
+  void shouldSearchDeclaredActivityForAssociation() throws Exception {
+    BddLogger.given("the search declared activity for association endpoint and an existing trace");
+    UUID traceId = getFirstTraceIdFromOverview();
 
-    for (ETraceAssociationType type : ETraceAssociationType.values()) {
-      mockMvc
-          .perform(
-              get(SEARCH_ASSOCIATION_BASE_PATH, type.name())
-                  .param("keyword", "")
-                  .param("page", "0")
-                  .param("pageSize", "8")
-                  .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                  .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                  .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                  .accept(MediaType.APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-          .andExpect(jsonPath("$.data").isArray())
-          .andExpect(jsonPath("$.page.page").value(0))
-          .andExpect(jsonPath("$.page.pageSize").value(8))
-          .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(0)));
-    }
+    BddLogger.when("performing GET /{traceId}/search-for-association/declared-activity");
+    BddLogger.then("it should return a paged response");
+
+    mockMvc
+        .perform(
+            get(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH, traceId)
+                .param("keyword", "")
+                .param("page", "0")
+                .param("pageSize", "8")
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.page.page").value(0))
+        .andExpect(jsonPath("$.page.pageSize").value(8))
+        .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(0)));
   }
 
   @Test
-  void shouldReturn404WhenUnknownUserAssociatesTrace() throws Exception {
-    BddLogger.given("unknown user context");
+  void shouldSearchDeclaredSkillForAssociation() throws Exception {
+    BddLogger.given("the search declared skill for association endpoint and an existing trace");
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    BddLogger.when("performing GET /{traceId}/search-for-association/declared-skill");
+    BddLogger.then("it should return a paged response");
+
+    mockMvc
+        .perform(
+            get(SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH, traceId)
+                .param("keyword", "")
+                .param("page", "0")
+                .param("pageSize", "8")
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.data").isArray())
+        .andExpect(jsonPath("$.page.page").value(0))
+        .andExpect(jsonPath("$.page.pageSize").value(8))
+        .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(0)));
+  }
+
+  @Test
+  void shouldAssociateTraceWithActivities() throws Exception {
+    BddLogger.given("an existing trace and a declared activity");
 
     UUID traceId = getFirstTraceIdFromOverview();
-    UUID activityId = UUID.randomUUID();
+    UUID activityId = searchFirstAssociationDeclaredActivityId();
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(activityId));
 
-    BddLogger.when("performing POST with unknown user");
+    BddLogger.when("performing POST /associate/activities");
+    BddLogger.then("it should associate the trace with declared activity");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/activities")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.declaredActivityAssociations").exists());
+  }
+
+  @Test
+  void shouldReturn404WhenAssociateActivitiesTraceNotFound() throws Exception {
+    BddLogger.given("unknown trace id");
+
+    UUID traceId = UUID.randomUUID();
+    UUID activityId = searchFirstAssociationDeclaredActivityId();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(activityId));
+
+    BddLogger.when("performing POST /associate/activities");
+    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/activities")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
+  }
+
+  @Test
+  void shouldReturn404WhenUnknownUserAssociatesActivities() throws Exception {
+    BddLogger.given("unknown user context");
+
+    UUID traceId = getFirstTraceIdFromOverview();
+    UUID activityId = searchFirstAssociationDeclaredActivityId();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(activityId));
+
+    BddLogger.when("performing POST with unknown user on associate activities");
     BddLogger.then("it should return 404 USER_NOT_FOUND");
 
     mockMvc
@@ -489,6 +597,127 @@ class TraceControllerIT extends ContainerConfigurationTest {
                 .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
+  }
+
+  @Test
+  void shouldReturn403WhenUserNotOwnerAssociatesActivities() throws Exception {
+    BddLogger.given("a trace not owned by the logged-in user");
+
+    UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
+    UUID activityId = searchFirstAssociationDeclaredActivityId();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(activityId));
+
+    BddLogger.when("performing POST /associate/activities");
+    BddLogger.then("it should return 403 USER_NOT_AUTHORIZED");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/activities")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
+  }
+
+  @Test
+  void shouldAssociateTraceWithDeclaredSkill() throws Exception {
+    BddLogger.given("an existing trace and a declared skill");
+
+    UUID traceId = getFirstTraceIdFromOverview();
+    UUID skillId = searchFirstAssociationDeclaredSkillId();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
+
+    BddLogger.when("performing POST /associate/declared-skill");
+    BddLogger.then("it should associate the trace with declared skill");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.declaredSkillAssociations").exists());
+  }
+
+  @Test
+  void shouldReturn404WhenAssociateDeclaredSkillTraceNotFound() throws Exception {
+    BddLogger.given("unknown trace id");
+
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = searchFirstAssociationDeclaredSkillId();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
+
+    BddLogger.when("performing POST /associate/declared-skill");
+    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
+  }
+
+  @Test
+  void shouldReturn404WhenUnknownUserAssociatesDeclaredSkill() throws Exception {
+    BddLogger.given("unknown user context");
+
+    UUID traceId = getFirstTraceIdFromOverview();
+    UUID skillId = searchFirstAssociationDeclaredSkillId();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
+
+    BddLogger.when("performing POST with unknown user");
+    BddLogger.then("it should return 404 USER_NOT_FOUND");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
+  }
+
+  @Test
+  void shouldReturn403WhenUserNotOwnerAssociatesDeclaredSkill() throws Exception {
+    BddLogger.given("a trace not owned by the logged-in user");
+
+    UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
+    UUID skillId = searchFirstAssociationDeclaredSkillId();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
+
+    BddLogger.when("performing POST /associate/declared-skill");
+    BddLogger.then("it should return 403 USER_NOT_AUTHORIZED");
+
+    mockMvc
+        .perform(
+            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(body))
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
   }
 
   @Test
@@ -580,108 +809,11 @@ class TraceControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldAssociateTraceWithDeclaredSkill() throws Exception {
-    BddLogger.given("an existing trace and a declared skill");
-
-    UUID traceId = getFirstTraceIdFromOverview();
-    UUID skillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
-
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
-
-    BddLogger.when("performing POST /associate/declared-skill");
-    BddLogger.then("it should associate the trace with declared skill");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.declaredSkillAssociations").exists());
-  }
-
-  @Test
-  void shouldReturn404WhenAssociateDeclaredSkillTraceNotFound() throws Exception {
-    BddLogger.given("unknown trace id");
-
-    UUID traceId = UUID.randomUUID();
-    UUID skillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
-
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
-
-    BddLogger.when("performing POST /associate/declared-skill");
-    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturn404WhenUnknownUserAssociatesDeclaredSkill() throws Exception {
-    BddLogger.given("unknown user context");
-
-    UUID traceId = getFirstTraceIdFromOverview();
-    UUID skillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
-
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
-
-    BddLogger.when("performing POST with unknown user");
-    BddLogger.then("it should return 404 USER_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturn403WhenUserNotOwnerAssociatesDeclaredSkill() throws Exception {
-    BddLogger.given("a trace not owned by the logged-in user");
-
-    UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
-    UUID skillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
-
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
-
-    BddLogger.when("performing POST /associate/declared-skill");
-    BddLogger.then("it should return 403 USER_NOT_AUTHORIZED");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
-  }
-
-  @Test
   void shouldUnassociateTraceAssociationsSuccessfully() throws Exception {
     BddLogger.given("An existing trace and an active association");
 
     UUID traceId = getFirstTraceIdFromOverview();
-    UUID skillId = searchFirstAssociationId(ETraceAssociationType.DECLARED_SKILL);
+    UUID skillId = searchFirstAssociationDeclaredSkillId();
 
     AssociationsCreationRequest associateBody = new AssociationsCreationRequest(List.of(skillId));
     var associateResult =

@@ -883,4 +883,33 @@ class DeclaredActivityServiceImplTest {
 
     verify(associationService, never()).deleteAllByIds(anyList());
   }
+
+  @Test
+  void searchDeclaredActivity_should_return_paged_result_from_repository_with_correct_graph() {
+    BddLogger.given("A logged-in student, a keyword and page criteria");
+    String keyword = "recherche";
+    PageCriteria pageCriteria = new PageCriteria(0, 10);
+    PageInfo pageInfo = new PageInfo(0, 10, 1);
+
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+    PagedResult<DeclaredActivity> expectedResult =
+        new PagedResult<>(List.of(declaredActivity), pageInfo);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+
+    ArgumentCaptor<FetchGraph> graphCaptor = ArgumentCaptor.forClass(FetchGraph.class);
+
+    when(declaredActivityRepository.findAllByStudent(
+            eq(student), eq(keyword), eq(pageCriteria), graphCaptor.capture()))
+        .thenReturn(expectedResult);
+
+    BddLogger.when("He searches for declared activities");
+    PagedResult<DeclaredActivity> result = service.searchDeclaredActivity(keyword, pageCriteria);
+
+    BddLogger.then(
+        "It should return the paginated result from the repository with the correct FetchGraph");
+    assertThat(result).isEqualTo(expectedResult);
+
+    assertThat(graphCaptor.getValue().children()).containsKey("activity");
+  }
 }

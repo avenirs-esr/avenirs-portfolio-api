@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 @Slf4j
 @Configuration
@@ -22,10 +23,9 @@ public class DeclaredActivityServiceConfig {
   private final TraceRepository traceRepository;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final TraceService traceService;
 
   @Bean
-  public DeclaredActivityService declaredActivityService() {
+  public DeclaredActivityService declaredActivityService(@Lazy TraceService traceService) {
     return new DeclaredActivityServiceImpl(
         declaredActivityRepository,
         activityRepository,

@@ -11,19 +11,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class DeclaredSkillProgressServiceConfig {
-  private final TraceService traceService;
   private final DeclaredSkillSyncService declaredSkillSyncService;
   private final DeclaredSkillProgressDatabaseRepository declaredSkillProgressRepository;
   private final ExternalSkillClient externalSkillClient;
   private final LoggedInUserService loggedInUserService;
 
   @Bean
-  public DeclaredSkillProgressService declaredSkillProgressService() {
+  public DeclaredSkillProgressService declaredSkillProgressService(
+      @Lazy TraceService traceService) {
     return new DeclaredSkillProgressServiceImpl(
         traceService,
         declaredSkillSyncService,

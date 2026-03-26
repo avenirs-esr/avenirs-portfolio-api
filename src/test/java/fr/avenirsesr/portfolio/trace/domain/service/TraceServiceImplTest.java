@@ -33,8 +33,10 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
@@ -76,7 +78,8 @@ public class TraceServiceImplTest {
   @Mock private AssociationService associationService;
   @Mock private DeclaredActivityRepository declaredActivityRepository;
   @Mock private DeclaredSkillProgressRepository declaredSkillProgressRepository;
-
+  @Mock private DeclaredActivityService declaredActivityService;
+  @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private TraceConfigurationClient traceConfigurationClient;
 
   @Mock private StudentServiceImpl studentService;
@@ -1099,5 +1102,153 @@ public class TraceServiceImplTest {
         () -> traceService.unassociate(trace.getId(), idsToDelete));
 
     verify(associationService, never()).deleteAllByIds(any());
+  }
+
+  @Test
+  void searchDeclaredActivityForAssociation_should_return_mapped_results() {
+    BddLogger.given("A valid trace and a list of declared activities");
+    UUID traceId = UUID.randomUUID();
+    Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    UUID assocActivityId = UUID.randomUUID();
+    UUID unassocActivityId = UUID.randomUUID();
+
+    Association assoc = mock(Association.class);
+    when(assoc.getId1()).thenReturn(assocActivityId);
+    when(associationService.getAllOf(
+            traceId, Trace.class, List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
+        .thenReturn(List.of(assoc));
+
+    DeclaredActivity assocActivity = mock(DeclaredActivity.class);
+    when(assocActivity.getId()).thenReturn(assocActivityId);
+    var act1 = mock(fr.avenirsesr.portfolio.activity.domain.model.Activity.class);
+    when(act1.getTitle()).thenReturn("Activity 1");
+    when(assocActivity.getActivity()).thenReturn(act1);
+
+    DeclaredActivity unassocActivity = mock(DeclaredActivity.class);
+    when(unassocActivity.getId()).thenReturn(unassocActivityId);
+    var act2 = mock(fr.avenirsesr.portfolio.activity.domain.model.Activity.class);
+    when(act2.getTitle()).thenReturn("Activity 2");
+    when(unassocActivity.getActivity()).thenReturn(act2);
+
+    PageCriteria criteria = new PageCriteria(0, 10);
+    PageInfo pageInfo = new PageInfo(0, 10, 2);
+    when(declaredActivityService.searchDeclaredActivity("kw", criteria))
+        .thenReturn(new PagedResult<>(List.of(assocActivity, unassocActivity), pageInfo));
+
+    BddLogger.when("searching declared activities for association");
+    var result = traceService.searchDeclaredActivityForAssociation(traceId, "kw", criteria);
+
+    BddLogger.then("it should return mapped results with correct disabled flags");
+    assertEquals(2, result.content().size());
+    assertTrue(result.content().get(0).disabled());
+    assertFalse(result.content().get(1).disabled());
+  }
+
+  @Test
+  void searchDeclaredSkillForAssociation_should_return_mapped_results() {
+    BddLogger.given("A valid trace and a list of declared skills");
+    UUID traceId = UUID.randomUUID();
+    Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    UUID assocSkillId = UUID.randomUUID();
+    UUID unassocSkillId = UUID.randomUUID();
+
+    Association assoc = mock(Association.class);
+    when(assoc.getId2()).thenReturn(assocSkillId);
+    when(associationService.getAllOf(
+            traceId, Trace.class, List.of(EAssociationType.TRACE_DECLARED_SKILL)))
+        .thenReturn(List.of(assoc));
+
+    DeclaredSkillProgress assocSkillProg = mock(DeclaredSkillProgress.class);
+    when(assocSkillProg.getId()).thenReturn(assocSkillId);
+    var skill1 = mock(fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill.class);
+    when(skill1.getLibelle()).thenReturn("Skill 1");
+    when(assocSkillProg.getSkill()).thenReturn(skill1);
+
+    DeclaredSkillProgress unassocSkillProg = mock(DeclaredSkillProgress.class);
+    when(unassocSkillProg.getId()).thenReturn(unassocSkillId);
+    var skill2 = mock(fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill.class);
+    when(skill2.getLibelle()).thenReturn("Skill 2");
+    when(unassocSkillProg.getSkill()).thenReturn(skill2);
+
+    PageCriteria criteria = new PageCriteria(0, 10);
+    PageInfo pageInfo = new PageInfo(0, 10, 2);
+    when(declaredSkillProgressService.searchDeclaredSkill("kw", criteria))
+        .thenReturn(new PagedResult<>(List.of(assocSkillProg, unassocSkillProg), pageInfo));
+
+    BddLogger.when("searching declared skills for association");
+    var result = traceService.searchDeclaredSkillForAssociation(traceId, "kw", criteria);
+
+    BddLogger.then("it should return mapped results with correct disabled flags");
+    assertEquals(2, result.content().size());
+    assertTrue(result.content().get(0).disabled());
+    assertFalse(result.content().get(1).disabled());
+  }
+
+  @Test
+  void searchDeclaredActivityForAssociation_should_throw_TraceNotFoundException() {
+    BddLogger.given("an unknown trace id");
+    UUID traceId = UUID.randomUUID();
+    when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+    BddLogger.when("searching declared activities");
+    assertThrows(
+        TraceNotFoundException.class,
+        () ->
+            traceService.searchDeclaredActivityForAssociation(
+                traceId, "", new PageCriteria(0, 10)));
+
+    BddLogger.then("it should throw TraceNotFoundException");
+  }
+
+  @Test
+  void searchDeclaredSkillForAssociation_should_throw_TraceNotFoundException() {
+    BddLogger.given("an unknown trace id");
+    UUID traceId = UUID.randomUUID();
+    when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+    BddLogger.when("searching declared skills");
+    assertThrows(
+        TraceNotFoundException.class,
+        () -> traceService.searchDeclaredSkillForAssociation(traceId, "", new PageCriteria(0, 10)));
+
+    BddLogger.then("it should throw TraceNotFoundException");
+  }
+
+  @Test
+  void searchDeclaredActivityForAssociation_should_throw_UserNotAuthorizedException() {
+    BddLogger.given("a trace owned by another user");
+    UUID traceId = UUID.randomUUID();
+    User otherUser = UserFixture.create().toModel();
+    Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    BddLogger.when("searching declared activities");
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () ->
+            traceService.searchDeclaredActivityForAssociation(
+                traceId, "", new PageCriteria(0, 10)));
+
+    BddLogger.then("it should throw UserNotAuthorizedException");
+  }
+
+  @Test
+  void searchDeclaredSkillForAssociation_should_throw_UserNotAuthorizedException() {
+    BddLogger.given("a trace owned by another user");
+    UUID traceId = UUID.randomUUID();
+    User otherUser = UserFixture.create().toModel();
+    Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+    BddLogger.when("searching declared skills");
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () -> traceService.searchDeclaredSkillForAssociation(traceId, "", new PageCriteria(0, 10)));
+
+    BddLogger.then("it should throw UserNotAuthorizedException");
   }
 }

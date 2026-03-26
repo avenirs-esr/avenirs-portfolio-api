@@ -5,15 +5,15 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.*;
-import fr.avenirsesr.portfolio.trace.application.adapter.response.TraceAssociationSearchResult;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
+import fr.avenirsesr.portfolio.trace.domain.data.DeclaredActivityAssociationSearchInfoData;
+import fr.avenirsesr.portfolio.trace.domain.data.DeclaredSkillAssociationSearchInfoData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
@@ -114,47 +114,66 @@ public class TraceController {
     return ResponseEntity.ok(TraceDetailMapper.toDTO(traceDetail));
   }
 
-  @GetMapping("/search-association/{associationType}")
-  public ResponseEntity<PagedResponse<TraceAssociationSearchResult>> getAssociatedTraces(
-      @PathVariable ETraceAssociationType associationType,
-      @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
+  @GetMapping("/{traceId}/search-for-association/declared-activities")
+  public ResponseEntity<PagedResponse<TraceAssociationDeclaredActivityInfoDTO>>
+      searchDeclaredActivityForAssociation(
+          Principal principal,
+          @Valid @PathVariable UUID traceId,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
-    PagedResult<TraceAssociationSearchResult> results =
-        new PagedResult<>(List.of(), new PageInfo(page, pageSize, 0));
+    log.debug(
+        "Received request to search declared activity for association with trace [{}] by student"
+            + " [{}] (keyword={}, page={}, size={})",
+        traceId,
+        principal.getName(),
+        keyword,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
 
-    switch (associationType) {
-      case AMS -> {
-        var amses = amsService.search(keyword, pageCriteria);
-        results =
-            new PagedResult<>(
-                amses.content().stream().map(TraceAssociationSearchResultMapper::toDTO).toList(),
-                amses.pageInfo());
-      }
-      case SKILL_LEVEL -> {
-        var skillLevelProgresses = studentProgressService.searchSkillLevel(keyword, pageCriteria);
-        results =
-            new PagedResult<>(
-                skillLevelProgresses.content().stream()
-                    .map(TraceAssociationSearchResultMapper::toDTO)
-                    .toList(),
-                skillLevelProgresses.pageInfo());
-      }
-      case DECLARED_SKILL -> {
-        var declaredSkills =
-            declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria);
-        results =
-            new PagedResult<>(
-                declaredSkills.content().stream()
-                    .map(TraceAssociationSearchResultMapper::toDTO)
-                    .toList(),
-                declaredSkills.pageInfo());
-      }
-    }
+    PagedResult<DeclaredActivityAssociationSearchInfoData> pagedResult =
+        traceService.searchDeclaredActivityForAssociation(traceId, keyword, pageCriteria);
 
-    return ResponseEntity.ok(
-        new PagedResponse<>(results.content(), PageInfoDTO.fromDomain(results.pageInfo())));
+    var response =
+        new PagedResponse<>(
+            pagedResult.content().stream()
+                .map(TraceAssociationDeclaredActivityInfoDTOMapper::toDTO)
+                .toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{traceId}/search-for-association/declared-skills")
+  public ResponseEntity<PagedResponse<TraceAssociationDeclaredSkillInfoDTO>>
+      searchDeclaredSkillForAssociation(
+          Principal principal,
+          @Valid @PathVariable UUID traceId,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to search declared skill for association with trace [{}] by student"
+            + " [{}] (keyword={}, page={}, size={})",
+        traceId,
+        principal.getName(),
+        keyword,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<DeclaredSkillAssociationSearchInfoData> pagedResult =
+        traceService.searchDeclaredSkillForAssociation(traceId, keyword, pageCriteria);
+
+    var response =
+        new PagedResponse<>(
+            pagedResult.content().stream()
+                .map(TraceAssociationDeclaredSkillInfoDTOMapper::toDTO)
+                .toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+
+    return ResponseEntity.ok(response);
   }
 
   @PostMapping
