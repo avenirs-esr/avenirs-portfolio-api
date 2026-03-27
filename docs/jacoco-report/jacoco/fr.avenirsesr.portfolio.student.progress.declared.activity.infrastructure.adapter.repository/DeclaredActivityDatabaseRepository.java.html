@@ -59,22 +59,29 @@ public class DeclaredActivityDatabaseRepository
   }
 
   @Override
+  public List&lt;DeclaredActivity&gt; findAllNotCompletedActivitiesByIds(
+      List&lt;UUID&gt; activityIds, FetchGraph fetchGraph) {
+<span class="fc" id="L64">    var specification = DeclaredActivitySpecification.isNotCompleted();</span>
+<span class="fc" id="L65">    return findAllById(activityIds, specification, fetchGraph);</span>
+  }
+
+  @Override
   public PagedResult&lt;DeclaredActivity&gt; findStudentActivitiesByProgressAndDate(
       Student student, PageCriteria pageCriteria, FetchGraph fetchGraph) {
-<span class="fc" id="L64">    var sort =</span>
-<span class="fc" id="L65">        Sort.by(Sort.Direction.ASC, &quot;isFinishedOrder&quot;)</span>
-<span class="fc" id="L66">            .and(Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;));</span>
-<span class="fc" id="L67">    return findAll(</span>
-<span class="fc" id="L68">        hasStudent(student),</span>
-<span class="fc" id="L69">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),</span>
+<span class="fc" id="L71">    var sort =</span>
+<span class="fc" id="L72">        Sort.by(Sort.Direction.ASC, &quot;isFinishedOrder&quot;)</span>
+<span class="fc" id="L73">            .and(Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;));</span>
+<span class="fc" id="L74">    return findAll(</span>
+<span class="fc" id="L75">        hasStudent(student),</span>
+<span class="fc" id="L76">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort),</span>
         fetchGraph);
   }
 
   @Override
   public Optional&lt;DeclaredActivity&gt; findByActivity(Student student, Activity activity) {
-<span class="fc" id="L75">    return jpaRepository</span>
-<span class="fc" id="L76">        .findByStudentIdAndActivityId(student.getId(), activity.getId())</span>
-<span class="fc" id="L77">        .map(DeclaredActivityMapper.INSTANCE::toDomain);</span>
+<span class="fc" id="L82">    return jpaRepository</span>
+<span class="fc" id="L83">        .findByStudentIdAndActivityId(student.getId(), activity.getId())</span>
+<span class="fc" id="L84">        .map(DeclaredActivityMapper.INSTANCE::toDomain);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

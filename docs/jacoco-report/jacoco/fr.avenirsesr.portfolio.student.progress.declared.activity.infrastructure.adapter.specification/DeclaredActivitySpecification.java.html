@@ -31,5 +31,13 @@ public final class DeclaredActivitySpecification {
 <span class="nc" id="L31">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
     };
   }
+
+  public static Specification&lt;DeclaredActivityEntity&gt; isNotCompleted() {
+<span class="pc" id="L36">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;finishedAt&quot;));</span>
+  }
+
+  public static Specification&lt;DeclaredActivityEntity&gt; isCompleted() {
+<span class="nc" id="L40">    return (root, query, cb) -&gt; cb.isNotNull(root.get(&quot;finishedAt&quot;));</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
