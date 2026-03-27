@@ -6,4 +6,7 @@ import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "title", "thematic", "disabled"})
 public record TraceAssociationDeclaredActivityInfoDTO(
-    UUID id, String title, EActivityThematic thematic, boolean disabled) {}
+    UUID id,
+    String title,
+    @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
+    boolean disabled) {}
