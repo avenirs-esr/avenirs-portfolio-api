@@ -13,5 +13,15 @@
     "id1": "2e5c8a44-9b7f-4d11-b6a3-5c7d9e2f8b33",
     "id2": "f3d22e78-e827-4bae-8831-44168c176198",
     "associationType": "DECLARED_ACTIVITY_TRACE"
+  },
+  {
+    "id1": "f3d22e78-e827-4bae-8831-44168c176198",
+    "id2": "ef319adc-d693-4db5-8b76-a47d907d9271",
+    "associationType": "TRACE_DECLARED_SKILL"
+  },
+  {
+    "id1": "f3d22e78-e827-4bae-8831-44168c176198",
+    "id2": "0b6cdaac-0b71-4102-b342-fee525a42989",
+    "associationType": "TRACE_DECLARED_SKILL"
   }
 ]

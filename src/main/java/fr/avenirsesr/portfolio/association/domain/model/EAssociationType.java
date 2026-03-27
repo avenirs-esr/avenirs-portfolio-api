@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.association.domain.model;
 
-import fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 public enum EAssociationType {
   DECLARED_ACTIVITY_TRACE(DeclaredActivity.class, Trace.class),
-  TRACE_DECLARED_SKILL(Trace.class, DeclaredSkill.class);
+  TRACE_DECLARED_SKILL(Trace.class, DeclaredSkillProgress.class);
 
   private final Class<?> key1;
   private final Class<?> key2;
