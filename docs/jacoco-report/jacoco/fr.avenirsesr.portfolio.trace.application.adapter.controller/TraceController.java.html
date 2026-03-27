@@ -114,7 +114,7 @@ public class TraceController {
 <span class="fc" id="L114">    return ResponseEntity.ok(TraceDetailMapper.toDTO(traceDetail));</span>
   }
 
-  @GetMapping(&quot;/{traceId}/search-for-association/declared-activity&quot;)
+  @GetMapping(&quot;/{traceId}/search-for-association/declared-activities&quot;)
   public ResponseEntity&lt;PagedResponse&lt;TraceAssociationDeclaredActivityInfoDTO&gt;&gt;
       searchDeclaredActivityForAssociation(
           Principal principal,
@@ -145,7 +145,7 @@ public class TraceController {
 <span class="fc" id="L145">    return ResponseEntity.ok(response);</span>
   }
 
-  @GetMapping(&quot;/{traceId}/search-for-association/declared-skill&quot;)
+  @GetMapping(&quot;/{traceId}/search-for-association/declared-skills&quot;)
   public ResponseEntity&lt;PagedResponse&lt;TraceAssociationDeclaredSkillInfoDTO&gt;&gt;
       searchDeclaredSkillForAssociation(
           Principal principal,
