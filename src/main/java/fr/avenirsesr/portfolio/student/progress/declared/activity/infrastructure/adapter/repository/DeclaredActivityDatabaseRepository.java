@@ -59,6 +59,13 @@ public class DeclaredActivityDatabaseRepository
   }
 
   @Override
+  public List<DeclaredActivity> findAllNotCompletedActivitiesByIds(
+      List<UUID> activityIds, FetchGraph fetchGraph) {
+    var specification = DeclaredActivitySpecification.isNotCompleted();
+    return findAllById(activityIds, specification, fetchGraph);
+  }
+
+  @Override
   public PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
       Student student, PageCriteria pageCriteria, FetchGraph fetchGraph) {
     var sort =

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
+import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
@@ -786,7 +787,7 @@ public class TraceServiceImplTest {
 
     BddLogger.when("getting trace associations");
 
-    TraceAssociationsData result = traceService.getTraceAssociations(traceId);
+    TraceAssociationsData result = traceService.getTraceAssociations(traceId, false);
 
     BddLogger.then("it should return declared activity associations");
 
@@ -803,7 +804,8 @@ public class TraceServiceImplTest {
 
     BddLogger.when("getting trace associations");
 
-    assertThrows(TraceNotFoundException.class, () -> traceService.getTraceAssociations(traceId));
+    assertThrows(
+        TraceNotFoundException.class, () -> traceService.getTraceAssociations(traceId, false));
 
     BddLogger.then("it should throw TraceNotFoundException");
   }
@@ -823,9 +825,41 @@ public class TraceServiceImplTest {
     BddLogger.when("getting trace associations");
 
     assertThrows(
-        UserNotAuthorizedException.class, () -> traceService.getTraceAssociations(traceId));
+        UserNotAuthorizedException.class, () -> traceService.getTraceAssociations(traceId, false));
 
     BddLogger.then("it should throw UserNotAuthorizedException");
+  }
+
+  @Test
+  void givenTraceWithDeclaredActivity_whenOnlyNotCompleted_shouldCallFindAllNotCompleted() {
+    BddLogger.given("a trace with a declared activity association");
+    UUID traceId = UUID.randomUUID();
+    Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+    UUID activityId = UUID.randomUUID();
+
+    Association association = mock(Association.class);
+    when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
+    when(association.getId1()).thenReturn(activityId);
+
+    DeclaredActivity activity = mock(DeclaredActivity.class);
+    when(activity.getId()).thenReturn(activityId);
+
+    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+    when(associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+        .thenReturn(List.of(association));
+
+    when(declaredActivityRepository.findAllNotCompletedActivitiesByIds(
+            eq(List.of(activityId)), any()))
+        .thenReturn(List.of(activity));
+
+    BddLogger.when("getting ONLY NOT COMPLETED trace associations");
+    TraceAssociationsData result = traceService.getTraceAssociations(traceId, true);
+
+    BddLogger.then("it should call the specific repository method and return the data");
+    verify(declaredActivityRepository)
+        .findAllNotCompletedActivitiesByIds(eq(List.of(activityId)), any());
+    verify(declaredActivityRepository, never()).findAllById(any());
+    assertEquals(1, result.declaredActivityAssociations().size());
   }
 
   @Test
@@ -1098,7 +1132,7 @@ public class TraceServiceImplTest {
     BddLogger.then("AssociationDoesNotExistException is thrown");
 
     assertThrows(
-        fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException.class,
+        AssociationDoesNotExistException.class,
         () -> traceService.unassociate(trace.getId(), idsToDelete));
 
     verify(associationService, never()).deleteAllByIds(any());
