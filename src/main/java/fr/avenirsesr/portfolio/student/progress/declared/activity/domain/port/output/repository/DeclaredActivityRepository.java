@@ -20,6 +20,9 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
   List<DeclaredActivity> findAllByActivityIdAndStudent(
       List<UUID> activityIds, Student student, FetchGraph fetchGraph);
 
+  List<DeclaredActivity> findAllNotCompletedActivitiesByIds(
+      List<UUID> activityIds, FetchGraph fetchGraph);
+
   PagedResult<DeclaredActivity> findStudentActivitiesByProgressAndDate(
       Student student, PageCriteria pageCriteria, FetchGraph fetchGraph);
 

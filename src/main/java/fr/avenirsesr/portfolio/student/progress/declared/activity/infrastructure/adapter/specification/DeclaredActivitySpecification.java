@@ -31,4 +31,12 @@ public final class DeclaredActivitySpecification {
           "%" + keyword.toLowerCase() + "%");
     };
   }
+
+  public static Specification<DeclaredActivityEntity> isNotCompleted() {
+    return (root, query, cb) -> cb.isNull(root.get("finishedAt"));
+  }
+
+  public static Specification<DeclaredActivityEntity> isCompleted() {
+    return (root, query, cb) -> cb.isNotNull(root.get("finishedAt"));
+  }
 }

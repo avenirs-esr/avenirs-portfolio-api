@@ -910,4 +910,25 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .andExpect(status().is4xxClientError())
         .andExpect(jsonPath("$.code", is(EErrorCode.ASSOCIATION_NOT_FOUND.name())));
   }
+
+  @Test
+  void shouldGetTraceAssociationsOnlyNotCompleted() throws Exception {
+    BddLogger.given("an existing trace created by the logged-in student");
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    BddLogger.when("performing GET /{traceId}/associations?onlyNotCompleted=true");
+    BddLogger.then("it should return trace associations filtered by non-completed status");
+
+    mockMvc
+        .perform(
+            get(BASE_PATH + "/" + traceId + "/associations")
+                .param("onlyNotCompleted", "true")
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.declaredActivityAssociations").exists());
+  }
 }

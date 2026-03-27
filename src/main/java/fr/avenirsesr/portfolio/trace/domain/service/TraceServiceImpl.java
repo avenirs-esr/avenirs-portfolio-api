@@ -5,10 +5,12 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
 
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
+import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -21,6 +23,7 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.File;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
@@ -32,7 +35,6 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.outpu
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.data.*;
-import fr.avenirsesr.portfolio.trace.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.*;
@@ -171,13 +173,11 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public TraceAssociationsData getTraceAssociations(UUID traceId) {
+  public TraceAssociationsData getTraceAssociations(UUID traceId, boolean onlyNotCompleted) {
     var userLoggedIn = loggedInUserService.getLoggedInUser();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
 
-    if (!trace.getUser().equals(userLoggedIn)) {
-      throw new UserNotAuthorizedException();
-    }
+    checkIfUserIsAuthorizedOnTrace(userLoggedIn, trace);
 
     var associations =
         associationService.getAllOf(
@@ -187,9 +187,19 @@ public class TraceServiceImpl implements TraceService {
         associations.stream()
             .filter(a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
             .toList();
-    var activities =
-        declaredActivityRepository.findAllById(
-            declaredActivityAssociations.stream().map(Association::getId1).toList());
+
+    List<DeclaredActivity> activities;
+
+    if (onlyNotCompleted) {
+      var graph = FetchGraph.init().fetch("activity");
+      activities =
+          declaredActivityRepository.findAllNotCompletedActivitiesByIds(
+              declaredActivityAssociations.stream().map(Association::getId1).toList(), graph);
+    } else {
+      activities =
+          declaredActivityRepository.findAllById(
+              declaredActivityAssociations.stream().map(Association::getId1).toList());
+    }
 
     var declaredSkillAssociations =
         associations.stream()
@@ -333,7 +343,7 @@ public class TraceServiceImpl implements TraceService {
                         activityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE))
             .toList());
 
-    return getTraceAssociations(traceId);
+    return getTraceAssociations(traceId, false);
   }
 
   private TraceAssociationsData.DeclaredActivityAssociationData declaredActivityMapper(
@@ -380,7 +390,7 @@ public class TraceServiceImpl implements TraceService {
                     new AssociationData(traceId, skillId, EAssociationType.TRACE_DECLARED_SKILL))
             .toList());
 
-    return getTraceAssociations(traceId);
+    return getTraceAssociations(traceId, false);
   }
 
   @Override
@@ -431,6 +441,21 @@ public class TraceServiceImpl implements TraceService {
         .containsAll(associationIds)) {
       throw new AssociationDoesNotExistException();
     }
+
+    List<UUID> declaredActivityIds =
+        associationList.stream()
+            .filter(
+                association ->
+                    association.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
+            .map(Association::getId1)
+            .toList();
+    var declaredActivities = declaredActivityRepository.findAllById(declaredActivityIds);
+    declaredActivities.forEach(
+        declaredActivity -> {
+          if (declaredActivity.getFinishedAt().isPresent()) {
+            throw new DeclaredActivityAlreadyFinishedException();
+          }
+        });
 
     associationService.deleteAllByIds(associationIds);
   }

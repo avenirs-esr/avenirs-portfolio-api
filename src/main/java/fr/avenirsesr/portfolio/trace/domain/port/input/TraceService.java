@@ -59,7 +59,7 @@ public interface TraceService {
 
   TraceAssociationsData associateTraceWithDeclaredSkill(UUID traceId, List<UUID> skillIds);
 
-  TraceAssociationsData getTraceAssociations(UUID traceId);
+  TraceAssociationsData getTraceAssociations(UUID traceId, boolean onlyNotCompleted);
 
   void unassociateTraces(DeclaredSkillProgress declaredSkillProgress);
 

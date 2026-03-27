@@ -12,10 +12,7 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.Stude
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
-import fr.avenirsesr.portfolio.trace.domain.data.DeclaredActivityAssociationSearchInfoData;
-import fr.avenirsesr.portfolio.trace.domain.data.DeclaredSkillAssociationSearchInfoData;
-import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
-import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
+import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
@@ -242,13 +239,18 @@ public class TraceController {
 
   @GetMapping("/{traceId}/associations")
   public ResponseEntity<TraceAssociationsDTO> getTraceAssociations(
-      Principal principal, @Valid @PathVariable UUID traceId) {
+      Principal principal,
+      @PathVariable UUID traceId,
+      @RequestParam(required = false, defaultValue = "false") boolean onlyNotCompleted) {
     log.debug(
-        "Received request to get associate Trace[{}] associations by student [{}]",
+        "Received request to get associate Trace[{}] associations by student [{}]"
+            + " (onlyNotCompleted= {})",
         traceId,
-        principal.getName());
+        principal.getName(),
+        onlyNotCompleted);
 
-    var traceAssociations = traceService.getTraceAssociations(traceId);
+    var traceAssociations = traceService.getTraceAssociations(traceId, onlyNotCompleted);
+
     return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));
   }
 
