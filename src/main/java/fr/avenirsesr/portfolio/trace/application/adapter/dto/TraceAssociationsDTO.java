@@ -11,11 +11,11 @@ public record TraceAssociationsDTO(
     List<DeclaredActivityAssociationDTO> declaredActivityAssociations,
     List<DeclaredSkillAssociationDTO> declaredSkillAssociations) {
 
-  @Schema(requiredProperties = {"associationId, declaredActivity"})
+  @Schema(requiredProperties = {"associationId", "declaredActivity"})
   public record DeclaredActivityAssociationDTO(
       UUID associationId, DeclaredActivityViewDTO declaredActivity) {}
 
-  @Schema(requiredProperties = {"associationId, declaredSkill"})
+  @Schema(requiredProperties = {"associationId", "declaredSkill"})
   public record DeclaredSkillAssociationDTO(
       UUID associationId, DeclaredSkillProgressDTO declaredSkill) {}
 }
