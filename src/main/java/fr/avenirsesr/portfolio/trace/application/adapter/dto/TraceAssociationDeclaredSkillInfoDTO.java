@@ -6,4 +6,7 @@ import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "title", "type", "disabled"})
 public record TraceAssociationDeclaredSkillInfoDTO(
-    UUID id, String title, EExternalSkillType type, boolean disabled) {}
+    UUID id,
+    String title,
+    @Schema(ref = "#/components/schemas/EExternalSkillType") EExternalSkillType type,
+    boolean disabled) {}
