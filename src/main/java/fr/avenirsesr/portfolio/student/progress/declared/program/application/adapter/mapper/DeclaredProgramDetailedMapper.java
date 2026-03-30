@@ -14,7 +14,6 @@ public interface DeclaredProgramDetailedMapper {
         declaredProgram.getOrganization(),
         declaredProgram.getResult(),
         declaredProgram.getSourceOfInformation(),
-        declaredProgram.getLink(),
         declaredProgram.getStartDate(),
         declaredProgram.getEndDate(),
         declaredProgram.getCreatedAt(),

@@ -15,7 +15,6 @@ public record DeclaredProgramDetailedDTO(
     String organization,
     String result,
     String sourceOfInformation,
-    String link,
     LocalDate startDate,
     LocalDate endDate,
     Instant createdAt,

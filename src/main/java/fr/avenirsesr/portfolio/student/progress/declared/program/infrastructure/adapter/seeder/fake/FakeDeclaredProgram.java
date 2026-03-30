@@ -41,7 +41,6 @@ public class FakeDeclaredProgram {
             "Organization - %s".formatted(truncate(faker.lorem().sentence(1), 30)),
             "Result - %s".formatted(truncate(faker.lorem().sentence(1), 10)),
             "Source - %s".formatted(truncate(faker.lorem().sentence(3), 100)),
-            faker.internet().url(),
             startDate,
             endDate,
             Instant.now(),

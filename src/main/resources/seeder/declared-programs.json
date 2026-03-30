@@ -7,7 +7,6 @@
     "organization": "TechNova",
     "result": "Mise en production de plusieurs fonctionnalités.",
     "sourceOfInformation": "Portail étudiants",
-    "link": "https://technova.com",
     "startDate": "2024-02-01",
     "endDate": "2024-05-31"
   },
@@ -19,7 +18,6 @@
     "organization": "LeadPro",
     "result": "Certificat obtenu",
     "sourceOfInformation": "Affichage campus",
-    "link": null,
     "startDate": "2024-03-05",
     "endDate": "2024-03-08"
   },
@@ -31,7 +29,6 @@
     "organization": "HumanAct",
     "result": "Construction d’une salle de classe.",
     "sourceOfInformation": "BDE",
-    "link": null,
     "startDate": "2023-07-10",
     "endDate": "2023-07-29"
   },
@@ -43,7 +40,6 @@
     "organization": "CyberSense Academy",
     "result": null,
     "sourceOfInformation": "Email institutionnel",
-    "link": "https://cybersense.fr",
     "startDate": "2024-11-01",
     "endDate": null
   },
@@ -55,7 +51,6 @@
     "organization": "StartupLab",
     "result": null,
     "sourceOfInformation": "Forum orientation",
-    "link": null,
     "startDate": "2027-01-15",
     "endDate": "2027-03-15"
   },
@@ -67,7 +62,6 @@
     "organization": "DataCraft",
     "result": null,
     "sourceOfInformation": "LinkedIn",
-    "link": "https://datacraft.io",
     "startDate": "2024-10-01",
     "endDate": null
   },
@@ -79,7 +73,6 @@
     "organization": "UXLab",
     "result": "Projet UX validé",
     "sourceOfInformation": null,
-    "link": null,
     "startDate": "2024-01-10",
     "endDate": "2024-04-25"
   },
@@ -91,7 +84,6 @@
     "organization": "InnovFest",
     "result": "Prototype validé",
     "sourceOfInformation": "Professeur référent",
-    "link": null,
     "startDate": "2024-05-06",
     "endDate": "2024-05-10"
   },
@@ -103,7 +95,6 @@
     "organization": "DigitalBoost",
     "result": "Création d’une mini-campagne.",
     "sourceOfInformation": "Email institutionnel",
-    "link": null,
     "startDate": "2023-11-20",
     "endDate": "2023-12-10"
   },
@@ -115,7 +106,6 @@
     "organization": "AI School",
     "result": null,
     "sourceOfInformation": "Affichage campus",
-    "link": null,
     "startDate": "2027-02-01",
     "endDate": "2027-02-28"
   },
@@ -127,7 +117,6 @@
     "organization": "OpenCloud Academy",
     "result": null,
     "sourceOfInformation": "Conseiller pédagogique",
-    "link": "https://opencloud.fr",
     "startDate": "2024-09-01",
     "endDate": null
   },
@@ -139,7 +128,6 @@
     "organization": "Université de Montréal",
     "result": "Crédits validés",
     "sourceOfInformation": "International Office",
-    "link": null,
     "startDate": "2023-09-01",
     "endDate": "2023-12-31"
   }

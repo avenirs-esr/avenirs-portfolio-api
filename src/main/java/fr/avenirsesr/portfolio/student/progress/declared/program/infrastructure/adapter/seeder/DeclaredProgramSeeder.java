@@ -54,7 +54,6 @@ public class DeclaredProgramSeeder {
                               entity.getOrganization(),
                               entity.getResult(),
                               entity.getSourceOfInformation(),
-                              entity.getLink(),
                               entity.getStartDate(),
                               entity.getEndDate()))
                   .toList();
@@ -70,7 +69,6 @@ public class DeclaredProgramSeeder {
               creationData.organization(),
               creationData.result(),
               creationData.sourceOfInformation(),
-              creationData.link(),
               creationData.startDate(),
               creationData.endDate());
         });

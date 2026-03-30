@@ -15,6 +15,5 @@ public record DeclaredProgramRequestDTO(
     @NotBlank @Size(max = ORGANIZATION_LENGTH) String organization,
     @Size(max = RESULT_LENGTH) String result,
     @Size(max = SOURCE_OF_INFORMATION_LENGTH) String sourceOfInformation,
-    String link,
     @NotNull LocalDate startDate,
     LocalDate endDate) {}

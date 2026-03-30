@@ -57,7 +57,6 @@ public class DeclaredProgramController {
             declaredProgramRequestDTO.organization(),
             declaredProgramRequestDTO.result(),
             declaredProgramRequestDTO.sourceOfInformation(),
-            declaredProgramRequestDTO.link(),
             declaredProgramRequestDTO.startDate(),
             declaredProgramRequestDTO.endDate());
     return ResponseEntity.created(URI.create("/me/declared/programs/" + declaredProgram.getId()))
@@ -76,7 +75,6 @@ public class DeclaredProgramController {
             declaredProgramRequestDTO.organization(),
             declaredProgramRequestDTO.result(),
             declaredProgramRequestDTO.sourceOfInformation(),
-            declaredProgramRequestDTO.link(),
             declaredProgramRequestDTO.startDate(),
             declaredProgramRequestDTO.endDate());
     return ResponseEntity.ok(DeclaredProgramDetailedMapper.toDTO(declaredProgram));
