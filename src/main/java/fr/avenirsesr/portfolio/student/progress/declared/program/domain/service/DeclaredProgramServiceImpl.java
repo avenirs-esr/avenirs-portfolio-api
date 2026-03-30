@@ -36,12 +36,11 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
 
     fieldsValidation(
-        title, description, organization, result, sourceOfInformation, link, startDate, endDate);
+        title, description, organization, result, sourceOfInformation, startDate, endDate);
 
     DeclaredProgram declaredProgram =
         DeclaredProgram.create(
@@ -52,7 +51,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
             organization,
             result,
             sourceOfInformation,
-            link,
             startDate,
             endDate);
 
@@ -65,7 +63,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
@@ -76,7 +73,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
         "sourceOfInformation", sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
     requireNotNull("startDate", startDate);
     validateDateOrder(startDate, endDate);
-    validateUrl(link);
   }
 
   @Override
@@ -88,7 +84,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
     Student student =
@@ -101,7 +96,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
         organization,
         result,
         sourceOfInformation,
-        link,
         startDate,
         endDate);
   }
@@ -113,7 +107,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
     Student student = loggedInUserService.getLoggedInStudent();
@@ -125,7 +118,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
         organization,
         result,
         sourceOfInformation,
-        link,
         startDate,
         endDate);
   }
@@ -157,7 +149,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
     Student student = loggedInUserService.getLoggedInStudent();
@@ -170,13 +161,12 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       throw new UserNotAuthorizedException();
     }
     fieldsValidation(
-        title, description, organization, result, sourceOfInformation, link, startDate, endDate);
+        title, description, organization, result, sourceOfInformation, startDate, endDate);
     declaredProgram.setTitle(title);
     declaredProgram.setDescription(description);
     declaredProgram.setOrganization(organization);
     declaredProgram.setResult(result);
     declaredProgram.setSourceOfInformation(sourceOfInformation);
-    declaredProgram.setLink(link);
     declaredProgram.setStartDate(startDate);
     declaredProgram.setEndDate(endDate);
     declaredProgram.setStatus(getProgramStatus(startDate, endDate));

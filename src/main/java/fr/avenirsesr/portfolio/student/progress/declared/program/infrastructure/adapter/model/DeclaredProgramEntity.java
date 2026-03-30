@@ -48,8 +48,6 @@ public class DeclaredProgramEntity extends PeriodEntity<LocalDate> {
   @Column(name = "source_of_information", length = SOURCE_OF_INFORMATION_LENGTH)
   private String sourceOfInformation;
 
-  @Column() private String link;
-
   private DeclaredProgramEntity(
       UUID id,
       StudentEntity student,
@@ -59,7 +57,6 @@ public class DeclaredProgramEntity extends PeriodEntity<LocalDate> {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate,
       Instant createdAt,
@@ -74,7 +71,6 @@ public class DeclaredProgramEntity extends PeriodEntity<LocalDate> {
     this.organization = organization;
     this.result = result;
     this.sourceOfInformation = sourceOfInformation;
-    this.link = link;
     setCreatedAt(createdAt);
     setUpdatedAt(updatedAt);
   }
@@ -88,7 +84,6 @@ public class DeclaredProgramEntity extends PeriodEntity<LocalDate> {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate,
       Instant createdAt,
@@ -102,7 +97,6 @@ public class DeclaredProgramEntity extends PeriodEntity<LocalDate> {
         organization,
         result,
         sourceOfInformation,
-        link,
         startDate,
         endDate,
         createdAt,

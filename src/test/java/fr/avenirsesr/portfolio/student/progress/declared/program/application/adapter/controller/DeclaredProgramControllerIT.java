@@ -106,7 +106,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Tech4Future",
                 "Acquisition de premières compétences techniques",
                 "Conseiller d'orientation",
-                "https://tech4future.example.com",
                 LocalDate.now().minusMonths(1),
                 LocalDate.now());
 
@@ -144,7 +143,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Tech4Future",
                 "Résultat",
                 "Source",
-                "https://example.com",
                 LocalDate.now().minusMonths(1),
                 LocalDate.now());
 
@@ -178,7 +176,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Tech4Future",
                 "Résultat",
                 "Source",
-                "https://example.com",
                 LocalDate.now().minusMonths(1),
                 LocalDate.now());
 
@@ -211,7 +208,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "   ",
                 "Résultat",
                 "Source",
-                "https://example.com",
                 LocalDate.now().minusMonths(1),
                 LocalDate.now());
 
@@ -243,7 +239,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Tech4Future",
                 "Acquisition de premières compétences techniques",
                 "Conseiller d'orientation",
-                "https://tech4future.example.com",
                 null,
                 LocalDate.now());
 
@@ -281,7 +276,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Tech4Future",
                     "Acquisition de premières compétences techniques",
                     "Conseiller d'orientation",
-                    "https://tech4future.example.com",
                     LocalDate.now().minusMonths(1),
                     LocalDate.now()),
                 studentPayload,
@@ -306,7 +300,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .andExpect(
                 jsonPath("$.result").value("Acquisition de premières compétences techniques"))
             .andExpect(jsonPath("$.sourceOfInformation").value("Conseiller d'orientation"))
-            .andExpect(jsonPath("$.link").value("https://tech4future.example.com"))
             .andExpect(jsonPath("$.startDate").isNotEmpty())
             .andExpect(jsonPath("$.endDate").isNotEmpty())
             .andExpect(jsonPath("$.createdAt").isNotEmpty())
@@ -364,7 +357,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Org",
                     "Result",
                     "Source",
-                    "https://example.com",
                     LocalDate.now().minusMonths(1),
                     LocalDate.now()),
                 secondStudentPayload,
@@ -436,7 +428,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Tech4Future",
                     "Acquisition de premières compétences techniques",
                     "Conseiller d'orientation",
-                    "https://tech4future.example.com",
                     LocalDate.now().minusMonths(1),
                     LocalDate.now()),
                 studentPayload,
@@ -450,7 +441,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Tech4Future UPDATED",
                 "Nouveau résultat",
                 "Nouvelle source",
-                "https://updated.example.com",
                 LocalDate.now().minusDays(5),
                 LocalDate.now().plusDays(5));
 
@@ -471,7 +461,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .andExpect(jsonPath("$.organization").value("Tech4Future UPDATED"))
             .andExpect(jsonPath("$.result").value("Nouveau résultat"))
             .andExpect(jsonPath("$.sourceOfInformation").value("Nouvelle source"))
-            .andExpect(jsonPath("$.link").value("https://updated.example.com"))
             // status recalculé: startDate past + endDate future => IN_PROGRESS
             .andExpect(jsonPath("$.status").value(EProgramStatus.IN_PROGRESS.name()))
             .andExpect(jsonPath("$.startDate").isNotEmpty())
@@ -507,7 +496,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Org",
                 "Result",
                 "Source",
-                "https://example.com",
                 LocalDate.now().minusDays(10),
                 LocalDate.now().minusDays(5));
 
@@ -539,7 +527,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Org",
                     "Result",
                     "Source",
-                    "https://example.com",
                     LocalDate.now().minusMonths(1),
                     LocalDate.now()),
                 secondStudentPayload,
@@ -552,7 +539,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Org",
                 "Result",
                 "Source",
-                "https://example.com",
                 LocalDate.now().minusDays(10),
                 LocalDate.now().minusDays(5));
 
@@ -581,7 +567,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Org",
                 "Result",
                 "Source",
-                "https://example.com",
                 LocalDate.now().minusDays(10),
                 LocalDate.now().minusDays(5));
 
@@ -611,7 +596,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Tech4Future",
                     "Result",
                     "Source",
-                    "https://example.com",
                     LocalDate.now().minusMonths(1),
                     LocalDate.now()),
                 studentPayload,
@@ -619,14 +603,7 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
 
         DeclaredProgramRequestDTO updateBody =
             new DeclaredProgramRequestDTO(
-                "Title",
-                "Description",
-                "Org",
-                "Result",
-                "Source",
-                "https://example.com",
-                null,
-                LocalDate.now());
+                "Title", "Description", "Org", "Result", "Source", null, LocalDate.now());
 
         mockMvc
             .perform(
@@ -657,7 +634,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Tech4Future",
                     "Result",
                     "Source",
-                    "https://example.com",
                     LocalDate.now().minusMonths(1),
                     LocalDate.now()),
                 studentPayload,
@@ -672,7 +648,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Tech4Future",
                 "Result",
                 "Source",
-                "https://example.com",
                 LocalDate.now().minusDays(10),
                 LocalDate.now().minusDays(5));
 
@@ -704,7 +679,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Tech4Future",
                     "Result",
                     "Source",
-                    "https://example.com",
                     LocalDate.now().minusMonths(1),
                     LocalDate.now()),
                 studentPayload,
@@ -717,7 +691,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Org",
                 "Result",
                 "Source",
-                "https://example.com",
                 LocalDate.now().minusDays(10),
                 LocalDate.now().minusDays(5));
 
@@ -753,7 +726,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Org",
                     "Result",
                     "Source",
-                    "https://example.com",
                     LocalDate.now().minusMonths(1),
                     LocalDate.now()),
                 studentPayload,
@@ -767,7 +739,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Org",
                     "Result",
                     "Source",
-                    "https://example.com",
                     LocalDate.now().minusMonths(2),
                     LocalDate.now().minusMonths(1)),
                 studentPayload,
@@ -823,7 +794,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Org",
                     "Result",
                     "Source",
-                    "https://example.com",
                     LocalDate.now().minusMonths(1),
                     LocalDate.now()),
                 secondStudentPayload,

@@ -19,7 +19,6 @@ public class DeclaredProgram extends AvenirsBaseModel {
   private String organization;
   private String result;
   private String sourceOfInformation;
-  private String link;
   private LocalDate startDate;
   private LocalDate endDate;
 
@@ -32,7 +31,6 @@ public class DeclaredProgram extends AvenirsBaseModel {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate,
       Instant createdAt,
@@ -47,7 +45,6 @@ public class DeclaredProgram extends AvenirsBaseModel {
     this.endDate = endDate;
     this.result = result;
     this.sourceOfInformation = sourceOfInformation;
-    this.link = link;
   }
 
   public static DeclaredProgram create(
@@ -58,7 +55,6 @@ public class DeclaredProgram extends AvenirsBaseModel {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
     return new DeclaredProgram(
@@ -70,7 +66,6 @@ public class DeclaredProgram extends AvenirsBaseModel {
         organization,
         result,
         sourceOfInformation,
-        link,
         startDate,
         endDate,
         Instant.now(),
@@ -86,7 +81,6 @@ public class DeclaredProgram extends AvenirsBaseModel {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate,
       Instant createdAt,
@@ -100,7 +94,6 @@ public class DeclaredProgram extends AvenirsBaseModel {
         organization,
         result,
         sourceOfInformation,
-        link,
         startDate,
         endDate,
         createdAt,

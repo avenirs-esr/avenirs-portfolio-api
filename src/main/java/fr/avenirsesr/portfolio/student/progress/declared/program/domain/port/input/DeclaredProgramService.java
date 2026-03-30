@@ -17,7 +17,6 @@ public interface DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate);
 
@@ -27,7 +26,6 @@ public interface DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate);
 
@@ -42,7 +40,6 @@ public interface DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate);
 

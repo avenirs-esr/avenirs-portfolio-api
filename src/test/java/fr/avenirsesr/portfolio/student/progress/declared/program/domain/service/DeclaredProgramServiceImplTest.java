@@ -65,7 +65,6 @@ class DeclaredProgramServiceImplTest {
       private String organization;
       private String result;
       private String sourceOfInformation;
-      private String link;
       private LocalDate startDate;
       private LocalDate endDate;
 
@@ -79,7 +78,6 @@ class DeclaredProgramServiceImplTest {
         organization = "Organization";
         result = "Result";
         sourceOfInformation = "Source";
-        link = "https://example.com";
         startDate = LocalDate.now().minusMonths(1);
         endDate = LocalDate.now().plusMonths(1);
       }
@@ -113,7 +111,6 @@ class DeclaredProgramServiceImplTest {
                   organization,
                   result,
                   sourceOfInformation,
-                  link,
                   startDate,
                   endDate);
 
@@ -149,7 +146,6 @@ class DeclaredProgramServiceImplTest {
                       organization,
                       result,
                       sourceOfInformation,
-                      link,
                       startDate,
                       endDate));
 
@@ -169,7 +165,6 @@ class DeclaredProgramServiceImplTest {
       private String organization;
       private String result;
       private String sourceOfInformation;
-      private String link;
       private LocalDate startDate;
       private LocalDate endDate;
 
@@ -182,7 +177,6 @@ class DeclaredProgramServiceImplTest {
         organization = "Organization";
         result = "Result";
         sourceOfInformation = "Source";
-        link = "https://example.com";
         startDate = LocalDate.now().minusMonths(1);
         endDate = LocalDate.now();
       }
@@ -218,7 +212,6 @@ class DeclaredProgramServiceImplTest {
                   organization,
                   result,
                   sourceOfInformation,
-                  link,
                   futureStartDate,
                   futureEndDate);
 
@@ -241,7 +234,6 @@ class DeclaredProgramServiceImplTest {
                   organization,
                   result,
                   sourceOfInformation,
-                  link,
                   startDate,
                   endDate);
 
@@ -267,7 +259,6 @@ class DeclaredProgramServiceImplTest {
                   organization,
                   result,
                   sourceOfInformation,
-                  link,
                   pastStartDate,
                   pastEndDate);
 
@@ -302,7 +293,6 @@ class DeclaredProgramServiceImplTest {
                       organization,
                       result,
                       sourceOfInformation,
-                      link,
                       startDate,
                       endDate));
 
@@ -471,7 +461,6 @@ class DeclaredProgramServiceImplTest {
       private String organization;
       private String result;
       private String sourceOfInformation;
-      private String link;
       private LocalDate startDate;
       private LocalDate endDate;
 
@@ -485,7 +474,6 @@ class DeclaredProgramServiceImplTest {
         organization = "Updated organization";
         result = "Updated result";
         sourceOfInformation = "Updated source";
-        link = "https://example.com/updated";
 
         startDate = LocalDate.now().minusDays(10);
         endDate = LocalDate.now().plusDays(10);
@@ -527,7 +515,6 @@ class DeclaredProgramServiceImplTest {
                         organization,
                         result,
                         sourceOfInformation,
-                        link,
                         startDate,
                         endDate));
 
@@ -576,7 +563,6 @@ class DeclaredProgramServiceImplTest {
                           organization,
                           result,
                           sourceOfInformation,
-                          link,
                           startDate,
                           endDate));
 
@@ -612,7 +598,6 @@ class DeclaredProgramServiceImplTest {
                       organization,
                       result,
                       sourceOfInformation,
-                      link,
                       startDate,
                       endDate);
 
@@ -628,7 +613,6 @@ class DeclaredProgramServiceImplTest {
               verify(declaredProgram).setOrganization(organization);
               verify(declaredProgram).setResult(result);
               verify(declaredProgram).setSourceOfInformation(sourceOfInformation);
-              verify(declaredProgram).setLink(link);
               verify(declaredProgram).setStartDate(startDate);
               verify(declaredProgram).setEndDate(endDate);
 
@@ -651,7 +635,6 @@ class DeclaredProgramServiceImplTest {
                   organization,
                   result,
                   sourceOfInformation,
-                  link,
                   futureStartDate,
                   futureEndDate);
 
@@ -673,7 +656,6 @@ class DeclaredProgramServiceImplTest {
                   organization,
                   result,
                   sourceOfInformation,
-                  link,
                   pastStartDate,
                   pastEndDate);
 
@@ -698,7 +680,6 @@ class DeclaredProgramServiceImplTest {
                             organization,
                             result,
                             sourceOfInformation,
-                            link,
                             startDate,
                             endDate));
 
@@ -720,7 +701,6 @@ class DeclaredProgramServiceImplTest {
                             " ",
                             result,
                             sourceOfInformation,
-                            link,
                             startDate,
                             endDate));
 
@@ -742,7 +722,6 @@ class DeclaredProgramServiceImplTest {
                             organization,
                             result,
                             sourceOfInformation,
-                            link,
                             null,
                             endDate));
 
@@ -767,7 +746,6 @@ class DeclaredProgramServiceImplTest {
                             organization,
                             result,
                             sourceOfInformation,
-                            link,
                             s,
                             e));
 
@@ -803,7 +781,6 @@ class DeclaredProgramServiceImplTest {
                       organization,
                       result,
                       sourceOfInformation,
-                      link,
                       startDate,
                       endDate));
 
