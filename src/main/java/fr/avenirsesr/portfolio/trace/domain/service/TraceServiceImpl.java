@@ -435,13 +435,24 @@ public class TraceServiceImpl implements TraceService {
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
     List<Association> associationList =
-        associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class));
+        associationService
+            .getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class))
+            .stream()
+            .filter(association -> associationIds.contains(association.getId()))
+            .toList();
 
     if (!new HashSet<>(associationList.stream().map(Association::getId).toList())
         .containsAll(associationIds)) {
       throw new AssociationDoesNotExistException();
     }
 
+    checkIfDeclaredActivitiesAssociationsAreDeletable(associationList);
+
+    associationService.deleteAllByIds(associationIds);
+  }
+
+  private void checkIfDeclaredActivitiesAssociationsAreDeletable(
+      List<Association> associationList) {
     List<UUID> declaredActivityIds =
         associationList.stream()
             .filter(
@@ -449,15 +460,11 @@ public class TraceServiceImpl implements TraceService {
                     association.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
             .map(Association::getId1)
             .toList();
-    var declaredActivities = declaredActivityRepository.findAllById(declaredActivityIds);
-    declaredActivities.forEach(
-        declaredActivity -> {
-          if (declaredActivity.getFinishedAt().isPresent()) {
-            throw new DeclaredActivityAlreadyFinishedException();
-          }
-        });
 
-    associationService.deleteAllByIds(associationIds);
+    if (declaredActivityRepository.findAllById(declaredActivityIds).stream()
+        .anyMatch(a -> a.getFinishedAt().isPresent())) {
+      throw new DeclaredActivityAlreadyFinishedException();
+    }
   }
 
   @Override
