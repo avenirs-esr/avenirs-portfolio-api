@@ -487,7 +487,8 @@ public class TraceServiceImpl implements TraceService {
                         declaredActivity.getId(),
                         declaredActivity.getActivity().getTitle(),
                         declaredActivity.getActivity().getThematic(),
-                        alreadyAssociatedIds.contains(declaredActivity.getId())))
+                        alreadyAssociatedIds.contains(declaredActivity.getId())
+                            || declaredActivity.getFinishedAt().isPresent()))
             .toList();
 
     return new PagedResult<>(mappedContent, declaredActivityPagedResult.pageInfo());

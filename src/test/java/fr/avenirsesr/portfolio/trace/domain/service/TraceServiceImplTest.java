@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
@@ -1147,6 +1148,7 @@ public class TraceServiceImplTest {
 
     UUID assocActivityId = UUID.randomUUID();
     UUID unassocActivityId = UUID.randomUUID();
+    UUID finishedActivityId = UUID.randomUUID();
 
     Association assoc = mock(Association.class);
     when(assoc.getId1()).thenReturn(assocActivityId);
@@ -1156,28 +1158,37 @@ public class TraceServiceImplTest {
 
     DeclaredActivity assocActivity = mock(DeclaredActivity.class);
     when(assocActivity.getId()).thenReturn(assocActivityId);
-    var act1 = mock(fr.avenirsesr.portfolio.activity.domain.model.Activity.class);
+    var act1 = mock(Activity.class);
     when(act1.getTitle()).thenReturn("Activity 1");
     when(assocActivity.getActivity()).thenReturn(act1);
 
     DeclaredActivity unassocActivity = mock(DeclaredActivity.class);
     when(unassocActivity.getId()).thenReturn(unassocActivityId);
-    var act2 = mock(fr.avenirsesr.portfolio.activity.domain.model.Activity.class);
+    var act2 = mock(Activity.class);
     when(act2.getTitle()).thenReturn("Activity 2");
     when(unassocActivity.getActivity()).thenReturn(act2);
+
+    DeclaredActivity finishedActivity = mock(DeclaredActivity.class);
+    when(finishedActivity.getId()).thenReturn(finishedActivityId);
+    var act3 = mock(Activity.class);
+    when(act3.getTitle()).thenReturn("Activity 3");
+    when(finishedActivity.getActivity()).thenReturn(act3);
+    when(finishedActivity.getFinishedAt()).thenReturn(Optional.ofNullable(Instant.now()));
 
     PageCriteria criteria = new PageCriteria(0, 10);
     PageInfo pageInfo = new PageInfo(0, 10, 2);
     when(declaredActivityService.searchDeclaredActivity("kw", criteria))
-        .thenReturn(new PagedResult<>(List.of(assocActivity, unassocActivity), pageInfo));
+        .thenReturn(
+            new PagedResult<>(List.of(assocActivity, unassocActivity, finishedActivity), pageInfo));
 
     BddLogger.when("searching declared activities for association");
     var result = traceService.searchDeclaredActivityForAssociation(traceId, "kw", criteria);
 
     BddLogger.then("it should return mapped results with correct disabled flags");
-    assertEquals(2, result.content().size());
+    assertEquals(3, result.content().size());
     assertTrue(result.content().get(0).disabled());
     assertFalse(result.content().get(1).disabled());
+    assertTrue(result.content().get(2).disabled());
   }
 
   @Test
