@@ -14,7 +14,7 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.ProgramFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.TrainingPathFixture;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -30,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class InstitutionServiceImplTest {
 
-  @Mock private StudentProgressRepository studentProgressRepository;
+  @Mock private StudentProgressService studentProgressService;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private InstitutionConfigClient institutionConfigClient;
 
@@ -63,7 +63,8 @@ class InstitutionServiceImplTest {
     StudentProgress sp2 =
         StudentProgressFixture.create().withTrainingPath(tp2).withStudent(student).toModel();
 
-    when(studentProgressRepository.findAllByStudent(student)).thenReturn(List.of(sp1, sp2));
+    when(studentProgressService.findAllStudentProgressesByStudent(student))
+        .thenReturn(List.of(sp1, sp2));
 
     when(institutionConfigClient.getInstitutionConfigElementsById(institutionId1))
         .thenReturn(new InstitutionConfigurationElements(true, false));
@@ -77,7 +78,7 @@ class InstitutionServiceImplTest {
     assertTrue(result.apcEnabled());
     assertTrue(result.lifeProjectEnabled());
 
-    verify(studentProgressRepository).findAllByStudent(student);
+    verify(studentProgressService).findAllStudentProgressesByStudent(student);
     verify(institutionConfigClient).getInstitutionConfigElementsById(institutionId1);
     verify(institutionConfigClient).getInstitutionConfigElementsById(institutionId2);
     verifyNoMoreInteractions(institutionConfigClient);
@@ -101,7 +102,8 @@ class InstitutionServiceImplTest {
     StudentProgress sp2 =
         StudentProgressFixture.create().withTrainingPath(tp2).withStudent(student).toModel();
 
-    when(studentProgressRepository.findAllByStudent(student)).thenReturn(List.of(sp1, sp2));
+    when(studentProgressService.findAllStudentProgressesByStudent(student))
+        .thenReturn(List.of(sp1, sp2));
 
     when(institutionConfigClient.getInstitutionConfigElementsById(institutionId))
         .thenReturn(new InstitutionConfigurationElements(true, true));
@@ -113,7 +115,7 @@ class InstitutionServiceImplTest {
     assertTrue(result.apcEnabled());
     assertTrue(result.lifeProjectEnabled());
 
-    verify(studentProgressRepository).findAllByStudent(student);
+    verify(studentProgressService).findAllStudentProgressesByStudent(student);
     verify(institutionConfigClient, times(1)).getInstitutionConfigElementsById(institutionId);
     verifyNoMoreInteractions(institutionConfigClient);
   }
@@ -121,7 +123,7 @@ class InstitutionServiceImplTest {
   @Test
   void shouldReturnAllFalseWhenStudentHasNoProgress() {
     BddLogger.given("a student with no progresses");
-    when(studentProgressRepository.findAllByStudent(student)).thenReturn(List.of());
+    when(studentProgressService.findAllStudentProgressesByStudent(student)).thenReturn(List.of());
 
     BddLogger.when("getting the aggregated institution configuration");
     InstitutionConfigurationElements result = institutionService.getInstitutionConfiguration();
@@ -130,7 +132,7 @@ class InstitutionServiceImplTest {
     assertFalse(result.apcEnabled());
     assertFalse(result.lifeProjectEnabled());
 
-    verify(studentProgressRepository).findAllByStudent(student);
+    verify(studentProgressService).findAllStudentProgressesByStudent(student);
     verifyNoInteractions(institutionConfigClient);
   }
 
@@ -153,7 +155,8 @@ class InstitutionServiceImplTest {
     StudentProgress sp2 =
         StudentProgressFixture.create().withTrainingPath(tp2).withStudent(student).toModel();
 
-    when(studentProgressRepository.findAllByStudent(student)).thenReturn(List.of(sp1, sp2));
+    when(studentProgressService.findAllStudentProgressesByStudent(student))
+        .thenReturn(List.of(sp1, sp2));
 
     when(institutionConfigClient.getInstitutionConfigElementsById(institutionId1))
         .thenReturn(new InstitutionConfigurationElements(false, false));

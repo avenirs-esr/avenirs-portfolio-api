@@ -8,11 +8,16 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillLevelP
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public interface StudentProgressService {
+  List<StudentProgress> findAllStudentProgressesByStudent(Student student);
+
+  List<StudentProgress> findStudentProgressesBySkillLevelProgresses(
+      List<SkillLevelProgress> skillLevelProgresses);
+
   boolean isStudentFollowingAPCProgram();
 
   List<StudentProgress> getAllCurrentStudentProgress();
@@ -24,10 +29,6 @@ public interface StudentProgressService {
 
   PagedResult<SkillProgressData> getAllTimeSkillsView(
       SortCriteria sortCriteria, PageCriteria pageCriteria);
-
-  PagedResult<SkillLevelProgress> searchSkillLevel(String keyword, PageCriteria pageCriteria);
-
-  List<SkillLevelProgress> getSkillLevelsBySkillId(UUID skillId);
 
   List<Skill> getAllSkillList();
 }

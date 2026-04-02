@@ -4,13 +4,13 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Commo
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
 
+import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
-import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -20,20 +20,19 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
 import fr.avenirsesr.portfolio.file.domain.model.shared.File;
-import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
+import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
@@ -41,7 +40,7 @@ import fr.avenirsesr.portfolio.trace.domain.model.*;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -56,22 +55,39 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class TraceServiceImpl implements TraceService {
   private final TraceRepository traceRepository;
-  private final UserRepository userRepository;
-  private final StudentProgressRepository studentProgressRepository;
-  private final TraceAttachmentRepository traceAttachmentRepository;
-  private final DeclaredActivityRepository declaredActivityRepository;
-  private final DeclaredSkillProgressRepository declaredSkillProgressRepository;
+  private final UserService userService;
+  private final StudentProgressService studentProgressService;
+  private final TraceAttachmentService traceAttachmentService;
+  private final DeclaredActivityService declaredActivityService;
+  private final DeclaredSkillProgressService declaredSkillProgressService;
   private final TraceConfigurationClient traceConfigurationClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final DeclaredActivityService declaredActivityService;
-  private final DeclaredSkillProgressService declaredSkillProgressService;
+
+  @Override
+  public Trace getTraceById(UUID id) {
+    return traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
+  }
+
+  @Override
+  public List<Trace> findAllTracesById(List<UUID> ids) {
+    return traceRepository.findAllById(ids);
+  }
+
+  @Override
+  public List<Trace> getTracesLinkedWithAMS(AMS ams) {
+    return traceRepository.linkedWith(ams);
+  }
+
+  @Override
+  public List<Trace> getTracesLinkedWithSkillLevelProgress(SkillLevelProgress skillLevelProgress) {
+    return traceRepository.linkedWith(skillLevelProgress);
+  }
 
   @Override
   public String programNameOfTrace(Trace trace) {
     List<StudentProgress> studentProgresses =
-        studentProgressRepository.findStudentProgressesBySkillLevelProgresses(
-            trace.getSkillLevels());
+        studentProgressService.findStudentProgressesBySkillLevelProgresses(trace.getSkillLevels());
     return studentProgresses.stream()
         .filter(sp -> sp.getTrainingPath().getProgram().isAPC())
         .map(sp -> sp.getTrainingPath().getProgram().getName())
@@ -191,13 +207,12 @@ public class TraceServiceImpl implements TraceService {
     List<DeclaredActivity> activities;
 
     if (onlyNotCompleted) {
-      var graph = FetchGraph.init().fetch("activity");
       activities =
-          declaredActivityRepository.findAllNotCompletedActivitiesByIds(
-              declaredActivityAssociations.stream().map(Association::getId1).toList(), graph);
+          declaredActivityService.findAllNotCompletedActivitiesByIds(
+              declaredActivityAssociations.stream().map(Association::getId1).toList());
     } else {
       activities =
-          declaredActivityRepository.findAllById(
+          declaredActivityService.findAllDeclaredActivitiesByIds(
               declaredActivityAssociations.stream().map(Association::getId1).toList());
     }
 
@@ -206,7 +221,7 @@ public class TraceServiceImpl implements TraceService {
             .filter(a -> a.getAssociationType() == EAssociationType.TRACE_DECLARED_SKILL)
             .toList();
     var skills =
-        declaredSkillProgressRepository.findAllById(
+        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
             declaredSkillAssociations.stream().map(Association::getId2).toList());
 
     return new TraceAssociationsData(
@@ -227,7 +242,7 @@ public class TraceServiceImpl implements TraceService {
       String aiJustification) {
     return createTrace(
         traceId,
-        userRepository.findById(userId).orElseThrow(),
+        userService.getUser(userId),
         title,
         language,
         isGroup,
@@ -298,7 +313,7 @@ public class TraceServiceImpl implements TraceService {
   }
 
   private TraceAttachment getTraceAttachment(Trace trace) {
-    return traceAttachmentRepository.findByTrace(trace).stream()
+    return traceAttachmentService.findByTrace(trace).stream()
         .filter(File::isActiveVersion)
         .findFirst()
         .orElseThrow(FileNotFoundException::new);
@@ -324,7 +339,7 @@ public class TraceServiceImpl implements TraceService {
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
-    var activities = declaredActivityRepository.findAllById(activityIds);
+    var activities = declaredActivityService.findAllDeclaredActivitiesByIds(activityIds);
 
     if (!new HashSet<>(activities.stream().map(DeclaredActivity::getId).toList())
         .containsAll(activityIds)) {
@@ -372,7 +387,7 @@ public class TraceServiceImpl implements TraceService {
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
-    var declaredSkills = declaredSkillProgressRepository.findAllById(skillIds);
+    var declaredSkills = declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(skillIds);
 
     if (!new HashSet<>(declaredSkills.stream().map(DeclaredSkillProgress::getId).toList())
         .containsAll(skillIds)) {
@@ -461,7 +476,7 @@ public class TraceServiceImpl implements TraceService {
             .map(Association::getId1)
             .toList();
 
-    if (declaredActivityRepository.findAllById(declaredActivityIds).stream()
+    if (declaredActivityService.findAllDeclaredActivitiesByIds(declaredActivityIds).stream()
         .anyMatch(a -> a.getFinishedAt().isPresent())) {
       throw new DeclaredActivityAlreadyFinishedException();
     }

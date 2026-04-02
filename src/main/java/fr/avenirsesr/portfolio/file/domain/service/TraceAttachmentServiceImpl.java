@@ -9,10 +9,8 @@ import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.io.IOException;
 import java.util.List;
@@ -25,9 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class TraceAttachmentServiceImpl implements TraceAttachmentService {
   private final TraceAttachmentRepository traceAttachmentRepository;
-  private final TraceRepository traceRepository;
-  private final FileStorageService fileStorageService;
   private final TraceService traceService;
+  private final FileStorageService fileStorageService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
@@ -35,7 +32,7 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
       UUID traceId, String fileName, String mimeType, long size, byte[] content)
       throws IOException {
     Student loggedInStudent = loggedInUserService.getLoggedInStudent();
-    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
+    var trace = traceService.getTraceById(traceId);
     var allTraceAttachments = traceAttachmentRepository.findByTrace(trace);
 
     if (!trace.getUser().equals(loggedInStudent.getUser())) {
@@ -91,5 +88,10 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
         true,
         uri,
         student.getUser());
+  }
+
+  @Override
+  public List<TraceAttachment> findByTrace(Trace trace) {
+    return traceAttachmentRepository.findByTrace(trace);
   }
 }

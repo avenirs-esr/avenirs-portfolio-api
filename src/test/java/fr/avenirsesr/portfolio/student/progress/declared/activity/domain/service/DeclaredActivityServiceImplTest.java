@@ -8,7 +8,7 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
-import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
@@ -37,7 +37,6 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.ou
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -60,8 +59,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DeclaredActivityServiceImplTest {
 
   @Mock private DeclaredActivityRepository declaredActivityRepository;
-  @Mock private ActivityRepository activityRepository;
-  @Mock private TraceRepository traceRepository;
+  @Mock private ActivityService activityService;
+
   @Mock private AssociationService associationService;
   @Mock private TraceService traceService;
   @Mock private LoggedInUserService loggedInUserService;
@@ -80,10 +79,9 @@ class DeclaredActivityServiceImplTest {
     declaredActivityService =
         new DeclaredActivityServiceImpl(
             declaredActivityRepository,
-            activityRepository,
-            traceRepository,
-            associationService,
+            activityService,
             traceService,
+            associationService,
             loggedInUserService);
   }
 
@@ -95,7 +93,7 @@ class DeclaredActivityServiceImplTest {
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findByActivity(student, activity)).thenReturn(Optional.empty());
-    when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+    when(activityService.getActivityById(activityId)).thenReturn(activity);
 
     BddLogger.when("He tries to subscribe to this activity without dates");
     service.subscribe(activityId, null, null);
@@ -117,7 +115,7 @@ class DeclaredActivityServiceImplTest {
     UUID activityId = UUID.randomUUID();
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(activityRepository.findById(activityId)).thenReturn(Optional.empty());
+    when(activityService.getActivityById(activityId)).thenThrow(new ActivityNotFoundException());
 
     BddLogger.when("He tries to subscribe to this activity");
 
@@ -136,7 +134,7 @@ class DeclaredActivityServiceImplTest {
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(activityRepository.findById(activity.getId())).thenReturn(Optional.of(activity));
+    when(activityService.getActivityById(activity.getId())).thenReturn(activity);
     when(declaredActivityRepository.findByActivity(student, activity))
         .thenReturn(Optional.of(declaredActivity));
 
@@ -157,7 +155,7 @@ class DeclaredActivityServiceImplTest {
     LocalDate startDate = LocalDate.now();
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+    when(activityService.getActivityById(activityId)).thenReturn(activity);
 
     BddLogger.when("He tries to subscribe with incomplete dates");
 
@@ -177,7 +175,7 @@ class DeclaredActivityServiceImplTest {
     LocalDate endDate = LocalDate.now().plusDays(2);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+    when(activityService.getActivityById(activityId)).thenReturn(activity);
 
     BddLogger.when("He tries to subscribe with inconsistent dates");
 
@@ -198,7 +196,7 @@ class DeclaredActivityServiceImplTest {
     LocalDate endDate = LocalDate.now().plusDays(5);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
-    when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+    when(activityService.getActivityById(activityId)).thenReturn(activity);
 
     BddLogger.when("He tries to subscribe with a past startDate");
 

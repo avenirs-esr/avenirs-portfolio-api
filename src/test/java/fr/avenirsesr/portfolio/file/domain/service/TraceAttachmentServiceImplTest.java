@@ -19,13 +19,11 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +37,6 @@ class TraceAttachmentServiceImplTest {
 
   @Mock private TraceAttachmentRepository traceAttachmentRepository;
   @Mock private FileStorageService fileStorageService;
-  @Mock private TraceRepository traceRepository;
   @Mock private TraceService traceService;
   @Mock private LoggedInUserService loggedInUserService;
 
@@ -59,7 +56,7 @@ class TraceAttachmentServiceImplTest {
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
-    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+    when(traceService.getTraceById(traceId)).thenReturn(trace);
 
     // FileResource real instance
     when(fileStorageService.upload(any(FileResource.class))).thenReturn("uri/to/file.txt");
@@ -103,7 +100,7 @@ class TraceAttachmentServiceImplTest {
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
-    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+    when(traceService.getTraceById(traceId)).thenReturn(trace);
 
     when(fileStorageService.upload(any(FileResource.class))).thenReturn("some-uri");
 
@@ -127,7 +124,7 @@ class TraceAttachmentServiceImplTest {
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
-    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+    when(traceService.getTraceById(traceId)).thenReturn(trace);
 
     BddLogger.when("uploading a trace attachment and a disk write error occurs");
     when(fileStorageService.upload(any(FileResource.class)))
@@ -153,7 +150,7 @@ class TraceAttachmentServiceImplTest {
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
 
-    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+    when(traceService.getTraceById(traceId)).thenReturn(trace);
     when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
 
     BddLogger.when(
@@ -183,7 +180,7 @@ class TraceAttachmentServiceImplTest {
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
 
-    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+    when(traceService.getTraceById(traceId)).thenReturn(trace);
     when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
 
     when(fileStorageService.upload(any(FileResource.class)))
@@ -211,7 +208,7 @@ class TraceAttachmentServiceImplTest {
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
 
-    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+    when(traceService.getTraceById(traceId)).thenReturn(trace);
     when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
 
     when(fileStorageService.upload(any(FileResource.class)))
@@ -241,7 +238,7 @@ class TraceAttachmentServiceImplTest {
     UUID traceId = UUID.randomUUID();
 
     BddLogger.when("uploading a trace attachment with a trace that is not found");
-    when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+    when(traceService.getTraceById(traceId)).thenThrow(new TraceNotFoundException());
 
     BddLogger.then("it should throw TraceNotFoundException");
     assertThatThrownBy(
@@ -259,7 +256,7 @@ class TraceAttachmentServiceImplTest {
     Trace trace = TraceFixture.create().toModel();
 
     BddLogger.when("uploading a trace attachment with a not authorized user");
-    when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+    when(traceService.getTraceById(traceId)).thenReturn(trace);
 
     BddLogger.then("it should throw UserNotAuthorizedException");
     assertThatThrownBy(

@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.map
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.exception.SkillLevelNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.SkillLevelProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import java.security.Principal;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/me/skill-level-progress")
 public class SkillLevelProgressController {
   private final StudentProgressService studentProgressService;
+  private final SkillLevelProgressService skillLevelProgressService;
 
   @GetMapping()
   public ResponseEntity<PagedResponse<SkillDTO>> getSkillLevelProgresses(
@@ -65,7 +67,7 @@ public class SkillLevelProgressController {
         skillId.toString(),
         principal.getName());
     List<SkillLevelProgress> skillLevelProgresses =
-        studentProgressService.getSkillLevelsBySkillId(skillId);
+        skillLevelProgressService.getSkillLevelsBySkillId(skillId);
     List<SkillLevel> skillLevels =
         skillLevelProgresses.stream().map(SkillLevelProgress::getSkillLevel).toList();
     Skill skill =

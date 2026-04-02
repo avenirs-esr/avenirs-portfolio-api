@@ -11,8 +11,9 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.excep
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.output.repository.DeclaredExperienceRepository;
+import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,7 +31,7 @@ class DeclaredExperienceServiceImplTest {
 
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private DeclaredExperienceRepository experienceRepository;
-  @Mock private StudentRepository studentRepository;
+  @Mock private StudentService studentService;
 
   @InjectMocks private DeclaredExperienceServiceImpl service;
 
@@ -52,7 +53,7 @@ class DeclaredExperienceServiceImplTest {
   void shouldCreateExperienceWhenLoggedInStudentMatches() {
     DeclaredExperience saved = mock(DeclaredExperience.class);
     when(experienceRepository.save(any())).thenReturn(saved);
-    when(studentRepository.findById(studentId)).thenReturn(Optional.of(student));
+    when(studentService.getStudentById(studentId)).thenReturn(student);
 
     DeclaredExperience result =
         service.create(
@@ -77,7 +78,7 @@ class DeclaredExperienceServiceImplTest {
   void shouldLoadStudentFromRepositoryWhenRequestContextNotDefined() {
     DeclaredExperience saved = mock(DeclaredExperience.class);
     when(experienceRepository.save(any())).thenReturn(saved);
-    when(studentRepository.findById(studentId)).thenReturn(Optional.of(student));
+    when(studentService.getStudentById(studentId)).thenReturn(student);
 
     DeclaredExperience result =
         service.create(
@@ -95,16 +96,16 @@ class DeclaredExperienceServiceImplTest {
             end);
 
     assertNotNull(result);
-    verify(studentRepository).findById(studentId);
+    verify(studentService).getStudentById(studentId);
     verify(experienceRepository).save(any());
   }
 
   @Test
   void shouldThrowWhenStudentNotFound() {
-    when(studentRepository.findById(studentId)).thenReturn(Optional.empty());
+    when(studentService.getStudentById(studentId)).thenThrow(new UserIsNotStudentException());
 
     assertThrows(
-        UserNotAuthorizedException.class,
+        UserIsNotStudentException.class,
         () ->
             service.create(
                 studentId,

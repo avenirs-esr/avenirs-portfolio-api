@@ -4,9 +4,8 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateDateOrder;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
-import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
-import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
@@ -31,7 +30,6 @@ import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -45,10 +43,9 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
-  private final ActivityRepository activityRepository;
-  private final TraceRepository traceRepository;
-  private final AssociationService associationService;
+  private final ActivityService activityService;
   private final TraceService traceService;
+  private final AssociationService associationService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
@@ -81,8 +78,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public DeclaredActivity subscribe(
       UUID declaredActivityId, UUID activityId, LocalDate startDate, LocalDate endDate) {
     Student student = loggedInUserService.getLoggedInStudent();
-    Activity activity =
-        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+    Activity activity = activityService.getActivityById(activityId);
 
     if (declaredActivityRepository.findByActivity(student, activity).isPresent()) {
       throw new DeclaredActivityAlreadyExistException();
@@ -228,7 +224,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       UUID declaredActivityId, List<UUID> traceIds) {
     Student student = loggedInUserService.getLoggedInStudent();
     fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
-    var traces = traceRepository.findAllById(traceIds);
+    var traces = traceService.findAllTracesById(traceIds);
 
     if (!new HashSet<>(traces.stream().map(Trace::getId).toList()).containsAll(traceIds)) {
       throw new TraceNotFoundException();
@@ -285,6 +281,17 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public List<DeclaredActivity> findAllDeclaredActivitiesByIds(List<UUID> ids) {
+    return declaredActivityRepository.findAllById(ids);
+  }
+
+  @Override
+  public List<DeclaredActivity> findAllNotCompletedActivitiesByIds(List<UUID> ids) {
+    var graph = FetchGraph.init().fetch("activity");
+    return declaredActivityRepository.findAllNotCompletedActivitiesByIds(ids, graph);
+  }
+
+  @Override
   public DeclaredActivityAssociationsData getDeclaredActivityAssociations(UUID declaredActivityId) {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
@@ -296,7 +303,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
             List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));
 
     var traces =
-        traceRepository.findAllById(traceAssociations.stream().map(Association::getId2).toList());
+        traceService.findAllTracesById(
+            traceAssociations.stream().map(Association::getId2).toList());
 
     return new DeclaredActivityAssociationsData(
         traceAssociations.stream()

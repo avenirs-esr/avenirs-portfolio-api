@@ -18,7 +18,7 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfK
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
-  private final StudentRepository studentRepository;
+  private final StudentService studentService;
   private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
   private final LoggedInUserService loggedInUserService;
@@ -162,13 +162,13 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
     if (categoriesToAssociate.isEmpty()) {
       throw new SelfKnowledgeCategoryNotFoundException();
     }
-    studentRepository.addSelfKnowledgeCategories(student, categoriesToAssociate);
+    studentService.addSelfKnowledgeCategories(student, categoriesToAssociate);
   }
 
   @Override
   public void initSelfKnowledgeCategoriesMandatory(Student student) {
     var mandatoryCategories = selfKnowledgeCategoryRepository.findAllMandatory();
-    studentRepository.addSelfKnowledgeCategories(student, mandatoryCategories);
+    studentService.addSelfKnowledgeCategories(student, mandatoryCategories);
   }
 
   @Override
@@ -182,7 +182,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
       throw new SelfKnowledgeCategoryIsMandatoryException();
     }
     selfKnowledgeElementRepository.deleteAllByStudentAndCategory(student, selfKnowledgeCategory);
-    studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);
+    studentService.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);
   }
 
   @Override

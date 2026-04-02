@@ -19,6 +19,8 @@ public interface ActivityService {
       String executionPeriodInfo,
       String executionPeriodInfoSummary);
 
+  Activity getActivityById(UUID id);
+
   ActivityDetailData getActivityDetail(UUID id);
 
   Map<EActivityThematic, List<Activity>> getActivityNavigation();

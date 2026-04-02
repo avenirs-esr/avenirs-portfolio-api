@@ -15,8 +15,9 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.domain.exceptio
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.output.DeclaredProgramRepository;
+import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DeclaredProgramServiceImplTest {
 
-  @Mock private StudentRepository studentRepository;
+  @Mock private StudentService studentService;
   @Mock private DeclaredProgramRepository declaredProgramRepository;
   @Mock private LoggedInUserService loggedInUserService;
 
@@ -44,7 +45,7 @@ class DeclaredProgramServiceImplTest {
   void setup() {
     declaredProgramService =
         new DeclaredProgramServiceImpl(
-            studentRepository, declaredProgramRepository, loggedInUserService);
+            studentService, declaredProgramRepository, loggedInUserService);
   }
 
   @Nested
@@ -92,7 +93,7 @@ class DeclaredProgramServiceImplTest {
         void setupAnd() {
           BddLogger.and("student exists in repository for given id");
           student = mock(Student.class);
-          when(studentRepository.findById(studentId)).thenReturn(Optional.of(student));
+          when(studentService.getStudentById(studentId)).thenReturn(student);
 
           savedProgram = mock(DeclaredProgram.class);
           when(declaredProgramRepository.save(any(DeclaredProgram.class))).thenReturn(savedProgram);
@@ -116,7 +117,7 @@ class DeclaredProgramServiceImplTest {
 
           assertNotNull(declaredProgram);
           assertEquals(savedProgram, declaredProgram);
-          verify(studentRepository).findById(studentId);
+          verify(studentService).getStudentById(studentId);
           verify(loggedInUserService, never()).getLoggedInStudent();
           verify(declaredProgramRepository).save(any(DeclaredProgram.class));
         }
@@ -128,15 +129,15 @@ class DeclaredProgramServiceImplTest {
         @BeforeEach
         void setupAnd() {
           BddLogger.and("no student exists in repository for given id");
-          when(studentRepository.findById(studentId)).thenReturn(Optional.empty());
+          when(studentService.getStudentById(studentId)).thenThrow(new UserIsNotStudentException());
         }
 
         @Test
-        void thenItShouldThrowUserNotAuthorizedException() {
-          BddLogger.then("it should throw UserNotAuthorizedException");
+        void thenItShouldThrowUUserIsNotStudentException() {
+          BddLogger.then("it should throw UserIsNotStudentException");
 
           assertThrows(
-              UserNotAuthorizedException.class,
+              UserIsNotStudentException.class,
               () ->
                   declaredProgramService.create(
                       studentId,
@@ -149,7 +150,7 @@ class DeclaredProgramServiceImplTest {
                       startDate,
                       endDate));
 
-          verify(studentRepository).findById(studentId);
+          verify(studentService).getStudentById(studentId);
           verify(declaredProgramRepository, never()).save(any());
           verify(loggedInUserService, never()).getLoggedInStudent();
         }
@@ -218,7 +219,7 @@ class DeclaredProgramServiceImplTest {
           assertNotNull(declaredProgram);
           assertEquals(savedProgram, declaredProgram);
           verify(loggedInUserService).getLoggedInStudent();
-          verify(studentRepository, never()).findById(any());
+          verify(studentService, never()).getStudentById(any());
           verify(declaredProgramRepository).save(any(DeclaredProgram.class));
         }
 
@@ -240,7 +241,7 @@ class DeclaredProgramServiceImplTest {
           assertNotNull(declaredProgram);
           assertEquals(savedProgram, declaredProgram);
           verify(loggedInUserService).getLoggedInStudent();
-          verify(studentRepository, never()).findById(any());
+          verify(studentService, never()).getStudentById(any());
           verify(declaredProgramRepository).save(any(DeclaredProgram.class));
         }
 
@@ -265,7 +266,7 @@ class DeclaredProgramServiceImplTest {
           assertNotNull(declaredProgram);
           assertEquals(savedProgram, declaredProgram);
           verify(loggedInUserService).getLoggedInStudent();
-          verify(studentRepository, never()).findById(any());
+          verify(studentService, never()).getStudentById(any());
           verify(declaredProgramRepository).save(any(DeclaredProgram.class));
         }
       }
@@ -296,7 +297,7 @@ class DeclaredProgramServiceImplTest {
                       startDate,
                       endDate));
 
-          verify(studentRepository, never()).findById(any());
+          verify(studentService, never()).getStudentById(any());
           verify(declaredProgramRepository, never()).save(any());
         }
       }

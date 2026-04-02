@@ -24,7 +24,7 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.fixture.DeclaredSkillProgressFixture;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
-import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
+import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
 import fr.avenirsesr.portfolio.program.domain.model.Program;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
@@ -36,13 +36,11 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
@@ -54,7 +52,7 @@ import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceReposito
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.service.StudentServiceImpl;
+import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Duration;
@@ -75,16 +73,15 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class TraceServiceImplTest {
   @Mock private TraceRepository traceRepository;
-  @Mock private TraceAttachmentRepository traceAttachmentRepository;
-  @Mock private StudentProgressRepository studentProgressRepository;
+  @Mock private TraceAttachmentService traceAttachmentService;
+  @Mock private StudentProgressService studentProgressService;
   @Mock private AssociationService associationService;
-  @Mock private DeclaredActivityRepository declaredActivityRepository;
-  @Mock private DeclaredSkillProgressRepository declaredSkillProgressRepository;
+
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private TraceConfigurationClient traceConfigurationClient;
 
-  @Mock private StudentServiceImpl studentService;
+  @Mock private UserService userService;
   @Mock private LoggedInUserService loggedInUserService;
   @InjectMocks private TraceServiceImpl traceService;
 
@@ -100,7 +97,7 @@ public class TraceServiceImplTest {
   void givenTraceWithoutSkillLevels_shouldReturnLifeProject() {
     BddLogger.given("a TraceServiceImpl service and a trace without skill levels");
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
-    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
+    when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
         .thenReturn(List.of());
 
     BddLogger.when("getting the progam name of the trace");
@@ -132,7 +129,7 @@ public class TraceServiceImplTest {
             .withSkillLevels(List.of(skillLevelProgress))
             .toModel();
 
-    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
+    when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
         .thenReturn(List.of(studentProgress));
 
     BddLogger.when("getting the progam name of the trace");
@@ -164,7 +161,7 @@ public class TraceServiceImplTest {
             .withSkillLevels(List.of(skillLevelProgress))
             .toModel();
 
-    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
+    when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
         .thenReturn(List.of(studentProgress));
 
     BddLogger.when("getting the progam name of the trace");
@@ -427,7 +424,7 @@ public class TraceServiceImplTest {
             .toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
     when(traceRepository.save(trace)).thenReturn(trace);
-    when(traceAttachmentRepository.findByTrace(any()))
+    when(traceAttachmentService.findByTrace(any()))
         .thenReturn(List.of(TraceAttachmentFixture.create().toModel()));
 
     BddLogger.when("update trace");
@@ -481,7 +478,7 @@ public class TraceServiceImplTest {
             .toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
     when(traceRepository.save(trace)).thenReturn(trace);
-    when(traceAttachmentRepository.findByTrace(any()))
+    when(traceAttachmentService.findByTrace(any()))
         .thenReturn(List.of(TraceAttachmentFixture.create().toModel()));
 
     BddLogger.when("update trace with null fields");
@@ -543,7 +540,7 @@ public class TraceServiceImplTest {
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
     when(traceRepository.save(any())).thenReturn(trace);
-    when(traceAttachmentRepository.findByTrace(any())).thenReturn(List.of());
+    when(traceAttachmentService.findByTrace(any())).thenReturn(List.of());
 
     BddLogger.when("updating the trace");
     assertThrows(
@@ -663,11 +660,11 @@ public class TraceServiceImplTest {
             .toModel();
 
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-    when(studentProgressRepository.findStudentProgressesBySkillLevelProgresses(any()))
+    when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
         .thenReturn(List.of());
 
     var activeAttachment = TraceAttachmentFixture.create().toModel();
-    when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of(activeAttachment));
+    when(traceAttachmentService.findByTrace(trace)).thenReturn(List.of(activeAttachment));
 
     BddLogger.when("getting trace detail");
     TraceDetailData detail = traceService.getTraceDetail(trace.getId());
@@ -684,7 +681,7 @@ public class TraceServiceImplTest {
     BddLogger.given("a TraceServiceImpl service and a trace without active attachment");
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
     when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-    when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
+    when(traceAttachmentService.findByTrace(trace)).thenReturn(List.of());
 
     BddLogger.when("getting trace detail");
     assertThrows(FileNotFoundException.class, () -> traceService.getTraceDetail(trace.getId()));
@@ -784,7 +781,8 @@ public class TraceServiceImplTest {
     when(associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
         .thenReturn(List.of(association));
 
-    when(declaredActivityRepository.findAllById(List.of(activityId))).thenReturn(List.of(activity));
+    when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(activityId)))
+        .thenReturn(List.of(activity));
 
     BddLogger.when("getting trace associations");
 
@@ -849,17 +847,15 @@ public class TraceServiceImplTest {
     when(associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
         .thenReturn(List.of(association));
 
-    when(declaredActivityRepository.findAllNotCompletedActivitiesByIds(
-            eq(List.of(activityId)), any()))
+    when(declaredActivityService.findAllNotCompletedActivitiesByIds(eq(List.of(activityId))))
         .thenReturn(List.of(activity));
 
     BddLogger.when("getting ONLY NOT COMPLETED trace associations");
     TraceAssociationsData result = traceService.getTraceAssociations(traceId, true);
 
     BddLogger.then("it should call the specific repository method and return the data");
-    verify(declaredActivityRepository)
-        .findAllNotCompletedActivitiesByIds(eq(List.of(activityId)), any());
-    verify(declaredActivityRepository, never()).findAllById(any());
+    verify(declaredActivityService).findAllNotCompletedActivitiesByIds(eq(List.of(activityId)));
+    verify(declaredActivityService, never()).findAllDeclaredActivitiesByIds(any());
     assertEquals(1, result.declaredActivityAssociations().size());
   }
 
@@ -878,12 +874,14 @@ public class TraceServiceImplTest {
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
 
-    when(declaredSkillProgressRepository.findAllById(List.of(skillId))).thenReturn(List.of(skill));
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+        .thenReturn(List.of(skill));
 
     when(associationService.getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
         .thenReturn(List.of());
 
-    when(declaredSkillProgressRepository.findAllById(any())).thenReturn(List.of(skill));
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(any()))
+        .thenReturn(List.of(skill));
 
     BddLogger.when("associating trace with declared skills");
 
@@ -948,7 +946,8 @@ public class TraceServiceImplTest {
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
 
-    when(declaredSkillProgressRepository.findAllById(List.of(skillId))).thenReturn(List.of());
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+        .thenReturn(List.of());
 
     BddLogger.when("associating");
 
@@ -977,7 +976,8 @@ public class TraceServiceImplTest {
 
     when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
 
-    when(declaredSkillProgressRepository.findAllById(List.of(skillId))).thenReturn(List.of(skill));
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+        .thenReturn(List.of(skill));
 
     BddLogger.when("associating");
 
