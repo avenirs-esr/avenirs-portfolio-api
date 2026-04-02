@@ -64,6 +64,11 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public Activity getActivityById(UUID id) {
+    return activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
+  }
+
+  @Override
   public ActivityDetailData getActivityDetail(UUID id) {
     Activity activity = activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
     ActivityBanner activityBanner = activityResourceService.getActivityBanner(activity);

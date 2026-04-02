@@ -13,9 +13,8 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillProgre
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.SkillLevelProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
 import java.util.*;
@@ -28,9 +27,20 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class StudentProgressServiceImpl implements StudentProgressService {
   private final StudentProgressRepository studentProgressRepository;
-  private final SkillLevelProgressRepository skillLevelProgressRepository;
-  private final TraceRepository traceRepository;
+  private final TraceService traceService;
   private final LoggedInUserService loggedInUserService;
+
+  @Override
+  public List<StudentProgress> findAllStudentProgressesByStudent(Student student) {
+    return studentProgressRepository.findAllByStudent(student);
+  }
+
+  @Override
+  public List<StudentProgress> findStudentProgressesBySkillLevelProgresses(
+      List<SkillLevelProgress> skillLevelProgresses) {
+    return studentProgressRepository.findStudentProgressesBySkillLevelProgresses(
+        skillLevelProgresses);
+  }
 
   @Override
   public boolean isStudentFollowingAPCProgram() {
@@ -68,7 +78,9 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                             skillLevelProgress ->
                                 new SkillLevelProgressWithTraceCountData(
                                     skillLevelProgress,
-                                    traceRepository.linkedWith(skillLevelProgress).size()))
+                                    traceService
+                                        .getTracesLinkedWithSkillLevelProgress(skillLevelProgress)
+                                        .size()))
                         .toList()));
   }
 
@@ -89,7 +101,9 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                             skillLevelProgress ->
                                 new SkillLevelProgressWithTraceCountData(
                                     skillLevelProgress,
-                                    traceRepository.linkedWith(skillLevelProgress).size()))
+                                    traceService
+                                        .getTracesLinkedWithSkillLevelProgress(skillLevelProgress)
+                                        .size()))
                         .toList(),
                 (v1, v2) -> v1,
                 LinkedHashMap::new));
@@ -114,7 +128,10 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                                     studentProgress,
                                     new SkillLevelProgressWithTraceCountData(
                                         currentSkillLevel,
-                                        traceRepository.linkedWith(currentSkillLevel).size()))))
+                                        traceService
+                                            .getTracesLinkedWithSkillLevelProgress(
+                                                currentSkillLevel)
+                                            .size()))))
             .sorted(
                 Comparator.comparing(
                         (SkillProgressData skillProgress) ->
@@ -128,21 +145,6 @@ public class StudentProgressServiceImpl implements StudentProgressService {
             .limit(pageCriteria.pageSize())
             .toList(),
         new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skillProgresses.size()));
-  }
-
-  @Override
-  public PagedResult<SkillLevelProgress> searchSkillLevel(
-      String keyword, PageCriteria pageCriteria) {
-    Student student = loggedInUserService.getLoggedInStudent();
-    log.debug("Searching SkillLevelProgress for {} with pagination {}", student, pageCriteria);
-
-    return skillLevelProgressRepository.findAllByStudent(student, pageCriteria, keyword);
-  }
-
-  @Override
-  public List<SkillLevelProgress> getSkillLevelsBySkillId(UUID skillId) {
-    Student student = loggedInUserService.getLoggedInStudent();
-    return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);
   }
 
   @Override

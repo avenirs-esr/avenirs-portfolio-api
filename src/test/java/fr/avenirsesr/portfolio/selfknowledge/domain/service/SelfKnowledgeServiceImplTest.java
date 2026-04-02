@@ -31,7 +31,7 @@ import fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture.SelfKnowledg
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +49,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class SelfKnowledgeServiceImplTest {
 
-  @Mock private StudentRepository studentRepository;
+  @Mock private StudentService studentService;
   @Mock private SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
   @Mock private SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   @Mock private LoggedInUserService loggedInUserService;
@@ -78,7 +78,6 @@ class SelfKnowledgeServiceImplTest {
       @BeforeEach
       void setupAnd() {
         BddLogger.and("a logged in student");
-        when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
       }
 
       @Nested
@@ -791,7 +790,7 @@ class SelfKnowledgeServiceImplTest {
               () -> selfKnowledgeService.addSelfKnowledgeCategories(requestedIdsAsString));
 
           verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
-          verify(studentRepository, never()).addSelfKnowledgeCategories(any(), anyList());
+          verify(studentService, never()).addSelfKnowledgeCategories(any(), anyList());
         }
       }
 
@@ -834,11 +833,11 @@ class SelfKnowledgeServiceImplTest {
           @Test
           void thenItShouldDelegateToRepositoriesAndAssociateCategories() {
             BddLogger.then(
-                "it should use available categories and delegate to studentRepository to"
+                "it should use available categories and delegate to studentService to"
                     + " associate them");
 
             verify(selfKnowledgeCategoryRepository).findAllAvailableByStudent(eq(student));
-            verify(studentRepository)
+            verify(studentService)
                 .addSelfKnowledgeCategories(
                     eq(student), eq(List.of(strengthsCategory, valuesCategory)));
           }
@@ -884,8 +883,7 @@ class SelfKnowledgeServiceImplTest {
             verify(selfKnowledgeCategoryRepository).findById(eq(categoryId));
             verify(selfKnowledgeElementRepository)
                 .deleteAllByStudentAndCategory(eq(student), eq(removableCategory));
-            verify(studentRepository)
-                .removeSelfKnowledgeCategory(eq(student), eq(removableCategory));
+            verify(studentService).removeSelfKnowledgeCategory(eq(student), eq(removableCategory));
           }
         }
       }
@@ -909,7 +907,7 @@ class SelfKnowledgeServiceImplTest {
 
           verify(selfKnowledgeCategoryRepository).findById(eq(unknownId));
           verifyNoInteractions(selfKnowledgeElementRepository);
-          verify(studentRepository, never())
+          verify(studentService, never())
               .removeSelfKnowledgeCategory(any(), any(SelfKnowledgeCategory.class));
         }
       }
@@ -935,7 +933,7 @@ class SelfKnowledgeServiceImplTest {
 
           verify(selfKnowledgeCategoryRepository).findById(eq(categoryId));
           verifyNoInteractions(selfKnowledgeElementRepository);
-          verify(studentRepository, never())
+          verify(studentService, never())
               .removeSelfKnowledgeCategory(eq(student), any(SelfKnowledgeCategory.class));
         }
       }
@@ -961,7 +959,7 @@ class SelfKnowledgeServiceImplTest {
           assertThrows(
               UserNotFoundException.class, () -> selfKnowledgeService.getSelfKnowledgeCategories());
 
-          verifyNoInteractions(studentRepository);
+          verifyNoInteractions(studentService);
           verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
@@ -979,7 +977,7 @@ class SelfKnowledgeServiceImplTest {
               UserNotFoundException.class,
               () -> selfKnowledgeService.getSelfKnowledgeCategoriesAvailable());
 
-          verifyNoInteractions(studentRepository);
+          verifyNoInteractions(studentService);
           verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
@@ -1003,7 +1001,7 @@ class SelfKnowledgeServiceImplTest {
               UserNotFoundException.class,
               () -> selfKnowledgeService.addSelfKnowledgeCategories(categoryIdsAsString));
 
-          verifyNoInteractions(studentRepository);
+          verifyNoInteractions(studentService);
           verifyNoInteractions(selfKnowledgeCategoryRepository);
         }
       }
@@ -1022,7 +1020,7 @@ class SelfKnowledgeServiceImplTest {
               UserNotFoundException.class,
               () -> selfKnowledgeService.removeSelfKnowledgeCategory(categoryId));
 
-          verifyNoInteractions(studentRepository);
+          verifyNoInteractions(studentService);
           verifyNoInteractions(selfKnowledgeCategoryRepository);
           verifyNoInteractions(selfKnowledgeElementRepository);
         }

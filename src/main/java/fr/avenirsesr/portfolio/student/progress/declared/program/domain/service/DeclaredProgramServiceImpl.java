@@ -14,7 +14,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.en
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.input.DeclaredProgramService;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.output.DeclaredProgramRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class DeclaredProgramServiceImpl implements DeclaredProgramService {
-  private final StudentRepository studentRepository;
+  private final StudentService studentService;
   private final DeclaredProgramRepository declaredProgramRepository;
   private final LoggedInUserService loggedInUserService;
 
@@ -86,8 +86,7 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String sourceOfInformation,
       LocalDate startDate,
       LocalDate endDate) {
-    Student student =
-        studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);
+    Student student = studentService.getStudentById(studentId);
     return create(
         student,
         status,

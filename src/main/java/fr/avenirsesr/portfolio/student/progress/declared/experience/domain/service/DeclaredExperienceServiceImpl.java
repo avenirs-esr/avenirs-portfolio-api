@@ -14,7 +14,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.output.repository.DeclaredExperienceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +28,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
   private final LoggedInUserService loggedInUserService;
   private final DeclaredExperienceRepository experienceRepository;
-  private final StudentRepository studentRepository;
+  private final StudentService studentService;
 
   @Override
   public DeclaredExperience create(
@@ -44,8 +44,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String externalLink,
       LocalDate startDate,
       LocalDate endDate) {
-    Student student =
-        studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);
+    Student student = studentService.getStudentById(studentId);
     return create(
         student,
         title,

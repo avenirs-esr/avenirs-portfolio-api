@@ -21,7 +21,7 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevel
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
@@ -41,7 +41,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class StudentProgressServiceImplTest {
   @Mock private StudentProgressRepository studentProgressRepository;
-  @Mock private TraceRepository traceRepository;
+  @Mock private TraceService traceService;
   @Mock private LoggedInUserService loggedInUserService;
   @InjectMocks private StudentProgressServiceImpl studentProgressService;
 
@@ -171,7 +171,8 @@ public class StudentProgressServiceImplTest {
 
         when(studentProgressRepository.findAllByStudent(eq(student)))
             .thenReturn(List.of(progress, progress2));
-        when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
+        when(traceService.getTracesLinkedWithSkillLevelProgress(any(SkillLevelProgress.class)))
+            .thenReturn(List.of());
       }
 
       @Nested
@@ -321,7 +322,8 @@ public class StudentProgressServiceImplTest {
         // Mock repository to return all progress
         when(studentProgressRepository.findAllByStudent(eq(student)))
             .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
-        when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
+        when(traceService.getTracesLinkedWithSkillLevelProgress(any(SkillLevelProgress.class)))
+            .thenReturn(List.of());
       }
 
       @Nested
@@ -505,7 +507,8 @@ public class StudentProgressServiceImplTest {
 
         when(studentProgressRepository.findAllByStudent(eq(student)))
             .thenReturn(List.of(progressBNew, progressAOld));
-        when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
+        when(traceService.getTracesLinkedWithSkillLevelProgress(any(SkillLevelProgress.class)))
+            .thenReturn(List.of());
       }
 
       @Nested
@@ -728,7 +731,8 @@ public class StudentProgressServiceImplTest {
 
         when(studentProgressRepository.findAllByStudent(eq(student)))
             .thenReturn(List.of(finishedProgress, currentProgress));
-        when(traceRepository.linkedWith(any(SkillLevelProgress.class))).thenReturn(List.of());
+        when(traceService.getTracesLinkedWithSkillLevelProgress(any(SkillLevelProgress.class)))
+            .thenReturn(List.of());
       }
 
       @Nested

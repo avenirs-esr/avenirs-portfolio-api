@@ -6,29 +6,23 @@ import fr.avenirsesr.portfolio.file.domain.service.TraceAttachmentServiceImpl;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.TraceAttachmentDatabaseRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceDatabaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
 @RequiredArgsConstructor
 public class TraceAttachmentServiceConfig {
   private final TraceAttachmentDatabaseRepository traceAttachmentRepository;
-  private final TraceDatabaseRepository traceRepository;
   private final FileStorageService fileStorageService;
-  private final TraceService traceService;
   private final LoggedInUserService loggedInUserService;
 
   @Bean
   @Primary
-  public TraceAttachmentService traceAttachmentService() {
+  public TraceAttachmentService traceAttachmentService(@Lazy TraceService traceService) {
     return new TraceAttachmentServiceImpl(
-        traceAttachmentRepository,
-        traceRepository,
-        fileStorageService,
-        traceService,
-        loggedInUserService);
+        traceAttachmentRepository, traceService, fileStorageService, loggedInUserService);
   }
 }

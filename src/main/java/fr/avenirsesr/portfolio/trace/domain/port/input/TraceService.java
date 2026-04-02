@@ -1,10 +1,12 @@
 package fr.avenirsesr.portfolio.trace.domain.port.input;
 
+import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -14,6 +16,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TraceService {
+  Trace getTraceById(UUID id);
+
+  List<Trace> findAllTracesById(List<UUID> ids);
+
+  List<Trace> getTracesLinkedWithAMS(AMS ams);
+
+  List<Trace> getTracesLinkedWithSkillLevelProgress(SkillLevelProgress skillLevelProgress);
+
   String programNameOfTrace(Trace trace);
 
   List<Trace> lastTracesOf();

@@ -7,8 +7,8 @@ import fr.avenirsesr.portfolio.ams.domain.port.output.repository.AMSRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.SkillLevelProgressRepository;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.SkillLevelProgressService;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -18,8 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class AMSServiceImpl implements AMSService {
   private final AMSRepository amsRepository;
-  private final TraceRepository traceRepository;
-  private final SkillLevelProgressRepository skillLevelProgressRepository;
+  private final TraceService traceService;
+  private final SkillLevelProgressService skillLevelProgressService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
@@ -40,8 +40,8 @@ public class AMSServiceImpl implements AMSService {
                 ams ->
                     new AmsView(
                         ams,
-                        skillLevelProgressRepository.linkedWith(ams).size(),
-                        traceRepository.linkedWith(ams).size()))
+                        skillLevelProgressService.getSkillLevelProgressesLinkedWithAMS(ams).size(),
+                        traceService.getTracesLinkedWithAMS(ams).size()))
             .toList(),
         amses.pageInfo());
   }

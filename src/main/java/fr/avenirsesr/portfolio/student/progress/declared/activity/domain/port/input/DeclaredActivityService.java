@@ -45,4 +45,8 @@ public interface DeclaredActivityService {
 
   PagedResult<TraceAssociationSearchInfoData> searchTracesForAssociation(
       UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated);
+
+  List<DeclaredActivity> findAllDeclaredActivitiesByIds(List<UUID> ids);
+
+  List<DeclaredActivity> findAllNotCompletedActivitiesByIds(List<UUID> ids);
 }

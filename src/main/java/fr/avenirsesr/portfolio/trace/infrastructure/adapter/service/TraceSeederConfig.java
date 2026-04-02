@@ -6,7 +6,6 @@ import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageServic
 import fr.avenirsesr.portfolio.file.domain.service.TraceAttachmentServiceImpl;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,14 +17,9 @@ public class TraceSeederConfig {
   public TraceAttachmentService MockTraceAttachmentService(
       @Qualifier("seederFileStorageService") FileStorageService fileStorageService,
       TraceAttachmentRepository traceAttachmentRepository,
-      TraceRepository traceRepository,
       TraceService traceService,
       LoggedInUserService loggedInUserService) {
     return new TraceAttachmentServiceImpl(
-        traceAttachmentRepository,
-        traceRepository,
-        fileStorageService,
-        traceService,
-        loggedInUserService);
+        traceAttachmentRepository, traceService, fileStorageService, loggedInUserService);
   }
 }

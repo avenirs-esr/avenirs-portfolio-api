@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.program.domain.port.output.client.InstitutionConf
 import fr.avenirsesr.portfolio.program.domain.port.output.repository.InstitutionRepository;
 import fr.avenirsesr.portfolio.program.domain.service.InstitutionServiceImpl;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class InstitutionServiceConfig {
-  private final StudentProgressRepository studentProgressRepository;
+  private final StudentProgressService studentProgressService;
   private final LoggedInUserService loggedInUserService;
   private final InstitutionConfigClient institutionConfigClient;
   private final InstitutionRepository institutionRepository;
@@ -23,7 +23,7 @@ public class InstitutionServiceConfig {
   @Bean
   public InstitutionService institutionService() {
     return new InstitutionServiceImpl(
-        studentProgressRepository,
+        studentProgressService,
         loggedInUserService,
         institutionConfigClient,
         institutionRepository);

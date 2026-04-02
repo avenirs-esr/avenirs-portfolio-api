@@ -8,16 +8,16 @@ import fr.avenirsesr.portfolio.user.domain.service.StudentServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 @RequiredArgsConstructor
 public class StudentServiceConfig {
   private final StudentRepository studentRepository;
   private final UserRepository userRepository;
-  private final SelfKnowledgeService selfKnowledgeService;
 
   @Bean
-  public StudentService studentService() {
+  public StudentService studentService(@Lazy SelfKnowledgeService selfKnowledgeService) {
     return new StudentServiceImpl(studentRepository, userRepository, selfKnowledgeService);
   }
 }

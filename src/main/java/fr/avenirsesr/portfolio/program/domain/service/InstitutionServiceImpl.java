@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.program.domain.port.output.client.InstitutionConf
 import fr.avenirsesr.portfolio.program.domain.port.output.repository.InstitutionRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class InstitutionServiceImpl implements InstitutionService {
-  private final StudentProgressRepository studentProgressRepository;
+  private final StudentProgressService studentProgressService;
   private final LoggedInUserService loggedInUserService;
   private final InstitutionConfigClient institutionConfigClient;
   private final InstitutionRepository institutionRepository;
@@ -26,7 +26,8 @@ public class InstitutionServiceImpl implements InstitutionService {
   public InstitutionConfigurationElements getInstitutionConfiguration() {
     Student student = loggedInUserService.getLoggedInStudent();
 
-    List<StudentProgress> studentProgresses = studentProgressRepository.findAllByStudent(student);
+    List<StudentProgress> studentProgresses =
+        studentProgressService.findAllStudentProgressesByStudent(student);
 
     List<InstitutionConfigurationElements> configs =
         studentProgresses.stream()

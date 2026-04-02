@@ -180,6 +180,11 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     return declaredSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);
   }
 
+  @Override
+  public List<DeclaredSkillProgress> findAllDeclaredSkillProgressesByIds(List<UUID> ids) {
+    return declaredSkillProgressRepository.findAllById(ids);
+  }
+
   private static void checkDescriptionField(String description) {
     if (description != null && description.length() > DESCRIPTION_LENGTH) {
       log.error(
