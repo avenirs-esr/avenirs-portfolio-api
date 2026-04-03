@@ -36,19 +36,19 @@ public class SelfKnowledgeElementDatabaseRepository
   @Override
   public PagedResult&lt;SelfKnowledgeElement&gt; findAllByStudentIdAndCategoryId(
       UUID studentId, UUID selfKnowledgeCategoryId, PageCriteria pageCriteria) {
-<span class="fc" id="L39">    Specification&lt;SelfKnowledgeElementEntity&gt; spec =</span>
-<span class="fc" id="L40">        SelfKnowledgeElementSpecification.hasStudentId(studentId)</span>
-<span class="fc" id="L41">            .and(</span>
-<span class="fc" id="L42">                SelfKnowledgeElementSpecification.hasSelfKnowledgeCategoryId(</span>
+<span class="nc" id="L39">    Specification&lt;SelfKnowledgeElementEntity&gt; spec =</span>
+<span class="nc" id="L40">        SelfKnowledgeElementSpecification.hasStudentId(studentId)</span>
+<span class="nc" id="L41">            .and(</span>
+<span class="nc" id="L42">                SelfKnowledgeElementSpecification.hasSelfKnowledgeCategoryId(</span>
                     selfKnowledgeCategoryId));
-<span class="fc" id="L44">    return findAll(spec, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
+<span class="nc" id="L44">    return findAll(spec, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
   }
 
   @Override
   public void deleteAllByStudentAndCategory(Student student, SelfKnowledgeCategory category) {
-<span class="fc" id="L49">    jpaRepository.deleteByStudentAndSelfKnowledgeCategory(</span>
-<span class="fc" id="L50">        StudentMapper.INSTANCE.fromDomain(student),</span>
-<span class="fc" id="L51">        SelfKnowledgeCategoryMapper.INSTANCE.fromDomain(category));</span>
-<span class="fc" id="L52">  }</span>
+<span class="nc" id="L49">    jpaRepository.deleteByStudentAndSelfKnowledgeCategory(</span>
+<span class="nc" id="L50">        StudentMapper.INSTANCE.fromDomain(student),</span>
+<span class="nc" id="L51">        SelfKnowledgeCategoryMapper.INSTANCE.fromDomain(category));</span>
+<span class="nc" id="L52">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -43,26 +43,26 @@ public class DeclaredActivityDatabaseRepository
   @Override
   public PagedResult&lt;DeclaredActivity&gt; findAllByStudent(
       Student student, String keyword, PageCriteria pageCriteria, FetchGraph fetchGraph) {
-<span class="fc" id="L46">    var specification = hasStudent(student).and(DeclaredActivitySpecification.search(keyword));</span>
-<span class="fc" id="L47">    return findAll(</span>
-<span class="fc" id="L48">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()), fetchGraph);</span>
+<span class="nc" id="L46">    var specification = hasStudent(student).and(DeclaredActivitySpecification.search(keyword));</span>
+<span class="nc" id="L47">    return findAll(</span>
+<span class="nc" id="L48">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()), fetchGraph);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllByActivityIdAndStudent(
       List&lt;UUID&gt; activityIds, Student student, FetchGraph fetchGraph) {
-<span class="pc bpc" id="L54" title="2 of 4 branches missed.">    if (activityIds == null || activityIds.isEmpty()) {</span>
+<span class="nc bnc" id="L54" title="All 4 branches missed.">    if (activityIds == null || activityIds.isEmpty()) {</span>
 <span class="nc" id="L55">      return List.of();</span>
     }
 
-<span class="fc" id="L58">    return findAll(hasActivityIdInAndStudent(activityIds, student), fetchGraph);</span>
+<span class="nc" id="L58">    return findAll(hasActivityIdInAndStudent(activityIds, student), fetchGraph);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllNotCompletedActivitiesByIds(
       List&lt;UUID&gt; activityIds, FetchGraph fetchGraph) {
-<span class="fc" id="L64">    var specification = DeclaredActivitySpecification.isNotCompleted();</span>
-<span class="fc" id="L65">    return findAllById(activityIds, specification, fetchGraph);</span>
+<span class="nc" id="L64">    var specification = DeclaredActivitySpecification.isNotCompleted();</span>
+<span class="nc" id="L65">    return findAllById(activityIds, specification, fetchGraph);</span>
   }
 
   @Override

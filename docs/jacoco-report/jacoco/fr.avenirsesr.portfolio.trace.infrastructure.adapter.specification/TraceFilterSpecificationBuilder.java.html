@@ -20,15 +20,15 @@ import org.springframework.data.jpa.domain.Specification;
 
   @Override
   public Specification&lt;TraceEntity&gt; getSpecification(ETraceFilterKey key, Object value) {
-<span class="fc bfc" id="L23" title="All 4 branches covered.">    return switch (key) {</span>
+<span class="pc bpc" id="L23" title="1 of 4 branches missed.">    return switch (key) {</span>
 <span class="fc" id="L24">      case FILE_TYPE -&gt; fileType((List&lt;EFileType&gt;) value);</span>
 <span class="fc" id="L25">      case SKILL -&gt; skill((List&lt;UUID&gt;) value);</span>
 <span class="fc" id="L26">      case STATUS -&gt; status((List&lt;ETraceStatus&gt;) value);</span>
       case IS_ASSOCIATED -&gt; {
-<span class="fc bfc" id="L28" title="All 2 branches covered.">        if (value == null) yield null;</span>
-<span class="fc bfc" id="L29" title="All 2 branches covered.">        yield ((Boolean) value)</span>
-<span class="fc" id="L30">            ? TraceSpecification.associated()</span>
-<span class="fc" id="L31">            : TraceSpecification.unassociated();</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (value == null) yield null;</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        yield ((Boolean) value)</span>
+<span class="nc" id="L30">            ? TraceSpecification.associated()</span>
+<span class="nc" id="L31">            : TraceSpecification.unassociated();</span>
       }
     };
   }

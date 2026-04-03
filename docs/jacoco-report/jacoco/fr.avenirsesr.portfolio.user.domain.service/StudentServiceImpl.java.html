@@ -2,17 +2,19 @@
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L15">@Slf4j</span>
+<span class="fc" id="L17">@Slf4j</span>
 @AllArgsConstructor
 public class StudentServiceImpl implements StudentService {
   private StudentRepository studentRepository;
@@ -21,39 +23,50 @@ public class StudentServiceImpl implements StudentService {
 
   @Override
   public Student getStudentById(UUID studentId) {
-<span class="nc" id="L24">    return studentRepository</span>
-<span class="nc" id="L25">        .findById(studentId)</span>
-<span class="nc" id="L26">        .orElseThrow(</span>
+<span class="fc" id="L26">    return studentRepository</span>
+<span class="fc" id="L27">        .findById(studentId)</span>
+<span class="fc" id="L28">        .orElseThrow(</span>
             () -&gt; {
-<span class="nc" id="L28">              log.error(&quot;Student {} not found&quot;, studentId);</span>
-<span class="nc" id="L29">              return new UserIsNotStudentException();</span>
+<span class="fc" id="L30">              log.error(&quot;Student {} not found&quot;, studentId);</span>
+<span class="fc" id="L31">              return new UserIsNotStudentException();</span>
             });
   }
 
   @Override
   public String getBio(User user) {
-<span class="fc" id="L35">    var student =</span>
-<span class="fc" id="L36">        studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);</span>
-<span class="fc" id="L37">    return student.getBio();</span>
+<span class="fc" id="L37">    var student =</span>
+<span class="fc" id="L38">        studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);</span>
+<span class="fc" id="L39">    return student.getBio();</span>
   }
 
   @Override
   public void updateProfile(User user, String bio) {
-<span class="fc" id="L42">    var student =</span>
-<span class="fc" id="L43">        studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);</span>
+<span class="fc" id="L44">    var student =</span>
+<span class="fc" id="L45">        studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);</span>
 
-<span class="pc bpc" id="L45" title="1 of 2 branches missed.">    if (student != null) student.setBio(bio);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">    if (student != null) student.setBio(bio);</span>
 
-<span class="fc" id="L47">    studentRepository.save(student);</span>
-<span class="fc" id="L48">  }</span>
+<span class="fc" id="L49">    studentRepository.save(student);</span>
+<span class="fc" id="L50">  }</span>
 
   @Override
   public Student createStudent(UUID userId, String bio) {
-<span class="fc" id="L52">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L53">    var student = Student.create(user, bio);</span>
-<span class="fc" id="L54">    studentRepository.save(student);</span>
-<span class="fc" id="L55">    selfKnowledgeService.initSelfKnowledgeCategoriesMandatory(student);</span>
-<span class="fc" id="L56">    return student;</span>
+<span class="fc" id="L54">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L55">    var student = Student.create(user, bio);</span>
+<span class="fc" id="L56">    studentRepository.save(student);</span>
+<span class="fc" id="L57">    selfKnowledgeService.initSelfKnowledgeCategoriesMandatory(student);</span>
+<span class="fc" id="L58">    return student;</span>
   }
+
+  @Override
+  public void addSelfKnowledgeCategories(Student student, List&lt;SelfKnowledgeCategory&gt; categories) {
+<span class="fc" id="L63">    studentRepository.addSelfKnowledgeCategories(student, categories);</span>
+<span class="fc" id="L64">  }</span>
+
+  @Override
+  public void removeSelfKnowledgeCategory(
+      Student student, SelfKnowledgeCategory selfKnowledgeCategory) {
+<span class="nc" id="L69">    studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);</span>
+<span class="nc" id="L70">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -14,7 +14,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.en
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.input.DeclaredProgramService;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.output.DeclaredProgramRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 <span class="fc" id="L24">@Slf4j</span>
 @AllArgsConstructor
 public class DeclaredProgramServiceImpl implements DeclaredProgramService {
-  private final StudentRepository studentRepository;
+  private final StudentService studentService;
   private final DeclaredProgramRepository declaredProgramRepository;
   private final LoggedInUserService loggedInUserService;
 
@@ -36,15 +36,14 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
 
-<span class="fc" id="L43">    fieldsValidation(</span>
-        title, description, organization, result, sourceOfInformation, link, startDate, endDate);
+<span class="fc" id="L42">    fieldsValidation(</span>
+        title, description, organization, result, sourceOfInformation, startDate, endDate);
 
-<span class="fc" id="L46">    DeclaredProgram declaredProgram =</span>
-<span class="fc" id="L47">        DeclaredProgram.create(</span>
+<span class="fc" id="L45">    DeclaredProgram declaredProgram =</span>
+<span class="fc" id="L46">        DeclaredProgram.create(</span>
             student,
             status,
             title,
@@ -52,11 +51,10 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
             organization,
             result,
             sourceOfInformation,
-            link,
             startDate,
             endDate);
 
-<span class="fc" id="L59">    return declaredProgramRepository.save(declaredProgram);</span>
+<span class="fc" id="L57">    return declaredProgramRepository.save(declaredProgram);</span>
   }
 
   private static void fieldsValidation(
@@ -65,19 +63,17 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L71">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
-<span class="fc" id="L72">    requireNotBlankAndMaxLength(&quot;organization&quot;, organization, ORGANIZATION_LENGTH);</span>
-<span class="fc" id="L73">    validateOptionalTextMaxLength(&quot;description&quot;, description, DESCRIPTION_LENGTH);</span>
-<span class="fc" id="L74">    validateOptionalTextMaxLength(&quot;result&quot;, result, RESULT_LENGTH);</span>
-<span class="fc" id="L75">    validateOptionalTextMaxLength(</span>
+<span class="fc" id="L68">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
+<span class="fc" id="L69">    requireNotBlankAndMaxLength(&quot;organization&quot;, organization, ORGANIZATION_LENGTH);</span>
+<span class="fc" id="L70">    validateOptionalTextMaxLength(&quot;description&quot;, description, DESCRIPTION_LENGTH);</span>
+<span class="fc" id="L71">    validateOptionalTextMaxLength(&quot;result&quot;, result, RESULT_LENGTH);</span>
+<span class="fc" id="L72">    validateOptionalTextMaxLength(</span>
         &quot;sourceOfInformation&quot;, sourceOfInformation, SOURCE_OF_INFORMATION_LENGTH);
-<span class="fc" id="L77">    requireNotNull(&quot;startDate&quot;, startDate);</span>
-<span class="fc" id="L78">    validateDateOrder(startDate, endDate);</span>
-<span class="fc" id="L79">    validateUrl(link);</span>
-<span class="fc" id="L80">  }</span>
+<span class="fc" id="L74">    requireNotNull(&quot;startDate&quot;, startDate);</span>
+<span class="fc" id="L75">    validateDateOrder(startDate, endDate);</span>
+<span class="fc" id="L76">  }</span>
 
   @Override
   public DeclaredProgram create(
@@ -88,12 +84,10 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L94">    Student student =</span>
-<span class="fc" id="L95">        studentRepository.findById(studentId).orElseThrow(UserNotAuthorizedException::new);</span>
-<span class="fc" id="L96">    return create(</span>
+<span class="fc" id="L89">    Student student = studentService.getStudentById(studentId);</span>
+<span class="fc" id="L90">    return create(</span>
         student,
         status,
         title,
@@ -101,7 +95,6 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
         organization,
         result,
         sourceOfInformation,
-        link,
         startDate,
         endDate);
   }
@@ -113,40 +106,38 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L119">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L120">    return create(</span>
+<span class="fc" id="L111">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L112">    return create(</span>
         student,
-<span class="fc" id="L122">        getProgramStatus(startDate, endDate),</span>
+<span class="fc" id="L114">        getProgramStatus(startDate, endDate),</span>
         title,
         description,
         organization,
         result,
         sourceOfInformation,
-        link,
         startDate,
         endDate);
   }
 
   @Override
   public DeclaredProgram getById(UUID declaredProgramId) {
-<span class="fc" id="L135">    DeclaredProgram declaredProgram =</span>
+<span class="fc" id="L126">    DeclaredProgram declaredProgram =</span>
         declaredProgramRepository
-<span class="fc" id="L137">            .findById(declaredProgramId)</span>
-<span class="fc" id="L138">            .orElseThrow(DeclaredProgramNotFoundException::new);</span>
-<span class="fc" id="L139">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc bfc" id="L140" title="All 2 branches covered.">    if (!declaredProgram.getStudent().equals(student)) {</span>
-<span class="fc" id="L141">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L128">            .findById(declaredProgramId)</span>
+<span class="fc" id="L129">            .orElseThrow(DeclaredProgramNotFoundException::new);</span>
+<span class="fc" id="L130">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">    if (!declaredProgram.getStudent().equals(student)) {</span>
+<span class="fc" id="L132">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L143">    return declaredProgram;</span>
+<span class="fc" id="L134">    return declaredProgram;</span>
   }
 
   @Override
   public PagedResult&lt;DeclaredProgram&gt; getDeclaredPrograms(PageCriteria pageCriteria) {
-<span class="fc" id="L148">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L149">    return declaredProgramRepository.findAllByStudent(student, pageCriteria);</span>
+<span class="fc" id="L139">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L140">    return declaredProgramRepository.findAllByStudent(student, pageCriteria);</span>
   }
 
   @Override
@@ -157,50 +148,48 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String organization,
       String result,
       String sourceOfInformation,
-      String link,
       LocalDate startDate,
       LocalDate endDate) {
-<span class="fc" id="L163">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L164">    log.info(&quot;Update declaredProgramId {} by {}&quot;, declaredProgramId, student);</span>
-<span class="fc" id="L165">    DeclaredProgram declaredProgram =</span>
+<span class="fc" id="L153">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L154">    log.info(&quot;Update declaredProgramId {} by {}&quot;, declaredProgramId, student);</span>
+<span class="fc" id="L155">    DeclaredProgram declaredProgram =</span>
         declaredProgramRepository
-<span class="fc" id="L167">            .findById(declaredProgramId)</span>
-<span class="fc" id="L168">            .orElseThrow(DeclaredProgramNotFoundException::new);</span>
-<span class="fc bfc" id="L169" title="All 2 branches covered.">    if (!declaredProgram.getStudent().equals(student)) {</span>
-<span class="fc" id="L170">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L157">            .findById(declaredProgramId)</span>
+<span class="fc" id="L158">            .orElseThrow(DeclaredProgramNotFoundException::new);</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">    if (!declaredProgram.getStudent().equals(student)) {</span>
+<span class="fc" id="L160">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L172">    fieldsValidation(</span>
-        title, description, organization, result, sourceOfInformation, link, startDate, endDate);
-<span class="fc" id="L174">    declaredProgram.setTitle(title);</span>
-<span class="fc" id="L175">    declaredProgram.setDescription(description);</span>
-<span class="fc" id="L176">    declaredProgram.setOrganization(organization);</span>
-<span class="fc" id="L177">    declaredProgram.setResult(result);</span>
-<span class="fc" id="L178">    declaredProgram.setSourceOfInformation(sourceOfInformation);</span>
-<span class="fc" id="L179">    declaredProgram.setLink(link);</span>
-<span class="fc" id="L180">    declaredProgram.setStartDate(startDate);</span>
-<span class="fc" id="L181">    declaredProgram.setEndDate(endDate);</span>
-<span class="fc" id="L182">    declaredProgram.setStatus(getProgramStatus(startDate, endDate));</span>
-<span class="fc" id="L183">    return declaredProgramRepository.save(declaredProgram);</span>
+<span class="fc" id="L162">    fieldsValidation(</span>
+        title, description, organization, result, sourceOfInformation, startDate, endDate);
+<span class="fc" id="L164">    declaredProgram.setTitle(title);</span>
+<span class="fc" id="L165">    declaredProgram.setDescription(description);</span>
+<span class="fc" id="L166">    declaredProgram.setOrganization(organization);</span>
+<span class="fc" id="L167">    declaredProgram.setResult(result);</span>
+<span class="fc" id="L168">    declaredProgram.setSourceOfInformation(sourceOfInformation);</span>
+<span class="fc" id="L169">    declaredProgram.setStartDate(startDate);</span>
+<span class="fc" id="L170">    declaredProgram.setEndDate(endDate);</span>
+<span class="fc" id="L171">    declaredProgram.setStatus(getProgramStatus(startDate, endDate));</span>
+<span class="fc" id="L172">    return declaredProgramRepository.save(declaredProgram);</span>
   }
 
   @Override
   public void delete(List&lt;UUID&gt; declaredProgramIds) {
-<span class="fc" id="L188">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L189">    List&lt;DeclaredProgram&gt; declaredPrograms =</span>
-<span class="fc" id="L190">        declaredProgramRepository.findAllById(declaredProgramIds);</span>
+<span class="fc" id="L177">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L178">    List&lt;DeclaredProgram&gt; declaredPrograms =</span>
+<span class="fc" id="L179">        declaredProgramRepository.findAllById(declaredProgramIds);</span>
 
-<span class="fc bfc" id="L192" title="All 2 branches covered.">    if (!declaredPrograms.stream().allMatch(p -&gt; p.getStudent().equals(student))) {</span>
-<span class="fc" id="L193">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">    if (!declaredPrograms.stream().allMatch(p -&gt; p.getStudent().equals(student))) {</span>
+<span class="fc" id="L182">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L195">    declaredProgramRepository.removeAllFromDatabase(declaredPrograms);</span>
-<span class="fc" id="L196">  }</span>
+<span class="fc" id="L184">    declaredProgramRepository.removeAllFromDatabase(declaredPrograms);</span>
+<span class="fc" id="L185">  }</span>
 
   private EProgramStatus getProgramStatus(LocalDate startDate, LocalDate endDate) {
-<span class="fc" id="L199">    EPeriodStatus periodStatus = EPeriodStatus.of(startDate, endDate);</span>
-<span class="fc bfc" id="L200" title="All 3 branches covered.">    return switch (periodStatus) {</span>
-<span class="fc" id="L201">      case EPeriodStatus.BEFORE -&gt; EProgramStatus.NOT_STARTED;</span>
-<span class="fc" id="L202">      case EPeriodStatus.DURING -&gt; EProgramStatus.IN_PROGRESS;</span>
-<span class="fc" id="L203">      case EPeriodStatus.AFTER -&gt; EProgramStatus.COMPLETED;</span>
+<span class="fc" id="L188">    EPeriodStatus periodStatus = EPeriodStatus.of(startDate, endDate);</span>
+<span class="fc bfc" id="L189" title="All 3 branches covered.">    return switch (periodStatus) {</span>
+<span class="fc" id="L190">      case EPeriodStatus.BEFORE -&gt; EProgramStatus.NOT_STARTED;</span>
+<span class="fc" id="L191">      case EPeriodStatus.DURING -&gt; EProgramStatus.IN_PROGRESS;</span>
+<span class="fc" id="L192">      case EPeriodStatus.AFTER -&gt; EProgramStatus.COMPLETED;</span>
     };
   }
 }

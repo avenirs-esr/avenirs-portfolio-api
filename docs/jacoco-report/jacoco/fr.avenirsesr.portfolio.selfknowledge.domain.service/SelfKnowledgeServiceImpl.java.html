@@ -18,7 +18,7 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfK
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.output.repository.SelfKnowledgeElementRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 <span class="fc" id="L30">@Slf4j</span>
 @AllArgsConstructor
 public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
-  private final StudentRepository studentRepository;
+  private final StudentService studentService;
   private final SelfKnowledgeElementRepository selfKnowledgeElementRepository;
   private final SelfKnowledgeCategoryRepository selfKnowledgeCategoryRepository;
   private final LoggedInUserService loggedInUserService;
@@ -162,13 +162,13 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 <span class="pc bpc" id="L162" title="1 of 2 branches missed.">    if (categoriesToAssociate.isEmpty()) {</span>
 <span class="nc" id="L163">      throw new SelfKnowledgeCategoryNotFoundException();</span>
     }
-<span class="fc" id="L165">    studentRepository.addSelfKnowledgeCategories(student, categoriesToAssociate);</span>
+<span class="fc" id="L165">    studentService.addSelfKnowledgeCategories(student, categoriesToAssociate);</span>
 <span class="fc" id="L166">  }</span>
 
   @Override
   public void initSelfKnowledgeCategoriesMandatory(Student student) {
 <span class="fc" id="L170">    var mandatoryCategories = selfKnowledgeCategoryRepository.findAllMandatory();</span>
-<span class="fc" id="L171">    studentRepository.addSelfKnowledgeCategories(student, mandatoryCategories);</span>
+<span class="fc" id="L171">    studentService.addSelfKnowledgeCategories(student, mandatoryCategories);</span>
 <span class="fc" id="L172">  }</span>
 
   @Override
@@ -182,7 +182,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 <span class="fc" id="L182">      throw new SelfKnowledgeCategoryIsMandatoryException();</span>
     }
 <span class="fc" id="L184">    selfKnowledgeElementRepository.deleteAllByStudentAndCategory(student, selfKnowledgeCategory);</span>
-<span class="fc" id="L185">    studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);</span>
+<span class="fc" id="L185">    studentService.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);</span>
 <span class="fc" id="L186">  }</span>
 
   @Override

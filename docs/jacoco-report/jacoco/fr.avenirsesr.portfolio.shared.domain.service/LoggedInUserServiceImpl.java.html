@@ -5,31 +5,28 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundExcepti
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.shared.application.adapter.exception.RequestContextNotDefinedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L14">@Slf4j</span>
+<span class="fc" id="L13">@Slf4j</span>
 @AllArgsConstructor
 public class LoggedInUserServiceImpl implements LoggedInUserService {
-  private final StudentRepository studentRepository;
+  private final StudentService studentService;
 
   @Override
   public Student getLoggedInStudent() {
-<span class="fc" id="L21">    return studentRepository</span>
-<span class="fc" id="L22">        .findById(getLoggedInUser().getId())</span>
-<span class="fc" id="L23">        .orElseThrow(UserIsNotStudentException::new);</span>
+<span class="fc" id="L20">    return studentService.getStudentById(getLoggedInUser().getId());</span>
   }
 
   @Override
   public User getLoggedInUser() {
-<span class="fc" id="L28">    var context = RequestContext.get();</span>
-<span class="pc bpc" id="L29" title="1 of 2 branches missed.">    if (context == null) {</span>
-<span class="nc" id="L30">      throw new RequestContextNotDefinedException();</span>
+<span class="fc" id="L25">    var context = RequestContext.get();</span>
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">    if (context == null) {</span>
+<span class="nc" id="L27">      throw new RequestContextNotDefinedException();</span>
     }
-<span class="fc" id="L32">    return RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L29">    return RequestContext.get().userLoggedIn().orElseThrow(UserNotFoundException::new);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

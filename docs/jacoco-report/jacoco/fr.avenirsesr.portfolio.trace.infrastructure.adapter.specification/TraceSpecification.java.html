@@ -25,30 +25,30 @@ import org.springframework.data.jpa.domain.Specification;
   }
 
   public static Specification&lt;TraceEntity&gt; unassociated() {
-<span class="fc" id="L28">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L29">        criteriaBuilder.not(associated().toPredicate(root, query, criteriaBuilder));</span>
+<span class="nc" id="L28">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="nc" id="L29">        criteriaBuilder.not(associated().toPredicate(root, query, criteriaBuilder));</span>
   }
 
   public static Specification&lt;TraceEntity&gt; associated() {
 <span class="fc" id="L33">    return (root, query, cb) -&gt; {</span>
-<span class="fc bfc" id="L34" title="All 2 branches covered.">      if (query == null) return null;</span>
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">      if (query == null) return null;</span>
 
-<span class="fc" id="L36">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
-<span class="fc" id="L37">      Root&lt;AssociationEntity&gt; associationRoot = subquery.from(AssociationEntity.class);</span>
+<span class="nc" id="L36">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
+<span class="nc" id="L37">      Root&lt;AssociationEntity&gt; associationRoot = subquery.from(AssociationEntity.class);</span>
 
-<span class="fc" id="L39">      var traceId = root.get(&quot;id&quot;);</span>
+<span class="nc" id="L39">      var traceId = root.get(&quot;id&quot;);</span>
 
-<span class="fc" id="L41">      var id1Match = cb.equal(associationRoot.get(&quot;id1&quot;), traceId);</span>
-<span class="fc" id="L42">      var id2Match = cb.equal(associationRoot.get(&quot;id2&quot;), traceId);</span>
+<span class="nc" id="L41">      var id1Match = cb.equal(associationRoot.get(&quot;id1&quot;), traceId);</span>
+<span class="nc" id="L42">      var id2Match = cb.equal(associationRoot.get(&quot;id2&quot;), traceId);</span>
 
-<span class="fc" id="L44">      var typeIn =</span>
-<span class="fc" id="L45">          associationRoot.get(&quot;associationType&quot;).in(EAssociationType.getAllBy(Trace.class));</span>
+<span class="nc" id="L44">      var typeIn =</span>
+<span class="nc" id="L45">          associationRoot.get(&quot;associationType&quot;).in(EAssociationType.getAllBy(Trace.class));</span>
 
-<span class="fc" id="L47">      subquery.select(associationRoot.get(&quot;id&quot;)).where(cb.and(cb.or(id1Match, id2Match), typeIn));</span>
+<span class="nc" id="L47">      subquery.select(associationRoot.get(&quot;id&quot;)).where(cb.and(cb.or(id1Match, id2Match), typeIn));</span>
 
-<span class="fc" id="L49">      query.distinct(true);</span>
+<span class="nc" id="L49">      query.distinct(true);</span>
 
-<span class="fc" id="L51">      return cb.exists(subquery);</span>
+<span class="nc" id="L51">      return cb.exists(subquery);</span>
     };
   }
 
@@ -71,10 +71,10 @@ import org.springframework.data.jpa.domain.Specification;
 
   public static Specification&lt;TraceEntity&gt; ofDeclaredSkillProgress(
       DeclaredSkillProgress declaredSkillProgress) {
-<span class="fc" id="L74">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L75">        criteriaBuilder.isMember(</span>
-<span class="fc" id="L76">            DeclaredSkillProgressMapper.INSTANCE.fromDomain(declaredSkillProgress),</span>
-<span class="fc" id="L77">            root.get(&quot;declaredSkillsProgresses&quot;));</span>
+<span class="nc" id="L74">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="nc" id="L75">        criteriaBuilder.isMember(</span>
+<span class="nc" id="L76">            DeclaredSkillProgressMapper.INSTANCE.fromDomain(declaredSkillProgress),</span>
+<span class="nc" id="L77">            root.get(&quot;declaredSkillsProgresses&quot;));</span>
   }
 
   public static Specification&lt;TraceEntity&gt; search(String keyword, ELanguage language) {

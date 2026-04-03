@@ -12,19 +12,19 @@ import org.springframework.data.jpa.domain.Specification;
 public final class DeclaredActivitySpecification {
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityIdIn(
       Collection&lt;UUID&gt; activityIds) {
-<span class="fc" id="L15">    return (root, query, cb) -&gt; root.get(&quot;activity&quot;).get(&quot;id&quot;).in(activityIds);</span>
+<span class="nc" id="L15">    return (root, query, cb) -&gt; root.get(&quot;activity&quot;).get(&quot;id&quot;).in(activityIds);</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityIdInAndStudent(
       Collection&lt;UUID&gt; activityIds, Student student) {
-<span class="fc" id="L20">    return Specification.where(StudentSpecification.&lt;DeclaredActivityEntity&gt;hasStudent(student))</span>
-<span class="fc" id="L21">        .and(hasActivityIdIn(activityIds));</span>
+<span class="nc" id="L20">    return Specification.where(StudentSpecification.&lt;DeclaredActivityEntity&gt;hasStudent(student))</span>
+<span class="nc" id="L21">        .and(hasActivityIdIn(activityIds));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; search(String keyword) {
-<span class="fc" id="L25">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L26" title="1 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="fc" id="L27">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L25">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L26" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="nc" id="L27">        return criteriaBuilder.conjunction();</span>
       }
 <span class="nc" id="L29">      return criteriaBuilder.like(</span>
 <span class="nc" id="L30">          criteriaBuilder.lower(root.get(&quot;activity&quot;).get(&quot;title&quot;)),</span>
@@ -33,7 +33,7 @@ public final class DeclaredActivitySpecification {
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isNotCompleted() {
-<span class="pc" id="L36">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;finishedAt&quot;));</span>
+<span class="nc" id="L36">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;finishedAt&quot;));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isCompleted() {

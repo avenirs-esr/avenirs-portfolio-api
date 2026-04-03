@@ -42,22 +42,22 @@ public class SelfKnowledgeController {
       @PathVariable(&quot;selfKnowledgeCategoryId&quot;) UUID selfKnowledgeCategoryId,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L45">    log.debug(</span>
+<span class="nc" id="L45">    log.debug(</span>
         &quot;Received request to get elements of self knowledge category [{}], with&quot;
             + &quot; pagination (page={}, pageSize={})&quot;,
         selfKnowledgeCategoryId,
         page,
         pageSize);
-<span class="fc" id="L51">    PagedResult&lt;SelfKnowledgeElement&gt; selfKnowledgeElementPagedResult =</span>
-<span class="fc" id="L52">        selfKnowledgeService.getSelfKnowledgeElements(</span>
+<span class="nc" id="L51">    PagedResult&lt;SelfKnowledgeElement&gt; selfKnowledgeElementPagedResult =</span>
+<span class="nc" id="L52">        selfKnowledgeService.getSelfKnowledgeElements(</span>
             selfKnowledgeCategoryId, new PageCriteria(page, pageSize));
 
-<span class="fc" id="L55">    return ResponseEntity.ok(</span>
+<span class="nc" id="L55">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L57">            selfKnowledgeElementPagedResult.content().stream()</span>
-<span class="fc" id="L58">                .map(SelfKnowledgeElementViewMapper::toDTO)</span>
-<span class="fc" id="L59">                .toList(),</span>
-<span class="fc" id="L60">            PageInfoDTO.fromDomain(selfKnowledgeElementPagedResult.pageInfo())));</span>
+<span class="nc" id="L57">            selfKnowledgeElementPagedResult.content().stream()</span>
+<span class="nc" id="L58">                .map(SelfKnowledgeElementViewMapper::toDTO)</span>
+<span class="nc" id="L59">                .toList(),</span>
+<span class="nc" id="L60">            PageInfoDTO.fromDomain(selfKnowledgeElementPagedResult.pageInfo())));</span>
   }
 
   @GetMapping(&quot;/element/{selfKnowledgeElementId}&quot;)
@@ -95,19 +95,19 @@ public class SelfKnowledgeController {
   public ResponseEntity&lt;SelfKnowledgeElementViewDTO&gt; updateSelfKnowledgeElement(
       @PathVariable(&quot;selfKnowledgeElementId&quot;) UUID selfKnowledgeElementId,
       @Valid @RequestBody SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
-<span class="fc" id="L98">    log.debug(</span>
+<span class="nc" id="L98">    log.debug(</span>
         &quot;Received request to update self knowledge element [{}] with infos [{}]&quot;,
         selfKnowledgeElementId,
         selfKnowledgeElementRequest);
 
-<span class="fc" id="L103">    SelfKnowledgeElement selfKnowledgeElement =</span>
-<span class="fc" id="L104">        selfKnowledgeService.updateSelfKnowledgeElement(</span>
+<span class="nc" id="L103">    SelfKnowledgeElement selfKnowledgeElement =</span>
+<span class="nc" id="L104">        selfKnowledgeService.updateSelfKnowledgeElement(</span>
             selfKnowledgeElementId,
-<span class="fc" id="L106">            selfKnowledgeElementRequest.title(),</span>
-<span class="fc" id="L107">            selfKnowledgeElementRequest.description(),</span>
-<span class="fc" id="L108">            selfKnowledgeElementRequest.rating());</span>
+<span class="nc" id="L106">            selfKnowledgeElementRequest.title(),</span>
+<span class="nc" id="L107">            selfKnowledgeElementRequest.description(),</span>
+<span class="nc" id="L108">            selfKnowledgeElementRequest.rating());</span>
 
-<span class="fc" id="L110">    return ResponseEntity.ok(SelfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));</span>
+<span class="nc" id="L110">    return ResponseEntity.ok(SelfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));</span>
   }
 
   @DeleteMapping(&quot;/elements&quot;)
@@ -142,8 +142,8 @@ public class SelfKnowledgeController {
 
   @DeleteMapping(&quot;/categories/{categoryId}&quot;)
   public ResponseEntity&lt;String&gt; removeSelfKnowledgeCategory(@PathVariable UUID categoryId) {
-<span class="fc" id="L145">    selfKnowledgeService.removeSelfKnowledgeCategory(categoryId);</span>
-<span class="fc" id="L146">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
+<span class="nc" id="L145">    selfKnowledgeService.removeSelfKnowledgeCategory(categoryId);</span>
+<span class="nc" id="L146">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

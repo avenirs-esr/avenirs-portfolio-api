@@ -113,15 +113,15 @@ public class UserResourceServiceImpl implements UserResourceService {
 
   @Override
   public void deletePhoto(UUID fileId) {
-<span class="fc" id="L116">    var fileResource =</span>
+<span class="fc" id="L116">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L117">    var fileResource =</span>
         userPhotoRepository
-<span class="fc" id="L118">            .findById(fileId)</span>
-<span class="fc" id="L119">            .orElseThrow(</span>
+<span class="fc" id="L119">            .findById(fileId)</span>
+<span class="fc" id="L120">            .orElseThrow(</span>
                 () -&gt; {
-<span class="fc" id="L121">                  log.error(&quot;No user photo with id {} found&quot;, fileId);</span>
-<span class="fc" id="L122">                  return new FileNotFoundException();</span>
+<span class="fc" id="L122">                  log.error(&quot;No user photo with id {} found&quot;, fileId);</span>
+<span class="fc" id="L123">                  return new FileNotFoundException();</span>
                 });
-<span class="fc" id="L124">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
 <span class="fc bfc" id="L125" title="All 2 branches covered.">    if (!fileResource.getUser().equals(loggedInUser)) {</span>
 <span class="fc" id="L126">      throw new UserNotAuthorizedException();</span>
     }
