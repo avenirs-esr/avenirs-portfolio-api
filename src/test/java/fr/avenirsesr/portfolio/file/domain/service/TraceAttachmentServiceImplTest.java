@@ -27,12 +27,15 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class TraceAttachmentServiceImplTest {
 
   @Mock private TraceAttachmentRepository traceAttachmentRepository;
@@ -154,7 +157,7 @@ class TraceAttachmentServiceImplTest {
     when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
 
     BddLogger.when(
-        "uploading a trace attachment and the file size is too big and the trace has no"
+        "uploading a trace attachment and the file fileSize is too big and the trace has no"
             + " attachments");
     FileSizeTooBigException thrown =
         catchThrowableOfType(
@@ -174,17 +177,13 @@ class TraceAttachmentServiceImplTest {
 
   @Test
   void
-      uploadTraceAttachment_shouldThrowFileTypeNotSupportedException_andDeleteTraceWhenNoAttachments()
-          throws IOException {
+      uploadTraceAttachment_shouldThrowFileTypeNotSupportedException_andDeleteTraceWhenNoAttachments() {
     BddLogger.given("a TraceAttachmentServiceImpl service");
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
 
     when(traceService.getTraceById(traceId)).thenReturn(trace);
     when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
-
-    when(fileStorageService.upload(any(FileResource.class)))
-        .thenThrow(new FileTypeNotSupportedException("File type not supported"));
 
     BddLogger.when(
         "uploading a trace attachment and the file type is not supported and the trace has no"

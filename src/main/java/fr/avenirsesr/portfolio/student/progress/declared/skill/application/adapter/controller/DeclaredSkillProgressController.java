@@ -34,7 +34,7 @@ public class DeclaredSkillProgressController {
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to trace overview of user [{}] (page= {}, size= {})",
+        "Received request to trace overview of user [{}] (page= {}, fileSize= {})",
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());

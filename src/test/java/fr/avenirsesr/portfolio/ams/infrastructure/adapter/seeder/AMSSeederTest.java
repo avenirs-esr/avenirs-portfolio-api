@@ -27,10 +27,13 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@ExtendWith(MockitoExtension.class)
 class AMSSeederTest extends ContainerConfigurationTest {
 
   @Autowired UserSeeder userSeeder;
@@ -111,7 +114,7 @@ class AMSSeederTest extends ContainerConfigurationTest {
     List<AMSEntity> result = amsSeeder.seed(students, skillLevels, traces, cohorts);
 
     BddLogger.then(
-        "it should return an AMS list with correct size and fields and call the amsRepository");
+        "it should return an AMS list with correct fileSize and fields and call the amsRepository");
     assertNotNull(result);
     assertEquals(SeederConfig.AMS_NB, result.size());
 

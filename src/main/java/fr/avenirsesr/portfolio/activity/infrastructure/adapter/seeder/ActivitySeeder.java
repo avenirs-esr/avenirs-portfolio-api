@@ -96,7 +96,7 @@ public class ActivitySeeder {
                 activity,
                 data.banner().fileName(),
                 data.banner().fileType().getMimeType(),
-                data.banner().size(),
+                data.banner().fileSize(),
                 null);
           } catch (IOException e) {
             throw new RuntimeException(e);

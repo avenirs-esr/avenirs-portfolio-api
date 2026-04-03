@@ -30,15 +30,18 @@ import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 public class StudentProgressServiceImplTest {
   @Mock private StudentProgressRepository studentProgressRepository;
   @Mock private TraceService traceService;
@@ -657,7 +660,7 @@ public class StudentProgressServiceImplTest {
 
           @BeforeEach
           void setupAnd() {
-            BddLogger.and("a page size criteria is passed");
+            BddLogger.and("a page fileSize criteria is passed");
             sortCriteria = new SortCriteria(ESortField.DATE, ESortOrder.ASC);
             pageCriteria = new PageCriteria(0, 1); // 1 element by page
             result = studentProgressService.getAllTimeSkillsView(sortCriteria, pageCriteria);
@@ -666,7 +669,7 @@ public class StudentProgressServiceImplTest {
           @Test
           void thenItShouldReturnPagedSkillsLifeProjectView() {
             BddLogger.then(
-                "it should return paged skill progress according to the page size criteria");
+                "it should return paged skill progress according to the page fileSize criteria");
             assertEquals(1, result.content().size(), "Page should contain 1 element");
             assertEquals(4, result.pageInfo().totalElements(), "Total elements should match");
             verify(studentProgressRepository).findAllByStudent(eq(student));

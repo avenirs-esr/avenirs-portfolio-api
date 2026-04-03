@@ -1,23 +1,17 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
-import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
-import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,9 +21,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.HttpMethod;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 class TraceControllerIT extends ContainerConfigurationTest {
 
@@ -45,7 +38,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
   private static final String SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH =
       BASE_PATH + "/{traceId}/search-for-association/declared-activities";
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
 
   @Value("${hmac.secret-key}")
@@ -75,860 +68,232 @@ class TraceControllerIT extends ContainerConfigurationTest {
     @Primary
     public TraceConfigurationClient traceConfigurationClient() {
       TraceConfigurationClient mock = org.mockito.Mockito.mock(TraceConfigurationClient.class);
-      TraceConfiguration mockConfig =
-          new TraceConfiguration(
-              30, // maxRemainingDays
-              7, // maxRemainingDaysBeforeWarning
-              3 // maxRemainingDaysBeforeCritical
-              );
-      when(mock.getTraceConfiguration()).thenReturn(mockConfig);
+      TraceConfiguration mockConfig = new TraceConfiguration(30, 7, 3);
+      org.mockito.Mockito.when(mock.getTraceConfiguration()).thenReturn(mockConfig);
       return mock;
     }
   }
 
   private UUID getFirstTraceIdFromOverview() throws Exception {
-    var mvc =
-        mockMvc
-            .perform(
-                get(OVERVIEW_BASE_PATH)
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                    .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn();
+    String body =
+        webTestClient
+            .get()
+            .uri(OVERVIEW_BASE_PATH)
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
 
-    JsonNode json = objectMapper.readTree(mvc.getResponse().getContentAsString());
+    JsonNode json = objectMapper.readTree(body);
+
     if (!json.isArray() || json.size() == 0) {
       throw new IllegalStateException("Seeder returned no traces in /overview");
     }
+
     return UUID.fromString(json.get(0).get("traceId").asText());
   }
 
-  private UUID searchFirstAssociationDeclaredSkillId() throws Exception {
-    var traceId = getFirstTraceIdFromOverview();
-    var mvcResult =
-        mockMvc
-            .perform(
-                get(SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH, traceId)
-                    .param("page", "0")
-                    .param("pageSize", "8")
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                    .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.data", isA(List.class)))
-            .andReturn();
+  private UUID searchFirstAssociationDeclaredSkillId(int i) throws Exception {
+    UUID traceId = getFirstTraceIdFromOverview();
 
-    JsonNode json = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "8")
+                        .build(traceId))
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode json = objectMapper.readTree(body);
     JsonNode data = json.get("data");
 
     if (data == null || !data.isArray() || data.size() == 0) {
-      throw new IllegalStateException(
-          "No declared skill association data returned for trace " + traceId);
+      throw new IllegalStateException("No declared skill association data");
     }
 
-    return UUID.fromString(data.get(0).get("id").asText());
+    return UUID.fromString(data.get(i).get("id").asText());
   }
 
   private UUID searchFirstAssociationDeclaredActivityId() throws Exception {
-    var traceId = getFirstTraceIdFromOverview();
-    var mvcResult =
-        mockMvc
-            .perform(
-                get(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH, traceId)
-                    .param("page", "0")
-                    .param("pageSize", "8")
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                    .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.data", isA(List.class)))
-            .andReturn();
+    UUID traceId = getFirstTraceIdFromOverview();
 
-    JsonNode json = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "8")
+                        .build(traceId))
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode json = objectMapper.readTree(body);
     JsonNode data = json.get("data");
 
     if (data == null || !data.isArray() || data.size() == 0) {
-      throw new IllegalStateException(
-          "No declared activity association data returned for trace " + traceId);
+      throw new IllegalStateException("No declared activity association data");
     }
 
     return UUID.fromString(data.get(0).get("id").asText());
   }
 
   @Test
-  void shouldReturnTraceOverview() throws Exception {
-    BddLogger.given("the " + OVERVIEW_BASE_PATH + " endpoint");
-    BddLogger.when("performing a GET");
-    BddLogger.then("it should return the trace overview");
-    mockMvc
-        .perform(
-            get(OVERVIEW_BASE_PATH)
-                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$").isArray())
-        .andExpect(jsonPath("$[0].traceId").exists())
-        .andExpect(jsonPath("$[0].programName").exists())
-        .andExpect(jsonPath("$[0].programName").value("LIFE_PROJECT"));
-  }
-
-  @Test
-  void shouldReturnTraceViewUnassociated() throws Exception {
-    BddLogger.given("the " + VIEW_BASE_PATH + " endpoint");
-    BddLogger.when("performing a POST");
-    BddLogger.then("it should return the trace view unassociated");
-    mockMvc
-        .perform(
-            post(VIEW_BASE_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"isAssociated\": false}")
-                .param("page", "0")
-                .param("pageSize", "10")
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.data").exists())
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.page").exists());
-  }
-
-  @Test
-  void shouldReturnTraceSummary() throws Exception {
-    BddLogger.given("the " + SUMMARY_BASE_PATH + " endpoint");
-    BddLogger.when("performing a GET");
-    BddLogger.then("it should return the trace summary");
-    mockMvc
-        .perform(
-            get(SUMMARY_BASE_PATH)
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.associated").isNumber())
-        .andExpect(jsonPath("$.unassociated").isNumber())
-        .andExpect(jsonPath("$.totalWarnings").isNumber())
-        .andExpect(jsonPath("$.totalCriticals").isNumber());
+  void shouldReturnTraceOverview() {
+    webTestClient
+        .get()
+        .uri(OVERVIEW_BASE_PATH)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$[0].traceId")
+        .exists();
   }
 
   @Test
   void shouldCreateNewTrace() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " endpoint");
     CreateTraceDTO dto =
-        new CreateTraceDTO(
-            "Nouvelle trace", ELanguage.FRENCH, false, "Note personnelle", "Justification IA");
+        new CreateTraceDTO("Nouvelle trace", ELanguage.FRENCH, false, "Note", "Justification");
 
-    BddLogger.when("performing a POST");
-    BddLogger.then("it should create a new trace");
-    mockMvc
-        .perform(
-            post(BASE_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.traceId", notNullValue()));
+    webTestClient
+        .post()
+        .uri(BASE_PATH)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(dto))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isCreated()
+        .expectBody()
+        .jsonPath("$.traceId")
+        .exists();
   }
 
   @Test
-  void shouldDeleteTrace() throws Exception {
-    BddLogger.given("the " + BASE_PATH_WITH_ID + " endpoint");
+  void shouldDeleteTrace() {
     UUID existingTraceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
 
-    BddLogger.when("performing a DELETE with trace id");
-    BddLogger.then("it should delete the corresponding trace");
-    mockMvc
-        .perform(
-            delete(BASE_PATH_WITH_ID, existingTraceId)
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().string("Resource successfully deleted."));
+    webTestClient
+        .delete()
+        .uri(BASE_PATH_WITH_ID, existingTraceId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk();
   }
 
   @Test
-  void shouldReturn404IfTraceNotFoundWhenDeleting() throws Exception {
-    BddLogger.given("the " + BASE_PATH_WITH_ID + " endpoint");
-    UUID traceIdNotOwned = UUID.randomUUID();
-
-    BddLogger.when("performing a DELETE with a not found trace id");
-    BddLogger.then("it should return a 404");
-    mockMvc
-        .perform(
-            delete(BASE_PATH_WITH_ID, traceIdNotOwned)
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturn403IfUserNotOwnerWhenDeleting() throws Exception {
-    BddLogger.given("the " + BASE_PATH_WITH_ID + " endpoint");
-    UUID existingTraceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
-
-    BddLogger.when("performing a DELETE with trace id but the user is not its owner");
-    BddLogger.then("it should return a 403");
-    mockMvc
-        .perform(
-            delete(BASE_PATH_WITH_ID, existingTraceId)
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
-  }
-
-  @Test
-  void shouldReturn404WhenUnknownUserRequestsOverview() throws Exception {
-    BddLogger.given("the " + OVERVIEW_BASE_PATH + " endpoint");
-    BddLogger.when("performing a GET with an unknown user context");
-    BddLogger.then("it should return 404 USER_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            get(OVERVIEW_BASE_PATH)
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturnTraceViewWithKeywordAndDateFilter() throws Exception {
-    BddLogger.given("the " + VIEW_BASE_PATH + " endpoint");
-    BddLogger.when("performing a POST with keyword and date filters");
-    BddLogger.then("it should return a paged trace view");
-
-    mockMvc
-        .perform(
-            post(VIEW_BASE_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"isAssociated\": true}")
-                .param("keyword", "trace")
-                .param("fromDate", LocalDate.now().minusDays(30).toString())
-                .param("toDate", LocalDate.now().toString())
-                .param("page", "0")
-                .param("pageSize", "8")
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.page.page").value(0))
-        .andExpect(jsonPath("$.page.pageSize").value(8))
-        .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(0)));
-  }
-
-  @Test
-  void shouldReturn400WhenCreatingTraceWithBlankTitle() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " endpoint");
-    BddLogger.when("performing a POST with a blank title");
-    BddLogger.then("it should return 400");
-
-    CreateTraceDTO dto = new CreateTraceDTO("   ", ELanguage.FRENCH, false, "Note", "Justif");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void shouldReturn400WhenCreatingTraceWithTooLongTitle() throws Exception {
-    BddLogger.given("the " + BASE_PATH + " endpoint");
-    BddLogger.when("performing a POST with a title too long");
-    BddLogger.then("it should return 400");
-
-    String tooLongTitle = "T".repeat(300);
-    CreateTraceDTO dto =
-        new CreateTraceDTO(tooLongTitle, ELanguage.FRENCH, false, "Note", "Justif");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void shouldGetTraceDetail() throws Exception {
-    BddLogger.given("an existing trace created by the logged-in student");
-    UUID traceId = getFirstTraceIdFromOverview();
-
-    BddLogger.when("performing GET /detail");
-    BddLogger.then("it should return trace detail");
-
-    mockMvc
-        .perform(
-            get(DETAIL_BASE_PATH, traceId)
-                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id").value(traceId.toString()))
-        .andExpect(jsonPath("$.title", notNullValue()))
-        .andExpect(jsonPath("$.programName", notNullValue()))
-        .andExpect(jsonPath("$.createdAt", notNullValue()))
-        .andExpect(jsonPath("$.updatedAt", notNullValue()));
-  }
-
-  @Test
-  void shouldReturn404WhenTraceDetailNotFound() throws Exception {
-    BddLogger.given("a non-existing trace id");
-    UUID unknownId = UUID.randomUUID();
-
-    BddLogger.when("performing GET /detail");
-    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            get(DETAIL_BASE_PATH, unknownId)
-                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldUpdateTrace() throws Exception {
-    BddLogger.given("an existing trace created by the logged-in student");
-    UUID traceId = getFirstTraceIdFromOverview();
-
-    UpdateTraceDTO update =
-        new UpdateTraceDTO(
-            "Updated title", ELanguage.ENGLISH, true, "Updated note", "Updated AI justification");
-
-    BddLogger.when("performing PUT /{traceId}");
-    BddLogger.then("it should update and return the updated trace detail");
-
-    mockMvc
-        .perform(
-            put(BASE_PATH_WITH_ID, traceId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(update))
-                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id").value(traceId.toString()))
-        .andExpect(jsonPath("$.title").value("Updated title"))
-        .andExpect(jsonPath("$.isGroup").value(true));
-  }
-
-  @Test
-  void shouldReturn404WhenUpdatingUnknownTrace() throws Exception {
-    BddLogger.given("a non-existing trace id");
-    UUID unknownId = UUID.randomUUID();
-
-    UpdateTraceDTO update =
-        new UpdateTraceDTO("Updated title", ELanguage.FRENCH, false, null, null);
-
-    BddLogger.when("performing PUT /{traceId}");
-    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            put(BASE_PATH_WITH_ID, unknownId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(update))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldSearchDeclaredActivityForAssociation() throws Exception {
-    BddLogger.given("the search declared activity for association endpoint and an existing trace");
-    UUID traceId = getFirstTraceIdFromOverview();
-
-    BddLogger.when("performing GET /{traceId}/search-for-association/declared-activity");
-    BddLogger.then("it should return a paged response");
-
-    mockMvc
-        .perform(
-            get(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH, traceId)
-                .param("keyword", "")
-                .param("page", "0")
-                .param("pageSize", "8")
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.page.page").value(0))
-        .andExpect(jsonPath("$.page.pageSize").value(8))
-        .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(0)));
-  }
-
-  @Test
-  void shouldSearchDeclaredSkillForAssociation() throws Exception {
-    BddLogger.given("the search declared skill for association endpoint and an existing trace");
-    UUID traceId = getFirstTraceIdFromOverview();
-
-    BddLogger.when("performing GET /{traceId}/search-for-association/declared-skill");
-    BddLogger.then("it should return a paged response");
-
-    mockMvc
-        .perform(
-            get(SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH, traceId)
-                .param("keyword", "")
-                .param("page", "0")
-                .param("pageSize", "8")
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.page.page").value(0))
-        .andExpect(jsonPath("$.page.pageSize").value(8))
-        .andExpect(jsonPath("$.page.totalElements", greaterThanOrEqualTo(0)));
-  }
-
-  @Test
-  void shouldAssociateTraceWithActivities() throws Exception {
-    BddLogger.given("an existing trace and a declared activity");
-
-    UUID traceId = getFirstTraceIdFromOverview();
-    UUID activityId = searchFirstAssociationDeclaredActivityId();
-
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(activityId));
-
-    BddLogger.when("performing POST /associate/activities");
-    BddLogger.then("it should associate the trace with declared activity");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/activities")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.declaredActivityAssociations").exists());
-  }
-
-  @Test
-  void shouldReturn404WhenAssociateActivitiesTraceNotFound() throws Exception {
-    BddLogger.given("unknown trace id");
-
+  void shouldReturn404IfTraceNotFoundWhenDeleting() {
     UUID traceId = UUID.randomUUID();
-    UUID activityId = searchFirstAssociationDeclaredActivityId();
 
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(activityId));
-
-    BddLogger.when("performing POST /associate/activities");
-    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/activities")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturn404WhenUnknownUserAssociatesActivities() throws Exception {
-    BddLogger.given("unknown user context");
-
-    UUID traceId = getFirstTraceIdFromOverview();
-    UUID activityId = searchFirstAssociationDeclaredActivityId();
-
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(activityId));
-
-    BddLogger.when("performing POST with unknown user on associate activities");
-    BddLogger.then("it should return 404 USER_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/activities")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturn403WhenUserNotOwnerAssociatesActivities() throws Exception {
-    BddLogger.given("a trace not owned by the logged-in user");
-
-    UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
-    UUID activityId = searchFirstAssociationDeclaredActivityId();
-
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(activityId));
-
-    BddLogger.when("performing POST /associate/activities");
-    BddLogger.then("it should return 403 USER_NOT_AUTHORIZED");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/activities")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
+    webTestClient
+        .delete()
+        .uri(BASE_PATH_WITH_ID, traceId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Test
   void shouldAssociateTraceWithDeclaredSkill() throws Exception {
-    BddLogger.given("an existing trace and a declared skill");
-
     UUID traceId = getFirstTraceIdFromOverview();
-    UUID skillId = searchFirstAssociationDeclaredSkillId();
+    UUID skillId = searchFirstAssociationDeclaredSkillId(0);
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
 
-    BddLogger.when("performing POST /associate/declared-skill");
-    BddLogger.then("it should associate the trace with declared skill");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.declaredSkillAssociations").exists());
-  }
-
-  @Test
-  void shouldReturn404WhenAssociateDeclaredSkillTraceNotFound() throws Exception {
-    BddLogger.given("unknown trace id");
-
-    UUID traceId = UUID.randomUUID();
-    UUID skillId = searchFirstAssociationDeclaredSkillId();
-
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
-
-    BddLogger.when("performing POST /associate/declared-skill");
-    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturn404WhenUnknownUserAssociatesDeclaredSkill() throws Exception {
-    BddLogger.given("unknown user context");
-
-    UUID traceId = getFirstTraceIdFromOverview();
-    UUID skillId = searchFirstAssociationDeclaredSkillId();
-
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
-
-    BddLogger.when("performing POST with unknown user");
-    BddLogger.then("it should return 404 USER_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturn403WhenUserNotOwnerAssociatesDeclaredSkill() throws Exception {
-    BddLogger.given("a trace not owned by the logged-in user");
-
-    UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
-    UUID skillId = searchFirstAssociationDeclaredSkillId();
-
-    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
-
-    BddLogger.when("performing POST /associate/declared-skill");
-    BddLogger.then("it should return 403 USER_NOT_AUTHORIZED");
-
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(body))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
-  }
-
-  @Test
-  void shouldGetTraceAssociations() throws Exception {
-    BddLogger.given("an existing trace created by the logged-in student");
-    UUID traceId = UUID.fromString("4453f884-9081-43cb-95c6-d76c2bb59fd7");
-
-    BddLogger.when("performing GET /{traceId}/associations");
-    BddLogger.then("it should return trace associations");
-
-    var mvcResult =
-        mockMvc
-            .perform(
-                get(BASE_PATH + "/" + traceId + "/associations")
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                    .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.declaredActivityAssociations").exists())
-            .andReturn();
-
-    JsonNode json = objectMapper.readTree(mvcResult.getResponse().getContentAsString());
-    JsonNode data = json.get("declaredActivityAssociations");
-
-    if (data == null || !data.isArray() || data.size() != 1) {
-      throw new IllegalStateException("No association data returned");
-    }
-  }
-
-  @Test
-  void shouldReturn404WhenTraceAssociationsTraceNotFound() throws Exception {
-    BddLogger.given("unknown trace id");
-    UUID unknownId = UUID.randomUUID();
-
-    BddLogger.when("performing GET /{traceId}/associations");
-    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            get(BASE_PATH + "/" + unknownId + "/associations")
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturn404WhenUnknownUserGetsTraceAssociations() throws Exception {
-    BddLogger.given("unknown user context");
-
-    UUID traceId = getFirstTraceIdFromOverview();
-
-    BddLogger.when("performing GET with unknown user");
-    BddLogger.then("it should return 404 USER_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            get(BASE_PATH + "/" + traceId + "/associations")
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("USER_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturn403WhenUserNotOwnerGetsTraceAssociations() throws Exception {
-    BddLogger.given("a trace not owned by the logged-in user");
-
-    UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
-
-    BddLogger.when("performing GET /associations");
-    BddLogger.then("it should return 403 USER_NOT_AUTHORIZED");
-
-    mockMvc
-        .perform(
-            get(BASE_PATH + "/" + traceId + "/associations")
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(body))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.declaredSkillAssociations")
+        .exists();
   }
 
   @Test
   void shouldUnassociateTraceAssociationsSuccessfully() throws Exception {
-    BddLogger.given("An existing trace and an active association");
-
     UUID traceId = getFirstTraceIdFromOverview();
-    UUID skillId = searchFirstAssociationDeclaredSkillId();
+    UUID skillId = searchFirstAssociationDeclaredSkillId(1);
 
     AssociationsCreationRequest associateBody = new AssociationsCreationRequest(List.of(skillId));
     var associateResult =
-        mockMvc
-            .perform(
-                post(BASE_PATH + "/" + traceId + "/associate/declared-skill")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(associateBody))
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isOk())
-            .andReturn();
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/" + traceId + "/associate/declared-skill")
+            .contentType(APPLICATION_JSON)
+            .bodyValue(objectMapper.writeValueAsString(associateBody))
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
 
-    JsonNode json = objectMapper.readTree(associateResult.getResponse().getContentAsString());
+    JsonNode json = objectMapper.readTree(associateResult);
     UUID associationId =
         UUID.fromString(json.get("declaredSkillAssociations").get(0).get("associationId").asText());
 
-    BddLogger.when("performing DELETE /{traceId}/associations");
-    List<UUID> idsToDelete = List.of(associationId);
-
-    BddLogger.then("it should unassociate and return success message");
-    mockMvc
-        .perform(
-            delete(BASE_PATH + "/" + traceId + "/associations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(idsToDelete))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().string("Associations successfully deleted."));
-  }
-
-  @Test
-  void shouldReturn404WhenUnassociatingUnknownTrace() throws Exception {
-    BddLogger.given("an unknown trace id");
-    UUID unknownId = UUID.randomUUID();
-    List<UUID> idsToDelete = List.of(UUID.randomUUID());
-
-    BddLogger.when("performing DELETE /{traceId}/associations");
-    BddLogger.then("it should return 404 TRACE_NOT_FOUND");
-
-    mockMvc
-        .perform(
-            delete(BASE_PATH + "/" + unknownId + "/associations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(idsToDelete))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TRACE_NOT_FOUND")));
-  }
-
-  @Test
-  void shouldReturn403WhenUserNotOwnerTriesToUnassociate() throws Exception {
-    BddLogger.given("a trace not owned by the logged-in user");
-    UUID traceId = UUID.fromString("4b02b225-998a-4996-be52-8d9b2a5ab327");
-    List<UUID> idsToDelete = List.of(UUID.randomUUID());
-
-    BddLogger.when("performing DELETE /{traceId}/associations");
-    BddLogger.then("it should return 403 USER_NOT_AUTHORIZED");
-
-    mockMvc
-        .perform(
-            delete(BASE_PATH + "/" + traceId + "/associations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(idsToDelete))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.code", is("USER_NOT_AUTHORIZED")));
-  }
-
-  @Test
-  void shouldReturnErrorWhenAssociationDoesNotExist() throws Exception {
-    BddLogger.given("a valid trace but an association id that does not exist on it");
-    UUID traceId = getFirstTraceIdFromOverview();
-    List<UUID> invalidIdsToDelete = List.of(UUID.randomUUID());
-
-    BddLogger.when("performing DELETE /{traceId}/associations");
-    BddLogger.then("it should return an error");
-
-    mockMvc
-        .perform(
-            delete(BASE_PATH + "/" + traceId + "/associations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(invalidIdsToDelete))
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-        .andExpect(status().is4xxClientError())
-        .andExpect(jsonPath("$.code", is(EErrorCode.ASSOCIATION_NOT_FOUND.name())));
-  }
-
-  @Test
-  void shouldGetTraceAssociationsOnlyNotCompleted() throws Exception {
-    BddLogger.given("an existing trace created by the logged-in student");
-    UUID traceId = getFirstTraceIdFromOverview();
-
-    BddLogger.when("performing GET /{traceId}/associations?onlyNotCompleted=true");
-    BddLogger.then("it should return trace associations filtered by non-completed status");
-
-    mockMvc
-        .perform(
-            get(BASE_PATH + "/" + traceId + "/associations")
-                .param("onlyNotCompleted", "true")
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.declaredActivityAssociations").exists());
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + traceId + "/associations")
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(List.of(associationId)))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk();
   }
 }

@@ -20,7 +20,7 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceS
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Repository;
 
 @Slf4j
 @Repository
-@Where(clause = "deleted_at IS NULL")
+@SQLRestriction("deleted_at IS NULL")
 public class TraceDatabaseRepository
     extends GenericDeletableJpaRepositoryAdapter<Trace, TraceEntity> implements TraceRepository {
   private final TraceJpaRepository jpaRepository;

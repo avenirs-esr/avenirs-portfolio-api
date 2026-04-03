@@ -47,7 +47,7 @@ public class FakeTraceAttachment {
             trace,
             fileDataGenerator.with("filename").fileName(fileType),
             fileType,
-            dataGenerator.with("size").number((int) fileType.getSizeLimit().bytes()),
+            dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,
             true,
             "/workspace/app%s/%s.%s"

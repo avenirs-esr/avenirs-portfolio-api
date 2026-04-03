@@ -1,9 +1,5 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -16,13 +12,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 class UserResourceControllerIT extends ContainerConfigurationTest {
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired private WebTestClient webTestClient;
 
   @Autowired private ObjectMapper objectMapper;
 
@@ -41,55 +38,66 @@ class UserResourceControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldUploadUserProfilePhotoSuccessfully() throws Exception {
+  void shouldUploadUserProfilePhotoSuccessfully() {
     BddLogger.given("the /me/storage/users/{userCategory}/{photoType} endpoint");
-    MockMultipartFile file =
-        new MockMultipartFile(
-            "file",
-            "profile-photo.jpg",
-            MediaType.IMAGE_JPEG_VALUE,
-            "FakeImageContent".getBytes(StandardCharsets.UTF_8));
 
-    BddLogger.when("performing a MULTIPART");
+    byte[] fileContent = "FakeImageContent".getBytes(StandardCharsets.UTF_8);
+
+    MultipartBodyBuilder builder = new MultipartBodyBuilder();
+    builder
+        .part(
+            "file",
+            new ByteArrayResource(fileContent) {
+              @Override
+              public String getFilename() {
+                return "profile-photo.jpg";
+              }
+            })
+        .contentType(MediaType.IMAGE_JPEG);
+
+    BddLogger.when("performing a MULTIPART PUT");
     BddLogger.then("it should upload user profile photo successfully");
-    mockMvc
-        .perform(
-            multipart(
-                    "/me/storage/users/{userCategory}/{photoType}",
-                    EUserCategory.STUDENT,
-                    EUserPhotoType.PROFILE)
-                .file(file)
-                .with(
-                    request -> {
-                      request.setMethod("PUT"); // multipart default is POST, on force PUT
-                      return request;
-                    })
-                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.id").exists())
-        .andExpect(
-            jsonPath("$.fileSize")
-                .value("FakeImageContent".getBytes(StandardCharsets.UTF_8).length))
-        .andExpect(jsonPath("$.version").value(2));
+
+    webTestClient
+        .put()
+        .uri(
+            "/me/storage/users/{userCategory}/{photoType}",
+            EUserCategory.STUDENT,
+            EUserPhotoType.PROFILE)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .bodyValue(builder.build())
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.id")
+        .exists()
+        .jsonPath("$.fileSize")
+        .isEqualTo(fileContent.length)
+        .jsonPath("$.version")
+        .isEqualTo(2);
   }
 
   @Test
-  void shouldReturnNotFoundWhenDeletingNonExistingPhoto() throws Exception {
+  void shouldReturnNotFoundWhenDeletingNonExistingPhoto() {
     BddLogger.given("the /me/storage/users/{fileId} endpoint");
+
     UUID fileId = UUID.randomUUID();
 
-    BddLogger.when("performing a DELETE ob bib existing photo");
+    BddLogger.when("performing a DELETE on non existing photo");
     BddLogger.then("it should return the not found status");
-    mockMvc
-        .perform(
-            delete("/me/storage/users/{fileId}", fileId)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isNotFound());
+
+    webTestClient
+        .delete()
+        .uri("/me/storage/users/{fileId}", fileId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 }

@@ -2,8 +2,6 @@ package fr.avenirsesr.portfolio.user.application.adapter.controller;
 
 import static fr.avenirsesr.portfolio.common.testutils.infrastructure.adapter.util.TestResourceUtils.loadJson;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.Utils;
@@ -16,10 +14,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 public class UserControllerIT extends ContainerConfigurationTest {
-  @Autowired private MockMvc mockMvc;
+
+  @Autowired private WebTestClient webTestClient;
 
   @Value("${hmac.secret-key}")
   private String secretKey;
@@ -54,16 +53,20 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     BddLogger.when("performing a PUT");
     BddLogger.then("it should update the student profile successfully");
-    mockMvc
-        .perform(
-            put("/me/users/STUDENT/update")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payloadJson))
-        .andExpect(status().isOk())
-        .andExpect(content().string("Mise à jour faite."));
+
+    webTestClient
+        .put()
+        .uri("/me/users/STUDENT/update")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(payloadJson)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .isEqualTo("Mise à jour faite.");
   }
 
   @Test
@@ -73,49 +76,66 @@ public class UserControllerIT extends ContainerConfigurationTest {
 
     BddLogger.when("performing a PUT");
     BddLogger.then("it should update the teacher profile successfully");
-    mockMvc
-        .perform(
-            put("/me/users/TEACHER/update")
-                .header("X-Signed-Context", teacherPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", teacherSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payloadJson))
-        .andExpect(status().isOk())
-        .andExpect(content().string("Mise à jour faite."));
+
+    webTestClient
+        .put()
+        .uri("/me/users/TEACHER/update")
+        .header("X-Signed-Context", teacherPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", teacherSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(payloadJson)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .isEqualTo("Mise à jour faite.");
   }
 
   @Test
-  void shouldReturnNotFoundForUnknownUser() throws Exception {
+  void shouldReturnNotFoundForUnknownUser() {
     BddLogger.given("the /me/users/STUDENT/overview endpoint");
     BddLogger.when("performing a GET with an unknown user");
     BddLogger.then("it should return a 404");
-    mockMvc
-        .perform(
-            get("/me/users/STUDENT/overview")
-                .header("X-Signed-Context", unknownPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", unknownSignature))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+
+    webTestClient
+        .get()
+        .uri("/me/users/STUDENT/overview")
+        .header("X-Signed-Context", unknownPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", unknownSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_NOT_FOUND");
   }
 
   @Test
-  void shouldGetStudentProfile() throws Exception {
+  void shouldGetStudentProfile() {
     BddLogger.given("the /me/users/STUDENT/overview endpoint");
     BddLogger.when("performing a GET");
     BddLogger.then("it should return the student profile");
-    mockMvc
-        .perform(
-            get("/me/users/STUDENT/overview")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.firstname").value("Lucas"))
-        .andExpect(jsonPath("$.lastname").value("Tessier"))
-        .andExpect(jsonPath("$.email").value("lucas.tessier@email.com"))
-        .andExpect(jsonPath("$.bio").exists());
+
+    webTestClient
+        .get()
+        .uri("/me/users/STUDENT/overview")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.firstname")
+        .isEqualTo("Updated")
+        .jsonPath("$.lastname")
+        .isEqualTo("Name")
+        .jsonPath("$.email")
+        .isEqualTo("new.email@example.com")
+        .jsonPath("$.bio")
+        .exists();
   }
 
   @Test

@@ -1,28 +1,28 @@
 package fr.avenirsesr.portfolio.student.progress.imported.application.adapter.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 public class SkillLevelProgressControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/skill-level-progress";
   private static final String DETAILS_BASE_PATH = BASE_PATH + "/details/{skillId}";
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired private WebTestClient webTestClient;
+
+  @Autowired private ObjectMapper objectMapper;
 
   @Value("${hmac.secret-key}")
   private String secretKey;
@@ -54,116 +54,130 @@ public class SkillLevelProgressControllerIT extends ContainerConfigurationTest {
 
   @Nested
   class GivenSkillLevelProgressEndpoint {
-    @BeforeEach
-    void setupGiven() {
-      BddLogger.given("the " + BASE_PATH + " enpoint");
-    }
 
     @Nested
     class WhenPerformingGET {
-      @BeforeEach
-      void setupWhen() {
-        BddLogger.when("performing a GET");
-      }
 
       @Nested
       class AndAStudentUserIsPassed {
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("a student user is passed");
-        }
 
         @Test
-        void thenItShouldReturnPagedSkillLevelProgress() throws Exception {
+        void thenItShouldReturnPagedSkillLevelProgress() {
+          BddLogger.given("the " + BASE_PATH + " enpoint");
+          BddLogger.when("performing a GET");
+          BddLogger.and("a student user is passed");
           BddLogger.then("it should return paged skill level progresses");
-          mockMvc
-              .perform(
-                  get(BASE_PATH)
-                      .param("page", "0")
-                      .param("pageSize", "10")
-                      .param("sort", "NAME")
-                      .header("Accept-Language", language.getCode())
-                      .header("X-Signed-Context", studentPayload)
-                      .header("X-Context-Kid", secretKey)
-                      .header("X-Context-Signature", studentSignature)
-                      .accept(MediaType.APPLICATION_JSON))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.data").isArray())
-              .andExpect(jsonPath("$.page").exists());
+
+          webTestClient
+              .get()
+              .uri(
+                  uriBuilder ->
+                      uriBuilder
+                          .path(BASE_PATH)
+                          .queryParam("page", "0")
+                          .queryParam("pageSize", "10")
+                          .queryParam("sort", "NAME")
+                          .build())
+              .header("Accept-Language", language.getCode())
+              .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+              .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+              .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+              .accept(MediaType.APPLICATION_JSON)
+              .exchange()
+              .expectStatus()
+              .isOk()
+              .expectBody()
+              .jsonPath("$.data")
+              .isArray()
+              .jsonPath("$.page")
+              .exists();
         }
       }
 
       @Nested
       class AndNoPaginationParamsArePassed {
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("no pagination params are passed");
-        }
 
         @Test
-        void thenItShouldReturnDefaultPagination() throws Exception {
+        void thenItShouldReturnDefaultPagination() {
+          BddLogger.given("the " + BASE_PATH + " enpoint");
+          BddLogger.when("performing a GET");
+          BddLogger.and("no pagination params are passed");
           BddLogger.then("it should return default pagination");
-          mockMvc
-              .perform(
-                  get(BASE_PATH)
-                      .header("Accept-Language", language.getCode())
-                      .header("X-Signed-Context", studentPayload)
-                      .header("X-Context-Kid", secretKey)
-                      .header("X-Context-Signature", studentSignature)
-                      .accept(MediaType.APPLICATION_JSON))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.data").isArray())
-              .andExpect(jsonPath("$.page").exists());
+
+          webTestClient
+              .get()
+              .uri(BASE_PATH)
+              .header("Accept-Language", language.getCode())
+              .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+              .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+              .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+              .accept(MediaType.APPLICATION_JSON)
+              .exchange()
+              .expectStatus()
+              .isOk()
+              .expectBody()
+              .jsonPath("$.data")
+              .isArray()
+              .jsonPath("$.page")
+              .exists();
         }
       }
 
       @Nested
       class AndAnUnknownUserIsPassed {
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("an unknown user or an non student user is passed");
-        }
 
         @Test
-        void thenItShouldReturn404() throws Exception {
-          BddLogger.then("it should return 403");
-          mockMvc
-              .perform(
-                  get(BASE_PATH)
-                      .header("Accept-Language", language.getCode())
-                      .header("X-Signed-Context", unknownUserPayload)
-                      .header("X-Context-Kid", secretKey)
-                      .header("X-Context-Signature", unknownUserSignature)
-                      .accept(MediaType.APPLICATION_JSON))
-              .andExpect(status().isNotFound())
-              .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-              .andExpect(jsonPath("$.message").value("User not found"))
-              .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+        void thenItShouldReturn404() {
+          BddLogger.given("the " + BASE_PATH + " enpoint");
+          BddLogger.when("performing a GET");
+          BddLogger.and("an unknown user is passed");
+          BddLogger.then("it should return 404");
+
+          webTestClient
+              .get()
+              .uri(BASE_PATH)
+              .header("Accept-Language", language.getCode())
+              .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+              .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+              .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
+              .accept(MediaType.APPLICATION_JSON)
+              .exchange()
+              .expectStatus()
+              .isNotFound()
+              .expectBody()
+              .jsonPath("$.message")
+              .isEqualTo("User not found")
+              .jsonPath("$.code")
+              .isEqualTo("USER_NOT_FOUND");
         }
       }
 
       @Nested
       class AndADateParamIsPassed {
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("a date param is passed");
-        }
 
         @Test
-        void thenItShouldSupportSortingByDate() throws Exception {
+        void thenItShouldSupportSortingByDate() {
+          BddLogger.given("the " + BASE_PATH + " enpoint");
+          BddLogger.when("performing a GET");
+          BddLogger.and("a date param is passed");
           BddLogger.then("it should return paged skill level progresses sorted by date");
-          mockMvc
-              .perform(
-                  get(BASE_PATH)
-                      .param("sort", "DATE")
-                      .header("Accept-Language", language.getCode())
-                      .header("X-Signed-Context", studentPayload)
-                      .header("X-Context-Kid", secretKey)
-                      .header("X-Context-Signature", studentSignature)
-                      .accept(MediaType.APPLICATION_JSON))
-              .andExpect(status().isOk())
-              .andExpect(jsonPath("$.data").isArray())
-              .andExpect(jsonPath("$.page").exists());
+
+          webTestClient
+              .get()
+              .uri(uriBuilder -> uriBuilder.path(BASE_PATH).queryParam("sort", "DATE").build())
+              .header("Accept-Language", language.getCode())
+              .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+              .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+              .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+              .accept(MediaType.APPLICATION_JSON)
+              .exchange()
+              .expectStatus()
+              .isOk()
+              .expectBody()
+              .jsonPath("$.data")
+              .isArray()
+              .jsonPath("$.page")
+              .exists();
         }
       }
     }
@@ -171,40 +185,36 @@ public class SkillLevelProgressControllerIT extends ContainerConfigurationTest {
 
   @Nested
   class GivenSkillLevelProgressDetailsEndpoint {
-    @BeforeEach
-    void setupGiven() {
-      BddLogger.given("the " + DETAILS_BASE_PATH + " enpoint");
-    }
 
     @Nested
     class WhenPerformingGET {
-      @BeforeEach
-      void setupWhen() {
-        BddLogger.when("performing a GET");
-      }
 
       @Nested
-      class AndAnUnknowSkillIdIsPassed {
-        private static final UUID UNKNOWN_SKILL_ID = UUID.randomUUID();
+      class AndAnUnknownSkillIdIsPassed {
 
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("an unknown skill id is passed");
-        }
+        private final UUID UNKNOWN_SKILL_ID = UUID.randomUUID();
 
         @Test
-        void thenItShouldReturn404() throws Exception {
+        void thenItShouldReturn404() {
+          BddLogger.given("the " + DETAILS_BASE_PATH + " enpoint");
+          BddLogger.when("performing a GET");
+          BddLogger.and("an unknown skill id is passed");
           BddLogger.then("it should return 404");
-          mockMvc
-              .perform(
-                  get(DETAILS_BASE_PATH, UNKNOWN_SKILL_ID)
-                      .header("Accept-Language", language.getCode())
-                      .header("X-Signed-Context", studentPayload)
-                      .header("X-Context-Kid", secretKey)
-                      .header("X-Context-Signature", studentSignature)
-                      .accept(MediaType.APPLICATION_JSON))
-              .andExpect(status().isNotFound())
-              .andExpect(jsonPath("$.code").value("SKILL_NOT_FOUND"));
+
+          webTestClient
+              .get()
+              .uri(DETAILS_BASE_PATH, UNKNOWN_SKILL_ID)
+              .header("Accept-Language", language.getCode())
+              .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+              .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+              .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+              .accept(MediaType.APPLICATION_JSON)
+              .exchange()
+              .expectStatus()
+              .isNotFound()
+              .expectBody()
+              .jsonPath("$.code")
+              .isEqualTo("SKILL_NOT_FOUND");
         }
       }
     }

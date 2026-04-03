@@ -32,7 +32,7 @@ public class FakeActivityBanner {
             activity,
             fileDataGenerator.with("file-name").fileName(fileType),
             fileType,
-            dataGenerator.with("size").number((int) fileType.getSizeLimit().bytes()),
+            dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,
             true,
             "/workspace/app%s/%s.%s"

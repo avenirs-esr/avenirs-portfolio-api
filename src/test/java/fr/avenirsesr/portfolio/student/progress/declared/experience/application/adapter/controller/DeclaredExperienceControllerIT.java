@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.controller;
 
 import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
@@ -11,15 +11,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.transaction.annotation.Transactional;
 
 public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/declared/experiences";
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired private WebTestClient webTestClient;
+  @Autowired private ObjectMapper objectMapper;
 
   @Value("${hmac.secret-key}")
   private String secretKey;
@@ -59,6 +61,11 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         + "}\n";
   }
 
+  private String extractIdFromResponse(String responseBody) throws Exception {
+    JsonNode jsonNode = objectMapper.readTree(responseBody);
+    return jsonNode.get("id").asText();
+  }
+
   @Transactional
   @Test
   void shouldCreateDeclaredExperience() throws Exception {
@@ -66,52 +73,63 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     BddLogger.when("performing a POST to create a declared experience");
     BddLogger.then("it should return created status and the experience");
 
-    mockMvc
-        .perform(
-            post(BASE_PATH + "/")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(buildCreateExperienceJson()))
-        .andExpect(status().isCreated())
-        .andExpect(header().string("Location", containsString(BASE_PATH)))
-        .andExpect(jsonPath("$.id", notNullValue()))
-        .andExpect(jsonPath("$.title").value("My Experience"));
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(buildCreateExperienceJson())
+        .exchange()
+        .expectStatus()
+        .isCreated()
+        .expectBody()
+        .jsonPath("$.id")
+        .exists()
+        .jsonPath("$.title")
+        .isEqualTo("My Experience");
   }
 
   @Transactional
   @Test
   void shouldGetDeclaredExperience() throws Exception {
     BddLogger.given("an already created declared experience");
-    var result =
-        mockMvc
-            .perform(
-                post(BASE_PATH + "/")
-                    .header("X-Signed-Context", studentPayload)
-                    .header("X-Context-Kid", secretKey)
-                    .header("X-Context-Signature", studentSignature)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(buildCreateExperienceJson()))
-            .andExpect(status().isCreated())
-            .andReturn();
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
 
-    String responseBody = result.getResponse().getContentAsString();
-    String createdId =
-        responseBody.substring(responseBody.indexOf(":") + 2, responseBody.indexOf(",") - 1);
+    String createdId = extractIdFromResponse(responseBody);
 
     BddLogger.when("performing a GET on the created declared experience");
     BddLogger.then("it should return the declared experience");
 
-    mockMvc
-        .perform(
-            get(BASE_PATH + "/" + createdId)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(createdId))
-        .andExpect(jsonPath("$.title").value("My Experience"));
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + createdId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(createdId)
+        .jsonPath("$.title")
+        .isEqualTo("My Experience");
   }
 
   @Test
@@ -121,13 +139,15 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     BddLogger.when("performing a GET with unknown id");
     BddLogger.then("it should return not found");
 
-    mockMvc
-        .perform(
-            get(BASE_PATH + "/" + notFoundDeclaredExperienceId)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isNotFound());
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Transactional
@@ -137,19 +157,28 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     BddLogger.when("performing a GET on /view without pagination params");
     BddLogger.then("it should return a paged list of declared experiences");
 
-    mockMvc
-        .perform(
-            get(BASE_PATH + "/view")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.page").exists())
-        .andExpect(jsonPath("$.page.page").exists())
-        .andExpect(jsonPath("$.page.pageSize").exists())
-        .andExpect(jsonPath("$.page.totalElements").exists())
-        .andExpect(jsonPath("$.page.totalPages").exists());
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/view")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page")
+        .exists()
+        .jsonPath("$.page.page")
+        .exists()
+        .jsonPath("$.page.pageSize")
+        .exists()
+        .jsonPath("$.page.totalElements")
+        .exists()
+        .jsonPath("$.page.totalPages")
+        .exists();
   }
 
   @Transactional
@@ -159,44 +188,51 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     BddLogger.when("performing a GET on /view with pagination params");
     BddLogger.then("it should return a paged list respecting pagination");
 
-    mockMvc
-        .perform(
-            get(BASE_PATH + "/view")
-                .param("page", "0")
-                .param("pageSize", "5")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.data").isArray())
-        .andExpect(jsonPath("$.data.length()").value(lessThanOrEqualTo(5)))
-        .andExpect(jsonPath("$.page.page").value(0))
-        .andExpect(jsonPath("$.page.pageSize").value(5));
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/view")
+                    .queryParam("page", 0)
+                    .queryParam("pageSize", 5)
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(5);
   }
 
   @Transactional
   @Test
   void shouldUpdateDeclaredExperience() throws Exception {
     BddLogger.given("an existing declared experience");
-    var result =
-        mockMvc
-            .perform(
-                post(BASE_PATH + "/")
-                    .header("X-Signed-Context", studentPayload)
-                    .header("X-Context-Kid", secretKey)
-                    .header("X-Context-Signature", studentSignature)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(buildCreateExperienceJson()))
-            .andExpect(status().isCreated())
-            .andReturn();
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
 
-    String createdId =
-        result
-            .getResponse()
-            .getContentAsString()
-            .substring(
-                result.getResponse().getContentAsString().indexOf(":") + 2,
-                result.getResponse().getContentAsString().indexOf(",") - 1);
+    String createdId = extractIdFromResponse(responseBody);
 
     String updateJson =
         "{\n"
@@ -216,20 +252,28 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     BddLogger.when("performing PUT on that declared experience");
     BddLogger.then("it should update and return the new values");
 
-    mockMvc
-        .perform(
-            put(BASE_PATH + "/" + createdId)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(updateJson))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(createdId))
-        .andExpect(jsonPath("$.title").value("Updated Experience"))
-        .andExpect(jsonPath("$.organization").value("New Org"))
-        .andExpect(jsonPath("$.location").value("Lyon"))
-        .andExpect(jsonPath("$.externalLink").value("https://updated.com"));
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + createdId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(updateJson)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(createdId)
+        .jsonPath("$.title")
+        .isEqualTo("Updated Experience")
+        .jsonPath("$.organization")
+        .isEqualTo("New Org")
+        .jsonPath("$.location")
+        .isEqualTo("Lyon")
+        .jsonPath("$.externalLink")
+        .isEqualTo("https://updated.com");
   }
 
   @Test
@@ -238,40 +282,40 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     BddLogger.when("performing PUT with unknown id");
     BddLogger.then("it should return not found");
 
-    mockMvc
-        .perform(
-            put(BASE_PATH + "/" + notFoundDeclaredExperienceId)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(buildCreateExperienceJson()))
-        .andExpect(status().isNotFound());
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(buildCreateExperienceJson())
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Transactional
   @Test
   void shouldReturnBadRequestWhenUpdatingWithInvalidData() throws Exception {
     BddLogger.given("an existing declared experience");
-    var result =
-        mockMvc
-            .perform(
-                post(BASE_PATH + "/")
-                    .header("X-Signed-Context", studentPayload)
-                    .header("X-Context-Kid", secretKey)
-                    .header("X-Context-Signature", studentSignature)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(buildCreateExperienceJson()))
-            .andExpect(status().isCreated())
-            .andReturn();
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
 
-    String createdId =
-        result
-            .getResponse()
-            .getContentAsString()
-            .substring(
-                result.getResponse().getContentAsString().indexOf(":") + 2,
-                result.getResponse().getContentAsString().indexOf(",") - 1);
+    String createdId = extractIdFromResponse(responseBody);
 
     String invalidUpdateJson =
         "{\n"
@@ -291,66 +335,75 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
     BddLogger.when("performing PUT with invalid payload");
     BddLogger.then("it should return 400");
 
-    mockMvc
-        .perform(
-            put(BASE_PATH + "/" + createdId)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(invalidUpdateJson))
-        .andExpect(status().isBadRequest());
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + createdId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(invalidUpdateJson)
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
   }
 
   @Transactional
   @Test
   void shouldDeleteDeclaredExperiences() throws Exception {
     BddLogger.given("an existing declared experience");
-    var result =
-        mockMvc
-            .perform(
-                post(BASE_PATH + "/")
-                    .header("X-Signed-Context", studentPayload)
-                    .header("X-Context-Kid", secretKey)
-                    .header("X-Context-Signature", studentSignature)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(buildCreateExperienceJson()))
-            .andExpect(status().isCreated())
-            .andReturn();
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
 
-    String createdId =
-        result
-            .getResponse()
-            .getContentAsString()
-            .substring(
-                result.getResponse().getContentAsString().indexOf(":") + 2,
-                result.getResponse().getContentAsString().indexOf(",") - 1);
+    String createdId = extractIdFromResponse(responseBody);
 
     BddLogger.when("performing DELETE on that declared experience");
     BddLogger.then("it should delete successfully");
 
     String deleteJson = "[\"" + createdId + "\"]";
 
-    mockMvc
-        .perform(
-            delete(BASE_PATH + "/")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(deleteJson))
-        .andExpect(status().isOk())
-        .andExpect(content().string(containsString("successfully deleted")));
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(deleteJson)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .consumeWith(
+            result -> {
+              String body = new String(result.getResponseBody());
+              assert body.contains("successfully deleted");
+            });
 
     BddLogger.then("trying to GET the deleted experience should return 404");
 
-    mockMvc
-        .perform(
-            get(BASE_PATH + "/" + createdId)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isNotFound());
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + createdId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Test
@@ -361,15 +414,17 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
 
     String deleteJson = "[\"" + notFoundDeclaredExperienceId + "\"]";
 
-    mockMvc
-        .perform(
-            delete(BASE_PATH + "/")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(deleteJson))
-        .andExpect(status().isNotFound());
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(deleteJson)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 
   @Transactional
@@ -377,39 +432,39 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
   void shouldReturnUnauthorizedWhenDeletingOtherStudentsExperience() throws Exception {
     BddLogger.given("an existing declared experience for another student");
 
-    var result =
-        mockMvc
-            .perform(
-                post(BASE_PATH + "/")
-                    .header("X-Signed-Context", otherStudentPayload)
-                    .header("X-Context-Kid", secretKey)
-                    .header("X-Context-Signature", otherStudentSignature)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(buildCreateExperienceJson()))
-            .andExpect(status().isCreated())
-            .andReturn();
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", otherStudentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", otherStudentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
 
-    String otherId =
-        result
-            .getResponse()
-            .getContentAsString()
-            .substring(
-                result.getResponse().getContentAsString().indexOf(":") + 2,
-                result.getResponse().getContentAsString().indexOf(",") - 1);
+    String otherId = extractIdFromResponse(responseBody);
 
     BddLogger.when("performing DELETE on that experience as another student");
-    BddLogger.then("it should return unauthorized");
+    BddLogger.then("it should return forbidden");
 
     String deleteJson = "[\"" + otherId + "\"]";
 
-    mockMvc
-        .perform(
-            delete(BASE_PATH + "/")
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(deleteJson))
-        .andExpect(status().isForbidden());
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(deleteJson)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
   }
 }

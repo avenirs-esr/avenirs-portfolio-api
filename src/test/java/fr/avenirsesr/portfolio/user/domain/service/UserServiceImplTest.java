@@ -23,15 +23,18 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 public class UserServiceImplTest {
 
   @Mock private UserRepository userRepository;
@@ -51,8 +54,6 @@ public class UserServiceImplTest {
     mockedRequestContext
         .when(RequestContext::get)
         .thenReturn(new RequestData(Optional.ofNullable(student.getUser()), ELanguage.FRENCH));
-
-    when(studentRepository.findById(eq(student.getId()))).thenReturn(Optional.of(student));
   }
 
   @AfterEach

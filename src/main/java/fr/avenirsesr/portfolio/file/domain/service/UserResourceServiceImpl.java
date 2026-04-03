@@ -113,6 +113,7 @@ public class UserResourceServiceImpl implements UserResourceService {
 
   @Override
   public void deletePhoto(UUID fileId) {
+    var loggedInUser = loggedInUserService.getLoggedInUser();
     var fileResource =
         userPhotoRepository
             .findById(fileId)
@@ -121,7 +122,6 @@ public class UserResourceServiceImpl implements UserResourceService {
                   log.error("No user photo with id {} found", fileId);
                   return new FileNotFoundException();
                 });
-    var loggedInUser = loggedInUserService.getLoggedInUser();
     if (!fileResource.getUser().equals(loggedInUser)) {
       throw new UserNotAuthorizedException();
     }

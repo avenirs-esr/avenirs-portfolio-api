@@ -33,7 +33,7 @@ public class DeclaredProgramController {
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to get declared programs (page= {}, size= {})",
+        "Received request to get declared programs (page= {}, fileSize= {})",
         pageCriteria.page(),
         pageCriteria.pageSize());
     PagedResult<DeclaredProgram> declaredProgramPagedResult =

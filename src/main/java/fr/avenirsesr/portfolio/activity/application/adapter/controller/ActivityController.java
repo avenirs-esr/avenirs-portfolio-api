@@ -50,7 +50,7 @@ public class ActivityController {
       @RequestParam(required = false) EActivityThematic thematic) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to activities view of user [{}] (page= {}, size= {})",
+        "Received request to activities view of user [{}] (page= {}, fileSize= {})",
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());
@@ -73,7 +73,7 @@ public class ActivityController {
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to latest activities view of user [{}] (page= {}, size= {})",
+        "Received request to latest activities view of user [{}] (page= {}, fileSize= {})",
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());

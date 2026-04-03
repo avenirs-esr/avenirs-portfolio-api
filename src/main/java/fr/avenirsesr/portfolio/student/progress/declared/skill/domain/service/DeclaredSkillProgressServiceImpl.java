@@ -81,8 +81,8 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   @Override
   public DeclaredSkillProgress updateDeclaredSkillProgress(
       UUID declaredSkillProgressId, EDeclaredSkillLevel level, String description) {
-    checkDescriptionField(description);
     Student student = loggedInUserService.getLoggedInStudent();
+    checkDescriptionField(description);
 
     DeclaredSkillProgress declaredSkillProgress =
         declaredSkillProgressRepository

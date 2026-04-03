@@ -62,7 +62,7 @@ public class TraceController {
     var dateFilter = new DateFilter(fromDate, toDate);
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to trace view of user [{}] (page= {}, size= {})",
+        "Received request to trace view of user [{}] (page= {}, fileSize= {})",
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());
@@ -122,7 +122,7 @@ public class TraceController {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to search declared activity for association with trace [{}] by student"
-            + " [{}] (keyword={}, page={}, size={})",
+            + " [{}] (keyword={}, page={}, fileSize={})",
         traceId,
         principal.getName(),
         keyword,
@@ -153,7 +153,7 @@ public class TraceController {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to search declared skill for association with trace [{}] by student"
-            + " [{}] (keyword={}, page={}, size={})",
+            + " [{}] (keyword={}, page={}, fileSize={})",
         traceId,
         principal.getName(),
         keyword,

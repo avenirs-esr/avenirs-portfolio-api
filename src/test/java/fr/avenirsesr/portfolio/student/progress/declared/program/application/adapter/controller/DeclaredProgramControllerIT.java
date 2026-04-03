@@ -1,10 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.controller;
 
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
@@ -24,8 +20,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 class DeclaredProgramControllerIT extends ContainerConfigurationTest {
 
@@ -33,7 +30,7 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
 
   @Autowired private DeclaredProgramJpaRepository declaredProgramJpaRepository;
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired private WebTestClient webTestClient;
 
   @Autowired private ObjectMapper objectMapper;
 
@@ -62,24 +59,33 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
   private String unknownUserSignature;
 
   private String createDeclaredProgramAndReturnId(
-      DeclaredProgramRequestDTO body, String userPayload, String userSignature) throws Exception {
+      DeclaredProgramRequestDTO body, String userPayload, String userSignature) {
     var result =
-        mockMvc
-            .perform(
-                post(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(body))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, userPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, userSignature))
-            .andExpect(status().isCreated())
-            .andExpect(header().string(HttpHeaders.LOCATION, notNullValue()))
-            .andReturn();
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(body))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, userPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, userSignature)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .returnResult(String.class);
 
-    String location = result.getResponse().getHeader(HttpHeaders.LOCATION);
+    String location = result.getResponseHeaders().getFirst(HttpHeaders.LOCATION);
     assertNotNull(location);
     return location.substring(location.lastIndexOf('/') + 1);
+  }
+
+  private String writeValueAsString(Object value) {
+    try {
+      return objectMapper.writeValueAsString(value);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @BeforeAll
@@ -94,7 +100,7 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
     class WhenCreatingADeclaredProgram {
 
       @Test
-      void shouldCreateDeclaredProgramSuccessfully() throws Exception {
+      void shouldCreateDeclaredProgramSuccessfully() {
         BddLogger.given("the " + BASE_PATH + " POST endpoint");
         BddLogger.when("performing a POST with a valid payload as a student");
         BddLogger.then("it should create a declared program and return 201 with Location header");
@@ -109,29 +115,27 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 LocalDate.now().minusMonths(1),
                 LocalDate.now());
 
-        mockMvc
-            .perform(
-                post(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(body))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isCreated())
-            .andExpect(header().string(HttpHeaders.LOCATION, notNullValue()))
-            .andExpect(
-                header()
-                    .string(
-                        HttpHeaders.LOCATION,
-                        matchesPattern(".*/me/declared/programs/[0-9a-fA-F\\-]{36}")))
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.title").value("Stage d'observation"))
-            .andExpect(jsonPath("$.organization").value("Tech4Future"));
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(body))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody()
+            .jsonPath("$.title")
+            .isEqualTo("Stage d'observation")
+            .jsonPath("$.organization")
+            .isEqualTo("Tech4Future");
       }
 
       @Test
-      void shouldReturn404WhenUserNotFound() throws Exception {
+      void shouldReturn404WhenUserNotFound() {
         BddLogger.given("the " + BASE_PATH + " POST endpoint");
         BddLogger.when("performing a POST with an unknown user");
         BddLogger.then("it should return a 404 USER_NOT_FOUND");
@@ -146,23 +150,27 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 LocalDate.now().minusMonths(1),
                 LocalDate.now());
 
-        mockMvc
-            .perform(
-                post(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(body))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
-            .andExpect(status().isNotFound())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"))
-            .andExpect(jsonPath("$.message").value("User not found"));
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(body))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_NOT_FOUND")
+            .jsonPath("$.message")
+            .isEqualTo("User not found");
       }
 
       @Test
-      void shouldReturn400WhenTitleTooLong() throws Exception {
+      void shouldReturn400WhenTitleTooLong() {
         BddLogger.given("the " + BASE_PATH + " POST endpoint");
         BddLogger.when("performing a POST with a title longer than 80 characters");
         BddLogger.then("it should return a 400 REQUEST_VALIDATION_ERROR");
@@ -179,24 +187,27 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 LocalDate.now().minusMonths(1),
                 LocalDate.now());
 
-        mockMvc
-            .perform(
-                post(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(body))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isBadRequest())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.code").value("TOO_LONG"))
-            .andExpect(
-                jsonPath("$.message").value("The field title exceeds the maximum allowed length"));
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(body))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isBadRequest()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("TOO_LONG")
+            .jsonPath("$.message")
+            .isEqualTo("The field title exceeds the maximum allowed length");
       }
 
       @Test
-      void shouldReturn400WhenOrganizationIsBlank() throws Exception {
+      void shouldReturn400WhenOrganizationIsBlank() {
         BddLogger.given("the " + BASE_PATH + " POST endpoint");
         BddLogger.when("performing a POST with a blank organization");
         BddLogger.then("it should return a 400 REQUEST_VALIDATION_ERROR");
@@ -211,23 +222,27 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 LocalDate.now().minusMonths(1),
                 LocalDate.now());
 
-        mockMvc
-            .perform(
-                post(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(body))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isBadRequest())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.code").value("NOT_BLANK"))
-            .andExpect(jsonPath("$.message").value("The field organization cannot be blank"));
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(body))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isBadRequest()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("NOT_BLANK")
+            .jsonPath("$.message")
+            .isEqualTo("The field organization cannot be blank");
       }
 
       @Test
-      void shouldReturn400WhenStartDateIsMissing() throws Exception {
+      void shouldReturn400WhenStartDateIsMissing() {
         BddLogger.given("the " + BASE_PATH + " POST endpoint");
         BddLogger.when("performing a POST with a missing startDate");
         BddLogger.then("it should return a 400 REQUEST_VALIDATION_ERROR");
@@ -242,19 +257,23 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 null,
                 LocalDate.now());
 
-        mockMvc
-            .perform(
-                post(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(body))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isBadRequest())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.code").value("NOT_NULL"))
-            .andExpect(jsonPath("$.message").value("The field startDate cannot be null"));
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(body))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isBadRequest()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("NOT_NULL")
+            .jsonPath("$.message")
+            .isEqualTo("The field startDate cannot be null");
       }
     }
 
@@ -262,7 +281,7 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
     class WhenGettingADeclaredProgram {
 
       @Test
-      void shouldReturn200WhenDeclaredProgramExistsAndBelongsToLoggedInStudent() throws Exception {
+      void shouldReturn200WhenDeclaredProgramExistsAndBelongsToLoggedInStudent() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} GET endpoint");
         BddLogger.when(
             "performing a GET for an existing declared program owned by the logged-in student");
@@ -281,73 +300,88 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 studentPayload,
                 studentSignature);
 
-        mockMvc
-            .perform(
-                get(BASE_PATH + "/" + id)
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(id))
-            .andExpect(jsonPath("$.status").value(EProgramStatus.IN_PROGRESS.name()))
-            .andExpect(jsonPath("$.title").value("Stage d'observation"))
-            .andExpect(
-                jsonPath("$.description")
-                    .value("Participation aux activités d'une équipe technique"))
-            .andExpect(jsonPath("$.organization").value("Tech4Future"))
-            .andExpect(
-                jsonPath("$.result").value("Acquisition de premières compétences techniques"))
-            .andExpect(jsonPath("$.sourceOfInformation").value("Conseiller d'orientation"))
-            .andExpect(jsonPath("$.startDate").isNotEmpty())
-            .andExpect(jsonPath("$.endDate").isNotEmpty())
-            .andExpect(jsonPath("$.createdAt").isNotEmpty())
-            .andExpect(jsonPath("$.updatedAt").isNotEmpty());
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/" + id)
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.id")
+            .isEqualTo(id)
+            .jsonPath("$.status")
+            .isEqualTo(EProgramStatus.IN_PROGRESS.name())
+            .jsonPath("$.title")
+            .isEqualTo("Stage d'observation")
+            .jsonPath("$.description")
+            .isEqualTo("Participation aux activités d'une équipe technique")
+            .jsonPath("$.organization")
+            .isEqualTo("Tech4Future")
+            .jsonPath("$.result")
+            .isEqualTo("Acquisition de premières compétences techniques")
+            .jsonPath("$.sourceOfInformation")
+            .isEqualTo("Conseiller d'orientation")
+            .jsonPath("$.startDate")
+            .isNotEmpty()
+            .jsonPath("$.endDate")
+            .isNotEmpty()
+            .jsonPath("$.createdAt")
+            .isNotEmpty()
+            .jsonPath("$.updatedAt")
+            .isNotEmpty();
       }
 
       @Test
-      void shouldReturn404WhenDeclaredProgramNotFound() throws Exception {
+      void shouldReturn404WhenDeclaredProgramNotFound() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} GET endpoint");
         BddLogger.when("performing a GET for a non-existing declared program");
         BddLogger.then("it should return 404 DECLARED_PROGRAM_NOT_FOUND");
 
         String unknownId = UUID.randomUUID().toString();
 
-        mockMvc
-            .perform(
-                get(BASE_PATH + "/" + unknownId)
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isNotFound())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.code").value("DECLARED_PROGRAM_NOT_FOUND"));
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/" + unknownId)
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("DECLARED_PROGRAM_NOT_FOUND");
       }
 
       @Test
-      void shouldReturn400WhenDeclaredProgramIdIsNotUUID() throws Exception {
+      void shouldReturn400WhenDeclaredProgramIdIsNotUUID() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} GET endpoint");
         BddLogger.when("performing a GET with an invalid UUID");
         BddLogger.then("it should return 400");
 
-        mockMvc
-            .perform(
-                get(BASE_PATH + "/not-a-uuid")
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isBadRequest());
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/not-a-uuid")
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isBadRequest();
       }
 
       @Test
-      void shouldReturn403WhenDeclaredProgramBelongsToAnotherStudent() throws Exception {
+      void shouldReturn403WhenDeclaredProgramBelongsToAnotherStudent() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} GET endpoint");
         BddLogger.when(
             "performing a GET for an existing declared program owned by another student");
-        BddLogger.then("it should return 403 (or 401 depending on your handler)");
+        BddLogger.then("it should return 403");
 
         String id =
             createDeclaredProgramAndReturnId(
@@ -362,14 +396,16 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 secondStudentPayload,
                 secondStudentSignature);
 
-        mockMvc
-            .perform(
-                get(BASE_PATH + "/" + id)
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isForbidden());
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/" + id)
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
       }
     }
 
@@ -377,36 +413,39 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
     class WhenGettingDeclaredPrograms {
 
       @Test
-      void shouldReturn200WhenDeclaredProgramsExistsAndBelongsToLoggedInStudent() throws Exception {
+      void shouldReturn200WhenDeclaredProgramsExistsAndBelongsToLoggedInStudent() {
         BddLogger.given("the " + BASE_PATH + " GET endpoint");
         BddLogger.when(
             "performing a GET for existing declared programs owned by the logged-in student");
         BddLogger.then("it should return 200 with declared programs dto");
 
-        mockMvc
-            .perform(
-                get(BASE_PATH)
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.data.length()").value(2))
-            .andExpect(jsonPath("$.data[0].status").value(EProgramStatus.COMPLETED.name()))
-            .andExpect(jsonPath("$.data[0].title").value("Stage développeur web"))
-            .andExpect(jsonPath("$.data[0].organization").value("TechNova"))
-            .andExpect(
-                jsonPath("$.data[0].result")
-                    .value("Mise en production de plusieurs fonctionnalités."))
-            .andExpect(jsonPath("$.data[1].status").value(EProgramStatus.COMPLETED.name()))
-            .andExpect(jsonPath("$.data[1].title").value("Séminaire leadership et communication"))
-            .andExpect(jsonPath("$.data[1].organization").value("LeadPro"))
-            .andExpect(jsonPath("$.data[1].result").value("Certificat obtenu"))
-            .andExpect(jsonPath("$.page.page").value(0))
-            .andExpect(jsonPath("$.page.pageSize").value(8))
-            .andExpect(jsonPath("$.page.totalElements").value(2))
-            .andExpect(jsonPath("$.page.totalPages").value(1));
+        webTestClient
+            .get()
+            .uri(BASE_PATH)
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data[0].status")
+            .isEqualTo(EProgramStatus.COMPLETED.name())
+            .jsonPath("$.data[0].title")
+            .isEqualTo("Stage développeur web")
+            .jsonPath("$.data[0].organization")
+            .isEqualTo("TechNova")
+            .jsonPath("$.data[0].result")
+            .isEqualTo("Mise en production de plusieurs fonctionnalités.")
+            .jsonPath("$.data[1].status")
+            .isEqualTo(EProgramStatus.COMPLETED.name())
+            .jsonPath("$.data[1].title")
+            .isEqualTo("Séminaire leadership et communication")
+            .jsonPath("$.data[1].organization")
+            .isEqualTo("LeadPro")
+            .jsonPath("$.data[1].result")
+            .isEqualTo("Certificat obtenu");
       }
     }
 
@@ -414,7 +453,7 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
     class WhenUpdatingADeclaredProgram {
 
       @Test
-      void shouldUpdateDeclaredProgramSuccessfully() throws Exception {
+      void shouldUpdateDeclaredProgramSuccessfully() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} PUT endpoint");
         BddLogger.when("performing a PUT with a valid payload as the owner student");
         BddLogger.then("it should return 200 and the updated declared program");
@@ -444,45 +483,62 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 LocalDate.now().minusDays(5),
                 LocalDate.now().plusDays(5));
 
-        mockMvc
-            .perform(
-                put(BASE_PATH + "/" + id)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(updateBody))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(id))
-            .andExpect(jsonPath("$.title").value("Stage d'observation - UPDATE"))
-            .andExpect(jsonPath("$.description").value("Nouvelle description"))
-            .andExpect(jsonPath("$.organization").value("Tech4Future UPDATED"))
-            .andExpect(jsonPath("$.result").value("Nouveau résultat"))
-            .andExpect(jsonPath("$.sourceOfInformation").value("Nouvelle source"))
-            // status recalculé: startDate past + endDate future => IN_PROGRESS
-            .andExpect(jsonPath("$.status").value(EProgramStatus.IN_PROGRESS.name()))
-            .andExpect(jsonPath("$.startDate").isNotEmpty())
-            .andExpect(jsonPath("$.endDate").isNotEmpty())
-            .andExpect(jsonPath("$.updatedAt").isNotEmpty());
+        webTestClient
+            .put()
+            .uri(BASE_PATH + "/" + id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(updateBody))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.id")
+            .isEqualTo(id)
+            .jsonPath("$.title")
+            .isEqualTo("Stage d'observation - UPDATE")
+            .jsonPath("$.description")
+            .isEqualTo("Nouvelle description")
+            .jsonPath("$.organization")
+            .isEqualTo("Tech4Future UPDATED")
+            .jsonPath("$.result")
+            .isEqualTo("Nouveau résultat")
+            .jsonPath("$.sourceOfInformation")
+            .isEqualTo("Nouvelle source")
+            .jsonPath("$.status")
+            .isEqualTo(EProgramStatus.IN_PROGRESS.name())
+            .jsonPath("$.startDate")
+            .isNotEmpty()
+            .jsonPath("$.endDate")
+            .isNotEmpty()
+            .jsonPath("$.updatedAt")
+            .isNotEmpty();
 
         // Bonus: GET after update to ensure persistence and returned object match
-        mockMvc
-            .perform(
-                get(BASE_PATH + "/" + id)
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.title").value("Stage d'observation - UPDATE"))
-            .andExpect(jsonPath("$.organization").value("Tech4Future UPDATED"))
-            .andExpect(jsonPath("$.status").value(EProgramStatus.IN_PROGRESS.name()));
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/" + id)
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.title")
+            .isEqualTo("Stage d'observation - UPDATE")
+            .jsonPath("$.organization")
+            .isEqualTo("Tech4Future UPDATED")
+            .jsonPath("$.status")
+            .isEqualTo(EProgramStatus.IN_PROGRESS.name());
       }
 
       @Test
-      void shouldReturn404WhenDeclaredProgramNotFound() throws Exception {
+      void shouldReturn404WhenDeclaredProgramNotFound() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} PUT endpoint");
         BddLogger.when("performing a PUT for a non-existing declared program");
         BddLogger.then("it should return 404 DECLARED_PROGRAM_NOT_FOUND");
@@ -499,22 +555,25 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 LocalDate.now().minusDays(10),
                 LocalDate.now().minusDays(5));
 
-        mockMvc
-            .perform(
-                put(BASE_PATH + "/" + unknownId)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(updateBody))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isNotFound())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.code").value("DECLARED_PROGRAM_NOT_FOUND"));
+        webTestClient
+            .put()
+            .uri(BASE_PATH + "/" + unknownId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(updateBody))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("DECLARED_PROGRAM_NOT_FOUND");
       }
 
       @Test
-      void shouldReturn403WhenDeclaredProgramBelongsToAnotherStudent() throws Exception {
+      void shouldReturn403WhenDeclaredProgramBelongsToAnotherStudent() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} PUT endpoint");
         BddLogger.when("performing a PUT on a declared program owned by another student");
         BddLogger.then("it should return 403");
@@ -542,20 +601,22 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 LocalDate.now().minusDays(10),
                 LocalDate.now().minusDays(5));
 
-        mockMvc
-            .perform(
-                put(BASE_PATH + "/" + id)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(updateBody))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isForbidden());
+        webTestClient
+            .put()
+            .uri(BASE_PATH + "/" + id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(updateBody))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
       }
 
       @Test
-      void shouldReturn400WhenDeclaredProgramIdIsNotUUID() throws Exception {
+      void shouldReturn400WhenDeclaredProgramIdIsNotUUID() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} PUT endpoint");
         BddLogger.when("performing a PUT with an invalid UUID");
         BddLogger.then("it should return 400");
@@ -570,20 +631,22 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 LocalDate.now().minusDays(10),
                 LocalDate.now().minusDays(5));
 
-        mockMvc
-            .perform(
-                put(BASE_PATH + "/not-a-uuid")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(updateBody))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isBadRequest());
+        webTestClient
+            .put()
+            .uri(BASE_PATH + "/not-a-uuid")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(updateBody))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isBadRequest();
       }
 
       @Test
-      void shouldReturn400WhenStartDateIsMissing() throws Exception {
+      void shouldReturn400WhenStartDateIsMissing() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} PUT endpoint");
         BddLogger.when("performing a PUT with a missing startDate");
         BddLogger.then("it should return 400 NOT_NULL for startDate");
@@ -605,23 +668,27 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             new DeclaredProgramRequestDTO(
                 "Title", "Description", "Org", "Result", "Source", null, LocalDate.now());
 
-        mockMvc
-            .perform(
-                put(BASE_PATH + "/" + id)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(updateBody))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isBadRequest())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.code").value("NOT_NULL"))
-            .andExpect(jsonPath("$.message").value("The field startDate cannot be null"));
+        webTestClient
+            .put()
+            .uri(BASE_PATH + "/" + id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(updateBody))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isBadRequest()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("NOT_NULL")
+            .jsonPath("$.message")
+            .isEqualTo("The field startDate cannot be null");
       }
 
       @Test
-      void shouldReturn400WhenTitleTooLong() throws Exception {
+      void shouldReturn400WhenTitleTooLong() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} PUT endpoint");
         BddLogger.when("performing a PUT with a title longer than 80 characters");
         BddLogger.then("it should return 400 TOO_LONG");
@@ -651,25 +718,28 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 LocalDate.now().minusDays(10),
                 LocalDate.now().minusDays(5));
 
-        mockMvc
-            .perform(
-                put(BASE_PATH + "/" + id)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(updateBody))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isBadRequest())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.code").value("TOO_LONG"));
+        webTestClient
+            .put()
+            .uri(BASE_PATH + "/" + id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(updateBody))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isBadRequest()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("TOO_LONG");
       }
 
       @Test
-      void shouldReturn404WhenUserNotFound() throws Exception {
+      void shouldReturn404WhenUserNotFound() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} PUT endpoint");
         BddLogger.when("performing a PUT with an unknown user");
-        BddLogger.then("it should return 404 USER_NOT_FOUND (depending on your handler)");
+        BddLogger.then("it should return 404 USER_NOT_FOUND");
 
         String id =
             createDeclaredProgramAndReturnId(
@@ -694,18 +764,21 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 LocalDate.now().minusDays(10),
                 LocalDate.now().minusDays(5));
 
-        mockMvc
-            .perform(
-                put(BASE_PATH + "/" + id)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(updateBody))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
-            .andExpect(status().isNotFound())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+        webTestClient
+            .put()
+            .uri(BASE_PATH + "/" + id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(updateBody))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_NOT_FOUND");
       }
     }
 
@@ -713,7 +786,7 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
     class WhenDeletingDeclaredPrograms {
 
       @Test
-      void shouldDeleteDeclaredProgramsSuccessfully() throws Exception {
+      void shouldDeleteDeclaredProgramsSuccessfully() {
         BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
         BddLogger.when("performing a DELETE with ids owned by the logged-in student");
         BddLogger.then("it should return 200 and the programs should be deleted");
@@ -744,44 +817,53 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 studentPayload,
                 studentSignature);
 
-        mockMvc
-            .perform(
-                delete(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        objectMapper.writeValueAsString(
-                            List.of(UUID.fromString(id1), UUID.fromString(id2))))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isOk())
-            .andExpect(content().string("Declared programs deleted successfully."));
+        webTestClient
+            .method(HttpMethod.DELETE)
+            .uri(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(List.of(UUID.fromString(id1), UUID.fromString(id2))))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .isEqualTo("Declared programs deleted successfully.");
 
         // Assert deletion: each GET should now be 404
-        mockMvc
-            .perform(
-                get(BASE_PATH + "/" + id1)
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.code").value("DECLARED_PROGRAM_NOT_FOUND"));
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/" + id1)
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("DECLARED_PROGRAM_NOT_FOUND");
 
-        mockMvc
-            .perform(
-                get(BASE_PATH + "/" + id2)
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.code").value("DECLARED_PROGRAM_NOT_FOUND"));
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/" + id2)
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("DECLARED_PROGRAM_NOT_FOUND");
       }
 
       @Test
-      void shouldReturn403WhenTryingToDeleteProgramsOfAnotherStudent() throws Exception {
+      void shouldReturn403WhenTryingToDeleteProgramsOfAnotherStudent() {
         BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
         BddLogger.when("performing a DELETE including an id owned by another student");
         BddLogger.then("it should return 403 and not delete anything");
@@ -799,73 +881,80 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 secondStudentPayload,
                 secondStudentSignature);
 
-        mockMvc
-            .perform(
-                delete(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(
-                        objectMapper.writeValueAsString(
-                            List.of(UUID.fromString(ownedByOtherStudent))))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isForbidden());
+        webTestClient
+            .method(HttpMethod.DELETE)
+            .uri(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(List.of(UUID.fromString(ownedByOtherStudent))))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
       }
 
       @Test
-      void shouldReturn404WhenUserNotFound() throws Exception {
+      void shouldReturn404WhenUserNotFound() {
         BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
         BddLogger.when("performing a DELETE with an unknown user");
         BddLogger.then("it should return 404 USER_NOT_FOUND");
 
-        mockMvc
-            .perform(
-                delete(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(List.of(UUID.randomUUID())))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature))
-            .andExpect(status().isNotFound())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
+        webTestClient
+            .method(HttpMethod.DELETE)
+            .uri(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(List.of(UUID.randomUUID())))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, unknownUserPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_NOT_FOUND");
       }
 
       @Test
-      void shouldReturn400WhenBodyContainsInvalidUUID() throws Exception {
+      void shouldReturn400WhenBodyContainsInvalidUUID() {
         BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
         BddLogger.when("performing a DELETE with invalid UUID in body");
         BddLogger.then("it should return 400");
 
-        mockMvc
-            .perform(
-                delete(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("[\"not-a-uuid\"]")
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isBadRequest());
+        webTestClient
+            .method(HttpMethod.DELETE)
+            .uri(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue("[\"not-a-uuid\"]")
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isBadRequest();
       }
 
       @Test
-      void shouldReturn400WhenBodyIsMissing() throws Exception {
+      void shouldReturn400WhenBodyIsMissing() {
         BddLogger.given("the " + BASE_PATH + " DELETE endpoint");
         BddLogger.when("performing a DELETE without body");
         BddLogger.then("it should return 400");
 
-        mockMvc
-            .perform(
-                delete(BASE_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
-                    .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                    .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                    .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature))
-            .andExpect(status().isBadRequest());
+        webTestClient
+            .delete()
+            .uri(BASE_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isBadRequest();
       }
     }
   }

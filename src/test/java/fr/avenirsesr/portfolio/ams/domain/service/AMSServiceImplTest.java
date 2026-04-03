@@ -28,14 +28,17 @@ import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class AMSServiceImplTest {
 
   @Mock private AMSRepository amsRepository;
@@ -73,7 +76,6 @@ class AMSServiceImplTest {
     when(skillLevelProgressService.getSkillLevelProgressesLinkedWithAMS(any()))
         .thenReturn(Collections.emptyList());
     when(traceService.getTracesLinkedWithAMS(any(AMS.class))).thenReturn(Collections.emptyList());
-
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     try (MockedStatic<RequestContext> mockedRequestContext = mockStatic(RequestContext.class)) {
       mockedRequestContext

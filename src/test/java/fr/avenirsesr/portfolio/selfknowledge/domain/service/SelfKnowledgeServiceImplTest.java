@@ -33,20 +33,22 @@ import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 class SelfKnowledgeServiceImplTest {
 
   @Mock private StudentService studentService;
@@ -608,8 +610,6 @@ class SelfKnowledgeServiceImplTest {
           unknownId = UUID.randomUUID();
 
           when(selfKnowledgeElementRepository.findById(eq(unknownId))).thenReturn(Optional.empty());
-          when(selfKnowledgeElementRepository.findAllById(eq(List.of(unknownId))))
-              .thenReturn(Collections.emptyList());
         }
 
         @Nested
@@ -690,9 +690,6 @@ class SelfKnowledgeServiceImplTest {
           SelfKnowledgeCategory selfKnowledgeCategory =
               SelfKnowledgeCategoryFixture.create().toModel();
 
-          when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategory.getId()))
-              .thenReturn(Optional.of(selfKnowledgeCategory));
-
           String tooLongTitle = "T".repeat(500);
 
           assertThrows(
@@ -714,9 +711,6 @@ class SelfKnowledgeServiceImplTest {
           SelfKnowledgeCategory selfKnowledgeCategory =
               SelfKnowledgeCategoryFixture.create().toModel();
 
-          when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategory.getId()))
-              .thenReturn(Optional.of(selfKnowledgeCategory));
-
           String tooLongDescription = "D".repeat(5000);
 
           assertThrows(
@@ -737,9 +731,6 @@ class SelfKnowledgeServiceImplTest {
           BddLogger.when("creating self knowledge element with invalid rating");
           SelfKnowledgeCategory selfKnowledgeCategory =
               SelfKnowledgeCategoryFixture.create().toModel();
-
-          when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategory.getId()))
-              .thenReturn(Optional.of(selfKnowledgeCategory));
 
           assertThrows(
               SelfKnowledgeInvalidRatingException.class,

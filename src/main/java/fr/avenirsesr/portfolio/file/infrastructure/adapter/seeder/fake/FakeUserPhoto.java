@@ -36,7 +36,7 @@ public class FakeUserPhoto {
             dataGenerator.with("category").pickIn(EUserCategory.class),
             dataGenerator.with("file-type").pickIn(EUserPhotoType.class),
             fileType,
-            dataGenerator.with("size").number((int) fileType.getSizeLimit().bytes()),
+            dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,
             true,
             "/workspace/app%s/%s.%s"

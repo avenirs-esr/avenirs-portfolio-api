@@ -52,7 +52,7 @@ class SkillSeederTest extends ContainerConfigurationTest {
     BddLogger.when("seeding skills");
     List<SkillLevelEntity> skillLevels = skillSeeder.seed(programs);
 
-    BddLogger.then("it should return skills levels with correct size");
+    BddLogger.then("it should return skills levels with correct fileSize");
     assertNotNull(skillLevels);
     assertFalse(skillLevels.isEmpty());
 

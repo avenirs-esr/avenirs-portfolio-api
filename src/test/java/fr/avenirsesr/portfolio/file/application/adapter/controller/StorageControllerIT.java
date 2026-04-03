@@ -2,8 +2,6 @@ package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
@@ -15,6 +13,7 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.UserPhotoD
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,17 +23,16 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 class StorageControllerIT extends ContainerConfigurationTest {
 
   private static final String DEFAULT_BASE_PATH = "/storage/users/default/{photoType}";
 
-  @Autowired private MockMvc mockMvc;
+  private WebTestClient webTestClient;
 
   @Mock private FileStorageService fileStorageService;
-  @Autowired private StorageController storageController;
+
   @Autowired private UserPhotoDatabaseRepository userPhotoDatabaseRepository;
   @Autowired private ActivityBannerRepository activityBannerRepository;
   @Autowired private LoggedInUserService loggedInUserService;
@@ -54,51 +52,64 @@ class StorageControllerIT extends ContainerConfigurationTest {
   }
 
   @BeforeEach
-  void setup() {
+  void init() {
     MockitoAnnotations.openMocks(this);
-    storageController =
+
+    StorageController storageController =
         new StorageController(
             new UserResourceServiceImpl(
                 fileStorageService, userPhotoDatabaseRepository, loggedInUserService),
             new ActivityResourceServiceImpl(
                 fileStorageService, loggedInUserService, activityBannerRepository),
             fileStorageService);
-    mockMvc = MockMvcBuilders.standaloneSetup(storageController).build();
+
+    webTestClient =
+        WebTestClient.bindToController(storageController).configureClient().baseUrl("").build();
   }
 
   @Test
-  void shouldGetDefaultUserProfilePhoto() throws Exception {
+  void shouldGetDefaultUserProfilePhoto() throws IOException {
     BddLogger.given("the " + DEFAULT_BASE_PATH + " endpoint");
+
     when(fileStorageService.get(anyString()))
         .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
 
     BddLogger.when("performing a GET with a PROFILE photo type");
     BddLogger.then("it should return the default user profile photo");
-    mockMvc
-        .perform(
-            get(DEFAULT_BASE_PATH, EUserPhotoType.PROFILE)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.IMAGE_PNG));
+
+    webTestClient
+        .get()
+        .uri(DEFAULT_BASE_PATH, EUserPhotoType.PROFILE)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectHeader()
+        .contentTypeCompatibleWith(MediaType.IMAGE_PNG);
   }
 
   @Test
-  void shouldGetDefaultUserCoverPhoto() throws Exception {
+  void shouldGetDefaultUserCoverPhoto() throws IOException {
     BddLogger.given("the " + DEFAULT_BASE_PATH + " endpoint");
+
     when(fileStorageService.get(anyString()))
         .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
 
     BddLogger.when("performing a GET with a COVER photo type");
     BddLogger.then("it should return the default user cover photo");
-    mockMvc
-        .perform(
-            get(DEFAULT_BASE_PATH, EUserPhotoType.COVER)
-                .header("X-Signed-Context", studentPayload)
-                .header("X-Context-Kid", secretKey)
-                .header("X-Context-Signature", studentSignature))
-        .andExpect(status().isOk())
-        .andExpect(content().contentTypeCompatibleWith(MediaType.IMAGE_PNG));
+
+    webTestClient
+        .get()
+        .uri(DEFAULT_BASE_PATH, EUserPhotoType.COVER)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectHeader()
+        .contentTypeCompatibleWith(MediaType.IMAGE_PNG);
   }
 }

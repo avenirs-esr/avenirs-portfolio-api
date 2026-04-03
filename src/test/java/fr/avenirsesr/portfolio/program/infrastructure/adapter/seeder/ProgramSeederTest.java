@@ -45,7 +45,7 @@ class ProgramSeederTest extends ContainerConfigurationTest {
     BddLogger.when("seeding programs");
     List<ProgramEntity> programs = programSeeder.seed(institutions);
 
-    BddLogger.then("it should return programs with correct size");
+    BddLogger.then("it should return programs with correct fileSize");
     assertNotNull(programs);
     assertFalse(programs.isEmpty());
 

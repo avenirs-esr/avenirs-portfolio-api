@@ -26,14 +26,17 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 public class UserResourceServiceImplTest {
   @Mock private UserPhotoRepository userPhotoRepository;
   @Mock private FileStorageService fileStorageService;
@@ -45,7 +48,6 @@ public class UserResourceServiceImplTest {
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
   }
 
@@ -129,7 +131,7 @@ public class UserResourceServiceImplTest {
     var size = EFileType.PNG.getSizeLimit().bytes() + 1; // Exceeds limit
     var content = new byte[(int) size];
 
-    BddLogger.when("uploading a photo which file size is too big");
+    BddLogger.when("uploading a photo which file fileSize is too big");
     BddLogger.then("it should throw a FileSizeTooBigException");
     org.junit.jupiter.api.Assertions.assertThrows(
         FileSizeTooBigException.class,
@@ -167,7 +169,6 @@ public class UserResourceServiceImplTest {
   @Test
   void deletePhoto_shouldThrowFileNotFoundException_whenPhotoDoesNotExist() {
     BddLogger.given("a UserResourceServiceImpl service");
-    var user = student.getUser();
     var photoId = UUID.randomUUID();
     when(userPhotoRepository.findById(photoId)).thenReturn(Optional.empty());
 

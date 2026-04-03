@@ -17,8 +17,11 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@ExtendWith(MockitoExtension.class)
 class TraceSeederTest extends ContainerConfigurationTest {
 
   @Autowired private TraceSeeder traceSeeder;
@@ -56,7 +59,7 @@ class TraceSeederTest extends ContainerConfigurationTest {
   @Test
   void seed_shouldReturnTraces_withCorrectSizeAndUser() {
     BddLogger.given("a trace seeder");
-    BddLogger.when("seeding traces with correct size and user");
+    BddLogger.when("seeding traces with correct fileSize and user");
     List<TraceEntity> traces = traceSeeder.seed(users, declaredSkillProgresses);
 
     BddLogger.then("it should return traces");

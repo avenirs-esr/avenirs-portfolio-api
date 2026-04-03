@@ -45,7 +45,7 @@ public class DeclaredActivityController {
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to get declared activities view of user [{}] (page= {}, size= {})",
+        "Received request to get declared activities view of user [{}] (page= {}, fileSize= {})",
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());
@@ -187,7 +187,7 @@ public class DeclaredActivityController {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to search traces for association with declared activity [{}] by student"
-            + " [{}] (isAssociated={}, keyword={}, page={}, size={})",
+            + " [{}] (isAssociated={}, keyword={}, page={}, fileSize={})",
         declaredActivityId,
         principal.getName(),
         isAssociated,

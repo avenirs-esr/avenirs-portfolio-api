@@ -40,14 +40,17 @@ import java.util.random.RandomGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
 public class DeclaredSkillProgressServiceImplTest {
   @Mock private TraceService traceService;
   @Mock private DeclaredSkillSyncService declaredSkillSyncService;
@@ -119,7 +122,6 @@ public class DeclaredSkillProgressServiceImplTest {
         BddLogger.when("calling the method with a given student and declaredSkillProgressId");
         when(declaredSkillProgressRepository.findById(any(), any()))
             .thenReturn(Optional.of(declaredSkillProgress));
-        when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
         when(traceService.getTracesLinkedWithDeclaredSkillProgress(declaredSkillProgress))
             .thenReturn(List.of(trace1, trace2));
         when(traceService.programNameOfTrace(trace1)).thenReturn(programName);
