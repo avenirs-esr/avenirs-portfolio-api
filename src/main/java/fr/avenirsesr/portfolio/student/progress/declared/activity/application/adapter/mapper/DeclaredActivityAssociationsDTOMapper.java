@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.application.a
 
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityAssociationsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
 
 public interface DeclaredActivityAssociationsDTOMapper {
@@ -12,6 +13,13 @@ public interface DeclaredActivityAssociationsDTOMapper {
                 t ->
                     new DeclaredActivityAssociationsDTO.DeclaredActivityTraceAssociationDTO(
                         t.associationId(), TraceOverviewMapper.toDTO(t.trace(), null)))
+            .toList(),
+        associations.declaredSkillAssociations().stream()
+            .map(
+                s ->
+                    new DeclaredActivityAssociationsDTO.DeclaredActivityDeclaredSkillAssociationDTO(
+                        s.associationId(),
+                        DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(s.declaredSkill())))
             .toList());
   }
 }

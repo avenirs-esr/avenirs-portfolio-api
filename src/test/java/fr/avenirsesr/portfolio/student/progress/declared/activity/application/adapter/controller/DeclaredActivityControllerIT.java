@@ -151,4 +151,72 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isOk();
   }
+
+  @Test
+  @Transactional
+  void shouldAssociateDeclaredSkillsToDeclaredActivity() throws Exception {
+    String id = declaredActivityId;
+
+    BddLogger.given("a declared activity and declared skills to associate");
+
+    String requestBody =
+        """
+        {
+          "idsToAssociate": [
+            "0b6cdaac-0b71-4102-b342-fee525a42989",
+            "d2cfae1d-cd31-43f0-9723-2ad762c52fb1"
+          ]
+        }
+        """;
+
+    BddLogger.when("associating declared skills to the activity");
+
+    BddLogger.then("it should return updated associations");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + id + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.declaredSkillAssociations")
+        .isArray();
+  }
+
+  @Test
+  @Transactional
+  void shouldReturnNotFoundWhenAssociatingDeclaredSkillsToUnknownActivity() {
+    BddLogger.given("unknown declared activity id");
+
+    String requestBody =
+        """
+        {
+          "idsToAssociate": [
+            "11111111-1111-1111-1111-111111111111"
+          ]
+        }
+        """;
+
+    BddLogger.when("associating declared skills");
+
+    BddLogger.then("it should return not found");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + notFoundId + "/associate/declared-skills")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
 }

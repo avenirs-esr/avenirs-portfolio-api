@@ -23,5 +23,10 @@
     "id1": "f3d22e78-e827-4bae-8831-44168c176198",
     "id2": "0b6cdaac-0b71-4102-b342-fee525a42989",
     "associationType": "TRACE_DECLARED_SKILL"
+  },
+  {
+    "id1": "7f3a2b91-3d44-4c6a-8a9e-2b6d5f1c0a22",
+    "id2": "ef319adc-d693-4db5-8b76-a47d907d9271",
+    "associationType": "DECLARED_ACTIVITY_DECLARED_SKILL"
   }
 ]

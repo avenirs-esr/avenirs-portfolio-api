@@ -43,6 +43,9 @@ public interface DeclaredActivityService {
   DeclaredActivityAssociationsData associateActivityWithTraces(
       UUID declaredActivityId, List<UUID> traceIds);
 
+  DeclaredActivityAssociationsData associateActivityWithDeclaredSkills(
+      UUID declaredActivityId, List<UUID> declaredSkillIds);
+
   PagedResult<TraceAssociationSearchInfoData> searchTracesForAssociation(
       UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated);
 

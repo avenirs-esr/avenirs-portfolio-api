@@ -26,6 +26,9 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.excepti
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -45,6 +48,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
   private final ActivityService activityService;
   private final TraceService traceService;
+  private final DeclaredSkillProgressService declaredSkillProgressService;
   private final AssociationService associationService;
   private final LoggedInUserService loggedInUserService;
 
@@ -234,26 +238,45 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new UserNotAuthorizedException();
     }
 
-    List<Association> associations =
-        associationService.createAll(
-            traceIds.stream()
-                .map(
-                    traceId ->
-                        new AssociationData(
-                            declaredActivityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE))
-                .toList());
-
-    return new DeclaredActivityAssociationsData(
-        associations.stream()
+    associationService.createAll(
+        traceIds.stream()
             .map(
-                a ->
-                    new DeclaredActivityAssociationsData.DeclaredActivityTraceAssociationData(
-                        a.getId(),
-                        traces.stream()
-                            .filter(t -> t.getId().equals(a.getId2()))
-                            .findAny()
-                            .orElseThrow(TraceNotFoundException::new)))
+                traceId ->
+                    new AssociationData(
+                        declaredActivityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE))
             .toList());
+
+    return getDeclaredActivityAssociations(declaredActivityId);
+  }
+
+  @Override
+  public DeclaredActivityAssociationsData associateActivityWithDeclaredSkills(
+      UUID declaredActivityId, List<UUID> declaredSkillIds) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    var declaredSkills =
+        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillIds);
+
+    if (!new HashSet<>(declaredSkills.stream().map(DeclaredSkillProgress::getId).toList())
+        .containsAll(declaredSkillIds)) {
+      throw new DeclaredSkillProgressNotFoundException();
+    }
+
+    if (!declaredSkills.stream().allMatch(skill -> skill.getStudent().equals(student))) {
+      throw new UserNotAuthorizedException();
+    }
+
+    associationService.createAll(
+        declaredSkillIds.stream()
+            .map(
+                skillId ->
+                    new AssociationData(
+                        declaredActivityId,
+                        skillId,
+                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
+            .toList());
+
+    return getDeclaredActivityAssociations(declaredActivityId);
   }
 
   @Override
@@ -296,18 +319,33 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
-    var traceAssociations =
+    var associations =
         associationService.getAllOf(
             declaredActivity.getId(),
             DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));
+            List.of(
+                EAssociationType.DECLARED_ACTIVITY_TRACE,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL));
 
     var traces =
         traceService.findAllTracesById(
-            traceAssociations.stream().map(Association::getId2).toList());
+            associations.stream()
+                .filter(a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
+                .map(Association::getId2)
+                .toList());
+
+    var declaredSkills =
+        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
+            associations.stream()
+                .filter(
+                    a ->
+                        a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)
+                .map(Association::getId2)
+                .toList());
 
     return new DeclaredActivityAssociationsData(
-        traceAssociations.stream()
+        associations.stream()
+            .filter(a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
             .map(
                 a ->
                     new DeclaredActivityAssociationsData.DeclaredActivityTraceAssociationData(
@@ -316,6 +354,19 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
                             .filter(t -> t.getId().equals(a.getId2()))
                             .findAny()
                             .orElseThrow(TraceNotFoundException::new)))
+            .toList(),
+        associations.stream()
+            .filter(
+                a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)
+            .map(
+                a ->
+                    new DeclaredActivityAssociationsData
+                        .DeclaredActivityDeclaredSkillAssociationData(
+                        a.getId(),
+                        declaredSkills.stream()
+                            .filter(s -> s.getId().equals(a.getId2()))
+                            .findAny()
+                            .orElseThrow(DeclaredSkillProgressNotFoundException::new)))
             .toList());
   }
 

@@ -10,6 +10,7 @@ import lombok.Getter;
 @Getter
 public enum EAssociationType {
   DECLARED_ACTIVITY_TRACE(DeclaredActivity.class, Trace.class),
+  DECLARED_ACTIVITY_DECLARED_SKILL(DeclaredActivity.class, DeclaredSkillProgress.class),
   TRACE_DECLARED_SKILL(Trace.class, DeclaredSkillProgress.class);
 
   private final Class<?> key1;

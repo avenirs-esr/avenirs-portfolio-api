@@ -175,6 +175,23 @@ public class DeclaredActivityController {
     return ResponseEntity.ok(DeclaredActivityAssociationsDTOMapper.toDTO(newAssociations));
   }
 
+  @PostMapping("/{declaredActivityId}/associate/declared-skills")
+  public ResponseEntity<DeclaredActivityAssociationsDTO> associateActivityWithDeclaredSkills(
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId,
+      @Valid @RequestBody AssociationsCreationRequest body) {
+    log.debug(
+        "Received request to associate declared activity [{}] with declared skills [{}] by student"
+            + " [{}]",
+        declaredActivityId,
+        body.idsToAssociate(),
+        principal.getName());
+    var newAssociations =
+        declaredActivityService.associateActivityWithDeclaredSkills(
+            declaredActivityId, body.idsToAssociate());
+    return ResponseEntity.ok(DeclaredActivityAssociationsDTOMapper.toDTO(newAssociations));
+  }
+
   @GetMapping("/{declaredActivityId}/search-for-association/traces")
   public ResponseEntity<PagedResponse<DeclaredActivityAssociationTraceInfoDTO>>
       searchTracesForAssociation(
