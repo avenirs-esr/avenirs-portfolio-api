@@ -175,6 +175,23 @@ public class DeclaredActivityController {
 <span class="nc" id="L175">    return ResponseEntity.ok(DeclaredActivityAssociationsDTOMapper.toDTO(newAssociations));</span>
   }
 
+  @PostMapping(&quot;/{declaredActivityId}/associate/declared-skills&quot;)
+  public ResponseEntity&lt;DeclaredActivityAssociationsDTO&gt; associateActivityWithDeclaredSkills(
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId,
+      @Valid @RequestBody AssociationsCreationRequest body) {
+<span class="fc" id="L183">    log.debug(</span>
+        &quot;Received request to associate declared activity [{}] with declared skills [{}] by student&quot;
+            + &quot; [{}]&quot;,
+        declaredActivityId,
+<span class="fc" id="L187">        body.idsToAssociate(),</span>
+<span class="fc" id="L188">        principal.getName());</span>
+<span class="fc" id="L189">    var newAssociations =</span>
+<span class="fc" id="L190">        declaredActivityService.associateActivityWithDeclaredSkills(</span>
+<span class="fc" id="L191">            declaredActivityId, body.idsToAssociate());</span>
+<span class="fc" id="L192">    return ResponseEntity.ok(DeclaredActivityAssociationsDTOMapper.toDTO(newAssociations));</span>
+  }
+
   @GetMapping(&quot;/{declaredActivityId}/search-for-association/traces&quot;)
   public ResponseEntity&lt;PagedResponse&lt;DeclaredActivityAssociationTraceInfoDTO&gt;&gt;
       searchTracesForAssociation(
@@ -184,29 +201,29 @@ public class DeclaredActivityController {
           @RequestParam(required = false) String keyword,
           @RequestParam(required = false) Integer page,
           @RequestParam(required = false) Integer pageSize) {
-<span class="nc" id="L187">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="nc" id="L188">    log.debug(</span>
+<span class="nc" id="L204">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="nc" id="L205">    log.debug(</span>
         &quot;Received request to search traces for association with declared activity [{}] by student&quot;
             + &quot; [{}] (isAssociated={}, keyword={}, page={}, fileSize={})&quot;,
         declaredActivityId,
-<span class="nc" id="L192">        principal.getName(),</span>
+<span class="nc" id="L209">        principal.getName(),</span>
         isAssociated,
         keyword,
-<span class="nc" id="L195">        pageCriteria.page(),</span>
-<span class="nc" id="L196">        pageCriteria.pageSize());</span>
+<span class="nc" id="L212">        pageCriteria.page(),</span>
+<span class="nc" id="L213">        pageCriteria.pageSize());</span>
 
-<span class="nc" id="L198">    PagedResult&lt;TraceAssociationSearchInfoData&gt; pagedResult =</span>
-<span class="nc" id="L199">        declaredActivityService.searchTracesForAssociation(</span>
+<span class="nc" id="L215">    PagedResult&lt;TraceAssociationSearchInfoData&gt; pagedResult =</span>
+<span class="nc" id="L216">        declaredActivityService.searchTracesForAssociation(</span>
             declaredActivityId, keyword, pageCriteria, isAssociated);
 
-<span class="nc" id="L202">    var response =</span>
+<span class="nc" id="L219">    var response =</span>
         new PagedResponse&lt;&gt;(
-<span class="nc" id="L204">            pagedResult.content().stream()</span>
-<span class="nc" id="L205">                .map(DeclaredActivityAssociationTraceInfoDTOMapper::toDTO)</span>
-<span class="nc" id="L206">                .toList(),</span>
-<span class="nc" id="L207">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="nc" id="L221">            pagedResult.content().stream()</span>
+<span class="nc" id="L222">                .map(DeclaredActivityAssociationTraceInfoDTOMapper::toDTO)</span>
+<span class="nc" id="L223">                .toList(),</span>
+<span class="nc" id="L224">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
 
-<span class="nc" id="L209">    return ResponseEntity.ok(response);</span>
+<span class="nc" id="L226">    return ResponseEntity.ok(response);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
