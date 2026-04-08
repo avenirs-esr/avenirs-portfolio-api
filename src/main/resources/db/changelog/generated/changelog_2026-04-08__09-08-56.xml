@@ -1,0 +1,33 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="pbeger (generated)" id="1775639342890-4">
+        <dropForeignKeyConstraint baseTableName="teacher" constraintName="FKf3nb30ggdsojitnha20fcd0jv"/>
+    </changeSet>
+    <changeSet author="pbeger (generated)" id="1775639342890-1">
+        <createTable tableName="staff">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="staffPK"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bio" type="VARCHAR(400)"/>
+            <column name="user_id" type="UUID"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="pbeger (generated)" id="1775639342890-2">
+        <addUniqueConstraint columnNames="user_id" constraintName="UC_STAFFUSER_ID_COL" tableName="staff"/>
+    </changeSet>
+    <changeSet author="pbeger (generated)" id="1775639342890-3">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="staff" constraintName="FK4i3t4vgl7l6p28i1hm6eq0ny6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
+    </changeSet>
+    <changeSet author="pbeger (generated)" id="1775639342890-5">
+        <dropUniqueConstraint constraintName="uc_teacheruser_id_col" tableName="teacher"/>
+    </changeSet>
+    <changeSet author="pbeger (generated)" id="1775639342890-6">
+        <dropTable tableName="teacher"/>
+    </changeSet>
+</databaseChangeLog>
