@@ -48,5 +48,20 @@
     "id1": "7f3a2b91-3d44-4c6a-8a9e-2b6d5f1c0a22",
     "id2": "ef319adc-d693-4db5-8b76-a47d907d9271",
     "associationType": "DECLARED_ACTIVITY_DECLARED_SKILL"
+  },
+  {
+    "id1": "7f3a2b91-3d44-4c6a-8a9e-2b6d5f1c0a22",
+    "id2": "0b6cdaac-0b71-4102-b342-fee525a42989",
+    "associationType": "DECLARED_ACTIVITY_DECLARED_SKILL"
+  },
+  {
+    "id1": "7f3a2b91-3d44-4c6a-8a9e-2b6d5f1c0a22",
+    "id2": "0c2f159b-c094-417c-a78c-28348fea3743",
+    "associationType": "DECLARED_ACTIVITY_DECLARED_SKILL"
+  },
+  {
+    "id1": "7f3a2b91-3d44-4c6a-8a9e-2b6d5f1c0a22",
+    "id2": "d2cfae1d-cd31-43f0-9723-2ad762c52fb1",
+    "associationType": "DECLARED_ACTIVITY_DECLARED_SKILL"
   }
 ]
