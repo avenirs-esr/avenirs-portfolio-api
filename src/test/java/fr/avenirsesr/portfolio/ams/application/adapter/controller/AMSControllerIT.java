@@ -27,8 +27,8 @@ public class AMSControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.payload}")
   private String studentPayload;
 
-  @Value("${user.teacher.payload}")
-  private String teacherPayload;
+  @Value("${user.staff.payload}")
+  private String staffPayload;
 
   @Value("${user.unknown.payload}")
   private String unknownUserPayload;
@@ -36,8 +36,8 @@ public class AMSControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.signature}")
   private String studentSignature;
 
-  @Value("${user.teacher.signature}")
-  private String teacherSignature;
+  @Value("${user.staff.signature}")
+  private String staffSignature;
 
   @Value("${user.unknown.signature}")
   private String unknownUserSignature;
@@ -122,9 +122,9 @@ public class AMSControllerIT extends ContainerConfigurationTest {
                     .queryParam("studentProgressId", VALID_STUDENT_PROGRESS_ID)
                     .build())
         .header("Accept-Language", language.getCode())
-        .header("X-Signed-Context", teacherPayload)
+        .header("X-Signed-Context", staffPayload)
         .header("X-Context-Kid", secretKey)
-        .header("X-Context-Signature", teacherSignature)
+        .header("X-Context-Signature", staffSignature)
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()

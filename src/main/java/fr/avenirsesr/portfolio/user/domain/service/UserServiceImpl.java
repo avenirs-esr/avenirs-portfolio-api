@@ -10,8 +10,8 @@ import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.exception.FirstnameIsNullException;
 import fr.avenirsesr.portfolio.user.domain.exception.LastnameIsNullException;
+import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
-import fr.avenirsesr.portfolio.user.domain.port.input.TeacherService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import java.util.UUID;
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
   private final UserResourceService userResourceService;
-  private final TeacherService teacherService;
+  private final StaffService staffService;
   private final StudentService studentService;
 
   @Override
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
     var bio =
         switch (userCategory) {
           case STUDENT -> studentService.getBio(user);
-          case TEACHER -> teacherService.getBio(user);
+          case STAFF -> staffService.getBio(user);
         };
 
     return new UserProfileOverviewData(
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
     switch (userCategory) {
       case STUDENT -> studentService.updateProfile(user, bio);
-      case TEACHER -> teacherService.updateProfile(user, bio);
+      case STAFF -> staffService.updateProfile(user, bio);
     }
   }
 

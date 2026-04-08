@@ -9,23 +9,23 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Teacher extends AvenirsBaseModel {
+public class Staff extends AvenirsBaseModel {
   @Setter(AccessLevel.NONE)
   private final User user;
 
   private String bio;
 
-  private Teacher(User user, String bio, Instant createdAt, Instant updatedAt) {
+  private Staff(User user, String bio, Instant createdAt, Instant updatedAt) {
     super(user.getId(), createdAt, updatedAt);
     this.user = user;
     this.bio = bio;
   }
 
-  public static Teacher create(User user, String bio) {
-    return new Teacher(user, bio, Instant.now(), Instant.now());
+  public static Staff create(User user, String bio) {
+    return new Staff(user, bio, Instant.now(), Instant.now());
   }
 
-  public static Teacher toDomain(User user, String bio, Instant createdAt, Instant updatedAt) {
-    return new Teacher(user, bio, createdAt, updatedAt);
+  public static Staff toDomain(User user, String bio, Instant createdAt, Instant updatedAt) {
+    return new Staff(user, bio, createdAt, updatedAt);
   }
 }

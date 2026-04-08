@@ -41,7 +41,7 @@ public class UserServiceImplTest {
   @Mock private StudentRepository studentRepository;
 
   @Mock private StudentServiceImpl studentService;
-  @Mock private TeacherServiceImpl teacherService;
+  @Mock private StaffServiceImpl staffService;
   @InjectMocks private UserServiceImpl userService;
 
   private Student student;
@@ -86,8 +86,7 @@ public class UserServiceImplTest {
     String saveEmail = student.getUser().getEmail();
 
     BddLogger.when("only updating firstname and lastname");
-    userService.updateProfile(
-        EUserCategory.TEACHER, "RandomFirstname", "RandomLastname", null, null);
+    userService.updateProfile(EUserCategory.STAFF, "RandomFirstname", "RandomLastname", null, null);
 
     BddLogger.then("it should only update firstname and lastname");
     ArgumentCaptor<User> captorUser = ArgumentCaptor.forClass(User.class);
@@ -98,7 +97,7 @@ public class UserServiceImplTest {
     assertEquals("RandomLastname", savedUser.getLastName());
     assertEquals(saveEmail, savedUser.getEmail());
 
-    verify(teacherService).updateProfile(any(User.class), isNull());
+    verify(staffService).updateProfile(any(User.class), isNull());
   }
 
   @Test

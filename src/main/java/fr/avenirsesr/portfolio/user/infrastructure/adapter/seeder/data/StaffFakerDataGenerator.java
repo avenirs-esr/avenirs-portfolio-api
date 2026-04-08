@@ -1,11 +1,11 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.data;
 
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
-import fr.avenirsesr.portfolio.user.domain.port.output.seeder.TeacherDataGenerator;
+import fr.avenirsesr.portfolio.user.domain.port.output.seeder.StaffDataGenerator;
 import java.util.Locale;
 import net.datafaker.Faker;
 
-public class TeacherFakerDataGenerator extends DataGenerator implements TeacherDataGenerator {
+public class StaffFakerDataGenerator extends DataGenerator implements StaffDataGenerator {
   private Faker faker() {
     return new Faker(
         switch (getLanguage()) {
@@ -17,7 +17,7 @@ public class TeacherFakerDataGenerator extends DataGenerator implements TeacherD
   }
 
   @Override
-  public String teacherDescription() {
+  public String staffDescription() {
     return faker().lorem().sentence(10);
   }
 }

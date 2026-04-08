@@ -13,23 +13,23 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "teacher")
+@Table(name = "staff")
 @NoArgsConstructor
 @Getter
 @Setter
-public class TeacherEntity extends AvenirsBaseEntity {
+public class StaffEntity extends AvenirsBaseEntity {
   @OneToOne private UserEntity user;
 
   @Column(length = BIO_LENGTH)
   private String bio;
 
-  private TeacherEntity(UUID id, UserEntity user, String bio) {
+  private StaffEntity(UUID id, UserEntity user, String bio) {
     setId(id);
     this.user = user;
     this.bio = bio;
   }
 
-  public static TeacherEntity of(UserEntity user, String bio) {
-    return new TeacherEntity(user.getId(), user, bio);
+  public static StaffEntity of(UserEntity user, String bio) {
+    return new StaffEntity(user.getId(), user, bio);
   }
 }

@@ -114,7 +114,7 @@
         <modifyDataType columnName="bio" newDataType="VARCHAR(400)" tableName="student"/>
     </changeSet>
     <changeSet id="1767692913055-4" author="nathp">
-        <modifyDataType columnName="bio" newDataType="VARCHAR(400)" tableName="teacher"/>
+        <modifyDataType columnName="bio" newDataType="VARCHAR(400)" tableName="staff"/>
     </changeSet>
     <changeSet id="1767692913055-5" author="nathp">
         <modifyDataType columnName="description" newDataType="VARCHAR(400)" tableName="cohort"/>

@@ -23,8 +23,8 @@ import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.ExternalUserSeeder;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StaffSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.TeacherSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
@@ -57,7 +57,7 @@ public class SeederOrchestrator {
   private final UserSeeder userSeeder;
   private final ExternalUserSeeder externalUserSeeder;
   private final StudentSeeder studentSeeder;
-  private final TeacherSeeder teacherSeeder;
+  private final StaffSeeder staffSeeder;
   private final UserPhotoSeeder userPhotoSeeder;
 
   private final SelfKnowledgeCategorySeeder selfKnowledgeCategorySeeder;
@@ -97,12 +97,12 @@ public class SeederOrchestrator {
       var savedUsers = userSeeder.seed();
       externalUserSeeder.seed(savedUsers);
 
-      var savedTeachers = teacherSeeder.seed(savedUsers);
+      var savedStaffs = staffSeeder.seed(savedUsers);
       var savedStudents = studentSeeder.seed(savedUsers, savedSelfKnowledgeMandatoryCategories);
 
       declaredExperienceSeeder.seed(savedStudents);
 
-      userPhotoSeeder.seed(savedStudents, savedTeachers);
+      userPhotoSeeder.seed(savedStudents, savedStaffs);
 
       var savedDeclaredSkills = declaredSkillSeeder.seed();
       var savedStudentDeclaredSkills =
