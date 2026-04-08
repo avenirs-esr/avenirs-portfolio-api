@@ -11,5 +11,5 @@ public interface UserDataGenerator extends DataGeneratorInterface {
 
   String studentDescription();
 
-  String teacherDescription();
+  String staffDescription();
 }

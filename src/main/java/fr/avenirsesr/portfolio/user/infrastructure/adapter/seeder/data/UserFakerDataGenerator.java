@@ -37,7 +37,7 @@ public class UserFakerDataGenerator extends DataGenerator implements UserDataGen
   }
 
   @Override
-  public String teacherDescription() {
+  public String staffDescription() {
     return faker().lorem().sentence(10);
   }
 }

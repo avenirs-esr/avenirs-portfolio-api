@@ -29,11 +29,11 @@ public class UserControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.signature}")
   private String studentSignature;
 
-  @Value("${user.teacher.payload}")
-  private String teacherPayload;
+  @Value("${user.staff.payload}")
+  private String staffPayload;
 
-  @Value("${user.teacher.signature}")
-  private String teacherSignature;
+  @Value("${user.staff.signature}")
+  private String staffSignature;
 
   @Value("${user.unknown.payload}")
   private String unknownPayload;
@@ -70,19 +70,19 @@ public class UserControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldUpdateTeacherProfileSuccessfully() throws Exception {
-    BddLogger.given("the /me/users/TEACHER/update endpoint");
+  void shouldUpdateStaffProfileSuccessfully() throws Exception {
+    BddLogger.given("the /me/users/STAFF/update endpoint");
     String payloadJson = loadJson("user/mock-update-user.json");
 
     BddLogger.when("performing a PUT");
-    BddLogger.then("it should update the teacher profile successfully");
+    BddLogger.then("it should update the staff profile successfully");
 
     webTestClient
         .put()
-        .uri("/me/users/TEACHER/update")
-        .header("X-Signed-Context", teacherPayload)
+        .uri("/me/users/STAFF/update")
+        .header("X-Signed-Context", staffPayload)
         .header("X-Context-Kid", secretKey)
-        .header("X-Context-Signature", teacherSignature)
+        .header("X-Context-Signature", staffSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(payloadJson)
         .exchange()

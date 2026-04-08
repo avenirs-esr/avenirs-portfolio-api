@@ -33,8 +33,8 @@ class NavigationAccessControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.payload}")
   private String studentPayload;
 
-  @Value("${user.teacher.payload}")
-  private String teacherPayload;
+  @Value("${user.staff.payload}")
+  private String staffPayload;
 
   @Value("${user.unknown.payload}")
   private String unknownUserPayload;
@@ -42,8 +42,8 @@ class NavigationAccessControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.signature}")
   private String studentSignature;
 
-  @Value("${user.teacher.signature}")
-  private String teacherSignature;
+  @Value("${user.staff.signature}")
+  private String staffSignature;
 
   @Value("${user.unknown.signature}")
   private String unknownUserSignature;
@@ -132,9 +132,9 @@ class NavigationAccessControllerIT extends ContainerConfigurationTest {
     webTestClient
         .get()
         .uri(BASE_PATH)
-        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, teacherPayload)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, teacherSignature)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
         .header("Accept-Language", language.getCode())
         .exchange()
         .expectStatus()

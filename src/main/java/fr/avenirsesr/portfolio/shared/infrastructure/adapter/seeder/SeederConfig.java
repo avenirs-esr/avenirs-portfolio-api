@@ -4,7 +4,7 @@ public class SeederConfig {
   // Users
   public static final int USERS_NB = 50;
   public static final int USERS_NB_OF_STUDENT = (int) (0.5 * USERS_NB);
-  public static final int USERS_NB_OF_TEACHER = (int) (0.15 * USERS_NB);
+  public static final int USERS_NB_OF_STAFF = (int) (0.15 * USERS_NB);
   public static final int MAX_PROFILE_PHOTO_PER_USER = 1;
   public static final int MAX_COVER_PHOTO_PER_USER = 1;
 

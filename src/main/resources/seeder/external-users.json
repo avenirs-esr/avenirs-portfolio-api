@@ -31,7 +31,7 @@
     "firstName": "Ethan",
     "lastName": "Perrin",
     "email": "ethan.perrin@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TEACH-EP-09",
     "source": "PEGASE"
   },
@@ -40,7 +40,7 @@
     "firstName": "Camille",
     "lastName": "Fournier",
     "email": "camille.fournier@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "PEG-STD-1010",
     "source": "PEGASE"
   },
@@ -103,7 +103,7 @@
     "firstName": "Zoé",
     "lastName": "Cousin",
     "email": "zoe.cousin@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TCHR-ZC-23",
     "source": "PEGASE"
   },
@@ -166,7 +166,7 @@
     "firstName": "Emma",
     "lastName": "Gaillard",
     "email": "emma.gaillard@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TEACH-EG-14",
     "source": "PEGASE"
   },
@@ -220,7 +220,7 @@
     "firstName": "Manon",
     "lastName": "Hoareau",
     "email": "manon.hoareau@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TCHR-MH-88",
     "source": "PEGASE"
   },
@@ -292,7 +292,7 @@
     "firstName": "Alexandre",
     "lastName": "Perret",
     "email": "alexandre.perret@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TEACH-AP-55",
     "source": "PEGASE"
   },
@@ -346,7 +346,7 @@
     "firstName": "Timéo",
     "lastName": "Bertin",
     "email": "timeo.bertin@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TCHR-TB-31",
     "source": "PEGASE"
   },
@@ -409,7 +409,7 @@
     "firstName": "Noah",
     "lastName": "Maury",
     "email": "noah.maury@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TEACH-NM-72",
     "source": "PEGASE"
   },
@@ -472,7 +472,7 @@
     "firstName": "Elodie",
     "lastName": "Chretien",
     "email": "elodie.chretien@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TCHR-EC-19",
     "source": "PEGASE"
   },
@@ -526,7 +526,7 @@
     "firstName": "Axel",
     "lastName": "Poulain",
     "email": "axel.poulain@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TEACH-AP-43",
     "source": "PEGASE"
   },
@@ -589,7 +589,7 @@
     "firstName": "Eline",
     "lastName": "Guillot",
     "email": "eline.guillot@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TCHR-EG-66",
     "source": "PEGASE"
   },
@@ -652,7 +652,7 @@
     "firstName": "Anael",
     "lastName": "Hardy",
     "email": "anael.hardy@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TEACH-AH-91",
     "source": "PEGASE"
   },
@@ -706,7 +706,7 @@
     "firstName": "Iris",
     "lastName": "Barre",
     "email": "iris.barre@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TCHR-IB-37",
     "source": "PEGASE"
   },
@@ -769,7 +769,7 @@
     "firstName": "Lila",
     "lastName": "Daniel",
     "email": "lila.daniel@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TEACH-LD-28",
     "source": "PEGASE"
   },
@@ -832,7 +832,7 @@
     "firstName": "Dorian",
     "lastName": "Poulain",
     "email": "dorian.poulain@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TCHR-DP-54",
     "source": "PEGASE"
   },
@@ -895,7 +895,7 @@
     "firstName": "Aya",
     "lastName": "Germain",
     "email": "aya.germain@university.com",
-    "category": "TEACHER",
+    "category": "STAFF",
     "externalId": "TEACH-AG-82",
     "source": "PEGASE"
   }

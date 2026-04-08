@@ -513,8 +513,8 @@
             <column name="email" type="VARCHAR(255)"/>
             <column name="student_bio" type="VARCHAR(255)"/>
             <column name="student_is_active" type="BOOLEAN"/>
-            <column name="teacher_bio" type="VARCHAR(255)"/>
-            <column name="teacher_is_active" type="BOOLEAN"/>
+            <column name="staff_bio" type="VARCHAR(255)"/>
+            <column name="staff_is_active" type="BOOLEAN"/>
             <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at" type="TIMESTAMP WITH TIME ZONE">
                 <constraints nullable="false"/>
             </column>

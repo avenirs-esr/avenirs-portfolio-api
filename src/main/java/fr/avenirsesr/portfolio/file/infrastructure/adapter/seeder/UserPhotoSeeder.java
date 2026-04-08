@@ -14,8 +14,8 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data.UserPhoto
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeUserPhoto;
 import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.TeacherEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,9 +48,9 @@ public class UserPhotoSeeder {
   }
 
   @Transactional
-  public List<UserPhotoEntity> seed(List<StudentEntity> students, List<TeacherEntity> teachers) {
+  public List<UserPhotoEntity> seed(List<StudentEntity> students, List<StaffEntity> staffs) {
     ValidationUtils.requireNonEmpty(students, "students cannot be empty");
-    ValidationUtils.requireNonEmpty(teachers, "teachers cannot be empty");
+    ValidationUtils.requireNonEmpty(staffs, "staffs cannot be empty");
     log.info("Seeding user photos...");
 
     List<UserPhotoCreationData> creationData =
@@ -60,7 +60,7 @@ public class UserPhotoSeeder {
               buildFakePhotos(
                   Stream.concat(
                           students.stream().map(StudentEntity::getUser),
-                          teachers.stream().map(TeacherEntity::getUser))
+                          staffs.stream().map(StaffEntity::getUser))
                       .toList());
         };
 
