@@ -1,13 +1,13 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.mapper;
 
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityAssociationDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillAssociationDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.AmsAssociationDTO;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.DeclaredSkillAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.SkillLevelAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceAssociationsDTO;
 import fr.avenirsesr.portfolio.trace.domain.data.AmsAssociationData;
-import fr.avenirsesr.portfolio.trace.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.trace.domain.data.SkillLevelAssociationData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
 
@@ -17,14 +17,14 @@ public interface TraceAssociationsMapper {
         traceAssociations.declaredActivityAssociations().stream()
             .map(
                 association ->
-                    new TraceAssociationsDTO.DeclaredActivityAssociationDTO(
+                    new DeclaredActivityAssociationDTO(
                         association.associationId(),
                         DeclaredActivityViewDTOMapper.toDTO(association.declaredActivity())))
             .toList(),
         traceAssociations.declaredSkillAssociations().stream()
             .map(
                 association ->
-                    new TraceAssociationsDTO.DeclaredSkillAssociationDTO(
+                    new DeclaredSkillAssociationDTO(
                         association.associationId(),
                         DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(
                             association.declaredSkill())))
@@ -39,17 +39,6 @@ public interface TraceAssociationsMapper {
             skillLevelAssociation.level(),
             skillLevelAssociation.status(),
             toDTO(skillLevelAssociation.ams()))
-        : null;
-  }
-
-  static DeclaredSkillAssociationDTO toDTO(DeclaredSkillAssociationData declaredSkillAssociation) {
-    return declaredSkillAssociation != null
-        ? new DeclaredSkillAssociationDTO(
-            declaredSkillAssociation.id(),
-            declaredSkillAssociation.title(),
-            declaredSkillAssociation.level(),
-            declaredSkillAssociation.pathSegments(),
-            declaredSkillAssociation.type())
         : null;
   }
 

@@ -3,9 +3,12 @@ package fr.avenirsesr.portfolio.student.progress.declared.skill.application.adap
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillAssociationsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressRequest;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.mapper.DeclaredSkillAssociationsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.request.AddDeclaredSkillDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillProgressDetails;
@@ -122,5 +125,33 @@ public class DeclaredSkillProgressController {
     declaredSkillProgressService.unassociateTraces(declaredSkillProgressId, traceIds);
 
     return ResponseEntity.ok("Trace successfully unassociated.");
+  }
+
+  @GetMapping("/{declaredSkillProgressId}/associations")
+  public ResponseEntity<DeclaredSkillAssociationsDTO> getDeclaredSkillWithDeclaredActivities(
+      Principal principal, @Valid @PathVariable UUID declaredSkillProgressId) {
+    log.debug(
+        "Received request to get declared skill [{}] associations for student [{}]",
+        declaredSkillProgressId,
+        principal.getName());
+    var newAssociations = declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);
+    return ResponseEntity.ok(DeclaredSkillAssociationsDTOMapper.toDTO(newAssociations));
+  }
+
+  @PostMapping("/{declaredSkillProgressId}/associate/declared-activities")
+  public ResponseEntity<DeclaredSkillAssociationsDTO> associateDeclaredSkillWithDeclaredActivities(
+      Principal principal,
+      @Valid @PathVariable UUID declaredSkillProgressId,
+      @Valid @RequestBody AssociationsCreationRequest body) {
+    log.debug(
+        "Received request to associate declared skill [{}] with declared activities [{}] by student"
+            + " [{}]",
+        declaredSkillProgressId,
+        body.idsToAssociate(),
+        principal.getName());
+    var newAssociations =
+        declaredSkillProgressService.associateDeclaredSkillWithActivities(
+            declaredSkillProgressId, body.idsToAssociate());
+    return ResponseEntity.ok(DeclaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
 }

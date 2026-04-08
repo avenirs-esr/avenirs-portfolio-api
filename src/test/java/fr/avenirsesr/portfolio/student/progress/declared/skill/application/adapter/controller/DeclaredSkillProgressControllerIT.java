@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.declaredskill.domain.port.output.repository.Decla
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -218,5 +219,219 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
             + "  \"type\": \"ROME4\"\n"
             + "}\n")
         .formatted(id);
+  }
+
+  @Test
+  void shouldReturn404WhenGettingAssociationsForNonExistentSkill() throws Exception {
+    BddLogger.given("a non-existent declared skill progress ID");
+
+    UUID nonExistentId = UUID.randomUUID();
+
+    BddLogger.when("performing a GET to get associations");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + nonExistentId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+
+    BddLogger.then("it should return 404 with appropriate error code");
+  }
+
+  @Test
+  void shouldReturn403WhenGettingAssociationsForOtherStudentSkill() throws Exception {
+    BddLogger.given("a declared skill progress belonging to another student");
+
+    // Using a declared skill progress ID that belongs to another student
+    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+
+    BddLogger.when("performing a GET to get associations");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + otherStudentSkillId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_NOT_AUTHORIZED");
+
+    BddLogger.then("it should return 403 forbidden");
+  }
+
+  @Test
+  void shouldReturn404WhenAssociatingWithNonExistentSkill() throws Exception {
+    BddLogger.given("a non-existent declared skill progress");
+
+    UUID nonExistentId = UUID.randomUUID();
+    List<UUID> activityIds = List.of(UUID.randomUUID());
+
+    BddLogger.when("performing a POST to associate activities");
+
+    String requestBody = objectMapper.writeValueAsString(Map.of("idsToAssociate", activityIds));
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + nonExistentId + "/associate/declared-activities")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturn403WhenAssociatingWithOtherStudentSkill() throws Exception {
+    BddLogger.given("a declared skill progress belonging to another student");
+
+    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+    List<UUID> activityIds = List.of(UUID.randomUUID());
+
+    BddLogger.when("performing a POST to associate activities");
+
+    String requestBody = objectMapper.writeValueAsString(Map.of("idsToAssociate", activityIds));
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + otherStudentSkillId + "/associate/declared-activities")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_NOT_AUTHORIZED");
+
+    BddLogger.then("it should return 403 forbidden");
+  }
+
+  @Test
+  void shouldReturn404WhenAssociatingWithNonExistentActivities() throws Exception {
+    BddLogger.given("a declared skill progress and non-existent activity IDs");
+
+    // First create a declared skill progress
+    var declaredSkill =
+        declaredSkillRepository.findAll().stream().skip(3).findFirst().orElseThrow();
+    UUID externalSkillId = declaredSkill.getExternalSkillId();
+
+    // Create the declared skill progress
+    var createResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    UUID createdSkillId =
+        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+
+    List<UUID> nonExistentActivityIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+
+    BddLogger.when("performing a POST to associate with non-existent activities");
+
+    String requestBody =
+        objectMapper.writeValueAsString(Map.of("idsToAssociate", nonExistentActivityIds));
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + createdSkillId + "/associate/declared-activities")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("DECLARED_ACTIVITY_NOT_FOUND");
+
+    BddLogger.then("it should return 404 for activity not found");
+  }
+
+  @Test
+  void shouldHandleEmptyActivityListWhenAssociating() throws Exception {
+    BddLogger.given("a declared skill progress and empty activity list");
+
+    // First create a declared skill progress
+    var declaredSkill =
+        declaredSkillRepository.findAll().stream().skip(4).findFirst().orElseThrow();
+    UUID externalSkillId = declaredSkill.getExternalSkillId();
+
+    // Create the declared skill progress
+    var createResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    UUID createdSkillId =
+        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+
+    BddLogger.when("performing a POST with empty activity list");
+
+    String requestBody = objectMapper.writeValueAsString(Map.of("idsToAssociate", List.of()));
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + createdSkillId + "/associate/declared-activities")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.declaredActivityAssociations")
+        .isArray()
+        .jsonPath("$.declaredActivityAssociations")
+        .isEmpty();
+
+    BddLogger.then("it should succeed with empty associations");
   }
 }

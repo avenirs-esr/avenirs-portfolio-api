@@ -23,10 +23,12 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.File;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
@@ -361,9 +363,9 @@ public class TraceServiceImpl implements TraceService {
     return getTraceAssociations(traceId, false);
   }
 
-  private TraceAssociationsData.DeclaredActivityAssociationData declaredActivityMapper(
+  private DeclaredActivityAssociationData declaredActivityMapper(
       Association association, List<DeclaredActivity> activities) {
-    return new TraceAssociationsData.DeclaredActivityAssociationData(
+    return new DeclaredActivityAssociationData(
         association.getId(),
         activities.stream()
             .filter(activity -> activity.getId().equals(association.getId1()))
@@ -371,9 +373,9 @@ public class TraceServiceImpl implements TraceService {
             .orElseThrow(DeclaredActivityNotFoundException::new));
   }
 
-  private TraceAssociationsData.DeclaredSkillAssociationData declaredSkillMapper(
+  private DeclaredSkillAssociationData declaredSkillMapper(
       Association association, List<DeclaredSkillProgress> skills) {
-    return new TraceAssociationsData.DeclaredSkillAssociationData(
+    return new DeclaredSkillAssociationData(
         association.getId(),
         skills.stream()
             .filter(skill -> skill.getId().equals(association.getId2()))

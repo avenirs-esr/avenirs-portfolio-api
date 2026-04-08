@@ -1,8 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.service;
 
+import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.declaredskill.domain.port.input.DeclaredSkillSyncService;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service.DeclaredSkillProgressServiceImpl;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.repository.DeclaredSkillProgressDatabaseRepository;
@@ -21,15 +23,18 @@ public class DeclaredSkillProgressServiceConfig {
   private final DeclaredSkillProgressDatabaseRepository declaredSkillProgressRepository;
   private final ExternalSkillClient externalSkillClient;
   private final LoggedInUserService loggedInUserService;
+  private final AssociationService associationService;
 
   @Bean
   public DeclaredSkillProgressService declaredSkillProgressService(
-      @Lazy TraceService traceService) {
+      @Lazy TraceService traceService, @Lazy DeclaredActivityService declaredActivityService) {
     return new DeclaredSkillProgressServiceImpl(
         traceService,
         declaredSkillSyncService,
         declaredSkillProgressRepository,
         externalSkillClient,
-        loggedInUserService);
+        loggedInUserService,
+        declaredActivityService,
+        associationService);
   }
 }

@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationsData;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import java.util.List;
@@ -28,4 +29,9 @@ public interface DeclaredSkillProgressService {
   void unassociateTraces(UUID declaredSkillProgressId, List<UUID> traceIds);
 
   List<DeclaredSkillProgress> findAllDeclaredSkillProgressesByIds(List<UUID> ids);
+
+  DeclaredSkillAssociationsData getAssociationsOf(UUID declaredSkillId);
+
+  DeclaredSkillAssociationsData associateDeclaredSkillWithActivities(
+      UUID declaredSkillIId, List<UUID> declaredActivityIds);
 }

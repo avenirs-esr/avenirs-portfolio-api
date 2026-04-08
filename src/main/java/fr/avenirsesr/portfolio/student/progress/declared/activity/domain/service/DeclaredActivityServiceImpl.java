@@ -26,9 +26,11 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.excepti
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationData;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -348,7 +350,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
             .filter(a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
             .map(
                 a ->
-                    new DeclaredActivityAssociationsData.DeclaredActivityTraceAssociationData(
+                    new TraceAssociationData(
                         a.getId(),
                         traces.stream()
                             .filter(t -> t.getId().equals(a.getId2()))
@@ -360,8 +362,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
                 a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)
             .map(
                 a ->
-                    new DeclaredActivityAssociationsData
-                        .DeclaredActivityDeclaredSkillAssociationData(
+                    new DeclaredSkillAssociationData(
                         a.getId(),
                         declaredSkills.stream()
                             .filter(s -> s.getId().equals(a.getId2()))
