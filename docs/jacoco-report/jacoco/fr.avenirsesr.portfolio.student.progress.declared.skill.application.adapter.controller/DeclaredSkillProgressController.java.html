@@ -56,7 +56,7 @@ public class DeclaredSkillProgressController {
 <span class="fc" id="L56">            UUID.fromString(declaredSkill.getId()),</span>
 <span class="fc" id="L57">            declaredSkill.getType(),</span>
 <span class="fc" id="L58">            declaredSkill.getLevel(),</span>
-<span class="fc" id="L59">            declaredSkill.getDescription());</span>
+<span class="fc" id="L59">            declaredSkill.getReflection());</span>
 <span class="fc" id="L60">    return ResponseEntity.created(</span>
 <span class="fc" id="L61">            URI.create(&quot;/me/declared/skill-progress/&quot; + declaredSkill.getId()))</span>
 <span class="fc" id="L62">        .body(DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));</span>
@@ -73,7 +73,7 @@ public class DeclaredSkillProgressController {
 <span class="nc" id="L73">        declaredSkillProgressService.updateDeclaredSkillProgress(</span>
             declaredSkillProgressId,
 <span class="nc" id="L75">            declaredSkillProgressRequest.level(),</span>
-<span class="nc" id="L76">            declaredSkillProgressRequest.description());</span>
+<span class="nc" id="L76">            declaredSkillProgressRequest.reflection());</span>
 <span class="nc" id="L77">    return ResponseEntity.ok(</span>
 <span class="nc" id="L78">        DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));</span>
   }
