@@ -18,7 +18,7 @@ public class DeclaredSkillProgressFakerDataGenerator extends DataGenerator
   }
 
   @Override
-  public String description() {
+  public String reflection() {
     return faker().lorem().sentence(10);
   }
 }

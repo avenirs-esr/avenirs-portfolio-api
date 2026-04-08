@@ -27,7 +27,7 @@ public class DeclaredSkillProgressFixture {
   private Student student;
   private DeclaredSkill skill;
   private EDeclaredSkillLevel level;
-  private String description;
+  private String reflection;
   private Instant createdAt;
   private Instant updatedAt;
 
@@ -41,7 +41,7 @@ public class DeclaredSkillProgressFixture {
             EExternalSkillType.ROME4,
             List.of("Category", "Subcategory"));
     this.level = dataGenerator.with("level").pickIn(EDeclaredSkillLevel.class);
-    this.description = declaredSkillProgressGenerator.with("sentence").description();
+    this.reflection = declaredSkillProgressGenerator.with("sentence").reflection();
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }
@@ -70,8 +70,8 @@ public class DeclaredSkillProgressFixture {
     return this;
   }
 
-  public DeclaredSkillProgressFixture withDescription(String description) {
-    this.description = description;
+  public DeclaredSkillProgressFixture withReflection(String reflection) {
+    this.reflection = reflection;
     return this;
   }
 
@@ -87,6 +87,6 @@ public class DeclaredSkillProgressFixture {
 
   public DeclaredSkillProgress toModel() {
     return DeclaredSkillProgress.toDomain(
-        id, student, skill, level, description, createdAt, updatedAt);
+        id, student, skill, level, reflection, createdAt, updatedAt);
   }
 }

@@ -18,7 +18,7 @@ public class DeclaredSkillProgressMapper
         StudentMapper.INSTANCE.fromDomain(declaredSkillProgress.getStudent()),
         DeclaredSkillMapper.INSTANCE.fromDomain(declaredSkillProgress.getSkill()),
         declaredSkillProgress.getLevel(),
-        declaredSkillProgress.getDescription());
+        declaredSkillProgress.getReflection());
   }
 
   @Override
@@ -28,7 +28,7 @@ public class DeclaredSkillProgressMapper
         StudentMapper.INSTANCE.toDomain(entity.getStudent()),
         DeclaredSkillMapper.INSTANCE.toDomain(entity.getDeclaredSkill()),
         entity.getLevel(),
-        entity.getDescription(),
+        entity.getReflection(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -46,7 +46,7 @@ public class DeclaredSkillProgressMapper
             ? DeclaredSkillMapper.INSTANCE.toDomain(entity.getDeclaredSkill())
             : null,
         entity.getLevel(),
-        entity.getDescription(),
+        entity.getReflection(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }

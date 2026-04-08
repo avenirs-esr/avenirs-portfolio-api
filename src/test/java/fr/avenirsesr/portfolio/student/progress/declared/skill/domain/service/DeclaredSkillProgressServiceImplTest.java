@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.REFLECTION_LENGTH;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillCategoryType;
@@ -17,7 +18,6 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.declaredskill.domain.exception.DeclaredSkillNotFoundException;
 import fr.avenirsesr.portfolio.declaredskill.domain.exception.DuplicateDeclaredSkillException;
-import fr.avenirsesr.portfolio.declaredskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.declaredskill.domain.port.input.DeclaredSkillSyncService;
@@ -199,7 +199,7 @@ public class DeclaredSkillProgressServiceImplTest {
         UUID skillId = randomUUID();
         EExternalSkillType type = EExternalSkillType.ROME4;
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
-        String description = "Description for declared skill progress test";
+        String reflection = "Reflection for declared skill progress test";
         DeclaredSkill declaredSkill = mock(DeclaredSkill.class);
 
         BddLogger.when("calling the method with an available and not duplicate skill");
@@ -208,7 +208,7 @@ public class DeclaredSkillProgressServiceImplTest {
         when(declaredSkillProgressRepository.declaredSkillProgressAlreadyExists(any()))
             .thenReturn(false);
 
-        declaredSkillProgressService.createDeclaredSkillProgress(skillId, type, level, description);
+        declaredSkillProgressService.createDeclaredSkillProgress(skillId, type, level, reflection);
 
         BddLogger.then("it should save the declared skill progress");
         verify(declaredSkillSyncService).getOrCreateFromExternalSkill(skillId);
@@ -222,7 +222,7 @@ public class DeclaredSkillProgressServiceImplTest {
         UUID skillId = randomUUID();
         EExternalSkillType type = EExternalSkillType.ROME4;
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
-        String description = "Description for declared skill progress test";
+        String reflection = "Reflection for declared skill progress test";
         DeclaredSkill declaredSkill = mock(DeclaredSkill.class);
 
         BddLogger.when("calling the method with a duplicate skill");
@@ -238,7 +238,7 @@ public class DeclaredSkillProgressServiceImplTest {
             DuplicateDeclaredSkillException.class,
             () ->
                 declaredSkillProgressService.createDeclaredSkillProgress(
-                    skillId, type, level, description));
+                    skillId, type, level, reflection));
 
         verify(declaredSkillSyncService).getOrCreateFromExternalSkill(skillId);
         verify(declaredSkillProgressRepository).declaredSkillProgressAlreadyExists(any());
@@ -251,7 +251,7 @@ public class DeclaredSkillProgressServiceImplTest {
         UUID skillId = randomUUID();
         EExternalSkillType type = EExternalSkillType.ROME4;
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
-        String description = "Description for declared skill progress test";
+        String reflection = "Reflection for declared skill progress test";
 
         BddLogger.when("calling the method with an unknown skill");
         when(declaredSkillSyncService.getOrCreateFromExternalSkill(skillId))
@@ -263,7 +263,7 @@ public class DeclaredSkillProgressServiceImplTest {
             DeclaredSkillNotFoundException.class,
             () ->
                 declaredSkillProgressService.createDeclaredSkillProgress(
-                    skillId, type, level, description));
+                    skillId, type, level, reflection));
 
         verify(declaredSkillSyncService).getOrCreateFromExternalSkill(skillId);
         verifyNoInteractions(declaredSkillProgressRepository);
@@ -273,27 +273,27 @@ public class DeclaredSkillProgressServiceImplTest {
     @Nested
     class WhenUpdatingDeclaredSkillProgress {
       @Test
-      void updateDeclaredSkillProgress_shouldSaveLevelAndDescription() {
+      void updateDeclaredSkillProgress_shouldSaveLevelAndReflection() {
         BddLogger.given("the method updateDeclaredSkillProgress");
         EDeclaredSkillLevel level = EDeclaredSkillLevel.ADVANCED;
-        String description = "Description for declared skill progress test";
+        String reflection = "Reflection for declared skill progress test";
         DeclaredSkillProgress declaredSkillProgress =
             DeclaredSkillProgressFixture.create()
                 .withStudent(student)
                 .withLevel(EDeclaredSkillLevel.BEGINNER)
-                .withDescription(null)
+                .withReflection(null)
                 .toModel();
 
         BddLogger.when(
             "calling the method with a given student, declaredSkillProgressId, level and"
-                + " description");
+                + " reflection");
         when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
             .thenReturn(Optional.of(declaredSkillProgress));
 
         declaredSkillProgressService.updateDeclaredSkillProgress(
-            declaredSkillProgress.getId(), level, description);
+            declaredSkillProgress.getId(), level, reflection);
 
-        BddLogger.then("it should save level and description in declared skill progress");
+        BddLogger.then("it should save level and reflection in declared skill progress");
         ArgumentCaptor<DeclaredSkillProgress> captor =
             ArgumentCaptor.forClass(DeclaredSkillProgress.class);
         verify(declaredSkillProgressRepository).save(captor.capture());
@@ -303,16 +303,16 @@ public class DeclaredSkillProgressServiceImplTest {
         assertEquals(declaredSkillProgress.getStudent(), savedDeclaredSkillProgress.getStudent());
         assertEquals(declaredSkillProgress.getSkill(), savedDeclaredSkillProgress.getSkill());
         assertEquals(level, savedDeclaredSkillProgress.getLevel());
-        assertEquals(description, savedDeclaredSkillProgress.getDescription());
+        assertEquals(reflection, savedDeclaredSkillProgress.getReflection());
       }
 
       @Test
-      void updateDeclaredSkillProgress_shouldThrowInvalidDescriptionException() {
+      void updateDeclaredSkillProgress_shouldThrowFieldValidationException() {
         BddLogger.given("the method getDeclaredSkillProgressDetails");
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
-        String description =
+        String reflection =
             random
-                .ints(DESCRIPTION_LENGTH + 1, 0, CHARSET.length())
+                .ints(REFLECTION_LENGTH + 1, 0, CHARSET.length())
                 .mapToObj(CHARSET::charAt)
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
@@ -321,19 +321,19 @@ public class DeclaredSkillProgressServiceImplTest {
 
         BddLogger.when(
             "calling the method with a given student, declaredSkillProgressId, level and too long"
-                + " description");
+                + " reflection");
         assertThrows(
-            InvalidDescriptionException.class,
+            FieldValidationException.class,
             () ->
                 declaredSkillProgressService.updateDeclaredSkillProgress(
-                    declaredSkillProgress.getId(), level, description));
+                    declaredSkillProgress.getId(), level, reflection));
       }
 
       @Test
       void updateDeclaredSkillProgress_shouldThrowDeclaredSkillProgressNotFoundException() {
         BddLogger.given("the method getDeclaredSkillProgressDetails");
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
-        String description = "Description for declared skill progress test";
+        String reflection = "Reflection for declared skill progress test";
         DeclaredSkillProgress declaredSkillProgress =
             DeclaredSkillProgressFixture.create().withStudent(student).toModel();
 
@@ -342,7 +342,7 @@ public class DeclaredSkillProgressServiceImplTest {
             DeclaredSkillProgressNotFoundException.class,
             () ->
                 declaredSkillProgressService.updateDeclaredSkillProgress(
-                    declaredSkillProgress.getId(), level, description));
+                    declaredSkillProgress.getId(), level, reflection));
       }
 
       @Test
@@ -350,18 +350,18 @@ public class DeclaredSkillProgressServiceImplTest {
         BddLogger.given("the method getDeclaredSkillProgressDetails");
         Student anotherStudent = StudentFixture.create().toModel();
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
-        String description = "Description for declared skill progress test";
+        String reflection = "Reflection for declared skill progress test";
         DeclaredSkillProgress declaredSkillProgress =
             DeclaredSkillProgressFixture.create().withStudent(anotherStudent).toModel();
 
-        BddLogger.when("calling the method with another given student and level, description");
+        BddLogger.when("calling the method with another given student and level, reflection");
         when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
             .thenReturn(Optional.of(declaredSkillProgress));
         assertThrows(
             UserNotAuthorizedException.class,
             () ->
                 declaredSkillProgressService.updateDeclaredSkillProgress(
-                    declaredSkillProgress.getId(), level, description));
+                    declaredSkillProgress.getId(), level, reflection));
       }
     }
 

@@ -13,4 +13,4 @@ public record DeclaredSkillProgressDTO(
     List<String> pathSegments,
     @Schema(ref = "#/components/schemas/EExternalSkillType") EExternalSkillType type,
     @Schema(ref = "#/components/schemas/EDeclaredSkillLevel") EDeclaredSkillLevel level,
-    String description) {}
+    String reflection) {}

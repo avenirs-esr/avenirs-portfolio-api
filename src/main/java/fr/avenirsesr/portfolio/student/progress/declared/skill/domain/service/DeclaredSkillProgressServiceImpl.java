@@ -1,7 +1,8 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.REFLECTION_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -11,7 +12,6 @@ import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternal
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.declaredskill.domain.exception.DeclaredSkillNotFoundException;
 import fr.avenirsesr.portfolio.declaredskill.domain.exception.DuplicateDeclaredSkillException;
-import fr.avenirsesr.portfolio.declaredskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.declaredskill.domain.port.input.DeclaredSkillSyncService;
@@ -47,22 +47,19 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
 
   @Override
   public DeclaredSkillProgress createDeclaredSkillProgress(
-      UUID declaredSkillId,
-      EExternalSkillType type,
-      EDeclaredSkillLevel level,
-      String description) {
+      UUID declaredSkillId, EExternalSkillType type, EDeclaredSkillLevel level, String reflection) {
     Student student = loggedInUserService.getLoggedInStudent();
     requireNotNull("externalSkillId", declaredSkillId);
     requireNotNull("type", type);
     requireNotNull("level", level);
     try {
-      checkDescriptionField(description);
+      validateOptionalTextMaxLength("reflection", reflection, REFLECTION_LENGTH);
       DeclaredSkill declaredSkill =
           declaredSkillSyncService
               .getOrCreateFromExternalSkill(declaredSkillId)
               .orElseThrow(DeclaredSkillNotFoundException::new);
       DeclaredSkillProgress declaredSkillProgress =
-          DeclaredSkillProgress.create(student, declaredSkill, level, description);
+          DeclaredSkillProgress.create(student, declaredSkill, level, reflection);
       if (declaredSkillProgressRepository.declaredSkillProgressAlreadyExists(
           declaredSkillProgress)) {
         log.error(
@@ -80,9 +77,9 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
 
   @Override
   public DeclaredSkillProgress updateDeclaredSkillProgress(
-      UUID declaredSkillProgressId, EDeclaredSkillLevel level, String description) {
+      UUID declaredSkillProgressId, EDeclaredSkillLevel level, String reflection) {
     Student student = loggedInUserService.getLoggedInStudent();
-    checkDescriptionField(description);
+    validateOptionalTextMaxLength("reflection", reflection, REFLECTION_LENGTH);
 
     DeclaredSkillProgress declaredSkillProgress =
         declaredSkillProgressRepository
@@ -94,7 +91,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     }
 
     declaredSkillProgress.setLevel(level);
-    declaredSkillProgress.setDescription(description);
+    declaredSkillProgress.setReflection(reflection);
 
     return declaredSkillProgressRepository.save(declaredSkillProgress);
   }
@@ -183,19 +180,5 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   @Override
   public List<DeclaredSkillProgress> findAllDeclaredSkillProgressesByIds(List<UUID> ids) {
     return declaredSkillProgressRepository.findAllById(ids);
-  }
-
-  private static void checkDescriptionField(String description) {
-    if (description != null && description.length() > DESCRIPTION_LENGTH) {
-      log.error(
-          "Description too long: {} characters (max = " + DESCRIPTION_LENGTH + ")",
-          description.length());
-      throw new InvalidDescriptionException(
-          "Description exceeds "
-              + DESCRIPTION_LENGTH
-              + " characters (actual: "
-              + description.length()
-              + ")");
-    }
   }
 }

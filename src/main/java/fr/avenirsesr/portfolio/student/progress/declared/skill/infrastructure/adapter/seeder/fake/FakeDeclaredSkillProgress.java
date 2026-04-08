@@ -36,7 +36,7 @@ public class FakeDeclaredSkillProgress {
             student,
             randomSkill,
             dataGenerator.with("EDeclaredSkillLevel").pickIn(EDeclaredSkillLevel.class),
-            declaredSkillProgressGenerator.with("sentence").description()));
+            declaredSkillProgressGenerator.with("sentence").reflection()));
   }
 
   public DeclaredSkillProgressEntity toEntity() {

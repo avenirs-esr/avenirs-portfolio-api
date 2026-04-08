@@ -18,7 +18,7 @@ public interface DeclaredSkillProgressMapper {
         declaredSkillProgress.getSkill().getPathSegments(),
         declaredSkillProgress.getSkill().getType(),
         declaredSkillProgress.getLevel(),
-        declaredSkillProgress.getDescription());
+        declaredSkillProgress.getReflection());
   }
 
   static DeclaredSkillProgressDetailsDTO toDeclaredSkillProgressDetailsDTO(
@@ -36,7 +36,7 @@ public interface DeclaredSkillProgressMapper {
         declaredSkillProgressDetails.declaredSkillProgress().getId(),
         declaredSkillProgressDetails.declaredSkillProgress().getSkill().getLibelle(),
         categories,
-        declaredSkillProgressDetails.declaredSkillProgress().getDescription(),
+        declaredSkillProgressDetails.declaredSkillProgress().getReflection(),
         declaredSkillProgressDetails.declaredSkillProgress().getSkill().getType(),
         declaredSkillProgressDetails.declaredSkillProgress().getLevel(),
         declaredSkillProgressDetails.tracesWithProjectName().stream()
