@@ -56,7 +56,7 @@ public class DeclaredSkillProgressController {
             UUID.fromString(declaredSkill.getId()),
             declaredSkill.getType(),
             declaredSkill.getLevel(),
-            declaredSkill.getDescription());
+            declaredSkill.getReflection());
     return ResponseEntity.created(
             URI.create("/me/declared/skill-progress/" + declaredSkill.getId()))
         .body(DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));
@@ -73,7 +73,7 @@ public class DeclaredSkillProgressController {
         declaredSkillProgressService.updateDeclaredSkillProgress(
             declaredSkillProgressId,
             declaredSkillProgressRequest.level(),
-            declaredSkillProgressRequest.description());
+            declaredSkillProgressRequest.reflection());
     return ResponseEntity.ok(
         DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));
   }

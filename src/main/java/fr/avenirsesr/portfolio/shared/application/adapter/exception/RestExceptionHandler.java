@@ -9,7 +9,6 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundExcepti
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.declaredskill.domain.exception.DeclaredSkillNotFoundException;
 import fr.avenirsesr.portfolio.declaredskill.domain.exception.DuplicateDeclaredSkillException;
-import fr.avenirsesr.portfolio.declaredskill.domain.exception.InvalidDescriptionException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
@@ -117,13 +116,6 @@ public class RestExceptionHandler extends BaseRestExceptionHandler {
   public ResponseEntity<ErrorResponse> handleSkillLevelNotFoundException(
       SkillLevelNotFoundException ex) {
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
-  }
-
-  @ExceptionHandler(InvalidDescriptionException.class)
-  public ResponseEntity<ErrorResponse> handleInvalidDescriptionException(
-      InvalidDescriptionException ex) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new ErrorResponse(ex.getErrorCode().name(), ex.getMessage()));
   }
 

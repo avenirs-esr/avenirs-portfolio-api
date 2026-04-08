@@ -24,7 +24,7 @@ public record DeclaredSkillProgressDetailsDTO(
     UUID id,
     String title,
     List<DeclaredSkillCategoryDTO> pathSegments,
-    String description,
+    String reflection,
     @Schema(ref = "#/components/schemas/EExternalSkillType") EExternalSkillType type,
     @Schema(ref = "#/components/schemas/EDeclaredSkillLevel") EDeclaredSkillLevel level,
     List<TraceOverviewDTO> traceAssociations,

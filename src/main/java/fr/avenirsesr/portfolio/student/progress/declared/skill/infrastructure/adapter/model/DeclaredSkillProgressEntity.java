@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.DESCRIPTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.REFLECTION_LENGTH;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
@@ -34,20 +34,20 @@ public class DeclaredSkillProgressEntity extends AvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private EDeclaredSkillLevel level;
 
-  @Column(length = DESCRIPTION_LENGTH)
-  private String description;
+  @Column(length = REFLECTION_LENGTH)
+  private String reflection;
 
   private DeclaredSkillProgressEntity(
       UUID id,
       StudentEntity student,
       DeclaredSkillEntity declaredSkill,
       EDeclaredSkillLevel level,
-      String description) {
+      String reflection) {
     setId(id);
     this.student = student;
     this.declaredSkill = declaredSkill;
     this.level = level;
-    this.description = description;
+    this.reflection = reflection;
   }
 
   public static DeclaredSkillProgressEntity of(
@@ -55,8 +55,8 @@ public class DeclaredSkillProgressEntity extends AvenirsBaseEntity {
       StudentEntity student,
       DeclaredSkillEntity declaredSkill,
       EDeclaredSkillLevel level,
-      String description) {
-    return new DeclaredSkillProgressEntity(id, student, declaredSkill, level, description);
+      String reflection) {
+    return new DeclaredSkillProgressEntity(id, student, declaredSkill, level, reflection);
   }
 
   public static DeclaredSkillProgressEntity create(
@@ -64,7 +64,7 @@ public class DeclaredSkillProgressEntity extends AvenirsBaseEntity {
       StudentEntity student,
       DeclaredSkillEntity declaredSkill,
       EDeclaredSkillLevel level,
-      String description) {
-    return new DeclaredSkillProgressEntity(id, student, declaredSkill, level, description);
+      String reflection) {
+    return new DeclaredSkillProgressEntity(id, student, declaredSkill, level, reflection);
   }
 }

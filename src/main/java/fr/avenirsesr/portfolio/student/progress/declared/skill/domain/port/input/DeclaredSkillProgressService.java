@@ -14,10 +14,10 @@ public interface DeclaredSkillProgressService {
   PagedResult<DeclaredSkillProgress> getDeclaredSkillsProgresses(PageCriteria criteria);
 
   DeclaredSkillProgress createDeclaredSkillProgress(
-      UUID declaredSkillId, EExternalSkillType type, EDeclaredSkillLevel level, String description);
+      UUID declaredSkillId, EExternalSkillType type, EDeclaredSkillLevel level, String reflection);
 
   DeclaredSkillProgress updateDeclaredSkillProgress(
-      UUID declaredSkillProgressId, EDeclaredSkillLevel level, String description);
+      UUID declaredSkillProgressId, EDeclaredSkillLevel level, String reflection);
 
   DeclaredSkillProgressDetails getDeclaredSkillProgressDetails(UUID declaredSkillProgressId);
 
