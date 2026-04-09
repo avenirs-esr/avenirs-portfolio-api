@@ -3,7 +3,6 @@
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
@@ -19,7 +18,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L22">@Slf4j</span>
+<span class="fc" id="L21">@Slf4j</span>
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
@@ -29,71 +28,68 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User getUser(UUID id) {
-<span class="fc" id="L32">    return userRepository</span>
-<span class="fc" id="L33">        .findById(id)</span>
-<span class="fc" id="L34">        .orElseThrow(</span>
+<span class="fc" id="L31">    return userRepository</span>
+<span class="fc" id="L32">        .findById(id)</span>
+<span class="fc" id="L33">        .orElseThrow(</span>
             () -&gt; {
-<span class="fc" id="L36">              log.error(&quot;User {} not found&quot;, id);</span>
-<span class="fc" id="L37">              return new UserNotFoundException();</span>
+<span class="fc" id="L35">              log.error(&quot;User {} not found&quot;, id);</span>
+<span class="fc" id="L36">              return new UserNotFoundException();</span>
             });
   }
 
   @Override
   public UserPhotosData getUserPhotos(UUID userId, EUserCategory userCategory) {
-<span class="fc" id="L43">    var user = getUser(userId);</span>
-<span class="fc" id="L44">    var profile = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.PROFILE);</span>
-<span class="fc" id="L45">    var cover = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.COVER);</span>
+<span class="fc" id="L42">    var user = getUser(userId);</span>
+<span class="fc" id="L43">    var profile = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.PROFILE);</span>
+<span class="fc" id="L44">    var cover = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.COVER);</span>
 
-<span class="fc" id="L47">    return new UserPhotosData(</span>
-<span class="fc" id="L48">        profile.id(), profile.name(), profile.url(), cover.id(), cover.name(), cover.url());</span>
+<span class="fc" id="L46">    return new UserPhotosData(</span>
+<span class="fc" id="L47">        profile.id(), profile.name(), profile.url(), cover.id(), cover.name(), cover.url());</span>
   }
 
   @Override
   public UserProfileOverviewData getUserProfileOverviewDTO(
       UUID userId, EUserCategory userCategory) {
-<span class="fc" id="L54">    var user = getUser(userId);</span>
-<span class="fc" id="L55">    var bio =</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        switch (userCategory) {</span>
-<span class="fc" id="L57">          case STUDENT -&gt; studentService.getBio(user);</span>
-<span class="pc" id="L58">          case STAFF -&gt; staffService.getBio(user);</span>
+<span class="fc" id="L53">    var user = getUser(userId);</span>
+<span class="fc" id="L54">    var bio =</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        switch (userCategory) {</span>
+<span class="fc" id="L56">          case STUDENT -&gt; studentService.getBio(user);</span>
+<span class="pc" id="L57">          case STAFF -&gt; staffService.getBio(user);</span>
         };
 
-<span class="fc" id="L61">    return new UserProfileOverviewData(</span>
-<span class="fc" id="L62">        user.getFirstName(), user.getLastName(), user.getEmail(), bio);</span>
+<span class="fc" id="L60">    return new UserProfileOverviewData(</span>
+<span class="fc" id="L61">        user.getFirstName(), user.getLastName(), user.getEmail(), bio);</span>
   }
 
   @Override
   public void updateProfile(
       EUserCategory userCategory, String firstname, String lastname, String email, String bio) {
-<span class="fc" id="L68">    var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);</span>
-<span class="fc bfc" id="L69" title="All 2 branches covered.">    if (firstname == null) {</span>
-<span class="fc" id="L70">      throw new FirstnameIsNullException();</span>
+<span class="fc" id="L67">    var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);</span>
+<span class="fc" id="L68">    user.setFirstName(firstname);</span>
+<span class="fc" id="L69">    user.setLastName(lastname);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">    if (firstname == null) {</span>
+<span class="fc" id="L71">      throw new FirstnameIsNullException();</span>
     }
-<span class="fc bfc" id="L72" title="All 2 branches covered.">    if (lastname == null) {</span>
-<span class="fc" id="L73">      throw new LastnameIsNullException();</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">    if (lastname == null) {</span>
+<span class="fc" id="L74">      throw new LastnameIsNullException();</span>
     }
-<span class="fc" id="L75">    user.setFirstName(firstname);</span>
-<span class="fc" id="L76">    user.setLastName(lastname);</span>
 
-<span class="fc bfc" id="L78" title="All 2 branches covered.">    if (email != null) {</span>
-<span class="pc bpc" id="L79" title="1 of 3 branches missed.">      switch (userCategory) {</span>
-<span class="fc" id="L80">        case STUDENT -&gt; user.setEmail(email);</span>
-<span class="fc" id="L81">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
-      }
+<span class="fc bfc" id="L77" title="All 2 branches covered.">    if (email != null) {</span>
+<span class="fc" id="L78">      user.setEmail(email);</span>
     }
-<span class="fc" id="L84">    userRepository.save(user);</span>
+<span class="fc" id="L80">    userRepository.save(user);</span>
 
-<span class="pc bpc" id="L86" title="1 of 3 branches missed.">    switch (userCategory) {</span>
-<span class="fc" id="L87">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
-<span class="fc" id="L88">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
+<span class="pc bpc" id="L82" title="1 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="fc" id="L83">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
+<span class="fc" id="L84">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
     }
-<span class="fc" id="L90">  }</span>
+<span class="fc" id="L86">  }</span>
 
   @Override
   public User createUser(UUID id, String firstname, String lastname, String email) {
-<span class="fc" id="L94">    var user = User.create(id, firstname, lastname, email);</span>
-<span class="fc" id="L95">    userRepository.save(user);</span>
-<span class="fc" id="L96">    return user;</span>
+<span class="fc" id="L90">    var user = User.create(id, firstname, lastname, email);</span>
+<span class="fc" id="L91">    userRepository.save(user);</span>
+<span class="fc" id="L92">    return user;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
