@@ -14,8 +14,7 @@ public interface UserService extends BaseUserService {
 
   UserProfileOverviewData getUserProfileOverviewDTO(UUID userId, EUserCategory userCategory);
 
-  void updateProfile(
-      EUserCategory userCategory, String firstname, String lastname, String email, String bio);
+  void updateProfile(EUserCategory userCategory, String email, String bio);
 
   User createUser(UUID id, String firstname, String lastname, String email);
 }

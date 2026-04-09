@@ -76,12 +76,7 @@ public class UserController {
           EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {
     log.debug("Received request to update profile of user [{}]", principal.getName());
-    userService.updateProfile(
-        userCategory,
-        request.getFirstname(),
-        request.getLastname(),
-        request.getEmail(),
-        request.getBio());
+    userService.updateProfile(userCategory, request.getEmail(), request.getBio());
     return ResponseEntity.ok("Mise à jour faite.");
   }
 }
