@@ -43,11 +43,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 class SelfKnowledgeServiceImplTest {
 
@@ -63,7 +59,6 @@ class SelfKnowledgeServiceImplTest {
   @BeforeEach
   void setUp() {
     student = StudentFixture.create().toModel();
-    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
   }
 
   @Nested
@@ -80,6 +75,7 @@ class SelfKnowledgeServiceImplTest {
       @BeforeEach
       void setupAnd() {
         BddLogger.and("a logged in student");
+        when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
       }
 
       @Nested

@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
-import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -12,11 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class SelfKnowledgeElementFixture {
-
-  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
-      new DataGeneratorProvider<SharedDataGenerator>()
-          .init(SelfKnowledgeElementFixture.class, SharedDataGenerator.class);
-
   private UUID id;
   private Student student;
   private String title;
@@ -27,7 +20,7 @@ public class SelfKnowledgeElementFixture {
   private Instant updatedAt;
 
   private SelfKnowledgeElementFixture() {
-    this.id = dataGenerator.with("id").uuid();
+    this.id = UUID.randomUUID();
     this.student = StudentFixture.create().toModel();
     this.title = "Créativité";
     this.description =

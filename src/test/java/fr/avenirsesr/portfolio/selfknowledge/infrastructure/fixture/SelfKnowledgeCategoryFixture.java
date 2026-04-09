@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.selfknowledge.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
-import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import java.time.Instant;
@@ -10,11 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class SelfKnowledgeCategoryFixture {
-
-  private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
-      new DataGeneratorProvider<SharedDataGenerator>()
-          .init(SelfKnowledgeCategoryFixture.class, SharedDataGenerator.class);
-
   private UUID id;
   private String title;
   private String description;
@@ -24,7 +17,7 @@ public class SelfKnowledgeCategoryFixture {
   private Instant updatedAt;
 
   private SelfKnowledgeCategoryFixture() {
-    this.id = dataGenerator.with("id").uuid();
+    this.id = UUID.randomUUID();
     this.title = "Mes points forts";
     this.description = "Description de test pour la catégorie de connaissance de soi.";
     this.type = ESelfKnowledgeCategoryType.STRENGTHS;
