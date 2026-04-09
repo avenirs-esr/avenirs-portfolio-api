@@ -53,18 +53,20 @@ public class TraceDatabaseRepository
       TraceFilter filter,
       DateFilter dateFilter,
       PageCriteria pageCriteria) {
-    Specification<TraceEntity> filterSpecification =
-        new TraceFilterSpecificationBuilder().build(filter.toMap());
 
     Specification<TraceEntity> specification =
-        TraceSpecification.ofUser(user)
-            .and(TraceSpecification.notDeleted())
-            .and(filterSpecification);
+        TraceSpecification.ofUser(user).and(TraceSpecification.notDeleted());
+
+    var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());
+    if (filterSpecification.isPresent()) {
+      specification = specification.and(filterSpecification.get());
+    }
 
     if (dateFilter != null) {
-      Specification<TraceEntity> dateFilterSpecification =
+      var dateFilterSpecification =
           new DateFilterSpecificationBuilder<TraceEntity>().build(dateFilter.toMap());
-      specification = specification.and(dateFilterSpecification);
+      if (dateFilterSpecification.isPresent())
+        specification = specification.and(dateFilterSpecification.get());
     }
 
     if (keyword != null) {
