@@ -57,14 +57,17 @@ public class StudentSeeder {
                   .map(
                       fakeStudent ->
                           new StudentCreationData(
-                              fakeStudent.getUser().getId(), fakeStudent.getBio()))
+                              fakeStudent.getUser().getId(),
+                              fakeStudent.getBio(),
+                              fakeStudent.getInstitutionEmail()))
                   .toList();
         };
 
     List<Student> students = new ArrayList<>();
     creationData.forEach(
         data -> {
-          var student = studentService.createStudent(data.userId(), data.bio());
+          var student =
+              studentService.createStudent(data.userId(), data.institutionEmail(), data.bio());
           students.add(student);
         });
 

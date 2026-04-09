@@ -229,7 +229,7 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
   }
 
   private StudentEntity persistStudent(UserEntity u) {
-    StudentEntity s = StudentEntity.of(u, "student");
+    StudentEntity s = StudentEntity.of(u, "student@univ.com", "student");
     entityManager.persist(s);
     return s;
   }

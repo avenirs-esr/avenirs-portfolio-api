@@ -3,19 +3,19 @@
     "id": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "firstName": "Lucas",
     "lastName": "Tessier",
-    "email": "lucas.tessier@email.com"
+    "email": null
   },
   {
     "id": "7c508ac3-d7a8-4f00-9989-0f677f4f9dea",
     "firstName": "Arthur",
     "lastName": "Lambert",
-    "email": "arthur.lambert@email.com"
+    "email": null
   },
   {
     "id": "0bdebb55-0c48-45d4-9490-a6f85423e87b",
     "firstName": "Sophie",
     "lastName": "Charpentier",
-    "email": "sophie.charpentier@email.com"
+    "email": null
   },
   {
     "id": "c25498db-525f-4322-90ec-517582295718",
@@ -27,31 +27,31 @@
     "id": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
     "firstName": "Camille",
     "lastName": "Fournier",
-    "email": "camille.fournier@email.com"
+    "email": null
   },
   {
     "id": "ddc4a3cf-2843-4497-99d4-daa6fdfab16b",
     "firstName": "Anaïs",
     "lastName": "Marchand",
-    "email": "anais.marchand@email.com"
+    "email": null
   },
   {
     "id": "12947983-0266-47b1-a355-d6b1b31051aa",
     "firstName": "Valentin",
     "lastName": "Favre",
-    "email": "valentin.favre@email.com"
+    "email": null
   },
   {
     "id": "cdf03b3f-b76d-40a6-a9e6-069f15fc5af7",
     "firstName": "Lina",
     "lastName": "Boucher",
-    "email": "lina.boucher@email.com"
+    "email": null
   },
   {
     "id": "9b9c49f8-e537-4649-a035-67920cb643fb",
     "firstName": "Jules",
     "lastName": "Carpentier",
-    "email": "jules.carpentier@email.com"
+    "email": null
   },
   {
     "id": "31820daa-0e02-48e4-9804-a0c79a760e86",
@@ -69,7 +69,7 @@
     "id": "5fcd76c5-017c-4d61-99d2-62a6f199c94e",
     "firstName": "Zoé",
     "lastName": "Cousin",
-    "email": "zoe.cousin@email.com"
+    "email": null
   },
   {
     "id": "d6d2040d-2b96-46ea-9d92-2c221e4d60bf",
@@ -99,49 +99,49 @@
     "id": "d999193b-1835-43ee-b739-bd3209e95756",
     "firstName": "Léa",
     "lastName": "Richard",
-    "email": "lea.richard@email.com"
+    "email": null
   },
   {
     "id": "77662aa9-3800-430d-bd0d-1f4d0690189c",
     "firstName": "Adam",
     "lastName": "Hubert",
-    "email": "adam.hubert@email.com"
+    "email": null
   },
   {
     "id": "66e64c71-5664-4c75-b69a-2afdabb8e851",
     "firstName": "Emma",
     "lastName": "Gaillard",
-    "email": "emma.gaillard@email.com"
+    "email": null
   },
   {
     "id": "8b3c06da-3529-4aac-891e-4358c39f0b05",
     "firstName": "Hugo",
     "lastName": "Mahe",
-    "email": "hugo.mahe@email.com"
+    "email": null
   },
   {
     "id": "ecd18c24-96fc-4abb-949b-f62a254c0096",
     "firstName": "Chloé",
     "lastName": "Lebrun",
-    "email": "chloe.lebrun@email.com"
+    "email": null
   },
   {
     "id": "ce2d4be7-1c70-46d2-b55e-ba3692cb171d",
     "firstName": "Louis",
     "lastName": "Arnaud",
-    "email": "louis.arnaud@email.com"
+    "email": null
   },
   {
     "id": "a630487e-76ef-4afc-92f9-2c8d80d0aae6",
     "firstName": "Ines",
     "lastName": "Blanc",
-    "email": "ines.blanc@email.com"
+    "email": null
   },
   {
     "id": "25be402a-4130-4fc1-8cff-f3f55841ed67",
     "firstName": "Nathan",
     "lastName": "Rolland",
-    "email": "nathan.rolland@email.com"
+    "email": null
   },
   {
     "id": "c2c20f28-36f2-4584-afa2-33efbf5b134b",
@@ -153,31 +153,31 @@
     "id": "9cdfa9b4-81ee-4efa-8574-f1725b8d57e3",
     "firstName": "Alex",
     "lastName": "Poirier",
-    "email": "alex.poirier@email.com"
+    "email": null
   },
   {
     "id": "152adf1d-62ae-4925-aea3-fd3c149a18c8",
     "firstName": "Julie",
     "lastName": "Teixeira",
-    "email": "julie.teixeira@email.com"
+    "email": null
   },
   {
     "id": "284797b5-4b58-458f-b345-9f0a4e844a06",
     "firstName": "Maxime",
     "lastName": "Grondin",
-    "email": "maxime.grondin@email.com"
+    "email": null
   },
   {
     "id": "2c7c3160-5361-4cda-a8bc-4714d985541e",
     "firstName": "Paul",
     "lastName": "Lemoine",
-    "email": "paul.lemoine@email.com"
+    "email": null
   },
   {
     "id": "603d7c13-76d3-476a-a3fb-8d474b2bc79d",
     "firstName": "Clara",
     "lastName": "Renault",
-    "email": "clara.renault@email.com"
+    "email": null
   },
   {
     "id": "6511e45d-961b-47c4-94e5-b45a3de1a965",

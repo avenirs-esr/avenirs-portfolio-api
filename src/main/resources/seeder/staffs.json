@@ -1,14 +1,17 @@
 [
   {
     "userId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
-    "bio": "Enseignant en sciences de gestion, je m’intéresse particulièrement aux questions d’organisation, de management et d’innovation."
+    "bio": "Enseignant en sciences de gestion, je m’intéresse particulièrement aux questions d’organisation, de management et d’innovation.",
+    "institutionEmail": "camille.fournier@institution.com"
   },
   {
     "userId": "5fcd76c5-017c-4d61-99d2-62a6f199c94e",
-    "bio": "Passionnée par la pédagogie et la transmission des savoirs, j’enseigne depuis plusieurs années dans le domaine des sciences humaines. Mon objectif est d’aider les étudiants à structurer leur réflexion et à gagner en autonomie dans leurs travaux."
+    "bio": "Passionnée par la pédagogie et la transmission des savoirs, j’enseigne depuis plusieurs années dans le domaine des sciences humaines. Mon objectif est d’aider les étudiants à structurer leur réflexion et à gagner en autonomie dans leurs travaux.",
+    "institutionEmail": "zoe.cousin@institution.com"
   },
   {
     "userId": "66e64c71-5664-4c75-b69a-2afdabb8e851",
-    "bio": "Enseignant-chercheur, je m’investis autant dans l’enseignement que dans la recherche. J’accorde une grande importance à la rigueur méthodologique et à l’accompagnement personnalisé des étudiants tout au long de leur parcours universitaire."
+    "bio": "Enseignant-chercheur, je m’investis autant dans l’enseignement que dans la recherche. J’accorde une grande importance à la rigueur méthodologique et à l’accompagnement personnalisé des étudiants tout au long de leur parcours universitaire.",
+    "institutionEmail": "emma.gaillard@institution.com"
   }
 ]

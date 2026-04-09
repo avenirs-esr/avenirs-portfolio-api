@@ -49,14 +49,17 @@ public class StaffSeeder {
                   .map(FakeStaff::toEntity)
                   .map(
                       fakeStaff ->
-                          new StaffCreationData(fakeStaff.getUser().getId(), fakeStaff.getBio()))
+                          new StaffCreationData(
+                              fakeStaff.getUser().getId(),
+                              fakeStaff.getInstitutionEmail(),
+                              fakeStaff.getBio()))
                   .toList();
         };
 
     List<Staff> staffs = new ArrayList<>();
     creationData.forEach(
         data -> {
-          var staff = staffService.createStaff(data.userId(), data.bio());
+          var staff = staffService.createStaff(data.userId(), data.institutionEmail(), data.bio());
           staffs.add(staff);
         });
 

@@ -10,7 +10,10 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
 
   @Override
   public StudentEntity fromDomain(Student student) {
-    return StudentEntity.of(UserMapper.INSTANCE.fromDomain(student.getUser()), student.getBio());
+    return StudentEntity.of(
+        UserMapper.INSTANCE.fromDomain(student.getUser()),
+        student.getInstitutionEmail(),
+        student.getBio());
   }
 
   @Override
@@ -18,6 +21,7 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
     return Student.toDomain(
         UserMapper.INSTANCE.toDomain(studentEntity.getUser()),
         studentEntity.getBio(),
+        studentEntity.getInstitutionEmail(),
         studentEntity.getCreatedAt(),
         studentEntity.getUpdatedAt());
   }
@@ -27,6 +31,7 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
     var attributes = graph.attributes();
     return Student.toDomain(
         attributes.contains("user") ? UserMapper.INSTANCE.toDomain(studentEntity.getUser()) : null,
+        studentEntity.getInstitutionEmail(),
         studentEntity.getBio(),
         studentEntity.getCreatedAt(),
         studentEntity.getUpdatedAt());

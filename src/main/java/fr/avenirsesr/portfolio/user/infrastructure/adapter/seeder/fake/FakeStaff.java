@@ -18,7 +18,8 @@ public class FakeStaff {
 
   public static FakeStaff create(UserEntity user) {
     return new FakeStaff(
-        StaffEntity.of(user, staffDataGenerator.with("staff-bio").staffDescription()));
+        StaffEntity.of(
+            user, user.getEmail(), staffDataGenerator.with("staff-bio").staffDescription()));
   }
 
   public FakeStaff withBio(String bio) {

@@ -13,7 +13,7 @@ public interface StudentService {
 
   void updateProfile(User user, String bio);
 
-  Student createStudent(UUID userId, String bio);
+  Student createStudent(UUID userId, String institutionEmail, String bio);
 
   void addSelfKnowledgeCategories(Student student, List<SelfKnowledgeCategory> categories);
 

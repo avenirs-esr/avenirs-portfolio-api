@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,13 +24,18 @@ public class StaffEntity extends AvenirsBaseEntity {
   @Column(length = BIO_LENGTH)
   private String bio;
 
-  private StaffEntity(UUID id, UserEntity user, String bio) {
+  @Email
+  @Column(nullable = false, name = "institution_email")
+  private String institutionEmail;
+
+  private StaffEntity(UUID id, UserEntity user, String institutionEmail, String bio) {
     setId(id);
     this.user = user;
     this.bio = bio;
+    this.institutionEmail = institutionEmail;
   }
 
-  public static StaffEntity of(UserEntity user, String bio) {
-    return new StaffEntity(user.getId(), user, bio);
+  public static StaffEntity of(UserEntity user, String institutionEmail, String bio) {
+    return new StaffEntity(user.getId(), user, institutionEmail, bio);
   }
 }

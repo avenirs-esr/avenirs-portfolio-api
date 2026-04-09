@@ -9,5 +9,5 @@ public interface StaffService {
 
   void updateProfile(User user, String bio);
 
-  Staff createStaff(UUID userId, String bio);
+  Staff createStaff(UUID userId, String institutionEmail, String bio);
 }

@@ -1,70 +1,87 @@
 [
   {
     "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
-    "bio": "Étudiant motivé, je m’investis pleinement dans mon parcours universitaire afin de développer mes compétences et d’approfondir mes connaissances. J’accorde une grande importance au travail régulier et à la compréhension des notions abordées en cours."
+    "bio": "Étudiant motivé, je m’investis pleinement dans mon parcours universitaire afin de développer mes compétences et d’approfondir mes connaissances. J’accorde une grande importance au travail régulier et à la compréhension des notions abordées en cours.",
+    "institutionEmail": "lucas.tessier@email.com"
   },
   {
     "userId": "7c508ac3-d7a8-4f00-9989-0f677f4f9dea",
-    "bio": "Curieuse et impliquée, je cherche à tirer le maximum de mon expérience universitaire. J’aime travailler en groupe et confronter mes idées afin d’améliorer mes méthodes de travail et ma réflexion."
+    "bio": "Curieuse et impliquée, je cherche à tirer le maximum de mon expérience universitaire. J’aime travailler en groupe et confronter mes idées afin d’améliorer mes méthodes de travail et ma réflexion.",
+    "institutionEmail": "arthur.lambert@email.com"
   },
   {
     "userId": "0bdebb55-0c48-45d4-9490-a6f85423e87b",
-    "bio": "Étudiant sérieux et organisé, je m’efforce de maintenir un bon équilibre entre théorie et pratique. Mon objectif est de construire progressivement un projet professionnel cohérent avec mes aspirations."
+    "bio": "Étudiant sérieux et organisé, je m’efforce de maintenir un bon équilibre entre théorie et pratique. Mon objectif est de construire progressivement un projet professionnel cohérent avec mes aspirations.",
+    "institutionEmail": "sophie.charpentier@email.com"
   },
   {
     "userId": "ddc4a3cf-2843-4497-99d4-daa6fdfab16b",
-    "bio": "Investie dans mes études, je m’intéresse particulièrement aux travaux demandant de l’analyse et de la réflexion. J’apprécie les projets collaboratifs qui permettent d’enrichir les points de vue."
+    "bio": "Investie dans mes études, je m’intéresse particulièrement aux travaux demandant de l’analyse et de la réflexion. J’apprécie les projets collaboratifs qui permettent d’enrichir les points de vue.",
+    "institutionEmail": "anais.marchand@email.com"
   },
   {
     "userId": "12947983-0266-47b1-a355-d6b1b31051aa",
-    "bio": "Étudiant appliqué, je cherche à progresser continuellement et à renforcer mes compétences académiques. Je fais preuve de rigueur et d’autonomie dans la réalisation de mes travaux."
+    "bio": "Étudiant appliqué, je cherche à progresser continuellement et à renforcer mes compétences académiques. Je fais preuve de rigueur et d’autonomie dans la réalisation de mes travaux.",
+    "institutionEmail": "valentin.favre@email.com"
   },
   {
     "userId": "d999193b-1835-43ee-b739-bd3209e95756",
-    "bio": "Sérieuse et motivée, je m’implique activement dans mon parcours universitaire. J’accorde une attention particulière à la qualité de mes rendus et à la compréhension des attentes pédagogiques."
+    "bio": "Sérieuse et motivée, je m’implique activement dans mon parcours universitaire. J’accorde une attention particulière à la qualité de mes rendus et à la compréhension des attentes pédagogiques.",
+    "institutionEmail": "lea.richard@email.com"
   },
   {
     "userId": "77662aa9-3800-430d-bd0d-1f4d0690189c",
-    "bio": "Étudiant curieux et persévérant, je m’intéresse aux enjeux liés à mon domaine d’études. Je cherche à développer une méthodologie de travail efficace et durable."
+    "bio": "Étudiant curieux et persévérant, je m’intéresse aux enjeux liés à mon domaine d’études. Je cherche à développer une méthodologie de travail efficace et durable.",
+    "institutionEmail": "adam.hubert@email.com"
   },
   {
     "userId": "8b3c06da-3529-4aac-891e-4358c39f0b05",
-    "bio": "Impliquée dans mes études, j’apprécie particulièrement les travaux de groupe et les projets concrets. Je m’efforce de progresser continuellement, tant sur le plan académique que personnel."
+    "bio": "Impliquée dans mes études, j’apprécie particulièrement les travaux de groupe et les projets concrets. Je m’efforce de progresser continuellement, tant sur le plan académique que personnel.",
+    "institutionEmail": "hugo.mahe@email.com"
   },
   {
     "userId": "ecd18c24-96fc-4abb-949b-f62a254c0096",
-    "bio": "Étudiant dynamique, je m’investis dans les enseignements proposés et je fais preuve de sérieux dans la réalisation de mes travaux. Mon objectif est de construire un parcours solide et cohérent."
+    "bio": "Étudiant dynamique, je m’investis dans les enseignements proposés et je fais preuve de sérieux dans la réalisation de mes travaux. Mon objectif est de construire un parcours solide et cohérent.",
+    "institutionEmail": "louis.arnaud@email.com"
   },
   {
     "userId": "ce2d4be7-1c70-46d2-b55e-ba3692cb171d",
-    "bio": "Motivée par l’apprentissage, je m’efforce de développer mes capacités d’analyse et de synthèse. J’accorde une grande importance à la clarté et à la rigueur dans mes rendus."
+    "bio": "Motivée par l’apprentissage, je m’efforce de développer mes capacités d’analyse et de synthèse. J’accorde une grande importance à la clarté et à la rigueur dans mes rendus.",
+    "institutionEmail": "louis.arnaud@email.com"
   },
   {
     "userId": "a630487e-76ef-4afc-92f9-2c8d80d0aae6",
-    "bio": "Étudiante impliquée, je cherche à approfondir mes connaissances tout en développant mon autonomie. J’apprécie les enseignements qui favorisent la réflexion et l’esprit critique."
+    "bio": "Étudiante impliquée, je cherche à approfondir mes connaissances tout en développant mon autonomie. J’apprécie les enseignements qui favorisent la réflexion et l’esprit critique.",
+    "institutionEmail": "ines.blanc@email.com"
   },
   {
     "userId": "25be402a-4130-4fc1-8cff-f3f55841ed67",
-    "bio": "Étudiant rigoureux, je m’applique à fournir un travail sérieux et structuré. Je m’intéresse particulièrement aux méthodes d’analyse et à leur application dans des situations concrètes."
+    "bio": "Étudiant rigoureux, je m’applique à fournir un travail sérieux et structuré. Je m’intéresse particulièrement aux méthodes d’analyse et à leur application dans des situations concrètes.",
+    "institutionEmail": "nathan.rolland@email.com"
   },
   {
     "userId": "9cdfa9b4-81ee-4efa-8574-f1725b8d57e3",
-    "bio": "Étudiant motivé, je m’investis pleinement dans mes études afin de construire un projet professionnel solide. Je fais preuve de régularité et d’organisation dans mon travail."
+    "bio": "Étudiant motivé, je m’investis pleinement dans mes études afin de construire un projet professionnel solide. Je fais preuve de régularité et d’organisation dans mon travail.",
+    "institutionEmail": "alex.poirier@email.com"
   },
   {
     "userId": "152adf1d-62ae-4925-aea3-fd3c149a18c8",
-    "bio": "Sérieuse et appliquée, je m’efforce de progresser à travers chaque enseignement. J’accorde une attention particulière aux consignes et à la qualité des rendus demandés."
+    "bio": "Sérieuse et appliquée, je m’efforce de progresser à travers chaque enseignement. J’accorde une attention particulière aux consignes et à la qualité des rendus demandés.",
+    "institutionEmail": "julie.teixeira@email.com"
   },
   {
     "userId": "284797b5-4b58-458f-b345-9f0a4e844a06",
-    "bio": "Étudiant engagé dans mon parcours universitaire, je cherche à développer mes compétences tout en acquérant une méthodologie de travail efficace et structurée."
+    "bio": "Étudiant engagé dans mon parcours universitaire, je cherche à développer mes compétences tout en acquérant une méthodologie de travail efficace et structurée.",
+    "institutionEmail": "maxime.grondin@email.com"
   },
   {
     "userId": "2c7c3160-5361-4cda-a8bc-4714d985541e",
-    "bio": "Curieuse et motivée, je m’implique activement dans mes études. J’apprécie les projets qui me permettent de mettre en pratique les connaissances acquises."
+    "bio": "Curieuse et motivée, je m’implique activement dans mes études. J’apprécie les projets qui me permettent de mettre en pratique les connaissances acquises.",
+    "institutionEmail": "paul.lemoine@email.com"
   },
   {
     "userId": "603d7c13-76d3-476a-a3fb-8d474b2bc79d",
-    "bio": "Étudiante sérieuse, je m’investis dans mes études avec rigueur et constance. Mon objectif est de progresser durablement et de consolider mes acquis académiques."
+    "bio": "Étudiante sérieuse, je m’investis dans mes études avec rigueur et constance. Mon objectif est de progresser durablement et de consolider mes acquis académiques.",
+    "institutionEmail": "clara.renault@email.com"
   }
 ]

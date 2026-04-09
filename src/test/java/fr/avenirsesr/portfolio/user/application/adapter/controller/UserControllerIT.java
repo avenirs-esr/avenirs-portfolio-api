@@ -93,6 +93,27 @@ public class UserControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
+  void shouldFailOnUpdateStaffProfileWithEmail() throws Exception {
+    BddLogger.given("the /me/users/STAFF/update endpoint");
+    String payloadJson = loadJson("user/mock-update-user-with-email.json");
+
+    BddLogger.when("performing a PUT");
+    BddLogger.then("it should update the staff profile successfully");
+
+    webTestClient
+        .put()
+        .uri("/me/users/STAFF/update")
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(payloadJson)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
   void shouldReturnNotFoundForUnknownUser() {
     BddLogger.given("the /me/users/STUDENT/overview endpoint");
     BddLogger.when("performing a GET with an unknown user");
@@ -133,7 +154,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.lastname")
         .isEqualTo("Name")
         .jsonPath("$.email")
-        .isEqualTo("new.email@example.com")
+        .isEqualTo("lucas.tessier@email.com")
         .jsonPath("$.bio")
         .exists();
   }

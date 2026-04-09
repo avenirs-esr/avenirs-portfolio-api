@@ -9,7 +9,10 @@ public class StaffMapper implements Mapper<StaffEntity, Staff> {
 
   @Override
   public StaffEntity fromDomain(Staff staff) {
-    return StaffEntity.of(UserMapper.INSTANCE.fromDomain(staff.getUser()), staff.getBio());
+    return StaffEntity.of(
+        UserMapper.INSTANCE.fromDomain(staff.getUser()),
+        staff.getInstitutionEmail(),
+        staff.getBio());
   }
 
   @Override
@@ -17,6 +20,7 @@ public class StaffMapper implements Mapper<StaffEntity, Staff> {
     return Staff.toDomain(
         UserMapper.INSTANCE.toDomain(staffEntity.getUser()),
         staffEntity.getBio(),
+        staffEntity.getInstitutionEmail(),
         staffEntity.getCreatedAt(),
         staffEntity.getUpdatedAt());
   }

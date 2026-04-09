@@ -33,10 +33,14 @@ public class StaffServiceImpl implements StaffService {
   }
 
   @Override
-  public Staff createStaff(UUID userId, String bio) {
+  public Staff createStaff(UUID userId, String institutionEmail, String bio) {
     var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-    var staff = Staff.create(user, bio);
+    var staff = Staff.create(user, institutionEmail, bio);
     staffRepository.save(staff);
+    if (user.getEmail() == null) {
+      user.setEmail(institutionEmail);
+      userRepository.save(user);
+    }
     return staff;
   }
 }

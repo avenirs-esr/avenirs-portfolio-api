@@ -51,6 +51,6 @@ public class StudentFixture {
   }
 
   public Student toModel() {
-    return Student.toDomain(user, bio, createdAt, updatedAt);
+    return Student.toDomain(user, bio, user.getEmail(), createdAt, updatedAt);
   }
 }

@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.domain.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
@@ -65,17 +66,20 @@ public class UserServiceImpl implements UserService {
   public void updateProfile(
       EUserCategory userCategory, String firstname, String lastname, String email, String bio) {
     var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);
-    user.setFirstName(firstname);
-    user.setLastName(lastname);
     if (firstname == null) {
       throw new FirstnameIsNullException();
     }
     if (lastname == null) {
       throw new LastnameIsNullException();
     }
+    user.setFirstName(firstname);
+    user.setLastName(lastname);
 
     if (email != null) {
-      user.setEmail(email);
+      switch (userCategory) {
+        case STUDENT -> user.setEmail(email);
+        case STAFF -> throw new UserNotAuthorizedException();
+      }
     }
     userRepository.save(user);
 

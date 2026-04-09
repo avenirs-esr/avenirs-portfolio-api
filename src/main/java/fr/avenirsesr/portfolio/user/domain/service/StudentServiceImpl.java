@@ -44,15 +44,19 @@ public class StudentServiceImpl implements StudentService {
     var student =
         studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);
 
-    if (student != null) student.setBio(bio);
+    if (bio != null) student.setBio(bio);
 
     studentRepository.save(student);
   }
 
   @Override
-  public Student createStudent(UUID userId, String bio) {
+  public Student createStudent(UUID userId, String institutionEmail, String bio) {
     var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-    var student = Student.create(user, bio);
+    var student = Student.create(user, institutionEmail, bio);
+    if (user.getEmail() == null) {
+      user.setEmail(institutionEmail);
+      userRepository.save(user);
+    }
     studentRepository.save(student);
     selfKnowledgeService.initSelfKnowledgeCategoriesMandatory(student);
     return student;
