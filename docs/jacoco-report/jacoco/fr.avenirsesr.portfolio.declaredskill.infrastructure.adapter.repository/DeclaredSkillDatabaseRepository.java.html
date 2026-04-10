@@ -22,18 +22,16 @@ public class DeclaredSkillDatabaseRepository
 <span class="fc" id="L22">  }</span>
 
   @Override
-  public Optional&lt;DeclaredSkill&gt; findByExternalSkillId(UUID externalSkillId) {
-<span class="fc" id="L26">    return jpaRepository</span>
-<span class="fc" id="L27">        .findByExternalSkillId(externalSkillId)</span>
-<span class="fc" id="L28">        .map(DeclaredSkillMapper.INSTANCE::toDomain);</span>
+  public Optional&lt;DeclaredSkill&gt; findById(UUID id) {
+<span class="fc" id="L26">    return jpaRepository.findById(id).map(DeclaredSkillMapper.INSTANCE::toDomain);</span>
   }
 
   @Override
   public DeclaredSkill saveOrGet(DeclaredSkill declaredSkill) {
     try {
-<span class="fc" id="L34">      return save(declaredSkill);</span>
-<span class="nc" id="L35">    } catch (DataIntegrityViolationException e) {</span>
-<span class="nc" id="L36">      return findByExternalSkillId(declaredSkill.getExternalSkillId()).orElseThrow(() -&gt; e);</span>
+<span class="fc" id="L32">      return save(declaredSkill);</span>
+<span class="nc" id="L33">    } catch (DataIntegrityViolationException e) {</span>
+<span class="nc" id="L34">      return findById(declaredSkill.getId()).orElseThrow(() -&gt; e);</span>
     }
   }
 }

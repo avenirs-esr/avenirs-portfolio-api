@@ -19,34 +19,33 @@ public class DeclaredSkillSyncServiceImpl implements DeclaredSkillSyncService {
   private final ExternalSkillClient externalSkillClient;
 
   @Override
-  public Optional&lt;DeclaredSkill&gt; getOrCreateFromExternalSkill(UUID externalSkillId) {
-<span class="fc" id="L23">    Optional&lt;DeclaredSkill&gt; existing =</span>
-<span class="fc" id="L24">        declaredSkillRepository.findByExternalSkillId(externalSkillId);</span>
+  public Optional&lt;DeclaredSkill&gt; getOrCreateFromExternalSkill(UUID id) {
+<span class="fc" id="L23">    Optional&lt;DeclaredSkill&gt; existing = declaredSkillRepository.findById(id);</span>
 
-<span class="fc bfc" id="L26" title="All 2 branches covered.">    if (existing.isPresent()) {</span>
-<span class="fc" id="L27">      log.debug(&quot;DeclaredSkill already exists for external skill: {}&quot;, externalSkillId);</span>
-<span class="fc" id="L28">      return existing;</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">    if (existing.isPresent()) {</span>
+<span class="fc" id="L26">      log.debug(&quot;DeclaredSkill already exists for external skill: {}&quot;, id);</span>
+<span class="fc" id="L27">      return existing;</span>
     }
 
-<span class="fc" id="L31">    log.debug(&quot;Fetching external skill from interoperability: {}&quot;, externalSkillId);</span>
-<span class="fc" id="L32">    Optional&lt;ExternalSkillDTO&gt; externalSkillDTO = externalSkillClient.getById(externalSkillId);</span>
+<span class="fc" id="L30">    log.debug(&quot;Fetching external skill from interoperability: {}&quot;, id);</span>
+<span class="fc" id="L31">    Optional&lt;ExternalSkillDTO&gt; externalSkillDTO = externalSkillClient.getById(id);</span>
 
-<span class="fc bfc" id="L34" title="All 2 branches covered.">    if (externalSkillDTO.isEmpty()) {</span>
-<span class="fc" id="L35">      log.warn(&quot;External skill not found in interoperability: {}&quot;, externalSkillId);</span>
-<span class="fc" id="L36">      return Optional.empty();</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">    if (externalSkillDTO.isEmpty()) {</span>
+<span class="fc" id="L34">      log.warn(&quot;External skill not found in interoperability: {}&quot;, id);</span>
+<span class="fc" id="L35">      return Optional.empty();</span>
     }
 
-<span class="fc" id="L39">    ExternalSkillDTO dto = externalSkillDTO.get();</span>
-<span class="fc" id="L40">    DeclaredSkill newSkill =</span>
-<span class="fc" id="L41">        DeclaredSkill.create(</span>
-<span class="fc" id="L42">            dto.id(),</span>
-<span class="fc" id="L43">            dto.title(),</span>
-<span class="fc" id="L44">            EExternalSkillType.valueOf(dto.type().name()),</span>
-<span class="fc" id="L45">            dto.pathSegments());</span>
+<span class="fc" id="L38">    ExternalSkillDTO dto = externalSkillDTO.get();</span>
+<span class="fc" id="L39">    DeclaredSkill newSkill =</span>
+<span class="fc" id="L40">        DeclaredSkill.create(</span>
+<span class="fc" id="L41">            dto.id(),</span>
+<span class="fc" id="L42">            dto.title(),</span>
+<span class="fc" id="L43">            EExternalSkillType.valueOf(dto.type().name()),</span>
+<span class="fc" id="L44">            dto.pathSegments());</span>
 
-<span class="fc" id="L47">    DeclaredSkill saved = declaredSkillRepository.saveOrGet(newSkill);</span>
-<span class="fc" id="L48">    log.info(&quot;Created new DeclaredSkill from external skill: {}&quot;, externalSkillId);</span>
-<span class="fc" id="L49">    return Optional.of(saved);</span>
+<span class="fc" id="L46">    DeclaredSkill saved = declaredSkillRepository.saveOrGet(newSkill);</span>
+<span class="fc" id="L47">    log.info(&quot;Created new DeclaredSkill from external skill: {}&quot;, id);</span>
+<span class="fc" id="L48">    return Optional.of(saved);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
