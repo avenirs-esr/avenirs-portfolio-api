@@ -7,16 +7,18 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.TraceAssociationSearchInfoData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
@@ -52,6 +54,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final TraceService traceService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final AssociationService associationService;
+  private final AssociationSearchHelper associationSearchHelper;
   private final LoggedInUserService loggedInUserService;
 
   @Override
@@ -282,27 +285,36 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public PagedResult<TraceAssociationSearchInfoData> searchTracesForAssociation(
+  public PagedResult<AssociationSearchResultData> searchTracesForAssociation(
       UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated) {
     fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
-
-    var alreadyAssociatedTraceIds = getAlreadyAssociatedTraceIds(declaredActivityId);
-
-    var tracePagedResult =
+    return associationSearchHelper.searchForAssociation(
+        declaredActivityId,
+        DeclaredActivity.class,
+        EAssociationType.DECLARED_ACTIVITY_TRACE,
+        Association::getId2,
         traceService.getTracesView(
-            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria);
+            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria),
+        AvenirsBaseModel::getId,
+        Trace::getTitle,
+        null,
+        trace -> false);
+  }
 
-    var mappedContent =
-        tracePagedResult.content().stream()
-            .map(
-                trace ->
-                    new TraceAssociationSearchInfoData(
-                        trace.getId(),
-                        trace.getTitle(),
-                        alreadyAssociatedTraceIds.contains(trace.getId())))
-            .toList();
-
-    return new PagedResult<>(mappedContent, tracePagedResult.pageInfo());
+  @Override
+  public PagedResult<AssociationSearchResultData> searchDeclaredSkillsForAssociation(
+      UUID declaredActivityId, String keyword, PageCriteria pageCriteria) {
+    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    return associationSearchHelper.searchForAssociation(
+        declaredActivityId,
+        DeclaredActivity.class,
+        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+        Association::getId2,
+        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),
+        AvenirsBaseModel::getId,
+        ds -> ds.getSkill().getLibelle(),
+        ds -> ds.getSkill().getType().name(),
+        ds -> false);
   }
 
   @Override
@@ -407,16 +419,5 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new UserNotAuthorizedException();
     }
     return declaredActivity;
-  }
-
-  private Set<UUID> getAlreadyAssociatedTraceIds(UUID declaredActivityId) {
-    return associationService
-        .getAllOf(
-            declaredActivityId,
-            DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))
-        .stream()
-        .map(Association::getId2)
-        .collect(Collectors.toSet());
   }
 }

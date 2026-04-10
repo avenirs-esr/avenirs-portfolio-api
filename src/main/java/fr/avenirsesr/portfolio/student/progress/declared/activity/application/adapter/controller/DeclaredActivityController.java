@@ -1,5 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredSkillIDTO;
+import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultTraceDTO;
+import fr.avenirsesr.portfolio.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -7,11 +11,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.*;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityAssociationTraceInfoDTOMapper;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityAssociationsDTOMapper;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.TraceAssociationSearchInfoData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import jakarta.validation.Valid;
@@ -193,18 +193,17 @@ public class DeclaredActivityController {
   }
 
   @GetMapping("/{declaredActivityId}/search-for-association/traces")
-  public ResponseEntity<PagedResponse<DeclaredActivityAssociationTraceInfoDTO>>
-      searchTracesForAssociation(
-          Principal principal,
-          @Valid @PathVariable UUID declaredActivityId,
-          @RequestParam(required = false) Boolean isAssociated,
-          @RequestParam(required = false) String keyword,
-          @RequestParam(required = false) Integer page,
-          @RequestParam(required = false) Integer pageSize) {
+  public ResponseEntity<PagedResponse<AssociationSearchResultTraceDTO>> searchTracesForAssociation(
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId,
+      @RequestParam(required = false) Boolean isAssociated,
+      @RequestParam(required = false) String keyword,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to search traces for association with declared activity [{}] by student"
-            + " [{}] (isAssociated={}, keyword={}, page={}, fileSize={})",
+            + " [{}] (isAssociated={}, keyword={}, page={}, pageSize={})",
         declaredActivityId,
         principal.getName(),
         isAssociated,
@@ -212,14 +211,46 @@ public class DeclaredActivityController {
         pageCriteria.page(),
         pageCriteria.pageSize());
 
-    PagedResult<TraceAssociationSearchInfoData> pagedResult =
+    PagedResult<AssociationSearchResultData> pagedResult =
         declaredActivityService.searchTracesForAssociation(
             declaredActivityId, keyword, pageCriteria, isAssociated);
 
     var response =
         new PagedResponse<>(
             pagedResult.content().stream()
-                .map(DeclaredActivityAssociationTraceInfoDTOMapper::toDTO)
+                .map(AssociationSearchResultDTOMapper::toTraceDTO)
+                .toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{declaredActivityId}/search-for-association/declared-skills")
+  public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredSkillIDTO>>
+      searchDeclaredSkillsForAssociation(
+          Principal principal,
+          @Valid @PathVariable UUID declaredActivityId,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to search declared skills for association with declared activity [{}] by"
+            + " student [{}] (keyword={}, page={}, pageSize={})",
+        declaredActivityId,
+        principal.getName(),
+        keyword,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<AssociationSearchResultData> pagedResult =
+        declaredActivityService.searchDeclaredSkillsForAssociation(
+            declaredActivityId, keyword, pageCriteria);
+
+    var response =
+        new PagedResponse<>(
+            pagedResult.content().stream()
+                .map(AssociationSearchResultDTOMapper::toDeclaredSkillDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 

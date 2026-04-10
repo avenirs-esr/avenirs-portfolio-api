@@ -1,8 +1,12 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
+import fr.avenirsesr.portfolio.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillAssociationsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDTO;
@@ -125,6 +129,38 @@ public class DeclaredSkillProgressController {
     declaredSkillProgressService.unassociateTraces(declaredSkillProgressId, traceIds);
 
     return ResponseEntity.ok("Trace successfully unassociated.");
+  }
+
+  @GetMapping("/{declaredSkillProgressId}/search-for-association/declared-activities")
+  public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredActivityDTO>>
+      searchDeclaredActivityForAssociation(
+          Principal principal,
+          @Valid @PathVariable UUID declaredSkillProgressId,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to search declared activity for association with declared skill [{}] by"
+            + " student [{}] (keyword={}, page={}, pageSize={})",
+        declaredSkillProgressId,
+        principal.getName(),
+        keyword,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<AssociationSearchResultData> pagedResult =
+        declaredSkillProgressService.searchDeclaredActivityForAssociation(
+            declaredSkillProgressId, keyword, pageCriteria);
+
+    var response =
+        new PagedResponse<>(
+            pagedResult.content().stream()
+                .map(AssociationSearchResultDTOMapper::toDeclaredActivityDTO)
+                .toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/{declaredSkillProgressId}/associations")

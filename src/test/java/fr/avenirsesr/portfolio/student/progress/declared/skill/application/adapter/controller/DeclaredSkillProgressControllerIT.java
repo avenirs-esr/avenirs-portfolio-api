@@ -434,4 +434,249 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
 
     BddLogger.then("it should succeed with empty associations");
   }
+
+  @Test
+  void shouldSearchDeclaredActivitiesForAssociation() throws Exception {
+    BddLogger.given("an existing declared skill progress");
+
+    var declaredSkill =
+        declaredSkillRepository.findAll().stream().skip(5).findFirst().orElseThrow();
+    UUID externalSkillId = declaredSkill.getExternalSkillId();
+
+    var createResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    UUID createdSkillId =
+        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+
+    BddLogger.when("searching declared activities for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(
+                        BASE_PATH
+                            + "/"
+                            + createdSkillId
+                            + "/search-for-association/declared-activities")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8);
+
+    BddLogger.then("it should return paged declared activity results");
+  }
+
+  @Test
+  void shouldSearchDeclaredActivitiesForAssociationWithStructure() throws Exception {
+    BddLogger.given("an existing declared skill progress with seeded data");
+
+    var declaredSkill =
+        declaredSkillRepository.findAll().stream().skip(6).findFirst().orElseThrow();
+    UUID externalSkillId = declaredSkill.getExternalSkillId();
+
+    var createResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    UUID createdSkillId =
+        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+
+    BddLogger.when("searching declared activities for association");
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(
+                            BASE_PATH
+                                + "/"
+                                + createdSkillId
+                                + "/search-for-association/declared-activities")
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "50")
+                        .build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    com.fasterxml.jackson.databind.JsonNode json = objectMapper.readTree(body);
+    com.fasterxml.jackson.databind.JsonNode data = json.get("data");
+
+    BddLogger.then("each result should have id, title, thematic, and disabled fields");
+    if (data != null && data.isArray() && data.size() > 0) {
+      for (com.fasterxml.jackson.databind.JsonNode item : data) {
+        assert item.has("id") : "Missing id field";
+        assert item.has("title") : "Missing title field";
+        assert item.has("thematic") : "Missing thematic field";
+        assert item.has("disabled") : "Missing disabled field";
+      }
+    }
+  }
+
+  @Test
+  void shouldReturn404WhenSearchingDeclaredActivitiesForNonExistentSkill() {
+    BddLogger.given("a non-existent declared skill progress");
+    UUID nonExistentId = UUID.randomUUID();
+
+    BddLogger.when("searching declared activities for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(
+                        BASE_PATH
+                            + "/"
+                            + nonExistentId
+                            + "/search-for-association/declared-activities")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturn403WhenSearchingDeclaredActivitiesForOtherStudentSkill() {
+    BddLogger.given("a declared skill progress belonging to another student");
+    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+
+    BddLogger.when("searching declared activities for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(
+                        BASE_PATH
+                            + "/"
+                            + otherStudentSkillId
+                            + "/search-for-association/declared-activities")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_NOT_AUTHORIZED");
+
+    BddLogger.then("it should return 403");
+  }
+
+  @Test
+  void shouldSearchDeclaredActivitiesWithKeywordReturningEmpty() throws Exception {
+    BddLogger.given("an existing declared skill progress");
+
+    var declaredSkill =
+        declaredSkillRepository.findAll().stream().skip(7).findFirst().orElseThrow();
+    UUID externalSkillId = declaredSkill.getExternalSkillId();
+
+    var createResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    UUID createdSkillId =
+        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+
+    BddLogger.when("searching with a keyword that matches nothing");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(
+                        BASE_PATH
+                            + "/"
+                            + createdSkillId
+                            + "/search-for-association/declared-activities")
+                    .queryParam("keyword", "zzzznonexistent")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data.length()")
+        .isEqualTo(0);
+
+    BddLogger.then("it should return empty results");
+  }
 }

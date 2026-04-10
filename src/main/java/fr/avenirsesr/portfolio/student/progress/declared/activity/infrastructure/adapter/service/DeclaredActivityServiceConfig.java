@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructur
 
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -22,6 +23,7 @@ public class DeclaredActivityServiceConfig {
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
+  private final AssociationSearchHelper associationSearchHelper;
 
   @Bean
   public DeclaredActivityService declaredActivityService(
@@ -32,6 +34,7 @@ public class DeclaredActivityServiceConfig {
         traceService,
         declaredSkillProgressService,
         associationService,
+        associationSearchHelper,
         loggedInUserService);
   }
 }

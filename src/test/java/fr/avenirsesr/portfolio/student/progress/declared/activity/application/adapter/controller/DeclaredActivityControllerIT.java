@@ -219,4 +219,216 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isNotFound();
   }
+
+  @Test
+  @Transactional
+  void shouldSearchTracesForAssociation() {
+    BddLogger.given("an existing declared activity");
+    String id = declaredActivityId;
+
+    BddLogger.when("searching traces for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/" + id + "/search-for-association/traces")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8);
+
+    BddLogger.then("it should return paged trace results");
+  }
+
+  @Test
+  @Transactional
+  void shouldSearchTracesForAssociationWithDisabledField() throws Exception {
+    BddLogger.given("an existing declared activity with seeded data");
+    String id = declaredActivityId;
+
+    BddLogger.when("searching traces for association");
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH + "/" + id + "/search-for-association/traces")
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "50")
+                        .build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode json = objectMapper.readTree(body);
+    JsonNode data = json.get("data");
+
+    BddLogger.then("each result should have id, title, and disabled fields");
+    if (data != null && data.isArray() && data.size() > 0) {
+      for (JsonNode item : data) {
+        assert item.has("id") : "Missing id field";
+        assert item.has("title") : "Missing title field";
+        assert item.has("disabled") : "Missing disabled field";
+      }
+    }
+  }
+
+  @Test
+  void shouldReturn404WhenSearchingTracesForNonExistentActivity() {
+    BddLogger.given("a non-existent declared activity");
+
+    BddLogger.when("searching traces for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/" + notFoundId + "/search-for-association/traces")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  @Transactional
+  void shouldSearchTracesForAssociationWithKeyword() throws Exception {
+    BddLogger.given("an existing declared activity");
+    String id = declaredActivityId;
+
+    BddLogger.when("searching traces with keyword that matches nothing");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/" + id + "/search-for-association/traces")
+                    .queryParam("keyword", "zzzznonexistent")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data.length()")
+        .isEqualTo(0);
+
+    BddLogger.then("it should return empty results");
+  }
+
+  @Test
+  @Transactional
+  void shouldSearchDeclaredSkillsForAssociation() throws Exception {
+    BddLogger.given("an existing declared activity");
+    String id = declaredActivityId;
+
+    BddLogger.when("searching declared skills for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/" + id + "/search-for-association/declared-skills")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8);
+
+    BddLogger.then("it should return paged declared skill results");
+  }
+
+  @Test
+  void shouldReturn404WhenSearchingDeclaredSkillsForNonExistentActivity() {
+    BddLogger.given("a non-existent declared activity");
+
+    BddLogger.when("searching declared skills for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/" + notFoundId + "/search-for-association/declared-skills")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn403WhenSearchingTracesForOtherStudentActivity() throws Exception {
+    BddLogger.given("a declared activity belonging to another student");
+    String id = declaredActivityId;
+
+    BddLogger.when("another student searches traces for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/" + id + "/search-for-association/traces")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header("X-Signed-Context", otherStudentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return 403");
+  }
 }

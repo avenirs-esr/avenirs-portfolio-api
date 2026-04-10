@@ -5,10 +5,13 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
@@ -51,6 +54,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   private final LoggedInUserService loggedInUserService;
   private final DeclaredActivityService declaredActivityService;
   private final AssociationService associationService;
+  private final AssociationSearchHelper associationSearchHelper;
 
   @Override
   public PagedResult<DeclaredSkillProgress> getDeclaredSkillsProgresses(PageCriteria pageCriteria) {
@@ -286,6 +290,23 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
       String keyword, PageCriteria pageCriteria) {
     Student student = loggedInUserService.getLoggedInStudent();
     return declaredSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);
+  }
+
+  @Override
+  public PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
+      UUID declaredSkillProgressId, String keyword, PageCriteria pageCriteria) {
+    fetchAndCheckLoggedInStudentAuthorization(declaredSkillProgressId);
+
+    return associationSearchHelper.searchForAssociation(
+        declaredSkillProgressId,
+        DeclaredSkillProgress.class,
+        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+        Association::getId1,
+        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),
+        AvenirsBaseModel::getId,
+        da -> da.getActivity().getTitle(),
+        da -> da.getActivity().getThematic().name(),
+        da -> da.getFinishedAt().isPresent());
   }
 
   @Override

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
@@ -295,5 +296,171 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isOk();
+  }
+
+  @Test
+  void shouldSearchDeclaredActivitiesForAssociation() throws Exception {
+    BddLogger.given("an existing trace");
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    BddLogger.when("searching declared activities for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build(traceId))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data[0].id")
+        .exists()
+        .jsonPath("$.data[0].title")
+        .exists()
+        .jsonPath("$.data[0].thematic")
+        .exists()
+        .jsonPath("$.data[0].disabled")
+        .exists()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8);
+
+    BddLogger.then("it should return paged results with correct structure");
+  }
+
+  @Test
+  void shouldSearchDeclaredActivitiesForAssociationWithKeyword() throws Exception {
+    BddLogger.given("an existing trace and a keyword");
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    BddLogger.when("searching with a keyword that matches nothing");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH)
+                    .queryParam("keyword", "zzzzzznonexistent")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build(traceId))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data.length()")
+        .isEqualTo(0);
+
+    BddLogger.then("it should return empty results");
+  }
+
+  @Test
+  void shouldReturn404WhenSearchingDeclaredActivitiesForNonExistentTrace() {
+    BddLogger.given("a non-existent trace ID");
+    UUID nonExistentTraceId = UUID.randomUUID();
+
+    BddLogger.when("searching declared activities for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build(nonExistentTraceId))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldSearchDeclaredSkillsForAssociation() throws Exception {
+    BddLogger.given("an existing trace");
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    BddLogger.when("searching declared skills for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build(traceId))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data[0].id")
+        .exists()
+        .jsonPath("$.data[0].title")
+        .exists()
+        .jsonPath("$.data[0].type")
+        .exists()
+        .jsonPath("$.data[0].disabled")
+        .exists()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8);
+
+    BddLogger.then("it should return paged results with correct structure");
+  }
+
+  @Test
+  void shouldReturn404WhenSearchingDeclaredSkillsForNonExistentTrace() {
+    BddLogger.given("a non-existent trace ID");
+    UUID nonExistentTraceId = UUID.randomUUID();
+
+    BddLogger.when("searching declared skills for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build(nonExistentTraceId))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
   }
 }

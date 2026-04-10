@@ -4,13 +4,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
@@ -73,6 +74,7 @@ public class TraceServiceImplTest {
   @Mock private TraceAttachmentService traceAttachmentService;
   @Mock private StudentProgressService studentProgressService;
   @Mock private AssociationService associationService;
+  @Mock private AssociationSearchHelper associationSearchHelper;
 
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
@@ -1004,50 +1006,46 @@ public class TraceServiceImplTest {
       Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
       when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
 
-      UUID assocActivityId = UUID.randomUUID();
-      UUID unassocActivityId = UUID.randomUUID();
-      UUID finishedActivityId = UUID.randomUUID();
-
-      Association assoc = mock(Association.class);
-      when(assoc.getId1()).thenReturn(assocActivityId);
-      when(associationService.getAllOf(
-              traceId, Trace.class, List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
-          .thenReturn(List.of(assoc));
-
-      DeclaredActivity assocActivity = mock(DeclaredActivity.class);
-      when(assocActivity.getId()).thenReturn(assocActivityId);
-      var act1 = mock(Activity.class);
-      when(act1.getTitle()).thenReturn("Activity 1");
-      when(assocActivity.getActivity()).thenReturn(act1);
-
-      DeclaredActivity unassocActivity = mock(DeclaredActivity.class);
-      when(unassocActivity.getId()).thenReturn(unassocActivityId);
-      var act2 = mock(Activity.class);
-      when(act2.getTitle()).thenReturn("Activity 2");
-      when(unassocActivity.getActivity()).thenReturn(act2);
-
-      DeclaredActivity finishedActivity = mock(DeclaredActivity.class);
-      when(finishedActivity.getId()).thenReturn(finishedActivityId);
-      var act3 = mock(Activity.class);
-      when(act3.getTitle()).thenReturn("Activity 3");
-      when(finishedActivity.getActivity()).thenReturn(act3);
-      when(finishedActivity.getFinishedAt()).thenReturn(Optional.ofNullable(Instant.now()));
-
       PageCriteria criteria = new PageCriteria(0, 10);
-      PageInfo pageInfo = new PageInfo(0, 10, 2);
-      when(declaredActivityService.searchDeclaredActivity("kw", criteria))
-          .thenReturn(
-              new PagedResult<>(
-                  List.of(assocActivity, unassocActivity, finishedActivity), pageInfo));
+      PageInfo pageInfo = new PageInfo(0, 10, 3);
+
+      var expectedResults =
+          List.of(
+              new AssociationSearchResultData(UUID.randomUUID(), "Activity 1", "THEMATIC_1", true),
+              new AssociationSearchResultData(UUID.randomUUID(), "Activity 2", "THEMATIC_2", false),
+              new AssociationSearchResultData(UUID.randomUUID(), "Activity 3", "THEMATIC_3", true));
+
+      when(associationSearchHelper.searchForAssociation(
+              eq(traceId),
+              eq(Trace.class),
+              eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any()))
+          .thenReturn(new PagedResult<>(expectedResults, pageInfo));
 
       BddLogger.when("searching declared activities for association");
       var result = traceService.searchDeclaredActivityForAssociation(traceId, "kw", criteria);
 
-      BddLogger.then("it should return mapped results with correct disabled flags");
+      BddLogger.then("it should delegate to associationSearchHelper and return results");
       assertEquals(3, result.content().size());
       assertTrue(result.content().get(0).disabled());
       assertFalse(result.content().get(1).disabled());
       assertTrue(result.content().get(2).disabled());
+      verify(associationSearchHelper)
+          .searchForAssociation(
+              eq(traceId),
+              eq(Trace.class),
+              eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any());
     }
 
     @Test
@@ -1057,39 +1055,44 @@ public class TraceServiceImplTest {
       Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
       when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
 
-      UUID assocSkillId = UUID.randomUUID();
-      UUID unassocSkillId = UUID.randomUUID();
-
-      Association assoc = mock(Association.class);
-      when(assoc.getId2()).thenReturn(assocSkillId);
-      when(associationService.getAllOf(
-              traceId, Trace.class, List.of(EAssociationType.TRACE_DECLARED_SKILL)))
-          .thenReturn(List.of(assoc));
-
-      DeclaredSkillProgress assocSkillProg = mock(DeclaredSkillProgress.class);
-      when(assocSkillProg.getId()).thenReturn(assocSkillId);
-      var skill1 = mock(fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill.class);
-      when(skill1.getLibelle()).thenReturn("Skill 1");
-      when(assocSkillProg.getSkill()).thenReturn(skill1);
-
-      DeclaredSkillProgress unassocSkillProg = mock(DeclaredSkillProgress.class);
-      when(unassocSkillProg.getId()).thenReturn(unassocSkillId);
-      var skill2 = mock(fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill.class);
-      when(skill2.getLibelle()).thenReturn("Skill 2");
-      when(unassocSkillProg.getSkill()).thenReturn(skill2);
-
       PageCriteria criteria = new PageCriteria(0, 10);
       PageInfo pageInfo = new PageInfo(0, 10, 2);
-      when(declaredSkillProgressService.searchDeclaredSkill("kw", criteria))
-          .thenReturn(new PagedResult<>(List.of(assocSkillProg, unassocSkillProg), pageInfo));
+
+      var expectedResults =
+          List.of(
+              new AssociationSearchResultData(UUID.randomUUID(), "Skill 1", "TYPE_1", true),
+              new AssociationSearchResultData(UUID.randomUUID(), "Skill 2", "TYPE_2", false));
+
+      when(associationSearchHelper.searchForAssociation(
+              eq(traceId),
+              eq(Trace.class),
+              eq(EAssociationType.TRACE_DECLARED_SKILL),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any()))
+          .thenReturn(new PagedResult<>(expectedResults, pageInfo));
 
       BddLogger.when("searching declared skills for association");
       var result = traceService.searchDeclaredSkillForAssociation(traceId, "kw", criteria);
 
-      BddLogger.then("it should return mapped results with correct disabled flags");
+      BddLogger.then("it should delegate to associationSearchHelper and return results");
       assertEquals(2, result.content().size());
       assertTrue(result.content().get(0).disabled());
       assertFalse(result.content().get(1).disabled());
+      verify(associationSearchHelper)
+          .searchForAssociation(
+              eq(traceId),
+              eq(Trace.class),
+              eq(EAssociationType.TRACE_DECLARED_SKILL),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any());
     }
 
     @Test
