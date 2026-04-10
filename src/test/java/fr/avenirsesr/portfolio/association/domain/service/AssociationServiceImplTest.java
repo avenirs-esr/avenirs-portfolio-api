@@ -11,9 +11,6 @@ import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotEx
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.output.repository.AssociationRepository;
-import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.List;
@@ -28,10 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AssociationServiceImplTest {
 
-  @Mock private LoggedInUserService loggedInUserService;
   @Mock private AssociationRepository associationRepository;
-  @Mock private TraceRepository traceRepository;
-  @Mock private DeclaredActivityRepository declaredActivityRepository;
 
   @InjectMocks private AssociationServiceImpl service;
 

@@ -1,10 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input;
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.TraceAssociationSearchInfoData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
@@ -46,8 +46,11 @@ public interface DeclaredActivityService {
   DeclaredActivityAssociationsData associateActivityWithDeclaredSkills(
       UUID declaredActivityId, List<UUID> declaredSkillIds);
 
-  PagedResult<TraceAssociationSearchInfoData> searchTracesForAssociation(
+  PagedResult<AssociationSearchResultData> searchTracesForAssociation(
       UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated);
+
+  PagedResult<AssociationSearchResultData> searchDeclaredSkillsForAssociation(
+      UUID declaredActivityId, String keyword, PageCriteria pageCriteria);
 
   List<DeclaredActivity> findAllDeclaredActivitiesByIds(List<UUID> ids);
 

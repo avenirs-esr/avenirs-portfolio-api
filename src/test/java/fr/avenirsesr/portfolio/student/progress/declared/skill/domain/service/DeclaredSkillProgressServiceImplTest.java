@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
@@ -61,6 +62,7 @@ public class DeclaredSkillProgressServiceImplTest {
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private AssociationService associationService;
+  @Mock private AssociationSearchHelper associationSearchHelper;
   @InjectMocks private DeclaredSkillProgressServiceImpl declaredSkillProgressService;
   private static final String CHARSET =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -670,6 +672,7 @@ public class DeclaredSkillProgressServiceImplTest {
 
       @Mock private DeclaredActivityService declaredActivityService;
       @Mock private AssociationService associationService;
+      @Mock private AssociationSearchHelper associationSearchHelper;
 
       @BeforeEach
       void setUp() {
@@ -681,7 +684,8 @@ public class DeclaredSkillProgressServiceImplTest {
                 externalSkillClient,
                 loggedInUserService,
                 declaredActivityService,
-                associationService);
+                associationService,
+                associationSearchHelper);
       }
 
       @Test

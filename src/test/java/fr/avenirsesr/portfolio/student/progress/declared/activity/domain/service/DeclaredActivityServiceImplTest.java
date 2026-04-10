@@ -10,9 +10,11 @@ import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundExcepti
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
@@ -23,7 +25,6 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.TraceAssociationSearchInfoData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
@@ -41,7 +42,6 @@ import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.Instant;
@@ -66,6 +66,7 @@ class DeclaredActivityServiceImplTest {
   @Mock private ActivityService activityService;
 
   @Mock private AssociationService associationService;
+  @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private TraceService traceService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private LoggedInUserService loggedInUserService;
@@ -88,6 +89,7 @@ class DeclaredActivityServiceImplTest {
             traceService,
             declaredSkillProgressService,
             associationService,
+            associationSearchHelper,
             loggedInUserService);
   }
 
@@ -668,61 +670,48 @@ class DeclaredActivityServiceImplTest {
             + " not");
 
     UUID declaredActivityId = UUID.randomUUID();
-
-    Trace alreadyAssociatedTrace1 = TraceFixture.create().withUser(student.getUser()).toModel();
-    Trace alreadyAssociatedTrace2 = TraceFixture.create().withUser(student.getUser()).toModel();
-    Trace notAssociatedTrace = TraceFixture.create().withUser(student.getUser()).toModel();
+    UUID traceId1 = UUID.randomUUID();
+    UUID traceId2 = UUID.randomUUID();
+    UUID traceId3 = UUID.randomUUID();
 
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
-
-    Association assoc1 = mock(Association.class);
-    Association assoc2 = mock(Association.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
 
-    when(associationService.getAllOf(
-            declaredActivityId,
-            DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
-        .thenReturn(List.of(assoc1, assoc2));
-    when(assoc1.getId2()).thenReturn(alreadyAssociatedTrace1.getId());
-    when(assoc2.getId2()).thenReturn(alreadyAssociatedTrace2.getId());
-
     var pageInfo = new PageInfo(0, 10, 3);
     var pageCriteria = new PageCriteria(0, 10);
-    when(traceService.getTracesView(
-            eq("keyword"), any(TraceFilter.class), eq(null), eq(pageCriteria)))
-        .thenReturn(
-            new PagedResult<>(
-                List.of(alreadyAssociatedTrace1, alreadyAssociatedTrace2, notAssociatedTrace),
-                pageInfo));
+
+    var expectedResults =
+        List.of(
+            new AssociationSearchResultData(traceId1, "Trace 1", null, true),
+            new AssociationSearchResultData(traceId2, "Trace 2", null, true),
+            new AssociationSearchResultData(traceId3, "Trace 3", null, false));
+
+    when(associationSearchHelper.searchForAssociation(
+            eq(declaredActivityId),
+            eq(DeclaredActivity.class),
+            eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any()))
+        .thenReturn(new PagedResult<>(expectedResults, pageInfo));
 
     BddLogger.when("searchTracesForAssociation is called");
-    PagedResult<TraceAssociationSearchInfoData> result =
+    PagedResult<AssociationSearchResultData> result =
         service.searchTracesForAssociation(declaredActivityId, "keyword", pageCriteria, null);
 
-    BddLogger.then(
-        "The result contains 3 TraceInfoData: 2 with disabled=true, 1 with disabled=false");
+    BddLogger.then("The result contains 3 items: 2 with disabled=true, 1 with disabled=false");
     assertThat(result.content()).hasSize(3);
     assertThat(result.pageInfo()).isEqualTo(pageInfo);
-
-    assertThat(result.content())
-        .filteredOn(t -> t.id().equals(alreadyAssociatedTrace1.getId()))
-        .singleElement()
-        .satisfies(t -> assertThat(t.disabled()).isTrue());
-
-    assertThat(result.content())
-        .filteredOn(t -> t.id().equals(alreadyAssociatedTrace2.getId()))
-        .singleElement()
-        .satisfies(t -> assertThat(t.disabled()).isTrue());
-
-    assertThat(result.content())
-        .filteredOn(t -> t.id().equals(notAssociatedTrace.getId()))
-        .singleElement()
-        .satisfies(t -> assertThat(t.disabled()).isFalse());
+    assertThat(result.content().get(0).disabled()).isTrue();
+    assertThat(result.content().get(1).disabled()).isTrue();
+    assertThat(result.content().get(2).disabled()).isFalse();
   }
 
   @Test
@@ -738,19 +727,23 @@ class DeclaredActivityServiceImplTest {
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
 
-    when(associationService.getAllOf(
-            declaredActivityId,
-            DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
-        .thenReturn(List.of());
-
     var pageInfo = new PageInfo(0, 10, 0);
     var pageCriteria = new PageCriteria(0, 10);
-    when(traceService.getTracesView(any(), any(TraceFilter.class), eq(null), eq(pageCriteria)))
+
+    when(associationSearchHelper.searchForAssociation(
+            eq(declaredActivityId),
+            eq(DeclaredActivity.class),
+            eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any()))
         .thenReturn(new PagedResult<>(List.of(), pageInfo));
 
     BddLogger.when("searchTracesForAssociation is called");
-    PagedResult<TraceAssociationSearchInfoData> result =
+    PagedResult<AssociationSearchResultData> result =
         service.searchTracesForAssociation(declaredActivityId, null, pageCriteria, null);
 
     BddLogger.then("The result is empty");
@@ -821,14 +814,18 @@ class DeclaredActivityServiceImplTest {
         .thenReturn(Optional.of(declaredActivity));
     when(declaredActivity.getStudent()).thenReturn(student);
 
-    when(associationService.getAllOf(
-            declaredActivityId,
-            DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
-        .thenReturn(List.of());
-
     var pageCriteria = new PageCriteria(1, 5);
-    when(traceService.getTracesView(any(), any(), any(), any()))
+
+    when(associationSearchHelper.searchForAssociation(
+            eq(declaredActivityId),
+            eq(DeclaredActivity.class),
+            eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any()))
         .thenReturn(new PagedResult<>(List.of(), new PageInfo(1, 5, 0)));
 
     BddLogger.when(

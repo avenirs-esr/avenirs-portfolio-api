@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.trace.domain.port.input;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -77,9 +78,9 @@ public interface TraceService {
 
   void unassociate(UUID traceId, List<UUID> associationIds);
 
-  PagedResult<DeclaredActivityAssociationSearchInfoData> searchDeclaredActivityForAssociation(
+  PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria);
 
-  PagedResult<DeclaredSkillAssociationSearchInfoData> searchDeclaredSkillForAssociation(
+  PagedResult<AssociationSearchResultData> searchDeclaredSkillForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria);
 }

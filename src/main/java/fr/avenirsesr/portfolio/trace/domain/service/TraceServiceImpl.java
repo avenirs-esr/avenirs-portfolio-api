@@ -6,15 +6,14 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
-import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.data.domain.model.*;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
@@ -48,8 +47,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,6 +62,7 @@ public class TraceServiceImpl implements TraceService {
   private final TraceConfigurationClient traceConfigurationClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
+  private final AssociationSearchHelper associationSearchHelper;
 
   @Override
   public Trace getTraceById(UUID id) {
@@ -485,55 +483,35 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public PagedResult<DeclaredActivityAssociationSearchInfoData>
-      searchDeclaredActivityForAssociation(
-          UUID traceId, String keyword, PageCriteria pageCriteria) {
-
-    var alreadyAssociatedIds =
-        getAlreadyAssociatedIdsForTrace(
-            traceId, EAssociationType.DECLARED_ACTIVITY_TRACE, Association::getId1);
-
-    var declaredActivityPagedResult =
-        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria);
-
-    var mappedContent =
-        declaredActivityPagedResult.content().stream()
-            .map(
-                declaredActivity ->
-                    new DeclaredActivityAssociationSearchInfoData(
-                        declaredActivity.getId(),
-                        declaredActivity.getActivity().getTitle(),
-                        declaredActivity.getActivity().getThematic(),
-                        alreadyAssociatedIds.contains(declaredActivity.getId())
-                            || declaredActivity.getFinishedAt().isPresent()))
-            .toList();
-
-    return new PagedResult<>(mappedContent, declaredActivityPagedResult.pageInfo());
+  public PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
+      UUID traceId, String keyword, PageCriteria pageCriteria) {
+    checkTraceOwnership(traceId);
+    return associationSearchHelper.searchForAssociation(
+        traceId,
+        Trace.class,
+        EAssociationType.DECLARED_ACTIVITY_TRACE,
+        Association::getId1,
+        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),
+        AvenirsBaseModel::getId,
+        da -> da.getActivity().getTitle(),
+        da -> da.getActivity().getThematic().name(),
+        da -> da.getFinishedAt().isPresent());
   }
 
   @Override
-  public PagedResult<DeclaredSkillAssociationSearchInfoData> searchDeclaredSkillForAssociation(
+  public PagedResult<AssociationSearchResultData> searchDeclaredSkillForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
-
-    var alreadyAssociatedIds =
-        getAlreadyAssociatedIdsForTrace(
-            traceId, EAssociationType.TRACE_DECLARED_SKILL, Association::getId2);
-
-    var declaredSkillPagedResult =
-        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria);
-
-    var mappedContent =
-        declaredSkillPagedResult.content().stream()
-            .map(
-                declaredSkillProgress ->
-                    new DeclaredSkillAssociationSearchInfoData(
-                        declaredSkillProgress.getId(),
-                        declaredSkillProgress.getSkill().getLibelle(),
-                        declaredSkillProgress.getSkill().getType(),
-                        alreadyAssociatedIds.contains(declaredSkillProgress.getId())))
-            .toList();
-
-    return new PagedResult<>(mappedContent, declaredSkillPagedResult.pageInfo());
+    checkTraceOwnership(traceId);
+    return associationSearchHelper.searchForAssociation(
+        traceId,
+        Trace.class,
+        EAssociationType.TRACE_DECLARED_SKILL,
+        Association::getId2,
+        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),
+        AvenirsBaseModel::getId,
+        ds -> ds.getSkill().getLibelle(),
+        ds -> ds.getSkill().getType().name(),
+        ds -> false);
   }
 
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
@@ -542,15 +520,9 @@ public class TraceServiceImpl implements TraceService {
     }
   }
 
-  private Set<UUID> getAlreadyAssociatedIdsForTrace(
-      UUID traceId, EAssociationType associationType, Function<Association, UUID> idExtractor) {
+  private void checkTraceOwnership(UUID traceId) {
     var loggedInUser = loggedInUserService.getLoggedInUser();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
-
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
-
-    return associationService.getAllOf(traceId, Trace.class, List.of(associationType)).stream()
-        .map(idExtractor)
-        .collect(Collectors.toSet());
   }
 }
