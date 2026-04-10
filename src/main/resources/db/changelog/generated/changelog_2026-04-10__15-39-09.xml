@@ -1,23 +1,9 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
-    <changeSet author="pbeger (generated)" id="1775834613865-1">
-        <addColumn tableName="staff">
-            <column name="institution_email" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
-    </changeSet>
-    <changeSet author="pbeger (generated)" id="1775834613865-2">
-        <addColumn tableName="student">
-            <column name="institution_email" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-        </addColumn>
-    </changeSet>
-    <changeSet author="pbeger (generated)" id="1775834613865-3">
+    <changeSet author="pbeger (generated)" id="1775835555025-1">
         <dropUniqueConstraint constraintName="uc_8cc5a8856ba2ba06239c9cbd8" tableName="declared_skill"/>
     </changeSet>
-    <changeSet author="pbeger (generated)" id="1775834613865-4">
+    <changeSet author="pbeger (generated)" id="1775835555025-2">
         <dropColumn columnName="external_skill_id" tableName="declared_skill"/>
     </changeSet>
 </databaseChangeLog>
