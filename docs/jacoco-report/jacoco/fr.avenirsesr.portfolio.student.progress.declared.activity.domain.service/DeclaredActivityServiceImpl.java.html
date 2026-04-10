@@ -7,16 +7,17 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.TraceAssociationSearchInfoData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L47">@Slf4j</span>
+<span class="fc" id="L48">@Slf4j</span>
 @AllArgsConstructor
 public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final DeclaredActivityRepository declaredActivityRepository;
@@ -52,372 +53,371 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final TraceService traceService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final AssociationService associationService;
+  private final AssociationSearchHelper associationSearchHelper;
   private final LoggedInUserService loggedInUserService;
 
   @Override
   public PagedResult&lt;DeclaredActivity&gt; getDeclaredActivities(PageCriteria pageCriteria) {
-<span class="fc" id="L59">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L60">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
+<span class="fc" id="L61">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L62">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
 
-<span class="fc" id="L62">    return declaredActivityRepository.findStudentActivitiesByProgressAndDate(</span>
+<span class="fc" id="L64">    return declaredActivityRepository.findStudentActivitiesByProgressAndDate(</span>
         student, pageCriteria, graph);
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; getAllDeclaredActivitiesOf(Student student) {
-<span class="fc" id="L68">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
-<span class="fc" id="L69">    return declaredActivityRepository.findAllByStudent(student, graph);</span>
+<span class="fc" id="L70">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
+<span class="fc" id="L71">    return declaredActivityRepository.findAllByStudent(student, graph);</span>
   }
 
   @Override
   public Optional&lt;DeclaredActivity&gt; getByActivity(Activity activity) {
-<span class="fc" id="L74">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L75">    return declaredActivityRepository.findByActivity(student, activity);</span>
+<span class="fc" id="L76">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L77">    return declaredActivityRepository.findByActivity(student, activity);</span>
   }
 
   @Override
   public DeclaredActivity subscribe(UUID activityId, LocalDate startDate, LocalDate endDate) {
-<span class="fc" id="L80">    return subscribe(UUID.randomUUID(), activityId, startDate, endDate);</span>
+<span class="fc" id="L82">    return subscribe(UUID.randomUUID(), activityId, startDate, endDate);</span>
   }
 
   @Override
   public DeclaredActivity subscribe(
       UUID declaredActivityId, UUID activityId, LocalDate startDate, LocalDate endDate) {
-<span class="fc" id="L86">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L87">    Activity activity = activityService.getActivityById(activityId);</span>
+<span class="fc" id="L88">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L89">    Activity activity = activityService.getActivityById(activityId);</span>
 
-<span class="fc bfc" id="L89" title="All 2 branches covered.">    if (declaredActivityRepository.findByActivity(student, activity).isPresent()) {</span>
-<span class="fc" id="L90">      throw new DeclaredActivityAlreadyExistException();</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">    if (declaredActivityRepository.findByActivity(student, activity).isPresent()) {</span>
+<span class="fc" id="L92">      throw new DeclaredActivityAlreadyExistException();</span>
     }
 
-<span class="fc" id="L93">    validateActivityDates(startDate, endDate, Instant.now());</span>
+<span class="fc" id="L95">    validateActivityDates(startDate, endDate, Instant.now());</span>
 
-<span class="fc" id="L95">    DeclaredActivity declaredActivity =</span>
-<span class="fc" id="L96">        DeclaredActivity.create(</span>
+<span class="fc" id="L97">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L98">        DeclaredActivity.create(</span>
             declaredActivityId, student, activity, null, null, startDate, endDate, null);
-<span class="fc" id="L98">    return declaredActivityRepository.save(declaredActivity);</span>
+<span class="fc" id="L100">    return declaredActivityRepository.save(declaredActivity);</span>
   }
 
   @Override
   public void unsubscribeMultiple(List&lt;UUID&gt; activityIds) {
-<span class="fc" id="L103">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L105">    Student student = loggedInUserService.getLoggedInStudent();</span>
 
-<span class="fc" id="L105">    List&lt;DeclaredActivity&gt; declaredActivities =</span>
-<span class="fc" id="L106">        declaredActivityRepository.findAllByActivityIdAndStudent(</span>
-<span class="fc" id="L107">            activityIds, student, FetchGraph.init().fetch(&quot;activity&quot;).add(&quot;student&quot;).fetch(&quot;user&quot;));</span>
+<span class="fc" id="L107">    List&lt;DeclaredActivity&gt; declaredActivities =</span>
+<span class="fc" id="L108">        declaredActivityRepository.findAllByActivityIdAndStudent(</span>
+<span class="fc" id="L109">            activityIds, student, FetchGraph.init().fetch(&quot;activity&quot;).add(&quot;student&quot;).fetch(&quot;user&quot;));</span>
 
-<span class="fc" id="L109">    if (!declaredActivities.stream()</span>
-<span class="fc" id="L110">        .map(declaredActivity -&gt; declaredActivity.getActivity().getId())</span>
-<span class="fc" id="L111">        .collect(Collectors.toSet())</span>
-<span class="fc bfc" id="L112" title="All 2 branches covered.">        .containsAll(activityIds)) {</span>
-<span class="fc" id="L113">      throw new DeclaredActivityNotFoundException();</span>
+<span class="fc" id="L111">    if (!declaredActivities.stream()</span>
+<span class="fc" id="L112">        .map(declaredActivity -&gt; declaredActivity.getActivity().getId())</span>
+<span class="fc" id="L113">        .collect(Collectors.toSet())</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        .containsAll(activityIds)) {</span>
+<span class="fc" id="L115">      throw new DeclaredActivityNotFoundException();</span>
     }
 
-<span class="fc" id="L116">    declaredActivityRepository.removeAllFromDatabase(declaredActivities);</span>
-<span class="fc" id="L117">  }</span>
+<span class="fc" id="L118">    declaredActivityRepository.removeAllFromDatabase(declaredActivities);</span>
+<span class="fc" id="L119">  }</span>
 
   @Override
   public DeclaredActivity finish(UUID declaredActivityId) {
-<span class="fc" id="L121">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L122">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L123">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L124">    DeclaredActivity declaredActivity =</span>
         declaredActivityRepository
-<span class="fc" id="L124">            .findById(declaredActivityId)</span>
-<span class="fc" id="L125">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
+<span class="fc" id="L126">            .findById(declaredActivityId)</span>
+<span class="fc" id="L127">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
 
-<span class="fc bfc" id="L127" title="All 2 branches covered.">    if (!declaredActivity.getStudent().equals(student)) {</span>
-<span class="fc" id="L128">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">    if (!declaredActivity.getStudent().equals(student)) {</span>
+<span class="fc" id="L130">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc bfc" id="L131" title="All 2 branches covered.">    if (declaredActivity.getStartedAt().isEmpty()) {</span>
-<span class="fc" id="L132">      throw new DeclaredActivityHasNotStartedException();</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">    if (declaredActivity.getStartedAt().isEmpty()) {</span>
+<span class="fc" id="L134">      throw new DeclaredActivityHasNotStartedException();</span>
     }
 
-<span class="fc bfc" id="L135" title="All 2 branches covered.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
-<span class="fc" id="L136">      throw new DeclaredActivityAlreadyFinishedException();</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
+<span class="fc" id="L138">      throw new DeclaredActivityAlreadyFinishedException();</span>
     }
 
-<span class="fc" id="L139">    declaredActivity.setFinishedAt(Instant.now());</span>
+<span class="fc" id="L141">    declaredActivity.setFinishedAt(Instant.now());</span>
 
-<span class="fc" id="L141">    return declaredActivityRepository.save(declaredActivity);</span>
+<span class="fc" id="L143">    return declaredActivityRepository.save(declaredActivity);</span>
   }
 
   private static void fieldsValidation(String reflection) {
-<span class="fc" id="L145">    validateOptionalTextMaxLength(&quot;reflection&quot;, reflection, REFLECTION_LENGTH);</span>
-<span class="fc" id="L146">  }</span>
+<span class="fc" id="L147">    validateOptionalTextMaxLength(&quot;reflection&quot;, reflection, REFLECTION_LENGTH);</span>
+<span class="fc" id="L148">  }</span>
 
   @Override
   public void updateReflection(UUID declaredActivityId, String reflection) {
-<span class="fc" id="L150">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L151">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L152">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L153">    DeclaredActivity declaredActivity =</span>
         declaredActivityRepository
-<span class="fc" id="L153">            .findById(declaredActivityId)</span>
-<span class="fc" id="L154">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
-<span class="pc bpc" id="L155" title="1 of 2 branches missed.">    if (!declaredActivity.getStudent().equals(student)) {</span>
-<span class="nc" id="L156">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L155">            .findById(declaredActivityId)</span>
+<span class="fc" id="L156">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">    if (!declaredActivity.getStudent().equals(student)) {</span>
+<span class="nc" id="L158">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L158">    fieldsValidation(reflection);</span>
-<span class="pc bpc" id="L159" title="1 of 2 branches missed.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
-<span class="nc" id="L160">      throw new DeclaredActivityAlreadyFinishedException();</span>
+<span class="fc" id="L160">    fieldsValidation(reflection);</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">    if (declaredActivity.getFinishedAt().isPresent()) {</span>
+<span class="nc" id="L162">      throw new DeclaredActivityAlreadyFinishedException();</span>
     }
-<span class="fc" id="L162">    declaredActivity.setReflection(reflection);</span>
+<span class="fc" id="L164">    declaredActivity.setReflection(reflection);</span>
 
-<span class="pc bpc" id="L164" title="1 of 2 branches missed.">    if (declaredActivity.getStartedAt().isEmpty()) {</span>
-<span class="fc" id="L165">      declaredActivity.setStartedAt(Instant.now());</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">    if (declaredActivity.getStartedAt().isEmpty()) {</span>
+<span class="fc" id="L167">      declaredActivity.setStartedAt(Instant.now());</span>
     }
-<span class="fc" id="L167">    declaredActivityRepository.save(declaredActivity);</span>
-<span class="fc" id="L168">  }</span>
+<span class="fc" id="L169">    declaredActivityRepository.save(declaredActivity);</span>
+<span class="fc" id="L170">  }</span>
 
   @Override
   public DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId) {
-<span class="fc" id="L172">    return fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="fc" id="L174">    return fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
   }
 
   private void validateActivityDates(LocalDate startDate, LocalDate endDate, Instant subscribedAt) {
 
-<span class="fc bfc" id="L177" title="All 6 branches covered.">    if ((startDate == null) != (endDate == null)) {</span>
-<span class="fc" id="L178">      throw new DeclaredActivityDatesException();</span>
+<span class="fc bfc" id="L179" title="All 6 branches covered.">    if ((startDate == null) != (endDate == null)) {</span>
+<span class="fc" id="L180">      throw new DeclaredActivityDatesException();</span>
     }
 
-<span class="fc bfc" id="L181" title="All 2 branches covered.">    if (startDate != null) {</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">    if (startDate != null) {</span>
 
-<span class="fc" id="L183">      validateDateOrder(startDate, endDate);</span>
+<span class="fc" id="L185">      validateDateOrder(startDate, endDate);</span>
 
-<span class="fc" id="L185">      LocalDate subscriptionDate = subscribedAt.atZone(ZoneId.systemDefault()).toLocalDate();</span>
+<span class="fc" id="L187">      LocalDate subscriptionDate = subscribedAt.atZone(ZoneId.systemDefault()).toLocalDate();</span>
 
-<span class="fc bfc" id="L187" title="All 2 branches covered.">      if (startDate.isBefore(subscriptionDate)) {</span>
-<span class="fc" id="L188">        throw new DeclaredActivityStartDateBeforeSubscriptionException();</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">      if (startDate.isBefore(subscriptionDate)) {</span>
+<span class="fc" id="L190">        throw new DeclaredActivityStartDateBeforeSubscriptionException();</span>
       }
     }
-<span class="fc" id="L191">  }</span>
+<span class="fc" id="L193">  }</span>
 
   @Override
   public void updateDeclaredActivityDates(
       UUID declaredActivityId, LocalDate startDate, LocalDate endDate) {
 
-<span class="fc" id="L197">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L198">    log.debug(&quot;Authenticated student id: {}&quot;, student.getId());</span>
+<span class="fc" id="L199">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L200">    log.debug(&quot;Authenticated student id: {}&quot;, student.getId());</span>
 
-<span class="fc" id="L200">    log.debug(&quot;Fetching DeclaredActivity with id: {}&quot;, declaredActivityId);</span>
-<span class="fc" id="L201">    var declaredActivity =</span>
+<span class="fc" id="L202">    log.debug(&quot;Fetching DeclaredActivity with id: {}&quot;, declaredActivityId);</span>
+<span class="fc" id="L203">    var declaredActivity =</span>
         declaredActivityRepository
-<span class="fc" id="L203">            .findById(declaredActivityId)</span>
-<span class="fc" id="L204">            .orElseThrow(</span>
+<span class="fc" id="L205">            .findById(declaredActivityId)</span>
+<span class="fc" id="L206">            .orElseThrow(</span>
                 () -&gt;
-<span class="nc" id="L206">                    new DeclaredActivityNotFoundException(</span>
+<span class="nc" id="L208">                    new DeclaredActivityNotFoundException(</span>
                         &quot;DeclaredActivity not found with id: &quot; + declaredActivityId));
-<span class="pc bpc" id="L208" title="1 of 2 branches missed.">    if (!declaredActivity.getStudent().equals(student)) {</span>
-<span class="nc" id="L209">      throw new UserNotAuthorizedException();</span>
+<span class="pc bpc" id="L210" title="1 of 2 branches missed.">    if (!declaredActivity.getStudent().equals(student)) {</span>
+<span class="nc" id="L211">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L212">    validateActivityDates(startDate, endDate, declaredActivity.getCreatedAt());</span>
+<span class="fc" id="L214">    validateActivityDates(startDate, endDate, declaredActivity.getCreatedAt());</span>
 
-<span class="fc" id="L214">    declaredActivity.setStartDate(startDate);</span>
-<span class="fc" id="L215">    declaredActivity.setEndDate(endDate);</span>
+<span class="fc" id="L216">    declaredActivity.setStartDate(startDate);</span>
+<span class="fc" id="L217">    declaredActivity.setEndDate(endDate);</span>
 
-<span class="fc" id="L217">    declaredActivityRepository.save(declaredActivity);</span>
-<span class="fc" id="L218">  }</span>
+<span class="fc" id="L219">    declaredActivityRepository.save(declaredActivity);</span>
+<span class="fc" id="L220">  }</span>
 
   @Override
   public PagedResult&lt;DeclaredActivity&gt; searchDeclaredActivity(
       String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L223">    var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L224">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
-<span class="fc" id="L225">    return declaredActivityRepository.findAllByStudent(student, keyword, pageCriteria, graph);</span>
+<span class="fc" id="L225">    var student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L226">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
+<span class="fc" id="L227">    return declaredActivityRepository.findAllByStudent(student, keyword, pageCriteria, graph);</span>
   }
 
   @Override
   public DeclaredActivityAssociationsData associateActivityWithTraces(
       UUID declaredActivityId, List&lt;UUID&gt; traceIds) {
-<span class="nc" id="L231">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L232">    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
-<span class="nc" id="L233">    var traces = traceService.findAllTracesById(traceIds);</span>
+<span class="nc" id="L233">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="nc" id="L234">    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="nc" id="L235">    var traces = traceService.findAllTracesById(traceIds);</span>
 
-<span class="nc bnc" id="L235" title="All 2 branches missed.">    if (!new HashSet&lt;&gt;(traces.stream().map(Trace::getId).toList()).containsAll(traceIds)) {</span>
-<span class="nc" id="L236">      throw new TraceNotFoundException();</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">    if (!new HashSet&lt;&gt;(traces.stream().map(Trace::getId).toList()).containsAll(traceIds)) {</span>
+<span class="nc" id="L238">      throw new TraceNotFoundException();</span>
     }
 
-<span class="nc bnc" id="L239" title="All 2 branches missed.">    if (!traces.stream().allMatch(trace -&gt; trace.getUser().equals(student.getUser()))) {</span>
-<span class="nc" id="L240">      throw new UserNotAuthorizedException();</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">    if (!traces.stream().allMatch(trace -&gt; trace.getUser().equals(student.getUser()))) {</span>
+<span class="nc" id="L242">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="nc" id="L243">    associationService.createAll(</span>
-<span class="nc" id="L244">        traceIds.stream()</span>
-<span class="nc" id="L245">            .map(</span>
+<span class="nc" id="L245">    associationService.createAll(</span>
+<span class="nc" id="L246">        traceIds.stream()</span>
+<span class="nc" id="L247">            .map(</span>
                 traceId -&gt;
-<span class="nc" id="L247">                    new AssociationData(</span>
+<span class="nc" id="L249">                    new AssociationData(</span>
                         declaredActivityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE))
-<span class="nc" id="L249">            .toList());</span>
+<span class="nc" id="L251">            .toList());</span>
 
-<span class="nc" id="L251">    return getDeclaredActivityAssociations(declaredActivityId);</span>
+<span class="nc" id="L253">    return getDeclaredActivityAssociations(declaredActivityId);</span>
   }
 
   @Override
   public DeclaredActivityAssociationsData associateActivityWithDeclaredSkills(
       UUID declaredActivityId, List&lt;UUID&gt; declaredSkillIds) {
-<span class="fc" id="L257">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L258">    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
-<span class="fc" id="L259">    var declaredSkills =</span>
-<span class="fc" id="L260">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillIds);</span>
+<span class="fc" id="L259">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L260">    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="fc" id="L261">    var declaredSkills =</span>
+<span class="fc" id="L262">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillIds);</span>
 
-<span class="fc" id="L262">    if (!new HashSet&lt;&gt;(declaredSkills.stream().map(DeclaredSkillProgress::getId).toList())</span>
-<span class="fc bfc" id="L263" title="All 2 branches covered.">        .containsAll(declaredSkillIds)) {</span>
-<span class="fc" id="L264">      throw new DeclaredSkillProgressNotFoundException();</span>
+<span class="fc" id="L264">    if (!new HashSet&lt;&gt;(declaredSkills.stream().map(DeclaredSkillProgress::getId).toList())</span>
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        .containsAll(declaredSkillIds)) {</span>
+<span class="fc" id="L266">      throw new DeclaredSkillProgressNotFoundException();</span>
     }
 
-<span class="fc bfc" id="L267" title="All 2 branches covered.">    if (!declaredSkills.stream().allMatch(skill -&gt; skill.getStudent().equals(student))) {</span>
-<span class="fc" id="L268">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L269" title="All 2 branches covered.">    if (!declaredSkills.stream().allMatch(skill -&gt; skill.getStudent().equals(student))) {</span>
+<span class="fc" id="L270">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L271">    associationService.createAll(</span>
-<span class="fc" id="L272">        declaredSkillIds.stream()</span>
-<span class="fc" id="L273">            .map(</span>
+<span class="fc" id="L273">    associationService.createAll(</span>
+<span class="fc" id="L274">        declaredSkillIds.stream()</span>
+<span class="fc" id="L275">            .map(</span>
                 skillId -&gt;
-<span class="fc" id="L275">                    new AssociationData(</span>
+<span class="fc" id="L277">                    new AssociationData(</span>
                         declaredActivityId,
                         skillId,
                         EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
-<span class="fc" id="L279">            .toList());</span>
+<span class="fc" id="L281">            .toList());</span>
 
-<span class="fc" id="L281">    return getDeclaredActivityAssociations(declaredActivityId);</span>
+<span class="fc" id="L283">    return getDeclaredActivityAssociations(declaredActivityId);</span>
   }
 
   @Override
-  public PagedResult&lt;TraceAssociationSearchInfoData&gt; searchTracesForAssociation(
+  public PagedResult&lt;AssociationSearchResultData&gt; searchTracesForAssociation(
       UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated) {
-<span class="fc" id="L287">    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="fc" id="L289">    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="fc" id="L290">    return associationSearchHelper.searchForAssociation(</span>
+        declaredActivityId,
+        DeclaredActivity.class,
+        EAssociationType.DECLARED_ACTIVITY_TRACE,
+        Association::getId2,
+<span class="fc" id="L295">        traceService.getTracesView(</span>
+            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria),
+<span class="nc" id="L297">        trace -&gt; trace.getId(),</span>
+<span class="nc" id="L298">        trace -&gt; trace.getTitle(),</span>
+<span class="nc" id="L299">        trace -&gt; null,</span>
+<span class="nc" id="L300">        trace -&gt; false);</span>
+  }
 
-<span class="fc" id="L289">    var alreadyAssociatedTraceIds = getAlreadyAssociatedTraceIds(declaredActivityId);</span>
-
-<span class="fc" id="L291">    var tracePagedResult =</span>
-<span class="fc" id="L292">        traceService.getTracesView(</span>
-            keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria);
-
-<span class="fc" id="L295">    var mappedContent =</span>
-<span class="fc" id="L296">        tracePagedResult.content().stream()</span>
-<span class="fc" id="L297">            .map(</span>
-                trace -&gt;
-<span class="fc" id="L299">                    new TraceAssociationSearchInfoData(</span>
-<span class="fc" id="L300">                        trace.getId(),</span>
-<span class="fc" id="L301">                        trace.getTitle(),</span>
-<span class="fc" id="L302">                        alreadyAssociatedTraceIds.contains(trace.getId())))</span>
-<span class="fc" id="L303">            .toList();</span>
-
-<span class="fc" id="L305">    return new PagedResult&lt;&gt;(mappedContent, tracePagedResult.pageInfo());</span>
+  @Override
+  public PagedResult&lt;AssociationSearchResultData&gt; searchDeclaredSkillsForAssociation(
+      UUID declaredActivityId, String keyword, PageCriteria pageCriteria) {
+<span class="nc" id="L306">    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="nc" id="L307">    return associationSearchHelper.searchForAssociation(</span>
+        declaredActivityId,
+        DeclaredActivity.class,
+        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+        Association::getId2,
+<span class="nc" id="L312">        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),</span>
+<span class="nc" id="L313">        ds -&gt; ds.getId(),</span>
+<span class="nc" id="L314">        ds -&gt; ds.getSkill().getLibelle(),</span>
+<span class="nc" id="L315">        ds -&gt; ds.getSkill().getType().name(),</span>
+<span class="nc" id="L316">        ds -&gt; false);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllDeclaredActivitiesByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L310">    return declaredActivityRepository.findAllById(ids);</span>
+<span class="fc" id="L321">    return declaredActivityRepository.findAllById(ids);</span>
   }
 
   @Override
   public List&lt;DeclaredActivity&gt; findAllNotCompletedActivitiesByIds(List&lt;UUID&gt; ids) {
-<span class="nc" id="L315">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
-<span class="nc" id="L316">    return declaredActivityRepository.findAllNotCompletedActivitiesByIds(ids, graph);</span>
+<span class="nc" id="L326">    var graph = FetchGraph.init().fetch(&quot;activity&quot;);</span>
+<span class="nc" id="L327">    return declaredActivityRepository.findAllNotCompletedActivitiesByIds(ids, graph);</span>
   }
 
   @Override
   public DeclaredActivityAssociationsData getDeclaredActivityAssociations(UUID declaredActivityId) {
-<span class="fc" id="L321">    DeclaredActivity declaredActivity =</span>
-<span class="fc" id="L322">        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="fc" id="L332">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L333">        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
 
-<span class="fc" id="L324">    var associations =</span>
-<span class="fc" id="L325">        associationService.getAllOf(</span>
-<span class="fc" id="L326">            declaredActivity.getId(),</span>
+<span class="fc" id="L335">    var associations =</span>
+<span class="fc" id="L336">        associationService.getAllOf(</span>
+<span class="fc" id="L337">            declaredActivity.getId(),</span>
             DeclaredActivity.class,
-<span class="fc" id="L328">            List.of(</span>
+<span class="fc" id="L339">            List.of(</span>
                 EAssociationType.DECLARED_ACTIVITY_TRACE,
                 EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL));
 
-<span class="fc" id="L332">    var traces =</span>
-<span class="fc" id="L333">        traceService.findAllTracesById(</span>
-<span class="fc" id="L334">            associations.stream()</span>
-<span class="fc bfc" id="L335" title="All 2 branches covered.">                .filter(a -&gt; a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)</span>
-<span class="fc" id="L336">                .map(Association::getId2)</span>
-<span class="fc" id="L337">                .toList());</span>
+<span class="fc" id="L343">    var traces =</span>
+<span class="fc" id="L344">        traceService.findAllTracesById(</span>
+<span class="fc" id="L345">            associations.stream()</span>
+<span class="fc bfc" id="L346" title="All 2 branches covered.">                .filter(a -&gt; a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)</span>
+<span class="fc" id="L347">                .map(Association::getId2)</span>
+<span class="fc" id="L348">                .toList());</span>
 
-<span class="fc" id="L339">    var declaredSkills =</span>
-<span class="fc" id="L340">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(</span>
-<span class="fc" id="L341">            associations.stream()</span>
-<span class="fc" id="L342">                .filter(</span>
+<span class="fc" id="L350">    var declaredSkills =</span>
+<span class="fc" id="L351">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(</span>
+<span class="fc" id="L352">            associations.stream()</span>
+<span class="fc" id="L353">                .filter(</span>
                     a -&gt;
-<span class="fc bfc" id="L344" title="All 2 branches covered.">                        a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)</span>
-<span class="fc" id="L345">                .map(Association::getId2)</span>
-<span class="fc" id="L346">                .toList());</span>
+<span class="fc bfc" id="L355" title="All 2 branches covered.">                        a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)</span>
+<span class="fc" id="L356">                .map(Association::getId2)</span>
+<span class="fc" id="L357">                .toList());</span>
 
-<span class="fc" id="L348">    return new DeclaredActivityAssociationsData(</span>
-<span class="fc" id="L349">        associations.stream()</span>
-<span class="fc bfc" id="L350" title="All 2 branches covered.">            .filter(a -&gt; a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)</span>
-<span class="fc" id="L351">            .map(</span>
-                a -&gt;
-<span class="fc" id="L353">                    new TraceAssociationData(</span>
-<span class="fc" id="L354">                        a.getId(),</span>
-<span class="fc" id="L355">                        traces.stream()</span>
-<span class="fc" id="L356">                            .filter(t -&gt; t.getId().equals(a.getId2()))</span>
-<span class="fc" id="L357">                            .findAny()</span>
-<span class="fc" id="L358">                            .orElseThrow(TraceNotFoundException::new)))</span>
-<span class="fc" id="L359">            .toList(),</span>
+<span class="fc" id="L359">    return new DeclaredActivityAssociationsData(</span>
 <span class="fc" id="L360">        associations.stream()</span>
-<span class="fc" id="L361">            .filter(</span>
-<span class="fc bfc" id="L362" title="All 2 branches covered.">                a -&gt; a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)</span>
-<span class="fc" id="L363">            .map(</span>
+<span class="fc bfc" id="L361" title="All 2 branches covered.">            .filter(a -&gt; a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)</span>
+<span class="fc" id="L362">            .map(</span>
                 a -&gt;
-<span class="fc" id="L365">                    new DeclaredSkillAssociationData(</span>
-<span class="fc" id="L366">                        a.getId(),</span>
-<span class="fc" id="L367">                        declaredSkills.stream()</span>
-<span class="fc" id="L368">                            .filter(s -&gt; s.getId().equals(a.getId2()))</span>
-<span class="fc" id="L369">                            .findAny()</span>
-<span class="fc" id="L370">                            .orElseThrow(DeclaredSkillProgressNotFoundException::new)))</span>
-<span class="fc" id="L371">            .toList());</span>
+<span class="fc" id="L364">                    new TraceAssociationData(</span>
+<span class="fc" id="L365">                        a.getId(),</span>
+<span class="fc" id="L366">                        traces.stream()</span>
+<span class="fc" id="L367">                            .filter(t -&gt; t.getId().equals(a.getId2()))</span>
+<span class="fc" id="L368">                            .findAny()</span>
+<span class="fc" id="L369">                            .orElseThrow(TraceNotFoundException::new)))</span>
+<span class="fc" id="L370">            .toList(),</span>
+<span class="fc" id="L371">        associations.stream()</span>
+<span class="fc" id="L372">            .filter(</span>
+<span class="fc bfc" id="L373" title="All 2 branches covered.">                a -&gt; a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)</span>
+<span class="fc" id="L374">            .map(</span>
+                a -&gt;
+<span class="fc" id="L376">                    new DeclaredSkillAssociationData(</span>
+<span class="fc" id="L377">                        a.getId(),</span>
+<span class="fc" id="L378">                        declaredSkills.stream()</span>
+<span class="fc" id="L379">                            .filter(s -&gt; s.getId().equals(a.getId2()))</span>
+<span class="fc" id="L380">                            .findAny()</span>
+<span class="fc" id="L381">                            .orElseThrow(DeclaredSkillProgressNotFoundException::new)))</span>
+<span class="fc" id="L382">            .toList());</span>
   }
 
   @Override
   public void deleteAssociations(UUID declaredActivityId, List&lt;UUID&gt; idsToDelete) {
-<span class="fc" id="L376">    DeclaredActivity declaredActivity =</span>
-<span class="fc" id="L377">        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
+<span class="fc" id="L387">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L388">        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);</span>
 
-<span class="fc" id="L379">    var associatedTracesIds =</span>
+<span class="fc" id="L390">    var associatedTracesIds =</span>
         associationService
-<span class="fc" id="L381">            .getAllOf(</span>
-<span class="fc" id="L382">                declaredActivity.getId(),</span>
+<span class="fc" id="L392">            .getAllOf(</span>
+<span class="fc" id="L393">                declaredActivity.getId(),</span>
                 DeclaredActivity.class,
-<span class="fc" id="L384">                List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))</span>
-<span class="fc" id="L385">            .stream()</span>
-<span class="fc" id="L386">            .map(Association::getId)</span>
-<span class="fc" id="L387">            .toList();</span>
+<span class="fc" id="L395">                List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))</span>
+<span class="fc" id="L396">            .stream()</span>
+<span class="fc" id="L397">            .map(Association::getId)</span>
+<span class="fc" id="L398">            .toList();</span>
 
-<span class="fc bfc" id="L389" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(associatedTracesIds).containsAll(idsToDelete)) {</span>
-<span class="fc" id="L390">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L400" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(associatedTracesIds).containsAll(idsToDelete)) {</span>
+<span class="fc" id="L401">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L393">    associationService.deleteAllByIds(idsToDelete);</span>
-<span class="fc" id="L394">  }</span>
+<span class="fc" id="L404">    associationService.deleteAllByIds(idsToDelete);</span>
+<span class="fc" id="L405">  }</span>
 
   private DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(
       UUID declaredActivityId) {
-<span class="fc" id="L398">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L399">    var graph = FetchGraph.init().fetch(&quot;activity&quot;).add(&quot;student&quot;).fetch(&quot;user&quot;);</span>
+<span class="fc" id="L409">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L410">    var graph = FetchGraph.init().fetch(&quot;activity&quot;).add(&quot;student&quot;).fetch(&quot;user&quot;);</span>
 
-<span class="fc" id="L401">    DeclaredActivity declaredActivity =</span>
+<span class="fc" id="L412">    DeclaredActivity declaredActivity =</span>
         declaredActivityRepository
-<span class="fc" id="L403">            .findById(declaredActivityId, graph)</span>
-<span class="fc" id="L404">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
+<span class="fc" id="L414">            .findById(declaredActivityId, graph)</span>
+<span class="fc" id="L415">            .orElseThrow(DeclaredActivityNotFoundException::new);</span>
 
-<span class="fc bfc" id="L406" title="All 2 branches covered.">    if (!declaredActivity.getStudent().equals(student)) {</span>
-<span class="fc" id="L407">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L417" title="All 2 branches covered.">    if (!declaredActivity.getStudent().equals(student)) {</span>
+<span class="fc" id="L418">      throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L409">    return declaredActivity;</span>
-  }
-
-  private Set&lt;UUID&gt; getAlreadyAssociatedTraceIds(UUID declaredActivityId) {
-<span class="fc" id="L413">    return associationService</span>
-<span class="fc" id="L414">        .getAllOf(</span>
-            declaredActivityId,
-            DeclaredActivity.class,
-<span class="fc" id="L417">            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))</span>
-<span class="fc" id="L418">        .stream()</span>
-<span class="fc" id="L419">        .map(Association::getId2)</span>
-<span class="fc" id="L420">        .collect(Collectors.toSet());</span>
+<span class="fc" id="L420">    return declaredActivity;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
