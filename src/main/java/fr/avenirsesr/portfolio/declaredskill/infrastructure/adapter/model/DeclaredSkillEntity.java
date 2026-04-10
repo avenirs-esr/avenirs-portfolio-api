@@ -12,16 +12,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(
-    name = "declared_skill",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"external_skill_id", "type"}))
+@Table(name = "declared_skill", uniqueConstraints = @UniqueConstraint(columnNames = {"type"}))
 @NoArgsConstructor
 @Getter
 @Setter
 public class DeclaredSkillEntity extends AvenirsBaseEntity {
-
-  @Column(nullable = false, name = "external_skill_id")
-  private UUID externalSkillId;
 
   @Column(name = "libelle")
   private String libelle;
@@ -36,30 +31,21 @@ public class DeclaredSkillEntity extends AvenirsBaseEntity {
   private List<String> pathSegments;
 
   private DeclaredSkillEntity(
-      UUID id,
-      UUID externalSkillId,
-      String libelle,
-      EExternalSkillType type,
-      List<String> pathSegments) {
+      UUID id, String libelle, EExternalSkillType type, List<String> pathSegments) {
     setId(id);
-    this.externalSkillId = externalSkillId;
     this.libelle = libelle;
     this.type = type;
     this.pathSegments = pathSegments != null ? pathSegments : List.of();
   }
 
   public static DeclaredSkillEntity of(
-      UUID id,
-      UUID externalSkillId,
-      String libelle,
-      EExternalSkillType type,
-      List<String> pathSegments) {
-    return new DeclaredSkillEntity(id, externalSkillId, libelle, type, pathSegments);
+      UUID id, String libelle, EExternalSkillType type, List<String> pathSegments) {
+    return new DeclaredSkillEntity(id, libelle, type, pathSegments);
   }
 
   public static DeclaredSkillEntity create(
-      UUID externalSkillId, String libelle, EExternalSkillType type, List<String> pathSegments) {
-    return new DeclaredSkillEntity(UUID.randomUUID(), externalSkillId, libelle, type, pathSegments);
+      UUID id, String libelle, EExternalSkillType type, List<String> pathSegments) {
+    return new DeclaredSkillEntity(id, libelle, type, pathSegments);
   }
 
   public void setPathSegments(List<String> pathSegments) {

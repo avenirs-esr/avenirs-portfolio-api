@@ -22,12 +22,12 @@ class DeclaredSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
   @Test
   void shouldSaveDeclaredSkill() {
     BddLogger.given("a new DeclaredSkill");
-    UUID externalSkillId = UUID.randomUUID();
+    UUID id = UUID.randomUUID();
     String libelle = "Java Programming";
     EExternalSkillType type = EExternalSkillType.ROME4;
     List<String> pathSegments = List.of("Domain", "Issue", "MacroSkill", "Skill");
 
-    DeclaredSkill skill = DeclaredSkill.create(externalSkillId, libelle, type, pathSegments);
+    DeclaredSkill skill = DeclaredSkill.create(id, libelle, type, pathSegments);
 
     BddLogger.when("saving the skill");
     DeclaredSkill savedSkill = repository.save(skill);
@@ -35,7 +35,7 @@ class DeclaredSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     BddLogger.then("it should be persisted with all fields");
     assertNotNull(savedSkill);
     assertNotNull(savedSkill.getId());
-    assertEquals(externalSkillId, savedSkill.getExternalSkillId());
+    assertEquals(id, savedSkill.getId());
     assertEquals(libelle, savedSkill.getLibelle());
     assertEquals(type, savedSkill.getType());
     assertEquals(pathSegments, savedSkill.getPathSegments());
@@ -44,11 +44,11 @@ class DeclaredSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
   @Test
   void shouldSaveWithPathSegments() {
     BddLogger.given("an DeclaredSkill with path segments");
-    UUID externalSkillId = UUID.randomUUID();
+    UUID id = UUID.randomUUID();
     List<String> pathSegments = List.of("A", "B", "C", "D");
 
     DeclaredSkill skill =
-        DeclaredSkill.create(externalSkillId, "Test Skill", EExternalSkillType.XXI, pathSegments);
+        DeclaredSkill.create(id, "Test Skill", EExternalSkillType.XXI, pathSegments);
 
     BddLogger.when("saving and retrieving the skill");
     DeclaredSkill savedSkill = repository.save(skill);
@@ -74,7 +74,7 @@ class DeclaredSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     BddLogger.then("it should return the skill");
     assertTrue(result.isPresent());
     assertEquals(savedEntity.getId(), result.get().getId());
-    assertEquals(savedEntity.getExternalSkillId(), result.get().getExternalSkillId());
+    assertEquals(savedEntity.getId(), result.get().getId());
     assertEquals(savedEntity.getLibelle(), result.get().getLibelle());
   }
 
@@ -91,29 +91,12 @@ class DeclaredSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldFindByExternalSkillId() {
-    BddLogger.given("a saved DeclaredSkill");
-    UUID externalSkillId = UUID.randomUUID();
-    DeclaredSkillEntity entity =
-        DeclaredSkillEntity.create(
-            externalSkillId, "Test Skill", EExternalSkillType.CASOC, List.of("A", "B"));
-    jpaRepository.save(entity);
+  void shouldReturnEmptyWhenIdNotFound() {
+    BddLogger.given("a non-existent ID");
+    UUID nonExistentId = UUID.randomUUID();
 
-    BddLogger.when("finding by external skill ID");
-    Optional<DeclaredSkill> result = repository.findByExternalSkillId(externalSkillId);
-
-    BddLogger.then("it should return the skill");
-    assertTrue(result.isPresent());
-    assertEquals(externalSkillId, result.get().getExternalSkillId());
-  }
-
-  @Test
-  void shouldReturnEmptyWhenExternalSkillIdNotFound() {
-    BddLogger.given("a non-existent external skill ID");
-    UUID nonExistentExternalId = UUID.randomUUID();
-
-    BddLogger.when("finding by external skill ID");
-    Optional<DeclaredSkill> result = repository.findByExternalSkillId(nonExistentExternalId);
+    BddLogger.when("finding by ID");
+    Optional<DeclaredSkill> result = repository.findById(nonExistentId);
 
     BddLogger.then("it should return empty");
     assertTrue(result.isEmpty());
@@ -122,10 +105,9 @@ class DeclaredSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
   @Test
   void shouldUpdateDeclaredSkill() {
     BddLogger.given("a saved DeclaredSkill");
-    UUID externalSkillId = UUID.randomUUID();
+    UUID id = UUID.randomUUID();
     DeclaredSkill skill =
-        DeclaredSkill.create(
-            externalSkillId, "Original Skill", EExternalSkillType.ROME4, List.of("A", "B"));
+        DeclaredSkill.create(id, "Original Skill", EExternalSkillType.ROME4, List.of("A", "B"));
     DeclaredSkill savedSkill = repository.save(skill);
 
     BddLogger.when("updating the skill");
@@ -236,25 +218,23 @@ class DeclaredSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturnExistingSkillWhenSaveOrGetOnDuplicateExternalSkillIdAndType() {
-    BddLogger.given("an existing DeclaredSkillEntity with a given externalSkillId and type");
-    UUID externalSkillId = UUID.randomUUID();
+  void shouldReturnExistingSkillWhenSaveOrGetOnDuplicateIdAndType() {
+    BddLogger.given("an existing DeclaredSkillEntity with a given id and type");
+    UUID id = UUID.randomUUID();
     EExternalSkillType type = EExternalSkillType.ROME4;
 
     DeclaredSkillEntity existingEntity =
-        DeclaredSkillEntity.create(externalSkillId, "Existing Skill", type, List.of("A", "B"));
+        DeclaredSkillEntity.create(id, "Existing Skill", type, List.of("A", "B"));
     existingEntity = jpaRepository.save(existingEntity);
 
-    BddLogger.when(
-        "calling saveOrGet with a domain object having the same externalSkillId and type");
-    DeclaredSkill toSave =
-        DeclaredSkill.create(externalSkillId, "New Name", type, List.of("X", "Y"));
+    BddLogger.when("calling saveOrGet with a domain object having the same id and type");
+    DeclaredSkill toSave = DeclaredSkill.create(id, "New Name", type, List.of("X", "Y"));
 
     DeclaredSkill result = repository.saveOrGet(toSave);
 
-    BddLogger.then("it should return a skill with the same externalSkillId and type");
+    BddLogger.then("it should return a skill with the same id and type");
     assertNotNull(result);
-    assertEquals(existingEntity.getExternalSkillId(), result.getExternalSkillId());
+    assertEquals(existingEntity.getId(), result.getId());
     assertEquals(existingEntity.getType(), result.getType());
   }
 }

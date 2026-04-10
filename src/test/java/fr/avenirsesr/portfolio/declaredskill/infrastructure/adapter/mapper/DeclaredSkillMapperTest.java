@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DeclaredSkillMapperTest {
 
   private final UUID id = UUID.randomUUID();
-  private final UUID externalSkillId = UUID.randomUUID();
   private final String libelle = "Java Programming";
   private final EExternalSkillType type = EExternalSkillType.ROME4;
   private final List<String> pathSegments = List.of("Domain", "Issue", "MacroSkill", "Skill");
@@ -27,8 +26,7 @@ class DeclaredSkillMapperTest {
   @Test
   void shouldMapEntityToDomain() {
     BddLogger.given("an DeclaredSkillEntity");
-    DeclaredSkillEntity entity =
-        DeclaredSkillEntity.of(id, externalSkillId, libelle, type, pathSegments);
+    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, pathSegments);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 
@@ -38,7 +36,6 @@ class DeclaredSkillMapperTest {
     BddLogger.then("it should map all fields correctly");
     assertNotNull(domain);
     assertEquals(id, domain.getId());
-    assertEquals(externalSkillId, domain.getExternalSkillId());
     assertEquals(libelle, domain.getLibelle());
     assertEquals(type, domain.getType());
     assertEquals(pathSegments, domain.getPathSegments());
@@ -50,8 +47,7 @@ class DeclaredSkillMapperTest {
   void shouldMapDomainToEntity() {
     BddLogger.given("an DeclaredSkill domain model");
     DeclaredSkill domain =
-        DeclaredSkill.toDomain(
-            id, externalSkillId, libelle, type, pathSegments, createdAt, updatedAt);
+        DeclaredSkill.toDomain(id, libelle, type, pathSegments, createdAt, updatedAt);
 
     BddLogger.when("mapping to entity");
     DeclaredSkillEntity entity = DeclaredSkillMapper.INSTANCE.fromDomain(domain);
@@ -59,7 +55,6 @@ class DeclaredSkillMapperTest {
     BddLogger.then("it should map all fields correctly");
     assertNotNull(entity);
     assertEquals(id, entity.getId());
-    assertEquals(externalSkillId, entity.getExternalSkillId());
     assertEquals(libelle, entity.getLibelle());
     assertEquals(type, entity.getType());
     assertEquals(pathSegments, entity.getPathSegments());
@@ -68,7 +63,7 @@ class DeclaredSkillMapperTest {
   @Test
   void shouldMapEntityToDomainWithNullPathSegments() {
     BddLogger.given("an entity with null pathSegments");
-    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, externalSkillId, libelle, type, null);
+    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, null);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 
@@ -80,7 +75,6 @@ class DeclaredSkillMapperTest {
     assertNotNull(domain.getPathSegments());
     assertTrue(domain.getPathSegments().isEmpty());
     assertEquals(id, domain.getId());
-    assertEquals(externalSkillId, domain.getExternalSkillId());
     assertEquals(libelle, domain.getLibelle());
     assertEquals(type, domain.getType());
   }
@@ -88,8 +82,7 @@ class DeclaredSkillMapperTest {
   @Test
   void shouldMapDomainToEntityWithNullPathSegments() {
     BddLogger.given("a domain model with null pathSegments");
-    DeclaredSkill domain =
-        DeclaredSkill.toDomain(id, externalSkillId, libelle, type, null, createdAt, updatedAt);
+    DeclaredSkill domain = DeclaredSkill.toDomain(id, libelle, type, null, createdAt, updatedAt);
 
     BddLogger.when("mapping to entity");
     DeclaredSkillEntity entity = DeclaredSkillMapper.INSTANCE.fromDomain(domain);
@@ -99,7 +92,6 @@ class DeclaredSkillMapperTest {
     assertNotNull(entity.getPathSegments());
     assertTrue(entity.getPathSegments().isEmpty());
     assertEquals(id, entity.getId());
-    assertEquals(externalSkillId, entity.getExternalSkillId());
     assertEquals(libelle, entity.getLibelle());
     assertEquals(type, entity.getType());
   }
@@ -108,8 +100,7 @@ class DeclaredSkillMapperTest {
   void shouldMapEntityToDomainWithEmptyPathSegments() {
     BddLogger.given("an entity with empty pathSegments");
     List<String> emptyPathSegments = List.of();
-    DeclaredSkillEntity entity =
-        DeclaredSkillEntity.of(id, externalSkillId, libelle, type, emptyPathSegments);
+    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, emptyPathSegments);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 
@@ -126,8 +117,7 @@ class DeclaredSkillMapperTest {
   void shouldPreserveAllFieldsInRoundTripMapping() {
     BddLogger.given("a complete domain model");
     DeclaredSkill originalDomain =
-        DeclaredSkill.toDomain(
-            id, externalSkillId, libelle, type, pathSegments, createdAt, updatedAt);
+        DeclaredSkill.toDomain(id, libelle, type, pathSegments, createdAt, updatedAt);
 
     BddLogger.when("mapping to entity and back to domain");
     DeclaredSkillEntity entity = DeclaredSkillMapper.INSTANCE.fromDomain(originalDomain);
@@ -138,7 +128,6 @@ class DeclaredSkillMapperTest {
     BddLogger.then("all fields should be preserved");
     assertNotNull(resultDomain);
     assertEquals(originalDomain.getId(), resultDomain.getId());
-    assertEquals(originalDomain.getExternalSkillId(), resultDomain.getExternalSkillId());
     assertEquals(originalDomain.getLibelle(), resultDomain.getLibelle());
     assertEquals(originalDomain.getType(), resultDomain.getType());
     assertEquals(originalDomain.getPathSegments(), resultDomain.getPathSegments());
@@ -150,8 +139,7 @@ class DeclaredSkillMapperTest {
   void shouldMapMultipleSegmentsCorrectly() {
     BddLogger.given("an entity with multiple path segments");
     List<String> multipleSegments = List.of("A", "B", "C", "D", "E");
-    DeclaredSkillEntity entity =
-        DeclaredSkillEntity.of(id, externalSkillId, libelle, type, multipleSegments);
+    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, multipleSegments);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 
@@ -176,8 +164,7 @@ class DeclaredSkillMapperTest {
 
     for (EExternalSkillType skillType : types) {
       BddLogger.when("mapping entity with type " + skillType);
-      DeclaredSkillEntity entity =
-          DeclaredSkillEntity.of(id, externalSkillId, libelle, skillType, pathSegments);
+      DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, skillType, pathSegments);
       entity.setCreatedAt(createdAt);
       entity.setUpdatedAt(updatedAt);
 

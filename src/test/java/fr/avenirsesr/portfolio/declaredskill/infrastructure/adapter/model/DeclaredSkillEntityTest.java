@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.converter.PathSegmentsConverter;
-import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -16,57 +15,24 @@ import org.junit.jupiter.api.Test;
 
 class DeclaredSkillEntityTest {
 
-  private final UUID externalSkillId = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
   private final String libelle = "Java Programming";
   private final EExternalSkillType type = EExternalSkillType.ROME4;
   private final List<String> pathSegments = List.of("Domain", "Issue", "MacroSkill", "Skill");
 
   @Test
   void shouldCreateEntityWithOfMethod() {
-    BddLogger.given("valid entity data with ID");
-    UUID id = UUID.randomUUID();
+    BddLogger.given("valid entity data");
 
     BddLogger.when("creating entity with of method");
-    DeclaredSkillEntity entity =
-        DeclaredSkillEntity.of(id, externalSkillId, libelle, type, pathSegments);
+    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, pathSegments);
 
     BddLogger.then("it should create an entity with all fields set");
     assertNotNull(entity);
     assertEquals(id, entity.getId());
-    assertEquals(externalSkillId, entity.getExternalSkillId());
     assertEquals(libelle, entity.getLibelle());
     assertEquals(type, entity.getType());
     assertEquals(pathSegments, entity.getPathSegments());
-  }
-
-  @Test
-  void shouldCreateEntityWithCreateMethod() {
-    BddLogger.given("valid entity data without ID");
-
-    BddLogger.when("creating entity with create method");
-    DeclaredSkillEntity entity =
-        DeclaredSkillEntity.create(externalSkillId, libelle, type, pathSegments);
-
-    BddLogger.then("it should generate an ID and set all fields");
-    assertNotNull(entity);
-    assertNotNull(entity.getId());
-    assertEquals(externalSkillId, entity.getExternalSkillId());
-    assertEquals(libelle, entity.getLibelle());
-    assertEquals(type, entity.getType());
-    assertEquals(pathSegments, entity.getPathSegments());
-  }
-
-  @Test
-  void shouldGenerateIdAutomatically() {
-    BddLogger.given("valid entity data");
-
-    BddLogger.when("creating entity with create method");
-    DeclaredSkillEntity entity =
-        DeclaredSkillEntity.create(externalSkillId, libelle, type, pathSegments);
-
-    BddLogger.then("it should generate a non-null ID");
-    assertNotNull(entity.getId());
-    assertNotEquals(UUID.fromString("00000000-0000-0000-0000-000000000000"), entity.getId());
   }
 
   @Test
@@ -75,21 +41,18 @@ class DeclaredSkillEntityTest {
     DeclaredSkillEntity entity = new DeclaredSkillEntity();
 
     BddLogger.when("setting all fields with setters");
-    UUID id = UUID.randomUUID();
-    UUID newExternalSkillId = UUID.randomUUID();
+    UUID newId = UUID.randomUUID();
     String newLibelle = "Python Programming";
     EExternalSkillType newType = EExternalSkillType.XXI;
     List<String> newPathSegments = List.of("A", "B", "C");
 
-    entity.setId(id);
-    entity.setExternalSkillId(newExternalSkillId);
+    entity.setId(newId);
     entity.setLibelle(newLibelle);
     entity.setType(newType);
     entity.setPathSegments(newPathSegments);
 
     BddLogger.then("all fields should be set correctly");
-    assertEquals(id, entity.getId());
-    assertEquals(newExternalSkillId, entity.getExternalSkillId());
+    assertEquals(newId, entity.getId());
     assertEquals(newLibelle, entity.getLibelle());
     assertEquals(newType, entity.getType());
     assertEquals(newPathSegments, entity.getPathSegments());
@@ -105,7 +68,6 @@ class DeclaredSkillEntityTest {
     BddLogger.then("it should create an instance with null fields");
     assertNotNull(entity);
     assertNull(entity.getId());
-    assertNull(entity.getExternalSkillId());
     assertNull(entity.getLibelle());
     assertNull(entity.getType());
     assertNull(entity.getPathSegments());
@@ -114,15 +76,13 @@ class DeclaredSkillEntityTest {
   @Test
   void shouldHandleNullPathSegments() {
     BddLogger.given("entity data with null pathSegments");
-    UUID id = UUID.randomUUID();
 
     BddLogger.when("creating entity with null pathSegments");
-    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, externalSkillId, libelle, type, null);
+    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, null);
 
     BddLogger.then("it should convert null pathSegments to empty list");
     assertNotNull(entity);
     assertEquals(id, entity.getId());
-    assertEquals(externalSkillId, entity.getExternalSkillId());
     assertEquals(libelle, entity.getLibelle());
     assertEquals(type, entity.getType());
     assertNotNull(entity.getPathSegments());
@@ -132,12 +92,10 @@ class DeclaredSkillEntityTest {
   @Test
   void shouldHandleEmptyPathSegments() {
     BddLogger.given("entity data with empty pathSegments");
-    UUID id = UUID.randomUUID();
     List<String> emptyPathSegments = List.of();
 
     BddLogger.when("creating entity with empty pathSegments");
-    DeclaredSkillEntity entity =
-        DeclaredSkillEntity.of(id, externalSkillId, libelle, type, emptyPathSegments);
+    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, emptyPathSegments);
 
     BddLogger.then("it should accept empty pathSegments");
     assertNotNull(entity);
@@ -174,24 +132,6 @@ class DeclaredSkillEntityTest {
           "Should use PathSegmentsConverter");
     } catch (NoSuchFieldException e) {
       fail("pathSegments field should exist");
-    }
-  }
-
-  @Test
-  void shouldHaveExternalSkillIdNotNullable() {
-    BddLogger.given("the externalSkillId field");
-
-    BddLogger.when("checking the @Column annotation");
-    try {
-      var field = DeclaredSkillEntity.class.getDeclaredField("externalSkillId");
-      Column columnAnnotation = field.getAnnotation(Column.class);
-
-      BddLogger.then("it should be marked as not nullable");
-      assertNotNull(columnAnnotation);
-      assertFalse(columnAnnotation.nullable(), "externalSkillId should not be nullable");
-      assertEquals("external_skill_id", columnAnnotation.name());
-    } catch (NoSuchFieldException e) {
-      fail("externalSkillId field should exist");
     }
   }
 

@@ -70,7 +70,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   @Test
   void shouldCreateDeclaredSkillProgress() throws Exception {
     var declaredSkill = declaredSkillRepository.findAll().stream().findFirst().orElseThrow();
-    UUID externalSkillId = declaredSkill.getExternalSkillId();
+    UUID id = declaredSkill.getId();
 
     webTestClient
         .post()
@@ -79,7 +79,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+        .bodyValue(buildDeclaredSkillsJson(id))
         .exchange()
         .expectStatus()
         .isCreated();
@@ -89,7 +89,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
   void shouldReturnConflictWhenDeclaredSkillAlreadyExists() throws Exception {
     var declaredSkill =
         declaredSkillRepository.findAll().stream().skip(1).findFirst().orElseThrow();
-    UUID externalSkillId = declaredSkill.getExternalSkillId();
+    UUID id = declaredSkill.getId();
 
     webTestClient
         .post()
@@ -98,7 +98,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+        .bodyValue(buildDeclaredSkillsJson(id))
         .exchange()
         .expectStatus()
         .isCreated();
@@ -110,7 +110,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
         .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+        .bodyValue(buildDeclaredSkillsJson(id))
         .exchange()
         .expectStatus()
         .isEqualTo(409);
@@ -335,7 +335,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
     // First create a declared skill progress
     var declaredSkill =
         declaredSkillRepository.findAll().stream().skip(3).findFirst().orElseThrow();
-    UUID externalSkillId = declaredSkill.getExternalSkillId();
+    UUID id = declaredSkill.getId();
 
     // Create the declared skill progress
     var createResponse =
@@ -346,7 +346,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
             .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+            .bodyValue(buildDeclaredSkillsJson(id))
             .exchange()
             .expectStatus()
             .isCreated()
@@ -389,7 +389,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
     // First create a declared skill progress
     var declaredSkill =
         declaredSkillRepository.findAll().stream().skip(4).findFirst().orElseThrow();
-    UUID externalSkillId = declaredSkill.getExternalSkillId();
+    UUID id = declaredSkill.getId();
 
     // Create the declared skill progress
     var createResponse =
@@ -400,7 +400,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
             .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+            .bodyValue(buildDeclaredSkillsJson(id))
             .exchange()
             .expectStatus()
             .isCreated()
@@ -441,7 +441,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
 
     var declaredSkill =
         declaredSkillRepository.findAll().stream().skip(5).findFirst().orElseThrow();
-    UUID externalSkillId = declaredSkill.getExternalSkillId();
+    UUID id = declaredSkill.getId();
 
     var createResponse =
         webTestClient
@@ -451,7 +451,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
             .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+            .bodyValue(buildDeclaredSkillsJson(id))
             .exchange()
             .expectStatus()
             .isCreated()
@@ -499,7 +499,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
 
     var declaredSkill =
         declaredSkillRepository.findAll().stream().skip(6).findFirst().orElseThrow();
-    UUID externalSkillId = declaredSkill.getExternalSkillId();
+    UUID id = declaredSkill.getId();
 
     var createResponse =
         webTestClient
@@ -509,7 +509,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
             .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+            .bodyValue(buildDeclaredSkillsJson(id))
             .exchange()
             .expectStatus()
             .isCreated()
@@ -629,7 +629,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
 
     var declaredSkill =
         declaredSkillRepository.findAll().stream().skip(7).findFirst().orElseThrow();
-    UUID externalSkillId = declaredSkill.getExternalSkillId();
+    UUID id = declaredSkill.getId();
 
     var createResponse =
         webTestClient
@@ -639,7 +639,7 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
             .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(buildDeclaredSkillsJson(externalSkillId))
+            .bodyValue(buildDeclaredSkillsJson(id))
             .exchange()
             .expectStatus()
             .isCreated()

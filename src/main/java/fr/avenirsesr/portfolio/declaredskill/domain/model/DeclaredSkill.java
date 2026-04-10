@@ -12,7 +12,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DeclaredSkill extends AvenirsBaseModel {
-  private UUID externalSkillId;
   private String libelle;
   private EExternalSkillType type;
 
@@ -21,36 +20,31 @@ public class DeclaredSkill extends AvenirsBaseModel {
 
   private DeclaredSkill(
       UUID id,
-      UUID externalSkillId,
       String libelle,
       EExternalSkillType type,
       List<String> pathSegments,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
-    this.externalSkillId = externalSkillId;
     this.libelle = libelle;
     this.type = type;
     this.pathSegments = pathSegments != null ? pathSegments : List.of();
   }
 
   public static DeclaredSkill create(
-      UUID externalSkillId, String libelle, EExternalSkillType type, List<String> pathSegments) {
+      UUID id, String libelle, EExternalSkillType type, List<String> pathSegments) {
     Instant now = Instant.now();
-    return new DeclaredSkill(
-        UUID.randomUUID(), externalSkillId, libelle, type, pathSegments, now, now);
+    return new DeclaredSkill(id, libelle, type, pathSegments, now, now);
   }
 
   public static DeclaredSkill toDomain(
       UUID id,
-      UUID externalSkillId,
       String libelle,
       EExternalSkillType type,
       List<String> pathSegments,
       Instant createdAt,
       Instant updatedAt) {
-    return new DeclaredSkill(
-        id, externalSkillId, libelle, type, pathSegments, createdAt, updatedAt);
+    return new DeclaredSkill(id, libelle, type, pathSegments, createdAt, updatedAt);
   }
 
   public void setPathSegments(List<String> pathSegments) {

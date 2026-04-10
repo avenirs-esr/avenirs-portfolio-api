@@ -66,7 +66,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   public DeclaredSkillProgress createDeclaredSkillProgress(
       UUID declaredSkillId, EExternalSkillType type, EDeclaredSkillLevel level, String reflection) {
     Student student = loggedInUserService.getLoggedInStudent();
-    requireNotNull("externalSkillId", declaredSkillId);
+    requireNotNull("id", declaredSkillId);
     requireNotNull("type", type);
     requireNotNull("level", level);
     try {
@@ -131,11 +131,11 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     List<Trace> traces =
         traceService.getTracesLinkedWithDeclaredSkillProgress(declaredSkillProgress);
 
-    UUID externalSkillId = declaredSkillProgress.getSkill().getExternalSkillId();
+    UUID id = declaredSkillProgress.getSkill().getId();
     ExternalSkillDetailsDTO externalSkillDetails =
         externalSkillClient
-            .getExternalSkillDetails(externalSkillId)
-            .orElse(new ExternalSkillDetailsDTO(externalSkillId, "", List.of(), null));
+            .getExternalSkillDetails(id)
+            .orElse(new ExternalSkillDetailsDTO(id, "", List.of(), null));
 
     return new DeclaredSkillProgressDetails(
         declaredSkillProgress,

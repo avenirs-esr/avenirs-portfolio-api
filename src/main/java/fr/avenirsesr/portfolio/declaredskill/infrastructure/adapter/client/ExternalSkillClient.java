@@ -33,14 +33,14 @@ public class ExternalSkillClient {
     this.webClient = webClient;
   }
 
-  @Cacheable(value = "externalSkillById", key = "#externalSkillId")
-  public Optional<ExternalSkillDTO> getById(UUID externalSkillId) {
+  @Cacheable(value = "externalSkillById", key = "#id")
+  public Optional<ExternalSkillDTO> getById(UUID id) {
     try {
-      log.debug("Fetching external skill from interoperability: {}", externalSkillId);
+      log.debug("Fetching external skill from interoperability: {}", id);
       ExternalSkillDetailsDTO details =
           webClient
               .get()
-              .uri(externalSkillEndpoint + "/" + externalSkillId)
+              .uri(externalSkillEndpoint + "/" + id)
               .header(AvenirsSecurityHeaders.API_KEY, apiKey)
               .retrieve()
               .bodyToMono(ExternalSkillDetailsDTO.class)
@@ -61,7 +61,7 @@ public class ExternalSkillClient {
     } catch (Exception e) {
       log.error(
           "Failed to fetch external skill {} from interoperability at '{}'. Error: {}",
-          externalSkillId,
+          id,
           externalSkillEndpoint,
           e.getMessage());
       log.debug("Full error details:", e);
@@ -69,14 +69,14 @@ public class ExternalSkillClient {
     }
   }
 
-  @Cacheable(value = "externalSkillDetails", key = "#externalSkillId")
-  public Optional<ExternalSkillDetailsDTO> getExternalSkillDetails(UUID externalSkillId) {
+  @Cacheable(value = "externalSkillDetails", key = "#id")
+  public Optional<ExternalSkillDetailsDTO> getExternalSkillDetails(UUID id) {
     try {
-      log.debug("Fetching external skill details from interoperability: {}", externalSkillId);
+      log.debug("Fetching external skill details from interoperability: {}", id);
       ExternalSkillDetailsDTO result =
           webClient
               .get()
-              .uri(externalSkillEndpoint + "/" + externalSkillId)
+              .uri(externalSkillEndpoint + "/" + id)
               .header(AvenirsSecurityHeaders.API_KEY, apiKey)
               .retrieve()
               .bodyToMono(ExternalSkillDetailsDTO.class)
@@ -85,7 +85,7 @@ public class ExternalSkillClient {
     } catch (Exception e) {
       log.error(
           "Failed to fetch external skill details {} from interoperability at '{}'. Error: {}",
-          externalSkillId,
+          id,
           externalSkillEndpoint,
           e.getMessage());
       log.debug("Full error details:", e);

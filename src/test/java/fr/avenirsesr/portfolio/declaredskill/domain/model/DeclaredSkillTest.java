@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 class DeclaredSkillTest {
 
-  private final UUID externalSkillId = UUID.randomUUID();
+  private final UUID id = UUID.randomUUID();
   private final String libelle = "Java Programming";
   private final EExternalSkillType type = EExternalSkillType.ROME4;
   private final List<String> pathSegments = List.of("Domain", "Issue", "MacroSkill", "Skill");
@@ -21,12 +21,12 @@ class DeclaredSkillTest {
     BddLogger.given("valid declared skill data");
 
     BddLogger.when("creating a new DeclaredSkill");
-    DeclaredSkill skill = DeclaredSkill.create(externalSkillId, libelle, type, pathSegments);
+    DeclaredSkill skill = DeclaredSkill.create(id, libelle, type, pathSegments);
 
     BddLogger.then("it should create an instance with all fields set");
     assertNotNull(skill);
     assertNotNull(skill.getId());
-    assertEquals(externalSkillId, skill.getExternalSkillId());
+    assertEquals(id, skill.getId());
     assertEquals(libelle, skill.getLibelle());
     assertEquals(type, skill.getType());
     assertEquals(pathSegments, skill.getPathSegments());
@@ -39,7 +39,7 @@ class DeclaredSkillTest {
     BddLogger.given("valid declared skill data");
 
     BddLogger.when("creating a new DeclaredSkill");
-    DeclaredSkill skill = DeclaredSkill.create(externalSkillId, libelle, type, pathSegments);
+    DeclaredSkill skill = DeclaredSkill.create(id, libelle, type, pathSegments);
 
     BddLogger.then("it should generate an ID automatically");
     assertNotNull(skill.getId());
@@ -52,7 +52,7 @@ class DeclaredSkillTest {
     Instant beforeCreation = Instant.now();
 
     BddLogger.when("creating a new DeclaredSkill");
-    DeclaredSkill skill = DeclaredSkill.create(externalSkillId, libelle, type, pathSegments);
+    DeclaredSkill skill = DeclaredSkill.create(id, libelle, type, pathSegments);
 
     BddLogger.then("it should set createdAt and updatedAt to current time");
     assertNotNull(skill.getCreatedAt());
@@ -67,19 +67,16 @@ class DeclaredSkillTest {
   @Test
   void shouldCreateFromDomainWithAllFields() {
     BddLogger.given("complete domain data");
-    UUID id = UUID.randomUUID();
     Instant createdAt = Instant.now().minusSeconds(3600);
     Instant updatedAt = Instant.now();
 
     BddLogger.when("creating DeclaredSkill from domain data");
     DeclaredSkill skill =
-        DeclaredSkill.toDomain(
-            id, externalSkillId, libelle, type, pathSegments, createdAt, updatedAt);
+        DeclaredSkill.toDomain(id, libelle, type, pathSegments, createdAt, updatedAt);
 
     BddLogger.then("it should create an instance with all provided fields");
     assertNotNull(skill);
     assertEquals(id, skill.getId());
-    assertEquals(externalSkillId, skill.getExternalSkillId());
     assertEquals(libelle, skill.getLibelle());
     assertEquals(type, skill.getType());
     assertEquals(pathSegments, skill.getPathSegments());
@@ -92,13 +89,13 @@ class DeclaredSkillTest {
     BddLogger.given("declared skill data with null pathSegments");
 
     BddLogger.when("creating a new DeclaredSkill");
-    DeclaredSkill skill = DeclaredSkill.create(externalSkillId, libelle, type, null);
+    DeclaredSkill skill = DeclaredSkill.create(id, libelle, type, null);
 
     BddLogger.then("it should convert null pathSegments to empty list");
     assertNotNull(skill);
     assertNotNull(skill.getPathSegments());
     assertTrue(skill.getPathSegments().isEmpty());
-    assertEquals(externalSkillId, skill.getExternalSkillId());
+    assertEquals(id, skill.getId());
     assertEquals(libelle, skill.getLibelle());
     assertEquals(type, skill.getType());
   }
@@ -109,7 +106,7 @@ class DeclaredSkillTest {
     List<String> emptyPathSegments = List.of();
 
     BddLogger.when("creating a new DeclaredSkill");
-    DeclaredSkill skill = DeclaredSkill.create(externalSkillId, libelle, type, emptyPathSegments);
+    DeclaredSkill skill = DeclaredSkill.create(id, libelle, type, emptyPathSegments);
 
     BddLogger.then("it should accept empty pathSegments");
     assertNotNull(skill);
@@ -120,21 +117,18 @@ class DeclaredSkillTest {
   @Test
   void shouldAllowSettersForAllFields() {
     BddLogger.given("an DeclaredSkill instance");
-    DeclaredSkill skill = DeclaredSkill.create(externalSkillId, libelle, type, pathSegments);
+    DeclaredSkill skill = DeclaredSkill.create(id, libelle, type, pathSegments);
 
     BddLogger.when("using setters to modify fields");
-    UUID newExternalSkillId = UUID.randomUUID();
     String newLibelle = "New Skill";
     EExternalSkillType newType = EExternalSkillType.XXI;
     List<String> newPathSegments = List.of("A", "B", "C");
 
-    skill.setExternalSkillId(newExternalSkillId);
     skill.setLibelle(newLibelle);
     skill.setType(newType);
     skill.setPathSegments(newPathSegments);
 
     BddLogger.then("all fields should be updated");
-    assertEquals(newExternalSkillId, skill.getExternalSkillId());
     assertEquals(newLibelle, skill.getLibelle());
     assertEquals(newType, skill.getType());
     assertEquals(newPathSegments, skill.getPathSegments());
@@ -144,8 +138,7 @@ class DeclaredSkillTest {
   void shouldPreserveImmutablePathSegmentsList() {
     BddLogger.given("an DeclaredSkill with pathSegments");
     List<String> originalPathSegments = List.of("A", "B", "C");
-    DeclaredSkill skill =
-        DeclaredSkill.create(externalSkillId, libelle, type, originalPathSegments);
+    DeclaredSkill skill = DeclaredSkill.create(id, libelle, type, originalPathSegments);
 
     BddLogger.when("getting pathSegments");
     List<String> retrievedPathSegments = skill.getPathSegments();

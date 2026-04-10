@@ -139,7 +139,7 @@ public class DeclaredSkillProgressServiceImplTest {
                 new ExternalSkillCategoryDTO("Issue", EExternalSkillCategoryType.ISSUE));
         ExternalSkillDetailsDTO externalSkillDetails =
             new ExternalSkillDetailsDTO(
-                declaredSkillProgress.getSkill().getExternalSkillId(),
+                declaredSkillProgress.getSkill().getId(),
                 "Test Skill",
                 categories,
                 EExternalSkillType.ROME4);
