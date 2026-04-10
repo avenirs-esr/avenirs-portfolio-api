@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.trace.application.adapter.controller</a> &gt; <span class="el_source">TraceController.java</span></div><h1>TraceController.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
+import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
+import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredSkillIDTO;
+import fr.avenirsesr.portfolio.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
@@ -28,7 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-<span class="fc" id="L31">@Slf4j</span>
+<span class="fc" id="L34">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/traces&quot;)
@@ -40,15 +43,15 @@ public class TraceController {
 
   @GetMapping(&quot;/overview&quot;)
   public ResponseEntity&lt;List&lt;TraceOverviewDTO&gt;&gt; getTraceOverview(Principal principal) {
-<span class="fc" id="L43">    log.debug(&quot;Received request to trace overview of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L44">    List&lt;Trace&gt; traces = traceService.lastTracesOf();</span>
+<span class="fc" id="L46">    log.debug(&quot;Received request to trace overview of user [{}]&quot;, principal.getName());</span>
+<span class="fc" id="L47">    List&lt;Trace&gt; traces = traceService.lastTracesOf();</span>
 
-<span class="fc" id="L46">    List&lt;TraceOverviewDTO&gt; response =</span>
-<span class="fc" id="L47">        traces.stream()</span>
-<span class="fc" id="L48">            .map(trace -&gt; TraceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))</span>
-<span class="fc" id="L49">            .toList();</span>
+<span class="fc" id="L49">    List&lt;TraceOverviewDTO&gt; response =</span>
+<span class="fc" id="L50">        traces.stream()</span>
+<span class="fc" id="L51">            .map(trace -&gt; TraceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))</span>
+<span class="fc" id="L52">            .toList();</span>
 
-<span class="fc" id="L51">    return ResponseEntity.ok(response);</span>
+<span class="fc" id="L54">    return ResponseEntity.ok(response);</span>
   }
 
   @PostMapping(&quot;/view&quot;)
@@ -60,126 +63,134 @@ public class TraceController {
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) LocalDate fromDate,
       @RequestParam(required = false) LocalDate toDate) {
-<span class="nc" id="L63">    var dateFilter = new DateFilter(fromDate, toDate);</span>
-<span class="nc" id="L64">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="nc" id="L65">    log.debug(</span>
+<span class="nc" id="L66">    var dateFilter = new DateFilter(fromDate, toDate);</span>
+<span class="nc" id="L67">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="nc" id="L68">    log.debug(</span>
         &quot;Received request to trace view of user [{}] (page= {}, fileSize= {})&quot;,
-<span class="nc" id="L67">        principal.getName(),</span>
-<span class="nc" id="L68">        pageCriteria.page(),</span>
-<span class="nc" id="L69">        pageCriteria.pageSize());</span>
-<span class="nc" id="L70">    PagedResult&lt;Trace&gt; tracesResult =</span>
-<span class="nc" id="L71">        traceService.getTracesView(keyword, traceFilter, dateFilter, pageCriteria);</span>
+<span class="nc" id="L70">        principal.getName(),</span>
+<span class="nc" id="L71">        pageCriteria.page(),</span>
+<span class="nc" id="L72">        pageCriteria.pageSize());</span>
+<span class="nc" id="L73">    PagedResult&lt;Trace&gt; tracesResult =</span>
+<span class="nc" id="L74">        traceService.getTracesView(keyword, traceFilter, dateFilter, pageCriteria);</span>
 
-<span class="nc" id="L73">    var tracesViewResponse =</span>
+<span class="nc" id="L76">    var tracesViewResponse =</span>
         new PagedResponse&lt;&gt;(
-<span class="nc" id="L75">            tracesResult.content().stream()</span>
-<span class="nc" id="L76">                .map(</span>
+<span class="nc" id="L78">            tracesResult.content().stream()</span>
+<span class="nc" id="L79">                .map(</span>
                     trace -&gt;
-<span class="nc" id="L78">                        TraceViewMapper.toDTO(</span>
-<span class="nc" id="L79">                            trace, traceService.getWillBeDeletedAt(trace).orElse(null)))</span>
-<span class="nc" id="L80">                .toList(),</span>
-<span class="nc" id="L81">            PageInfoDTO.fromDomain(tracesResult.pageInfo()));</span>
+<span class="nc" id="L81">                        TraceViewMapper.toDTO(</span>
+<span class="nc" id="L82">                            trace, traceService.getWillBeDeletedAt(trace).orElse(null)))</span>
+<span class="nc" id="L83">                .toList(),</span>
+<span class="nc" id="L84">            PageInfoDTO.fromDomain(tracesResult.pageInfo()));</span>
 
-<span class="nc" id="L83">    return ResponseEntity.ok(tracesViewResponse);</span>
+<span class="nc" id="L86">    return ResponseEntity.ok(tracesViewResponse);</span>
   }
 
   @DeleteMapping(&quot;/{traceId}&quot;)
   public ResponseEntity&lt;String&gt; deleteTrace(Principal principal, @PathVariable UUID traceId) {
-<span class="fc" id="L88">    log.debug(&quot;Received request to delete trace [{}] of user [{}]&quot;, traceId, principal.getName());</span>
+<span class="fc" id="L91">    log.debug(&quot;Received request to delete trace [{}] of user [{}]&quot;, traceId, principal.getName());</span>
 
-<span class="fc" id="L90">    traceService.deleteById(traceId);</span>
+<span class="fc" id="L93">    traceService.deleteById(traceId);</span>
 
-<span class="fc" id="L92">    return ResponseEntity.ok(&quot;Resource successfully deleted.&quot;);</span>
+<span class="fc" id="L95">    return ResponseEntity.ok(&quot;Resource successfully deleted.&quot;);</span>
   }
 
   @GetMapping(&quot;/summary&quot;)
   public ResponseEntity&lt;TracesSummaryDTO&gt; getTracesSummary(Principal principal) {
-<span class="nc" id="L97">    log.debug(&quot;Received request to get trace summary of user [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L100">    log.debug(&quot;Received request to get trace summary of user [{}]&quot;, principal.getName());</span>
 
-<span class="nc" id="L99">    TracesSummaryData summary = traceService.getTracesSummary();</span>
+<span class="nc" id="L102">    TracesSummaryData summary = traceService.getTracesSummary();</span>
 
-<span class="nc" id="L101">    return ResponseEntity.ok(TracesSummaryMapper.toDTO(summary));</span>
+<span class="nc" id="L104">    return ResponseEntity.ok(TracesSummaryMapper.toDTO(summary));</span>
   }
 
   @GetMapping(&quot;/{traceId}/detail&quot;)
   public ResponseEntity&lt;TraceDetailDTO&gt; getTraceDetail(
       Principal principal, @PathVariable UUID traceId) {
-<span class="nc" id="L107">    log.debug(</span>
-<span class="nc" id="L108">        &quot;Received request to get trace [{}] detail of user [{}]&quot;, traceId, principal.getName());</span>
+<span class="nc" id="L110">    log.debug(</span>
+<span class="nc" id="L111">        &quot;Received request to get trace [{}] detail of user [{}]&quot;, traceId, principal.getName());</span>
 
-<span class="nc" id="L110">    TraceDetailData traceDetail = traceService.getTraceDetail(traceId);</span>
+<span class="nc" id="L113">    TraceDetailData traceDetail = traceService.getTraceDetail(traceId);</span>
 
-<span class="nc" id="L112">    return ResponseEntity.ok(TraceDetailMapper.toDTO(traceDetail));</span>
+<span class="nc" id="L115">    return ResponseEntity.ok(TraceDetailMapper.toDTO(traceDetail));</span>
   }
 
   @GetMapping(&quot;/{traceId}/search-for-association/declared-activities&quot;)
-  public ResponseEntity&lt;PagedResponse&lt;AssociationSearchResultData&gt;&gt;
+  public ResponseEntity&lt;PagedResponse&lt;AssociationSearchResultDeclaredActivityDTO&gt;&gt;
       searchDeclaredActivityForAssociation(
           Principal principal,
           @Valid @PathVariable UUID traceId,
           @RequestParam(required = false) String keyword,
           @RequestParam(required = false) Integer page,
           @RequestParam(required = false) Integer pageSize) {
-<span class="nc" id="L123">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="nc" id="L124">    log.debug(</span>
+<span class="fc" id="L126">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L127">    log.debug(</span>
         &quot;Received request to search declared activity for association with trace [{}] by student&quot;
             + &quot; [{}] (keyword={}, page={}, pageSize={})&quot;,
         traceId,
-<span class="nc" id="L128">        principal.getName(),</span>
+<span class="fc" id="L131">        principal.getName(),</span>
         keyword,
-<span class="nc" id="L130">        pageCriteria.page(),</span>
-<span class="nc" id="L131">        pageCriteria.pageSize());</span>
+<span class="fc" id="L133">        pageCriteria.page(),</span>
+<span class="fc" id="L134">        pageCriteria.pageSize());</span>
 
-<span class="nc" id="L133">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
-<span class="nc" id="L134">        traceService.searchDeclaredActivityForAssociation(traceId, keyword, pageCriteria);</span>
+<span class="fc" id="L136">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
+<span class="fc" id="L137">        traceService.searchDeclaredActivityForAssociation(traceId, keyword, pageCriteria);</span>
 
-<span class="nc" id="L136">    var response =</span>
-<span class="nc" id="L137">        new PagedResponse&lt;&gt;(pagedResult.content(), PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="fc" id="L139">    var response =</span>
+        new PagedResponse&lt;&gt;(
+<span class="fc" id="L141">            pagedResult.content().stream()</span>
+<span class="fc" id="L142">                .map(AssociationSearchResultDTOMapper::toDeclaredActivityDTO)</span>
+<span class="fc" id="L143">                .toList(),</span>
+<span class="fc" id="L144">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
 
-<span class="nc" id="L139">    return ResponseEntity.ok(response);</span>
+<span class="fc" id="L146">    return ResponseEntity.ok(response);</span>
   }
 
   @GetMapping(&quot;/{traceId}/search-for-association/declared-skills&quot;)
-  public ResponseEntity&lt;PagedResponse&lt;AssociationSearchResultData&gt;&gt;
+  public ResponseEntity&lt;PagedResponse&lt;AssociationSearchResultDeclaredSkillIDTO&gt;&gt;
       searchDeclaredSkillForAssociation(
           Principal principal,
           @Valid @PathVariable UUID traceId,
           @RequestParam(required = false) String keyword,
           @RequestParam(required = false) Integer page,
           @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L150">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L151">    log.debug(</span>
+<span class="fc" id="L157">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L158">    log.debug(</span>
         &quot;Received request to search declared skill for association with trace [{}] by student&quot;
             + &quot; [{}] (keyword={}, page={}, pageSize={})&quot;,
         traceId,
-<span class="fc" id="L155">        principal.getName(),</span>
+<span class="fc" id="L162">        principal.getName(),</span>
         keyword,
-<span class="fc" id="L157">        pageCriteria.page(),</span>
-<span class="fc" id="L158">        pageCriteria.pageSize());</span>
+<span class="fc" id="L164">        pageCriteria.page(),</span>
+<span class="fc" id="L165">        pageCriteria.pageSize());</span>
 
-<span class="fc" id="L160">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
-<span class="fc" id="L161">        traceService.searchDeclaredSkillForAssociation(traceId, keyword, pageCriteria);</span>
+<span class="fc" id="L167">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
+<span class="fc" id="L168">        traceService.searchDeclaredSkillForAssociation(traceId, keyword, pageCriteria);</span>
 
-<span class="fc" id="L163">    var response =</span>
-<span class="fc" id="L164">        new PagedResponse&lt;&gt;(pagedResult.content(), PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="fc" id="L170">    var response =</span>
+        new PagedResponse&lt;&gt;(
+<span class="fc" id="L172">            pagedResult.content().stream()</span>
+<span class="fc" id="L173">                .map(AssociationSearchResultDTOMapper::toDeclaredSkillDTO)</span>
+<span class="fc" id="L174">                .toList(),</span>
+<span class="fc" id="L175">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
 
-<span class="fc" id="L166">    return ResponseEntity.ok(response);</span>
+<span class="fc" id="L177">    return ResponseEntity.ok(response);</span>
   }
 
   @PostMapping
   public ResponseEntity&lt;TracesCreationResponse&gt; createTrace(
       Principal principal, @Valid @RequestBody CreateTraceDTO createTraceDTO) {
-<span class="fc" id="L172">    log.debug(&quot;Received request to create new trace for user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L173">    var trace =</span>
-<span class="fc" id="L174">        traceService.createTrace(</span>
-<span class="fc" id="L175">            createTraceDTO.title(),</span>
-<span class="fc" id="L176">            createTraceDTO.language(),</span>
-<span class="fc" id="L177">            createTraceDTO.isGroup(),</span>
-<span class="fc" id="L178">            createTraceDTO.personalNote(),</span>
-<span class="fc" id="L179">            createTraceDTO.iaJustification());</span>
+<span class="fc" id="L183">    log.debug(&quot;Received request to create new trace for user [{}]&quot;, principal.getName());</span>
+<span class="fc" id="L184">    var trace =</span>
+<span class="fc" id="L185">        traceService.createTrace(</span>
+<span class="fc" id="L186">            createTraceDTO.title(),</span>
+<span class="fc" id="L187">            createTraceDTO.language(),</span>
+<span class="fc" id="L188">            createTraceDTO.isGroup(),</span>
+<span class="fc" id="L189">            createTraceDTO.personalNote(),</span>
+<span class="fc" id="L190">            createTraceDTO.iaJustification());</span>
 
-<span class="fc" id="L181">    return ResponseEntity.status(HttpStatus.CREATED)</span>
-<span class="fc" id="L182">        .body(new TracesCreationResponse(trace.getId()));</span>
+<span class="fc" id="L192">    return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="fc" id="L193">        .body(new TracesCreationResponse(trace.getId()));</span>
   }
 
   @PutMapping(&quot;/{traceId}&quot;)
@@ -187,17 +198,17 @@ public class TraceController {
       Principal principal,
       @PathVariable UUID traceId,
       @Valid @RequestBody UpdateTraceDTO updateTraceDTO) {
-<span class="nc" id="L190">    log.debug(&quot;Received request to update trace [{}] for user [{}]&quot;, traceId, principal.getName());</span>
-<span class="nc" id="L191">    var trace =</span>
-<span class="nc" id="L192">        traceService.updateTrace(</span>
+<span class="nc" id="L201">    log.debug(&quot;Received request to update trace [{}] for user [{}]&quot;, traceId, principal.getName());</span>
+<span class="nc" id="L202">    var trace =</span>
+<span class="nc" id="L203">        traceService.updateTrace(</span>
             traceId,
-<span class="nc" id="L194">            updateTraceDTO.title(),</span>
-<span class="nc" id="L195">            updateTraceDTO.language(),</span>
-<span class="nc" id="L196">            updateTraceDTO.isGroup(),</span>
-<span class="nc" id="L197">            updateTraceDTO.personalNote(),</span>
-<span class="nc" id="L198">            updateTraceDTO.iaJustification());</span>
+<span class="nc" id="L205">            updateTraceDTO.title(),</span>
+<span class="nc" id="L206">            updateTraceDTO.language(),</span>
+<span class="nc" id="L207">            updateTraceDTO.isGroup(),</span>
+<span class="nc" id="L208">            updateTraceDTO.personalNote(),</span>
+<span class="nc" id="L209">            updateTraceDTO.iaJustification());</span>
 
-<span class="nc" id="L200">    return ResponseEntity.ok(TraceDetailMapper.toDTO(trace));</span>
+<span class="nc" id="L211">    return ResponseEntity.ok(TraceDetailMapper.toDTO(trace));</span>
   }
 
   @PostMapping(&quot;/{traceId}/associate/activities&quot;)
@@ -205,14 +216,14 @@ public class TraceController {
       Principal principal,
       @Valid @PathVariable UUID traceId,
       @Valid @RequestBody AssociationsCreationRequest body) {
-<span class="nc" id="L208">    log.debug(</span>
+<span class="nc" id="L219">    log.debug(</span>
         &quot;Received request to associate Trace[{}] with activities [{}] by student [{}]&quot;,
         traceId,
-<span class="nc" id="L211">        body.idsToAssociate(),</span>
-<span class="nc" id="L212">        principal.getName());</span>
-<span class="nc" id="L213">    var traceAssociations =</span>
-<span class="nc" id="L214">        traceService.associateTraceWithActivities(traceId, body.idsToAssociate());</span>
-<span class="nc" id="L215">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
+<span class="nc" id="L222">        body.idsToAssociate(),</span>
+<span class="nc" id="L223">        principal.getName());</span>
+<span class="nc" id="L224">    var traceAssociations =</span>
+<span class="nc" id="L225">        traceService.associateTraceWithActivities(traceId, body.idsToAssociate());</span>
+<span class="nc" id="L226">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 
   @PostMapping(&quot;/{traceId}/associate/declared-skill&quot;)
@@ -220,14 +231,14 @@ public class TraceController {
       Principal principal,
       @Valid @PathVariable UUID traceId,
       @Valid @RequestBody AssociationsCreationRequest body) {
-<span class="fc" id="L223">    log.debug(</span>
+<span class="fc" id="L234">    log.debug(</span>
         &quot;Received request to associate Trace[{}] with declared skill [{}] by student [{}]&quot;,
         traceId,
-<span class="fc" id="L226">        body.idsToAssociate(),</span>
-<span class="fc" id="L227">        principal.getName());</span>
-<span class="fc" id="L228">    var traceAssociations =</span>
-<span class="fc" id="L229">        traceService.associateTraceWithDeclaredSkill(traceId, body.idsToAssociate());</span>
-<span class="fc" id="L230">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
+<span class="fc" id="L237">        body.idsToAssociate(),</span>
+<span class="fc" id="L238">        principal.getName());</span>
+<span class="fc" id="L239">    var traceAssociations =</span>
+<span class="fc" id="L240">        traceService.associateTraceWithDeclaredSkill(traceId, body.idsToAssociate());</span>
+<span class="fc" id="L241">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 
   @GetMapping(&quot;/{traceId}/associations&quot;)
@@ -235,16 +246,16 @@ public class TraceController {
       Principal principal,
       @PathVariable UUID traceId,
       @RequestParam(required = false, defaultValue = &quot;false&quot;) boolean onlyNotCompleted) {
-<span class="nc" id="L238">    log.debug(</span>
+<span class="nc" id="L249">    log.debug(</span>
         &quot;Received request to get associate Trace[{}] associations by student [{}]&quot;
             + &quot; (onlyNotCompleted= {})&quot;,
         traceId,
-<span class="nc" id="L242">        principal.getName(),</span>
-<span class="nc" id="L243">        onlyNotCompleted);</span>
+<span class="nc" id="L253">        principal.getName(),</span>
+<span class="nc" id="L254">        onlyNotCompleted);</span>
 
-<span class="nc" id="L245">    var traceAssociations = traceService.getTraceAssociations(traceId, onlyNotCompleted);</span>
+<span class="nc" id="L256">    var traceAssociations = traceService.getTraceAssociations(traceId, onlyNotCompleted);</span>
 
-<span class="nc" id="L247">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
+<span class="nc" id="L258">    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 
   @DeleteMapping(&quot;/{traceId}/associations&quot;)
@@ -252,15 +263,15 @@ public class TraceController {
       Principal principal,
       @Valid @PathVariable UUID traceId,
       @RequestBody List&lt;UUID&gt; associationIds) {
-<span class="fc" id="L255">    log.debug(</span>
+<span class="fc" id="L266">    log.debug(</span>
         &quot;Received request to unassociate associations [{}] to trace [{}] for student [{}]&quot;,
         associationIds,
         traceId,
-<span class="fc" id="L259">        principal.getName());</span>
+<span class="fc" id="L270">        principal.getName());</span>
 
-<span class="fc" id="L261">    traceService.unassociate(traceId, associationIds);</span>
+<span class="fc" id="L272">    traceService.unassociate(traceId, associationIds);</span>
 
-<span class="fc" id="L263">    return ResponseEntity.ok(&quot;Associations successfully deleted.&quot;);</span>
+<span class="fc" id="L274">    return ResponseEntity.ok(&quot;Associations successfully deleted.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

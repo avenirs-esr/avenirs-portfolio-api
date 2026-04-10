@@ -18,20 +18,20 @@ public class AssociationSearchHelper {
   private final AssociationService associationService;
 
   /**
-   * Pattern mutualisé pour les recherches d'entités candidates à l'association.
+   * Shared model for searching for entities that are candidates for association
    *
-   * @param sourceEntityId ID de l'entité source (ex: traceId, declaredActivityId)
-   * @param sourceEntityClass classe de l'entité source (ex: Trace.class)
-   * @param associationType type d'association recherché
-   * @param associationIdExtractor extracteur de l'ID pertinent depuis l'association (getId1 ou
+   * @param sourceEntityId ID of the source entity (e.g., traceId, declaredActivityId)
+   * @param sourceEntityClass class of the source entity (e.g., Trace.class)
+   * @param associationType type of association being searched for
+   * @param associationIdExtractor extractor for the relevant ID from the association (getId1 or
    *     getId2)
-   * @param searchResults résultats paginés de la recherche d'entités candidates
-   * @param resultIdExtractor extracteur de l'ID depuis le résultat de recherche
-   * @param resultTitleExtractor extracteur du titre depuis le résultat de recherche
-   * @param resultCategoryExtractor extracteur de la catégorie (thematic, type...) ou null
-   * @param additionalDisabledCondition condition supplémentaire pour désactiver (ex: activité
-   *     terminée)
-   * @return résultats paginés avec le flag disabled calculé
+   * @param searchResults paginated results of the search for candidate entities
+   * @param resultIdExtractor extractor for the ID from the search result
+   * @param resultTitleExtractor extractor for the title from the search result
+   * @param resultCategoryExtractor extractor for the category (thematic, type, etc.) or null
+   * @param additionalDisabledCondition additional condition for disabling (e.g., activity
+   *     completed)
+   * @return paginated results with the disabled flag calculated
    */
   public &lt;T&gt; PagedResult&lt;AssociationSearchResultData&gt; searchForAssociation(
       UUID sourceEntityId,
@@ -58,12 +58,14 @@ public class AssociationSearchHelper {
 <span class="fc" id="L58">                    new AssociationSearchResultData(</span>
 <span class="fc" id="L59">                        resultIdExtractor.apply(item),</span>
 <span class="fc" id="L60">                        resultTitleExtractor.apply(item),</span>
-<span class="fc" id="L61">                        resultCategoryExtractor.apply(item),</span>
-<span class="fc bfc" id="L62" title="All 2 branches covered.">                        alreadyAssociatedIds.contains(resultIdExtractor.apply(item))</span>
-<span class="pc bpc" id="L63" title="1 of 2 branches missed.">                            || additionalDisabledCondition.test(item)))</span>
-<span class="fc" id="L64">            .toList();</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">                        resultCategoryExtractor != null</span>
+<span class="fc" id="L62">                            ? resultCategoryExtractor.apply(item)</span>
+<span class="fc" id="L63">                            : null,</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">                        alreadyAssociatedIds.contains(resultIdExtractor.apply(item))</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">                            || additionalDisabledCondition.test(item)))</span>
+<span class="fc" id="L66">            .toList();</span>
 
-<span class="fc" id="L66">    return new PagedResult&lt;&gt;(mappedContent, searchResults.pageInfo());</span>
+<span class="fc" id="L68">    return new PagedResult&lt;&gt;(mappedContent, searchResults.pageInfo());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

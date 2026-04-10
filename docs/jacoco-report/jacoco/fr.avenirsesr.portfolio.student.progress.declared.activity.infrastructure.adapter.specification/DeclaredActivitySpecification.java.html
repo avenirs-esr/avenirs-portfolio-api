@@ -22,13 +22,13 @@ public final class DeclaredActivitySpecification {
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; search(String keyword) {
-<span class="nc" id="L25">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L26" title="All 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="nc" id="L27">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L25">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L26" title="1 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="fc" id="L27">        return criteriaBuilder.conjunction();</span>
       }
-<span class="nc" id="L29">      return criteriaBuilder.like(</span>
-<span class="nc" id="L30">          criteriaBuilder.lower(root.get(&quot;activity&quot;).get(&quot;title&quot;)),</span>
-<span class="nc" id="L31">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
+<span class="fc" id="L29">      return criteriaBuilder.like(</span>
+<span class="fc" id="L30">          criteriaBuilder.lower(root.get(&quot;activity&quot;).get(&quot;title&quot;)),</span>
+<span class="fc" id="L31">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
     };
   }
 

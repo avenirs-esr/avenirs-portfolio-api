@@ -43,9 +43,9 @@ public class DeclaredActivityDatabaseRepository
   @Override
   public PagedResult&lt;DeclaredActivity&gt; findAllByStudent(
       Student student, String keyword, PageCriteria pageCriteria, FetchGraph fetchGraph) {
-<span class="nc" id="L46">    var specification = hasStudent(student).and(DeclaredActivitySpecification.search(keyword));</span>
-<span class="nc" id="L47">    return findAll(</span>
-<span class="nc" id="L48">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()), fetchGraph);</span>
+<span class="fc" id="L46">    var specification = hasStudent(student).and(DeclaredActivitySpecification.search(keyword));</span>
+<span class="fc" id="L47">    return findAll(</span>
+<span class="fc" id="L48">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()), fetchGraph);</span>
   }
 
   @Override

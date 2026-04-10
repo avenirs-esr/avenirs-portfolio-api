@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
@@ -40,7 +41,6 @@ import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.*;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -295,32 +295,23 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   @Override
   public PagedResult&lt;AssociationSearchResultData&gt; searchDeclaredActivityForAssociation(
       UUID declaredSkillProgressId, String keyword, PageCriteria pageCriteria) {
-<span class="nc" id="L298">    return associationSearchHelper.searchForAssociation(</span>
+<span class="fc" id="L298">    fetchAndCheckLoggedInStudentAuthorization(declaredSkillProgressId);</span>
+
+<span class="fc" id="L300">    return associationSearchHelper.searchForAssociation(</span>
         declaredSkillProgressId,
         DeclaredSkillProgress.class,
         EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
         Association::getId1,
-<span class="nc" id="L303">        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),</span>
-<span class="nc" id="L304">        da -&gt; da.getId(),</span>
-<span class="nc" id="L305">        da -&gt; da.getActivity().getTitle(),</span>
-<span class="nc" id="L306">        da -&gt; da.getActivity().getThematic().name(),</span>
-<span class="nc" id="L307">        da -&gt; da.getFinishedAt().isPresent());</span>
+<span class="fc" id="L305">        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),</span>
+        AvenirsBaseModel::getId,
+<span class="fc" id="L307">        da -&gt; da.getActivity().getTitle(),</span>
+<span class="fc" id="L308">        da -&gt; da.getActivity().getThematic().name(),</span>
+<span class="fc" id="L309">        da -&gt; da.getFinishedAt().isPresent());</span>
   }
 
   @Override
   public List&lt;DeclaredSkillProgress&gt; findAllDeclaredSkillProgressesByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L312">    return declaredSkillProgressRepository.findAllById(ids);</span>
-  }
-
-  private Set&lt;UUID&gt; getAlreadyAssociatedDeclaredActivityIds(UUID declaredSkillProgressId) {
-<span class="nc" id="L316">    return associationService</span>
-<span class="nc" id="L317">        .getAllOf(</span>
-            declaredSkillProgressId,
-            DeclaredSkillProgress.class,
-<span class="nc" id="L320">            List.of(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))</span>
-<span class="nc" id="L321">        .stream()</span>
-<span class="nc" id="L322">        .map(Association::getId1)</span>
-<span class="nc" id="L323">        .collect(Collectors.toSet());</span>
+<span class="fc" id="L314">    return declaredSkillProgressRepository.findAllById(ids);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
