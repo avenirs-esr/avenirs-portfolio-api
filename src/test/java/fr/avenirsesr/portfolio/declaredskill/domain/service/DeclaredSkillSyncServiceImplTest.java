@@ -32,15 +32,13 @@ class DeclaredSkillSyncServiceImplTest {
   @Test
   void shouldReturnExistingDeclaredSkillWhenAlreadyExists() {
     BddLogger.given("an existing DeclaredSkill in database");
-    UUID externalSkillId = UUID.randomUUID();
+    UUID id = UUID.randomUUID();
     DeclaredSkill existing =
-        DeclaredSkill.create(
-            externalSkillId, "Existing Skill", EExternalSkillType.ROME4, List.of("A", "B"));
-    when(declaredSkillRepository.findByExternalSkillId(externalSkillId))
-        .thenReturn(Optional.of(existing));
+        DeclaredSkill.create(id, "Existing Skill", EExternalSkillType.ROME4, List.of("A", "B"));
+    when(declaredSkillRepository.findById(id)).thenReturn(Optional.of(existing));
 
     BddLogger.when("calling getOrCreateFromExternalSkill");
-    Optional<DeclaredSkill> result = service.getOrCreateFromExternalSkill(externalSkillId);
+    Optional<DeclaredSkill> result = service.getOrCreateFromExternalSkill(id);
 
     BddLogger.then("it should return the existing skill without calling external API");
     assertThat(result).isPresent();
@@ -52,28 +50,21 @@ class DeclaredSkillSyncServiceImplTest {
   @Test
   void shouldCreateNewDeclaredSkillWhenNotExists() {
     BddLogger.given("no existing DeclaredSkill and a valid external skill");
-    UUID externalSkillId = UUID.randomUUID();
+    UUID id = UUID.randomUUID();
     ExternalSkillDTO externalSkillDTO =
         new ExternalSkillDTO(
-            externalSkillId,
-            "Java Programming",
-            List.of("IT", "Development"),
-            EExternalSkillType.ROME4);
+            id, "Java Programming", List.of("IT", "Development"), EExternalSkillType.ROME4);
 
-    when(declaredSkillRepository.findByExternalSkillId(externalSkillId))
-        .thenReturn(Optional.empty());
-    when(externalSkillClient.getById(externalSkillId)).thenReturn(Optional.of(externalSkillDTO));
+    when(declaredSkillRepository.findById(id)).thenReturn(Optional.empty());
+    when(externalSkillClient.getById(id)).thenReturn(Optional.of(externalSkillDTO));
 
     DeclaredSkill savedSkill =
         DeclaredSkill.create(
-            externalSkillId,
-            "Java Programming",
-            EExternalSkillType.ROME4,
-            List.of("IT", "Development"));
+            id, "Java Programming", EExternalSkillType.ROME4, List.of("IT", "Development"));
     when(declaredSkillRepository.saveOrGet(any(DeclaredSkill.class))).thenReturn(savedSkill);
 
     BddLogger.when("calling getOrCreateFromExternalSkill");
-    Optional<DeclaredSkill> result = service.getOrCreateFromExternalSkill(externalSkillId);
+    Optional<DeclaredSkill> result = service.getOrCreateFromExternalSkill(id);
 
     BddLogger.then("it should create and save a new DeclaredSkill");
     assertThat(result).isPresent();
@@ -82,7 +73,7 @@ class DeclaredSkillSyncServiceImplTest {
     verify(declaredSkillRepository).saveOrGet(captor.capture());
 
     DeclaredSkill captured = captor.getValue();
-    assertThat(captured.getExternalSkillId()).isEqualTo(externalSkillId);
+    assertThat(captured.getId()).isEqualTo(id);
     assertThat(captured.getLibelle()).isEqualTo("Java Programming");
     assertThat(captured.getType()).isEqualTo(EExternalSkillType.ROME4);
     assertThat(captured.getPathSegments()).containsExactly("IT", "Development");
@@ -91,14 +82,13 @@ class DeclaredSkillSyncServiceImplTest {
   @Test
   void shouldReturnEmptyWhenExternalSkillNotFoundInInteroperability() {
     BddLogger.given("no existing DeclaredSkill and external skill not found in interoperability");
-    UUID externalSkillId = UUID.randomUUID();
+    UUID id = UUID.randomUUID();
 
-    when(declaredSkillRepository.findByExternalSkillId(externalSkillId))
-        .thenReturn(Optional.empty());
-    when(externalSkillClient.getById(externalSkillId)).thenReturn(Optional.empty());
+    when(declaredSkillRepository.findById(id)).thenReturn(Optional.empty());
+    when(externalSkillClient.getById(id)).thenReturn(Optional.empty());
 
     BddLogger.when("calling getOrCreateFromExternalSkill");
-    Optional<DeclaredSkill> result = service.getOrCreateFromExternalSkill(externalSkillId);
+    Optional<DeclaredSkill> result = service.getOrCreateFromExternalSkill(id);
 
     BddLogger.then("it should return empty and not save anything");
     assertThat(result).isEmpty();
@@ -108,20 +98,19 @@ class DeclaredSkillSyncServiceImplTest {
   @Test
   void shouldHandleNullPathSegments() {
     BddLogger.given("external skill with null pathSegments");
-    UUID externalSkillId = UUID.randomUUID();
+    UUID id = UUID.randomUUID();
     ExternalSkillDTO externalSkillDTO =
-        new ExternalSkillDTO(externalSkillId, "Simple Skill", null, EExternalSkillType.XXI);
+        new ExternalSkillDTO(id, "Simple Skill", null, EExternalSkillType.XXI);
 
-    when(declaredSkillRepository.findByExternalSkillId(externalSkillId))
-        .thenReturn(Optional.empty());
-    when(externalSkillClient.getById(externalSkillId)).thenReturn(Optional.of(externalSkillDTO));
+    when(declaredSkillRepository.findById(id)).thenReturn(Optional.empty());
+    when(externalSkillClient.getById(id)).thenReturn(Optional.of(externalSkillDTO));
 
     DeclaredSkill savedSkill =
-        DeclaredSkill.create(externalSkillId, "Simple Skill", EExternalSkillType.XXI, null);
+        DeclaredSkill.create(id, "Simple Skill", EExternalSkillType.XXI, null);
     when(declaredSkillRepository.saveOrGet(any(DeclaredSkill.class))).thenReturn(savedSkill);
 
     BddLogger.when("calling getOrCreateFromExternalSkill");
-    Optional<DeclaredSkill> result = service.getOrCreateFromExternalSkill(externalSkillId);
+    Optional<DeclaredSkill> result = service.getOrCreateFromExternalSkill(id);
 
     BddLogger.then("it should create skill with empty pathSegments list");
     assertThat(result).isPresent();
@@ -137,24 +126,24 @@ class DeclaredSkillSyncServiceImplTest {
   @Test
   void shouldMapExternalSkillTypeToDeclaredSkillType() {
     BddLogger.given("external skills with different types");
-    UUID externalSkillId1 = UUID.randomUUID();
-    UUID externalSkillId2 = UUID.randomUUID();
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
 
     ExternalSkillDTO rome4Skill =
-        new ExternalSkillDTO(externalSkillId1, "ROME4 Skill", List.of(), EExternalSkillType.ROME4);
+        new ExternalSkillDTO(id1, "ROME4 Skill", List.of(), EExternalSkillType.ROME4);
     ExternalSkillDTO xxiSkill =
-        new ExternalSkillDTO(externalSkillId2, "XXI Skill", List.of(), EExternalSkillType.XXI);
+        new ExternalSkillDTO(id2, "XXI Skill", List.of(), EExternalSkillType.XXI);
 
-    when(declaredSkillRepository.findByExternalSkillId(any())).thenReturn(Optional.empty());
-    when(externalSkillClient.getById(externalSkillId1)).thenReturn(Optional.of(rome4Skill));
-    when(externalSkillClient.getById(externalSkillId2)).thenReturn(Optional.of(xxiSkill));
+    when(declaredSkillRepository.findById(any())).thenReturn(Optional.empty());
+    when(externalSkillClient.getById(id1)).thenReturn(Optional.of(rome4Skill));
+    when(externalSkillClient.getById(id2)).thenReturn(Optional.of(xxiSkill));
 
     when(declaredSkillRepository.saveOrGet(any(DeclaredSkill.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
     BddLogger.when("creating skills with different types");
-    service.getOrCreateFromExternalSkill(externalSkillId1);
-    service.getOrCreateFromExternalSkill(externalSkillId2);
+    service.getOrCreateFromExternalSkill(id1);
+    service.getOrCreateFromExternalSkill(id2);
 
     BddLogger.then("types should be correctly mapped");
     ArgumentCaptor<DeclaredSkill> captor = ArgumentCaptor.forClass(DeclaredSkill.class);
@@ -168,35 +157,29 @@ class DeclaredSkillSyncServiceImplTest {
   @Test
   void shouldReturnExistingDeclaredSkillWhenSaveFailsWithUniqueConstraint() {
     BddLogger.given("no existing DeclaredSkill at first check but a concurrent insert occurs");
-    UUID externalSkillId = UUID.randomUUID();
+    UUID id = UUID.randomUUID();
     ExternalSkillDTO externalSkillDTO =
         new ExternalSkillDTO(
-            externalSkillId,
-            "Concurrent Skill",
-            List.of("IT", "Development"),
-            EExternalSkillType.ROME4);
+            id, "Concurrent Skill", List.of("IT", "Development"), EExternalSkillType.ROME4);
 
     DeclaredSkill existingSkill =
         DeclaredSkill.create(
-            externalSkillId,
-            "Concurrent Skill",
-            EExternalSkillType.ROME4,
-            List.of("IT", "Development"));
+            id, "Concurrent Skill", EExternalSkillType.ROME4, List.of("IT", "Development"));
 
-    when(declaredSkillRepository.findByExternalSkillId(externalSkillId))
+    when(declaredSkillRepository.findById(id))
         .thenReturn(Optional.empty())
         .thenReturn(Optional.of(existingSkill));
-    when(externalSkillClient.getById(externalSkillId)).thenReturn(Optional.of(externalSkillDTO));
+    when(externalSkillClient.getById(id)).thenReturn(Optional.of(externalSkillDTO));
     when(declaredSkillRepository.saveOrGet(any(DeclaredSkill.class))).thenReturn(existingSkill);
 
     BddLogger.when("calling getOrCreateFromExternalSkill while a concurrent insert happens");
-    Optional<DeclaredSkill> result = service.getOrCreateFromExternalSkill(externalSkillId);
+    Optional<DeclaredSkill> result = service.getOrCreateFromExternalSkill(id);
 
     BddLogger.then("it should return the existing skill created by the concurrent operation");
     assertThat(result).isPresent();
     assertThat(result.get()).isEqualTo(existingSkill);
 
-    verify(declaredSkillRepository, times(1)).findByExternalSkillId(externalSkillId);
+    verify(declaredSkillRepository, times(1)).findById(id);
     verify(declaredSkillRepository).saveOrGet(any(DeclaredSkill.class));
   }
 }

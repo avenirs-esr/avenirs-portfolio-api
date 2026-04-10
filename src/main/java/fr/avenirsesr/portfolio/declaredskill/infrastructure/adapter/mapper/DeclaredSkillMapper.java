@@ -12,7 +12,6 @@ public class DeclaredSkillMapper implements Mapper<DeclaredSkillEntity, Declared
   public DeclaredSkill toDomain(DeclaredSkillEntity entity) {
     return DeclaredSkill.toDomain(
         entity.getId(),
-        entity.getExternalSkillId(),
         entity.getLibelle(),
         entity.getType(),
         entity.getPathSegments(),
@@ -23,10 +22,6 @@ public class DeclaredSkillMapper implements Mapper<DeclaredSkillEntity, Declared
   @Override
   public DeclaredSkillEntity fromDomain(DeclaredSkill domain) {
     return DeclaredSkillEntity.of(
-        domain.getId(),
-        domain.getExternalSkillId(),
-        domain.getLibelle(),
-        domain.getType(),
-        domain.getPathSegments());
+        domain.getId(), domain.getLibelle(), domain.getType(), domain.getPathSegments());
   }
 }

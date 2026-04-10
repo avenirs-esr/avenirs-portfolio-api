@@ -27,20 +27,20 @@ public class ExternalSkillClientStub extends ExternalSkillClient {
   }
 
   @Override
-  public Optional<ExternalSkillDTO> getById(UUID externalSkillId) {
-    if (externalSkillId.equals(notFoundExternalSkillId)) {
+  public Optional<ExternalSkillDTO> getById(UUID id) {
+    if (id.equals(notFoundExternalSkillId)) {
       return Optional.empty();
     }
     return Optional.of(
         new ExternalSkillDTO(
-            externalSkillId,
-            "External Skill " + externalSkillId,
+            id,
+            "External Skill " + id,
             List.of("Domaine", "Issue", "Target"),
             EExternalSkillType.ROME4));
   }
 
   @Override
-  public Optional<ExternalSkillDetailsDTO> getExternalSkillDetails(UUID externalSkillId) {
+  public Optional<ExternalSkillDetailsDTO> getExternalSkillDetails(UUID id) {
     List<ExternalSkillCategoryDTO> categoryPath =
         List.of(
             new ExternalSkillCategoryDTO("Domaine 1", EExternalSkillCategoryType.DOMAIN),
@@ -49,7 +49,7 @@ public class ExternalSkillClientStub extends ExternalSkillClient {
 
     return Optional.of(
         new ExternalSkillDetailsDTO(
-            externalSkillId, "External Skill Details", categoryPath, EExternalSkillType.ROME4));
+            id, "External Skill Details", categoryPath, EExternalSkillType.ROME4));
   }
 
   @Override

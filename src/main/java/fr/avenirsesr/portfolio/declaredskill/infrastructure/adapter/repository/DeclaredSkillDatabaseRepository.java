@@ -22,10 +22,8 @@ public class DeclaredSkillDatabaseRepository
   }
 
   @Override
-  public Optional<DeclaredSkill> findByExternalSkillId(UUID externalSkillId) {
-    return jpaRepository
-        .findByExternalSkillId(externalSkillId)
-        .map(DeclaredSkillMapper.INSTANCE::toDomain);
+  public Optional<DeclaredSkill> findById(UUID id) {
+    return jpaRepository.findById(id).map(DeclaredSkillMapper.INSTANCE::toDomain);
   }
 
   @Override
@@ -33,7 +31,7 @@ public class DeclaredSkillDatabaseRepository
     try {
       return save(declaredSkill);
     } catch (DataIntegrityViolationException e) {
-      return findByExternalSkillId(declaredSkill.getExternalSkillId()).orElseThrow(() -> e);
+      return findById(declaredSkill.getId()).orElseThrow(() -> e);
     }
   }
 }

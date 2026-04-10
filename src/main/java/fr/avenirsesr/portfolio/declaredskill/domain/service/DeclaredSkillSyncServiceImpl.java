@@ -19,20 +19,19 @@ public class DeclaredSkillSyncServiceImpl implements DeclaredSkillSyncService {
   private final ExternalSkillClient externalSkillClient;
 
   @Override
-  public Optional<DeclaredSkill> getOrCreateFromExternalSkill(UUID externalSkillId) {
-    Optional<DeclaredSkill> existing =
-        declaredSkillRepository.findByExternalSkillId(externalSkillId);
+  public Optional<DeclaredSkill> getOrCreateFromExternalSkill(UUID id) {
+    Optional<DeclaredSkill> existing = declaredSkillRepository.findById(id);
 
     if (existing.isPresent()) {
-      log.debug("DeclaredSkill already exists for external skill: {}", externalSkillId);
+      log.debug("DeclaredSkill already exists for external skill: {}", id);
       return existing;
     }
 
-    log.debug("Fetching external skill from interoperability: {}", externalSkillId);
-    Optional<ExternalSkillDTO> externalSkillDTO = externalSkillClient.getById(externalSkillId);
+    log.debug("Fetching external skill from interoperability: {}", id);
+    Optional<ExternalSkillDTO> externalSkillDTO = externalSkillClient.getById(id);
 
     if (externalSkillDTO.isEmpty()) {
-      log.warn("External skill not found in interoperability: {}", externalSkillId);
+      log.warn("External skill not found in interoperability: {}", id);
       return Optional.empty();
     }
 
@@ -45,7 +44,7 @@ public class DeclaredSkillSyncServiceImpl implements DeclaredSkillSyncService {
             dto.pathSegments());
 
     DeclaredSkill saved = declaredSkillRepository.saveOrGet(newSkill);
-    log.info("Created new DeclaredSkill from external skill: {}", externalSkillId);
+    log.info("Created new DeclaredSkill from external skill: {}", id);
     return Optional.of(saved);
   }
 }
