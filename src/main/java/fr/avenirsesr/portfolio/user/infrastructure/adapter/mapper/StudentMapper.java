@@ -20,8 +20,8 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
   public Student toDomain(StudentEntity studentEntity) {
     return Student.toDomain(
         UserMapper.INSTANCE.toDomain(studentEntity.getUser()),
-        studentEntity.getBio(),
         studentEntity.getInstitutionEmail(),
+        studentEntity.getBio(),
         studentEntity.getCreatedAt(),
         studentEntity.getUpdatedAt());
   }

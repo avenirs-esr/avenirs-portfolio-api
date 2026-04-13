@@ -19,8 +19,8 @@ public class StaffMapper implements Mapper<StaffEntity, Staff> {
   public Staff toDomain(StaffEntity staffEntity) {
     return Staff.toDomain(
         UserMapper.INSTANCE.toDomain(staffEntity.getUser()),
-        staffEntity.getBio(),
         staffEntity.getInstitutionEmail(),
+        staffEntity.getBio(),
         staffEntity.getCreatedAt(),
         staffEntity.getUpdatedAt());
   }
