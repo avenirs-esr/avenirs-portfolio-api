@@ -24,6 +24,12 @@ public class StaffServiceImpl implements StaffService {
   }
 
   @Override
+  public String getInstitutionEmail(User user) {
+    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);
+    return staff.getInstitutionEmail();
+  }
+
+  @Override
   public void updateProfile(User user, String bio) {
     var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);
 

@@ -1,5 +1,10 @@
 [
   {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "bio": "Enseignant-chercheur, je m’investis autant dans l’enseignement que dans la recherche. J’accorde une grande importance à la rigueur méthodologique et à l’accompagnement personnalisé des étudiants tout au long de leur parcours universitaire.",
+    "institutionEmail": "lucas.tessier@university.com"
+  },
+  {
     "userId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
     "bio": "Enseignant en sciences de gestion, je m’intéresse particulièrement aux questions d’organisation, de management et d’innovation.",
     "institutionEmail": "camille.fournier@institution.com"
