@@ -9,6 +9,15 @@
     "source": "PEGASE"
   },
   {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "firstName": "Lucas",
+    "lastName": "Tessier",
+    "email": "lucas.tessier@university.com",
+    "category": "STAFF",
+    "externalId": "TEACH-AG-83",
+    "source": "PEGASE"
+  },
+  {
     "userId": "7c508ac3-d7a8-4f00-9989-0f677f4f9dea",
     "firstName": "Arthur",
     "lastName": "Lambert",

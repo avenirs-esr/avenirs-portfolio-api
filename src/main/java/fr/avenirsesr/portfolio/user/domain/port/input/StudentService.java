@@ -11,6 +11,8 @@ public interface StudentService {
 
   String getBio(User user);
 
+  String getInstitutionEmail(User user);
+
   void updateProfile(User user, String bio);
 
   Student createStudent(UUID userId, String institutionEmail, String bio);

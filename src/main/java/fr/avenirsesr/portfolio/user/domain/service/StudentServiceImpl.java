@@ -40,6 +40,13 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
+  public String getInstitutionEmail(User user) {
+    var student =
+        studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);
+    return student.getInstitutionEmail();
+  }
+
+  @Override
   public void updateProfile(User user, String bio) {
     var student =
         studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);

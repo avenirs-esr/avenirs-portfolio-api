@@ -7,6 +7,8 @@ import java.util.UUID;
 public interface StaffService {
   String getBio(User user);
 
+  String getInstitutionEmail(User user);
+
   void updateProfile(User user, String bio);
 
   Staff createStaff(UUID userId, String institutionEmail, String bio);
