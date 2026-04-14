@@ -105,7 +105,7 @@ public class SeederOrchestrator {
       userPhotoSeeder.seed(savedStudents, savedStaffs);
 
       var savedDeclaredSkills = declaredSkillSeeder.seed();
-      var savedStudentDeclaredSkills =
+      var savedDeclaredSkillProgresses =
           declaredSkillProgressSeeder.seed(savedStudents, savedDeclaredSkills);
 
       var savedInstitutions = institutionSeeder.seed();
@@ -128,7 +128,7 @@ public class SeederOrchestrator {
       var savedTraces =
           traceSeeder.seed(
               savedStudents.stream().map(StudentEntity::getUser).toList(),
-              savedStudentDeclaredSkills);
+              savedDeclaredSkillProgresses);
 
       amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
 
@@ -138,7 +138,8 @@ public class SeederOrchestrator {
 
       var savedActivities = activitySeeder.seed(savedUsers.getFirst());
       var declaredActivities = declaredActivitySeeder.seed(savedStudents, savedActivities);
-      associationSeeder.seed(declaredActivities, savedTraces, savedDeclaredSkills);
+      associationSeeder.seed(
+          declaredActivities, savedTraces, savedDeclaredSkills, savedDeclaredSkillProgresses);
 
       log.info("✔ Seeding successfully finished");
       seedingState.markCompleted();
