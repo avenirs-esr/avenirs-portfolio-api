@@ -24,7 +24,7 @@ public class StaffServiceImpl implements StaffService {
   }
 
   @Override
-  public String getEmail(User user) {
+  public String getInstitutionEmail(User user) {
 <span class="nc" id="L28">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
 <span class="nc" id="L29">    return staff.getInstitutionEmail();</span>
   }

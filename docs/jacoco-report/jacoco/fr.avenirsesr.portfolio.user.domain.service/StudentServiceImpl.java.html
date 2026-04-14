@@ -40,7 +40,7 @@ public class StudentServiceImpl implements StudentService {
   }
 
   @Override
-  public String getEmail(User user) {
+  public String getInstitutionEmail(User user) {
 <span class="fc" id="L44">    var student =</span>
 <span class="fc" id="L45">        studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);</span>
 <span class="fc" id="L46">    return student.getInstitutionEmail();</span>

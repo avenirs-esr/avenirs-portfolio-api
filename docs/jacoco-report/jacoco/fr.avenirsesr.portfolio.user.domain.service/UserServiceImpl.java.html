@@ -55,37 +55,38 @@ public class UserServiceImpl implements UserService {
 <span class="fc" id="L55">          case STUDENT -&gt; studentService.getBio(user);</span>
 <span class="pc" id="L56">          case STAFF -&gt; staffService.getBio(user);</span>
         };
-<span class="fc" id="L58">    var email =</span>
+<span class="fc" id="L58">    var institutionEmail =</span>
 <span class="pc bpc" id="L59" title="1 of 2 branches missed.">        switch (userCategory) {</span>
-<span class="fc" id="L60">          case STUDENT -&gt; studentService.getEmail(user);</span>
-<span class="pc" id="L61">          case STAFF -&gt; staffService.getEmail(user);</span>
+<span class="fc" id="L60">          case STUDENT -&gt; studentService.getInstitutionEmail(user);</span>
+<span class="pc" id="L61">          case STAFF -&gt; staffService.getInstitutionEmail(user);</span>
         };
 
-<span class="fc" id="L64">    return new UserProfileOverviewData(user.getFirstName(), user.getLastName(), email, bio);</span>
+<span class="fc" id="L64">    return new UserProfileOverviewData(</span>
+<span class="fc" id="L65">        user.getFirstName(), user.getLastName(), institutionEmail, bio);</span>
   }
 
   @Override
   public void updateProfile(EUserCategory userCategory, String email, String bio) {
-<span class="fc" id="L69">    var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);</span>
-<span class="fc bfc" id="L70" title="All 2 branches covered.">    if (email != null) {</span>
-<span class="pc bpc" id="L71" title="1 of 3 branches missed.">      switch (userCategory) {</span>
-<span class="fc" id="L72">        case STUDENT -&gt; user.setEmail(email);</span>
-<span class="fc" id="L73">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L70">    var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">    if (email != null) {</span>
+<span class="pc bpc" id="L72" title="1 of 3 branches missed.">      switch (userCategory) {</span>
+<span class="fc" id="L73">        case STUDENT -&gt; user.setEmail(email);</span>
+<span class="fc" id="L74">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
       }
     }
-<span class="fc" id="L76">    userRepository.save(user);</span>
+<span class="fc" id="L77">    userRepository.save(user);</span>
 
-<span class="pc bpc" id="L78" title="1 of 3 branches missed.">    switch (userCategory) {</span>
-<span class="fc" id="L79">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
-<span class="fc" id="L80">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
+<span class="pc bpc" id="L79" title="1 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="fc" id="L80">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
+<span class="fc" id="L81">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
     }
-<span class="fc" id="L82">  }</span>
+<span class="fc" id="L83">  }</span>
 
   @Override
   public User createUser(UUID id, String firstname, String lastname, String email) {
-<span class="fc" id="L86">    var user = User.create(id, firstname, lastname, email);</span>
-<span class="fc" id="L87">    userRepository.save(user);</span>
-<span class="fc" id="L88">    return user;</span>
+<span class="fc" id="L87">    var user = User.create(id, firstname, lastname, email);</span>
+<span class="fc" id="L88">    userRepository.save(user);</span>
+<span class="fc" id="L89">    return user;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
