@@ -14,6 +14,9 @@ import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -289,7 +292,8 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   public PagedResult<DeclaredSkillProgress> searchDeclaredSkill(
       String keyword, PageCriteria pageCriteria) {
     Student student = loggedInUserService.getLoggedInStudent();
-    return declaredSkillProgressRepository.findAllByStudent(student, pageCriteria, keyword);
+    return declaredSkillProgressRepository.findAllByStudent(
+        student, pageCriteria, keyword, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
   }
 
   @Override

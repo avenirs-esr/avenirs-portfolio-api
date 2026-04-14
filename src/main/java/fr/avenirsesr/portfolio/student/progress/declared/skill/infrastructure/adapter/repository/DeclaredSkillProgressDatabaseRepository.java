@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.a
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.mapper.DeclaredSkillProgressMapper;
@@ -57,8 +58,11 @@ public class DeclaredSkillProgressDatabaseRepository
 
   @Override
   public PagedResult<DeclaredSkillProgress> findAllByStudent(
-      Student student, PageCriteria pageCriteria, String keyword) {
-    var specification = hasStudent(student).and(DeclaredSkillProgressSpecification.search(keyword));
+      Student student, PageCriteria pageCriteria, String keyword, SortCriteria sortCriteria) {
+    var specification =
+        hasStudent(student)
+            .and(DeclaredSkillProgressSpecification.search(keyword))
+            .and(DeclaredSkillProgressSpecification.withSort(sortCriteria));
     return findAllByStudent(specification, pageCriteria);
   }
 
