@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.model.Declar
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +43,8 @@ public class AssociationSeeder {
   public List<AssociationEntity> seed(
       List<DeclaredActivityEntity> savedActivities,
       List<TraceEntity> savedTraces,
-      List<DeclaredSkillEntity> savedDeclaredSkills) {
+      List<DeclaredSkillEntity> savedDeclaredSkills,
+      List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses) {
     log.info("Seeding associations...");
 
     List<AssociationCreationData> creationData =
@@ -74,14 +76,18 @@ public class AssociationSeeder {
 
     List<Association> associations =
         associationService.createAll(
-            creationData.stream().map(mapToAssociationCreationData(savedDeclaredSkills)).toList());
+            creationData.stream()
+                .map(
+                    mapToAssociationCreationData(savedDeclaredSkills, savedDeclaredSkillProgresses))
+                .toList());
 
     log.info("✔ {} associations created", associations.size());
     return associations.stream().map(AssociationMapper.INSTANCE::fromDomain).toList();
   }
 
   private Function<AssociationCreationData, AssociationData> mapToAssociationCreationData(
-      List<DeclaredSkillEntity> savedDeclaredSkills) {
+      List<DeclaredSkillEntity> savedDeclaredSkills,
+      List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses) {
 
     return data -> {
       Function<String, UUID> mapperId1 =
@@ -93,8 +99,18 @@ public class AssociationSeeder {
       Function<String, UUID> mapperId2 =
           switch (data.associationType()) {
             case DECLARED_ACTIVITY_TRACE -> UUID::fromString;
-            case DECLARED_ACTIVITY_DECLARED_SKILL, TRACE_DECLARED_SKILL ->
+
+            case DECLARED_ACTIVITY_DECLARED_SKILL ->
                 id -> resolveDynamicId(id, savedDeclaredSkills);
+
+            case TRACE_DECLARED_SKILL ->
+                id ->
+                    resolveDynamicIdWithStudentParam(
+                        id,
+                        savedDeclaredSkillProgresses,
+                        progress ->
+                            progress.getStudent() != null ? progress.getStudent().getId() : null,
+                        DeclaredSkillProgressEntity::getId);
           };
 
       return new AssociationData(
@@ -110,5 +126,40 @@ public class AssociationSeeder {
     }
 
     return savedEntities.get(index).getId();
+  }
+
+  private <T> UUID resolveDynamicIdWithStudentParam(
+      String dynamicId,
+      List<T> savedEntities,
+      Function<T, UUID> studentIdExtractor,
+      Function<T, UUID> entityIdExtractor) {
+
+    int lastSeparatorIndex = dynamicId.lastIndexOf('_');
+    int secondLastSeparatorIndex = dynamicId.lastIndexOf('_', lastSeparatorIndex - 1);
+
+    if (lastSeparatorIndex < 0 || secondLastSeparatorIndex < 0) {
+      throw new IllegalArgumentException("Invalid dynamic student scoped id format: " + dynamicId);
+    }
+
+    String studentIdRaw = dynamicId.substring(secondLastSeparatorIndex + 1, lastSeparatorIndex);
+    String indexRaw = dynamicId.substring(lastSeparatorIndex + 1);
+
+    UUID studentId = UUID.fromString(studentIdRaw);
+    int index = Integer.parseInt(indexRaw);
+
+    List<T> filteredEntities =
+        savedEntities.stream()
+            .filter(entity -> studentId.equals(studentIdExtractor.apply(entity)))
+            .toList();
+
+    if (index < 0 || index >= filteredEntities.size()) {
+      throw new IllegalArgumentException(
+          "Invalid dynamic student scoped index: "
+              + dynamicId
+              + ", available size="
+              + filteredEntities.size());
+    }
+
+    return entityIdExtractor.apply(filteredEntities.get(index));
   }
 }
