@@ -3,6 +3,7 @@
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.mapper.DeclaredSkillProgressMapper;
@@ -25,46 +26,49 @@ public class DeclaredSkillProgressDatabaseRepository
   @PersistenceContext private EntityManager em;
 
   public DeclaredSkillProgressDatabaseRepository(DeclaredSkillProgressJpaRepository jpaRepository) {
-<span class="fc" id="L28">    super(</span>
+<span class="fc" id="L29">    super(</span>
         jpaRepository,
         jpaRepository,
         DeclaredSkillProgressEntity.class,
         DeclaredSkillProgressMapper.INSTANCE);
-<span class="fc" id="L33">    this.jpaRepository = jpaRepository;</span>
-<span class="fc" id="L34">  }</span>
+<span class="fc" id="L34">    this.jpaRepository = jpaRepository;</span>
+<span class="fc" id="L35">  }</span>
 
   @Override
   public boolean declaredSkillProgressAlreadyExists(DeclaredSkillProgress declaredSkillProgress) {
-<span class="fc" id="L38">    return jpaRepository.exists(</span>
-<span class="fc" id="L39">        DeclaredSkillProgressSpecification.declaredSkillProgressAlreadyExists(</span>
-<span class="fc" id="L40">            declaredSkillProgress.getSkill(), declaredSkillProgress.getStudent().getId()));</span>
+<span class="fc" id="L39">    return jpaRepository.exists(</span>
+<span class="fc" id="L40">        DeclaredSkillProgressSpecification.declaredSkillProgressAlreadyExists(</span>
+<span class="fc" id="L41">            declaredSkillProgress.getSkill(), declaredSkillProgress.getStudent().getId()));</span>
   }
 
   @Override
   public List&lt;DeclaredSkillProgress&gt; findAllByStudent(Student student) {
-<span class="nc" id="L45">    return findAll(hasStudent(student));</span>
+<span class="nc" id="L46">    return findAll(hasStudent(student));</span>
   }
 
   @Override
   public PagedResult&lt;DeclaredSkillProgress&gt; findAllByStudent(
       Student student, PageCriteria pageCriteria) {
-<span class="fc" id="L51">    var specification = hasStudent(student);</span>
-<span class="fc" id="L52">    return findAll(</span>
+<span class="fc" id="L52">    var specification = hasStudent(student);</span>
+<span class="fc" id="L53">    return findAll(</span>
         specification,
-<span class="fc" id="L54">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()),</span>
-<span class="fc" id="L55">        FetchGraph.init().fetch(&quot;student&quot;).fetch(&quot;declaredSkill&quot;));</span>
+<span class="fc" id="L55">        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()),</span>
+<span class="fc" id="L56">        FetchGraph.init().fetch(&quot;student&quot;).fetch(&quot;declaredSkill&quot;));</span>
   }
 
   @Override
   public PagedResult&lt;DeclaredSkillProgress&gt; findAllByStudent(
-      Student student, PageCriteria pageCriteria, String keyword) {
-<span class="fc" id="L61">    var specification = hasStudent(student).and(DeclaredSkillProgressSpecification.search(keyword));</span>
-<span class="fc" id="L62">    return findAllByStudent(specification, pageCriteria);</span>
+      Student student, PageCriteria pageCriteria, String keyword, SortCriteria sortCriteria) {
+<span class="fc" id="L62">    var specification =</span>
+<span class="fc" id="L63">        hasStudent(student)</span>
+<span class="fc" id="L64">            .and(DeclaredSkillProgressSpecification.search(keyword))</span>
+<span class="fc" id="L65">            .and(DeclaredSkillProgressSpecification.withSort(sortCriteria));</span>
+<span class="fc" id="L66">    return findAllByStudent(specification, pageCriteria);</span>
   }
 
   private PagedResult&lt;DeclaredSkillProgress&gt; findAllByStudent(
       Specification&lt;DeclaredSkillProgressEntity&gt; specification, PageCriteria pageCriteria) {
-<span class="fc" id="L67">    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
+<span class="fc" id="L71">    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
