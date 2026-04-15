@@ -100,10 +100,7 @@ public class AssociationSeeder {
           switch (data.associationType()) {
             case DECLARED_ACTIVITY_TRACE -> UUID::fromString;
 
-            case DECLARED_ACTIVITY_DECLARED_SKILL ->
-                id -> resolveDynamicId(id, savedDeclaredSkills);
-
-            case TRACE_DECLARED_SKILL ->
+            case DECLARED_ACTIVITY_DECLARED_SKILL, TRACE_DECLARED_SKILL ->
                 id ->
                     resolveDynamicIdWithStudentParam(
                         id,
