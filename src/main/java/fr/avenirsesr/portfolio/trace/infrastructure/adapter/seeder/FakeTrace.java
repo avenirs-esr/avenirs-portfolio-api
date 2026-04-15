@@ -37,12 +37,14 @@ public class FakeTrace {
                 false,
                 null,
                 null,
+                null,
                 Instant.now(),
                 Instant.now(),
                 null));
 
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.withAiUseJustification();
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.withPersonalNote();
+    if (new Random().nextBoolean()) fakeTrace = fakeTrace.withLink();
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.isGroup();
 
     return fakeTrace;
@@ -86,6 +88,11 @@ public class FakeTrace {
 
   public FakeTrace withPersonalNote() {
     trace.setPersonalNote("Personal note : %s".formatted(faker().lorem().sentence(5)));
+    return this;
+  }
+
+  public FakeTrace withLink() {
+    trace.setLink(faker().internet().url());
     return this;
   }
 

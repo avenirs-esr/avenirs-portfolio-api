@@ -167,4 +167,43 @@ class TraceAttachmentControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.code")
         .isEqualTo("USER_NOT_AUTHORIZED");
   }
+
+  @Test
+  void shouldReturn400WhenInvalidTraceType() {
+    BddLogger.given("the " + BASE_PATH + " endpoint");
+
+    UUID existingTraceId = UUID.fromString("ca745573-544c-4c4c-9768-724f02c690a1");
+
+    byte[] fileContent = "Contenu du fichier de test".getBytes(StandardCharsets.UTF_8);
+
+    MultipartBodyBuilder builder = new MultipartBodyBuilder();
+    builder
+        .part(
+            "file",
+            new ByteArrayResource(fileContent) {
+              @Override
+              public String getFilename() {
+                return "test-file.txt";
+              }
+            })
+        .contentType(MediaType.TEXT_PLAIN);
+
+    BddLogger.when("performing a MULTIPART with a trace of a different type");
+    BddLogger.then("it should return 400");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH, existingTraceId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .bodyValue(builder.build())
+        .exchange()
+        .expectStatus()
+        .isBadRequest()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("INVALID_TRACE_TYPE");
+  }
 }

@@ -45,7 +45,8 @@ public interface TraceService {
       ELanguage language,
       boolean isGroup,
       String personalNote,
-      String aiJustification);
+      String aiJustification,
+      String link);
 
   Trace createTrace(
       UUID traceId,
@@ -54,7 +55,8 @@ public interface TraceService {
       ELanguage language,
       boolean isGroup,
       String personalNote,
-      String aiJustification);
+      String aiJustification,
+      String link);
 
   TraceDetailData updateTrace(
       UUID traceId,

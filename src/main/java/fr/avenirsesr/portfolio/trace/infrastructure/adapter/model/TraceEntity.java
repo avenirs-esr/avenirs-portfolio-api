@@ -77,6 +77,10 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
   @Column(name = "personal_note")
   private String personalNote;
 
+  @Size(max = LINK_LENGTH, message = "link can not exceed {max} characters")
+  @Column(name = "link")
+  private String link;
+
   private TraceEntity(
       UUID id,
       UserEntity user,
@@ -88,6 +92,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       boolean isGroup,
       String aiUseJustification,
       String personalNote,
+      String link,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
@@ -104,6 +109,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
     this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
+    this.link = link;
   }
 
   public static TraceEntity of(
@@ -117,6 +123,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       boolean isGroup,
       String aiUseJustification,
       String personalNote,
+      String link,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
@@ -131,6 +138,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
         isGroup,
         aiUseJustification,
         personalNote,
+        link,
         createdAt,
         updatedAt,
         deletedAt);

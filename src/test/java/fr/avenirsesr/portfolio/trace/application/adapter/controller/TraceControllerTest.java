@@ -75,11 +75,17 @@ class TraceControllerTest {
   void shouldCreateTraceSuccessfully() {
     BddLogger.given("a TraceController");
     when(traceService.createTrace(
-            anyString(), any(ELanguage.class), anyBoolean(), anyString(), anyString()))
+            anyString(), any(ELanguage.class), anyBoolean(), anyString(), anyString(), anyString()))
         .thenReturn(trace);
 
     CreateTraceDTO dto =
-        new CreateTraceDTO("My Trace", ELanguage.FRENCH, true, "Personal note", "Justification IA");
+        new CreateTraceDTO(
+            "My Trace",
+            ELanguage.FRENCH,
+            true,
+            "Personal note",
+            "Justification IA",
+            "https://example.com");
 
     BddLogger.when("creating a trace");
     ResponseEntity<TracesCreationResponse> response = controller.createTrace(principal, dto);
@@ -95,16 +101,18 @@ class TraceControllerTest {
             eq(ELanguage.FRENCH),
             eq(true),
             eq("Personal note"),
-            eq("Justification IA"));
+            eq("Justification IA"),
+            eq("https://example.com"));
   }
 
   @Test
   void shouldCreateTraceWithNullFields() {
     BddLogger.given("a TraceController");
-    when(traceService.createTrace("Trace sans IA", ELanguage.FRENCH, false, null, null))
+    when(traceService.createTrace("Trace sans IA", ELanguage.FRENCH, false, null, null, null))
         .thenReturn(trace);
 
-    CreateTraceDTO dto = new CreateTraceDTO("Trace sans IA", ELanguage.FRENCH, false, null, null);
+    CreateTraceDTO dto =
+        new CreateTraceDTO("Trace sans IA", ELanguage.FRENCH, false, null, null, null);
 
     BddLogger.when("creating a trace with null fields");
     ResponseEntity<TracesCreationResponse> response = controller.createTrace(principal, dto);
@@ -112,6 +120,6 @@ class TraceControllerTest {
     BddLogger.then("it should create the trace with null fields successfully");
     assertEquals(201, response.getStatusCode().value());
 
-    verify(traceService).createTrace("Trace sans IA", ELanguage.FRENCH, false, null, null);
+    verify(traceService).createTrace("Trace sans IA", ELanguage.FRENCH, false, null, null, null);
   }
 }

@@ -14,6 +14,7 @@ import java.util.UUID;
       "isGroup",
       "aiUseJustification",
       "personalNote",
+      "link",
       "attachment",
       "createdAt",
       "updatedAt"
@@ -26,6 +27,7 @@ public record TraceDetailDTO(
     boolean isGroup,
     String aiUseJustification,
     String personalNote,
+    String link,
     AttachmentUploadDTO attachment,
     Instant createdAt,
     Instant updatedAt) {}

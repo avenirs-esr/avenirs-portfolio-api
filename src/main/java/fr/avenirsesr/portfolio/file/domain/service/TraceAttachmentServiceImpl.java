@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmentRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.trace.domain.exception.InvalidTraceTypeException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -33,12 +34,16 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
       throws IOException {
     Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceService.getTraceById(traceId);
-    var allTraceAttachments = traceAttachmentRepository.findByTrace(trace);
 
     if (!trace.getUser().equals(loggedInStudent.getUser())) {
       throw new UserNotAuthorizedException();
     }
 
+    if (trace.getLink().isPresent()) {
+      throw new InvalidTraceTypeException();
+    }
+
+    var allTraceAttachments = traceAttachmentRepository.findByTrace(trace);
     try {
       var fileType = EFileType.fromMimeType(mimeType);
       if (fileType.getSizeLimit().isLessThan(size)) {

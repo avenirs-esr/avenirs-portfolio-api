@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredExperienceDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredSkillIDTO;
@@ -12,8 +11,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
@@ -38,9 +35,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/traces")
 public class TraceController {
   private final TraceService traceService;
-  private final AMSService amsService;
-  private final StudentProgressService studentProgressService;
-  private final DeclaredSkillProgressService declaredSkillProgressService;
 
   @GetMapping("/overview")
   public ResponseEntity<List<TraceOverviewDTO>> getTraceOverview(Principal principal) {
@@ -219,7 +213,8 @@ public class TraceController {
             createTraceDTO.language(),
             createTraceDTO.isGroup(),
             createTraceDTO.personalNote(),
-            createTraceDTO.iaJustification());
+            createTraceDTO.iaJustification(),
+            createTraceDTO.link());
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(new TracesCreationResponse(trace.getId()));

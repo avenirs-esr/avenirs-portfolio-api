@@ -276,9 +276,10 @@ public class TraceServiceImplTest {
       boolean isGroup = true;
       String personalNote = "Some personal note";
       String iaJustification = "Justified by AI";
+      String link = "https://example.com";
 
       BddLogger.when("creating a new trace");
-      traceService.createTrace(title, language, isGroup, personalNote, iaJustification);
+      traceService.createTrace(title, language, isGroup, personalNote, iaJustification, link);
 
       BddLogger.then("it should create and save the new trace");
       ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
@@ -296,6 +297,9 @@ public class TraceServiceImplTest {
       assertTrue(trace.getPersonalNote().isPresent());
       assertEquals(personalNote, trace.getPersonalNote().get());
 
+      assertTrue(trace.getLink().isPresent());
+      assertEquals(link, trace.getLink().get());
+
       assertTrue(trace.getAiUseJustification().isPresent());
       assertEquals(iaJustification, trace.getAiUseJustification().get());
     }
@@ -306,7 +310,7 @@ public class TraceServiceImplTest {
       String title = "Trace with null fields";
 
       BddLogger.when("creating a new trace with null fields");
-      traceService.createTrace(title, ELanguage.FRENCH, false, null, null);
+      traceService.createTrace(title, ELanguage.FRENCH, false, null, null, null);
 
       BddLogger.then("it should create and save the new trace with null fields");
       ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
@@ -317,6 +321,7 @@ public class TraceServiceImplTest {
       assertEquals(title, trace.getTitle());
       assertEquals(ELanguage.FRENCH, trace.getLanguage());
       assertTrue(trace.getPersonalNote().isEmpty());
+      assertTrue(trace.getLink().isEmpty());
       assertTrue(trace.getAiUseJustification().isEmpty());
     }
 
@@ -326,7 +331,7 @@ public class TraceServiceImplTest {
       BddLogger.when("creating a new trace with a blank title");
       assertThrows(
           Exception.class,
-          () -> traceService.createTrace("   ", ELanguage.FRENCH, false, null, null));
+          () -> traceService.createTrace("   ", ELanguage.FRENCH, false, null, null, null));
       BddLogger.then("it should throw a validation exception");
       verify(traceRepository, never()).save(any());
     }

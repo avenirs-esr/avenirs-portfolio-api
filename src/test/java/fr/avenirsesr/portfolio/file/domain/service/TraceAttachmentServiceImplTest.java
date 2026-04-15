@@ -16,6 +16,7 @@ import fr.avenirsesr.portfolio.file.domain.port.output.repository.TraceAttachmen
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.trace.domain.exception.InvalidTraceTypeException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
@@ -259,5 +260,23 @@ class TraceAttachmentServiceImplTest {
                 service.uploadTraceAttachment(
                     traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes()))
         .isInstanceOf(UserNotAuthorizedException.class);
+  }
+
+  @Test
+  void uploadTraceAttachment_shouldThrowInvalidTraceTypeException() {
+    BddLogger.given("a TraceAttachmentServiceImpl service");
+    UUID traceId = UUID.randomUUID();
+    Trace trace =
+        TraceFixture.create().withUser(student.getUser()).withLink("https://example.com").toModel();
+
+    BddLogger.when("uploading a trace attachment with a trace of a different type");
+    when(traceService.getTraceById(traceId)).thenReturn(trace);
+
+    BddLogger.then("it should throw InvalidTraceTypeException");
+    assertThatThrownBy(
+            () ->
+                service.uploadTraceAttachment(
+                    traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes()))
+        .isInstanceOf(InvalidTraceTypeException.class);
   }
 }

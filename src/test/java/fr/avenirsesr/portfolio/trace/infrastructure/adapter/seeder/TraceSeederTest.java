@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;

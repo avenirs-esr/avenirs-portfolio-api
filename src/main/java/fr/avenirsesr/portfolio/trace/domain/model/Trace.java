@@ -33,6 +33,9 @@ public class Trace extends DeletableAvenirsBaseModel {
   @Getter(AccessLevel.NONE)
   private String personalNote;
 
+  @Getter(AccessLevel.NONE)
+  private String link;
+
   private Trace(
       UUID id,
       User user,
@@ -41,6 +44,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       boolean isGroup,
       String aiUseJustification,
       String personalNote,
+      String link,
       List<SkillLevelProgress> skillLevels,
       List<DeclaredSkillProgress> declaredSkillProgresses,
       List<AMS> amses,
@@ -57,6 +61,7 @@ public class Trace extends DeletableAvenirsBaseModel {
     this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
+    this.link = link;
   }
 
   public static Trace create(
@@ -66,7 +71,8 @@ public class Trace extends DeletableAvenirsBaseModel {
       ELanguage language,
       boolean isGroup,
       String aiUseJustification,
-      String personalNote) {
+      String personalNote,
+      String link) {
 
     return new Trace(
         id,
@@ -76,6 +82,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         isGroup,
         aiUseJustification,
         personalNote,
+        link,
         new ArrayList<>(),
         new ArrayList<>(),
         new ArrayList<>(),
@@ -94,6 +101,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       boolean group,
       String aiUseJustification,
       String personalNote,
+      String link,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt,
@@ -106,6 +114,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         group,
         aiUseJustification,
         personalNote,
+        link,
         skillLevels,
         declaredSkillProgresses,
         amses,
@@ -120,6 +129,10 @@ public class Trace extends DeletableAvenirsBaseModel {
 
   public Optional<String> getPersonalNote() {
     return Optional.ofNullable(personalNote);
+  }
+
+  public Optional<String> getLink() {
+    return Optional.ofNullable(link);
   }
 
   public boolean isUnassociated() {

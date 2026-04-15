@@ -31,6 +31,7 @@ public class TraceFixture {
   private boolean isGroup;
   private String aiUseJustification;
   private String personalNote;
+  private String link;
   private ELanguage language = ELanguage.FRENCH;
 
   private TraceFixture() {
@@ -117,6 +118,11 @@ public class TraceFixture {
     return this;
   }
 
+  public TraceFixture withLink(String link) {
+    this.link = link;
+    return this;
+  }
+
   public List<Trace> withCount(int count) {
     List<Trace> traces = new ArrayList<>();
     for (int i = 0; i < count; i++) {
@@ -141,6 +147,7 @@ public class TraceFixture {
         isGroup,
         aiUseJustification,
         personalNote,
+        link,
         createdAt,
         updatedAt,
         deletedAt,

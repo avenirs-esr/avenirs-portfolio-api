@@ -8,4 +8,6 @@ public interface TraceDataGenerator extends DataGeneratorInterface {
   String traceAiJustification();
 
   String tracePersonalNote();
+
+  String traceLink();
 }

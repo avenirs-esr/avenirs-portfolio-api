@@ -28,6 +28,7 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
         trace.isGroup(),
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
+        trace.getLink().orElse(null),
         trace.getCreatedAt(),
         trace.getUpdatedAt(),
         trace.getDeletedAt().orElse(null));
@@ -48,6 +49,7 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
             traceEntity.isGroup(),
             traceEntity.getAiUseJustification(),
             traceEntity.getPersonalNote(),
+            traceEntity.getLink(),
             traceEntity.getCreatedAt(),
             traceEntity.getUpdatedAt(),
             traceEntity.getDeletedAt(),
@@ -87,6 +89,7 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
         traceEntity.isGroup(),
         traceEntity.getAiUseJustification(),
         traceEntity.getPersonalNote(),
+        traceEntity.getLink(),
         traceEntity.getCreatedAt(),
         traceEntity.getUpdatedAt(),
         traceEntity.getDeletedAt(),
