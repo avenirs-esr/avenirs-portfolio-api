@@ -55,13 +55,23 @@
     "associationType": "TRACE_DECLARED_SKILL"
   },
   {
-    "id1": "7f3a2b91-3d44-4c6a-8a9e-2b6d5f1c0a22",
-    "id2": "DYNAMIC_DECLARED_SKILL_ID_0",
+    "id1": "c1c9f6d2-6c2b-4a5e-9c4f-8e2a6b1d3f01",
+    "id2": "DYNAMIC_STUDENT_DECLARED_SKILL_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_0",
     "associationType": "DECLARED_ACTIVITY_DECLARED_SKILL"
   },
   {
     "id1": "7f3a2b91-3d44-4c6a-8a9e-2b6d5f1c0a22",
-    "id2": "DYNAMIC_DECLARED_SKILL_ID_1",
+    "id2": "DYNAMIC_STUDENT_DECLARED_SKILL_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_0",
+    "associationType": "DECLARED_ACTIVITY_DECLARED_SKILL"
+  },
+  {
+    "id1": "c1c9f6d2-6c2b-4a5e-9c4f-8e2a6b1d3f01",
+    "id2": "DYNAMIC_STUDENT_DECLARED_SKILL_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_1",
+    "associationType": "DECLARED_ACTIVITY_DECLARED_SKILL"
+  },
+  {
+    "id1": "7f3a2b91-3d44-4c6a-8a9e-2b6d5f1c0a22",
+    "id2": "DYNAMIC_STUDENT_DECLARED_SKILL_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_1",
     "associationType": "DECLARED_ACTIVITY_DECLARED_SKILL"
   }
 ]
