@@ -9,6 +9,7 @@ public record ActivityCreationData(
     String title,
     EActivityThematic thematic,
     String summary,
+    String description,
     String executionPeriodInfo,
     Optional<String> executionPeriodInfoSummary,
     ActivityBannerCreationData banner) {}

@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.request;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.REFLECTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
@@ -21,7 +21,7 @@ public class AddDeclaredSkillDTO {
   EDeclaredSkillLevel level;
 
   @Size(
-      max = REFLECTION_LENGTH,
-      message = "The reflection cannot exceed " + REFLECTION_LENGTH + " characters")
+      max = RICH_TEXT_LENGTH,
+      message = "The reflection cannot exceed " + RICH_TEXT_LENGTH + " characters")
   String reflection;
 }

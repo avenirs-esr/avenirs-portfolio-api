@@ -11,6 +11,7 @@ import java.util.UUID;
       "title",
       "thematic",
       "summary",
+      "description",
       "executionPeriodInfo",
       "createdAt",
       "updatedAt"
@@ -20,6 +21,7 @@ public record ActivityDTO(
     String title,
     @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
     String summary,
+    String description,
     String executionPeriodInfo,
     Instant createdAt,
     Instant updatedAt) {}

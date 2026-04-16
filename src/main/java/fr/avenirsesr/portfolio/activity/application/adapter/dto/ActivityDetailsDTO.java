@@ -7,7 +7,15 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Schema(
-    requiredProperties = {"id", "title", "thematic", "banner", "summary", "executionPeriodInfo"})
+    requiredProperties = {
+      "id",
+      "title",
+      "thematic",
+      "banner",
+      "summary",
+      "description",
+      "executionPeriodInfo"
+    })
 public record ActivityDetailsDTO(
     UUID id,
     String title,
@@ -15,6 +23,7 @@ public record ActivityDetailsDTO(
     UUID subscribedDeclaredActivity,
     FileDTO banner,
     String summary,
+    String description,
     String executionPeriodInfo,
     Instant createdAt,
     Instant updatedAt) {}

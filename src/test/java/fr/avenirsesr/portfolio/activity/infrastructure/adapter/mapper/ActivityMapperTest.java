@@ -19,6 +19,7 @@ class ActivityMapperTest {
   private final String title = "Test Activity";
   private final EActivityThematic thematic = EActivityThematic.SELF_KNOWLEDGE;
   private final String summary = "Activity summary";
+  private final String description = "<h3>Objectives</h3><p>Test activity description</p>";
   private final String executionPeriodInfo = "2020 - 2022";
   private final String executionPeriodInfoSummary = "label 2020";
   private final Instant createdAt = Instant.parse("2023-01-01T00:00:00Z");
@@ -32,6 +33,7 @@ class ActivityMapperTest {
             title,
             thematic,
             summary,
+            description,
             executionPeriodInfo,
             executionPeriodInfoSummary,
             createdAt,
@@ -51,6 +53,7 @@ class ActivityMapperTest {
     assertEquals(title, entity.getTitle());
     assertEquals(thematic, entity.getThematic());
     assertEquals(summary, entity.getSummary());
+    assertEquals(description, entity.getDescription());
     assertEquals(executionPeriodInfo, entity.getExecutionPeriodInfo());
     assertEquals(createdAt, entity.getCreatedAt());
     assertEquals(updatedAt, entity.getUpdatedAt());
@@ -65,6 +68,7 @@ class ActivityMapperTest {
     entity.setTitle(title);
     entity.setThematic(thematic);
     entity.setSummary(summary);
+    entity.setDescription(description);
     entity.setExecutionPeriodInfo(executionPeriodInfo);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
@@ -78,6 +82,7 @@ class ActivityMapperTest {
     assertEquals(title, mappedActivity.getTitle());
     assertEquals(thematic, mappedActivity.getThematic());
     assertEquals(summary, mappedActivity.getSummary());
+    assertEquals(description, mappedActivity.getDescription());
     assertEquals(executionPeriodInfo, mappedActivity.getExecutionPeriodInfo());
     assertEquals(createdAt, mappedActivity.getCreatedAt());
     assertEquals(updatedAt, mappedActivity.getUpdatedAt());

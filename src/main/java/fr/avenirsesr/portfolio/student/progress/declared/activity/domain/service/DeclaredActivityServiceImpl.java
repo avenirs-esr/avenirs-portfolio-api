@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.REFLECTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateDateOrder;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
@@ -145,7 +145,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   private static void fieldsValidation(String reflection) {
-    validateOptionalTextMaxLength("reflection", reflection, REFLECTION_LENGTH);
+    validateOptionalTextMaxLength("reflection", reflection, RICH_TEXT_LENGTH);
   }
 
   @Override

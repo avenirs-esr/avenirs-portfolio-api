@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.REFLECTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
@@ -47,7 +47,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
   @Column(name = "started_at")
   private Instant startedAt;
 
-  @Size(max = REFLECTION_LENGTH, message = "reflection can not exceed {max} characters")
+  @Size(max = RICH_TEXT_LENGTH, message = "reflection can not exceed {max} characters")
   @Column(columnDefinition = "TEXT")
   private String reflection;
 

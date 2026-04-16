@@ -15,6 +15,7 @@ public class Activity extends AvenirsBaseModel {
   private String title;
   private EActivityThematic thematic;
   private String summary;
+  private String description;
   private String executionPeriodInfo;
 
   @Getter(AccessLevel.NONE)
@@ -25,6 +26,7 @@ public class Activity extends AvenirsBaseModel {
       String title,
       EActivityThematic thematic,
       String summary,
+      String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
       Instant createdAt,
@@ -33,6 +35,7 @@ public class Activity extends AvenirsBaseModel {
     this.title = title;
     this.thematic = thematic;
     this.summary = summary;
+    this.description = description;
     this.executionPeriodInfo = executionPeriodInfo;
     this.executionPeriodInfoSummary = executionPeriodInfoSummary;
   }
@@ -42,11 +45,20 @@ public class Activity extends AvenirsBaseModel {
       String title,
       EActivityThematic thematic,
       String summary,
+      String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary) {
     Instant now = Instant.now();
     return new Activity(
-        id, title, thematic, summary, executionPeriodInfo, executionPeriodInfoSummary, now, now);
+        id,
+        title,
+        thematic,
+        summary,
+        description,
+        executionPeriodInfo,
+        executionPeriodInfoSummary,
+        now,
+        now);
   }
 
   public static Activity toDomain(
@@ -54,6 +66,7 @@ public class Activity extends AvenirsBaseModel {
       String title,
       EActivityThematic thematic,
       String summary,
+      String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
       Instant createdAt,
@@ -63,6 +76,7 @@ public class Activity extends AvenirsBaseModel {
         title,
         thematic,
         summary,
+        description,
         executionPeriodInfo,
         executionPeriodInfoSummary,
         createdAt,

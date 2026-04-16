@@ -68,6 +68,7 @@ public class ActivitySeeder {
                             fakeActivity.getTitle(),
                             fakeActivity.getThematic(),
                             fakeActivity.getSummary(),
+                            fakeActivity.getDescription(),
                             fakeActivity.getExecutionPeriodInfo(),
                             Optional.ofNullable(fakeActivity.getExecutionPeriodInfoSummary()),
                             new ActivityBannerCreationData(
@@ -89,6 +90,7 @@ public class ActivitySeeder {
                   data.title(),
                   data.thematic(),
                   data.summary(),
+                  data.description(),
                   data.executionPeriodInfo(),
                   data.executionPeriodInfoSummary().orElse(null));
           try {

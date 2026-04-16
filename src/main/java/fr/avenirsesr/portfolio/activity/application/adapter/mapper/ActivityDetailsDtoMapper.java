@@ -16,6 +16,7 @@ public interface ActivityDetailsDtoMapper {
             activityDetail.activityBanner().name().orElse(null),
             baseUrl + activityDetail.activityBanner().url()),
         activityDetail.summary(),
+        activityDetail.description(),
         activityDetail.executionPeriodInfo(),
         activityDetail.createdAt(),
         activityDetail.updatedAt());

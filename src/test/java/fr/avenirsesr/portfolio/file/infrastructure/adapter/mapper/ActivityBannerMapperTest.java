@@ -46,6 +46,7 @@ class ActivityBannerMapperTest {
             "Activity Title",
             EActivityThematic.SELF_KNOWLEDGE,
             "Summary",
+            "<h3>Objectives</h3><p>Activity description</p>",
             "2020 - 2022",
             "label 2020",
             createdAt,

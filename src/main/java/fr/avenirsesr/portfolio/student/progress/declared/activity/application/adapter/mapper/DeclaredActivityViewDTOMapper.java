@@ -11,6 +11,7 @@ public interface DeclaredActivityViewDTOMapper {
         declaredActivity.getActivity().getTitle(),
         declaredActivity.getActivity().getThematic(),
         declaredActivity.getActivity().getSummary(),
+        declaredActivity.getActivity().getDescription(),
         declaredActivity.getActivity().getExecutionPeriodInfoSummary().orElse(null),
         declaredActivity.getStatus(),
         declaredActivity.getStartDate(),
