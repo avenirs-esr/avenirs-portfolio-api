@@ -51,8 +51,8 @@ public class ActivityServiceImpl implements ActivityService {
       String executionPeriodInfoSummary) {
 <span class="fc" id="L52">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
 <span class="fc" id="L53">    requireNotNull(&quot;thematic&quot;, thematic);</span>
-<span class="fc" id="L54">    requireNotBlankAndMaxLength(&quot;summary&quot;, summary, ACTIVITY_SUMMARY_LENGTH);</span>
-<span class="fc" id="L55">    requireNotBlankAndMaxLength(&quot;description&quot;, description, ACTIVITY_DESCRIPTION_LENGTH);</span>
+<span class="fc" id="L54">    requireNotBlankAndMaxLength(&quot;summary&quot;, summary, SUMMARY_LENGTH);</span>
+<span class="fc" id="L55">    requireNotBlankAndMaxLength(&quot;description&quot;, description, RICH_TEXT_LENGTH);</span>
 <span class="fc" id="L56">    requireNotBlankAndMaxLength(</span>
         &quot;executionPeriodInfo&quot;, executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
 <span class="fc" id="L58">    validateOptionalTextMaxLength(</span>

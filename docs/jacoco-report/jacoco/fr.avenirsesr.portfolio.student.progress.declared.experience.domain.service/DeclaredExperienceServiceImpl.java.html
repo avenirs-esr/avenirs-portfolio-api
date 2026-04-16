@@ -255,5 +255,16 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
 <span class="fc" id="L256">    return experienceRepository.findAllByStudent(student, pageCriteria);</span>
   }
+
+  @Override
+  public List&lt;DeclaredExperience&gt; findAllByIds(List&lt;UUID&gt; experienceIds) {
+<span class="fc" id="L261">    return experienceRepository.findAllById(experienceIds);</span>
+  }
+
+  @Override
+  public PagedResult&lt;DeclaredExperience&gt; search(String keyword, PageCriteria pageCriteria) {
+<span class="fc" id="L266">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L267">    return experienceRepository.findAllByStudent(student, pageCriteria, keyword);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

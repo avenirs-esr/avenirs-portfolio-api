@@ -28,5 +28,15 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="fc" id="L28">      return cb.conjunction();</span>
     };
   }
+
+  public static Specification&lt;DeclaredExperienceEntity&gt; search(String keyword) {
+<span class="fc" id="L33">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L34" title="1 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="fc" id="L35">        return criteriaBuilder.conjunction();</span>
+      }
+<span class="fc" id="L37">      return criteriaBuilder.like(</span>
+<span class="fc" id="L38">          criteriaBuilder.lower(root.get(&quot;title&quot;)), &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
+    };
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
