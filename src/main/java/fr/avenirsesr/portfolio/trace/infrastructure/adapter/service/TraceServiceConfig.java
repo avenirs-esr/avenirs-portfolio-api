@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelpe
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
@@ -25,6 +26,7 @@ public class TraceServiceConfig {
   private final TraceAttachmentService traceAttachmentService;
   private final DeclaredActivityService declaredActivityService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
+  private final DeclaredExperienceService declaredExperienceService;
   private final TraceConfigurationClient traceConfigurationClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
@@ -39,6 +41,7 @@ public class TraceServiceConfig {
         traceAttachmentService,
         declaredActivityService,
         declaredSkillProgressService,
+        declaredExperienceService,
         traceConfigurationClient,
         loggedInUserService,
         associationService,

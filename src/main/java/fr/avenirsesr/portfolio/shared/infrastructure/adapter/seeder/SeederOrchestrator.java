@@ -100,7 +100,7 @@ public class SeederOrchestrator {
       var savedStaffs = staffSeeder.seed(savedUsers);
       var savedStudents = studentSeeder.seed(savedUsers, savedSelfKnowledgeMandatoryCategories);
 
-      declaredExperienceSeeder.seed(savedStudents);
+      var savedDeclaredExperiences = declaredExperienceSeeder.seed(savedStudents);
 
       userPhotoSeeder.seed(savedStudents, savedStaffs);
 
@@ -139,7 +139,7 @@ public class SeederOrchestrator {
       var savedActivities = activitySeeder.seed(savedUsers.getFirst());
       var declaredActivities = declaredActivitySeeder.seed(savedStudents, savedActivities);
       associationSeeder.seed(
-          declaredActivities, savedTraces, savedDeclaredSkills, savedDeclaredSkillProgresses);
+          declaredActivities, savedTraces, savedDeclaredSkillProgresses, savedDeclaredExperiences);
 
       log.info("✔ Seeding successfully finished");
       seedingState.markCompleted();

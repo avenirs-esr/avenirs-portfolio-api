@@ -10,10 +10,10 @@ import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.Associat
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder.data.AssociationCreationData;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
-import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.model.DeclaredSkillEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.util.Collections;
@@ -43,8 +43,8 @@ public class AssociationSeeder {
   public List<AssociationEntity> seed(
       List<DeclaredActivityEntity> savedActivities,
       List<TraceEntity> savedTraces,
-      List<DeclaredSkillEntity> savedDeclaredSkills,
-      List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses) {
+      List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses,
+      List<DeclaredExperienceEntity> savedDeclaredExperiences) {
     log.info("Seeding associations...");
 
     List<AssociationCreationData> creationData =
@@ -78,7 +78,8 @@ public class AssociationSeeder {
         associationService.createAll(
             creationData.stream()
                 .map(
-                    mapToAssociationCreationData(savedDeclaredSkills, savedDeclaredSkillProgresses))
+                    mapToAssociationCreationData(
+                        savedDeclaredSkillProgresses, savedDeclaredExperiences))
                 .toList());
 
     log.info("✔ {} associations created", associations.size());
@@ -86,13 +87,16 @@ public class AssociationSeeder {
   }
 
   private Function<AssociationCreationData, AssociationData> mapToAssociationCreationData(
-      List<DeclaredSkillEntity> savedDeclaredSkills,
-      List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses) {
+      List<DeclaredSkillProgressEntity> savedDeclaredSkillProgresses,
+      List<DeclaredExperienceEntity> savedDeclaredExperiences) {
 
     return data -> {
       Function<String, UUID> mapperId1 =
           switch (data.associationType()) {
-            case DECLARED_ACTIVITY_TRACE, TRACE_DECLARED_SKILL, DECLARED_ACTIVITY_DECLARED_SKILL ->
+            case DECLARED_ACTIVITY_TRACE,
+                TRACE_DECLARED_SKILL,
+                DECLARED_ACTIVITY_DECLARED_SKILL,
+                TRACE_DECLARED_EXPERIENCE ->
                 UUID::fromString;
           };
 
@@ -108,6 +112,16 @@ public class AssociationSeeder {
                         progress ->
                             progress.getStudent() != null ? progress.getStudent().getId() : null,
                         DeclaredSkillProgressEntity::getId);
+            case TRACE_DECLARED_EXPERIENCE ->
+                id ->
+                    resolveDynamicIdWithStudentParam(
+                        id,
+                        savedDeclaredExperiences,
+                        experience ->
+                            experience.getStudent() != null
+                                ? experience.getStudent().getId()
+                                : null,
+                        DeclaredExperienceEntity::getId);
           };
 
       return new AssociationData(

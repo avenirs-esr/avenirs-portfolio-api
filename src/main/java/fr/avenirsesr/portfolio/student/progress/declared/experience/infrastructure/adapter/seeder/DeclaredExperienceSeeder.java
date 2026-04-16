@@ -5,10 +5,14 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeeder
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.mapper.DeclaredExperienceMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder.data.DeclaredExperienceCreationData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.seeder.fake.FakeDeclaredExperience;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -30,7 +34,7 @@ public class DeclaredExperienceSeeder {
   private ESeederSource seederSource;
 
   @Transactional
-  public void seed(List<StudentEntity> savedStudents) {
+  public List<DeclaredExperienceEntity> seed(List<StudentEntity> savedStudents) {
     ValidationUtils.requireNonEmpty(savedStudents, "savedStudents cannot be empty");
 
     List<DeclaredExperienceCreationData> creationData =
@@ -61,20 +65,28 @@ public class DeclaredExperienceSeeder {
                   .toList();
         };
 
+    List<DeclaredExperience> declaredExperiences = new ArrayList<>();
+
     creationData.forEach(
-        data ->
-            declaredExperienceService.create(
-                data.studentId(),
-                data.title(),
-                data.experienceType(),
-                data.organization(),
-                data.activitySector(),
-                data.location(),
-                data.description(),
-                data.sourceOfInformation(),
-                data.summary(),
-                data.externalLink(),
-                data.startDate(),
-                data.endDate()));
+        data -> {
+          var experience =
+              declaredExperienceService.create(
+                  data.studentId(),
+                  data.title(),
+                  data.experienceType(),
+                  data.organization(),
+                  data.activitySector(),
+                  data.location(),
+                  data.description(),
+                  data.sourceOfInformation(),
+                  data.summary(),
+                  data.externalLink(),
+                  data.startDate(),
+                  data.endDate());
+          declaredExperiences.add(experience);
+        });
+
+    log.info("✔ {} declared experiences created", declaredExperiences.size());
+    return declaredExperiences.stream().map(DeclaredExperienceMapper.INSTANCE::fromDomain).toList();
   }
 }

@@ -39,6 +39,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
   private static final String SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH =
       BASE_PATH + "/{traceId}/search-for-association/declared-activities";
 
+  private static final String DECLARED_EXPERIENCE_VIEW_URL = "/me/declared/experiences/view";
+
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
 
@@ -93,7 +95,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
 
     JsonNode json = objectMapper.readTree(body);
 
-    if (!json.isArray() || json.size() == 0) {
+    if (!json.isArray() || json.isEmpty()) {
       throw new IllegalStateException("Seeder returned no traces in /overview");
     }
 
@@ -127,7 +129,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     JsonNode json = objectMapper.readTree(body);
     JsonNode data = json.get("data");
 
-    if (data == null || !data.isArray() || data.size() == 0) {
+    if (data == null || !data.isArray() || data.isEmpty()) {
       throw new IllegalStateException("No declared skill association data");
     }
 
@@ -161,7 +163,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     JsonNode json = objectMapper.readTree(body);
     JsonNode data = json.get("data");
 
-    if (data == null || !data.isArray() || data.size() == 0) {
+    if (data == null || !data.isArray() || data.isEmpty()) {
       throw new IllegalStateException("No declared activity association data");
     }
 
@@ -462,5 +464,96 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .isNotFound();
 
     BddLogger.then("it should return 404");
+  }
+
+  private UUID getFirstDeclaredExperienceIdFromView() throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(DECLARED_EXPERIENCE_VIEW_URL)
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode json = objectMapper.readTree(body);
+    JsonNode data = json.get("data");
+
+    if (!data.isArray() || data.isEmpty()) {
+      throw new IllegalStateException("Seeder returned no experience in /overview");
+    }
+
+    return UUID.fromString(data.get(0).get("id").asText());
+  }
+
+  @Test
+  void shouldAssociateTraceWithDeclaredExperiences() throws Exception {
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    // On réutilise une méthode existante pour récupérer un ID valide
+    UUID experienceId = getFirstDeclaredExperienceIdFromView();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(experienceId));
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + traceId + "/associate/declared-experiences")
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(body))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.declaredExperienceAssociations")
+        .exists();
+  }
+
+  @Test
+  void shouldReturn404WhenAssociatingDeclaredExperiencesWithUnknownTrace() throws Exception {
+    UUID unknownTraceId = UUID.randomUUID();
+    UUID experienceId = searchFirstAssociationDeclaredActivityId();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(experienceId));
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + unknownTraceId + "/associate/declared-experiences")
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(body))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+
+  @Test
+  void shouldReturn400WhenAssociatingDeclaredExperiencesWithUnknownDeclaredExperiences()
+      throws Exception {
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(UUID.randomUUID()));
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + traceId + "/associate/declared-experiences")
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(body))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
   }
 }

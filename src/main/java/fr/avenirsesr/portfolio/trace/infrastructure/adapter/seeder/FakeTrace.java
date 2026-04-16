@@ -6,12 +6,11 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.ad
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
-import net.datafaker.Faker;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import net.datafaker.Faker;
 
 public class FakeTrace {
   private final TraceEntity trace;

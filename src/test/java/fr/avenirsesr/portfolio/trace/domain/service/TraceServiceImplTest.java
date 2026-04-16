@@ -34,6 +34,9 @@ import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
@@ -66,6 +69,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,6 +82,7 @@ public class TraceServiceImplTest {
 
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
+  @Mock private DeclaredExperienceService declaredExperienceService;
   @Mock private TraceConfigurationClient traceConfigurationClient;
 
   @Mock private UserService userService;
@@ -1159,6 +1164,125 @@ public class TraceServiceImplTest {
               traceService.searchDeclaredSkillForAssociation(traceId, "", new PageCriteria(0, 10)));
 
       BddLogger.then("it should throw UserNotAuthorizedException");
+    }
+
+    @Test
+    void givenTraceAndDeclaredExperiences_shouldAssociateTraceWithDeclaredExperiences() {
+      BddLogger.given("a trace and declared experiences");
+
+      UUID traceId = UUID.randomUUID();
+      UUID experienceId = UUID.randomUUID();
+
+      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+      DeclaredExperience experience = mock(DeclaredExperience.class);
+      when(experience.getId()).thenReturn(experienceId);
+      when(experience.getStudent()).thenReturn(student);
+
+      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+      when(associationService.getAllOf(
+              traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+          .thenReturn(List.of());
+
+      when(declaredExperienceService.findAllByIds(List.of(experienceId)))
+          .thenReturn(List.of(experience));
+
+      BddLogger.when("associating trace with declared experiences");
+
+      TraceAssociationsData result =
+          traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId));
+
+      BddLogger.then("association should be created");
+
+      verify(associationService).createAll(any());
+      assertNotNull(result);
+    }
+
+    @Test
+    void givenUnknownTrace_shouldThrowTraceNotFound_whenAssociateTraceWithDeclaredExperience() {
+      BddLogger.given("unknown trace");
+
+      UUID traceId = UUID.randomUUID();
+      UUID experienceId = UUID.randomUUID();
+
+      when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+      BddLogger.when("associating");
+
+      assertThrows(
+          TraceNotFoundException.class,
+          () -> traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
+
+      BddLogger.then("it should throw TraceNotFoundException");
+    }
+
+    @Test
+    void
+        givenTraceOfAnotherUser_shouldThrowUserNotAuthorized_whenAssociateTraceWithDeclaredExperience() {
+      BddLogger.given("trace of another user");
+
+      UUID traceId = UUID.randomUUID();
+      UUID experienceId = UUID.randomUUID();
+
+      User otherUser = UserFixture.create().toModel();
+
+      Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
+
+      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+      BddLogger.when("associating");
+
+      assertThrows(
+          UserNotAuthorizedException.class,
+          () -> traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
+
+      BddLogger.then("should throw UserNotAuthorizedException");
+    }
+
+    @Test
+    void givenMissingExperience_shouldThrowDeclaredExperienceNotFound() {
+      BddLogger.given("missing experience");
+
+      UUID traceId = UUID.randomUUID();
+      UUID experienceId = UUID.randomUUID();
+
+      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+      when(declaredExperienceService.findAllByIds(List.of(experienceId))).thenReturn(List.of());
+
+      BddLogger.when("associating");
+
+      assertThrows(
+          DeclaredExperienceNotFoundException.class,
+          () -> traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
+
+      BddLogger.then("should throw DeclaredExperienceNotFoundException");
+    }
+
+    @Test
+    void givenExperienceOfAnotherUser_shouldThrowUserNotAuthorized() {
+      BddLogger.given("experience of another user");
+
+      UUID traceId = UUID.randomUUID();
+      UUID experienceId = UUID.randomUUID();
+      var mockedExperience = Mockito.mock(DeclaredExperience.class);
+      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+      when(declaredExperienceService.findAllByIds(List.of(experienceId)))
+          .thenReturn(List.of(mockedExperience));
+      when(mockedExperience.getId()).thenReturn(experienceId);
+      when(mockedExperience.getStudent()).thenReturn(StudentFixture.create().toModel());
+
+      BddLogger.when("associating");
+
+      assertThrows(
+          UserNotAuthorizedException.class,
+          () -> traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
+
+      BddLogger.then("should throw UserNotAuthorizedException");
     }
   }
 

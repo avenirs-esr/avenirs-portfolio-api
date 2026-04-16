@@ -70,6 +70,9 @@ public interface TraceService {
 
   TraceAssociationsData associateTraceWithDeclaredSkill(UUID traceId, List<UUID> skillIds);
 
+  TraceAssociationsData associateTraceWithDeclaredExperience(
+      UUID traceId, List<UUID> experienceIds);
+
   TraceAssociationsData getTraceAssociations(UUID traceId, boolean onlyNotCompleted);
 
   void unassociateTraces(DeclaredSkillProgress declaredSkillProgress);
