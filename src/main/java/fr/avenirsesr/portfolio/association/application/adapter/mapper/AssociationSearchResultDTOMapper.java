@@ -1,12 +1,10 @@
 package fr.avenirsesr.portfolio.association.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
-import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDTO;
-import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
-import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredSkillIDTO;
-import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultTraceDTO;
+import fr.avenirsesr.portfolio.association.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 
 public interface AssociationSearchResultDTOMapper {
   static AssociationSearchResultDTO toDTO(AssociationSearchResultData associationSearchResultData) {
@@ -35,6 +33,17 @@ public interface AssociationSearchResultDTOMapper {
         associationSearchResultData.title(),
         associationSearchResultData.category() != null
             ? EExternalSkillType.valueOf(associationSearchResultData.category())
+            : null,
+        associationSearchResultData.disabled());
+  }
+
+  static AssociationSearchResultDeclaredExperienceDTO toDeclaredExperienceDTO(
+      AssociationSearchResultData associationSearchResultData) {
+    return new AssociationSearchResultDeclaredExperienceDTO(
+        associationSearchResultData.id(),
+        associationSearchResultData.title(),
+        associationSearchResultData.category() != null
+            ? EExperienceType.valueOf(associationSearchResultData.category())
             : null,
         associationSearchResultData.disabled());
   }

@@ -86,4 +86,7 @@ public interface TraceService {
 
   PagedResult<AssociationSearchResultData> searchDeclaredSkillForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria);
+
+  PagedResult<AssociationSearchResultData> searchDeclaredExperienceForAssociation(
+      UUID traceId, String keyword, PageCriteria pageCriteria);
 }

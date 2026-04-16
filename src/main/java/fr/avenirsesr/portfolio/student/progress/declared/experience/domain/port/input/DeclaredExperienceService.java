@@ -57,4 +57,6 @@ public interface DeclaredExperienceService {
   PagedResult<DeclaredExperience> getView(PageCriteria pageCriteria);
 
   List<DeclaredExperience> findAllByIds(List<UUID> experienceIds);
+
+  PagedResult<DeclaredExperience> search(String keyword, PageCriteria pageCriteria);
 }

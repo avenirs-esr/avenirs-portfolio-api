@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.ams.domain.port.input.AMSService;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
+import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredExperienceDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredSkillIDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
@@ -171,6 +172,37 @@ public class TraceController {
         new PagedResponse<>(
             pagedResult.content().stream()
                 .map(AssociationSearchResultDTOMapper::toDeclaredSkillDTO)
+                .toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{traceId}/search-for-association/declared-experiences")
+  public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredExperienceDTO>>
+      searchDeclaredExperienceForAssociation(
+          Principal principal,
+          @Valid @PathVariable UUID traceId,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to search declared experience for association with trace [{}] by student"
+            + " [{}] (keyword={}, page={}, pageSize={})",
+        traceId,
+        principal.getName(),
+        keyword,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<AssociationSearchResultData> pagedResult =
+        traceService.searchDeclaredExperienceForAssociation(traceId, keyword, pageCriteria);
+
+    var response =
+        new PagedResponse<>(
+            pagedResult.content().stream()
+                .map(AssociationSearchResultDTOMapper::toDeclaredExperienceDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 

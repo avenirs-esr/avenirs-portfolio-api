@@ -260,4 +260,10 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   public List<DeclaredExperience> findAllByIds(List<UUID> experienceIds) {
     return experienceRepository.findAllById(experienceIds);
   }
+
+  @Override
+  public PagedResult<DeclaredExperience> search(String keyword, PageCriteria pageCriteria) {
+    Student student = loggedInUserService.getLoggedInStudent();
+    return experienceRepository.findAllByStudent(student, pageCriteria, keyword);
+  }
 }

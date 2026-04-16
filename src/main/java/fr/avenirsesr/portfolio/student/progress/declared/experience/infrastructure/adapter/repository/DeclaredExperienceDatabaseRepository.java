@@ -32,4 +32,15 @@ public class DeclaredExperienceDatabaseRepository
         hasStudent(student).and(DeclaredExperienceSpecification.ordered()),
         PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
   }
+
+  @Override
+  public PagedResult<DeclaredExperience> findAllByStudent(
+      Student student, PageCriteria pageCriteria, String keyword) {
+    var specification =
+        hasStudent(student)
+            .and(DeclaredExperienceSpecification.ordered())
+            .and(DeclaredExperienceSpecification.search(keyword));
+
+    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
+  }
 }

@@ -28,4 +28,14 @@ public class DeclaredExperienceSpecification {
       return cb.conjunction();
     };
   }
+
+  public static Specification<DeclaredExperienceEntity> search(String keyword) {
+    return (root, query, criteriaBuilder) -> {
+      if (keyword == null || keyword.trim().isEmpty()) {
+        return criteriaBuilder.conjunction();
+      }
+      return criteriaBuilder.like(
+          criteriaBuilder.lower(root.get("title")), "%" + keyword.toLowerCase() + "%");
+    };
+  }
 }

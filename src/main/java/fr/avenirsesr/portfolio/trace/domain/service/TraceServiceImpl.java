@@ -570,6 +570,22 @@ public class TraceServiceImpl implements TraceService {
         ds -> false);
   }
 
+  @Override
+  public PagedResult<AssociationSearchResultData> searchDeclaredExperienceForAssociation(
+      UUID traceId, String keyword, PageCriteria pageCriteria) {
+    checkTraceOwnership(traceId);
+    return associationSearchHelper.searchForAssociation(
+        traceId,
+        Trace.class,
+        EAssociationType.TRACE_DECLARED_EXPERIENCE,
+        Association::getId2,
+        declaredExperienceService.search(keyword, pageCriteria),
+        AvenirsBaseModel::getId,
+        DeclaredExperience::getTitle,
+        de -> de.getExperienceType().name(),
+        de -> false);
+  }
+
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
     if (!trace.getUser().equals(user)) {
       throw new UserNotAuthorizedException("%s does not own this %s".formatted(user, trace));

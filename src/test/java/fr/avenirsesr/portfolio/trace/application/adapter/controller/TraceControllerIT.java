@@ -38,6 +38,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
       BASE_PATH + "/{traceId}/search-for-association/declared-skills";
   private static final String SEARCH_ASSOCIATION_DECLARED_ACTIVITY_BASE_PATH =
       BASE_PATH + "/{traceId}/search-for-association/declared-activities";
+  private static final String SEARCH_ASSOCIATION_DECLARED_EXPERIENCE_BASE_PATH =
+      BASE_PATH + "/{traceId}/search-for-association/declared-experiences";
 
   private static final String DECLARED_EXPERIENCE_VIEW_URL = "/me/declared/experiences/view";
 
@@ -496,7 +498,6 @@ class TraceControllerIT extends ContainerConfigurationTest {
   void shouldAssociateTraceWithDeclaredExperiences() throws Exception {
     UUID traceId = getFirstTraceIdFromOverview();
 
-    // On réutilise une méthode existante pour récupérer un ID valide
     UUID experienceId = getFirstDeclaredExperienceIdFromView();
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(experienceId));
@@ -555,5 +556,104 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+  }
+
+  @Test
+  void shouldSearchDeclaredExperiencesForAssociation() throws Exception {
+    BddLogger.given("an existing trace");
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    BddLogger.when("searching declared experiences for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(SEARCH_ASSOCIATION_DECLARED_EXPERIENCE_BASE_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build(traceId))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data[0].id")
+        .exists()
+        .jsonPath("$.data[0].title")
+        .exists()
+        .jsonPath("$.data[0].experienceType")
+        .exists()
+        .jsonPath("$.data[0].disabled")
+        .exists()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8);
+
+    BddLogger.then("it should return paged results with correct structure");
+  }
+
+  @Test
+  void shouldSearchDeclaredExperiencesForAssociationWithKeyword() throws Exception {
+    BddLogger.given("an existing trace and a keyword");
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    BddLogger.when("searching with a keyword that matches nothing");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(SEARCH_ASSOCIATION_DECLARED_EXPERIENCE_BASE_PATH)
+                    .queryParam("keyword", "zzzzzznonexistent")
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build(traceId))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data.length()")
+        .isEqualTo(0);
+
+    BddLogger.then("it should return empty results");
+  }
+
+  @Test
+  void shouldReturn404WhenSearchingDeclaredExperiencesForNonExistentTrace() {
+    BddLogger.given("a non-existent trace ID");
+    UUID nonExistentTraceId = UUID.randomUUID();
+
+    BddLogger.when("searching declared experiences for association");
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(SEARCH_ASSOCIATION_DECLARED_EXPERIENCE_BASE_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build(nonExistentTraceId))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
   }
 }

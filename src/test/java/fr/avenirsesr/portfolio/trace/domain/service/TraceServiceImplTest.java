@@ -1284,6 +1284,94 @@ public class TraceServiceImplTest {
 
       BddLogger.then("should throw UserNotAuthorizedException");
     }
+
+    @Test
+    void searchDeclaredExperienceForAssociation_should_return_mapped_results() {
+      BddLogger.given("A valid trace and a list of declared experiences");
+
+      UUID traceId = UUID.randomUUID();
+      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+      PageCriteria criteria = new PageCriteria(0, 10);
+      PageInfo pageInfo = new PageInfo(0, 10, 2);
+
+      var expectedResults =
+          List.of(
+              new AssociationSearchResultData(UUID.randomUUID(), "Experience 1", "TYPE_1", true),
+              new AssociationSearchResultData(UUID.randomUUID(), "Experience 2", "TYPE_2", false));
+
+      when(associationSearchHelper.searchForAssociation(
+              eq(traceId),
+              eq(Trace.class),
+              eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any()))
+          .thenReturn(new PagedResult<>(expectedResults, pageInfo));
+
+      BddLogger.when("searching declared experiences for association");
+      var result = traceService.searchDeclaredExperienceForAssociation(traceId, "kw", criteria);
+
+      BddLogger.then("it should delegate to associationSearchHelper and return results");
+      assertEquals(2, result.content().size());
+      assertTrue(result.content().get(0).disabled());
+      assertFalse(result.content().get(1).disabled());
+
+      verify(associationSearchHelper)
+          .searchForAssociation(
+              eq(traceId),
+              eq(Trace.class),
+              eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any());
+    }
+
+    @Test
+    void searchDeclaredExperienceForAssociation_should_throw_TraceNotFoundException() {
+      BddLogger.given("an unknown trace id");
+
+      UUID traceId = UUID.randomUUID();
+      when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+      BddLogger.when("searching declared experiences");
+
+      assertThrows(
+          TraceNotFoundException.class,
+          () ->
+              traceService.searchDeclaredExperienceForAssociation(
+                  traceId, "", new PageCriteria(0, 10)));
+
+      BddLogger.then("it should throw TraceNotFoundException");
+    }
+
+    @Test
+    void searchDeclaredExperienceForAssociation_should_throw_UserNotAuthorizedException() {
+      BddLogger.given("a trace owned by another user");
+
+      UUID traceId = UUID.randomUUID();
+      User otherUser = UserFixture.create().toModel();
+      Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
+
+      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+      BddLogger.when("searching declared experiences");
+
+      assertThrows(
+          UserNotAuthorizedException.class,
+          () ->
+              traceService.searchDeclaredExperienceForAssociation(
+                  traceId, "", new PageCriteria(0, 10)));
+
+      BddLogger.then("it should throw UserNotAuthorizedException");
+    }
   }
 
   @Nested
