@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.REFLECTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -318,7 +318,7 @@ public class DeclaredSkillProgressServiceImplTest {
         EDeclaredSkillLevel level = EDeclaredSkillLevel.BEGINNER;
         String reflection =
             random
-                .ints(REFLECTION_LENGTH + 1, 0, CHARSET.length())
+                .ints(RICH_TEXT_LENGTH + 1, 0, CHARSET.length())
                 .mapToObj(CHARSET::charAt)
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();

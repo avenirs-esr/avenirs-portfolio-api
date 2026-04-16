@@ -21,6 +21,7 @@ public class FakeActivity {
             faker.job().position(),
             faker.options().option(EActivityThematic.values()),
             faker.lorem().paragraph(2),
+            faker.lorem().paragraph(2),
             faker.lorem().sentence(15),
             faker.lorem().sentence(4),
             Instant.now(),

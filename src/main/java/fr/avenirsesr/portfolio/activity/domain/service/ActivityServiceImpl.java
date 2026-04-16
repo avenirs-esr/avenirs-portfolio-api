@@ -46,11 +46,13 @@ public class ActivityServiceImpl implements ActivityService {
       String title,
       EActivityThematic thematic,
       String summary,
+      String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     requireNotNull("thematic", thematic);
-    requireNotBlankAndMaxLength("summary", summary, DESCRIPTION_LENGTH);
+    requireNotBlankAndMaxLength("summary", summary, SUMMARY_LENGTH);
+    requireNotBlankAndMaxLength("description", description, RICH_TEXT_LENGTH);
     requireNotBlankAndMaxLength(
         "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
     validateOptionalTextMaxLength(
@@ -58,7 +60,13 @@ public class ActivityServiceImpl implements ActivityService {
 
     var activity =
         Activity.create(
-            id, title, thematic, summary, executionPeriodInfo, executionPeriodInfoSummary);
+            id,
+            title,
+            thematic,
+            summary,
+            description,
+            executionPeriodInfo,
+            executionPeriodInfoSummary);
     activityRepository.save(activity);
     return activity;
   }
@@ -82,6 +90,7 @@ public class ActivityServiceImpl implements ActivityService {
             Optional.of(activityBanner.getFileName()),
             ACTIVITY_BANNER_PATH + activityBanner.getId()),
         activity.getSummary(),
+        activity.getDescription(),
         activity.getExecutionPeriodInfo(),
         activity.getCreatedAt(),
         activity.getUpdatedAt());

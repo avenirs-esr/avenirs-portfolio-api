@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.activity.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
@@ -49,13 +49,20 @@ class ActivityServiceImplTest {
     String title = "Test Activity";
     EActivityThematic thematic = EActivityThematic.EXPERIENCES;
     String summary = "This is a test activity";
+    String description = "<h3>Objectives</h3><p>Test activity description</p>";
     String executionPeriodInfo = "2026";
     String executionPeriodInfoSummary = "Short label";
 
     // When
     Activity createdActivity =
         activityService.create(
-            id, title, thematic, summary, executionPeriodInfo, executionPeriodInfoSummary);
+            id,
+            title,
+            thematic,
+            summary,
+            description,
+            executionPeriodInfo,
+            executionPeriodInfoSummary);
 
     // Then
     assertNotNull(createdActivity);
@@ -63,6 +70,7 @@ class ActivityServiceImplTest {
     assertEquals(title, createdActivity.getTitle());
     assertEquals(thematic, createdActivity.getThematic());
     assertEquals(summary, createdActivity.getSummary());
+    assertEquals(description, createdActivity.getDescription());
     assertEquals(executionPeriodInfo, createdActivity.getExecutionPeriodInfo());
 
     // Verify repository was called
@@ -76,11 +84,14 @@ class ActivityServiceImplTest {
   void getActivityNavigation() {
     // Given
     Activity a1 =
-        Activity.create(UUID.randomUUID(), "A1", EActivityThematic.EXPERIENCES, "S1", "2026", "");
+        Activity.create(
+            UUID.randomUUID(), "A1", EActivityThematic.EXPERIENCES, "S1", "D1", "2026", "");
     Activity a2 =
-        Activity.create(UUID.randomUUID(), "A2", EActivityThematic.EXPERIENCES, "S2", "2025", null);
+        Activity.create(
+            UUID.randomUUID(), "A2", EActivityThematic.EXPERIENCES, "S2", "D2", "2025", null);
     Activity a3 =
-        Activity.create(UUID.randomUUID(), "A3", EActivityThematic.RESUMES, "S3", "2024", null);
+        Activity.create(
+            UUID.randomUUID(), "A3", EActivityThematic.RESUMES, "S3", "D3", "2024", null);
 
     when(activityRepository.findAll()).thenReturn(List.of(a1, a2, a3));
 
@@ -113,7 +124,8 @@ class ActivityServiceImplTest {
   void getActivityNavigation_shouldNotIncludeThematicsThatAreNotPresent() {
     // Given (only CV)
     Activity a1 =
-        Activity.create(UUID.randomUUID(), "A1", EActivityThematic.RESUMES, "S1", "2026", null);
+        Activity.create(
+            UUID.randomUUID(), "A1", EActivityThematic.RESUMES, "S1", "D1", "2026", null);
 
     when(activityRepository.findAll()).thenReturn(List.of(a1));
 
@@ -404,6 +416,8 @@ class ActivityServiceImplTest {
     when(activity.getTitle()).thenReturn("Activity");
     when(activity.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
     when(activity.getSummary()).thenReturn("is a test activity");
+    when(activity.getDescription())
+        .thenReturn("<h3>Objectives</h3><p>Test activity description</p>");
     when(activity.getExecutionPeriodInfo()).thenReturn("2026");
     when(activity.getCreatedAt()).thenReturn(Instant.now());
     when(activity.getUpdatedAt()).thenReturn(Instant.now());
@@ -420,6 +434,7 @@ class ActivityServiceImplTest {
     assertEquals("Activity", result.title());
     assertEquals(EActivityThematic.EXPERIENCES, result.thematic());
     assertEquals("is a test activity", result.summary());
+    assertEquals("<h3>Objectives</h3><p>Test activity description</p>", result.description());
     assertEquals("2026", result.executionPeriodInfo());
     assertTrue(result.activityBanner().id().isPresent());
     assertEquals(bannerId, result.activityBanner().id().get());

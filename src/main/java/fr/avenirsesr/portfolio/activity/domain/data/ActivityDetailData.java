@@ -13,6 +13,7 @@ public record ActivityDetailData(
     Optional<UUID> subscribedDeclaredActivity,
     FileData activityBanner,
     String summary,
+    String description,
     String executionPeriodInfo,
     Instant createdAt,
     Instant updatedAt) {}

@@ -11,6 +11,7 @@ public class ActivityFixture {
   private String title = "Default Title";
   private EActivityThematic thematic = EActivityThematic.EXPERIENCES;
   private String summary = "Default Summary";
+  private String description = "<h3>Objectives</h3><p>Default Description</p>";
   private String executionPeriodInfo = "Default Execution Period Info";
   private String executionPeriodInfoSummary = "Short Execution Period Info";
   private Instant createdAt = Instant.now();
@@ -40,6 +41,11 @@ public class ActivityFixture {
     return this;
   }
 
+  public ActivityFixture withDescription(String description) {
+    this.description = description;
+    return this;
+  }
+
   public ActivityFixture withExecutionPeriodInfo(String executionPeriodInfo) {
     this.executionPeriodInfo = executionPeriodInfo;
     return this;
@@ -66,6 +72,7 @@ public class ActivityFixture {
         title,
         thematic,
         summary,
+        description,
         executionPeriodInfo,
         executionPeriodInfoSummary,
         createdAt,

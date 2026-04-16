@@ -16,6 +16,7 @@ public interface ActivityService {
       String title,
       EActivityThematic thematic,
       String summary,
+      String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary);
 

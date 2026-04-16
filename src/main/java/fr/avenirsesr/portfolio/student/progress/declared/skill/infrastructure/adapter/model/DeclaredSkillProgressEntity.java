@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.REFLECTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
@@ -34,7 +34,7 @@ public class DeclaredSkillProgressEntity extends AvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private EDeclaredSkillLevel level;
 
-  @Column(length = REFLECTION_LENGTH)
+  @Column(length = RICH_TEXT_LENGTH)
   private String reflection;
 
   private DeclaredSkillProgressEntity(

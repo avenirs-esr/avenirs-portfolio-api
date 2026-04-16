@@ -7,13 +7,23 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"id", "activityId", "title", "thematic", "summary", "status"})
+@Schema(
+    requiredProperties = {
+      "id",
+      "activityId",
+      "title",
+      "thematic",
+      "summary",
+      "description",
+      "status"
+    })
 public record DeclaredActivityViewDTO(
     UUID id,
     UUID activityId,
     String title,
     @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
     String summary,
+    String description,
     String executionPeriodInfoSummary,
     @Schema(ref = "#/components/schemas/EDeclaredActivityStatus") EDeclaredActivityStatus status,
     LocalDate startDate,

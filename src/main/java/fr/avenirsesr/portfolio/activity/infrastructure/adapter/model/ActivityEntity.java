@@ -27,8 +27,11 @@ public class ActivityEntity extends AvenirsBaseEntity {
   @Column(nullable = false)
   private EActivityThematic thematic;
 
-  @Column(nullable = false, length = DESCRIPTION_LENGTH)
+  @Column(nullable = false, length = SUMMARY_LENGTH)
   private String summary;
+
+  @Column(nullable = false, length = RICH_TEXT_LENGTH)
+  private String description;
 
   @Column(name = "execution_period_info", nullable = false, length = ACTIVITY_EXECUTION_PERIOD_INFO)
   private String executionPeriodInfo;
@@ -41,6 +44,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
       String title,
       EActivityThematic thematic,
       String summary,
+      String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
       Instant createdAt,
@@ -50,6 +54,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
     this.title = title;
     this.thematic = thematic;
     this.summary = summary;
+    this.description = description;
     this.executionPeriodInfo = executionPeriodInfo;
     this.executionPeriodInfoSummary = executionPeriodInfoSummary;
     this.setCreatedAt(createdAt);
@@ -61,6 +66,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
       String title,
       EActivityThematic thematic,
       String summary,
+      String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
       Instant createdAt,
@@ -71,6 +77,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
         title,
         thematic,
         summary,
+        description,
         executionPeriodInfo,
         executionPeriodInfoSummary,
         createdAt,

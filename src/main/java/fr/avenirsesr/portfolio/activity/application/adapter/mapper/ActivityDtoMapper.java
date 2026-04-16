@@ -10,6 +10,7 @@ public interface ActivityDtoMapper {
         activity.getTitle(),
         activity.getThematic(),
         activity.getSummary(),
+        activity.getDescription(),
         activity.getExecutionPeriodInfo(),
         activity.getCreatedAt(),
         activity.getUpdatedAt());
