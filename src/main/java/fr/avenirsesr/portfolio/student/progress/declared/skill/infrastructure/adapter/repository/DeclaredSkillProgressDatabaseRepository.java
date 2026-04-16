@@ -48,26 +48,33 @@ public class DeclaredSkillProgressDatabaseRepository
 
   @Override
   public PagedResult<DeclaredSkillProgress> findAllByStudent(
-      Student student, PageCriteria pageCriteria) {
+      Student student, PageCriteria pageCriteria, SortCriteria sortCriteria) {
     var specification = hasStudent(student);
     return findAll(
         specification,
-        PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()),
+        PageRequest.of(
+            pageCriteria.page(),
+            pageCriteria.pageSize(),
+            DeclaredSkillProgressSpecification.toSort(sortCriteria)),
         FetchGraph.init().fetch("student").fetch("declaredSkill"));
   }
 
   @Override
   public PagedResult<DeclaredSkillProgress> findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword, SortCriteria sortCriteria) {
-    var specification =
-        hasStudent(student)
-            .and(DeclaredSkillProgressSpecification.search(keyword))
-            .and(DeclaredSkillProgressSpecification.withSort(sortCriteria));
-    return findAllByStudent(specification, pageCriteria);
+    var specification = hasStudent(student).and(DeclaredSkillProgressSpecification.search(keyword));
+    return findAllByStudent(specification, pageCriteria, sortCriteria);
   }
 
   private PagedResult<DeclaredSkillProgress> findAllByStudent(
-      Specification<DeclaredSkillProgressEntity> specification, PageCriteria pageCriteria) {
-    return findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
+      Specification<DeclaredSkillProgressEntity> specification,
+      PageCriteria pageCriteria,
+      SortCriteria sortCriteria) {
+    return findAll(
+        specification,
+        PageRequest.of(
+            pageCriteria.page(),
+            pageCriteria.pageSize(),
+            DeclaredSkillProgressSpecification.toSort(sortCriteria)));
   }
 }

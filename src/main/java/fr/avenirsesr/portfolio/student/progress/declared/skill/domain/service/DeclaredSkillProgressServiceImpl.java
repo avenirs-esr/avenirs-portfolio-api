@@ -62,7 +62,8 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   @Override
   public PagedResult<DeclaredSkillProgress> getDeclaredSkillsProgresses(PageCriteria pageCriteria) {
     Student student = loggedInUserService.getLoggedInStudent();
-    return declaredSkillProgressRepository.findAllByStudent(student, pageCriteria);
+    return declaredSkillProgressRepository.findAllByStudent(
+        student, pageCriteria, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
   }
 
   @Override

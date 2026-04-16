@@ -17,10 +17,12 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructu
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -111,7 +113,8 @@ public class AssociationSeeder {
                         savedDeclaredSkillProgresses,
                         progress ->
                             progress.getStudent() != null ? progress.getStudent().getId() : null,
-                        DeclaredSkillProgressEntity::getId);
+                        DeclaredSkillProgressEntity::getId,
+                        Comparator.comparing(progress -> progress.getDeclaredSkill().getLibelle()));
             case TRACE_DECLARED_EXPERIENCE ->
                 id ->
                     resolveDynamicIdWithStudentParam(
@@ -121,7 +124,8 @@ public class AssociationSeeder {
                             experience.getStudent() != null
                                 ? experience.getStudent().getId()
                                 : null,
-                        DeclaredExperienceEntity::getId);
+                        DeclaredExperienceEntity::getId,
+                        null);
           };
 
       return new AssociationData(
@@ -143,7 +147,8 @@ public class AssociationSeeder {
       String dynamicId,
       List<T> savedEntities,
       Function<T, UUID> studentIdExtractor,
-      Function<T, UUID> entityIdExtractor) {
+      Function<T, UUID> entityIdExtractor,
+      Comparator<T> sortComparator) {
 
     int lastSeparatorIndex = dynamicId.lastIndexOf('_');
     int secondLastSeparatorIndex = dynamicId.lastIndexOf('_', lastSeparatorIndex - 1);
@@ -158,10 +163,14 @@ public class AssociationSeeder {
     UUID studentId = UUID.fromString(studentIdRaw);
     int index = Integer.parseInt(indexRaw);
 
-    List<T> filteredEntities =
-        savedEntities.stream()
-            .filter(entity -> studentId.equals(studentIdExtractor.apply(entity)))
-            .toList();
+    Stream<T> filteredStream =
+        savedEntities.stream().filter(entity -> studentId.equals(studentIdExtractor.apply(entity)));
+
+    if (sortComparator != null) {
+      filteredStream = filteredStream.sorted(sortComparator);
+    }
+
+    List<T> filteredEntities = filteredStream.toList();
 
     if (index < 0 || index >= filteredEntities.size()) {
       throw new IllegalArgumentException(
