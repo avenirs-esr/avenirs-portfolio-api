@@ -4,13 +4,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.association.domain.model.Association;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.output.repository.DeclaredExperienceRepository;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
@@ -30,6 +37,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DeclaredExperienceServiceImplTest {
 
   @Mock private LoggedInUserService loggedInUserService;
+  @Mock private AssociationService associationService;
+  @Mock private TraceService traceService;
   @Mock private DeclaredExperienceRepository experienceRepository;
   @Mock private StudentService studentService;
 
@@ -908,5 +917,115 @@ class DeclaredExperienceServiceImplTest {
     service.delete(List.of(id));
 
     verify(experienceRepository).removeAllFromDatabase(List.of(exp));
+  }
+
+  @Test
+  void getAssociations_should_return_trace_associations() {
+    BddLogger.given("a declared experience with trace associations");
+
+    UUID experienceId = UUID.randomUUID();
+
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    when(experience.getId()).thenReturn(experienceId);
+    when(experience.getStudent()).thenReturn(loggedIn);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+
+    Association association = mock(Association.class);
+    UUID traceId = UUID.randomUUID();
+
+    when(association.getId()).thenReturn(UUID.randomUUID());
+    when(association.getId1()).thenReturn(traceId);
+    when(association.getAssociationType()).thenReturn(EAssociationType.TRACE_DECLARED_EXPERIENCE);
+
+    when(associationService.getAllOf(
+            experienceId,
+            DeclaredExperience.class,
+            EAssociationType.getAllBy(DeclaredExperience.class)))
+        .thenReturn(List.of(association));
+
+    Trace trace = TraceFixture.create().withId(traceId).toModel();
+    when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
+
+    BddLogger.when("getting associations");
+
+    var result = service.getAssociations(experienceId);
+
+    BddLogger.then("it should return mapped trace associations");
+
+    assertNotNull(result);
+    assertEquals(1, result.traceAssociations().size());
+  }
+
+  @Test
+  void getAssociations_should_throw_DeclaredExperienceNotFoundException() {
+    BddLogger.given("an unknown declared experience");
+
+    UUID experienceId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(experienceRepository.findById(experienceId)).thenReturn(Optional.empty());
+
+    BddLogger.when("getting associations");
+
+    assertThrows(
+        DeclaredExperienceNotFoundException.class, () -> service.getAssociations(experienceId));
+
+    BddLogger.then("it should throw DeclaredExperienceNotFoundException");
+  }
+
+  @Test
+  void getAssociations_should_throw_UserNotAuthorizedException() {
+    BddLogger.given("a declared experience owned by another student");
+
+    UUID experienceId = UUID.randomUUID();
+
+    Student loggedIn = student;
+    Student other = StudentFixture.create().toModel();
+
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    when(experience.getStudent()).thenReturn(other);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+
+    BddLogger.when("getting associations");
+
+    assertThrows(UserNotAuthorizedException.class, () -> service.getAssociations(experienceId));
+
+    BddLogger.then("it should throw UserNotAuthorizedException");
+  }
+
+  @Test
+  void getAssociations_should_return_empty_when_no_trace_associations() {
+    BddLogger.given("a declared experience without trace associations");
+
+    UUID experienceId = UUID.randomUUID();
+
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    when(experience.getId()).thenReturn(experienceId);
+    when(experience.getStudent()).thenReturn(student);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(experienceRepository.findById(experienceId)).thenReturn(Optional.of(experience));
+
+    when(associationService.getAllOf(
+            experienceId,
+            DeclaredExperience.class,
+            EAssociationType.getAllBy(DeclaredExperience.class)))
+        .thenReturn(List.of());
+
+    when(traceService.findAllTracesById(any())).thenReturn(List.of());
+
+    BddLogger.when("getting associations");
+
+    var result = service.getAssociations(experienceId);
+
+    BddLogger.then("it should return empty list");
+
+    assertNotNull(result);
+    assertTrue(result.traceAssociations().isEmpty());
   }
 }

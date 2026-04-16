@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.controller;
 
-import static org.hamcrest.Matchers.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -466,5 +464,101 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isForbidden();
+  }
+
+  @Test
+  void shouldGetDeclaredExperienceAssociations() throws Exception {
+    BddLogger.given("an existing declared experience");
+
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    String experienceId = extractIdFromResponse(responseBody);
+
+    BddLogger.when("getting associations of declared experience");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + experienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.traceAssociations")
+        .isArray();
+
+    BddLogger.then("it should return associations");
+  }
+
+  @Test
+  void shouldReturn404WhenGettingAssociationsOfUnknownDeclaredExperience() {
+    BddLogger.given("a non existing declared experience id");
+
+    BddLogger.when("getting associations");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + notFoundDeclaredExperienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturnForbiddenWhenGettingAssociationsOfAnotherStudentExperience() throws Exception {
+    BddLogger.given("a declared experience belonging to another student");
+
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", otherStudentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", otherStudentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    String otherExperienceId = extractIdFromResponse(responseBody);
+
+    BddLogger.when("another student tries to access associations");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + otherExperienceId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+
+    BddLogger.then("it should return forbidden");
   }
 }

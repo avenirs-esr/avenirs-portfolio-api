@@ -3,16 +3,24 @@ package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.serv
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
+import fr.avenirsesr.portfolio.association.domain.model.Association;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
+import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceAssociationsData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.output.repository.DeclaredExperienceRepository;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationData;
+import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import java.time.LocalDate;
@@ -27,6 +35,8 @@ import lombok.extern.slf4j.Slf4j;
 public class DeclaredExperienceServiceImpl implements DeclaredExperienceService {
 
   private final LoggedInUserService loggedInUserService;
+  private final AssociationService associationService;
+  private final TraceService traceService;
   private final DeclaredExperienceRepository experienceRepository;
   private final StudentService studentService;
 
@@ -265,5 +275,41 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   public PagedResult<DeclaredExperience> search(String keyword, PageCriteria pageCriteria) {
     Student student = loggedInUserService.getLoggedInStudent();
     return experienceRepository.findAllByStudent(student, pageCriteria, keyword);
+  }
+
+  private TraceAssociationData traceAssociationMapper(Association association, List<Trace> traces) {
+    return new TraceAssociationData(
+        association.getId(),
+        traces.stream()
+            .filter(t -> t.getId().equals(association.getId1()))
+            .findAny()
+            .orElseThrow(TraceNotFoundException::new));
+  }
+
+  @Override
+  public DeclaredExperienceAssociationsData getAssociations(UUID experienceId) {
+    var student = loggedInUserService.getLoggedInStudent();
+    var experience =
+        experienceRepository
+            .findById(experienceId)
+            .orElseThrow(DeclaredExperienceNotFoundException::new);
+    if (!experience.getStudent().equals(student)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    var associations =
+        associationService.getAllOf(
+            experience.getId(),
+            DeclaredExperience.class,
+            EAssociationType.getAllBy(DeclaredExperience.class));
+    var traceAssociations =
+        associations.stream()
+            .filter(a -> a.getAssociationType() == EAssociationType.TRACE_DECLARED_EXPERIENCE)
+            .toList();
+    var traces =
+        traceService.findAllTracesById(associations.stream().map(Association::getId1).toList());
+
+    return new DeclaredExperienceAssociationsData(
+        traceAssociations.stream().map(a -> traceAssociationMapper(a, traces)).toList());
   }
 }

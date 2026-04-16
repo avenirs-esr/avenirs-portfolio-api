@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceAssociationsData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import java.time.LocalDate;
@@ -59,4 +60,6 @@ public interface DeclaredExperienceService {
   List<DeclaredExperience> findAllByIds(List<UUID> experienceIds);
 
   PagedResult<DeclaredExperience> search(String keyword, PageCriteria pageCriteria);
+
+  DeclaredExperienceAssociationsData getAssociations(UUID experienceId);
 }

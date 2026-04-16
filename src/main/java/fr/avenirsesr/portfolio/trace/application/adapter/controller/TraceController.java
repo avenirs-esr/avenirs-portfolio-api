@@ -294,7 +294,7 @@ public class TraceController {
       @PathVariable UUID traceId,
       @RequestParam(required = false, defaultValue = "false") boolean onlyNotCompleted) {
     log.debug(
-        "Received request to get associate Trace[{}] associations by student [{}]"
+        "Received request to get Trace[{}] associations by student [{}]"
             + " (onlyNotCompleted= {})",
         traceId,
         principal.getName(),

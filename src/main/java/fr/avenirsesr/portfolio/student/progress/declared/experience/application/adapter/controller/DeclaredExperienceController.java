@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceAssociationsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.dto.DeclaredExperienceViewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.mapper.DeclaredExperienceMapper;
@@ -11,6 +12,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -93,5 +95,18 @@ public class DeclaredExperienceController {
   public ResponseEntity<String> deleteDeclaredExperiences(@RequestBody List<UUID> experienceIds) {
     declaredExperienceService.delete(experienceIds);
     return ResponseEntity.ok("Declared experiences successfully deleted");
+  }
+
+  @GetMapping("/{experienceId}/associations")
+  public ResponseEntity<DeclaredExperienceAssociationsDTO> getTraceAssociations(
+      Principal principal, @PathVariable UUID experienceId) {
+    log.debug(
+        "Received request to get declared experience[{}] associations by student [{}]",
+        experienceId,
+        principal.getName());
+
+    var associations = declaredExperienceService.getAssociations(experienceId);
+
+    return ResponseEntity.ok(DeclaredExperienceMapper.toAssociationsDTO(associations));
   }
 }
