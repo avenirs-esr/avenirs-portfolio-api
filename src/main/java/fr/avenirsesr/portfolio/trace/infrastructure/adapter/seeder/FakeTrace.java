@@ -2,25 +2,23 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
-import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
-import fr.avenirsesr.portfolio.trace.domain.port.output.seeder.TraceDataGenerator;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import net.datafaker.Faker;
+
 import java.time.Instant;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 public class FakeTrace {
-  private static final DataGeneratorProvider<SharedDataGenerator> sharedDataGenerator =
-      new DataGeneratorProvider<SharedDataGenerator>()
-          .init(FakeTrace.class, SharedDataGenerator.class);
-  private static final DataGeneratorProvider<TraceDataGenerator> traceDataGenerator =
-      new DataGeneratorProvider<TraceDataGenerator>()
-          .init(FakeTrace.class, TraceDataGenerator.class);
-
   private final TraceEntity trace;
+
+  private static Faker faker() {
+    return new Faker();
+  }
 
   private FakeTrace(TraceEntity trace) {
     this.trace = trace;
@@ -30,9 +28,9 @@ public class FakeTrace {
     var fakeTrace =
         new FakeTrace(
             TraceEntity.of(
-                sharedDataGenerator.with("id").uuid(),
+                UUID.randomUUID(),
                 user,
-                traceDataGenerator.with("trace-title").traceName(),
+                "Trace %s".formatted(faker().lorem().word()),
                 ELanguage.FALLBACK,
                 List.of(),
                 List.of(),
@@ -44,11 +42,9 @@ public class FakeTrace {
                 Instant.now(),
                 null));
 
-    if (sharedDataGenerator.with("withAiUseJustification").bool())
-      fakeTrace = fakeTrace.withAiUseJustification();
-    if (sharedDataGenerator.with("withPersonalNote").bool())
-      fakeTrace = fakeTrace.withPersonalNote();
-    if (sharedDataGenerator.with("isGroup").bool()) fakeTrace = fakeTrace.isGroup();
+    if (new Random().nextBoolean()) fakeTrace = fakeTrace.withAiUseJustification();
+    if (new Random().nextBoolean()) fakeTrace = fakeTrace.withPersonalNote();
+    if (new Random().nextBoolean()) fakeTrace = fakeTrace.isGroup();
 
     return fakeTrace;
   }
@@ -85,13 +81,12 @@ public class FakeTrace {
   }
 
   public FakeTrace withAiUseJustification() {
-    trace.setAiUseJustification(
-        traceDataGenerator.with("setAiUseJustification").traceAiJustification());
+    trace.setAiUseJustification("I use AI for : %s".formatted(faker().lorem().sentence(5)));
     return this;
   }
 
   public FakeTrace withPersonalNote() {
-    trace.setPersonalNote(traceDataGenerator.with("setPersonalNote").tracePersonalNote());
+    trace.setPersonalNote("Personal note : %s".formatted(faker().lorem().sentence(5)));
     return this;
   }
 
