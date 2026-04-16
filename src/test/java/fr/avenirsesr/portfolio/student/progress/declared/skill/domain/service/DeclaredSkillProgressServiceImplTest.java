@@ -12,6 +12,9 @@ import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillDetailsDTO;
@@ -95,7 +98,8 @@ public class DeclaredSkillProgressServiceImplTest {
         PagedResult<DeclaredSkillProgress> expected = mock(PagedResult.class);
 
         BddLogger.when("calling the method with a given student");
-        when(declaredSkillProgressRepository.findAllByStudent(student, criteria))
+        when(declaredSkillProgressRepository.findAllByStudent(
+                student, criteria, new SortCriteria(ESortField.NAME, ESortOrder.ASC)))
             .thenReturn(expected);
 
         PagedResult<DeclaredSkillProgress> result =
@@ -105,7 +109,8 @@ public class DeclaredSkillProgressServiceImplTest {
             "it should return the expected paged declared skill progress and delegate to"
                 + " repository");
         assertThat(result).isSameAs(expected);
-        verify(declaredSkillProgressRepository).findAllByStudent(student, criteria);
+        verify(declaredSkillProgressRepository)
+            .findAllByStudent(student, criteria, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
       }
 
       @Test

@@ -12,7 +12,8 @@ public interface DeclaredSkillProgressRepository
     extends GenericRepositoryPort<DeclaredSkillProgress> {
   boolean declaredSkillProgressAlreadyExists(DeclaredSkillProgress declaredSkillProgress);
 
-  PagedResult<DeclaredSkillProgress> findAllByStudent(Student student, PageCriteria pageCriteria);
+  PagedResult<DeclaredSkillProgress> findAllByStudent(
+      Student student, PageCriteria pageCriteria, SortCriteria sortCriteria);
 
   PagedResult<DeclaredSkillProgress> findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword, SortCriteria sortCriteria);
