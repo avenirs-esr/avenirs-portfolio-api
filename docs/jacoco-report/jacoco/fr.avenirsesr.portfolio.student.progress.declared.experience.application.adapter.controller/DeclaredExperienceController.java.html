@@ -101,7 +101,7 @@ public class DeclaredExperienceController {
   public ResponseEntity&lt;DeclaredExperienceAssociationsDTO&gt; getTraceAssociations(
       Principal principal, @PathVariable UUID experienceId) {
 <span class="fc" id="L103">    log.debug(</span>
-        &quot;Received request to get associate declared experience[{}] associations by student [{}]&quot;,
+        &quot;Received request to get declared experience[{}] associations by student [{}]&quot;,
         experienceId,
 <span class="fc" id="L106">        principal.getName());</span>
 
