@@ -93,52 +93,50 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="fc" id="L93">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;aiUseJustification&quot;)), pattern);</span>
 <span class="fc" id="L94">      var personalNotePredicate =</span>
 <span class="fc" id="L95">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;personalNote&quot;)), pattern);</span>
-<span class="fc" id="L96">      var linkPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;link&quot;)), pattern);</span>
 
       // Attachment
-<span class="fc" id="L99">      Subquery&lt;TraceAttachmentEntity&gt; attachSub = query.subquery(TraceAttachmentEntity.class);</span>
-<span class="fc" id="L100">      Root&lt;TraceAttachmentEntity&gt; attachRoot = attachSub.from(TraceAttachmentEntity.class);</span>
-<span class="fc" id="L101">      attachSub</span>
-<span class="fc" id="L102">          .select(attachRoot)</span>
-<span class="fc" id="L103">          .where(</span>
-<span class="fc" id="L104">              criteriaBuilder.equal(attachRoot.get(&quot;trace&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
-<span class="fc" id="L105">              criteriaBuilder.isTrue(attachRoot.get(&quot;isActiveVersion&quot;)),</span>
-<span class="fc" id="L106">              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get(&quot;name&quot;)), pattern));</span>
-<span class="fc" id="L107">      Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);</span>
+<span class="fc" id="L98">      Subquery&lt;TraceAttachmentEntity&gt; attachSub = query.subquery(TraceAttachmentEntity.class);</span>
+<span class="fc" id="L99">      Root&lt;TraceAttachmentEntity&gt; attachRoot = attachSub.from(TraceAttachmentEntity.class);</span>
+<span class="fc" id="L100">      attachSub</span>
+<span class="fc" id="L101">          .select(attachRoot)</span>
+<span class="fc" id="L102">          .where(</span>
+<span class="fc" id="L103">              criteriaBuilder.equal(attachRoot.get(&quot;trace&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L104">              criteriaBuilder.isTrue(attachRoot.get(&quot;isActiveVersion&quot;)),</span>
+<span class="fc" id="L105">              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get(&quot;name&quot;)), pattern));</span>
+<span class="fc" id="L106">      Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);</span>
 
       // Declared skills
-<span class="fc" id="L110">      var declaredSkillJoin =</span>
-<span class="fc" id="L111">          root.join(&quot;declaredSkillsProgresses&quot;, JoinType.LEFT).join(&quot;declaredSkill&quot;, JoinType.LEFT);</span>
+<span class="fc" id="L109">      var declaredSkillJoin =</span>
+<span class="fc" id="L110">          root.join(&quot;declaredSkillsProgresses&quot;, JoinType.LEFT).join(&quot;declaredSkill&quot;, JoinType.LEFT);</span>
 
-<span class="fc" id="L113">      var declaredSkillPredicate =</span>
-<span class="fc" id="L114">          criteriaBuilder.like(criteriaBuilder.lower(declaredSkillJoin.get(&quot;libelle&quot;)), pattern);</span>
+<span class="fc" id="L112">      var declaredSkillPredicate =</span>
+<span class="fc" id="L113">          criteriaBuilder.like(criteriaBuilder.lower(declaredSkillJoin.get(&quot;libelle&quot;)), pattern);</span>
 
       // Skill level
-<span class="fc" id="L117">      var slpJoin =</span>
-<span class="fc" id="L118">          root.join(&quot;skillLevels&quot;, JoinType.LEFT)</span>
-<span class="fc" id="L119">              .join(&quot;skillLevel&quot;, JoinType.LEFT)</span>
-<span class="fc" id="L120">              .join(&quot;translations&quot;, JoinType.LEFT);</span>
-<span class="fc" id="L121">      var slpLangPredicate = criteriaBuilder.equal(slpJoin.get(&quot;language&quot;), language);</span>
-<span class="fc" id="L122">      var slpNamePredicate =</span>
-<span class="fc" id="L123">          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get(&quot;name&quot;)), pattern);</span>
-<span class="fc" id="L124">      var slpDescPredicate =</span>
-<span class="fc" id="L125">          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get(&quot;description&quot;)), pattern);</span>
-<span class="fc" id="L126">      var skillLevelPredicate =</span>
-<span class="fc" id="L127">          criteriaBuilder.and(</span>
-<span class="fc" id="L128">              slpLangPredicate, criteriaBuilder.or(slpNamePredicate, slpDescPredicate));</span>
+<span class="fc" id="L116">      var slpJoin =</span>
+<span class="fc" id="L117">          root.join(&quot;skillLevels&quot;, JoinType.LEFT)</span>
+<span class="fc" id="L118">              .join(&quot;skillLevel&quot;, JoinType.LEFT)</span>
+<span class="fc" id="L119">              .join(&quot;translations&quot;, JoinType.LEFT);</span>
+<span class="fc" id="L120">      var slpLangPredicate = criteriaBuilder.equal(slpJoin.get(&quot;language&quot;), language);</span>
+<span class="fc" id="L121">      var slpNamePredicate =</span>
+<span class="fc" id="L122">          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get(&quot;name&quot;)), pattern);</span>
+<span class="fc" id="L123">      var slpDescPredicate =</span>
+<span class="fc" id="L124">          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get(&quot;description&quot;)), pattern);</span>
+<span class="fc" id="L125">      var skillLevelPredicate =</span>
+<span class="fc" id="L126">          criteriaBuilder.and(</span>
+<span class="fc" id="L127">              slpLangPredicate, criteriaBuilder.or(slpNamePredicate, slpDescPredicate));</span>
 
       // AMS
-<span class="fc" id="L131">      var amsJoin = root.join(&quot;amses&quot;, JoinType.LEFT).join(&quot;translations&quot;, JoinType.LEFT);</span>
-<span class="fc" id="L132">      var amsLangPredicate = criteriaBuilder.equal(amsJoin.get(&quot;language&quot;), language);</span>
-<span class="fc" id="L133">      var amsTitlePredicate =</span>
-<span class="fc" id="L134">          criteriaBuilder.like(criteriaBuilder.lower(amsJoin.get(&quot;title&quot;)), pattern);</span>
-<span class="fc" id="L135">      var amsPredicate = criteriaBuilder.and(amsLangPredicate, amsTitlePredicate);</span>
+<span class="fc" id="L130">      var amsJoin = root.join(&quot;amses&quot;, JoinType.LEFT).join(&quot;translations&quot;, JoinType.LEFT);</span>
+<span class="fc" id="L131">      var amsLangPredicate = criteriaBuilder.equal(amsJoin.get(&quot;language&quot;), language);</span>
+<span class="fc" id="L132">      var amsTitlePredicate =</span>
+<span class="fc" id="L133">          criteriaBuilder.like(criteriaBuilder.lower(amsJoin.get(&quot;title&quot;)), pattern);</span>
+<span class="fc" id="L134">      var amsPredicate = criteriaBuilder.and(amsLangPredicate, amsTitlePredicate);</span>
 
-<span class="fc" id="L137">      return criteriaBuilder.or(</span>
+<span class="fc" id="L136">      return criteriaBuilder.or(</span>
           titlePredicate,
           aiUsePredicate,
           personalNotePredicate,
-          linkPredicate,
           attachmentPredicate,
           declaredSkillPredicate,
           skillLevelPredicate,
