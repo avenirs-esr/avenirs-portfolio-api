@@ -125,7 +125,7 @@ public class AssociationSeeder {
                                 ? experience.getStudent().getId()
                                 : null,
                         DeclaredExperienceEntity::getId,
-                        null);
+                        declaredExperienceComparator());
           };
 
       return new AssociationData(
@@ -181,5 +181,14 @@ public class AssociationSeeder {
     }
 
     return entityIdExtractor.apply(filteredEntities.get(index));
+  }
+
+  private Comparator<DeclaredExperienceEntity> declaredExperienceComparator() {
+    return Comparator.comparing(
+            (DeclaredExperienceEntity experience) -> experience.getEndDate() == null ? 1 : 0,
+            Comparator.reverseOrder())
+        .thenComparing(DeclaredExperienceEntity::getStartDate, Comparator.reverseOrder())
+        .thenComparing(
+            experience -> experience.getTitle() == null ? "" : experience.getTitle().toLowerCase());
   }
 }

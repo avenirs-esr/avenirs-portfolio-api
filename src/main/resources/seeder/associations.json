@@ -73,5 +73,15 @@
     "id1": "7f3a2b91-3d44-4c6a-8a9e-2b6d5f1c0a22",
     "id2": "DYNAMIC_STUDENT_DECLARED_SKILL_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_1",
     "associationType": "DECLARED_ACTIVITY_DECLARED_SKILL"
+  },
+  {
+    "id1": "f3d22e78-e827-4bae-8831-44168c176198",
+    "id2": "DYNAMIC_STUDENT_DECLARED_EXPERIENCE_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_0",
+    "associationType": "TRACE_DECLARED_EXPERIENCE"
+  },
+  {
+    "id1": "4b02b225-998a-4996-be52-8d9b2a5ab327",
+    "id2": "DYNAMIC_STUDENT_DECLARED_EXPERIENCE_ID_0a8700ab-90b6-4a38-8338-acbdd4fbcd3d_0",
+    "associationType": "TRACE_DECLARED_EXPERIENCE"
   }
 ]
