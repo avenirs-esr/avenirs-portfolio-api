@@ -3,19 +3,24 @@
 import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.AttachmentUploadDTOMapper;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-<span class="fc" id="L18">@Slf4j</span>
+<span class="fc" id="L23">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/storage/traces&quot;)
@@ -28,32 +33,47 @@ public class TraceAttachmentController {
       @Valid @PathVariable UUID traceId,
       @RequestParam(&quot;file&quot;) MultipartFile file)
       throws IOException {
-<span class="fc" id="L31">    log.debug(</span>
+<span class="fc" id="L36">    log.debug(</span>
         &quot;Received attachment upload request from user [{}] for trace [{}]&quot;,
-<span class="fc" id="L33">        principal.getName(),</span>
+<span class="fc" id="L38">        principal.getName(),</span>
         traceId);
-<span class="fc" id="L35">    var attachment =</span>
-<span class="fc" id="L36">        service.uploadTraceAttachment(</span>
+<span class="fc" id="L40">    var attachment =</span>
+<span class="fc" id="L41">        service.uploadTraceAttachment(</span>
             traceId,
-<span class="fc" id="L38">            file.getOriginalFilename(),</span>
-<span class="fc" id="L39">            file.getContentType(),</span>
-<span class="fc" id="L40">            file.getSize(),</span>
-<span class="fc" id="L41">            file.getBytes());</span>
+<span class="fc" id="L43">            file.getOriginalFilename(),</span>
+<span class="fc" id="L44">            file.getContentType(),</span>
+<span class="fc" id="L45">            file.getSize(),</span>
+<span class="fc" id="L46">            file.getBytes());</span>
 
-<span class="fc" id="L43">    return ResponseEntity.status(HttpStatus.CREATED)</span>
-<span class="fc" id="L44">        .body(AttachmentUploadDTOMapper.fromDomain(attachment));</span>
+<span class="fc" id="L48">    return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="fc" id="L49">        .body(AttachmentUploadDTOMapper.fromDomain(attachment));</span>
   }
 
-  @GetMapping(&quot;/{traceId}/attachments/{attachmentId}&quot;)
-  public ResponseEntity&lt;byte[]&gt; downloadAttachment(
-      @Valid @PathVariable UUID traceId, @Valid @PathVariable UUID attachmentId)
+  @GetMapping(&quot;/attachments/{attachmentId}&quot;)
+  @Operation(
+      summary = &quot;Download an attachment&quot;,
+      description =
+          &quot;Retrieves the binary content of a specific attachment associated with a trace.&quot;,
+      responses = {
+        @ApiResponse(
+            responseCode = &quot;200&quot;,
+            description = &quot;File downloaded successfully&quot;,
+            content =
+                @Content(
+                    mediaType = &quot;application/octet-stream&quot;,
+                    schema = @Schema(type = &quot;string&quot;, format = &quot;binary&quot;))),
+        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Attachment not found&quot;)
+      })
+  public ResponseEntity&lt;byte[]&gt; downloadAttachment(@Valid @PathVariable UUID attachmentId)
       throws IOException {
-<span class="fc" id="L51">    log.debug(</span>
-        &quot;Received attachment download request for trace [{}] and attachment [{}]&quot;,
-        traceId,
-        attachmentId);
-<span class="fc" id="L55">    byte[] fileContent = service.downloadTraceAttachment(attachmentId);</span>
-<span class="fc" id="L56">    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(fileContent);</span>
+<span class="fc" id="L69">    log.debug(&quot;Received attachment download request for attachment [{}]&quot;, attachmentId);</span>
+<span class="fc" id="L70">    var attachment = service.downloadTraceAttachment(attachmentId);</span>
+<span class="fc" id="L71">    return ResponseEntity.ok()</span>
+<span class="fc" id="L72">        .contentType(MediaType.APPLICATION_OCTET_STREAM)</span>
+<span class="fc" id="L73">        .header(</span>
+            HttpHeaders.CONTENT_DISPOSITION,
+<span class="fc" id="L75">            &quot;attachment; filename=\&quot;&quot; + attachment.fileName() + &quot;\&quot;&quot;)</span>
+<span class="fc" id="L76">        .body(attachment.content());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
