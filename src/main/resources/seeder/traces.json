@@ -118,5 +118,15 @@
         "uploadedAt": "2025-11-30T10:05:00.000000Z"
       }
     ]
+  },
+  {
+    "traceId": "ca745573-544c-4c4c-9768-724f02c690a1",
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "title": "Lien vers travaux personnels",
+    "isGroup": false,
+    "language": "FRENCH",
+    "aiJustification": "Utilisation de l’IA pour réaliser les documentations techniques.",
+    "personalNote": "Portfolio technique des projets réalisés durant mon temps libre.",
+    "link": "https://example.com"
   }
 ]

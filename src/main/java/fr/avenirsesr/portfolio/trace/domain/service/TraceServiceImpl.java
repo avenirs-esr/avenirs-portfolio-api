@@ -1,8 +1,11 @@
 package fr.avenirsesr.portfolio.trace.domain.service;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.CommonLimits.MAX_TRACES_OVERVIEW;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.LINK_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotBlankAndMaxLength;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateUrl;
 
 import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
@@ -188,6 +191,7 @@ public class TraceServiceImpl implements TraceService {
         trace.isGroup(),
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
+        trace.getLink().orElse(null),
         traceAttachment,
         trace.getCreatedAt(),
         trace.getUpdatedAt());
@@ -255,7 +259,8 @@ public class TraceServiceImpl implements TraceService {
       ELanguage language,
       boolean isGroup,
       String personalNote,
-      String aiJustification) {
+      String aiJustification,
+      String link) {
     return createTrace(
         traceId,
         userService.getUser(userId),
@@ -263,7 +268,8 @@ public class TraceServiceImpl implements TraceService {
         language,
         isGroup,
         personalNote,
-        aiJustification);
+        aiJustification,
+        link);
   }
 
   @Override
@@ -272,10 +278,18 @@ public class TraceServiceImpl implements TraceService {
       ELanguage language,
       boolean isGroup,
       String personalNote,
-      String aiJustification) {
+      String aiJustification,
+      String link) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
     return createTrace(
-        UUID.randomUUID(), loggedInUser, title, language, isGroup, personalNote, aiJustification);
+        UUID.randomUUID(),
+        loggedInUser,
+        title,
+        language,
+        isGroup,
+        personalNote,
+        aiJustification,
+        link);
   }
 
   private Trace createTrace(
@@ -285,10 +299,13 @@ public class TraceServiceImpl implements TraceService {
       ELanguage language,
       boolean isGroup,
       String personalNote,
-      String aiJustification) {
+      String aiJustification,
+      String link) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
+    validateOptionalTextMaxLength("link", link, LINK_LENGTH);
+    validateUrl(link);
     var trace =
-        Trace.create(traceId, user, title, language, isGroup, aiJustification, personalNote);
+        Trace.create(traceId, user, title, language, isGroup, aiJustification, personalNote, link);
 
     return traceRepository.save(trace);
   }
@@ -323,6 +340,7 @@ public class TraceServiceImpl implements TraceService {
         savedTrace.isGroup(),
         savedTrace.getAiUseJustification().orElse(null),
         savedTrace.getPersonalNote().orElse(null),
+        savedTrace.getLink().orElse(null),
         traceAttachment,
         savedTrace.getCreatedAt(),
         savedTrace.getUpdatedAt());

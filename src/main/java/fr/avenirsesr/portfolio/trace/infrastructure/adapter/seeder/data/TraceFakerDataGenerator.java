@@ -30,4 +30,9 @@ public class TraceFakerDataGenerator extends DataGenerator implements TraceDataG
   public String tracePersonalNote() {
     return "Personal note : %s".formatted(faker().lorem().sentence(5));
   }
+
+  @Override
+  public String traceLink() {
+    return faker().internet().url();
+  }
 }

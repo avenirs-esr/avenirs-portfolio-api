@@ -192,7 +192,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
   @Test
   void shouldCreateNewTrace() throws Exception {
     CreateTraceDTO dto =
-        new CreateTraceDTO("Nouvelle trace", ELanguage.FRENCH, false, "Note", "Justification");
+        new CreateTraceDTO(
+            "Nouvelle trace", ELanguage.FRENCH, false, "Note", "Justification", null);
 
     webTestClient
         .post()

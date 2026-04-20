@@ -12,6 +12,7 @@ public record TraceDetailData(
     boolean isGroup,
     String aiUseJustification,
     String personalNote,
+    String link,
     TraceAttachment attachment,
     Instant createdAt,
     Instant updatedAt) {}

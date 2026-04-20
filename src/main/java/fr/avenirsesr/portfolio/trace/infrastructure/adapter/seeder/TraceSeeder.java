@@ -81,7 +81,8 @@ public class TraceSeeder {
                   data.language(),
                   data.isGroup(),
                   data.personalNote(),
-                  data.aiJustification());
+                  data.aiJustification(),
+                  data.link());
           traces.add(trace);
 
           RequestContext.set(
@@ -132,20 +133,23 @@ public class TraceSeeder {
                     entity.getLanguage(),
                     entity.getAiUseJustification(),
                     entity.getPersonalNote(),
-                    IntStream.range(
-                            1,
-                            dataGenerator
-                                .with("number")
-                                .number(SeederConfig.MAX_ATTACHMENT_PER_TRACE))
-                        .mapToObj(i -> FakeTraceAttachment.of(entity).toEntity())
-                        .map(
-                            attachmentEntity ->
-                                new TraceAttachementCreationData(
-                                    attachmentEntity.getName(),
-                                    attachmentEntity.getFileType(),
-                                    attachmentEntity.getSize(),
-                                    attachmentEntity.getUploadedAt()))
-                        .toList()))
+                    entity.getLink(),
+                    entity.getLink() == null
+                        ? IntStream.range(
+                                1,
+                                dataGenerator
+                                    .with("number")
+                                    .number(SeederConfig.MAX_ATTACHMENT_PER_TRACE))
+                            .mapToObj(i -> FakeTraceAttachment.of(entity).toEntity())
+                            .map(
+                                attachmentEntity ->
+                                    new TraceAttachementCreationData(
+                                        attachmentEntity.getName(),
+                                        attachmentEntity.getFileType(),
+                                        attachmentEntity.getSize(),
+                                        attachmentEntity.getUploadedAt()))
+                            .toList()
+                        : null))
         .toList();
   }
 }

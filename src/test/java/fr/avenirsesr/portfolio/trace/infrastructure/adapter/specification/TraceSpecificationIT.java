@@ -247,6 +247,7 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             false,
             null,
             null,
+            null,
             Instant.now(),
             Instant.now(),
             null);

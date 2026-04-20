@@ -12,4 +12,9 @@ public record TraceCreationData(
     ELanguage language,
     String aiJustification,
     String personalNote,
-    List<TraceAttachementCreationData> attachements) {}
+    String link,
+    List<TraceAttachementCreationData> attachements) {
+  public TraceCreationData {
+    if (attachements == null) attachements = List.of();
+  }
+}
