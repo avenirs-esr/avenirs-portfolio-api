@@ -98,7 +98,7 @@ public class DeclaredExperienceController {
   }
 
   @GetMapping("/{experienceId}/associations")
-  public ResponseEntity<DeclaredExperienceAssociationsDTO> getTraceAssociations(
+  public ResponseEntity<DeclaredExperienceAssociationsDTO> getDeclaredExperienceAssociations(
       Principal principal, @PathVariable UUID experienceId) {
     log.debug(
         "Received request to get declared experience[{}] associations by student [{}]",
