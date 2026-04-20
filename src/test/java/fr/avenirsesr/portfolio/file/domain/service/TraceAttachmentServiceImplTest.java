@@ -279,4 +279,61 @@ class TraceAttachmentServiceImplTest {
                     traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes()))
         .isInstanceOf(InvalidTraceTypeException.class);
   }
+
+  @Test
+  void downloadTraceAttachment_shouldReturnFileContent() throws IOException {
+    BddLogger.given("a TraceAttachmentServiceImpl service");
+    UUID attachmentId = UUID.randomUUID();
+    String expectedContent = "File content".repeat(100); // 1200 bytes
+    String expectedFileName = "file.txt";
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    TraceAttachment attachment =
+        TraceAttachmentFixture.create()
+            .withId(attachmentId)
+            .withTrace(trace)
+            .withFileName(expectedFileName)
+            .withUri("uri/to/file.txt")
+            .toModel();
+
+    when(traceAttachmentRepository.findById(attachmentId))
+        .thenReturn(java.util.Optional.of(attachment));
+    when(fileStorageService.get("uri/to/file.txt")).thenReturn(expectedContent.getBytes());
+
+    BddLogger.when("downloading a trace attachment");
+    var result = service.downloadTraceAttachment(attachmentId);
+
+    BddLogger.then("it should return the file content");
+    assertThat(result).isNotNull();
+    assertThat(result.fileName()).isEqualTo(expectedFileName);
+    assertThat(result.content()).isEqualTo(expectedContent.getBytes());
+    verify(traceAttachmentRepository).findById(attachmentId);
+    verify(fileStorageService).get("uri/to/file.txt");
+  }
+
+  @Test
+  void downloadTraceAttachment_shouldPropagateIOException() throws IOException {
+    BddLogger.given("a TraceAttachmentServiceImpl service");
+    UUID attachmentId = UUID.randomUUID();
+    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+    TraceAttachment attachment =
+        TraceAttachmentFixture.create()
+            .withId(attachmentId)
+            .withTrace(trace)
+            .withFileName("file.txt")
+            .withUri("uri/to/file.txt")
+            .toModel();
+
+    BddLogger.when("downloading a trace attachment and an IOException occurs");
+    when(traceAttachmentRepository.findById(attachmentId))
+        .thenReturn(java.util.Optional.of(attachment));
+    when(fileStorageService.get("uri/to/file.txt"))
+        .thenThrow(new IOException("Attachment not found"));
+
+    BddLogger.then("it should propagate the IOException");
+    assertThatThrownBy(() -> service.downloadTraceAttachment(attachmentId))
+        .isInstanceOf(IOException.class)
+        .hasMessageContaining("Attachment not found");
+    verify(traceAttachmentRepository).findById(attachmentId);
+    verify(fileStorageService).get("uri/to/file.txt");
+  }
 }

@@ -7,17 +7,17 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
+import fr.avenirsesr.portfolio.file.domain.model.TraceAttachmentDownload;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -29,16 +29,12 @@ public class TraceAttachmentControllerTest {
 
   @InjectMocks private TraceAttachmentController controller;
 
-  private User user;
-  private Trace trace;
   private UUID traceId;
 
   @BeforeEach
   void setup() {
     MockitoAnnotations.openMocks(this);
 
-    user = mock(User.class);
-    trace = mock(Trace.class);
     traceId = UUID.randomUUID();
 
     when(principal.getName()).thenReturn("user123");
@@ -65,5 +61,28 @@ public class TraceAttachmentControllerTest {
 
     verify(service)
         .uploadTraceAttachment(eq(traceId), anyString(), anyString(), anyLong(), any(byte[].class));
+  }
+
+  @Test
+  void downloadAttachment_success_shouldReturn200() throws IOException {
+    BddLogger.given("a TraceAttachmentController");
+    UUID attachmentId = UUID.randomUUID();
+    byte[] fileContent = "Test content".getBytes();
+    String fileName = "test.pdf";
+
+    when(service.downloadTraceAttachment(attachmentId))
+        .thenReturn(new TraceAttachmentDownload(fileName, fileContent));
+
+    BddLogger.when("the attachment download success");
+    ResponseEntity<byte[]> response = controller.downloadAttachment(attachmentId);
+
+    BddLogger.then("it should return a 200");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody()).isEqualTo(fileContent);
+    assertThat(response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION))
+        .isEqualTo("attachment; filename=\"test.pdf\"");
+
+    verify(service).downloadTraceAttachment(attachmentId);
   }
 }
