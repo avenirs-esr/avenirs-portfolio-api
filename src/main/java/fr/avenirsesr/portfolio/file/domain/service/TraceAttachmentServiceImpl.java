@@ -1,8 +1,10 @@
 package fr.avenirsesr.portfolio.file.domain.service;
 
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.file.domain.exception.AttachmentNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.domain.model.TraceAttachmentDownload;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
@@ -93,6 +95,23 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
         true,
         uri,
         student.getUser());
+  }
+
+  @Override
+  public TraceAttachmentDownload downloadTraceAttachment(UUID attachmentId) throws IOException {
+    var attachment = traceAttachmentRepository.findById(attachmentId);
+    if (attachment.isEmpty()) {
+      throw new AttachmentNotFoundException(attachmentId);
+    }
+
+    var trace = attachment.get().getTrace();
+    Student loggedInStudent = loggedInUserService.getLoggedInStudent();
+    if (!trace.getUser().equals(loggedInStudent.getUser())) {
+      throw new UserNotAuthorizedException();
+    }
+
+    return new TraceAttachmentDownload(
+        attachment.get().getName(), fileStorageService.get(attachment.get().getUri()));
   }
 
   @Override
