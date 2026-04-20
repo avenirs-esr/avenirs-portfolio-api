@@ -43,5 +43,20 @@ public class TraceAttachmentController {
 <span class="fc" id="L43">    return ResponseEntity.status(HttpStatus.CREATED)</span>
 <span class="fc" id="L44">        .body(AttachmentUploadDTOMapper.fromDomain(attachment));</span>
   }
+
+  @GetMapping(&quot;/{traceId}/attachments/{attachmentId}&quot;)
+  public ResponseEntity&lt;byte[]&gt; downloadAttachment(
+      Principal principal,
+      @Valid @PathVariable UUID traceId,
+      @Valid @PathVariable UUID attachmentId)
+      throws IOException {
+<span class="fc" id="L53">    log.debug(</span>
+        &quot;Received attachment download request from user [{}] for trace [{}] and attachment [{}]&quot;,
+<span class="fc" id="L55">        principal.getName(),</span>
+        traceId,
+        attachmentId);
+<span class="fc" id="L58">    byte[] fileContent = service.downloadTraceAttachment(attachmentId);</span>
+<span class="fc" id="L59">    return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).body(fileContent);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

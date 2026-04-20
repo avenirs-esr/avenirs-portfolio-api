@@ -96,8 +96,24 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
   }
 
   @Override
+  public byte[] downloadTraceAttachment(UUID attachmentId) throws IOException {
+<span class="fc" id="L100">    var attachment = traceAttachmentRepository.findById(attachmentId);</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">    if (attachment.isEmpty()) {</span>
+<span class="nc" id="L102">      throw new IOException(&quot;Attachment not found&quot;);</span>
+    }
+
+<span class="fc" id="L105">    var trace = attachment.get().getTrace();</span>
+<span class="fc" id="L106">    Student loggedInStudent = loggedInUserService.getLoggedInStudent();</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">    if (!trace.getUser().equals(loggedInStudent.getUser())) {</span>
+<span class="nc" id="L108">      throw new UserNotAuthorizedException();</span>
+    }
+
+<span class="fc" id="L111">    return fileStorageService.get(attachment.get().getUri());</span>
+  }
+
+  @Override
   public List&lt;TraceAttachment&gt; findByTrace(Trace trace) {
-<span class="nc" id="L100">    return traceAttachmentRepository.findByTrace(trace);</span>
+<span class="nc" id="L116">    return traceAttachmentRepository.findByTrace(trace);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
