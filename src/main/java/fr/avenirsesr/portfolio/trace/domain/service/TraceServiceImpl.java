@@ -119,12 +119,37 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public PagedResult<Trace> getTracesView(
+  public PagedResult<TraceViewData> getTracesView(
       String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
+    var config = traceConfigurationClient.getTraceConfiguration();
     PagedResult<Trace> pagedResult =
         traceRepository.findAll(loggedInUser, keyword, filter, dateFilter, pageCriteria);
-    return new PagedResult<>(pagedResult.content(), pagedResult.pageInfo());
+    Map<Trace, Boolean> traceAssociated = traceRepository.isAssociated(pagedResult.content());
+    return new PagedResult<>(
+        pagedResult.content().stream()
+            .map(
+                trace ->
+                    new TraceViewData(
+                        trace.getId(),
+                        trace.getTitle(),
+                        traceAssociated.get(trace),
+                        trace.getCreatedAt(),
+                        trace.getUpdatedAt(),
+                        traceAssociated.get(trace)
+                            ? Optional.empty()
+                            : Optional.of(computeDeletionDateForUnassociatedTrace(trace, config))))
+            .toList(),
+        pagedResult.pageInfo());
+  }
+
+  private LocalDate computeDeletionDateForUnassociatedTrace(
+      Trace unassociatedTrace, TraceConfiguration configuration) {
+    return unassociatedTrace
+        .getCreatedAt()
+        .plus(Duration.ofDays(configuration.maxRemainingDays()))
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate();
   }
 
   @Override
@@ -180,21 +205,23 @@ public class TraceServiceImpl implements TraceService {
     User loggedInUser = loggedInUserService.getLoggedInUser();
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    var isTraceAssociated = traceRepository.isAssociated(List.of(trace)).get(trace);
+    return buildTraceDetailData(trace, isTraceAssociated);
+  }
 
-    var traceLink = trace.getLink();
-
+  private TraceDetailData buildTraceDetailData(Trace trace, boolean isAssociated) {
     Optional<TraceAttachment> traceAttachment =
-        traceLink.isPresent() ? Optional.empty() : Optional.of(getTraceAttachment(trace));
+        trace.getLink().isPresent() ? Optional.empty() : Optional.of(getTraceAttachment(trace));
 
     return new TraceDetailData(
         trace.getId(),
         trace.getTitle(),
-        !trace.isUnassociated(),
+        isAssociated,
         programNameOfTrace(trace),
         trace.isGroup(),
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
-        traceLink,
+        trace.getLink(),
         traceAttachment,
         trace.getCreatedAt(),
         trace.getUpdatedAt());
@@ -332,23 +359,8 @@ public class TraceServiceImpl implements TraceService {
     trace.setAiUseJustification(aiJustification);
 
     var savedTrace = traceRepository.save(trace);
-    var traceLink = savedTrace.getLink();
-
-    Optional<TraceAttachment> traceAttachment =
-        traceLink.isPresent() ? Optional.empty() : Optional.of(getTraceAttachment(savedTrace));
-
-    return new TraceDetailData(
-        savedTrace.getId(),
-        savedTrace.getTitle(),
-        !savedTrace.isUnassociated(),
-        programNameOfTrace(savedTrace),
-        savedTrace.isGroup(),
-        savedTrace.getAiUseJustification().orElse(null),
-        savedTrace.getPersonalNote().orElse(null),
-        traceLink,
-        traceAttachment,
-        savedTrace.getCreatedAt(),
-        savedTrace.getUpdatedAt());
+    var isTraceAssociated = traceRepository.isAssociated(List.of(savedTrace)).get(savedTrace);
+    return buildTraceDetailData(savedTrace, isTraceAssociated);
   }
 
   private TraceAttachment getTraceAttachment(Trace trace) {
@@ -356,20 +368,6 @@ public class TraceServiceImpl implements TraceService {
         .filter(File::isActiveVersion)
         .findFirst()
         .orElseThrow(FileNotFoundException::new);
-  }
-
-  @Override
-  public Optional<LocalDate> getWillBeDeletedAt(Trace trace) {
-    var config = traceConfigurationClient.getTraceConfiguration();
-
-    return trace.isUnassociated()
-        ? Optional.of(
-            trace
-                .getCreatedAt()
-                .plus(Duration.ofDays(config.maxRemainingDays()))
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate())
-        : Optional.empty();
   }
 
   @Override

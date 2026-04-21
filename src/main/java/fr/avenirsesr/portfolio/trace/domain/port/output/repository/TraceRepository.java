@@ -32,4 +32,6 @@ public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {
   Map<SkillLevelProgress, List<Trace>> linkedWith(List<SkillLevelProgress> skillLevelProgresses);
 
   List<Trace> linkedWith(DeclaredSkillProgress declaredSkillProgress);
+
+  Map<Trace, Boolean> isAssociated(List<Trace> traces);
 }

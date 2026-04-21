@@ -11,9 +11,7 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevel
 import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface TraceService {
@@ -31,7 +29,7 @@ public interface TraceService {
 
   List<Trace> getTracesLinkedWithDeclaredSkillProgress(DeclaredSkillProgress declaredSkillProgress);
 
-  PagedResult<Trace> getTracesView(
+  PagedResult<TraceViewData> getTracesView(
       String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria);
 
   void deleteById(UUID id);
@@ -65,8 +63,6 @@ public interface TraceService {
       boolean isGroup,
       String personalNote,
       String aiJustification);
-
-  Optional<LocalDate> getWillBeDeletedAt(Trace trace);
 
   TraceAssociationsData associateTraceWithActivities(UUID traceId, List<UUID> activityIds);
 

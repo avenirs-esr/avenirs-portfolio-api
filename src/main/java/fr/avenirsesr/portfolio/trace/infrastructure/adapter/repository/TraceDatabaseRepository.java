@@ -19,6 +19,8 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceF
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification.TraceSpecification;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.domain.PageRequest;
@@ -44,6 +46,28 @@ public class TraceDatabaseRepository
             TraceSpecification.ofUser(user).and(TraceSpecification.notDeleted()),
             PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt")))
         .content();
+  }
+
+  @Override
+  public Map<Trace, Boolean> isAssociated(List<Trace> traces) {
+    if (traces == null || traces.isEmpty()) {
+      return Map.of();
+    }
+
+    var associatedIds =
+        jpaRepository
+            .findAll(
+                Specification.where(TraceSpecification.associated())
+                    .and(
+                        (root, query, cb) ->
+                            root.get("id").in(traces.stream().map(Trace::getId).toList())))
+            .stream()
+            .map(TraceEntity::getId)
+            .collect(Collectors.toSet());
+
+    return traces.stream()
+        .collect(
+            Collectors.toMap(Function.identity(), trace -> associatedIds.contains(trace.getId())));
   }
 
   @Override

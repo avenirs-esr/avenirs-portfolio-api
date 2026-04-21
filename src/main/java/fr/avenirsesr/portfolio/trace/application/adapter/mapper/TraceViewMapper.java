@@ -1,17 +1,16 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceViewDTO;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import java.time.LocalDate;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceViewData;
 
 public interface TraceViewMapper {
-  static TraceViewDTO toDTO(Trace trace, LocalDate willBeDeletedAt) {
+  static TraceViewDTO toDTO(TraceViewData trace) {
     return new TraceViewDTO(
-        trace.getId(),
-        trace.getTitle(),
-        !trace.isUnassociated(),
-        trace.getCreatedAt(),
-        trace.getUpdatedAt(),
-        willBeDeletedAt);
+        trace.id(),
+        trace.title(),
+        trace.isAssociated(),
+        trace.createdAt(),
+        trace.updatedAt(),
+        trace.willBeDeletedAt().orElse(null));
   }
 }

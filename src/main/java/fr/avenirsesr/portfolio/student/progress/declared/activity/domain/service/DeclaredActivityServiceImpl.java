@@ -33,6 +33,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationData;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceViewData;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -295,8 +296,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         Association::getId2,
         traceService.getTracesView(
             keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria),
-        AvenirsBaseModel::getId,
-        Trace::getTitle,
+        TraceViewData::id,
+        TraceViewData::title,
         null,
         trace -> false);
   }

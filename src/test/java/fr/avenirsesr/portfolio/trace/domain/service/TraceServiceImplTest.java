@@ -45,6 +45,7 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.Stude
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceViewData;
 import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
@@ -62,6 +63,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -90,6 +92,8 @@ public class TraceServiceImplTest {
   @InjectMocks private TraceServiceImpl traceService;
 
   private Student student;
+
+  private static final TraceConfiguration DEFAULT_CONFIG = new TraceConfiguration(90, 30, 5);
 
   @BeforeEach
   void setUp() {
@@ -142,7 +146,10 @@ public class TraceServiceImplTest {
               null,
               new PageCriteria(pageNumber, pageSize)))
           .thenReturn(new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
-      PagedResult<Trace> traceView =
+      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+      when(traceRepository.isAssociated(traces))
+          .thenReturn(traces.stream().collect(Collectors.toMap(t -> t, t -> false)));
+      PagedResult<TraceViewData> traceView =
           traceService.getTracesView(
               null,
               new TraceFilter(false, null, null, null),
@@ -223,7 +230,6 @@ public class TraceServiceImplTest {
     @Test
     void givenTraces_shouldReturnSummary() {
       BddLogger.given("a TraceServiceImpl service and unassociated traces");
-      TraceConfiguration traceConfiguration = new TraceConfiguration(90, 30, 5);
       List<Trace> unassociatedTraces =
           List.of(
               TraceFixture.create()
@@ -257,7 +263,7 @@ public class TraceServiceImplTest {
       BddLogger.when("getting the traces summary");
       when(traceRepository.findAll(student.getUser(), false)).thenReturn(unassociatedTraces);
       when(traceRepository.findAll(student.getUser(), true)).thenReturn(associatedTraces);
-      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(traceConfiguration);
+      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
       TracesSummaryData summary = traceService.getTracesSummary();
 
       BddLogger.then("it should return the traces summary");
@@ -362,6 +368,7 @@ public class TraceServiceImplTest {
               .toModel();
       when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
       when(traceRepository.save(trace)).thenReturn(trace);
+      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
       when(traceAttachmentService.findByTrace(any()))
           .thenReturn(List.of(TraceAttachmentFixture.create().toModel()));
 
@@ -416,6 +423,7 @@ public class TraceServiceImplTest {
               .toModel();
       when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
       when(traceRepository.save(trace)).thenReturn(trace);
+      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
       when(traceAttachmentService.findByTrace(any()))
           .thenReturn(List.of(TraceAttachmentFixture.create().toModel()));
 
@@ -479,6 +487,7 @@ public class TraceServiceImplTest {
       Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
       when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
       when(traceRepository.save(any())).thenReturn(trace);
+      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
       when(traceAttachmentService.findByTrace(any())).thenReturn(List.of());
 
       BddLogger.when("updating the trace");
@@ -525,6 +534,7 @@ public class TraceServiceImplTest {
               .toModel();
 
       when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
       when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
           .thenReturn(List.of());
 
@@ -546,6 +556,7 @@ public class TraceServiceImplTest {
       BddLogger.given("a TraceServiceImpl service and a trace without active attachment");
       Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
       when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
       when(traceAttachmentService.findByTrace(trace)).thenReturn(List.of());
 
       BddLogger.when("getting trace detail");
@@ -1377,6 +1388,71 @@ public class TraceServiceImplTest {
 
       BddLogger.then("it should throw UserNotAuthorizedException");
     }
+
+    @Test
+    void givenUnassociatedTrace_shouldReturnWillBeDeletedAt() {
+      BddLogger.given("a TraceServiceImpl service and an unassociated trace");
+
+      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+
+      Instant createdAt = Instant.now().minus(10, ChronoUnit.DAYS);
+      Trace trace =
+          TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
+      when(traceRepository.findAll(
+              student.getUser(),
+              null,
+              new TraceFilter(false, null, null, null),
+              null,
+              new PageCriteria(0, 8)))
+          .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+      when(traceRepository.isAssociated(anyList())).thenReturn(Map.of(trace, false));
+
+      BddLogger.when("getting willBeDeletedAt");
+      PagedResult<TraceViewData> traceView =
+          traceService.getTracesView(
+              null, new TraceFilter(false, null, null, null), null, new PageCriteria(0, 8));
+
+      BddLogger.then("it should return willBeDeletedAt");
+      var returnedTrace = traceView.content().getFirst();
+      assertFalse(returnedTrace.isAssociated());
+      LocalDate expectedDate =
+          createdAt
+              .plus(Duration.ofDays(DEFAULT_CONFIG.maxRemainingDays()))
+              .atZone(ZoneId.systemDefault())
+              .toLocalDate();
+      assertEquals(expectedDate, returnedTrace.willBeDeletedAt().get());
+    }
+
+    @Test
+    void givenAssociatedTrace_shouldReturnEmpty() {
+      BddLogger.given("a TraceServiceImpl service and an associated trace");
+      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+
+      Instant createdAt = Instant.now();
+      Trace trace =
+          TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
+      when(traceRepository.findAll(
+              student.getUser(),
+              null,
+              new TraceFilter(false, null, null, null),
+              null,
+              new PageCriteria(0, 8)))
+          .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+      when(traceRepository.isAssociated(anyList())).thenReturn(Map.of(trace, true));
+
+      BddLogger.when("getting willBeDeletedAt");
+
+      PagedResult<TraceViewData> traceView =
+          traceService.getTracesView(
+              null, new TraceFilter(false, null, null, null), null, new PageCriteria(0, 8));
+
+      BddLogger.then("it should return willBeDeletedAt");
+      var returnedTrace = traceView.content().getFirst();
+
+      BddLogger.then("it should return empty");
+      assertTrue(returnedTrace.isAssociated());
+      assertTrue(returnedTrace.willBeDeletedAt().isEmpty());
+    }
   }
 
   @Nested
@@ -1462,57 +1538,6 @@ public class TraceServiceImplTest {
 
       BddLogger.then("it should return the APC program name");
       assertEquals("Program name", result);
-    }
-
-    @Test
-    void givenUnassociatedTrace_shouldReturnWillBeDeletedAt() {
-      BddLogger.given("a TraceServiceImpl service and an unassociated trace");
-      TraceConfiguration config = new TraceConfiguration(90, 30, 5);
-      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(config);
-
-      Instant createdAt = Instant.now().minus(10, ChronoUnit.DAYS);
-      Trace trace =
-          TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
-
-      trace.setSkillLevels(List.of());
-      trace.setAmses(List.of());
-      trace.setDeclaredSkillProgresses(List.of());
-      assertTrue(trace.isUnassociated());
-
-      BddLogger.when("getting willBeDeletedAt");
-      Optional<LocalDate> willBeDeletedAt = traceService.getWillBeDeletedAt(trace);
-
-      BddLogger.then("it should return willBeDeletedAt");
-      assertTrue(willBeDeletedAt.isPresent());
-      LocalDate expectedDate =
-          createdAt
-              .plus(Duration.ofDays(config.maxRemainingDays()))
-              .atZone(ZoneId.systemDefault())
-              .toLocalDate();
-      assertEquals(expectedDate, willBeDeletedAt.get());
-    }
-
-    @Test
-    void givenAssociatedTrace_shouldReturnEmpty() {
-      BddLogger.given("a TraceServiceImpl service and an associated trace");
-      TraceConfiguration config = new TraceConfiguration(90, 30, 5);
-      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(config);
-
-      Instant createdAt = Instant.now();
-      Trace trace =
-          TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
-
-      SkillLevelProgress skillLevelProgress =
-          SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel()).toModel();
-      trace.setSkillLevels(List.of(skillLevelProgress));
-
-      assertFalse(trace.isUnassociated());
-
-      BddLogger.when("getting willBeDeletedAt");
-      Optional<LocalDate> willBeDeletedAt = traceService.getWillBeDeletedAt(trace);
-
-      BddLogger.then("it should return empty");
-      assertTrue(willBeDeletedAt.isEmpty());
     }
   }
 

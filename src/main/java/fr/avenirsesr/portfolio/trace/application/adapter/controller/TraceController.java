@@ -65,17 +65,12 @@ public class TraceController {
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());
-    PagedResult<Trace> tracesResult =
+    PagedResult<TraceViewData> tracesResult =
         traceService.getTracesView(keyword, traceFilter, dateFilter, pageCriteria);
 
     var tracesViewResponse =
         new PagedResponse<>(
-            tracesResult.content().stream()
-                .map(
-                    trace ->
-                        TraceViewMapper.toDTO(
-                            trace, traceService.getWillBeDeletedAt(trace).orElse(null)))
-                .toList(),
+            tracesResult.content().stream().map(TraceViewMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(tracesResult.pageInfo()));
 
     return ResponseEntity.ok(tracesViewResponse);

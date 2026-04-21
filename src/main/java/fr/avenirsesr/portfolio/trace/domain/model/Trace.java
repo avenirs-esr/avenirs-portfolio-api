@@ -135,10 +135,6 @@ public class Trace extends DeletableAvenirsBaseModel {
     return Optional.ofNullable(link);
   }
 
-  public boolean isUnassociated() {
-    return amses.isEmpty() && skillLevels.isEmpty() && declaredSkillProgresses.isEmpty();
-  }
-
   public void add(AMS ams) {
     setAmses(Stream.concat(amses.stream(), Stream.of(ams)).toList());
   }
