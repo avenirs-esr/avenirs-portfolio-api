@@ -120,6 +120,23 @@
     ]
   },
   {
+    "traceId": "3f9d7c52-8a4e-4d1f-b6a1-2c9e7b5f8d13",
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "title": "Bilan fin de projet",
+    "isGroup": false,
+    "language": "FRENCH",
+    "aiJustification": null,
+    "personalNote": null,
+    "attachements": [
+      {
+        "title": "memoire_final.pdf",
+        "fileType": "PDF",
+        "size": 5123456,
+        "uploadedAt": "2025-11-30T10:05:00.000000Z"
+      }
+    ]
+  },
+  {
     "traceId": "ca745573-544c-4c4c-9768-724f02c690a1",
     "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "title": "Lien vers travaux personnels",
