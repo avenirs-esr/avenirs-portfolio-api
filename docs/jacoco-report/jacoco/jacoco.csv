@@ -61,7 +61,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.domain.s
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.domain.service,SkillLevelProgressServiceImpl,27,8,0,0,5,2,2,2,2,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.data,FileData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.domain.data,SelfKnowledgeElementDetails,0,6,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,178,1014,12,26,36,249,18,69,10,58
+avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.service,TraceServiceImpl,182,1022,14,28,36,249,20,69,10,58
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.repository,DeclaredSkillProgressDatabaseRepository,6,68,0,0,1,20,1,5,1,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.specification,DeclaredSkillProgressSpecification,40,56,7,4,7,12,7,5,1,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.repository,DeclaredSkillDatabaseRepository,12,26,0,0,2,5,1,3,1,3
