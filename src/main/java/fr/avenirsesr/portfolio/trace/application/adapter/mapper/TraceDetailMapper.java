@@ -14,8 +14,8 @@ public interface TraceDetailMapper {
         traceDetail.isGroup(),
         traceDetail.aiUseJustification(),
         traceDetail.personalNote(),
-        traceDetail.link(),
-        AttachmentUploadDTOMapper.fromDomain(traceDetail.attachment()),
+        traceDetail.link().orElse(null),
+        traceDetail.attachment().map(AttachmentUploadDTOMapper::fromDomain).orElse(null),
         traceDetail.createdAt(),
         traceDetail.updatedAt());
   }

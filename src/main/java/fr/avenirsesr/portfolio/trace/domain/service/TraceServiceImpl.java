@@ -181,7 +181,10 @@ public class TraceServiceImpl implements TraceService {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
-    TraceAttachment traceAttachment = getTraceAttachment(trace);
+    var traceLink = trace.getLink();
+
+    Optional<TraceAttachment> traceAttachment =
+        traceLink.isPresent() ? Optional.empty() : Optional.of(getTraceAttachment(trace));
 
     return new TraceDetailData(
         trace.getId(),
@@ -191,7 +194,7 @@ public class TraceServiceImpl implements TraceService {
         trace.isGroup(),
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
-        trace.getLink().orElse(null),
+        traceLink,
         traceAttachment,
         trace.getCreatedAt(),
         trace.getUpdatedAt());
@@ -329,8 +332,10 @@ public class TraceServiceImpl implements TraceService {
     trace.setAiUseJustification(aiJustification);
 
     var savedTrace = traceRepository.save(trace);
+    var traceLink = savedTrace.getLink();
 
-    TraceAttachment traceAttachment = getTraceAttachment(savedTrace);
+    Optional<TraceAttachment> traceAttachment =
+        traceLink.isPresent() ? Optional.empty() : Optional.of(getTraceAttachment(savedTrace));
 
     return new TraceDetailData(
         savedTrace.getId(),
@@ -340,7 +345,7 @@ public class TraceServiceImpl implements TraceService {
         savedTrace.isGroup(),
         savedTrace.getAiUseJustification().orElse(null),
         savedTrace.getPersonalNote().orElse(null),
-        savedTrace.getLink().orElse(null),
+        traceLink,
         traceAttachment,
         savedTrace.getCreatedAt(),
         savedTrace.getUpdatedAt());

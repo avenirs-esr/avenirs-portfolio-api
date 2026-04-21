@@ -14,8 +14,6 @@ import java.util.UUID;
       "isGroup",
       "aiUseJustification",
       "personalNote",
-      "link",
-      "attachment",
       "createdAt",
       "updatedAt"
     })
