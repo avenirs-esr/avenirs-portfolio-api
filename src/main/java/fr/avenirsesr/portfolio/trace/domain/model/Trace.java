@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -135,34 +134,9 @@ public class Trace extends DeletableAvenirsBaseModel {
     return Optional.ofNullable(link);
   }
 
-  public void add(AMS ams) {
-    setAmses(Stream.concat(amses.stream(), Stream.of(ams)).toList());
-  }
-
-  public void add(SkillLevelProgress skillLevelProgress) {
-    setSkillLevels(Stream.concat(skillLevels.stream(), Stream.of(skillLevelProgress)).toList());
-  }
-
-  public void add(DeclaredSkillProgress declaredSkillProgress) {
-    setDeclaredSkillProgresses(
-        Stream.concat(declaredSkillProgresses.stream(), Stream.of(declaredSkillProgress)).toList());
-  }
-
   public void remove(DeclaredSkillProgress declaredSkillProgress) {
     var newDeclaredSkillProgresses = new ArrayList<>(declaredSkillProgresses);
     newDeclaredSkillProgresses.remove(declaredSkillProgress);
     setDeclaredSkillProgresses(newDeclaredSkillProgresses);
-  }
-
-  public void remove(SkillLevelProgress skillLevelProgress) {
-    var newSkillLevel = new ArrayList<>(skillLevels);
-    newSkillLevel.remove(skillLevelProgress);
-    setSkillLevels(newSkillLevel);
-  }
-
-  public void remove(AMS ams) {
-    var newAmses = new ArrayList<>(amses);
-    newAmses.remove(ams);
-    setAmses(newAmses);
   }
 }
