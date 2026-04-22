@@ -7,7 +7,6 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateUrl;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
@@ -38,9 +37,6 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.Decla
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
@@ -62,7 +58,6 @@ import lombok.extern.slf4j.Slf4j;
 public class TraceServiceImpl implements TraceService {
   private final TraceRepository traceRepository;
   private final UserService userService;
-  private final StudentProgressService studentProgressService;
   private final TraceAttachmentService traceAttachmentService;
   private final DeclaredActivityService declaredActivityService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
@@ -83,24 +78,8 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public List<Trace> getTracesLinkedWithAMS(AMS ams) {
-    return traceRepository.linkedWith(ams);
-  }
-
-  @Override
-  public List<Trace> getTracesLinkedWithSkillLevelProgress(SkillLevelProgress skillLevelProgress) {
-    return traceRepository.linkedWith(skillLevelProgress);
-  }
-
-  @Override
   public String programNameOfTrace(Trace trace) {
-    List<StudentProgress> studentProgresses =
-        studentProgressService.findStudentProgressesBySkillLevelProgresses(trace.getSkillLevels());
-    return studentProgresses.stream()
-        .filter(sp -> sp.getTrainingPath().getProgram().isAPC())
-        .map(sp -> sp.getTrainingPath().getProgram().getName())
-        .findAny()
-        .orElse(EPortfolioType.LIFE_PROJECT.name());
+    return EPortfolioType.LIFE_PROJECT.name();
   }
 
   @Override
@@ -158,9 +137,6 @@ public class TraceServiceImpl implements TraceService {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
-    trace.setAmses(new ArrayList<>());
-    trace.setSkillLevels(new ArrayList<>());
-    trace.setDeclaredSkillProgresses(new ArrayList<>());
     trace.setDeletedAt(Instant.now());
 
     traceRepository.save(trace);
@@ -483,40 +459,6 @@ public class TraceServiceImpl implements TraceService {
             .toList());
 
     return getTraceAssociations(traceId, false);
-  }
-
-  @Override
-  public void unassociateTraces(DeclaredSkillProgress declaredSkillProgress) {
-    List<Trace> traces = traceRepository.linkedWith(declaredSkillProgress);
-    traces.forEach(trace -> trace.remove(declaredSkillProgress));
-    traceRepository.saveAll(traces);
-  }
-
-  @Override
-  public void unassociateTraces(DeclaredSkillProgress declaredSkillProgress, List<UUID> traceIds) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
-
-    List<Trace> traces = traceRepository.findAllById(traceIds);
-
-    if (traceIds.size() != traces.size()) {
-      throw new TraceNotFoundException();
-    }
-
-    for (Trace trace : traces) {
-      checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
-
-      trace.getDeclaredSkillProgresses().stream()
-          .filter(asp -> asp.equals(declaredSkillProgress))
-          .findAny()
-          .orElseThrow(
-              () ->
-                  new AssociationDoesNotExistException(
-                      trace + " is not associated with " + declaredSkillProgress));
-
-      trace.remove(declaredSkillProgress);
-    }
-
-    traceRepository.saveAll(traces);
   }
 
   @Override

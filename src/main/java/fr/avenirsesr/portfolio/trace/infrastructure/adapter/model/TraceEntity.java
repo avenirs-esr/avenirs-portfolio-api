@@ -2,16 +2,12 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.model;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.DeletableAvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,27 +39,6 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private ELanguage language;
 
-  @ManyToMany
-  @JoinTable(
-      name = "trace_skill_level_progress",
-      joinColumns = @JoinColumn(name = "trace_id"),
-      inverseJoinColumns = @JoinColumn(name = "skill_level_progress_id"))
-  private List<SkillLevelProgressEntity> skillLevels;
-
-  @ManyToMany
-  @JoinTable(
-      name = "trace_ams",
-      joinColumns = @JoinColumn(name = "trace_id"),
-      inverseJoinColumns = @JoinColumn(name = "ams_id"))
-  private List<AMSEntity> amses;
-
-  @ManyToMany
-  @JoinTable(
-      name = "trace_declared_skill_progress",
-      joinColumns = @JoinColumn(name = "trace_id"),
-      inverseJoinColumns = @JoinColumn(name = "declared_skill_progress_id"))
-  private List<DeclaredSkillProgressEntity> declaredSkillsProgresses;
-
   @Column(nullable = false, name = "is_group")
   private boolean isGroup;
 
@@ -86,9 +61,6 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      List<SkillLevelProgressEntity> skillLevels,
-      List<DeclaredSkillProgressEntity> declaredSkillsProgresses,
-      List<AMSEntity> amses,
       boolean isGroup,
       String aiUseJustification,
       String personalNote,
@@ -103,9 +75,6 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
     this.user = user;
     this.title = title;
     this.language = language;
-    this.skillLevels = skillLevels;
-    this.declaredSkillsProgresses = declaredSkillsProgresses;
-    this.amses = amses;
     this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
@@ -117,9 +86,6 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      List<SkillLevelProgressEntity> skillLevels,
-      List<DeclaredSkillProgressEntity> declaredSkillsProgress,
-      List<AMSEntity> amses,
       boolean isGroup,
       String aiUseJustification,
       String personalNote,
@@ -132,9 +98,6 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
         user,
         title,
         language,
-        skillLevels,
-        declaredSkillsProgress,
-        amses,
         isGroup,
         aiUseJustification,
         personalNote,

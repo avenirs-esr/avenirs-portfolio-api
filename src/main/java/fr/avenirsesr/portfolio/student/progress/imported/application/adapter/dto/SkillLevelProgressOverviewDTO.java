@@ -8,6 +8,4 @@ import java.util.UUID;
 public record SkillLevelProgressOverviewDTO(
     UUID id,
     String name,
-    int traceCount,
-    int activityCount,
     @Schema(ref = "#/components/schemas/ESkillLevelStatus") ESkillLevelStatus status) {}

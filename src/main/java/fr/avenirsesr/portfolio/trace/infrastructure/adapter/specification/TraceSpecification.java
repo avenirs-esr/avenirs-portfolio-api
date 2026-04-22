@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
@@ -56,11 +54,6 @@ public class TraceSpecification {
     return (root, query, cb) -> cb.isNull(root.get("deletedAt"));
   }
 
-  public static Specification<TraceEntity> ofAms(AMS ams) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.isMember(AMSMapper.INSTANCE.fromDomain(ams), root.get("amses"));
-  }
-
   public static Specification<TraceEntity> ofSkillLevelProgress(
       SkillLevelProgress skillLevelProgress) {
     return (root, query, criteriaBuilder) ->
@@ -105,42 +98,8 @@ public class TraceSpecification {
               criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get("name")), pattern));
       Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);
 
-      // Declared skills
-      var declaredSkillJoin =
-          root.join("declaredSkillsProgresses", JoinType.LEFT).join("declaredSkill", JoinType.LEFT);
-
-      var declaredSkillPredicate =
-          criteriaBuilder.like(criteriaBuilder.lower(declaredSkillJoin.get("libelle")), pattern);
-
-      // Skill level
-      var slpJoin =
-          root.join("skillLevels", JoinType.LEFT)
-              .join("skillLevel", JoinType.LEFT)
-              .join("translations", JoinType.LEFT);
-      var slpLangPredicate = criteriaBuilder.equal(slpJoin.get("language"), language);
-      var slpNamePredicate =
-          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get("name")), pattern);
-      var slpDescPredicate =
-          criteriaBuilder.like(criteriaBuilder.lower(slpJoin.get("description")), pattern);
-      var skillLevelPredicate =
-          criteriaBuilder.and(
-              slpLangPredicate, criteriaBuilder.or(slpNamePredicate, slpDescPredicate));
-
-      // AMS
-      var amsJoin = root.join("amses", JoinType.LEFT).join("translations", JoinType.LEFT);
-      var amsLangPredicate = criteriaBuilder.equal(amsJoin.get("language"), language);
-      var amsTitlePredicate =
-          criteriaBuilder.like(criteriaBuilder.lower(amsJoin.get("title")), pattern);
-      var amsPredicate = criteriaBuilder.and(amsLangPredicate, amsTitlePredicate);
-
       return criteriaBuilder.or(
-          titlePredicate,
-          aiUsePredicate,
-          personalNotePredicate,
-          attachmentPredicate,
-          declaredSkillPredicate,
-          skillLevelPredicate,
-          amsPredicate);
+          titlePredicate, aiUsePredicate, personalNotePredicate, attachmentPredicate);
     };
   }
 }

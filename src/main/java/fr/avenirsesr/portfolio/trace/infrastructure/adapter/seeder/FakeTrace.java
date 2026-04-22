@@ -1,13 +1,9 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
-import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import net.datafaker.Faker;
@@ -31,9 +27,6 @@ public class FakeTrace {
                 user,
                 "Trace %s".formatted(faker().lorem().word()),
                 ELanguage.FALLBACK,
-                List.of(),
-                List.of(),
-                List.of(),
                 false,
                 null,
                 null,
@@ -48,22 +41,6 @@ public class FakeTrace {
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.isGroup();
 
     return fakeTrace;
-  }
-
-  public FakeTrace withSkillLevel(List<SkillLevelProgressEntity> skillLevels) {
-    trace.setSkillLevels(skillLevels);
-    return this;
-  }
-
-  public FakeTrace withDeclaredSkillsProgress(
-      List<DeclaredSkillProgressEntity> declaredSkillsProgress) {
-    trace.setDeclaredSkillsProgresses(declaredSkillsProgress);
-    return this;
-  }
-
-  public FakeTrace withAMS(List<AMSEntity> amses) {
-    trace.setAmses(amses);
-    return this;
   }
 
   public FakeTrace withELanguage(ELanguage language) {

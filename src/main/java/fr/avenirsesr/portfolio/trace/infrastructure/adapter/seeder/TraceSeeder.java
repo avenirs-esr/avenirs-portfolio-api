@@ -111,18 +111,7 @@ public class TraceSeeder {
       List<UserEntity> users, List<DeclaredSkillProgressEntity> declaredSkillsProgresses) {
     return IntStream.range(0, SeederConfig.TRACES_NB_MAX)
         .mapToObj(i -> users.get(new Random().nextInt(users.size())))
-        .map(
-            u ->
-                FakeTrace.of(u)
-                    .withDeclaredSkillsProgress(
-                        declaredSkillsProgresses.subList(
-                            0,
-                            dataGenerator
-                                .with("nb-declared-skills")
-                                .number(
-                                    SeederConfig.MIN_TRACES_DECLARED_SKILL_PROGRESS,
-                                    SeederConfig.MAX_TRACES_DECLARED_SKILL_PROGRESS)))
-                    .toEntity())
+        .map(u -> FakeTrace.of(u).toEntity())
         .map(
             entity ->
                 new TraceCreationData(

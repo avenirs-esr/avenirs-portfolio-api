@@ -1,0 +1,75 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-1">
+        <dropForeignKeyConstraint baseTableName="trace_ams" constraintName="FK20bh0fn3idgah6j6njqbyyubp"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-2">
+        <dropForeignKeyConstraint baseTableName="ams" constraintName="FK29yky9jptfmqhqn4l6cersqy"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-3">
+        <dropForeignKeyConstraint baseTableName="trace_skill_level_progress" constraintName="FK9sdlato41t1ox3e37vylau5v6"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-4">
+        <dropForeignKeyConstraint baseTableName="trace_skill_level_progress" constraintName="FKaofs6849fsapqssvj77amy3ps"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-5">
+        <dropForeignKeyConstraint baseTableName="trace_ams" constraintName="FKcckyv1xsxa76diihyxlf75ftd"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-6">
+        <dropForeignKeyConstraint baseTableName="ams_skill_level_progress" constraintName="FKdw170ywd7eil97l7xr9aetsmm"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-7">
+        <dropForeignKeyConstraint baseTableName="ams_translation" constraintName="FKhekvktxhoydhs3g9l4b0nbapm"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-8">
+        <dropForeignKeyConstraint baseTableName="ams_skill_level_progress" constraintName="FKhw2oxcx030v3pt9lh6pnw0s3o"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-9">
+        <dropForeignKeyConstraint baseTableName="cohort_ams" constraintName="FKjly3gf1r4geb3d95qqbwhtglb"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-10">
+        <dropForeignKeyConstraint baseTableName="cohort" constraintName="FKlp91aolb8ygsy0e4x0tynusw3"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-11">
+        <dropForeignKeyConstraint baseTableName="cohort_user" constraintName="FKm64avyh89aq7de9e0vgpilbl7"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-12">
+        <dropForeignKeyConstraint baseTableName="cohort_ams" constraintName="FKoec68tvtlki8634y92qymypvc"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-13">
+        <dropForeignKeyConstraint baseTableName="cohort_user" constraintName="FKqylk3iib8lfpkff27kvnjrtwm"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-14">
+        <dropForeignKeyConstraint baseTableName="trace_declared_skill_progress" constraintName="fk_tradecskipro_on_declared_skill_progress_entity"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-15">
+        <dropForeignKeyConstraint baseTableName="trace_declared_skill_progress" constraintName="fk_tradecskipro_on_trace_entity"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-16">
+        <dropTable tableName="ams"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-17">
+        <dropTable tableName="ams_skill_level_progress"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-18">
+        <dropTable tableName="ams_translation"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-19">
+        <dropTable tableName="cohort"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-20">
+        <dropTable tableName="cohort_ams"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-21">
+        <dropTable tableName="cohort_user"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-22">
+        <dropTable tableName="trace_ams"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-23">
+        <dropTable tableName="trace_declared_skill_progress"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1776954072886-24">
+        <dropTable tableName="trace_skill_level_progress"/>
+    </changeSet>
+</databaseChangeLog>

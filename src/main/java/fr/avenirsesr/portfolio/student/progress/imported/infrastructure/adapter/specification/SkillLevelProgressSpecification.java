@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.specification;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -11,11 +9,6 @@ import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
 public class SkillLevelProgressSpecification {
-  public static Specification<SkillLevelProgressEntity> linkedTo(AMS ams) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.isMember(AMSMapper.INSTANCE.fromDomain(ams), root.get("amses"));
-  }
-
   public static Specification<SkillLevelProgressEntity> with(Student student, UUID skillId) {
     return (root, query, criteriaBuilder) -> {
       var studentPredicate =

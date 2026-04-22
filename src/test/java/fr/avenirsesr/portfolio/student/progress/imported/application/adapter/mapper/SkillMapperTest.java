@@ -9,7 +9,6 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto.SkillDTO;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -31,25 +30,20 @@ class SkillMapperTest {
     var javaSkillLevel2 = SkillLevelFixture.create().withSkill(javaSkill).toModel();
 
     var progress1 =
-        new SkillLevelProgressWithTraceCountData(
-            SkillLevelProgressFixture.create(student, javaSkillLevel1)
-                .withStatus(ESkillLevelStatus.VALIDATED)
-                .withEndDate(LocalDate.now().minusMonths(2))
-                .toModel(),
-            2);
+        SkillLevelProgressFixture.create(student, javaSkillLevel1)
+            .withStatus(ESkillLevelStatus.VALIDATED)
+            .withEndDate(LocalDate.now().minusMonths(2))
+            .toModel();
     var progress2 =
-        new SkillLevelProgressWithTraceCountData(
-            SkillLevelProgressFixture.create(student, javaSkillLevel2)
-                .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-                .withEndDate(LocalDate.now().plusMonths(1))
-                .toModel(),
-            2);
+        SkillLevelProgressFixture.create(student, javaSkillLevel2)
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .withEndDate(LocalDate.now().plusMonths(1))
+            .toModel();
 
     StudentProgress studentProgress =
         StudentProgressFixture.create()
             .withStudent(student)
-            .withSkillLevels(
-                List.of(progress1.skillLevelProgress(), progress2.skillLevelProgress()))
+            .withSkillLevels(List.of(progress1, progress2))
             .toModel();
 
     try (MockedStatic<SkillLevelViewMapper> skillLevelViewMapperMock =
@@ -83,16 +77,14 @@ class SkillMapperTest {
 
     var pythonSkillLevel = SkillLevelFixture.create().withSkill(pythonSkill).toModel();
     var pythonProgress =
-        new SkillLevelProgressWithTraceCountData(
-            SkillLevelProgressFixture.create(student, pythonSkillLevel)
-                .withStatus(ESkillLevelStatus.NOT_STARTED)
-                .toModel(),
-            2);
+        SkillLevelProgressFixture.create(student, pythonSkillLevel)
+            .withStatus(ESkillLevelStatus.NOT_STARTED)
+            .toModel();
 
     StudentProgress studentProgress =
         StudentProgressFixture.create()
             .withStudent(student)
-            .withSkillLevels(List.of(pythonProgress.skillLevelProgress()))
+            .withSkillLevels(List.of(pythonProgress))
             .toModel();
 
     BddLogger.when(
@@ -112,22 +104,20 @@ class SkillMapperTest {
     var skill = SkillFixture.create().toModel();
     var skillLevel = SkillLevelFixture.create().withSkill(skill).toModel();
     var progress =
-        new SkillLevelProgressWithTraceCountData(
-            SkillLevelProgressFixture.create(student, skillLevel)
-                .withStatus(ESkillLevelStatus.VALIDATED)
-                .toModel(),
-            3);
+        SkillLevelProgressFixture.create(student, skillLevel)
+            .withStatus(ESkillLevelStatus.VALIDATED)
+            .toModel();
 
     StudentProgress finishedProgress =
         StudentProgressFixture.create()
             .withStudent(student)
-            .withSkillLevels(List.of(progress.skillLevelProgress()))
+            .withSkillLevels(List.of(progress))
             .withStartDate(LocalDate.now().minusMonths(2), Period.ofMonths(1))
             .toModel();
     StudentProgress ongoingProgress =
         StudentProgressFixture.create()
             .withStudent(student)
-            .withSkillLevels(List.of(progress.skillLevelProgress()))
+            .withSkillLevels(List.of(progress))
             .withStartDate(LocalDate.now().minusMonths(2), Period.ofMonths(3))
             .toModel();
 

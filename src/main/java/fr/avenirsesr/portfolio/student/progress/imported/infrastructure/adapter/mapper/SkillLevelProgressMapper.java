@@ -1,14 +1,11 @@
 package fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper;
 
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.mapper.SkillLevelMapper;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class SkillLevelProgressMapper
     implements Mapper<SkillLevelProgressEntity, SkillLevelProgress> {
@@ -22,10 +19,7 @@ public class SkillLevelProgressMapper
         SkillLevelMapper.INSTANCE.fromDomain(skillLevelProgress.getSkillLevel()),
         skillLevelProgress.getStatus(),
         skillLevelProgress.getStartDate(),
-        skillLevelProgress.getEndDate(),
-        skillLevelProgress.getAmses().stream()
-            .map(AMSMapper.INSTANCE::fromDomain)
-            .collect(Collectors.toSet()));
+        skillLevelProgress.getEndDate());
   }
 
   @Override
@@ -37,7 +31,6 @@ public class SkillLevelProgressMapper
         entity.getStatus(),
         entity.getStartDate(),
         entity.getEndDate(),
-        entity.getAmses().stream().map(AMSMapper.INSTANCE::toDomain).toList(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -56,11 +49,6 @@ public class SkillLevelProgressMapper
         entity.getStatus(),
         entity.getStartDate(),
         entity.getEndDate(),
-        attributs.contains("amses")
-            ? entity.getAmses().stream()
-                .map(e -> AMSMapper.INSTANCE.toDomain(e, graph.from("amses")))
-                .toList()
-            : List.of(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }

@@ -1,8 +1,6 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.ActivitySeeder;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.AMSSeeder;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.seeder.CohortSeeder;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder.AssociationSeeder;
 import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.configuration.SeedingState;
@@ -74,9 +72,7 @@ public class SeederOrchestrator {
   private final SkillSeeder skillSeeder;
   private final StudentProgressSeeder studentProgressSeeder;
 
-  private final CohortSeeder cohortSeeder;
   private final TraceSeeder traceSeeder;
-  private final AMSSeeder amsSeeder;
   private final ActivitySeeder activitySeeder;
   private final DeclaredActivitySeeder declaredActivitySeeder;
   private final AssociationSeeder associationSeeder;
@@ -123,14 +119,10 @@ public class SeederOrchestrator {
       var savedSkillLevelProgresses =
           savedStudentProgresses.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
 
-      var savedCohorts = cohortSeeder.seed(savedUsers, savedTrainingPaths);
-
       var savedTraces =
           traceSeeder.seed(
               savedStudents.stream().map(StudentEntity::getUser).toList(),
               savedDeclaredSkillProgresses);
-
-      amsSeeder.seed(savedStudents, savedSkillLevelProgresses, savedTraces, savedCohorts);
 
       selfKnowledgeElementSeeder.seed();
 

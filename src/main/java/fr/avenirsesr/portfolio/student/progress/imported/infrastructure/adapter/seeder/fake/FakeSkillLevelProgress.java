@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
@@ -9,7 +8,6 @@ import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.Set;
 
 public class FakeSkillLevelProgress {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
@@ -32,8 +30,7 @@ public class FakeSkillLevelProgress {
             skillLevel,
             ESkillLevelStatus.NOT_STARTED,
             futureStartDate,
-            futureEndDate,
-            Set.of()));
+            futureEndDate));
   }
 
   public FakeSkillLevelProgress withStatus(ESkillLevelStatus status) {
@@ -56,11 +53,6 @@ public class FakeSkillLevelProgress {
         skillLevelProgress.setEndDate(futureEndDate);
       }
     }
-    return this;
-  }
-
-  public FakeSkillLevelProgress withAmses(Set<AMSEntity> amses) {
-    this.skillLevelProgress.setAmses(amses);
     return this;
   }
 

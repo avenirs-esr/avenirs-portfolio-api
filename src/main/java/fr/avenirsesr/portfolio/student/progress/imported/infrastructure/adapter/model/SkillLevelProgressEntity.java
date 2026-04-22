@@ -1,13 +1,11 @@
 package fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model;
 
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,26 +36,17 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
   @Enumerated(EnumType.STRING)
   private ESkillLevelStatus status;
 
-  @ManyToMany
-  @JoinTable(
-      name = "ams_skill_level_progress",
-      joinColumns = @JoinColumn(name = "skill_level_progress_id"),
-      inverseJoinColumns = @JoinColumn(name = "ams_id"))
-  private Set<AMSEntity> amses;
-
   private SkillLevelProgressEntity(
       UUID id,
       StudentEntity student,
       SkillLevelEntity skillLevelEntity,
       ESkillLevelStatus status,
       LocalDate startDate,
-      LocalDate endDate,
-      Set<AMSEntity> amses) {
+      LocalDate endDate) {
     setId(id);
     this.student = student;
     this.skillLevel = skillLevelEntity;
     this.status = status;
-    this.amses = amses;
     this.startDate = startDate;
     this.endDate = endDate;
   }
@@ -68,10 +57,8 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
       SkillLevelEntity skillLevelEntity,
       ESkillLevelStatus status,
       LocalDate startDate,
-      LocalDate endDate,
-      Set<AMSEntity> amses) {
-    return new SkillLevelProgressEntity(
-        id, student, skillLevelEntity, status, startDate, endDate, amses);
+      LocalDate endDate) {
+    return new SkillLevelProgressEntity(id, student, skillLevelEntity, status, startDate, endDate);
   }
 
   @Override

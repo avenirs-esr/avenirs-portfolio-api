@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.trace.domain.port.output.repository;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -24,8 +23,6 @@ public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {
       PageCriteria pageCriteria);
 
   List<Trace> findAll(User user, boolean isAssociated);
-
-  List<Trace> linkedWith(AMS ams);
 
   List<Trace> linkedWith(SkillLevelProgress skillLevelProgress);
 

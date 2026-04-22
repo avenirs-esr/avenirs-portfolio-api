@@ -5,21 +5,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Schema(
-    requiredProperties = {
-      "traceId",
-      "title",
-      "skillCount",
-      "AMSCount",
-      "programName",
-      "isGroup",
-      "createdAt",
-      "updatedAt"
-    })
+    requiredProperties = {"traceId", "title", "programName", "isGroup", "createdAt", "updatedAt"})
 public record TraceOverviewDTO(
     UUID traceId,
     String title,
-    Integer skillCount,
-    Integer AMSCount,
     String programName,
     boolean isGroup,
     Instant createdAt,

@@ -4,8 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import fr.avenirsesr.portfolio.ams.domain.model.enums.EAmsStatus;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.model.AMSEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
@@ -20,7 +18,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -152,41 +149,6 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldBuildStatusSpecification_withEmptyStatusesAlsoCovered() {
-    TraceEntity t = persistTrace("status");
-    AMSEntity ams = persistAMS(student, EAmsStatus.SUBMITTED);
-
-    t.setAmses(new ArrayList<>());
-    t.getAmses().add(ams);
-
-    entityManager.flush();
-    entityManager.clear();
-
-    TraceFilterSpecificationBuilder builder = new TraceFilterSpecificationBuilder();
-
-    Specification<TraceEntity> specEvaluated =
-        builder.getSpecification(
-            ETraceFilterKey.STATUS, List.of(ETraceStatus.ASSOCIATED_EVALUATED));
-    Specification<TraceEntity> specInEval =
-        builder.getSpecification(
-            ETraceFilterKey.STATUS, List.of(ETraceStatus.ASSOCIATED_IN_EVALUATION));
-    Specification<TraceEntity> specDeclaredOnly =
-        builder.getSpecification(
-            ETraceFilterKey.STATUS, List.of(ETraceStatus.ASSOCIATED_WITH_DECLARED_SKILL));
-
-    List<TraceEntity> resultEvaluated =
-        traceJpaRepository.findAll(ofTestUser(user.getId()).and(specEvaluated));
-    List<TraceEntity> resultInEval =
-        traceJpaRepository.findAll(ofTestUser(user.getId()).and(specInEval));
-    List<TraceEntity> resultDeclaredOnly =
-        traceJpaRepository.findAll(ofTestUser(user.getId()).and(specDeclaredOnly));
-
-    assertThat(resultEvaluated).isNotNull();
-    assertThat(resultInEval).isNotNull();
-    assertThat(resultDeclaredOnly).isNotNull();
-  }
-
-  @Test
   void shouldCoverAssociatedQueryNullBranch() {
     Root<TraceEntity> root = mock(Root.class);
     CriteriaBuilder cb = mock(CriteriaBuilder.class);
@@ -241,9 +203,6 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             user,
             title,
             ELanguage.FRENCH,
-            new ArrayList<>(),
-            new ArrayList<>(),
-            new ArrayList<>(),
             false,
             null,
             null,
@@ -262,11 +221,5 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             UUID.randomUUID(), trace, name, type, 1L, 1, active, "uri", user, Instant.now());
     entityManager.persist(att);
     return att;
-  }
-
-  private AMSEntity persistAMS(StudentEntity s, EAmsStatus status) {
-    AMSEntity ams = AMSEntity.of(UUID.randomUUID(), s, status, Instant.now(), Instant.now());
-    entityManager.persist(ams);
-    return ams;
   }
 }

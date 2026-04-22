@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.ams.infrastructure.fixture.AMSFixture;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
@@ -21,14 +19,9 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.declaredskill.infrastructure.fixture.DeclaredSkillProgressFixture;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
-import fr.avenirsesr.portfolio.program.domain.model.Program;
-import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
-import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
-import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -40,9 +33,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceViewData;
@@ -161,70 +152,6 @@ public class TraceServiceImplTest {
       assertEquals(pageSize, traceView.pageInfo().pageSize());
       assertEquals(totalElement, traceView.pageInfo().totalElements());
       assertEquals(pageNumber, traceView.pageInfo().page());
-    }
-
-    @Test
-    void givenTraceWithAmsAndSkillLevels_shouldDeleteTraceAndLinksToAmsAndSkillLevels() {
-      BddLogger.given("a TraceServiceImpl service and a trace with AMS and skill levels");
-      AMS ams = AMSFixture.create().toModel();
-      DeclaredSkillProgress dsp =
-          DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-      SkillLevelProgress slp =
-          SkillLevelProgressFixture.create(student, SkillLevelFixture.create().toModel()).toModel();
-
-      Trace trace =
-          TraceFixture.create()
-              .withUser(student.getUser())
-              .withAmses(List.of(ams))
-              .withDeclaredSkillProgresses(List.of(dsp))
-              .withSkillLevels(List.of(slp))
-              .toModel();
-
-      BddLogger.when("deleting the trace");
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-      traceService.deleteById(trace.getId());
-
-      BddLogger.then("it should delete the trace and its links to AMS and skill levels");
-      verify(traceRepository).save(trace);
-      assertTrue(trace.getDeletedAt().isPresent());
-      assertTrue(trace.getAmses().isEmpty());
-      assertTrue(trace.getSkillLevels().isEmpty());
-      assertTrue(trace.getDeclaredSkillProgresses().isEmpty());
-    }
-
-    @Test
-    void givenTraceWithAmsAndSkillLevels_shouldThrowTraceNotFoundException() {
-      BddLogger.given("a TraceServiceImpl service and a trace with AMS and skill levels");
-      AMS ams = AMSFixture.create().toModel();
-      Trace trace =
-          TraceFixture.create().withUser(student.getUser()).withAmses(List.of(ams)).toModel();
-
-      BddLogger.when("deleting the trace but the trace is not found");
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.empty());
-      TraceNotFoundException exception =
-          assertThrows(TraceNotFoundException.class, () -> traceService.deleteById(trace.getId()));
-
-      BddLogger.then("it should throw TRACE_NOT_FOUND");
-      assertEquals(EErrorCode.TRACE_NOT_FOUND, exception.getErrorCode());
-      verify(traceRepository, never()).delete(trace);
-    }
-
-    @Test
-    void givenTraceWithAmsAndSkillLevels_shouldThrowUserNotAuthorizedException() {
-      BddLogger.given("a TraceServiceImpl service and a trace with AMS and skill levels");
-      User otherUser = UserFixture.create().toModel();
-      AMS ams = AMSFixture.create().toModel();
-      Trace trace = TraceFixture.create().withUser(otherUser).withAmses(List.of(ams)).toModel();
-
-      BddLogger.when("deleting the trace of another user");
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-      UserNotAuthorizedException exception =
-          assertThrows(
-              UserNotAuthorizedException.class, () -> traceService.deleteById(trace.getId()));
-
-      BddLogger.then("it should throw UserNotAuthorizedException");
-      assertEquals(EErrorCode.USER_NOT_AUTHORIZED, exception.getErrorCode());
-      verify(traceRepository, never()).delete(trace);
     }
 
     @Test
@@ -519,8 +446,7 @@ public class TraceServiceImplTest {
     void givenExistingTrace_shouldReturnTraceDetailData_withAssociations() {
       BddLogger.given(
           "a TraceServiceImpl service and a trace with associations and an active attachment");
-      SkillLevelProgress slpWithNoAms = mock(SkillLevelProgress.class);
-      SkillLevelProgress slpWithAms = mock(SkillLevelProgress.class);
+      SkillLevelProgress slp = mock(SkillLevelProgress.class);
       DeclaredSkillProgress dsp = mock(DeclaredSkillProgress.class);
 
       Trace trace =
@@ -529,14 +455,12 @@ public class TraceServiceImplTest {
               .withTitle("Trace title")
               .withLanguage(ELanguage.FRENCH)
               .withGroup(true)
-              .withSkillLevels(List.of(slpWithNoAms, slpWithAms))
+              .withSkillLevels(List.of(slp))
               .withDeclaredSkillProgresses(List.of(dsp))
               .toModel();
 
       when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
       when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-      when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
-          .thenReturn(List.of());
 
       var activeAttachment = TraceAttachmentFixture.create().toModel();
       when(traceAttachmentService.findByTrace(trace)).thenReturn(List.of(activeAttachment));
@@ -579,61 +503,6 @@ public class TraceServiceImplTest {
 
       BddLogger.then("it should throw USER_NOT_AUTHORIZED");
       assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
-    }
-
-    @Test
-    void givenAssociatedDeclaredSkillProgress_shouldReturnTraces() {
-      BddLogger.given("two traces associated to the given declaredSkillProgress");
-      DeclaredSkillProgress declaredSkillProgress =
-          DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-      Trace trace1 =
-          TraceFixture.create()
-              .withUser(student.getUser())
-              .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
-              .toModel();
-      Trace trace2 =
-          TraceFixture.create()
-              .withUser(student.getUser())
-              .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
-              .toModel();
-      when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
-      when(traceRepository.linkedWith(declaredSkillProgress)).thenReturn(List.of(trace1, trace2));
-
-      BddLogger.when("getting two traces associated to DeclaredSkillProgress");
-      List<Trace> traces =
-          traceService.getTracesLinkedWithDeclaredSkillProgress(declaredSkillProgress);
-
-      BddLogger.then(
-          "it should return two traces associated to DeclaredSkillProgress and right user");
-      assertEquals(2, traces.size());
-      assertEquals(trace1, traces.getFirst());
-      assertEquals(trace2, traces.getLast());
-    }
-
-    @Test
-    void givenAssociatedDeclaredSkillProgress_shouldThrowUserNotAuthorizedException() {
-      BddLogger.given("two traces associated to the given declaredSkillProgress");
-      Student anotherStudent = StudentFixture.create().toModel();
-      DeclaredSkillProgress declaredSkillProgress =
-          DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-      Trace trace1 =
-          TraceFixture.create()
-              .withUser(student.getUser())
-              .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
-              .toModel();
-      Trace trace2 =
-          TraceFixture.create()
-              .withUser(student.getUser())
-              .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
-              .toModel();
-      when(loggedInUserService.getLoggedInUser()).thenReturn(anotherStudent.getUser());
-      when(traceRepository.linkedWith(declaredSkillProgress)).thenReturn(List.of(trace1, trace2));
-
-      BddLogger.when(
-          "getting two traces associated to DeclaredSkillProgress but to another student");
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () -> traceService.getTracesLinkedWithDeclaredSkillProgress(declaredSkillProgress));
     }
 
     @Test
@@ -1453,169 +1322,5 @@ public class TraceServiceImplTest {
       assertTrue(returnedTrace.isAssociated());
       assertTrue(returnedTrace.willBeDeletedAt().isEmpty());
     }
-  }
-
-  @Nested
-  class NotConnectedTests {
-    @BeforeEach
-    void setupGiven() {
-      BddLogger.given("a non connected student");
-    }
-
-    @Test
-    void givenTraceWithoutSkillLevels_shouldReturnLifeProject() {
-      BddLogger.given("a TraceServiceImpl service and a trace without skill levels");
-      Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
-      when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
-          .thenReturn(List.of());
-
-      BddLogger.when("getting the progam name of the trace");
-      String result = traceService.programNameOfTrace(trace);
-
-      BddLogger.then("it should return LIFE_PROJECT");
-      assertEquals("LIFE_PROJECT", result);
-    }
-
-    @Test
-    void givenTraceWithSkillLevelsButNoApc_shouldReturnLifeProject() {
-      BddLogger.given("a TraceServiceImpl service and a trace with skill levels and without APC");
-      Program program = ProgramFixture.create().withAPC(false).toModel();
-      TrainingPath progress = TrainingPathFixture.create().withProgram(program).toModel();
-      SkillLevel skillLevel = SkillLevelFixture.create().toModel();
-      SkillLevelProgress skillLevelProgress =
-          SkillLevelProgressFixture.create(student, skillLevel)
-              .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-              .toModel();
-      StudentProgress studentProgress =
-          StudentProgressFixture.create()
-              .withTrainingPath(progress)
-              .withSkillLevels(List.of(skillLevelProgress))
-              .withStudent(student)
-              .toModel();
-      Trace trace =
-          TraceFixture.create()
-              .withUser(student.getUser())
-              .withSkillLevels(List.of(skillLevelProgress))
-              .toModel();
-
-      when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
-          .thenReturn(List.of(studentProgress));
-
-      BddLogger.when("getting the progam name of the trace");
-      String result = traceService.programNameOfTrace(trace);
-
-      BddLogger.then("it should return LIFE_PROJECT");
-      assertEquals("LIFE_PROJECT", result);
-    }
-
-    @Test
-    void givenTraceWithApcProgram_shouldReturnProgramName() {
-      BddLogger.given("a TraceServiceImpl service and a trace with APC program");
-      Program program = ProgramFixture.create().withAPC(true).withName("Program name").toModel();
-      TrainingPath progress = TrainingPathFixture.create().withProgram(program).toModel();
-      SkillLevel skillLevel = SkillLevelFixture.create().toModel();
-      SkillLevelProgress skillLevelProgress =
-          SkillLevelProgressFixture.create(student, skillLevel)
-              .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-              .toModel();
-      StudentProgress studentProgress =
-          StudentProgressFixture.create()
-              .withTrainingPath(progress)
-              .withSkillLevels(List.of(skillLevelProgress))
-              .withStudent(student)
-              .toModel();
-      Trace trace =
-          TraceFixture.create()
-              .withUser(student.getUser())
-              .withSkillLevels(List.of(skillLevelProgress))
-              .toModel();
-
-      when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
-          .thenReturn(List.of(studentProgress));
-
-      BddLogger.when("getting the progam name of the trace");
-      String result = traceService.programNameOfTrace(trace);
-
-      BddLogger.then("it should return the APC program name");
-      assertEquals("Program name", result);
-    }
-  }
-
-  @Test
-  void givenTraceWithoutSkillLevels_shouldReturnLifeProject() {
-    BddLogger.given("a TraceServiceImpl service and a trace without skill levels");
-    Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
-    when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
-        .thenReturn(List.of());
-
-    BddLogger.when("getting the progam name of the trace");
-    String result = traceService.programNameOfTrace(trace);
-
-    BddLogger.then("it should return LIFE_PROJECT");
-    assertEquals("LIFE_PROJECT", result);
-  }
-
-  @Test
-  void givenTraceWithSkillLevelsButNoApc_shouldReturnLifeProject() {
-    BddLogger.given("a TraceServiceImpl service and a trace with skill levels and without APC");
-    Program program = ProgramFixture.create().withAPC(false).toModel();
-    TrainingPath progress = TrainingPathFixture.create().withProgram(program).toModel();
-    SkillLevel skillLevel = SkillLevelFixture.create().toModel();
-    SkillLevelProgress skillLevelProgress =
-        SkillLevelProgressFixture.create(student, skillLevel)
-            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-            .toModel();
-    StudentProgress studentProgress =
-        StudentProgressFixture.create()
-            .withTrainingPath(progress)
-            .withSkillLevels(List.of(skillLevelProgress))
-            .withStudent(student)
-            .toModel();
-    Trace trace =
-        TraceFixture.create()
-            .withUser(student.getUser())
-            .withSkillLevels(List.of(skillLevelProgress))
-            .toModel();
-
-    when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
-        .thenReturn(List.of(studentProgress));
-
-    BddLogger.when("getting the progam name of the trace");
-    String result = traceService.programNameOfTrace(trace);
-
-    BddLogger.then("it should return LIFE_PROJECT");
-    assertEquals("LIFE_PROJECT", result);
-  }
-
-  @Test
-  void givenTraceWithApcProgram_shouldReturnProgramName() {
-    BddLogger.given("a TraceServiceImpl service and a trace with APC program");
-    Program program = ProgramFixture.create().withAPC(true).withName("Program name").toModel();
-    TrainingPath progress = TrainingPathFixture.create().withProgram(program).toModel();
-    SkillLevel skillLevel = SkillLevelFixture.create().toModel();
-    SkillLevelProgress skillLevelProgress =
-        SkillLevelProgressFixture.create(student, skillLevel)
-            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-            .toModel();
-    StudentProgress studentProgress =
-        StudentProgressFixture.create()
-            .withTrainingPath(progress)
-            .withSkillLevels(List.of(skillLevelProgress))
-            .withStudent(student)
-            .toModel();
-    Trace trace =
-        TraceFixture.create()
-            .withUser(student.getUser())
-            .withSkillLevels(List.of(skillLevelProgress))
-            .toModel();
-
-    when(studentProgressService.findStudentProgressesBySkillLevelProgresses(any()))
-        .thenReturn(List.of(studentProgress));
-
-    BddLogger.when("getting the progam name of the trace");
-    String result = traceService.programNameOfTrace(trace);
-
-    BddLogger.then("it should return the APC program name");
-    assertEquals("Program name", result);
   }
 }

@@ -6,11 +6,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.application.
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.mapper.DeclaredExperienceMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillAssociationDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.AmsAssociationDTO;
-import fr.avenirsesr.portfolio.trace.application.adapter.dto.SkillLevelAssociationDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceAssociationsDTO;
-import fr.avenirsesr.portfolio.trace.domain.data.AmsAssociationData;
-import fr.avenirsesr.portfolio.trace.domain.data.SkillLevelAssociationData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
 
 public interface TraceAssociationsMapper {
@@ -38,23 +34,5 @@ public interface TraceAssociationsMapper {
                         association.associationId(),
                         DeclaredExperienceMapper.toDTO(association.declaredExperience())))
             .toList());
-  }
-
-  static SkillLevelAssociationDTO toDTO(SkillLevelAssociationData skillLevelAssociation) {
-    return skillLevelAssociation != null
-        ? new SkillLevelAssociationDTO(
-            skillLevelAssociation.id(),
-            skillLevelAssociation.skillTitle(),
-            skillLevelAssociation.level(),
-            skillLevelAssociation.status(),
-            toDTO(skillLevelAssociation.ams()))
-        : null;
-  }
-
-  static AmsAssociationDTO toDTO(AmsAssociationData amsAssociation) {
-    return amsAssociation != null
-        ? new AmsAssociationDTO(
-            amsAssociation.id(), amsAssociation.title(), amsAssociation.status())
-        : null;
   }
 }

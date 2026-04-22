@@ -37,17 +37,6 @@ public class SeederConfig {
   public static final int COHORT_NB_USERS_MIN = 1;
   public static final int COHORT_NB_USERS_MAX = 15;
 
-  // AMS
-  public static final int AMS_NB = 80;
-  public static final int NB_COHORTS_MIN_PER_AMS = 0;
-  public static final int NB_COHORTS_MAX_PER_AMS = 8;
-
-  public static final int NB_SKILL_LEVEL_MIN_PER_AMS = 1;
-  public static final int NB_SKILL_LEVEL_MAX_PER_AMS = 4;
-
-  public static final int NB_TRACES_MIN_PER_AMS = 0;
-  public static final int NB_TRACES_MAX_PER_AMS = 3;
-
   // Student Declared Skills
   public static final int MIN_DECLARED_SKILLS_PER_STUDENT = 1;
   public static final int MAX_DECLARED_SKILLS_PER_STUDENT = 4;

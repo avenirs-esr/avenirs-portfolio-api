@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -119,11 +118,6 @@ public class TraceDatabaseRepository
             isAssociated ? TraceSpecification.associated() : TraceSpecification.unassociated());
 
     return findAll(specification);
-  }
-
-  @Override
-  public List<Trace> linkedWith(AMS ams) {
-    return findAll(TraceSpecification.ofAms(ams));
   }
 
   @Override

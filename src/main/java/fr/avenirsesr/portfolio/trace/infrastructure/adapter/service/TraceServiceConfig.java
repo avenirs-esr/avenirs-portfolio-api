@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.service.TraceServiceImpl;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
@@ -22,7 +21,6 @@ import org.springframework.context.annotation.Configuration;
 public class TraceServiceConfig {
   private final TraceDatabaseRepository traceRepository;
   private final UserService userService;
-  private final StudentProgressService studentProgressService;
   private final TraceAttachmentService traceAttachmentService;
   private final DeclaredActivityService declaredActivityService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
@@ -37,7 +35,6 @@ public class TraceServiceConfig {
     return new TraceServiceImpl(
         traceRepository,
         userService,
-        studentProgressService,
         traceAttachmentService,
         declaredActivityService,
         declaredSkillProgressService,

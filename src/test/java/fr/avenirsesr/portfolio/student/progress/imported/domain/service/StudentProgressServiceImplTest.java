@@ -15,7 +15,6 @@ import fr.avenirsesr.portfolio.program.domain.model.TrainingPath;
 import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
@@ -170,13 +169,11 @@ public class StudentProgressServiceImplTest {
 
         when(studentProgressRepository.findAllByStudent(eq(student)))
             .thenReturn(List.of(progress, progress2));
-        when(traceService.getTracesLinkedWithSkillLevelProgress(any(SkillLevelProgress.class)))
-            .thenReturn(List.of());
       }
 
       @Nested
       class WhenGettingTheStudentProgressOverview {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
+        private Map<StudentProgress, List<SkillLevelProgress>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -202,7 +199,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheStudentProgressView {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
+        private Map<StudentProgress, List<SkillLevelProgress>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -238,7 +235,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheStudentProgressOverview {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
+        private Map<StudentProgress, List<SkillLevelProgress>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -321,13 +318,11 @@ public class StudentProgressServiceImplTest {
         // Mock repository to return all progress
         when(studentProgressRepository.findAllByStudent(eq(student)))
             .thenReturn(List.of(currentProgress, pastProgress, futureProgress));
-        when(traceService.getTracesLinkedWithSkillLevelProgress(any(SkillLevelProgress.class)))
-            .thenReturn(List.of());
       }
 
       @Nested
       class WhenGettingTheStudentProgressOverview {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
+        private Map<StudentProgress, List<SkillLevelProgress>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -352,7 +347,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheStudentProgressView {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
+        private Map<StudentProgress, List<SkillLevelProgress>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -418,7 +413,7 @@ public class StudentProgressServiceImplTest {
 
       @Nested
       class WhenGettingTheStudentProgressView {
-        private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
+        private Map<StudentProgress, List<SkillLevelProgress>> result;
 
         @BeforeEach
         void setupWhen() {
@@ -506,15 +501,13 @@ public class StudentProgressServiceImplTest {
 
         when(studentProgressRepository.findAllByStudent(eq(student)))
             .thenReturn(List.of(progressBNew, progressAOld));
-        when(traceService.getTracesLinkedWithSkillLevelProgress(any(SkillLevelProgress.class)))
-            .thenReturn(List.of());
       }
 
       @Nested
       class WhenGettingTheStudentProgressView {
         private ESortField sortField;
         private List<StudentProgress> orderedKeys;
-        private List<SkillLevelProgressWithTraceCountData> skillsOfFirst, skillsOfSecond;
+        private List<SkillLevelProgress> skillsOfFirst, skillsOfSecond;
 
         @BeforeEach
         void setupWhen() {
@@ -523,7 +516,7 @@ public class StudentProgressServiceImplTest {
 
         @Nested
         class AndASortByNameCriteriaIsPassed {
-          private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
+          private Map<StudentProgress, List<SkillLevelProgress>> result;
 
           @BeforeEach
           void setupAnd() {
@@ -552,13 +545,13 @@ public class StudentProgressServiceImplTest {
             skillsOfFirst = result.get(orderedKeys.get(0));
             List<String> skillNamesOfFirst =
                 skillsOfFirst.stream()
-                    .map(slp -> slp.skillLevelProgress().getSkillLevel().getSkill().getName())
+                    .map(slp -> slp.getSkillLevel().getSkill().getName())
                     .toList();
 
             skillsOfSecond = result.get(orderedKeys.get(1));
             List<String> skillNamesOfSecond =
                 skillsOfSecond.stream()
-                    .map(slp -> slp.skillLevelProgress().getSkillLevel().getSkill().getName())
+                    .map(slp -> slp.getSkillLevel().getSkill().getName())
                     .toList();
 
             List<String> expectedOrder =
@@ -573,7 +566,7 @@ public class StudentProgressServiceImplTest {
 
         @Nested
         class AndASortByDateCriteriaIsPassed {
-          private Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> result;
+          private Map<StudentProgress, List<SkillLevelProgress>> result;
 
           @BeforeEach
           void setupAnd() {
@@ -600,13 +593,11 @@ public class StudentProgressServiceImplTest {
 
             skillsOfFirst = result.get(orderedKeys.get(0));
             List<LocalDate> datesFirst =
-                skillsOfFirst.stream().map(dto -> dto.skillLevelProgress().getStartDate()).toList();
+                skillsOfFirst.stream().map(SkillLevelProgress::getStartDate).toList();
 
             skillsOfSecond = result.get(orderedKeys.get(1));
             List<LocalDate> datesSecond =
-                skillsOfSecond.stream()
-                    .map(dto -> dto.skillLevelProgress().getStartDate())
-                    .toList();
+                skillsOfSecond.stream().map(SkillLevelProgress::getStartDate).toList();
 
             List<LocalDate> expectedFirst =
                 (order == ESortOrder.ASC)
@@ -730,8 +721,6 @@ public class StudentProgressServiceImplTest {
 
         when(studentProgressRepository.findAllByStudent(eq(student)))
             .thenReturn(List.of(finishedProgress, currentProgress));
-        when(traceService.getTracesLinkedWithSkillLevelProgress(any(SkillLevelProgress.class)))
-            .thenReturn(List.of());
       }
 
       @Nested

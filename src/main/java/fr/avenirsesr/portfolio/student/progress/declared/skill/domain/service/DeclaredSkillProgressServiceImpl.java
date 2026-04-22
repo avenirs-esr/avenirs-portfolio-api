@@ -170,26 +170,8 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
       throw new UserNotAuthorizedException();
     }
 
-    declaredSkillProgressList.forEach(traceService::unassociateTraces);
-
     declaredSkillProgressRepository.removeAllFromDatabase(declaredSkillProgressList);
     log.info("DeclaredSkillProgressIds {} successfully deleted", declaredSkillProgressIds);
-  }
-
-  @Override
-  public void unassociateTraces(UUID declaredSkillProgressId, List<UUID> traceIds) {
-    Student student = loggedInUserService.getLoggedInStudent();
-
-    DeclaredSkillProgress declaredSkillProgress =
-        declaredSkillProgressRepository
-            .findById(declaredSkillProgressId)
-            .orElseThrow(DeclaredSkillProgressNotFoundException::new);
-
-    if (!declaredSkillProgress.getStudent().equals(student)) {
-      throw new UserNotAuthorizedException();
-    }
-
-    traceService.unassociateTraces(declaredSkillProgress, traceIds);
   }
 
   @Override

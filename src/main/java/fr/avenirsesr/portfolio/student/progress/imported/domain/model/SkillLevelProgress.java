@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.student.progress.imported.domain.model;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
@@ -9,7 +8,6 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +20,6 @@ public class SkillLevelProgress extends AvenirsBaseModel {
   private ESkillLevelStatus status;
   private LocalDate startDate;
   private LocalDate endDate;
-  private List<AMS> amses;
 
   private SkillLevelProgress(
       UUID id,
@@ -31,7 +28,6 @@ public class SkillLevelProgress extends AvenirsBaseModel {
       ESkillLevelStatus status,
       LocalDate startDate,
       LocalDate endDate,
-      List<AMS> amses,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -40,7 +36,6 @@ public class SkillLevelProgress extends AvenirsBaseModel {
     this.status = status;
     this.startDate = startDate;
     this.endDate = endDate;
-    this.amses = amses;
   }
 
   public static SkillLevelProgress create(
@@ -52,7 +47,6 @@ public class SkillLevelProgress extends AvenirsBaseModel {
         ESkillLevelStatus.NOT_STARTED,
         startDate,
         endDate,
-        List.of(),
         Instant.now(),
         Instant.now());
   }
@@ -64,11 +58,10 @@ public class SkillLevelProgress extends AvenirsBaseModel {
       ESkillLevelStatus status,
       LocalDate startDate,
       LocalDate endDate,
-      List<AMS> amses,
       Instant createdAt,
       Instant updatedAt) {
     return new SkillLevelProgress(
-        id, student, skillLevel, status, startDate, endDate, amses, createdAt, updatedAt);
+        id, student, skillLevel, status, startDate, endDate, createdAt, updatedAt);
   }
 
   public static Comparator<SkillLevelProgress> comparatorOf(SortCriteria sortCriteria) {

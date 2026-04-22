@@ -10,7 +10,6 @@ import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.SkillLevelProgressFixture;
 import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto.StudentProgressViewDTO;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.fixture.StudentProgressFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -35,40 +34,30 @@ public class StudentProgressViewMapperTest {
     var pythonSkillLevel_2 = SkillLevelFixture.create().withSkill(pythonSkill).toModel();
 
     var javaProgress_1 =
-        new SkillLevelProgressWithTraceCountData(
-            SkillLevelProgressFixture.create(student, javaSkillLevel_1)
-                .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-                .withEndDate(LocalDate.now().minusMonths(2))
-                .toModel(),
-            2);
+        SkillLevelProgressFixture.create(student, javaSkillLevel_1)
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .withEndDate(LocalDate.now().minusMonths(2))
+            .toModel();
     var javaProgress_2 =
-        new SkillLevelProgressWithTraceCountData(
-            SkillLevelProgressFixture.create(student, javaSkillLevel_2)
-                .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-                .withEndDate(LocalDate.now().minusMonths(1))
-                .toModel(),
-            2);
+        SkillLevelProgressFixture.create(student, javaSkillLevel_2)
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .withEndDate(LocalDate.now().minusMonths(1))
+            .toModel();
     var javaProgress_3 =
-        new SkillLevelProgressWithTraceCountData(
-            SkillLevelProgressFixture.create(student, javaSkillLevel_3)
-                .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
-                .withEndDate(LocalDate.now().plusMonths(1))
-                .toModel(),
-            2);
+        SkillLevelProgressFixture.create(student, javaSkillLevel_3)
+            .withStatus(ESkillLevelStatus.TO_BE_EVALUATED)
+            .withEndDate(LocalDate.now().plusMonths(1))
+            .toModel();
     var pythonProgress_1 =
-        new SkillLevelProgressWithTraceCountData(
-            SkillLevelProgressFixture.create(student, pythonSkillLevel_1)
-                .withStatus(ESkillLevelStatus.VALIDATED)
-                .withEndDate(LocalDate.now().minusMonths(4))
-                .toModel(),
-            2);
+        SkillLevelProgressFixture.create(student, pythonSkillLevel_1)
+            .withStatus(ESkillLevelStatus.VALIDATED)
+            .withEndDate(LocalDate.now().minusMonths(4))
+            .toModel();
     var pythonProgress_2 =
-        new SkillLevelProgressWithTraceCountData(
-            SkillLevelProgressFixture.create(student, pythonSkillLevel_2)
-                .withStatus(ESkillLevelStatus.NOT_STARTED)
-                .withEndDate(LocalDate.now().plusMonths(4))
-                .toModel(),
-            2);
+        SkillLevelProgressFixture.create(student, pythonSkillLevel_2)
+            .withStatus(ESkillLevelStatus.NOT_STARTED)
+            .withEndDate(LocalDate.now().plusMonths(4))
+            .toModel();
 
     var skillLevelProgresses =
         List.of(javaProgress_1, javaProgress_2, javaProgress_3, pythonProgress_1, pythonProgress_2);
@@ -76,10 +65,7 @@ public class StudentProgressViewMapperTest {
     StudentProgress studentProgress =
         StudentProgressFixture.create()
             .withStudent(student)
-            .withSkillLevels(
-                skillLevelProgresses.stream()
-                    .map(SkillLevelProgressWithTraceCountData::skillLevelProgress)
-                    .toList())
+            .withSkillLevels(skillLevelProgresses)
             .toModel();
 
     try (MockedStatic<SkillMapper> mockedSkillViewMapper = mockStatic(SkillMapper.class)) {

@@ -121,16 +121,7 @@ public class DeclaredSkillProgressController {
       Principal principal,
       @PathVariable UUID declaredSkillProgressId,
       @RequestBody List<UUID> traceIds) {
-    log.debug(
-        "Received request to unassociate traces [{}] to declared skill progress [{}] for student"
-            + " [{}]",
-        traceIds,
-        declaredSkillProgressId,
-        principal.getName());
-
-    declaredSkillProgressService.unassociateTraces(declaredSkillProgressId, traceIds);
-
-    return ResponseEntity.ok("Trace successfully unassociated.");
+    return ResponseEntity.status(410).build();
   }
 
   @GetMapping("/search-for-association")

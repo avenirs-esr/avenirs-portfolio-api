@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.student.progress.imported.domain.service;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -32,10 +31,5 @@ public class SkillLevelProgressServiceImpl implements SkillLevelProgressService 
     log.debug("Searching SkillLevelProgress for {} with pagination {}", student, pageCriteria);
 
     return skillLevelProgressRepository.findAllByStudent(student, pageCriteria, keyword);
-  }
-
-  @Override
-  public List<SkillLevelProgress> getSkillLevelProgressesLinkedWithAMS(AMS ams) {
-    return skillLevelProgressRepository.linkedWith(ams);
   }
 }

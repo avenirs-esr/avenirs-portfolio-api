@@ -37,8 +37,6 @@ public interface DeclaredSkillProgressService {
   PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
       UUID declaredSkillProgressId, String keyword, PageCriteria pageCriteria);
 
-  void unassociateTraces(UUID declaredSkillProgressId, List<UUID> traceIds);
-
   List<DeclaredSkillProgress> findAllDeclaredSkillProgressesByIds(List<UUID> ids);
 
   DeclaredSkillAssociationsData getAssociationsOf(UUID declaredSkillId);

@@ -1,13 +1,9 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.fixture;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.mapper.DeclaredSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.FakeTrace;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -24,7 +20,6 @@ public class TraceFixture {
   private String title;
   private List<SkillLevelProgress> skillLevels;
   private List<DeclaredSkillProgress> declaredSkillProgresses;
-  private List<AMS> amses;
   private Instant createdAt;
   private Instant updatedAt;
   private Instant deletedAt;
@@ -40,13 +35,6 @@ public class TraceFixture {
     this.id = base.getId();
     this.user = fakeUser;
     this.title = base.getTitle();
-    this.skillLevels =
-        base.getSkillLevels().stream().map(SkillLevelProgressMapper.INSTANCE::toDomain).toList();
-    this.amses = base.getAmses().stream().map(AMSMapper.INSTANCE::toDomain).toList();
-    this.declaredSkillProgresses =
-        base.getDeclaredSkillsProgresses().stream()
-            .map(DeclaredSkillProgressMapper.INSTANCE::toDomain)
-            .toList();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
     this.deletedAt = base.getDeletedAt();
@@ -80,11 +68,6 @@ public class TraceFixture {
   public TraceFixture withDeclaredSkillProgresses(
       List<DeclaredSkillProgress> declaredSkillProgresses) {
     this.declaredSkillProgresses = declaredSkillProgresses;
-    return this;
-  }
-
-  public TraceFixture withAmses(List<AMS> amses) {
-    this.amses = amses;
     return this;
   }
 
@@ -141,9 +124,6 @@ public class TraceFixture {
         id,
         user,
         title,
-        skillLevels,
-        declaredSkillProgresses,
-        amses,
         isGroup,
         aiUseJustification,
         personalNote,

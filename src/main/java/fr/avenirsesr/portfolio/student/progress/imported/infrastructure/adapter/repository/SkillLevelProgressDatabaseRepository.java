@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.repository;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
@@ -32,11 +31,6 @@ public class SkillLevelProgressDatabaseRepository
         SkillLevelProgressEntity.class,
         SkillLevelProgressMapper.INSTANCE);
     this.jpaRepository = jpaRepository;
-  }
-
-  @Override
-  public List<SkillLevelProgress> linkedWith(AMS ams) {
-    return findAll(SkillLevelProgressSpecification.linkedTo(ams));
   }
 
   @Override

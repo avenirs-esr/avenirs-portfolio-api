@@ -178,9 +178,7 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .jsonPath("$[0].skills[0].levelCount")
         .isEqualTo(3)
         .jsonPath("$[0].skills[0].currentSkillLevel")
-        .exists()
-        .jsonPath("$[0].skills[0].currentSkillLevel.traceCount")
-        .isEqualTo(0);
+        .exists();
   }
 
   @Test
@@ -250,9 +248,7 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .jsonPath("$[0].skills[0].levelCount")
         .isEqualTo(3)
         .jsonPath("$[0].skills[0].currentSkillLevel")
-        .exists()
-        .jsonPath("$[0].skills[0].currentSkillLevel.traceCount")
-        .isEqualTo(0);
+        .exists();
   }
 
   @Test

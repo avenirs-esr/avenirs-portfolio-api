@@ -67,21 +67,14 @@ public class TraceFilterSpecificationBuilder
       query.distinct(true);
       List<Predicate> predicates = new ArrayList<>();
       for (ETraceStatus status : traceStatus) {
-        var amsJoin = root.join("amses", JoinType.LEFT);
         var skillLevelJoin = root.join("skillLevels", JoinType.LEFT);
 
-        Predicate amsPredicate = null;
         Predicate skillPredicate = null;
-
-        if (!status.getAmsStatuses().isEmpty()) {
-          amsPredicate = amsJoin.get("status").in(status.getAmsStatuses());
-        }
 
         if (!status.getSkillLevelStatuses().isEmpty()) {
           skillPredicate = skillLevelJoin.get("status").in(status.getSkillLevelStatuses());
         }
 
-        if (amsPredicate != null) predicates.add(amsPredicate);
         if (skillPredicate != null) predicates.add(skillPredicate);
       }
 

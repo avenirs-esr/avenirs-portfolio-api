@@ -1,14 +1,9 @@
 package fr.avenirsesr.portfolio.trace.domain.model;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.DeletableAvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -20,9 +15,6 @@ import lombok.Setter;
 public class Trace extends DeletableAvenirsBaseModel {
   private final User user;
   private String title;
-  private List<SkillLevelProgress> skillLevels;
-  private List<DeclaredSkillProgress> declaredSkillProgresses;
-  private List<AMS> amses;
   private boolean isGroup;
   private ELanguage language;
 
@@ -44,9 +36,6 @@ public class Trace extends DeletableAvenirsBaseModel {
       String aiUseJustification,
       String personalNote,
       String link,
-      List<SkillLevelProgress> skillLevels,
-      List<DeclaredSkillProgress> declaredSkillProgresses,
-      List<AMS> amses,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
@@ -54,9 +43,6 @@ public class Trace extends DeletableAvenirsBaseModel {
     this.user = user;
     this.title = title;
     this.language = language;
-    this.skillLevels = skillLevels;
-    this.declaredSkillProgresses = declaredSkillProgresses;
-    this.amses = amses;
     this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
@@ -82,9 +68,6 @@ public class Trace extends DeletableAvenirsBaseModel {
         aiUseJustification,
         personalNote,
         link,
-        new ArrayList<>(),
-        new ArrayList<>(),
-        new ArrayList<>(),
         Instant.now(),
         Instant.now(),
         null);
@@ -94,9 +77,6 @@ public class Trace extends DeletableAvenirsBaseModel {
       UUID id,
       User user,
       String title,
-      List<SkillLevelProgress> skillLevels,
-      List<DeclaredSkillProgress> declaredSkillProgresses,
-      List<AMS> amses,
       boolean group,
       String aiUseJustification,
       String personalNote,
@@ -114,9 +94,6 @@ public class Trace extends DeletableAvenirsBaseModel {
         aiUseJustification,
         personalNote,
         link,
-        skillLevels,
-        declaredSkillProgresses,
-        amses,
         createdAt,
         updatedAt,
         deletedAt);
@@ -132,11 +109,5 @@ public class Trace extends DeletableAvenirsBaseModel {
 
   public Optional<String> getLink() {
     return Optional.ofNullable(link);
-  }
-
-  public void remove(DeclaredSkillProgress declaredSkillProgress) {
-    var newDeclaredSkillProgresses = new ArrayList<>(declaredSkillProgresses);
-    newDeclaredSkillProgresses.remove(declaredSkillProgress);
-    setDeclaredSkillProgresses(newDeclaredSkillProgresses);
   }
 }

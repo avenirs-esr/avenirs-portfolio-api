@@ -8,7 +8,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
@@ -59,8 +58,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
   }
 
   @Override
-  public Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>>
-      getStudentProgressOverview() {
+  public Map<StudentProgress, List<SkillLevelProgress>> getStudentProgressOverview() {
     Student student = loggedInUserService.getLoggedInStudent();
     var studentProgresses =
         studentProgressRepository.findAllByStudent(student).stream()
@@ -74,18 +72,11 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                 studentProgress ->
                     studentProgress.getCurrentSkillLevels().stream()
                         .limit(MAX_IMPORTED_SKILLS / studentProgresses.size())
-                        .map(
-                            skillLevelProgress ->
-                                new SkillLevelProgressWithTraceCountData(
-                                    skillLevelProgress,
-                                    traceService
-                                        .getTracesLinkedWithSkillLevelProgress(skillLevelProgress)
-                                        .size()))
                         .toList()));
   }
 
   @Override
-  public Map<StudentProgress, List<SkillLevelProgressWithTraceCountData>> getStudentProgressView(
+  public Map<StudentProgress, List<SkillLevelProgress>> getStudentProgressView(
       SortCriteria sortCriteria) {
     Student student = loggedInUserService.getLoggedInStudent();
     return studentProgressRepository.findAllByStudent(student).stream()
@@ -97,13 +88,6 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                 studentProgress ->
                     studentProgress.getCurrentSkillLevels().stream()
                         .sorted(SkillLevelProgress.comparatorOf(sortCriteria))
-                        .map(
-                            skillLevelProgress ->
-                                new SkillLevelProgressWithTraceCountData(
-                                    skillLevelProgress,
-                                    traceService
-                                        .getTracesLinkedWithSkillLevelProgress(skillLevelProgress)
-                                        .size()))
                         .toList(),
                 (v1, v2) -> v1,
                 LinkedHashMap::new));
@@ -126,12 +110,7 @@ public class StudentProgressServiceImpl implements StudentProgressService {
                                 new SkillProgressData(
                                     currentSkillLevel.getSkillLevel().getSkill(),
                                     studentProgress,
-                                    new SkillLevelProgressWithTraceCountData(
-                                        currentSkillLevel,
-                                        traceService
-                                            .getTracesLinkedWithSkillLevelProgress(
-                                                currentSkillLevel)
-                                            .size()))))
+                                    currentSkillLevel)))
             .sorted(
                 Comparator.comparing(
                         (SkillProgressData skillProgress) ->

@@ -8,8 +8,6 @@ public interface TraceOverviewMapper {
     return new TraceOverviewDTO(
         trace.getId(),
         trace.getTitle(),
-        trace.getSkillLevels().size(),
-        trace.getAmses().size(),
         programName,
         trace.isGroup(),
         trace.getCreatedAt(),

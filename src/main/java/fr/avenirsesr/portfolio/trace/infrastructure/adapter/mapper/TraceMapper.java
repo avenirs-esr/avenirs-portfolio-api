@@ -1,14 +1,10 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper;
 
-import fr.avenirsesr.portfolio.ams.infrastructure.adapter.mapper.AMSMapper;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.mapper.DeclaredSkillProgressMapper;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
-import java.util.List;
 
 public class TraceMapper implements Mapper<TraceEntity, Trace> {
   public static final TraceMapper INSTANCE = new TraceMapper();
@@ -20,11 +16,6 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
         UserMapper.INSTANCE.fromDomain(trace.getUser()),
         trace.getTitle(),
         trace.getLanguage(),
-        trace.getSkillLevels().stream().map(SkillLevelProgressMapper.INSTANCE::fromDomain).toList(),
-        trace.getDeclaredSkillProgresses().stream()
-            .map(DeclaredSkillProgressMapper.INSTANCE::fromDomain)
-            .toList(),
-        trace.getAmses().stream().map(AMSMapper.INSTANCE::fromDomain).toList(),
         trace.isGroup(),
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
@@ -36,29 +27,18 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
 
   @Override
   public Trace toDomain(TraceEntity traceEntity) {
-    Trace trace =
-        Trace.toDomain(
-            traceEntity.getId(),
-            UserMapper.INSTANCE.toDomain(traceEntity.getUser()),
-            traceEntity.getTitle(),
-            List.of(),
-            traceEntity.getDeclaredSkillsProgresses().stream()
-                .map(DeclaredSkillProgressMapper.INSTANCE::toDomain)
-                .toList(),
-            traceEntity.getAmses().stream().map(AMSMapper.INSTANCE::toDomain).toList(),
-            traceEntity.isGroup(),
-            traceEntity.getAiUseJustification(),
-            traceEntity.getPersonalNote(),
-            traceEntity.getLink(),
-            traceEntity.getCreatedAt(),
-            traceEntity.getUpdatedAt(),
-            traceEntity.getDeletedAt(),
-            traceEntity.getLanguage());
-    trace.setSkillLevels(
-        traceEntity.getSkillLevels().stream()
-            .map(SkillLevelProgressMapper.INSTANCE::toDomain)
-            .toList());
-    return trace;
+    return Trace.toDomain(
+        traceEntity.getId(),
+        UserMapper.INSTANCE.toDomain(traceEntity.getUser()),
+        traceEntity.getTitle(),
+        traceEntity.isGroup(),
+        traceEntity.getAiUseJustification(),
+        traceEntity.getPersonalNote(),
+        traceEntity.getLink(),
+        traceEntity.getCreatedAt(),
+        traceEntity.getUpdatedAt(),
+        traceEntity.getDeletedAt(),
+        traceEntity.getLanguage());
   }
 
   @Override
@@ -68,24 +48,6 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
         traceEntity.getId(),
         attributes.contains("user") ? UserMapper.INSTANCE.toDomain(traceEntity.getUser()) : null,
         traceEntity.getTitle(),
-        attributes.contains("skillLevels")
-            ? traceEntity.getSkillLevels().stream()
-                .map(e -> SkillLevelProgressMapper.INSTANCE.toDomain(e, graph.from("skillLevels")))
-                .toList()
-            : List.of(),
-        attributes.contains("declaredSkillsProgresses")
-            ? traceEntity.getDeclaredSkillsProgresses().stream()
-                .map(
-                    e ->
-                        DeclaredSkillProgressMapper.INSTANCE.toDomain(
-                            e, graph.from("declaredSkillsProgresses")))
-                .toList()
-            : List.of(),
-        attributes.contains("amses")
-            ? traceEntity.getAmses().stream()
-                .map(e -> AMSMapper.INSTANCE.toDomain(e, graph.from("amses")))
-                .toList()
-            : List.of(),
         traceEntity.isGroup(),
         traceEntity.getAiUseJustification(),
         traceEntity.getPersonalNote(),
