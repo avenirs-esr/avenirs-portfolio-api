@@ -7,10 +7,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
@@ -740,5 +743,172 @@ public class DeclaredSkillProgressServiceImplTest {
         verifyNoInteractions(associationService);
       }
     }
+  }
+
+  @Test
+  void searchDeclaredSkillsForAssociation_should_use_TRACE_DECLARED_SKILL_when_context_is_Trace() {
+    UUID contextId = randomUUID();
+    PageCriteria pageCriteria = new PageCriteria(0, 10);
+    PagedResult<DeclaredSkillProgress> skillSearch =
+        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
+
+    when(declaredSkillProgressRepository.findAllByStudent(
+            eq(student),
+            eq(pageCriteria),
+            eq("kw"),
+            eq(new SortCriteria(ESortField.NAME, ESortOrder.ASC))))
+        .thenReturn(skillSearch);
+
+    PagedResult<AssociationSearchResultData> expected =
+        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
+    when(associationSearchHelper.searchForAssociation(
+            eq(contextId),
+            eq(Trace.class),
+            eq(EAssociationType.TRACE_DECLARED_SKILL),
+            any(),
+            eq(skillSearch),
+            any(),
+            any(),
+            any(),
+            any()))
+        .thenReturn(expected);
+
+    var result =
+        declaredSkillProgressService.searchDeclaredSkillsForAssociation(
+            contextId, EAssociationContextType.TRACE, "kw", pageCriteria);
+
+    assertThat(result).isSameAs(expected);
+  }
+
+  @Test
+  void
+      searchDeclaredSkillsForAssociation_should_use_DECLARED_ACTIVITY_DECLARED_SKILL_when_context_is_Activity() {
+    UUID contextId = randomUUID();
+    PageCriteria pageCriteria = new PageCriteria(0, 10);
+    PagedResult<DeclaredSkillProgress> skillSearch =
+        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
+
+    when(declaredSkillProgressRepository.findAllByStudent(
+            eq(student),
+            eq(pageCriteria),
+            eq("kw"),
+            eq(new SortCriteria(ESortField.NAME, ESortOrder.ASC))))
+        .thenReturn(skillSearch);
+
+    PagedResult<AssociationSearchResultData> expected =
+        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
+    when(associationSearchHelper.searchForAssociation(
+            eq(contextId),
+            eq(DeclaredActivity.class),
+            eq(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL),
+            any(),
+            eq(skillSearch),
+            any(),
+            any(),
+            any(),
+            any()))
+        .thenReturn(expected);
+
+    var result =
+        declaredSkillProgressService.searchDeclaredSkillsForAssociation(
+            contextId, EAssociationContextType.DECLARED_ACTIVITY, "kw", pageCriteria);
+
+    assertThat(result).isSameAs(expected);
+  }
+
+  @Test
+  void searchDeclaredSkillsForAssociation_should_pass_nulls_when_context_class_unknown() {
+    PageCriteria pageCriteria = new PageCriteria(0, 10);
+    PagedResult<DeclaredSkillProgress> skillSearch =
+        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
+
+    when(declaredSkillProgressRepository.findAllByStudent(
+            eq(student),
+            eq(pageCriteria),
+            eq("kw"),
+            eq(new SortCriteria(ESortField.NAME, ESortOrder.ASC))))
+        .thenReturn(skillSearch);
+
+    PagedResult<AssociationSearchResultData> expected =
+        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
+    when(associationSearchHelper.searchForAssociation(
+            eq(null), eq(null), eq(null), eq(null), eq(skillSearch), any(), any(), any(), any()))
+        .thenReturn(expected);
+
+    var result =
+        declaredSkillProgressService.searchDeclaredSkillsForAssociation(
+            null, null, "kw", pageCriteria);
+
+    assertThat(result).isSameAs(expected);
+  }
+
+  @Test
+  void
+      searchDeclaredActivityForAssociation_should_delegate_to_helper_when_skill_owned_by_student() {
+    UUID declaredSkillProgressId = randomUUID();
+    PageCriteria pageCriteria = new PageCriteria(0, 10);
+
+    DeclaredSkillProgress skill =
+        DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+    when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
+        .thenReturn(Optional.of(skill));
+
+    PagedResult<DeclaredActivity> activitySearch =
+        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
+    when(declaredActivityService.searchDeclaredActivity("kw", pageCriteria))
+        .thenReturn(activitySearch);
+
+    PagedResult<AssociationSearchResultData> expected =
+        new PagedResult<>(List.of(), new PageInfo(0, 10, 0));
+    when(associationSearchHelper.searchForAssociation(
+            eq(declaredSkillProgressId),
+            eq(DeclaredSkillProgress.class),
+            eq(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL),
+            any(),
+            eq(activitySearch),
+            any(),
+            any(),
+            any(),
+            any()))
+        .thenReturn(expected);
+
+    var result =
+        declaredSkillProgressService.searchDeclaredActivityForAssociation(
+            declaredSkillProgressId, "kw", pageCriteria);
+
+    assertThat(result).isSameAs(expected);
+  }
+
+  @Test
+  void searchDeclaredActivityForAssociation_should_throw_when_skill_not_found() {
+    UUID declaredSkillProgressId = randomUUID();
+    when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
+        .thenReturn(Optional.empty());
+
+    assertThrows(
+        DeclaredSkillProgressNotFoundException.class,
+        () ->
+            declaredSkillProgressService.searchDeclaredActivityForAssociation(
+                declaredSkillProgressId, "kw", new PageCriteria(0, 10)));
+
+    verifyNoInteractions(associationSearchHelper);
+  }
+
+  @Test
+  void searchDeclaredActivityForAssociation_should_throw_when_skill_belongs_to_another_student() {
+    UUID declaredSkillProgressId = randomUUID();
+    Student anotherStudent = StudentFixture.create().toModel();
+    DeclaredSkillProgress skill =
+        DeclaredSkillProgressFixture.create().withStudent(anotherStudent).toModel();
+    when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
+        .thenReturn(Optional.of(skill));
+
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () ->
+            declaredSkillProgressService.searchDeclaredActivityForAssociation(
+                declaredSkillProgressId, "kw", new PageCriteria(0, 10)));
+
+    verifyNoInteractions(associationSearchHelper);
   }
 }

@@ -1,9 +1,11 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredSkillIDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultTraceDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -190,6 +192,39 @@ public class DeclaredActivityController {
         declaredActivityService.associateActivityWithDeclaredSkills(
             declaredActivityId, body.idsToAssociate());
     return ResponseEntity.ok(DeclaredActivityAssociationsDTOMapper.toDTO(newAssociations));
+  }
+
+  @GetMapping("/search-for-association")
+  public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredActivityDTO>>
+      searchDeclaredActivitiesForAssociation(
+          Principal principal,
+          @RequestParam(required = false) UUID excludeAssociatedWithElementId,
+          @RequestParam(required = false) EAssociationContextType contextType,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to search declared activities for association (contextType={},"
+            + " excludeAssociatedWithElementId={}) by student [{}] (keyword={}, page={},"
+            + " pageSize={})",
+        contextType,
+        excludeAssociatedWithElementId,
+        principal.getName(),
+        keyword,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<AssociationSearchResultData> pagedResult =
+        declaredActivityService.searchDeclaredActivitiesForAssociation(
+            excludeAssociatedWithElementId, contextType, keyword, pageCriteria);
+
+    return ResponseEntity.ok(
+        new PagedResponse<>(
+            pagedResult.content().stream()
+                .map(AssociationSearchResultDTOMapper::toDeclaredActivityDTO)
+                .toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
 
   @GetMapping("/{declaredActivityId}/search-for-association/traces")

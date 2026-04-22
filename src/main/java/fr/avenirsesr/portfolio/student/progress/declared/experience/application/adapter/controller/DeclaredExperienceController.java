@@ -1,5 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.controller;
 
+import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredExperienceDTO;
+import fr.avenirsesr.portfolio.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -95,6 +99,39 @@ public class DeclaredExperienceController {
   public ResponseEntity<String> deleteDeclaredExperiences(@RequestBody List<UUID> experienceIds) {
     declaredExperienceService.delete(experienceIds);
     return ResponseEntity.ok("Declared experiences successfully deleted");
+  }
+
+  @GetMapping("/search-for-association")
+  public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredExperienceDTO>>
+      searchDeclaredExperiencesForAssociation(
+          Principal principal,
+          @RequestParam(required = false) UUID excludeAssociatedWithElementId,
+          @RequestParam(required = false) EAssociationContextType contextType,
+          @RequestParam(required = false) String keyword,
+          @RequestParam(required = false) Integer page,
+          @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to search declared experiences for association (contextType={},"
+            + " excludeAssociatedWithElementId={}) by student [{}] (keyword={}, page={},"
+            + " pageSize={})",
+        contextType,
+        excludeAssociatedWithElementId,
+        principal.getName(),
+        keyword,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<AssociationSearchResultData> pagedResult =
+        declaredExperienceService.searchDeclaredExperiencesForAssociation(
+            excludeAssociatedWithElementId, contextType, keyword, pageCriteria);
+
+    return ResponseEntity.ok(
+        new PagedResponse<>(
+            pagedResult.content().stream()
+                .map(AssociationSearchResultDTOMapper::toDeclaredExperienceDTO)
+                .toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
 
   @GetMapping("/{experienceId}/associations")

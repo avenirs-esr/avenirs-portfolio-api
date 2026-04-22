@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input;
 
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceAssociationsData;
@@ -62,4 +64,10 @@ public interface DeclaredExperienceService {
   PagedResult<DeclaredExperience> search(String keyword, PageCriteria pageCriteria);
 
   DeclaredExperienceAssociationsData getAssociations(UUID experienceId);
+
+  PagedResult<AssociationSearchResultData> searchDeclaredExperiencesForAssociation(
+      UUID excludeAssociatedWithElementId,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria);
 }

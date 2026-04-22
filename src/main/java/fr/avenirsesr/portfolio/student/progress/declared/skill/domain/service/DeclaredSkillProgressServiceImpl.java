@@ -7,6 +7,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
@@ -298,6 +299,41 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   }
 
   @Override
+  public PagedResult<AssociationSearchResultData> searchDeclaredSkillsForAssociation(
+      UUID excludeAssociatedWithElementId,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria) {
+    var skills = searchDeclaredSkill(keyword, pageCriteria);
+
+    if (contextType == null) {
+      return associationSearchHelper.searchForAssociation(
+          null,
+          null,
+          null,
+          null,
+          skills,
+          AvenirsBaseModel::getId,
+          ds -> ds.getSkill().getLibelle(),
+          ds -> ds.getSkill().getType().name(),
+          ds -> false);
+    }
+
+    EAssociationType associationType = getAssociationType(contextType);
+
+    return associationSearchHelper.searchForAssociation(
+        excludeAssociatedWithElementId,
+        contextType.toClass(),
+        associationType,
+        Association::getId2,
+        skills,
+        AvenirsBaseModel::getId,
+        ds -> ds.getSkill().getLibelle(),
+        ds -> ds.getSkill().getType().name(),
+        ds -> false);
+  }
+
+  @Override
   public PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
       UUID declaredSkillProgressId, String keyword, PageCriteria pageCriteria) {
     fetchAndCheckLoggedInStudentAuthorization(declaredSkillProgressId);
@@ -317,5 +353,13 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   @Override
   public List<DeclaredSkillProgress> findAllDeclaredSkillProgressesByIds(List<UUID> ids) {
     return declaredSkillProgressRepository.findAllById(ids);
+  }
+
+  private EAssociationType getAssociationType(EAssociationContextType contextType) {
+    return switch (contextType) {
+      case TRACE -> EAssociationType.TRACE_DECLARED_SKILL;
+      case DECLARED_ACTIVITY -> EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;
+      case DECLARED_SKILL, DECLARED_EXPERIENCE -> throw new UnsupportedOperationException();
+    };
   }
 }
