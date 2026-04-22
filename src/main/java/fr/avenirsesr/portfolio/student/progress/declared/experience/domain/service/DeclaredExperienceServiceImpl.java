@@ -3,9 +3,12 @@ package fr.avenirsesr.portfolio.student.progress.declared.experience.domain.serv
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
+import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -36,6 +39,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
+  private final AssociationSearchHelper associationSearchHelper;
   private final TraceService traceService;
   private final DeclaredExperienceRepository experienceRepository;
   private final StudentService studentService;
@@ -287,6 +291,41 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   }
 
   @Override
+  public PagedResult<AssociationSearchResultData> searchDeclaredExperiencesForAssociation(
+      UUID excludeAssociatedWithElementId,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria) {
+    var experiences = search(keyword, pageCriteria);
+
+    if (contextType == null) {
+      return associationSearchHelper.searchForAssociation(
+          null,
+          null,
+          null,
+          null,
+          experiences,
+          AvenirsBaseModel::getId,
+          DeclaredExperience::getTitle,
+          de -> de.getExperienceType().name(),
+          de -> false);
+    }
+
+    EAssociationType associationType = getAssociationType(contextType);
+
+    return associationSearchHelper.searchForAssociation(
+        excludeAssociatedWithElementId,
+        contextType.toClass(),
+        associationType,
+        Association::getId2,
+        experiences,
+        AvenirsBaseModel::getId,
+        DeclaredExperience::getTitle,
+        de -> de.getExperienceType().name(),
+        de -> false);
+  }
+
+  @Override
   public DeclaredExperienceAssociationsData getAssociations(UUID experienceId) {
     var student = loggedInUserService.getLoggedInStudent();
     var experience =
@@ -311,5 +350,13 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
 
     return new DeclaredExperienceAssociationsData(
         traceAssociations.stream().map(a -> traceAssociationMapper(a, traces)).toList());
+  }
+
+  private EAssociationType getAssociationType(EAssociationContextType contextType) {
+    return switch (contextType) {
+      case TRACE -> EAssociationType.TRACE_DECLARED_EXPERIENCE;
+      case DECLARED_ACTIVITY, DECLARED_SKILL, DECLARED_EXPERIENCE ->
+          throw new UnsupportedOperationException();
+    };
   }
 }

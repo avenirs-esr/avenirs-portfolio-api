@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.i
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
@@ -51,6 +52,12 @@ public interface DeclaredActivityService {
 
   PagedResult<AssociationSearchResultData> searchDeclaredSkillsForAssociation(
       UUID declaredActivityId, String keyword, PageCriteria pageCriteria);
+
+  PagedResult<AssociationSearchResultData> searchDeclaredActivitiesForAssociation(
+      UUID excludeAssociatedWithElementId,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria);
 
   List<DeclaredActivity> findAllDeclaredActivitiesByIds(List<UUID> ids);
 

@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input;
 
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
@@ -26,6 +27,12 @@ public interface DeclaredSkillProgressService {
   void deleteDeclaredSkillProgresses(List<UUID> declaredSkillProgressIds);
 
   PagedResult<DeclaredSkillProgress> searchDeclaredSkill(String keyword, PageCriteria pageCriteria);
+
+  PagedResult<AssociationSearchResultData> searchDeclaredSkillsForAssociation(
+      UUID excludeAssociatedWithElementId,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria);
 
   PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
       UUID declaredSkillProgressId, String keyword, PageCriteria pageCriteria);

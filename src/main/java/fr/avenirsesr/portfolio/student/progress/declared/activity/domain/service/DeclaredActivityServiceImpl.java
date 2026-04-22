@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
+import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
@@ -319,6 +320,41 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public PagedResult<AssociationSearchResultData> searchDeclaredActivitiesForAssociation(
+      UUID excludeAssociatedWithElementId,
+      EAssociationContextType contextType,
+      String keyword,
+      PageCriteria pageCriteria) {
+    var activities = searchDeclaredActivity(keyword, pageCriteria);
+
+    if (contextType == null) {
+      return associationSearchHelper.searchForAssociation(
+          null,
+          null,
+          null,
+          null,
+          activities,
+          AvenirsBaseModel::getId,
+          da -> da.getActivity().getTitle(),
+          da -> da.getActivity().getThematic().name(),
+          da -> da.getFinishedAt().isPresent());
+    }
+
+    EAssociationType associationType = getAssociationType(contextType);
+
+    return associationSearchHelper.searchForAssociation(
+        excludeAssociatedWithElementId,
+        contextType.toClass(),
+        associationType,
+        Association::getId1,
+        activities,
+        AvenirsBaseModel::getId,
+        da -> da.getActivity().getTitle(),
+        da -> da.getActivity().getThematic().name(),
+        da -> da.getFinishedAt().isPresent());
+  }
+
+  @Override
   public List<DeclaredActivity> findAllDeclaredActivitiesByIds(List<UUID> ids) {
     return declaredActivityRepository.findAllById(ids);
   }
@@ -420,5 +456,13 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new UserNotAuthorizedException();
     }
     return declaredActivity;
+  }
+
+  private EAssociationType getAssociationType(EAssociationContextType contextType) {
+    return switch (contextType) {
+      case TRACE -> EAssociationType.DECLARED_ACTIVITY_TRACE;
+      case DECLARED_SKILL -> EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;
+      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -> throw new UnsupportedOperationException();
+    };
   }
 }

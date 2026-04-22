@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.output.repository.DeclaredExperienceRepository;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Lazy;
 public class DeclaredExperienceServiceConfig {
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
+  private final AssociationSearchHelper associationSearchHelper;
   private final DeclaredExperienceRepository experienceRepository;
   private final StudentService studentService;
 
@@ -25,6 +27,7 @@ public class DeclaredExperienceServiceConfig {
     return new DeclaredExperienceServiceImpl(
         loggedInUserService,
         associationService,
+        associationSearchHelper,
         traceService,
         experienceRepository,
         studentService);
