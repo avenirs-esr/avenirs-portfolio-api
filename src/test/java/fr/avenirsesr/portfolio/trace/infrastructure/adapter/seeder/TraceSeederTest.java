@@ -27,18 +27,15 @@ class TraceSeederTest extends ContainerConfigurationTest {
 
   @Autowired private UserSeeder userSeeder;
   @Autowired private StudentSeeder studentSeeder;
-  @Autowired private DeclaredSkillProgressSeeder declaredSkillProgressSeeder;
   @Autowired private DeclaredSkillSeeder declaredSkillSeeder;
 
   private static List<UserEntity> users;
-  private static List<DeclaredSkillProgressEntity> declaredSkillProgresses;
 
   @BeforeAll
   void setUp() {
     users = userSeeder.seed();
-    List<StudentEntity> students = studentSeeder.seed(users);
-    var declaredSkills = declaredSkillSeeder.seed();
-    declaredSkillProgresses = declaredSkillProgressSeeder.seed(students, declaredSkills);
+    studentSeeder.seed(users);
+    declaredSkillSeeder.seed();
   }
 
   @Test
@@ -49,9 +46,7 @@ class TraceSeederTest extends ContainerConfigurationTest {
     BddLogger.when("seeding traces and there is no users");
     BddLogger.then("it should throw IllegalArgumentException");
     Exception exception =
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> traceSeeder.seed(emptyUsers, declaredSkillProgresses));
+        assertThrows(IllegalArgumentException.class, () -> traceSeeder.seed(emptyUsers));
     assertTrue(exception.getMessage().contains("users cannot be empty"));
   }
 
@@ -59,7 +54,7 @@ class TraceSeederTest extends ContainerConfigurationTest {
   void seed_shouldReturnTraces_withCorrectSizeAndUser() {
     BddLogger.given("a trace seeder");
     BddLogger.when("seeding traces with correct fileSize and user");
-    List<TraceEntity> traces = traceSeeder.seed(users, declaredSkillProgresses);
+    List<TraceEntity> traces = traceSeeder.seed(users);
 
     BddLogger.then("it should return traces");
     assertNotNull(traces);

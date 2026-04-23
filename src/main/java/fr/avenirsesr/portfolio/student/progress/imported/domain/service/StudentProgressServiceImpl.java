@@ -13,7 +13,6 @@ import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevel
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
-import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
 import java.util.*;
@@ -26,19 +25,11 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class StudentProgressServiceImpl implements StudentProgressService {
   private final StudentProgressRepository studentProgressRepository;
-  private final TraceService traceService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
   public List<StudentProgress> findAllStudentProgressesByStudent(Student student) {
     return studentProgressRepository.findAllByStudent(student);
-  }
-
-  @Override
-  public List<StudentProgress> findStudentProgressesBySkillLevelProgresses(
-      List<SkillLevelProgress> skillLevelProgresses) {
-    return studentProgressRepository.findStudentProgressesBySkillLevelProgresses(
-        skillLevelProgresses);
   }
 
   @Override

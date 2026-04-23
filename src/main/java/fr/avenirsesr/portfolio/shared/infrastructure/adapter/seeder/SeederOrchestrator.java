@@ -108,21 +108,13 @@ public class SeederOrchestrator {
       var savedPrograms = programSeeder.seed(savedInstitutions);
 
       var savedSkillLevels = skillSeeder.seed(savedPrograms);
-      var savedSkills =
-          savedSkillLevels.stream().map(SkillLevelEntity::getSkill).distinct().toList();
 
       var savedTrainingPaths = trainingPathSeeder.seed(savedPrograms, savedSkillLevels);
 
-      var savedStudentProgresses =
-          studentProgressSeeder.seed(savedTrainingPaths, savedStudents, savedSkillLevels);
-
-      var savedSkillLevelProgresses =
-          savedStudentProgresses.stream().flatMap(s -> s.getSkillLevels().stream()).toList();
+      studentProgressSeeder.seed(savedTrainingPaths, savedStudents, savedSkillLevels);
 
       var savedTraces =
-          traceSeeder.seed(
-              savedStudents.stream().map(StudentEntity::getUser).toList(),
-              savedDeclaredSkillProgresses);
+          traceSeeder.seed(savedStudents.stream().map(StudentEntity::getUser).toList());
 
       selfKnowledgeElementSeeder.seed();
 

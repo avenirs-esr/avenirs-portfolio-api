@@ -133,16 +133,6 @@ public class AssociationSeeder {
     };
   }
 
-  private UUID resolveDynamicId(String id, List<? extends AvenirsBaseEntity> savedEntities) {
-    int index = Integer.parseInt(id.substring(id.lastIndexOf('_') + 1));
-
-    if (index < 0 || index >= savedEntities.size()) {
-      throw new IllegalArgumentException("Invalid dynamic id: " + id);
-    }
-
-    return savedEntities.get(index).getId();
-  }
-
   private <T> UUID resolveDynamicIdWithStudentParam(
       String dynamicId,
       List<T> savedEntities,

@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper.StudentProgressMapper;
@@ -60,23 +59,6 @@ public class StudentProgressDatabaseRepository
   @Override
   public List<StudentProgress> findAllAPCByStudent(Student student) {
     return findAll(hasStudent(student).and(StudentProgressSpecification.isAPC())).stream()
-        .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))
-        .values()
-        .stream()
-        .map(List::getFirst)
-        .toList();
-  }
-
-  @Override
-  public List<StudentProgress> findStudentProgressesBySkillLevelProgresses(
-      List<SkillLevelProgress> skillLevelProgresses) {
-    if (skillLevelProgresses.isEmpty()) {
-      return List.of();
-    }
-    return findAll(
-            hasStudent(skillLevelProgresses.getFirst().getStudent())
-                .and(StudentProgressSpecification.hasSkillLevelProgresses(skillLevelProgresses)))
-        .stream()
         .collect(Collectors.groupingBy(StudentProgress::getTrainingPath))
         .values()
         .stream()

@@ -56,8 +56,7 @@ public class TraceSeeder {
   }
 
   @Transactional
-  public List<TraceEntity> seed(
-      List<UserEntity> users, List<DeclaredSkillProgressEntity> declaredSkillsProgresses) {
+  public List<TraceEntity> seed(List<UserEntity> users) {
     ValidationUtils.requireNonEmpty(users, "users cannot be empty");
 
     log.info("Seeding Traces...");
@@ -66,7 +65,7 @@ public class TraceSeeder {
         switch (seederSource) {
           case CSV ->
               fileReader.readJSON(PATH_FILE, new TypeReference<List<TraceCreationData>>() {});
-          case FAKER -> buildFakeTraces(users, declaredSkillsProgresses);
+          case FAKER -> buildFakeTraces(users);
         };
 
     List<Trace> traces = new ArrayList<>();
@@ -107,8 +106,7 @@ public class TraceSeeder {
     return traces.stream().map(TraceMapper.INSTANCE::fromDomain).toList();
   }
 
-  private List<TraceCreationData> buildFakeTraces(
-      List<UserEntity> users, List<DeclaredSkillProgressEntity> declaredSkillsProgresses) {
+  private List<TraceCreationData> buildFakeTraces(List<UserEntity> users) {
     return IntStream.range(0, SeederConfig.TRACES_NB_MAX)
         .mapToObj(i -> users.get(new Random().nextInt(users.size())))
         .map(u -> FakeTrace.of(u).toEntity())

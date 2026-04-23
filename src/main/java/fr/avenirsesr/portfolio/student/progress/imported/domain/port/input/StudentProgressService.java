@@ -14,9 +14,6 @@ import java.util.Map;
 public interface StudentProgressService {
   List<StudentProgress> findAllStudentProgressesByStudent(Student student);
 
-  List<StudentProgress> findStudentProgressesBySkillLevelProgresses(
-      List<SkillLevelProgress> skillLevelProgresses);
-
   boolean isStudentFollowingAPCProgram();
 
   List<StudentProgress> getAllCurrentStudentProgress();

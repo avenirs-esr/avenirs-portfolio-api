@@ -38,7 +38,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
 
   @Override
   public Activity toDomain(ActivityEntity entity, EntityGrapher<?> graph) {
-    var attributs = graph.attributes();
+    graph.attributes();
     return Activity.toDomain(
         entity.getId(),
         entity.getTitle(),
