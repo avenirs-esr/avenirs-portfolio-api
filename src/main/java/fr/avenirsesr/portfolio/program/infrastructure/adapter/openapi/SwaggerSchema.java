@@ -5,8 +5,10 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
 
-public interface SwaggerSchema {
-  Schema<String> skillLevelStatusSchema =
+public final class SwaggerSchema {
+  private SwaggerSchema() {}
+
+  public static final Schema<String> skillLevelStatusSchema =
       new StringSchema()
           .name("ESkillLevelStatus")
           ._enum(Arrays.stream(ESkillLevelStatus.values()).map(Enum::name).toList())

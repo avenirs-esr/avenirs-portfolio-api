@@ -7,20 +7,22 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
 
-public interface SwaggerSchema {
-  Schema<String> userContextSchema =
+public final class SwaggerSchema {
+  private SwaggerSchema() {}
+
+  public static final Schema<String> userContextSchema =
       new StringSchema()
           .name("EContextType")
           ._enum(Arrays.stream(EContextType.values()).map(Enum::name).toList())
           .description("Enum for context type");
 
-  Schema<String> userExternalSourceSchema =
+  public static final Schema<String> userExternalSourceSchema =
       new StringSchema()
           .name("EExternalSource")
           ._enum(Arrays.stream(EExternalSource.values()).map(Enum::name).toList())
           .description("Enum for external source");
 
-  Schema<String> userCategorySchema =
+  public static final Schema<String> userCategorySchema =
       new StringSchema()
           .name("EUserCategory")
           ._enum(Arrays.stream(EUserCategory.values()).map(Enum::name).toList())

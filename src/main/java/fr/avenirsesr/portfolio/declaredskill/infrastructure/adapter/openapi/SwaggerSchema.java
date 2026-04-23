@@ -7,20 +7,22 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
 
-public interface SwaggerSchema {
-  Schema<String> declaredSkillLevelSchema =
+public final class SwaggerSchema {
+  private SwaggerSchema() {}
+
+  public static final Schema<String> declaredSkillLevelSchema =
       new StringSchema()
           .name("EDeclaredSkillLevel")
           ._enum(Arrays.stream(EDeclaredSkillLevel.values()).map(Enum::name).toList())
           .description("Enum for declared skill level");
 
-  Schema<String> externalSkillTypeSchema =
+  public static final Schema<String> externalSkillTypeSchema =
       new StringSchema()
           .name("EExternalSkillType")
           ._enum(Arrays.stream(EExternalSkillType.values()).map(Enum::name).toList())
           .description("Enum for external skill type");
 
-  Schema<String> externalSkillCategoryTypeSchema =
+  public static final Schema<String> externalSkillCategoryTypeSchema =
       new StringSchema()
           .name("EExternalSkillCategoryType")
           ._enum(Arrays.stream(EExternalSkillCategoryType.values()).map(Enum::name).toList())

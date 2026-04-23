@@ -6,9 +6,8 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
 
-public interface SwaggerSchema extends BaseSwaggerSchema {
-
-  Schema<String> portfolioTypeSchema =
+public class SwaggerSchema extends BaseSwaggerSchema {
+  public static Schema<String> portfolioTypeSchema =
       new StringSchema()
           .name("EPortfolioType")
           ._enum(Arrays.stream(EPortfolioType.values()).map(Enum::name).toList())

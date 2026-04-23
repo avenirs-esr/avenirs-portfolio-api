@@ -5,8 +5,10 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
 
-public interface SwaggerSchema {
-  Schema<String> associationContextTypeSchema =
+public final class SwaggerSchema {
+  private SwaggerSchema() {}
+
+  public static final Schema<String> associationContextTypeSchema =
       new StringSchema()
           .name("EAssociationContextType")
           ._enum(Arrays.stream(EAssociationContextType.values()).map(Enum::name).toList())

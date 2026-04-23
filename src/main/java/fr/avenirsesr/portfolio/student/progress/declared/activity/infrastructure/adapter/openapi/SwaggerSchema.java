@@ -5,8 +5,10 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
 
-public interface SwaggerSchema {
-  Schema<String> declaredActivityStatusSchema =
+public final class SwaggerSchema {
+  private SwaggerSchema() {}
+
+  public static final Schema<String> declaredActivityStatusSchema =
       new StringSchema()
           .name("EDeclaredActivityStatus")
           ._enum(Arrays.stream(EDeclaredActivityStatus.values()).map(Enum::name).toList())

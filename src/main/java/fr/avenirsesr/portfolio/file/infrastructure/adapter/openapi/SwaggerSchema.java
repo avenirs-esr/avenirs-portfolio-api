@@ -6,14 +6,16 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
 
-public interface SwaggerSchema {
-  Schema<String> fileTypeSchema =
+public final class SwaggerSchema {
+  private SwaggerSchema() {}
+
+  public static final Schema<String> fileTypeSchema =
       new StringSchema()
           .name("EFileType")
           ._enum(Arrays.stream(EFileType.values()).map(Enum::name).toList())
           .description("Enum for file type");
 
-  Schema<String> fileUserPhotoTypeSchema =
+  public static final Schema<String> fileUserPhotoTypeSchema =
       new StringSchema()
           .name("EUserPhotoType")
           ._enum(Arrays.stream(EUserPhotoType.values()).map(Enum::name).toList())
