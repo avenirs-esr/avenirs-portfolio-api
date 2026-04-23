@@ -38,11 +38,9 @@ import org.springframework.data.jpa.domain.Specification;
     Sort.Direction direction =
 <span class="pc bpc" id="L39" title="1 of 2 branches missed.">        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;</span>
 
-<span class="pc bpc" id="L41" title="2 of 3 branches missed.">    return switch (sortCriteria.field()) {</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">    return switch (sortCriteria.field()) {</span>
 <span class="fc" id="L42">      case NAME -&gt; Sort.by(direction, &quot;declaredSkill.libelle&quot;);</span>
 <span class="nc" id="L43">      case DATE -&gt; Sort.by(direction, &quot;createdAt&quot;);</span>
-      default -&gt;
-<span class="nc" id="L45">          throw new IllegalArgumentException(&quot;Unsupported sort field: &quot; + sortCriteria.field());</span>
     };
   }
 }

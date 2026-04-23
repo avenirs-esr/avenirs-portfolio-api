@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SkillLevelProgressServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.student.progress.imported.domain.service</a> &gt; <span class="el_source">SkillLevelProgressServiceImpl.java</span></div><h1>SkillLevelProgressServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.student.progress.imported.domain.service;
 
-import fr.avenirsesr.portfolio.ams.domain.model.AMS;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -13,7 +12,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L16">@Slf4j</span>
+<span class="fc" id="L15">@Slf4j</span>
 @AllArgsConstructor
 public class SkillLevelProgressServiceImpl implements SkillLevelProgressService {
   private final SkillLevelProgressRepository skillLevelProgressRepository;
@@ -21,22 +20,17 @@ public class SkillLevelProgressServiceImpl implements SkillLevelProgressService 
 
   @Override
   public List&lt;SkillLevelProgress&gt; getSkillLevelsBySkillId(UUID skillId) {
-<span class="fc" id="L24">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L25">    return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);</span>
+<span class="fc" id="L23">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="nc" id="L24">    return skillLevelProgressRepository.findAllByStudentAndSkillId(student, skillId);</span>
   }
 
   @Override
   public PagedResult&lt;SkillLevelProgress&gt; searchSkillLevel(
       String keyword, PageCriteria pageCriteria) {
-<span class="nc" id="L31">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="nc" id="L32">    log.debug(&quot;Searching SkillLevelProgress for {} with pagination {}&quot;, student, pageCriteria);</span>
+<span class="nc" id="L30">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="nc" id="L31">    log.debug(&quot;Searching SkillLevelProgress for {} with pagination {}&quot;, student, pageCriteria);</span>
 
-<span class="nc" id="L34">    return skillLevelProgressRepository.findAllByStudent(student, pageCriteria, keyword);</span>
-  }
-
-  @Override
-  public List&lt;SkillLevelProgress&gt; getSkillLevelProgressesLinkedWithAMS(AMS ams) {
-<span class="nc" id="L39">    return skillLevelProgressRepository.linkedWith(ams);</span>
+<span class="nc" id="L33">    return skillLevelProgressRepository.findAllByStudent(student, pageCriteria, keyword);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
