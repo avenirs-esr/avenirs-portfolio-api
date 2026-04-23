@@ -8,7 +8,6 @@ import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.mapper.AssociationMapper;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder.data.AssociationCreationData;
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;

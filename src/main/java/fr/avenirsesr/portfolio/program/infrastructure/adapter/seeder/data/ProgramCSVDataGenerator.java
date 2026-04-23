@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.CsvReader;
 import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGenerator;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +14,7 @@ public class ProgramCSVDataGenerator extends DataGenerator implements ProgramDat
   private static final String PATH_ENGLISH = "seeder/programs.en.csv";
   private static final String PATH_SPANISH = "seeder/programs.es.csv";
   private static final String DELIMITER = ",";
-  private static final Map<ELanguage, ArrayList<CsvProgramDto>> data =
+  private static final Map<ELanguage, List<CsvProgramDto>> data =
       Map.of(
           ELanguage.FRENCH,
           new CsvReader<CsvProgramDto>()

@@ -6,7 +6,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
 
-public class SwaggerSchema extends BaseSwaggerSchema {
+public final class SwaggerSchema extends BaseSwaggerSchema {
   public static Schema<String> portfolioTypeSchema =
       new StringSchema()
           .name("EPortfolioType")

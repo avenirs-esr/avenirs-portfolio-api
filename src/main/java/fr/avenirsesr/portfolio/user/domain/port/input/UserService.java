@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import java.util.UUID;
 
+@SuppressWarnings("PMD.MissingOverride")
 public interface UserService extends BaseUserService {
   User getUser(UUID id);
 

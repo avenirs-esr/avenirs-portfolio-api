@@ -112,6 +112,7 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
     return selfKnowledgeElementRepository.save(selfKnowledgeElement);
   }
 
+  @Override
   public void deleteSelfKnowledgeElements(List<UUID> selfKnowledgeElementIds) {
     Student student = loggedInUserService.getLoggedInStudent();
 

@@ -41,8 +41,6 @@ public class DeclaredSkillProgressSpecification {
     return switch (sortCriteria.field()) {
       case NAME -> Sort.by(direction, "declaredSkill.libelle");
       case DATE -> Sort.by(direction, "createdAt");
-      default ->
-          throw new IllegalArgumentException("Unsupported sort field: " + sortCriteria.field());
     };
   }
 }
