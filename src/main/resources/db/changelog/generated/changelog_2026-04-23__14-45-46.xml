@@ -1,0 +1,28 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="nathp" id="add-migration-test-flag-nullable">
+        <addColumn tableName="declared_activity">
+            <column name="migration_test_flag" type="boolean"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="nathp" id="backfill-migration-test-flag">
+        <update tableName="declared_activity">
+            <column name="migration_test_flag" valueBoolean="false"/>
+            <where>migration_test_flag IS NULL</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="nathp" id="set-migration-test-flag-not-null">
+        <preConditions onFail="HALT">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM declared_activity WHERE migration_test_flag IS NULL
+            </sqlCheck>
+        </preConditions>
+
+        <addNotNullConstraint
+                tableName="declared_activity"
+                columnName="migration_test_flag"
+                columnDataType="boolean"/>
+    </changeSet>
+</databaseChangeLog>

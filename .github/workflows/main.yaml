@@ -6,7 +6,7 @@ on:
 
 jobs:
   call-main-ci:
-    uses: avenirs-esr/avenirs-workflows/.github/workflows/common-backend-workflow.yaml@main
+    uses: avenirs-esr/avenirs-workflows/.github/workflows/common-backend-test-workflow.yaml@feat/1474-changelogs-check
     secrets: inherit
     with:
       run_integration_tests: true

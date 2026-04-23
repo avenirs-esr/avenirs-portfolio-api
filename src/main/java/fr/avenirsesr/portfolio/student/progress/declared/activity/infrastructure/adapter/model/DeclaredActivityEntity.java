@@ -57,6 +57,9 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
   @Formula("CASE WHEN finished_at IS NULL THEN 0 ELSE 1 END")
   private Integer isFinishedOrder;
 
+  @Column(nullable = false)
+  private boolean migrationTestFlag;
+
   private DeclaredActivityEntity(
       UUID id,
       StudentEntity student,
