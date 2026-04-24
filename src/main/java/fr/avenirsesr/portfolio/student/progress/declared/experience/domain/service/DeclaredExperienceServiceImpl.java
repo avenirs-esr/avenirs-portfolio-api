@@ -242,6 +242,8 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       throw new DeclaredExperienceNotFoundException();
     }
 
+    associationService.deleteAllOf(experienceIds, DeclaredExperience.class);
+
     experienceRepository.removeAllFromDatabase(experiences);
     log.info("ExperienceIds {} successfully deleted", experienceIds);
   }

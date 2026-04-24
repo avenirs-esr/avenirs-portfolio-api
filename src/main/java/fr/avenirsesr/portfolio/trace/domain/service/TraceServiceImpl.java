@@ -139,6 +139,8 @@ public class TraceServiceImpl implements TraceService {
 
     trace.setDeletedAt(Instant.now());
 
+    associationService.deleteAllOf(List.of(trace.getId()), Trace.class);
+
     traceRepository.save(trace);
     log.info("Deleted trace {}", trace);
   }

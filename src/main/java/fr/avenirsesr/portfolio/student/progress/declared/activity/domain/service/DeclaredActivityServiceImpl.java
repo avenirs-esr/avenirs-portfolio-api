@@ -118,6 +118,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new DeclaredActivityNotFoundException();
     }
 
+    associationService.deleteAllOf(activityIds, DeclaredActivity.class);
+
     declaredActivityRepository.removeAllFromDatabase(declaredActivities);
   }
 

@@ -12,4 +12,6 @@ public interface AssociationService {
   List<Association> getAllOf(UUID id, Class<?> clazz, List<EAssociationType> associationTypes);
 
   void deleteAllByIds(List<UUID> ids);
+
+  void deleteAllOf(List<UUID> ids, Class<?> clazz);
 }

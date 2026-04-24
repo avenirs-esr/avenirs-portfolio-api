@@ -398,6 +398,11 @@ public class DeclaredSkillProgressServiceImplTest {
         when(declaredSkillProgressRepository.findAllById(
                 List.of(declaredSkillProgress1.getId(), declaredSkillProgress2.getId())))
             .thenReturn(List.of(declaredSkillProgress1, declaredSkillProgress2));
+        doNothing()
+            .when(associationService)
+            .deleteAllOf(
+                List.of(declaredSkillProgress1.getId(), declaredSkillProgress2.getId()),
+                DeclaredSkillProgress.class);
 
         declaredSkillProgressService.deleteDeclaredSkillProgresses(
             List.of(declaredSkillProgress1.getId(), declaredSkillProgress2.getId()));
@@ -408,6 +413,10 @@ public class DeclaredSkillProgressServiceImplTest {
             .findAllById(List.of(declaredSkillProgress1.getId(), declaredSkillProgress2.getId()));
         verify(declaredSkillProgressRepository)
             .removeAllFromDatabase(List.of(declaredSkillProgress1, declaredSkillProgress2));
+        verify(associationService)
+            .deleteAllOf(
+                List.of(declaredSkillProgress1.getId(), declaredSkillProgress2.getId()),
+                DeclaredSkillProgress.class);
       }
 
       @Test

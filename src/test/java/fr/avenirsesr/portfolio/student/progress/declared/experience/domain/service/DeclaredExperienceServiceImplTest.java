@@ -852,11 +852,13 @@ class DeclaredExperienceServiceImplTest {
     when(exp1.getId()).thenReturn(id1);
     when(exp2.getId()).thenReturn(id2);
     when(experienceRepository.findAllById(List.of(id1, id2))).thenReturn(List.of(exp1, exp2));
+    doNothing().when(associationService).deleteAllOf(List.of(id1, id2), DeclaredExperience.class);
 
     service.delete(List.of(id1, id2));
 
     verify(experienceRepository).findAllById(List.of(id1, id2));
     verify(experienceRepository).removeAllFromDatabase(List.of(exp1, exp2));
+    verify(associationService).deleteAllOf(List.of(id1, id2), DeclaredExperience.class);
   }
 
   @Test

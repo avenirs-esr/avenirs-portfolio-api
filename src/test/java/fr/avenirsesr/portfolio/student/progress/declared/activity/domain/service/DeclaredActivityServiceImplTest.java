@@ -231,6 +231,9 @@ class DeclaredActivityServiceImplTest {
     var idActivity2 = UUID.randomUUID();
     var activityIds = List.of(idActivity1, idActivity2);
 
+    when(declaredActivity1.getId()).thenReturn(idActivity1);
+    when(declaredActivity2.getId()).thenReturn(idActivity2);
+
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
 
     // repository returns declared activities found by (activityIds + student + graph)
@@ -243,6 +246,7 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity2.getActivity()).thenReturn(activity2);
     when(activity1.getId()).thenReturn(idActivity1);
     when(activity2.getId()).thenReturn(idActivity2);
+    doNothing().when(associationService).deleteAllOf(activityIds, DeclaredActivity.class);
 
     BddLogger.when("He requests to unsubscribe from these activities");
     declaredActivityService.unsubscribeMultiple(activityIds);
@@ -250,6 +254,9 @@ class DeclaredActivityServiceImplTest {
     BddLogger.then("The student is removed from all activities.");
     verify(declaredActivityRepository)
         .removeAllFromDatabase(List.of(declaredActivity1, declaredActivity2));
+    verify(associationService)
+        .deleteAllOf(
+            List.of(declaredActivity1.getId(), declaredActivity2.getId()), DeclaredActivity.class);
   }
 
   @Test

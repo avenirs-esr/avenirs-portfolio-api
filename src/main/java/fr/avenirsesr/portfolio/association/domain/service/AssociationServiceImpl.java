@@ -49,4 +49,12 @@ public class AssociationServiceImpl implements AssociationService {
 
     associationRepository.removeAllFromDatabase(activities);
   }
+
+  @Override
+  public void deleteAllOf(List<UUID> ids, Class<?> clazz) {
+    var associationTypes = EAssociationType.getAllBy(clazz);
+    var associations =
+        ids.stream().flatMap(id -> getAllOf(id, clazz, associationTypes).stream()).toList();
+    deleteAllByIds(associations.stream().map(Association::getId).toList());
+  }
 }

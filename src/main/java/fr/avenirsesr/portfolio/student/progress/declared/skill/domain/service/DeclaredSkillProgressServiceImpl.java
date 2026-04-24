@@ -170,6 +170,8 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
       throw new UserNotAuthorizedException();
     }
 
+    associationService.deleteAllOf(declaredSkillProgressIds, DeclaredSkillProgress.class);
+
     declaredSkillProgressRepository.removeAllFromDatabase(declaredSkillProgressList);
     log.info("DeclaredSkillProgressIds {} successfully deleted", declaredSkillProgressIds);
   }
