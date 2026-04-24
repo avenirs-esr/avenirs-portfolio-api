@@ -49,5 +49,13 @@ public class AssociationServiceImpl implements AssociationService {
 
 <span class="fc" id="L50">    associationRepository.removeAllFromDatabase(activities);</span>
 <span class="fc" id="L51">  }</span>
+
+  @Override
+  public void deleteAllOf(List&lt;UUID&gt; ids, Class&lt;?&gt; clazz) {
+<span class="fc" id="L55">    var associationTypes = EAssociationType.getAllBy(clazz);</span>
+<span class="fc" id="L56">    var associations =</span>
+<span class="fc" id="L57">        ids.stream().flatMap(id -&gt; getAllOf(id, clazz, associationTypes).stream()).toList();</span>
+<span class="fc" id="L58">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
+<span class="fc" id="L59">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

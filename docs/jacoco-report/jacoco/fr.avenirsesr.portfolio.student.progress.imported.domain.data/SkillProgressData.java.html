@@ -2,29 +2,34 @@
 
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import java.util.Comparator;
 
-<span class="fc" id="L9">public record SkillProgressData(</span>
-    Skill skill, StudentProgress studentProgress, SkillLevelProgress currentSkillLevelProgress) {
+<span class="fc" id="L8">public record SkillProgressData(</span>
+    Skill skill,
+    StudentProgress studentProgress,
+    SkillLevelProgressWithTraceCountData currentSkillLevelProgress) {
 
   public static Comparator&lt;SkillProgressData&gt; comparatorOf(SortCriteria sortCriteria) {
-<span class="fc" id="L13">    Comparator&lt;SkillProgressData&gt; comparator =</span>
-<span class="fc bfc" id="L14" title="All 2 branches covered.">        switch (sortCriteria.field()) {</span>
-<span class="fc" id="L15">          case NAME -&gt; Comparator.comparing(slp -&gt; slp.skill().getName());</span>
+<span class="fc" id="L14">    Comparator&lt;SkillProgressData&gt; comparator =</span>
+<span class="fc bfc" id="L15" title="All 2 branches covered.">        switch (sortCriteria.field()) {</span>
+<span class="fc" id="L16">          case NAME -&gt; Comparator.comparing(slp -&gt; slp.skill().getName());</span>
           case DATE -&gt;
-<span class="fc" id="L17">              Comparator.comparing(</span>
-<span class="fc" id="L18">                  skillProgress -&gt; skillProgress.currentSkillLevelProgress().getStartDate());</span>
+<span class="fc" id="L18">              Comparator.comparing(</span>
+                  skillProgress -&gt;
+<span class="fc" id="L20">                      skillProgress</span>
+<span class="fc" id="L21">                          .currentSkillLevelProgress()</span>
+<span class="fc" id="L22">                          .skillLevelProgress()</span>
+<span class="fc" id="L23">                          .getStartDate());</span>
         };
 
-<span class="fc" id="L21">    comparator =</span>
-<span class="fc bfc" id="L22" title="All 2 branches covered.">        switch (sortCriteria.order()) {</span>
-<span class="fc" id="L23">          case ASC -&gt; comparator;</span>
-<span class="fc" id="L24">          case DESC -&gt; comparator.reversed();</span>
+<span class="fc" id="L26">    comparator =</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        switch (sortCriteria.order()) {</span>
+<span class="fc" id="L28">          case ASC -&gt; comparator;</span>
+<span class="fc" id="L29">          case DESC -&gt; comparator.reversed();</span>
         };
 
-<span class="fc" id="L27">    return comparator;</span>
+<span class="fc" id="L32">    return comparator;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

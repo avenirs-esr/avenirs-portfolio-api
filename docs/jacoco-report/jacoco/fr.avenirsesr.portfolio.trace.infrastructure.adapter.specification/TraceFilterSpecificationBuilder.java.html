@@ -62,23 +62,30 @@ import org.springframework.data.jpa.domain.Specification;
 
   private Specification&lt;TraceEntity&gt; status(List&lt;ETraceStatus&gt; traceStatus) {
 <span class="fc" id="L64">    return (root, query, cb) -&gt; {</span>
-<span class="pc bpc" id="L65" title="2 of 4 branches missed.">      if (traceStatus == null || query == null) return null;</span>
+<span class="pc bpc" id="L65" title="1 of 4 branches missed.">      if (traceStatus == null || query == null) return null;</span>
 
-<span class="nc" id="L67">      query.distinct(true);</span>
-<span class="nc" id="L68">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L69" title="All 2 branches missed.">      for (ETraceStatus status : traceStatus) {</span>
-<span class="nc" id="L70">        var skillLevelJoin = root.join(&quot;skillLevels&quot;, JoinType.LEFT);</span>
+<span class="fc" id="L67">      query.distinct(true);</span>
+<span class="fc" id="L68">      List&lt;Predicate&gt; predicates = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">      for (ETraceStatus status : traceStatus) {</span>
+<span class="fc" id="L70">        var amsJoin = root.join(&quot;amses&quot;, JoinType.LEFT);</span>
+<span class="fc" id="L71">        var skillLevelJoin = root.join(&quot;skillLevels&quot;, JoinType.LEFT);</span>
 
-<span class="nc" id="L72">        Predicate skillPredicate = null;</span>
+<span class="fc" id="L73">        Predicate amsPredicate = null;</span>
+<span class="fc" id="L74">        Predicate skillPredicate = null;</span>
 
-<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (!status.getSkillLevelStatuses().isEmpty()) {</span>
-<span class="nc" id="L75">          skillPredicate = skillLevelJoin.get(&quot;status&quot;).in(status.getSkillLevelStatuses());</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        if (!status.getAmsStatuses().isEmpty()) {</span>
+<span class="fc" id="L77">          amsPredicate = amsJoin.get(&quot;status&quot;).in(status.getAmsStatuses());</span>
         }
 
-<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (skillPredicate != null) predicates.add(skillPredicate);</span>
-<span class="nc" id="L79">      }</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        if (!status.getSkillLevelStatuses().isEmpty()) {</span>
+<span class="fc" id="L81">          skillPredicate = skillLevelJoin.get(&quot;status&quot;).in(status.getSkillLevelStatuses());</span>
+        }
 
-<span class="nc" id="L81">      return cb.or(predicates.toArray(new Predicate[0]));</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (amsPredicate != null) predicates.add(amsPredicate);</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        if (skillPredicate != null) predicates.add(skillPredicate);</span>
+<span class="fc" id="L86">      }</span>
+
+<span class="fc" id="L88">      return cb.or(predicates.toArray(new Predicate[0]));</span>
     };
   }
 }

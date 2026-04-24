@@ -8,11 +8,13 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.program.domain.model.Skill;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillLevelProgressWithTraceCountData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.data.SkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.port.output.repository.StudentProgressRepository;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
 import java.util.*;
@@ -21,112 +23,140 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L24">@Slf4j</span>
+<span class="fc" id="L26">@Slf4j</span>
 @AllArgsConstructor
 public class StudentProgressServiceImpl implements StudentProgressService {
   private final StudentProgressRepository studentProgressRepository;
+  private final TraceService traceService;
   private final LoggedInUserService loggedInUserService;
 
   @Override
   public List&lt;StudentProgress&gt; findAllStudentProgressesByStudent(Student student) {
-<span class="fc" id="L32">    return studentProgressRepository.findAllByStudent(student);</span>
+<span class="fc" id="L35">    return studentProgressRepository.findAllByStudent(student);</span>
+  }
+
+  @Override
+  public List&lt;StudentProgress&gt; findStudentProgressesBySkillLevelProgresses(
+      List&lt;SkillLevelProgress&gt; skillLevelProgresses) {
+<span class="fc" id="L41">    return studentProgressRepository.findStudentProgressesBySkillLevelProgresses(</span>
+        skillLevelProgresses);
   }
 
   @Override
   public boolean isStudentFollowingAPCProgram() {
-<span class="fc" id="L37">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L38">    var studentProgress = studentProgressRepository.findAllAPCByStudent(student);</span>
-<span class="fc bfc" id="L39" title="All 2 branches covered.">    return !studentProgress.isEmpty();</span>
+<span class="fc" id="L47">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L48">    var studentProgress = studentProgressRepository.findAllAPCByStudent(student);</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">    return !studentProgress.isEmpty();</span>
   }
 
   @Override
   public List&lt;StudentProgress&gt; getAllCurrentStudentProgress() {
-<span class="fc" id="L44">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L45">    log.debug(&quot;{} fetched his student progresses&quot;, student);</span>
-<span class="fc" id="L46">    return studentProgressRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L47">        .filter(StudentProgress::isCurrent)</span>
-<span class="fc" id="L48">        .toList();</span>
+<span class="fc" id="L54">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L55">    log.debug(&quot;{} fetched his student progresses&quot;, student);</span>
+<span class="fc" id="L56">    return studentProgressRepository.findAllByStudent(student).stream()</span>
+<span class="fc" id="L57">        .filter(StudentProgress::isCurrent)</span>
+<span class="fc" id="L58">        .toList();</span>
   }
 
   @Override
-  public Map&lt;StudentProgress, List&lt;SkillLevelProgress&gt;&gt; getStudentProgressOverview() {
-<span class="fc" id="L53">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L54">    var studentProgresses =</span>
-<span class="fc" id="L55">        studentProgressRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L56">            .filter(StudentProgress::isCurrent)</span>
-<span class="fc" id="L57">            .toList();</span>
+  public Map&lt;StudentProgress, List&lt;SkillLevelProgressWithTraceCountData&gt;&gt;
+      getStudentProgressOverview() {
+<span class="fc" id="L64">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L65">    var studentProgresses =</span>
+<span class="fc" id="L66">        studentProgressRepository.findAllByStudent(student).stream()</span>
+<span class="fc" id="L67">            .filter(StudentProgress::isCurrent)</span>
+<span class="fc" id="L68">            .toList();</span>
 
-<span class="fc" id="L59">    return studentProgresses.stream()</span>
-<span class="fc" id="L60">        .collect(</span>
-<span class="fc" id="L61">            Collectors.toMap(</span>
-<span class="fc" id="L62">                Function.identity(),</span>
+<span class="fc" id="L70">    return studentProgresses.stream()</span>
+<span class="fc" id="L71">        .collect(</span>
+<span class="fc" id="L72">            Collectors.toMap(</span>
+<span class="fc" id="L73">                Function.identity(),</span>
                 studentProgress -&gt;
-<span class="fc" id="L64">                    studentProgress.getCurrentSkillLevels().stream()</span>
-<span class="fc" id="L65">                        .limit(MAX_IMPORTED_SKILLS / studentProgresses.size())</span>
-<span class="fc" id="L66">                        .toList()));</span>
+<span class="fc" id="L75">                    studentProgress.getCurrentSkillLevels().stream()</span>
+<span class="fc" id="L76">                        .limit(MAX_IMPORTED_SKILLS / studentProgresses.size())</span>
+<span class="fc" id="L77">                        .map(</span>
+                            skillLevelProgress -&gt;
+<span class="fc" id="L79">                                new SkillLevelProgressWithTraceCountData(</span>
+                                    skillLevelProgress,
+                                    traceService
+<span class="fc" id="L82">                                        .getTracesLinkedWithSkillLevelProgress(skillLevelProgress)</span>
+<span class="fc" id="L83">                                        .size()))</span>
+<span class="fc" id="L84">                        .toList()));</span>
   }
 
   @Override
-  public Map&lt;StudentProgress, List&lt;SkillLevelProgress&gt;&gt; getStudentProgressView(
+  public Map&lt;StudentProgress, List&lt;SkillLevelProgressWithTraceCountData&gt;&gt; getStudentProgressView(
       SortCriteria sortCriteria) {
-<span class="fc" id="L72">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L73">    return studentProgressRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L74">        .filter(StudentProgress::isCurrent)</span>
-<span class="fc" id="L75">        .sorted(StudentProgress.comparatorOf(sortCriteria))</span>
-<span class="fc" id="L76">        .collect(</span>
-<span class="fc" id="L77">            Collectors.toMap(</span>
-<span class="fc" id="L78">                Function.identity(),</span>
+<span class="fc" id="L90">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L91">    return studentProgressRepository.findAllByStudent(student).stream()</span>
+<span class="fc" id="L92">        .filter(StudentProgress::isCurrent)</span>
+<span class="fc" id="L93">        .sorted(StudentProgress.comparatorOf(sortCriteria))</span>
+<span class="fc" id="L94">        .collect(</span>
+<span class="fc" id="L95">            Collectors.toMap(</span>
+<span class="fc" id="L96">                Function.identity(),</span>
                 studentProgress -&gt;
-<span class="fc" id="L80">                    studentProgress.getCurrentSkillLevels().stream()</span>
-<span class="fc" id="L81">                        .sorted(SkillLevelProgress.comparatorOf(sortCriteria))</span>
-<span class="fc" id="L82">                        .toList(),</span>
-<span class="nc" id="L83">                (v1, v2) -&gt; v1,</span>
+<span class="fc" id="L98">                    studentProgress.getCurrentSkillLevels().stream()</span>
+<span class="fc" id="L99">                        .sorted(SkillLevelProgress.comparatorOf(sortCriteria))</span>
+<span class="fc" id="L100">                        .map(</span>
+                            skillLevelProgress -&gt;
+<span class="fc" id="L102">                                new SkillLevelProgressWithTraceCountData(</span>
+                                    skillLevelProgress,
+                                    traceService
+<span class="fc" id="L105">                                        .getTracesLinkedWithSkillLevelProgress(skillLevelProgress)</span>
+<span class="fc" id="L106">                                        .size()))</span>
+<span class="fc" id="L107">                        .toList(),</span>
+<span class="nc" id="L108">                (v1, v2) -&gt; v1,</span>
                 LinkedHashMap::new));
   }
 
   @Override
   public PagedResult&lt;SkillProgressData&gt; getAllTimeSkillsView(
       SortCriteria sortCriteria, PageCriteria pageCriteria) {
-<span class="fc" id="L90">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L91">    var studentProgresses = studentProgressRepository.findAllByStudent(student).stream().toList();</span>
+<span class="fc" id="L115">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L116">    var studentProgresses = studentProgressRepository.findAllByStudent(student).stream().toList();</span>
 
-<span class="fc" id="L93">    var skillProgresses =</span>
-<span class="fc" id="L94">        studentProgresses.stream()</span>
-<span class="fc" id="L95">            .filter(studentProgress -&gt; studentProgress.getStartDate().isBefore(LocalDate.now()))</span>
-<span class="fc" id="L96">            .flatMap(</span>
+<span class="fc" id="L118">    var skillProgresses =</span>
+<span class="fc" id="L119">        studentProgresses.stream()</span>
+<span class="fc" id="L120">            .filter(studentProgress -&gt; studentProgress.getStartDate().isBefore(LocalDate.now()))</span>
+<span class="fc" id="L121">            .flatMap(</span>
                 studentProgress -&gt;
-<span class="fc" id="L98">                    studentProgress.getCurrentSkillLevels().stream()</span>
-<span class="fc" id="L99">                        .map(</span>
+<span class="fc" id="L123">                    studentProgress.getCurrentSkillLevels().stream()</span>
+<span class="fc" id="L124">                        .map(</span>
                             currentSkillLevel -&gt;
-<span class="fc" id="L101">                                new SkillProgressData(</span>
-<span class="fc" id="L102">                                    currentSkillLevel.getSkillLevel().getSkill(),</span>
+<span class="fc" id="L126">                                new SkillProgressData(</span>
+<span class="fc" id="L127">                                    currentSkillLevel.getSkillLevel().getSkill(),</span>
                                     studentProgress,
-                                    currentSkillLevel)))
-<span class="fc" id="L105">            .sorted(</span>
-<span class="fc" id="L106">                Comparator.comparing(</span>
+                                    new SkillLevelProgressWithTraceCountData(
+                                        currentSkillLevel,
+                                        traceService
+<span class="fc" id="L132">                                            .getTracesLinkedWithSkillLevelProgress(</span>
+                                                currentSkillLevel)
+<span class="fc" id="L134">                                            .size()))))</span>
+<span class="fc" id="L135">            .sorted(</span>
+<span class="fc" id="L136">                Comparator.comparing(</span>
                         (SkillProgressData skillProgress) -&gt;
-<span class="fc bfc" id="L108" title="All 2 branches covered.">                            skillProgress.studentProgress().isCurrent() ? 0 : 1)</span>
-<span class="fc" id="L109">                    .thenComparing(SkillProgressData.comparatorOf(sortCriteria)))</span>
-<span class="fc" id="L110">            .toList();</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">                            skillProgress.studentProgress().isCurrent() ? 0 : 1)</span>
+<span class="fc" id="L139">                    .thenComparing(SkillProgressData.comparatorOf(sortCriteria)))</span>
+<span class="fc" id="L140">            .toList();</span>
 
-<span class="fc" id="L112">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L113">        skillProgresses.stream()</span>
-<span class="fc" id="L114">            .skip((long) (pageCriteria.page()) * pageCriteria.pageSize())</span>
-<span class="fc" id="L115">            .limit(pageCriteria.pageSize())</span>
-<span class="fc" id="L116">            .toList(),</span>
-<span class="fc" id="L117">        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skillProgresses.size()));</span>
+<span class="fc" id="L142">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L143">        skillProgresses.stream()</span>
+<span class="fc" id="L144">            .skip((long) (pageCriteria.page()) * pageCriteria.pageSize())</span>
+<span class="fc" id="L145">            .limit(pageCriteria.pageSize())</span>
+<span class="fc" id="L146">            .toList(),</span>
+<span class="fc" id="L147">        new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), skillProgresses.size()));</span>
   }
 
   @Override
   public List&lt;Skill&gt; getAllSkillList() {
-<span class="fc" id="L122">    Student student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L123">    return studentProgressRepository.findAllByStudent(student).stream()</span>
-<span class="fc" id="L124">        .flatMap(</span>
+<span class="fc" id="L152">    Student student = loggedInUserService.getLoggedInStudent();</span>
+<span class="fc" id="L153">    return studentProgressRepository.findAllByStudent(student).stream()</span>
+<span class="fc" id="L154">        .flatMap(</span>
             studentProgress -&gt;
-<span class="fc" id="L126">                studentProgress.getAllSkillLevels().stream()</span>
-<span class="fc" id="L127">                    .map(skillLevelProgress -&gt; skillLevelProgress.getSkillLevel().getSkill()))</span>
-<span class="fc" id="L128">        .distinct()</span>
-<span class="fc" id="L129">        .toList();</span>
+<span class="fc" id="L156">                studentProgress.getAllSkillLevels().stream()</span>
+<span class="fc" id="L157">                    .map(skillLevelProgress -&gt; skillLevelProgress.getSkillLevel().getSkill()))</span>
+<span class="fc" id="L158">        .distinct()</span>
+<span class="fc" id="L159">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
