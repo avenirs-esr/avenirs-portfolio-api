@@ -318,23 +318,6 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   }
 
   @Override
-  public PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
-      UUID declaredSkillProgressId, String keyword, PageCriteria pageCriteria) {
-    fetchAndCheckLoggedInStudentAuthorization(declaredSkillProgressId);
-
-    return associationSearchHelper.searchForAssociation(
-        declaredSkillProgressId,
-        DeclaredSkillProgress.class,
-        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-        Association::getId1,
-        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),
-        AvenirsBaseModel::getId,
-        da -> da.getActivity().getTitle(),
-        da -> da.getActivity().getThematic().name(),
-        da -> da.getFinishedAt().isPresent());
-  }
-
-  @Override
   public List<DeclaredSkillProgress> findAllDeclaredSkillProgressesByIds(List<UUID> ids) {
     return declaredSkillProgressRepository.findAllById(ids);
   }

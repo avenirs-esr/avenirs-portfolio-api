@@ -246,63 +246,6 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
   @Test
   @Transactional
-  void shouldSearchDeclaredSkillsForAssociation() throws Exception {
-    BddLogger.given("an existing declared activity");
-    String id = declaredActivityId;
-
-    BddLogger.when("searching declared skills for association");
-    webTestClient
-        .get()
-        .uri(
-            uriBuilder ->
-                uriBuilder
-                    .path(BASE_PATH + "/" + id + "/search-for-association/declared-skills")
-                    .queryParam("page", "0")
-                    .queryParam("pageSize", "8")
-                    .build())
-        .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
-        .header("X-Context-Signature", studentSignature)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$.data")
-        .isArray()
-        .jsonPath("$.page.page")
-        .isEqualTo(0)
-        .jsonPath("$.page.pageSize")
-        .isEqualTo(8);
-
-    BddLogger.then("it should return paged declared skill results");
-  }
-
-  @Test
-  void shouldReturn404WhenSearchingDeclaredSkillsForNonExistentActivity() {
-    BddLogger.given("a non-existent declared activity");
-
-    BddLogger.when("searching declared skills for association");
-    webTestClient
-        .get()
-        .uri(
-            uriBuilder ->
-                uriBuilder
-                    .path(BASE_PATH + "/" + notFoundId + "/search-for-association/declared-skills")
-                    .queryParam("page", "0")
-                    .queryParam("pageSize", "8")
-                    .build())
-        .header("X-Signed-Context", studentPayload)
-        .header("X-Context-Kid", secretKey)
-        .header("X-Context-Signature", studentSignature)
-        .exchange()
-        .expectStatus()
-        .isNotFound();
-
-    BddLogger.then("it should return 404");
-  }
-
-  @Test
-  @Transactional
   void shouldReturn403WhenSearchingTracesForOtherStudentActivity() throws Exception {
     BddLogger.given("a declared activity belonging to another student");
     String id = declaredActivityId;
