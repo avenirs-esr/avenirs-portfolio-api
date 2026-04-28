@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredSkillIDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
@@ -19,6 +18,8 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapt
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.request.AddDeclaredSkillDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
@@ -132,7 +133,9 @@ public class DeclaredSkillProgressController {
       searchDeclaredSkillsForAssociation(
           Principal principal,
           @RequestParam(required = false) UUID excludeAssociatedWithElementId,
-          @RequestParam(required = false) EAssociationContextType contextType,
+          @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
+              @RequestParam(required = false)
+              EAssociationContextType contextType,
           @RequestParam(required = false) String keyword,
           @RequestParam(required = false) Integer page,
           @RequestParam(required = false) Integer pageSize) {
@@ -158,38 +161,6 @@ public class DeclaredSkillProgressController {
                 .map(associationSearchResultDTOMapper::toDeclaredSkillDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
-  }
-
-  @GetMapping("/{declaredSkillProgressId}/search-for-association/declared-activities")
-  public ResponseEntity<PagedResponse<AssociationSearchResultDeclaredActivityDTO>>
-      searchDeclaredActivityForAssociation(
-          Principal principal,
-          @Valid @PathVariable UUID declaredSkillProgressId,
-          @RequestParam(required = false) String keyword,
-          @RequestParam(required = false) Integer page,
-          @RequestParam(required = false) Integer pageSize) {
-    var pageCriteria = new PageCriteria(page, pageSize);
-    log.debug(
-        "Received request to search declared activity for association with declared skill [{}] by"
-            + " student [{}] (keyword={}, page={}, pageSize={})",
-        declaredSkillProgressId,
-        principal.getName(),
-        keyword,
-        pageCriteria.page(),
-        pageCriteria.pageSize());
-
-    PagedResult<AssociationSearchResultData> pagedResult =
-        declaredSkillProgressService.searchDeclaredActivityForAssociation(
-            declaredSkillProgressId, keyword, pageCriteria);
-
-    var response =
-        new PagedResponse<>(
-            pagedResult.content().stream()
-                .map(associationSearchResultDTOMapper::toDeclaredActivityDTO)
-                .toList(),
-            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
-
-    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/{declaredSkillProgressId}/associations")

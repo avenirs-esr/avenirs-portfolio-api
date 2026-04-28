@@ -306,22 +306,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public PagedResult<AssociationSearchResultData> searchDeclaredSkillsForAssociation(
-      UUID declaredActivityId, String keyword, PageCriteria pageCriteria) {
-    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
-    return associationSearchHelper.searchForAssociation(
-        declaredActivityId,
-        DeclaredActivity.class,
-        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
-        Association::getId2,
-        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),
-        AvenirsBaseModel::getId,
-        ds -> ds.getSkill().getLibelle(),
-        ds -> ds.getSkill().getType().name(),
-        ds -> false);
-  }
-
-  @Override
   public PagedResult<AssociationSearchResultData> searchDeclaredActivitiesForAssociation(
       UUID excludeAssociatedWithElementId,
       EAssociationContextType contextType,

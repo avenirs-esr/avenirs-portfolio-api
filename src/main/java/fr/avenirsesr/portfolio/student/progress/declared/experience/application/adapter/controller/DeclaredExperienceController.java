@@ -14,6 +14,8 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.application.
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.mapper.DeclaredExperienceMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.security.Principal;
@@ -108,7 +110,9 @@ public class DeclaredExperienceController {
       searchDeclaredExperiencesForAssociation(
           Principal principal,
           @RequestParam(required = false) UUID excludeAssociatedWithElementId,
-          @RequestParam(required = false) EAssociationContextType contextType,
+          @Parameter(schema = @Schema(ref = "#/components/schemas/EAssociationContextType"))
+              @RequestParam(required = false)
+              EAssociationContextType contextType,
           @RequestParam(required = false) String keyword,
           @RequestParam(required = false) Integer page,
           @RequestParam(required = false) Integer pageSize) {
