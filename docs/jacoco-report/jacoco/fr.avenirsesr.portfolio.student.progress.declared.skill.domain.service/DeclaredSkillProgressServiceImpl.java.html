@@ -318,15 +318,32 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   }
 
   @Override
+  public PagedResult&lt;AssociationSearchResultData&gt; searchDeclaredActivityForAssociation(
+      UUID declaredSkillProgressId, String keyword, PageCriteria pageCriteria) {
+<span class="fc" id="L323">    fetchAndCheckLoggedInStudentAuthorization(declaredSkillProgressId);</span>
+
+<span class="fc" id="L325">    return associationSearchHelper.searchForAssociation(</span>
+        declaredSkillProgressId,
+        DeclaredSkillProgress.class,
+        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+        Association::getId1,
+<span class="fc" id="L330">        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),</span>
+        AvenirsBaseModel::getId,
+<span class="fc" id="L332">        da -&gt; da.getActivity().getTitle(),</span>
+<span class="fc" id="L333">        da -&gt; da.getActivity().getThematic().name(),</span>
+<span class="fc" id="L334">        da -&gt; da.getFinishedAt().isPresent());</span>
+  }
+
+  @Override
   public List&lt;DeclaredSkillProgress&gt; findAllDeclaredSkillProgressesByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L322">    return declaredSkillProgressRepository.findAllById(ids);</span>
+<span class="fc" id="L339">    return declaredSkillProgressRepository.findAllById(ids);</span>
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
-<span class="pc bpc" id="L326" title="1 of 3 branches missed.">    return switch (contextType) {</span>
-<span class="fc" id="L327">      case TRACE -&gt; EAssociationType.TRACE_DECLARED_SKILL;</span>
-<span class="fc" id="L328">      case DECLARED_ACTIVITY -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
-<span class="nc" id="L329">      case DECLARED_SKILL, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
+<span class="pc bpc" id="L343" title="1 of 3 branches missed.">    return switch (contextType) {</span>
+<span class="fc" id="L344">      case TRACE -&gt; EAssociationType.TRACE_DECLARED_SKILL;</span>
+<span class="fc" id="L345">      case DECLARED_ACTIVITY -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
+<span class="nc" id="L346">      case DECLARED_SKILL, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
     };
   }
 }
