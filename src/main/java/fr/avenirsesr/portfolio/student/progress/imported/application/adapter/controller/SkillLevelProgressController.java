@@ -36,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class SkillLevelProgressController {
   private final StudentProgressService studentProgressService;
   private final SkillLevelProgressService skillLevelProgressService;
+  private final SkillMapper skillMapper;
+  private final SkillDetailedMapper skillDetailedMapper;
 
   @GetMapping()
   public ResponseEntity<PagedResponse<SkillDTO>> getSkillLevelProgresses(
@@ -51,7 +53,7 @@ public class SkillLevelProgressController {
             pagedResult.content().stream()
                 .map(
                     skillProgress ->
-                        SkillMapper.fromDomainToDto(
+                        skillMapper.fromDomainToDto(
                             skillProgress.currentSkillLevelProgress(),
                             skillProgress.studentProgress()))
                 .toList(),
@@ -76,7 +78,7 @@ public class SkillLevelProgressController {
             .orElseThrow(() -> new SkillLevelNotFoundException(skillId.toString()))
             .getSkill();
 
-    var response = SkillDetailedMapper.fromDomainToDto(skill, skillLevels);
+    var response = skillDetailedMapper.fromDomainToDto(skill, skillLevels);
 
     return ResponseEntity.ok(response);
   }

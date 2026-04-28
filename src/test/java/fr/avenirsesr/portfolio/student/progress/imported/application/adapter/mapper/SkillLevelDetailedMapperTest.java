@@ -11,8 +11,11 @@ import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 class SkillLevelDetailedMapperTest {
+
+  private final SkillLevelDetailedMapper mapper = Mappers.getMapper(SkillLevelDetailedMapper.class);
 
   @Nested
   class GivenSkillLevelDetailedMapper {
@@ -46,7 +49,7 @@ class SkillLevelDetailedMapperTest {
         void thenItShouldReturnACorrectSkillLevelDetailedDTO() {
           BddLogger.then("it should return a correct SkillLevelDetailedDTO");
 
-          SkillLevelDetailedDTO dto = SkillLevelDetailedMapper.fromDomainToDto(skillLevel);
+          SkillLevelDetailedDTO dto = mapper.fromDomainToDto(skillLevel);
 
           assertNotNull(dto);
           assertEquals(skillLevel.getId(), dto.id());

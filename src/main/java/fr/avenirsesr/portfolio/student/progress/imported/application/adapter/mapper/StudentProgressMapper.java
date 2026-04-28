@@ -2,9 +2,12 @@ package fr.avenirsesr.portfolio.student.progress.imported.application.adapter.ma
 
 import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto.StudentProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.StudentProgress;
+import org.mapstruct.Mapper;
 
+@Mapper(componentModel = "spring")
 public interface StudentProgressMapper {
-  static StudentProgressDTO toDto(StudentProgress studentProgress) {
+
+  default StudentProgressDTO toDto(StudentProgress studentProgress) {
     return new StudentProgressDTO(
         studentProgress.getId(),
         studentProgress.getStudent().getId(),

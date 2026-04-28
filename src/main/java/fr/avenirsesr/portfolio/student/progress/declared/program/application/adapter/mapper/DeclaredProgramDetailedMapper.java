@@ -2,21 +2,9 @@ package fr.avenirsesr.portfolio.student.progress.declared.program.application.ad
 
 import fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.dto.DeclaredProgramDetailedDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
+import org.mapstruct.Mapper;
 
+@Mapper(componentModel = "spring")
 public interface DeclaredProgramDetailedMapper {
-
-  static DeclaredProgramDetailedDTO toDTO(DeclaredProgram declaredProgram) {
-    return new DeclaredProgramDetailedDTO(
-        declaredProgram.getId(),
-        declaredProgram.getStatus(),
-        declaredProgram.getTitle(),
-        declaredProgram.getDescription(),
-        declaredProgram.getOrganization(),
-        declaredProgram.getResult(),
-        declaredProgram.getSourceOfInformation(),
-        declaredProgram.getStartDate(),
-        declaredProgram.getEndDate(),
-        declaredProgram.getCreatedAt(),
-        declaredProgram.getUpdatedAt());
-  }
+  DeclaredProgramDetailedDTO toDTO(DeclaredProgram declaredProgram);
 }

@@ -36,6 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/me/self-knowledge")
 public class SelfKnowledgeController {
   private final SelfKnowledgeService selfKnowledgeService;
+  private final SelfKnowledgeCategoryMapper selfKnowledgeCategoryMapper;
+  private final SelfKnowledgeElementDetailsMapper selfKnowledgeElementDetailsMapper;
+  private final SelfKnowledgeElementViewMapper selfKnowledgeElementViewMapper;
 
   @GetMapping("/{selfKnowledgeCategoryId}/elements")
   public ResponseEntity<PagedResponse<SelfKnowledgeElementViewDTO>> getSelfKnowledgeElements(
@@ -55,7 +58,7 @@ public class SelfKnowledgeController {
     return ResponseEntity.ok(
         new PagedResponse<>(
             selfKnowledgeElementPagedResult.content().stream()
-                .map(SelfKnowledgeElementViewMapper::toDTO)
+                .map(selfKnowledgeElementViewMapper::toDTO)
                 .toList(),
             PageInfoDTO.fromDomain(selfKnowledgeElementPagedResult.pageInfo())));
   }
@@ -70,7 +73,7 @@ public class SelfKnowledgeController {
         selfKnowledgeService.getSelfKnowledgeElementDetails(selfKnowledgeElementId);
 
     return ResponseEntity.ok(
-        SelfKnowledgeElementDetailsMapper.toDTO(selfKnowledgeElement.selfKnowledgeElement()));
+        selfKnowledgeElementDetailsMapper.toDTO(selfKnowledgeElement.selfKnowledgeElement()));
   }
 
   @PostMapping("/{selfKnowledgeCategoryId}/elements")
@@ -88,7 +91,7 @@ public class SelfKnowledgeController {
             selfKnowledgeElementRequest.title(),
             selfKnowledgeElementRequest.description(),
             selfKnowledgeElementRequest.rating());
-    return ResponseEntity.ok(SelfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
+    return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
   }
 
   @PutMapping("/element/{selfKnowledgeElementId}")
@@ -107,7 +110,7 @@ public class SelfKnowledgeController {
             selfKnowledgeElementRequest.description(),
             selfKnowledgeElementRequest.rating());
 
-    return ResponseEntity.ok(SelfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
+    return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));
   }
 
   @DeleteMapping("/elements")
@@ -122,7 +125,7 @@ public class SelfKnowledgeController {
   public ResponseEntity<List<SelfKnowledgeCategoryDTO>> getSelfKnowledgeCategories() {
     return ResponseEntity.ok(
         selfKnowledgeService.getSelfKnowledgeCategories().stream()
-            .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)
+            .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)
             .toList());
   }
 
@@ -136,7 +139,7 @@ public class SelfKnowledgeController {
   public ResponseEntity<List<SelfKnowledgeCategoryDTO>> getSelfKnowledgeCategoriesAvailable() {
     return ResponseEntity.ok(
         selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()
-            .map(SelfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)
+            .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)
             .toList());
   }
 

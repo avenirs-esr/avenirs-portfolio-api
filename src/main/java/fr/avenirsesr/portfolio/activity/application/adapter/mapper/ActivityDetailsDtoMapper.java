@@ -3,9 +3,11 @@ package fr.avenirsesr.portfolio.activity.application.adapter.mapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDetailsDTO;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
+import org.mapstruct.Mapper;
 
+@Mapper(componentModel = "spring")
 public interface ActivityDetailsDtoMapper {
-  static ActivityDetailsDTO toDTO(ActivityDetailData activityDetail, String baseUrl) {
+  default ActivityDetailsDTO toDTO(ActivityDetailData activityDetail, String baseUrl) {
     return new ActivityDetailsDTO(
         activityDetail.id(),
         activityDetail.title(),

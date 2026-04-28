@@ -16,9 +16,17 @@ import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 public class StudentProgressViewMapperTest {
+
+  @Mock private SkillMapper skillMapper;
+
+  @InjectMocks private StudentProgressViewMapper mapper;
 
   @Test
   void shouldMapStudentProgressToDTO() {
@@ -68,24 +76,18 @@ public class StudentProgressViewMapperTest {
             .withSkillLevels(skillLevelProgresses)
             .toModel();
 
-    try (MockedStatic<SkillMapper> mockedSkillViewMapper = mockStatic(SkillMapper.class)) {
+    BddLogger.when("mapping a domain StudentProgress to StudentProgressViewDTO");
+    StudentProgressViewDTO dto =
+        mapper.fromDomainToDto(studentProgress, List.of(javaProgress_3, pythonProgress_2));
 
-      BddLogger.when("mapping a domain StudentProgress to StudentProgressViewDTO");
-      StudentProgressViewDTO dto =
-          StudentProgressViewMapper.fromDomainToDto(
-              studentProgress, List.of(javaProgress_3, pythonProgress_2));
+    BddLogger.then("it should return a correct StudentProgressViewDTO");
+    assertNotNull(dto);
+    assertEquals(studentProgress.getId(), dto.id());
+    assertEquals(studentProgress.getTrainingPath().getProgram().getName(), dto.name());
+    assertEquals(2, dto.skills().size());
 
-      BddLogger.then("it should return a correct StudentProgressViewDTO");
-      assertNotNull(dto);
-      assertEquals(studentProgress.getId(), dto.id());
-      assertEquals(studentProgress.getTrainingPath().getProgram().getName(), dto.name());
-      assertEquals(2, dto.skills().size());
-
-      mockedSkillViewMapper.verify(
-          () -> SkillMapper.fromDomainToDto(eq(javaProgress_3), eq(studentProgress)));
-      mockedSkillViewMapper.verify(
-          () -> SkillMapper.fromDomainToDto(eq(pythonProgress_2), eq(studentProgress)));
-    }
+    verify(skillMapper).fromDomainToDto(eq(javaProgress_3), eq(studentProgress));
+    verify(skillMapper).fromDomainToDto(eq(pythonProgress_2), eq(studentProgress));
   }
 
   @Test
@@ -96,8 +98,7 @@ public class StudentProgressViewMapperTest {
 
     BddLogger.when(
         "mapping a domain StudentProgress without current skill levels to StudentProgressViewDTO");
-    StudentProgressViewDTO dto =
-        StudentProgressViewMapper.fromDomainToDto(studentProgress, List.of());
+    StudentProgressViewDTO dto = mapper.fromDomainToDto(studentProgress, List.of());
 
     BddLogger.then("it should handle empty current skill levels");
     assertNotNull(dto);

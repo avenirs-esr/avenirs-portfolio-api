@@ -22,11 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/me/student-progress")
 public class StudentProgressController {
   private final StudentProgressService studentProgressService;
+  private final StudentProgressMapper studentProgressMapper;
+  private final StudentProgressOverviewMapper studentProgressOverviewMapper;
+  private final StudentProgressViewMapper studentProgressViewMapper;
 
   @GetMapping
   public List<StudentProgressDTO> getAllStudentProgress() {
     return studentProgressService.getAllCurrentStudentProgress().stream()
-        .map(StudentProgressMapper::toDto)
+        .map(studentProgressMapper::toDto)
         .toList();
   }
 
@@ -35,7 +38,7 @@ public class StudentProgressController {
     return studentProgressService.getStudentProgressOverview().entrySet().stream()
         .map(
             entry ->
-                StudentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
+                studentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
         .toList();
   }
 
@@ -46,7 +49,7 @@ public class StudentProgressController {
         .getStudentProgressView(SortCriteria.fromString(sortRaw))
         .entrySet()
         .stream()
-        .map(entry -> StudentProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
+        .map(entry -> studentProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))
         .toList();
   }
 }

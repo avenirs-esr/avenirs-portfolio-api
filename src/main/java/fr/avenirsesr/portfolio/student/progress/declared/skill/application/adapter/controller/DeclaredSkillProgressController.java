@@ -35,6 +35,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/declared/skill-progress")
 public class DeclaredSkillProgressController {
   private final DeclaredSkillProgressService declaredSkillProgressService;
+  private final DeclaredSkillProgressMapper declaredSkillProgressMapper;
+  private final DeclaredSkillAssociationsDTOMapper declaredSkillAssociationsDTOMapper;
+  private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
 
   @GetMapping()
   public ResponseEntity<PagedResponse<DeclaredSkillProgressDTO>> getDeclaredSkillsProgresses(
@@ -51,7 +54,7 @@ public class DeclaredSkillProgressController {
     return ResponseEntity.ok(
         new PagedResponse<>(
             result.content().stream()
-                .map(DeclaredSkillProgressMapper::toDeclaredSkillProgressDTO)
+                .map(declaredSkillProgressMapper::toDeclaredSkillProgressDTO)
                 .toList(),
             PageInfoDTO.fromDomain(result.pageInfo())));
   }
@@ -68,7 +71,7 @@ public class DeclaredSkillProgressController {
             declaredSkill.getReflection());
     return ResponseEntity.created(
             URI.create("/me/declared/skill-progress/" + declaredSkill.getId()))
-        .body(DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));
+        .body(declaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));
   }
 
   @PutMapping("/{declaredSkillProgressId}")
@@ -84,7 +87,7 @@ public class DeclaredSkillProgressController {
             declaredSkillProgressRequest.level(),
             declaredSkillProgressRequest.reflection());
     return ResponseEntity.ok(
-        DeclaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));
+        declaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));
   }
 
   @GetMapping("/{declaredSkillProgressId}")
@@ -98,7 +101,7 @@ public class DeclaredSkillProgressController {
         declaredSkillProgressService.getDeclaredSkillProgressDetails(declaredSkillProgressId);
 
     return ResponseEntity.ok(
-        DeclaredSkillProgressMapper.toDeclaredSkillProgressDetailsDTO(
+        declaredSkillProgressMapper.toDeclaredSkillProgressDetailsDTO(
             declaredSkillProgressDetails));
   }
 
@@ -152,7 +155,7 @@ public class DeclaredSkillProgressController {
     return ResponseEntity.ok(
         new PagedResponse<>(
             pagedResult.content().stream()
-                .map(AssociationSearchResultDTOMapper::toDeclaredSkillDTO)
+                .map(associationSearchResultDTOMapper::toDeclaredSkillDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
@@ -182,7 +185,7 @@ public class DeclaredSkillProgressController {
     var response =
         new PagedResponse<>(
             pagedResult.content().stream()
-                .map(AssociationSearchResultDTOMapper::toDeclaredActivityDTO)
+                .map(associationSearchResultDTOMapper::toDeclaredActivityDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
@@ -197,7 +200,7 @@ public class DeclaredSkillProgressController {
         declaredSkillProgressId,
         principal.getName());
     var newAssociations = declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);
-    return ResponseEntity.ok(DeclaredSkillAssociationsDTOMapper.toDTO(newAssociations));
+    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
 
   @PostMapping("/{declaredSkillProgressId}/associate/declared-activities")
@@ -214,6 +217,6 @@ public class DeclaredSkillProgressController {
     var newAssociations =
         declaredSkillProgressService.associateDeclaredSkillWithActivities(
             declaredSkillProgressId, body.idsToAssociate());
-    return ResponseEntity.ok(DeclaredSkillAssociationsDTOMapper.toDTO(newAssociations));
+    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
   }
 }

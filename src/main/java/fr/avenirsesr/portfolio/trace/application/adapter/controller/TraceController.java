@@ -35,6 +35,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/traces")
 public class TraceController {
   private final TraceService traceService;
+  private final TraceViewMapper traceViewMapper;
+  private final TraceOverviewMapper traceOverviewMapper;
+  private final TraceDetailMapper traceDetailMapper;
+  private final TracesSummaryMapper tracesSummaryMapper;
+  private final TraceAssociationsMapper traceAssociationsMapper;
+  private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
 
   @GetMapping("/overview")
   public ResponseEntity<List<TraceOverviewDTO>> getTraceOverview(Principal principal) {
@@ -43,7 +49,7 @@ public class TraceController {
 
     List<TraceOverviewDTO> response =
         traces.stream()
-            .map(trace -> TraceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))
+            .map(trace -> traceOverviewMapper.toDTO(trace, traceService.programNameOfTrace(trace)))
             .toList();
 
     return ResponseEntity.ok(response);
@@ -70,7 +76,7 @@ public class TraceController {
 
     var tracesViewResponse =
         new PagedResponse<>(
-            tracesResult.content().stream().map(TraceViewMapper::toDTO).toList(),
+            traceViewMapper.toDTOs(tracesResult.content()),
             PageInfoDTO.fromDomain(tracesResult.pageInfo()));
 
     return ResponseEntity.ok(tracesViewResponse);
@@ -91,7 +97,7 @@ public class TraceController {
 
     TracesSummaryData summary = traceService.getTracesSummary();
 
-    return ResponseEntity.ok(TracesSummaryMapper.toDTO(summary));
+    return ResponseEntity.ok(tracesSummaryMapper.toDTO(summary));
   }
 
   @GetMapping("/{traceId}/detail")
@@ -102,7 +108,7 @@ public class TraceController {
 
     TraceDetailData traceDetail = traceService.getTraceDetail(traceId);
 
-    return ResponseEntity.ok(TraceDetailMapper.toDTO(traceDetail));
+    return ResponseEntity.ok(traceDetailMapper.toDTO(traceDetail));
   }
 
   @GetMapping("/{traceId}/search-for-association/declared-activities")
@@ -129,7 +135,7 @@ public class TraceController {
     var response =
         new PagedResponse<>(
             pagedResult.content().stream()
-                .map(AssociationSearchResultDTOMapper::toDeclaredActivityDTO)
+                .map(associationSearchResultDTOMapper::toDeclaredActivityDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
@@ -160,7 +166,7 @@ public class TraceController {
     var response =
         new PagedResponse<>(
             pagedResult.content().stream()
-                .map(AssociationSearchResultDTOMapper::toDeclaredSkillDTO)
+                .map(associationSearchResultDTOMapper::toDeclaredSkillDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
@@ -191,7 +197,7 @@ public class TraceController {
     var response =
         new PagedResponse<>(
             pagedResult.content().stream()
-                .map(AssociationSearchResultDTOMapper::toDeclaredExperienceDTO)
+                .map(associationSearchResultDTOMapper::toDeclaredExperienceDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
@@ -230,7 +236,7 @@ public class TraceController {
             updateTraceDTO.personalNote(),
             updateTraceDTO.iaJustification());
 
-    return ResponseEntity.ok(TraceDetailMapper.toDTO(trace));
+    return ResponseEntity.ok(traceDetailMapper.toDTO(trace));
   }
 
   @PostMapping("/{traceId}/associate/activities")
@@ -245,7 +251,7 @@ public class TraceController {
         principal.getName());
     var traceAssociations =
         traceService.associateTraceWithActivities(traceId, body.idsToAssociate());
-    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));
+    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
   @PostMapping("/{traceId}/associate/declared-skill")
@@ -260,7 +266,7 @@ public class TraceController {
         principal.getName());
     var traceAssociations =
         traceService.associateTraceWithDeclaredSkill(traceId, body.idsToAssociate());
-    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));
+    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
   @PostMapping("/{traceId}/associate/declared-experiences")
@@ -275,7 +281,7 @@ public class TraceController {
         principal.getName());
     var traceAssociations =
         traceService.associateTraceWithDeclaredExperience(traceId, body.idsToAssociate());
-    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));
+    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
   @GetMapping("/{traceId}/associations")
@@ -292,7 +298,7 @@ public class TraceController {
 
     var traceAssociations = traceService.getTraceAssociations(traceId, onlyNotCompleted);
 
-    return ResponseEntity.ok(TraceAssociationsMapper.toDTO(traceAssociations));
+    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));
   }
 
   @DeleteMapping("/{traceId}/associations")

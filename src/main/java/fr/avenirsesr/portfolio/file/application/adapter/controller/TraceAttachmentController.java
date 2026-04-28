@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/me/storage/traces")
 public class TraceAttachmentController {
   private final TraceAttachmentService service;
+  private final AttachmentUploadDTOMapper attachmentUploadDTOMapper;
 
   @PostMapping(value = "/{traceId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<AttachmentUploadDTO> uploadAttachment(
@@ -46,7 +47,7 @@ public class TraceAttachmentController {
             file.getBytes());
 
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(AttachmentUploadDTOMapper.fromDomain(attachment));
+        .body(attachmentUploadDTOMapper.fromDomain(attachment));
   }
 
   @GetMapping("/attachments/{attachmentId}")

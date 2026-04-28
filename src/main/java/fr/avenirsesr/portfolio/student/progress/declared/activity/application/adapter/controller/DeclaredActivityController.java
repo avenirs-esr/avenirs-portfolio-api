@@ -39,6 +39,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/me/activity-progress")
 public class DeclaredActivityController {
   private final DeclaredActivityService declaredActivityService;
+  private final DeclaredActivityViewDTOMapper declaredActivityViewDTOMapper;
+  private final DeclaredActivityDetailsDTOMapper declaredActivityDetailsDTOMapper;
+  private final DeclaredActivityAssociationsDTOMapper declaredActivityAssociationsDTOMapper;
+  private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
 
   @GetMapping
   public ResponseEntity<PagedResponse<DeclaredActivityViewDTO>> getDeclaredActivitiesView(
@@ -56,7 +60,7 @@ public class DeclaredActivityController {
 
     var viewResponse =
         new PagedResponse<>(
-            pagedResult.content().stream().map(DeclaredActivityViewDTOMapper::toDTO).toList(),
+            pagedResult.content().stream().map(declaredActivityViewDTOMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
     return ResponseEntity.ok(viewResponse);
@@ -76,7 +80,7 @@ public class DeclaredActivityController {
             : null;
     DeclaredActivity declaredActivity =
         declaredActivityService.subscribe(activityId, startDate, endDate);
-    return ResponseEntity.ok(DeclaredActivityDetailsDTOMapper.toDTO(declaredActivity));
+    return ResponseEntity.ok(declaredActivityDetailsDTOMapper.toDTO(declaredActivity));
   }
 
   @DeleteMapping("/unsubscribe")
@@ -96,7 +100,7 @@ public class DeclaredActivityController {
         declaredActivityId,
         principal.getName());
     DeclaredActivity declaredActivity = declaredActivityService.finish(declaredActivityId);
-    return ResponseEntity.ok(DeclaredActivityDetailsDTOMapper.toDTO(declaredActivity));
+    return ResponseEntity.ok(declaredActivityDetailsDTOMapper.toDTO(declaredActivity));
   }
 
   @PutMapping("/{activityId}/reflection")
@@ -116,7 +120,7 @@ public class DeclaredActivityController {
         declaredActivityId,
         principal.getName());
     return ResponseEntity.ok(
-        DeclaredActivityDetailsDTOMapper.toDTO(
+        declaredActivityDetailsDTOMapper.toDTO(
             declaredActivityService.getDeclaredActivityDetails(declaredActivityId)));
   }
 
@@ -128,7 +132,7 @@ public class DeclaredActivityController {
         declaredActivityId,
         principal.getName());
     return ResponseEntity.ok(
-        DeclaredActivityAssociationsDTOMapper.toDTO(
+        declaredActivityAssociationsDTOMapper.toDTO(
             declaredActivityService.getDeclaredActivityAssociations(declaredActivityId)));
   }
 
@@ -174,7 +178,7 @@ public class DeclaredActivityController {
     var newAssociations =
         declaredActivityService.associateActivityWithTraces(
             declaredActivityId, body.idsToAssociate());
-    return ResponseEntity.ok(DeclaredActivityAssociationsDTOMapper.toDTO(newAssociations));
+    return ResponseEntity.ok(declaredActivityAssociationsDTOMapper.toDTO(newAssociations));
   }
 
   @PostMapping("/{declaredActivityId}/associate/declared-skills")
@@ -191,7 +195,7 @@ public class DeclaredActivityController {
     var newAssociations =
         declaredActivityService.associateActivityWithDeclaredSkills(
             declaredActivityId, body.idsToAssociate());
-    return ResponseEntity.ok(DeclaredActivityAssociationsDTOMapper.toDTO(newAssociations));
+    return ResponseEntity.ok(declaredActivityAssociationsDTOMapper.toDTO(newAssociations));
   }
 
   @GetMapping("/search-for-association")
@@ -222,7 +226,7 @@ public class DeclaredActivityController {
     return ResponseEntity.ok(
         new PagedResponse<>(
             pagedResult.content().stream()
-                .map(AssociationSearchResultDTOMapper::toDeclaredActivityDTO)
+                .map(associationSearchResultDTOMapper::toDeclaredActivityDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
@@ -253,7 +257,7 @@ public class DeclaredActivityController {
     var response =
         new PagedResponse<>(
             pagedResult.content().stream()
-                .map(AssociationSearchResultDTOMapper::toTraceDTO)
+                .map(associationSearchResultDTOMapper::toTraceDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
@@ -285,7 +289,7 @@ public class DeclaredActivityController {
     var response =
         new PagedResponse<>(
             pagedResult.content().stream()
-                .map(AssociationSearchResultDTOMapper::toDeclaredSkillDTO)
+                .map(associationSearchResultDTOMapper::toDeclaredSkillDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.AttachmentUploadDTOMapper;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachmentDownload;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import org.springframework.mock.web.MockMultipartFile;
 public class TraceAttachmentControllerTest {
 
   @Mock private TraceAttachmentService service;
+  @Mock private AttachmentUploadDTOMapper attachmentUploadDTOMapper;
   @Mock private Principal principal;
 
   @InjectMocks private TraceAttachmentController controller;
@@ -50,6 +52,9 @@ public class TraceAttachmentControllerTest {
     when(service.uploadTraceAttachment(
             eq(traceId), anyString(), anyString(), anyLong(), any(byte[].class)))
         .thenReturn(returnedAttachment);
+    when(attachmentUploadDTOMapper.fromDomain(returnedAttachment))
+        .thenReturn(
+            new AttachmentUploadDTO(java.util.UUID.randomUUID(), "test.pdf", null, 10, 1, null));
 
     BddLogger.when("the attachment upload success");
     ResponseEntity<AttachmentUploadDTO> response =

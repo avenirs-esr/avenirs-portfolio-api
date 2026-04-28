@@ -4,9 +4,12 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
+import org.mapstruct.Mapper;
 
+@Mapper(componentModel = "spring")
 public interface ProfileOverviewMapper {
-  static ProfileOverviewDTO userDomainToDto(
+
+  default ProfileOverviewDTO userDomainToDto(
       UserProfileOverviewData overview, UserPhotosData userPhotos) {
     return new ProfileOverviewDTO(
         overview.firstName(),

@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/declared/experiences")
 public class DeclaredExperienceController {
   private final DeclaredExperienceService declaredExperienceService;
+  private final DeclaredExperienceMapper declaredExperienceMapper;
+  private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
 
   @PostMapping("/")
   public ResponseEntity<DeclaredExperienceViewDTO> createDeclaredExperience(
@@ -49,7 +51,7 @@ public class DeclaredExperienceController {
             request.endDate());
 
     return ResponseEntity.created(URI.create("/me/declared/experiences/" + experience.getId()))
-        .body(DeclaredExperienceMapper.toDTO(experience));
+        .body(declaredExperienceMapper.toDTO(experience));
   }
 
   @GetMapping("/{experienceId}")
@@ -57,7 +59,7 @@ public class DeclaredExperienceController {
       @Valid @PathVariable UUID experienceId) {
     DeclaredExperience experience = declaredExperienceService.get(experienceId);
 
-    return ResponseEntity.ok(DeclaredExperienceMapper.toDTO(experience));
+    return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));
   }
 
   @GetMapping("/view")
@@ -69,7 +71,7 @@ public class DeclaredExperienceController {
 
     return ResponseEntity.ok(
         new PagedResponse<>(
-            pagedExperiences.content().stream().map(DeclaredExperienceMapper::toDTO).toList(),
+            pagedExperiences.content().stream().map(declaredExperienceMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(pagedExperiences.pageInfo())));
   }
 
@@ -92,7 +94,7 @@ public class DeclaredExperienceController {
             request.startDate(),
             request.endDate());
 
-    return ResponseEntity.ok(DeclaredExperienceMapper.toDTO(experience));
+    return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));
   }
 
   @DeleteMapping("/")
@@ -129,7 +131,7 @@ public class DeclaredExperienceController {
     return ResponseEntity.ok(
         new PagedResponse<>(
             pagedResult.content().stream()
-                .map(AssociationSearchResultDTOMapper::toDeclaredExperienceDTO)
+                .map(associationSearchResultDTOMapper::toDeclaredExperienceDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
@@ -144,6 +146,6 @@ public class DeclaredExperienceController {
 
     var associations = declaredExperienceService.getAssociations(experienceId);
 
-    return ResponseEntity.ok(DeclaredExperienceMapper.toAssociationsDTO(associations));
+    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));
   }
 }

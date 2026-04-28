@@ -13,8 +13,20 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class SkillDetailedMapperTest {
+
+  @Spy
+  private SkillLevelDetailedMapper skillLevelDetailedMapper =
+      Mappers.getMapper(SkillLevelDetailedMapper.class);
+
+  @InjectMocks private SkillDetailedMapperImpl mapper;
 
   @Nested
   class GivenSkillDetailedMapper {
@@ -51,7 +63,7 @@ class SkillDetailedMapperTest {
         void thenItShouldReturnACorrectSkillDetailedDTO() {
           BddLogger.then("it should return a correct SkillDetailedDTO");
 
-          SkillDetailedDTO dto = SkillDetailedMapper.fromDomainToDto(skill, skillLevels);
+          SkillDetailedDTO dto = mapper.fromDomainToDto(skill, skillLevels);
 
           assertNotNull(dto);
           assertEquals(skill.getId(), dto.id());
