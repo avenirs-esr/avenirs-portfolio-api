@@ -36,61 +36,63 @@ import org.springframework.web.bind.annotation.RestController;
 public class SkillLevelProgressController {
   private final StudentProgressService studentProgressService;
   private final SkillLevelProgressService skillLevelProgressService;
+  private final SkillMapper skillMapper;
+  private final SkillDetailedMapper skillDetailedMapper;
 
   @GetMapping()
   public ResponseEntity&lt;PagedResponse&lt;SkillDTO&gt;&gt; getSkillLevelProgresses(
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(name = &quot;sort&quot;, required = false) String sortRaw) {
-<span class="fc" id="L45">    PagedResult&lt;SkillProgressData&gt; pagedResult =</span>
-<span class="fc" id="L46">        studentProgressService.getAllTimeSkillsView(</span>
-<span class="fc" id="L47">            SortCriteria.fromString(sortRaw), new PageCriteria(page, pageSize));</span>
+<span class="fc" id="L47">    PagedResult&lt;SkillProgressData&gt; pagedResult =</span>
+<span class="fc" id="L48">        studentProgressService.getAllTimeSkillsView(</span>
+<span class="fc" id="L49">            SortCriteria.fromString(sortRaw), new PageCriteria(page, pageSize));</span>
 
-<span class="fc" id="L49">    var response =</span>
+<span class="fc" id="L51">    var response =</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L51">            pagedResult.content().stream()</span>
-<span class="fc" id="L52">                .map(</span>
+<span class="fc" id="L53">            pagedResult.content().stream()</span>
+<span class="fc" id="L54">                .map(</span>
                     skillProgress -&gt;
-<span class="fc" id="L54">                        SkillMapper.fromDomainToDto(</span>
-<span class="fc" id="L55">                            skillProgress.currentSkillLevelProgress(),</span>
-<span class="fc" id="L56">                            skillProgress.studentProgress()))</span>
-<span class="fc" id="L57">                .toList(),</span>
-<span class="fc" id="L58">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
-<span class="fc" id="L59">    return ResponseEntity.ok(response);</span>
+<span class="fc" id="L56">                        skillMapper.fromDomainToDto(</span>
+<span class="fc" id="L57">                            skillProgress.currentSkillLevelProgress(),</span>
+<span class="fc" id="L58">                            skillProgress.studentProgress()))</span>
+<span class="fc" id="L59">                .toList(),</span>
+<span class="fc" id="L60">            PageInfoDTO.fromDomain(pagedResult.pageInfo()));</span>
+<span class="fc" id="L61">    return ResponseEntity.ok(response);</span>
   }
 
   @GetMapping(&quot;/details/{skillId}&quot;)
   public ResponseEntity&lt;SkillDetailedDTO&gt; getDetailedSkill(
       Principal principal, @PathVariable UUID skillId) {
-<span class="fc" id="L65">    log.debug(</span>
+<span class="fc" id="L67">    log.debug(</span>
         &quot;Received request to detailed skill [{}] of user [{}]&quot;,
-<span class="fc" id="L67">        skillId.toString(),</span>
-<span class="fc" id="L68">        principal.getName());</span>
-<span class="fc" id="L69">    List&lt;SkillLevelProgress&gt; skillLevelProgresses =</span>
-<span class="nc" id="L70">        skillLevelProgressService.getSkillLevelsBySkillId(skillId);</span>
-<span class="nc" id="L71">    List&lt;SkillLevel&gt; skillLevels =</span>
-<span class="nc" id="L72">        skillLevelProgresses.stream().map(SkillLevelProgress::getSkillLevel).toList();</span>
-<span class="nc" id="L73">    Skill skill =</span>
-<span class="nc" id="L74">        skillLevels.stream()</span>
-<span class="nc" id="L75">            .findFirst()</span>
-<span class="nc" id="L76">            .orElseThrow(() -&gt; new SkillLevelNotFoundException(skillId.toString()))</span>
-<span class="nc" id="L77">            .getSkill();</span>
+<span class="fc" id="L69">        skillId.toString(),</span>
+<span class="fc" id="L70">        principal.getName());</span>
+<span class="fc" id="L71">    List&lt;SkillLevelProgress&gt; skillLevelProgresses =</span>
+<span class="nc" id="L72">        skillLevelProgressService.getSkillLevelsBySkillId(skillId);</span>
+<span class="nc" id="L73">    List&lt;SkillLevel&gt; skillLevels =</span>
+<span class="nc" id="L74">        skillLevelProgresses.stream().map(SkillLevelProgress::getSkillLevel).toList();</span>
+<span class="nc" id="L75">    Skill skill =</span>
+<span class="nc" id="L76">        skillLevels.stream()</span>
+<span class="nc" id="L77">            .findFirst()</span>
+<span class="nc" id="L78">            .orElseThrow(() -&gt; new SkillLevelNotFoundException(skillId.toString()))</span>
+<span class="nc" id="L79">            .getSkill();</span>
 
-<span class="nc" id="L79">    var response = SkillDetailedMapper.fromDomainToDto(skill, skillLevels);</span>
+<span class="nc" id="L81">    var response = skillDetailedMapper.fromDomainToDto(skill, skillLevels);</span>
 
-<span class="nc" id="L81">    return ResponseEntity.ok(response);</span>
+<span class="nc" id="L83">    return ResponseEntity.ok(response);</span>
   }
 
   @GetMapping(&quot;/all-skill&quot;)
   public ResponseEntity&lt;List&lt;SkillListItemDTO&gt;&gt; getAllSkills(Principal principal) {
-<span class="nc" id="L86">    log.debug(&quot;Received request to all skills of [{}]&quot;, principal.getName());</span>
+<span class="nc" id="L88">    log.debug(&quot;Received request to all skills of [{}]&quot;, principal.getName());</span>
 
-<span class="nc" id="L88">    var response =</span>
-<span class="nc" id="L89">        studentProgressService.getAllSkillList().stream()</span>
-<span class="nc" id="L90">            .map(skill -&gt; new SkillListItemDTO(skill.getId(), skill.getName()))</span>
-<span class="nc" id="L91">            .toList();</span>
+<span class="nc" id="L90">    var response =</span>
+<span class="nc" id="L91">        studentProgressService.getAllSkillList().stream()</span>
+<span class="nc" id="L92">            .map(skill -&gt; new SkillListItemDTO(skill.getId(), skill.getName()))</span>
+<span class="nc" id="L93">            .toList();</span>
 
-<span class="nc" id="L93">    return ResponseEntity.ok(response);</span>
+<span class="nc" id="L95">    return ResponseEntity.ok(response);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
