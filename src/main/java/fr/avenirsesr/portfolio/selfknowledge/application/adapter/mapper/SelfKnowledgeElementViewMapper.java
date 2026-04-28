@@ -2,14 +2,9 @@ package fr.avenirsesr.portfolio.selfknowledge.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.selfknowledge.application.adapter.dto.SelfKnowledgeElementViewDTO;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeElement;
+import org.mapstruct.Mapper;
 
+@Mapper(componentModel = "spring")
 public interface SelfKnowledgeElementViewMapper {
-
-  static SelfKnowledgeElementViewDTO toDTO(SelfKnowledgeElement selfKnowledgeElement) {
-    return new SelfKnowledgeElementViewDTO(
-        selfKnowledgeElement.getId(),
-        selfKnowledgeElement.getTitle(),
-        selfKnowledgeElement.getDescription(),
-        selfKnowledgeElement.getRating());
-  }
+  SelfKnowledgeElementViewDTO toDTO(SelfKnowledgeElement selfKnowledgeElement);
 }

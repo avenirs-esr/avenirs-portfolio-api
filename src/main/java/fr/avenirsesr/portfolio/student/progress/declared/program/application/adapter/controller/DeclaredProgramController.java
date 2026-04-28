@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/declared/programs")
 public class DeclaredProgramController {
   private final DeclaredProgramService declaredProgramService;
+  private final DeclaredProgramViewMapper declaredProgramViewMapper;
+  private final DeclaredProgramDetailedMapper declaredProgramDetailedMapper;
 
   @GetMapping
   public ResponseEntity<PagedResponse<DeclaredProgramViewDTO>> getDeclaredPrograms(
@@ -42,7 +44,7 @@ public class DeclaredProgramController {
     return ResponseEntity.ok(
         new PagedResponse<>(
             declaredProgramPagedResult.content().stream()
-                .map(DeclaredProgramViewMapper::toDTO)
+                .map(declaredProgramViewMapper::toDTO)
                 .toList(),
             PageInfoDTO.fromDomain(declaredProgramPagedResult.pageInfo())));
   }
@@ -60,7 +62,7 @@ public class DeclaredProgramController {
             declaredProgramRequestDTO.startDate(),
             declaredProgramRequestDTO.endDate());
     return ResponseEntity.created(URI.create("/me/declared/programs/" + declaredProgram.getId()))
-        .body(DeclaredProgramViewMapper.toDTO(declaredProgram));
+        .body(declaredProgramViewMapper.toDTO(declaredProgram));
   }
 
   @PutMapping("/{declaredProgramId}")
@@ -77,14 +79,14 @@ public class DeclaredProgramController {
             declaredProgramRequestDTO.sourceOfInformation(),
             declaredProgramRequestDTO.startDate(),
             declaredProgramRequestDTO.endDate());
-    return ResponseEntity.ok(DeclaredProgramDetailedMapper.toDTO(declaredProgram));
+    return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));
   }
 
   @GetMapping("/{declaredProgramId}")
   public ResponseEntity<DeclaredProgramDetailedDTO> getDeclaredProgram(
       @PathVariable("declaredProgramId") UUID declaredProgramId) {
     DeclaredProgram declaredProgram = declaredProgramService.getById(declaredProgramId);
-    return ResponseEntity.ok(DeclaredProgramDetailedMapper.toDTO(declaredProgram));
+    return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));
   }
 
   @DeleteMapping

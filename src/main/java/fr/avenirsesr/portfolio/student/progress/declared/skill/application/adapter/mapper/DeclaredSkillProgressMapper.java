@@ -1,51 +1,34 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.mapper;
 
-import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillCategoryType;
+import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
 import fr.avenirsesr.portfolio.declaredskill.application.adapter.dto.DeclaredSkillCategoryDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
-import java.util.List;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
+@Mapper(componentModel = "spring", uses = TraceOverviewMapper.class)
 public interface DeclaredSkillProgressMapper {
-  static DeclaredSkillProgressDTO toDeclaredSkillProgressDTO(
-      DeclaredSkillProgress declaredSkillProgress) {
-    return new DeclaredSkillProgressDTO(
-        declaredSkillProgress.getId(),
-        declaredSkillProgress.getSkill().getLibelle(),
-        declaredSkillProgress.getSkill().getPathSegments(),
-        declaredSkillProgress.getSkill().getType(),
-        declaredSkillProgress.getLevel(),
-        declaredSkillProgress.getReflection());
-  }
 
-  static DeclaredSkillProgressDetailsDTO toDeclaredSkillProgressDetailsDTO(
-      DeclaredSkillProgressDetails declaredSkillProgressDetails) {
-    List<DeclaredSkillCategoryDTO> categories =
-        declaredSkillProgressDetails.externalCategories().stream()
-            .map(
-                externalCat ->
-                    new DeclaredSkillCategoryDTO(
-                        externalCat.libelle(),
-                        EExternalSkillCategoryType.valueOf(externalCat.type().name())))
-            .toList();
+  @Mapping(source = "skill.libelle", target = "title")
+  @Mapping(source = "skill.pathSegments", target = "pathSegments")
+  @Mapping(source = "skill.type", target = "type")
+  DeclaredSkillProgressDTO toDeclaredSkillProgressDTO(DeclaredSkillProgress declaredSkillProgress);
 
-    return new DeclaredSkillProgressDetailsDTO(
-        declaredSkillProgressDetails.declaredSkillProgress().getId(),
-        declaredSkillProgressDetails.declaredSkillProgress().getSkill().getLibelle(),
-        categories,
-        declaredSkillProgressDetails.declaredSkillProgress().getReflection(),
-        declaredSkillProgressDetails.declaredSkillProgress().getSkill().getType(),
-        declaredSkillProgressDetails.declaredSkillProgress().getLevel(),
-        declaredSkillProgressDetails.tracesWithProjectName().stream()
-            .map(
-                tracesWithProjectName ->
-                    TraceOverviewMapper.toDTO(
-                        tracesWithProjectName.trace(), tracesWithProjectName.programName()))
-            .toList(),
-        declaredSkillProgressDetails.declaredSkillProgress().getCreatedAt(),
-        declaredSkillProgressDetails.declaredSkillProgress().getUpdatedAt());
-  }
+  @Mapping(source = "declaredSkillProgress.id", target = "id")
+  @Mapping(source = "declaredSkillProgress.skill.libelle", target = "title")
+  @Mapping(source = "externalCategories", target = "pathSegments")
+  @Mapping(source = "declaredSkillProgress.reflection", target = "reflection")
+  @Mapping(source = "declaredSkillProgress.skill.type", target = "type")
+  @Mapping(source = "declaredSkillProgress.level", target = "level")
+  @Mapping(source = "tracesWithProjectName", target = "traceAssociations")
+  @Mapping(source = "declaredSkillProgress.createdAt", target = "createdAt")
+  @Mapping(source = "declaredSkillProgress.updatedAt", target = "updatedAt")
+  DeclaredSkillProgressDetailsDTO toDeclaredSkillProgressDetailsDTO(
+      DeclaredSkillProgressDetails declaredSkillProgressDetails);
+
+  DeclaredSkillCategoryDTO toCategoryDTO(ExternalSkillCategoryDTO externalCategory);
 }

@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
@@ -30,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 class TraceControllerTest {
 
   @Mock private TraceService traceService;
+  @Mock private TraceOverviewMapper traceOverviewMapper;
 
   @InjectMocks private TraceController controller;
 
@@ -51,6 +53,10 @@ class TraceControllerTest {
     BddLogger.given("a TraceController");
     when(traceService.lastTracesOf()).thenReturn(List.of(trace));
     when(traceService.programNameOfTrace(trace)).thenReturn("Program Name");
+    when(traceOverviewMapper.toDTO(trace, "Program Name"))
+        .thenReturn(
+            new TraceOverviewDTO(
+                trace.getId(), trace.getTitle(), "Program Name", false, null, null));
 
     BddLogger.when("getting the trace overview");
     ResponseEntity<List<TraceOverviewDTO>> response = controller.getTraceOverview(principal);

@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/me/storage/users")
 public class UserResourceController {
   private final UserResourceService userResourceService;
+  private final UserPhotoUploadDTOMapper userPhotoUploadDTOMapper;
 
   @PutMapping(value = "/{userCategory}/{photoType}", consumes = "multipart/form-data")
   public ResponseEntity<UserPhotoUploadDTO> updateProfilePhoto(
@@ -55,7 +56,7 @@ public class UserResourceController {
             file.getContentType(),
             file.getSize(),
             file.getBytes());
-    return ResponseEntity.ok(UserPhotoUploadDTOMapper.fromDomain(userPhoto));
+    return ResponseEntity.ok(userPhotoUploadDTOMapper.fromDomain(userPhoto));
   }
 
   @DeleteMapping(path = "/{fileId}")

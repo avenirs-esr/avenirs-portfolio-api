@@ -2,9 +2,9 @@ package fr.avenirsesr.portfolio.student.progress.imported.application.adapter.ma
 
 import fr.avenirsesr.portfolio.program.domain.model.SkillLevel;
 import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto.SkillLevelDetailedDTO;
+import org.mapstruct.Mapper;
 
+@Mapper(componentModel = "spring")
 public interface SkillLevelDetailedMapper {
-  static SkillLevelDetailedDTO fromDomainToDto(SkillLevel skillLevel) {
-    return new SkillLevelDetailedDTO(skillLevel.getId(), skillLevel.getName());
-  }
+  SkillLevelDetailedDTO fromDomainToDto(SkillLevel skillLevel);
 }

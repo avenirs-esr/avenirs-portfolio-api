@@ -31,6 +31,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/activities")
 public class ActivityController {
   private final ActivityService activityService;
+  private final ActivityDetailsDtoMapper activityDetailsDtoMapper;
+  private final ActivityNavigationMapper activityNavigationMapper;
+  private final ActivityOverviewDtoMapper activityOverviewDtoMapper;
 
   @GetMapping("/{activityId}")
   public ResponseEntity<ActivityDetailsDTO> getActivityDetail(
@@ -39,7 +42,7 @@ public class ActivityController {
 
     ActivityDetailData activityDetail = activityService.getActivityDetail(activityId);
     String baseUrl = extractOrigin(request);
-    return ResponseEntity.ok(ActivityDetailsDtoMapper.toDTO(activityDetail, baseUrl));
+    return ResponseEntity.ok(activityDetailsDtoMapper.toDTO(activityDetail, baseUrl));
   }
 
   @GetMapping
@@ -60,7 +63,7 @@ public class ActivityController {
 
     var viewResponse =
         new PagedResponse<>(
-            pagedResult.content().stream().map(ActivityOverviewDtoMapper::toDTO).toList(),
+            pagedResult.content().stream().map(activityOverviewDtoMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
     return ResponseEntity.ok(viewResponse);
@@ -83,7 +86,7 @@ public class ActivityController {
 
     var viewResponse =
         new PagedResponse<>(
-            pagedResult.content().stream().map(ActivityOverviewDtoMapper::toDTO).toList(),
+            pagedResult.content().stream().map(activityOverviewDtoMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
     return ResponseEntity.ok(viewResponse);
@@ -92,6 +95,6 @@ public class ActivityController {
   @GetMapping("/navigation")
   public ResponseEntity<List<ActivityNavigationDTO>> getActivityNavigation() {
     return ResponseEntity.ok(
-        ActivityNavigationMapper.toDTO(activityService.getActivityNavigation()));
+        activityNavigationMapper.toDTO(activityService.getActivityNavigation()));
   }
 }

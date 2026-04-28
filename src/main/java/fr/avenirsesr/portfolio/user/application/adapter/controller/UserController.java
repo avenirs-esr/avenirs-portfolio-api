@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/me/users")
 public class UserController {
   private final UserService userService;
+  private final ProfileOverviewMapper profileOverviewMapper;
 
   @GetMapping("/{userCategory}/overview")
   public ResponseEntity<ProfileOverviewDTO> getProfile(
@@ -52,7 +53,7 @@ public class UserController {
     String baseUrl = extractOrigin(request);
 
     return ResponseEntity.ok(
-        ProfileOverviewMapper.userDomainToDto(
+        profileOverviewMapper.userDomainToDto(
             overview,
             new UserPhotosData(
                 userPhotos.profileFileId(),

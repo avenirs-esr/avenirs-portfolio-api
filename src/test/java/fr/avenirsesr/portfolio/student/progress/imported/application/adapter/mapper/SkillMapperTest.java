@@ -16,9 +16,17 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class SkillMapperTest {
+
+  @Mock private SkillLevelViewMapper skillLevelViewMapper;
+
+  @InjectMocks private SkillMapperImpl mapper;
 
   @Test
   void shouldMapSkillLevelProgressToDTO() {
@@ -46,27 +54,14 @@ class SkillMapperTest {
             .withSkillLevels(List.of(progress1, progress2))
             .toModel();
 
-    try (MockedStatic<SkillLevelViewMapper> skillLevelViewMapperMock =
-        mockStatic(SkillLevelViewMapper.class)) {
+    BddLogger.when("mapping a domain SkillLevelProgress to SkillDTO");
+    SkillDTO dto = mapper.fromDomainToDto(progress2, studentProgress);
 
-      skillLevelViewMapperMock
-          .when(() -> SkillLevelViewMapper.fromDomainToDto(progress2))
-          .thenReturn(null);
-      skillLevelViewMapperMock
-          .when(() -> SkillLevelViewMapper.fromDomainToDto(progress1))
-          .thenReturn(null);
-
-      BddLogger.when("mapping a domain SkillLevelProgress to SkillDTO");
-      SkillDTO dto = SkillMapper.fromDomainToDto(progress2, studentProgress);
-
-      BddLogger.then("it should return a correct SkillDTO");
-      assertNotNull(dto);
-      assertEquals(javaSkill.getId(), dto.id());
-      assertEquals(javaSkill.getName(), dto.name());
-      assertEquals(2, dto.levelCount()); // Il y a 2 SkillLevelProgress pour ce skill
-
-      skillLevelViewMapperMock.verify(() -> SkillLevelViewMapper.fromDomainToDto(progress2));
-    }
+    BddLogger.then("it should return a correct SkillDTO");
+    assertNotNull(dto);
+    assertEquals(javaSkill.getId(), dto.id());
+    assertEquals(javaSkill.getName(), dto.name());
+    assertEquals(2, dto.levelCount()); // Il y a 2 SkillLevelProgress pour ce skill
   }
 
   @Test
@@ -89,7 +84,7 @@ class SkillMapperTest {
 
     BddLogger.when(
         "mapping a domain SkillLevelProgress without last achieved skill level to SkillDTO");
-    SkillDTO dto = SkillMapper.fromDomainToDto(pythonProgress, studentProgress);
+    SkillDTO dto = mapper.fromDomainToDto(pythonProgress, studentProgress);
 
     BddLogger.then("it should handle no last achieved skill level");
     assertNotNull(dto);
@@ -122,8 +117,8 @@ class SkillMapperTest {
             .toModel();
 
     BddLogger.when("mapping a domain SkillLevelProgress with end dates to SkillDTO");
-    SkillDTO finishedDto = SkillMapper.fromDomainToDto(progress, finishedProgress);
-    SkillDTO ongoingDto = SkillMapper.fromDomainToDto(progress, ongoingProgress);
+    SkillDTO finishedDto = mapper.fromDomainToDto(progress, finishedProgress);
+    SkillDTO ongoingDto = mapper.fromDomainToDto(progress, ongoingProgress);
 
     BddLogger.then("it should set IsProgramFinished based on end date");
     assertTrue(finishedDto.isProgramFinished(), "Program should be marked as finished");

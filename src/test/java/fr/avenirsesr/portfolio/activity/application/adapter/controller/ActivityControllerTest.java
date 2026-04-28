@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityOverviewDTO;
+import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
@@ -34,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 class ActivityControllerTest {
 
   @Mock private ActivityService activityService;
+  @Mock private ActivityOverviewDtoMapper activityOverviewDtoMapper;
 
   @InjectMocks private ActivityController controller;
 
@@ -63,6 +65,16 @@ class ActivityControllerTest {
         new PagedResult<>(List.of(data), pageInfo);
 
     when(activityService.activitiesView(eq(null), any(PageCriteria.class))).thenReturn(pagedResult);
+    when(activityOverviewDtoMapper.toDTO(data))
+        .thenReturn(
+            new ActivityOverviewDTO(
+                activity.getId(),
+                null,
+                null,
+                EDeclaredActivityStatus.SUBSCRIBED,
+                null,
+                null,
+                false));
 
     BddLogger.when("getting activities view without thematic");
     ResponseEntity<PagedResponse<ActivityOverviewDTO>> response =
@@ -94,6 +106,8 @@ class ActivityControllerTest {
 
     when(activityService.activitiesView(eq(EActivityThematic.EXPERIENCES), any(PageCriteria.class)))
         .thenReturn(pagedResult);
+    when(activityOverviewDtoMapper.toDTO(data))
+        .thenReturn(new ActivityOverviewDTO(activity.getId(), null, null, null, null, null, false));
 
     BddLogger.when("getting activities view with thematic");
     var response = controller.getActivitiesView(principal, 0, 10, EActivityThematic.EXPERIENCES);
@@ -146,6 +160,8 @@ class ActivityControllerTest {
         new PagedResult<>(List.of(data), pageInfo);
 
     when(activityService.latestActivitiesView(any(PageCriteria.class))).thenReturn(pagedResult);
+    when(activityOverviewDtoMapper.toDTO(data))
+        .thenReturn(new ActivityOverviewDTO(activity.getId(), null, null, null, null, null, false));
 
     BddLogger.when("getting latest activities view");
     var response = controller.getLatestActivitiesView(principal, 0, 10);
@@ -175,6 +191,8 @@ class ActivityControllerTest {
         new PagedResult<>(List.of(data), pageInfo);
 
     when(activityService.latestActivitiesView(any(PageCriteria.class))).thenReturn(pagedResult);
+    when(activityOverviewDtoMapper.toDTO(data))
+        .thenReturn(new ActivityOverviewDTO(activity.getId(), null, null, null, null, null, false));
 
     BddLogger.when("getting latest activities view");
     var response = controller.getLatestActivitiesView(principal, 0, 10);
@@ -208,6 +226,11 @@ class ActivityControllerTest {
     PagedResult<ActivityWithStudentStatusData> pagedResult = new PagedResult<>(dataList, pageInfo);
 
     when(activityService.latestActivitiesView(any(PageCriteria.class))).thenReturn(pagedResult);
+    when(activityOverviewDtoMapper.toDTO(dataList.get(0)))
+        .thenReturn(new ActivityOverviewDTO(activity.getId(), null, null, null, null, null, false));
+    when(activityOverviewDtoMapper.toDTO(dataList.get(1)))
+        .thenReturn(
+            new ActivityOverviewDTO(activity2.getId(), null, null, null, null, null, false));
 
     BddLogger.when("getting latest activities view");
     var response = controller.getLatestActivitiesView(principal, 0, 10);

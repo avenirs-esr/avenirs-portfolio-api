@@ -2,12 +2,13 @@ package fr.avenirsesr.portfolio.student.progress.imported.application.adapter.ma
 
 import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto.SkillLevelProgressOverviewDTO;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
+@Mapper(componentModel = "spring")
 public interface SkillLevelProgressOverviewMapper {
-  static SkillLevelProgressOverviewDTO fromDomainToDto(SkillLevelProgress skillLevelProgress) {
-    return new SkillLevelProgressOverviewDTO(
-        skillLevelProgress.getSkillLevel().getId(),
-        skillLevelProgress.getSkillLevel().getName(),
-        skillLevelProgress.getStatus());
-  }
+
+  @Mapping(source = "skillLevel.id", target = "id")
+  @Mapping(source = "skillLevel.name", target = "name")
+  SkillLevelProgressOverviewDTO fromDomainToDto(SkillLevelProgress skillLevelProgress);
 }
