@@ -4,10 +4,13 @@ import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto
 import fr.avenirsesr.portfolio.student.progress.imported.application.adapter.dto.SkillOverviewDTO;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = SkillLevelProgressOverviewMapper.class)
 public interface SkillOverviewMapper {
 
+  @Mapping(source = "skillLevel.id", target = "id")
+  @Mapping(source = "skillLevel.name", target = "name")
   SkillLevelProgressOverviewDTO toSkillLevelProgressOverview(SkillLevelProgress skillLevelProgress);
 
   default SkillOverviewDTO fromDomainToDto(SkillLevelProgress skillLevelProgress) {
