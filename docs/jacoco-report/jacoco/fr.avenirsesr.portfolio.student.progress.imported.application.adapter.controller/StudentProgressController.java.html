@@ -22,32 +22,35 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(&quot;/me/student-progress&quot;)
 public class StudentProgressController {
   private final StudentProgressService studentProgressService;
+  private final StudentProgressMapper studentProgressMapper;
+  private final StudentProgressOverviewMapper studentProgressOverviewMapper;
+  private final StudentProgressViewMapper studentProgressViewMapper;
 
   @GetMapping
   public List&lt;StudentProgressDTO&gt; getAllStudentProgress() {
-<span class="fc" id="L28">    return studentProgressService.getAllCurrentStudentProgress().stream()</span>
-<span class="fc" id="L29">        .map(StudentProgressMapper::toDto)</span>
-<span class="fc" id="L30">        .toList();</span>
+<span class="fc" id="L31">    return studentProgressService.getAllCurrentStudentProgress().stream()</span>
+<span class="fc" id="L32">        .map(studentProgressMapper::toDto)</span>
+<span class="fc" id="L33">        .toList();</span>
   }
 
   @GetMapping(&quot;/overview&quot;)
   public List&lt;StudentProgressOverviewDTO&gt; getStudentProgressOverview() {
-<span class="fc" id="L35">    return studentProgressService.getStudentProgressOverview().entrySet().stream()</span>
-<span class="fc" id="L36">        .map(</span>
+<span class="fc" id="L38">    return studentProgressService.getStudentProgressOverview().entrySet().stream()</span>
+<span class="fc" id="L39">        .map(</span>
             entry -&gt;
-<span class="fc" id="L38">                StudentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
-<span class="fc" id="L39">        .toList();</span>
+<span class="fc" id="L41">                studentProgressOverviewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="fc" id="L42">        .toList();</span>
   }
 
   @GetMapping(&quot;/view&quot;)
   public List&lt;StudentProgressViewDTO&gt; getStudentProgressView(
       @RequestParam(name = &quot;sort&quot;, required = false) String sortRaw) {
-<span class="fc" id="L45">    return studentProgressService</span>
-<span class="fc" id="L46">        .getStudentProgressView(SortCriteria.fromString(sortRaw))</span>
-<span class="fc" id="L47">        .entrySet()</span>
-<span class="fc" id="L48">        .stream()</span>
-<span class="fc" id="L49">        .map(entry -&gt; StudentProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
-<span class="fc" id="L50">        .toList();</span>
+<span class="fc" id="L48">    return studentProgressService</span>
+<span class="fc" id="L49">        .getStudentProgressView(SortCriteria.fromString(sortRaw))</span>
+<span class="fc" id="L50">        .entrySet()</span>
+<span class="fc" id="L51">        .stream()</span>
+<span class="fc" id="L52">        .map(entry -&gt; studentProgressViewMapper.fromDomainToDto(entry.getKey(), entry.getValue()))</span>
+<span class="fc" id="L53">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
