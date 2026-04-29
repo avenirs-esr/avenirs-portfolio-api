@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
@@ -23,7 +24,6 @@ import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +51,7 @@ class TraceAttachmentServiceImplTest {
   }
 
   @Test
-  void uploadTraceAttachment_shouldSaveNewAttachmentAndReturnIt() throws IOException {
+  void uploadTraceAttachment_shouldSaveNewAttachmentAndReturnIt() {
     BddLogger.given("a TraceAttachmentServiceImpl service");
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
@@ -95,7 +95,7 @@ class TraceAttachmentServiceImplTest {
   }
 
   @Test
-  void uploadTraceAttachment_noExistingAttachments_shouldVersionOne() throws IOException {
+  void uploadTraceAttachment_noExistingAttachments_shouldVersionOne() {
     BddLogger.given("a TraceAttachmentServiceImpl service");
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
@@ -119,7 +119,7 @@ class TraceAttachmentServiceImplTest {
   }
 
   @Test
-  void uploadTraceAttachment_shouldPropagateIOException() throws IOException {
+  void uploadTraceAttachment_shouldPropagateFileStorageException() {
     BddLogger.given("a TraceAttachmentServiceImpl service");
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
@@ -128,15 +128,15 @@ class TraceAttachmentServiceImplTest {
 
     BddLogger.when("uploading a trace attachment and a disk write error occurs");
     when(fileStorageService.upload(any(FileResource.class)))
-        .thenThrow(new IOException("Disk write error"));
+        .thenThrow(new FileStorageException("Disk write error", null));
 
-    BddLogger.then("it should throw an IOException and propagate it");
-    IOException thrown =
+    BddLogger.then("it should throw a FileStorageException and propagate it");
+    FileStorageException thrown =
         catchThrowableOfType(
             () ->
                 service.uploadTraceAttachment(
                     traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes()),
-            IOException.class);
+            FileStorageException.class);
 
     assertThat(thrown).isNotNull();
     assertThat(thrown).hasMessageContaining("Disk write error");
@@ -198,8 +198,7 @@ class TraceAttachmentServiceImplTest {
   }
 
   @Test
-  void uploadTraceAttachment_shouldPropagateIOException_andDeleteTraceWhenNoAttachments()
-      throws IOException {
+  void uploadTraceAttachment_shouldPropagateFileStorageException_andDeleteTraceWhenNoAttachments() {
     BddLogger.given("a TraceAttachmentServiceImpl service");
     UUID traceId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withId(traceId).withUser(student.getUser()).toModel();
@@ -208,19 +207,19 @@ class TraceAttachmentServiceImplTest {
     when(traceAttachmentRepository.findByTrace(trace)).thenReturn(List.of());
 
     when(fileStorageService.upload(any(FileResource.class)))
-        .thenThrow(new IOException("Disk write error"));
+        .thenThrow(new FileStorageException("Disk write error", null));
 
     BddLogger.when(
         "uploading a trace attachment and a disk write error occurs and the trace has no"
             + " attachments");
-    IOException thrown =
+    FileStorageException thrown =
         catchThrowableOfType(
             () ->
                 service.uploadTraceAttachment(
                     traceId, "file.txt", EFileType.TXT.getMimeType(), 1234L, "data".getBytes()),
-            IOException.class);
+            FileStorageException.class);
 
-    BddLogger.then("it should throw IOException and propagate it and delete the trace");
+    BddLogger.then("it should throw FileStorageException and propagate it and delete the trace");
     assertThat(thrown).isNotNull();
     assertThat(thrown).hasMessageContaining("Disk write error");
 
@@ -281,7 +280,7 @@ class TraceAttachmentServiceImplTest {
   }
 
   @Test
-  void downloadTraceAttachment_shouldReturnFileContent() throws IOException {
+  void downloadTraceAttachment_shouldReturnFileContent() {
     BddLogger.given("a TraceAttachmentServiceImpl service");
     UUID attachmentId = UUID.randomUUID();
     String expectedContent = "File content".repeat(100); // 1200 bytes
@@ -311,7 +310,7 @@ class TraceAttachmentServiceImplTest {
   }
 
   @Test
-  void downloadTraceAttachment_shouldPropagateIOException() throws IOException {
+  void downloadTraceAttachment_shouldPropagateFileStorageException() {
     BddLogger.given("a TraceAttachmentServiceImpl service");
     UUID attachmentId = UUID.randomUUID();
     Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
@@ -323,15 +322,15 @@ class TraceAttachmentServiceImplTest {
             .withUri("uri/to/file.txt")
             .toModel();
 
-    BddLogger.when("downloading a trace attachment and an IOException occurs");
+    BddLogger.when("downloading a trace attachment and a FileStorageException occurs");
     when(traceAttachmentRepository.findById(attachmentId))
         .thenReturn(java.util.Optional.of(attachment));
     when(fileStorageService.get("uri/to/file.txt"))
-        .thenThrow(new IOException("Attachment not found"));
+        .thenThrow(new FileStorageException("Attachment not found", null));
 
-    BddLogger.then("it should propagate the IOException");
+    BddLogger.then("it should propagate the FileStorageException");
     assertThatThrownBy(() -> service.downloadTraceAttachment(attachmentId))
-        .isInstanceOf(IOException.class)
+        .isInstanceOf(FileStorageException.class)
         .hasMessageContaining("Attachment not found");
     verify(traceAttachmentRepository).findById(attachmentId);
     verify(fileStorageService).get("uri/to/file.txt");

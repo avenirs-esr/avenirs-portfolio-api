@@ -15,7 +15,6 @@ import fr.avenirsesr.portfolio.file.domain.port.output.repository.ActivityBanner
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +46,7 @@ class ActivityResourceServiceImplTest {
   }
 
   @Test
-  void uploadBannerFor_shouldSaveNewBannerAndReturnIt() throws IOException {
+  void uploadBannerFor_shouldSaveNewBannerAndReturnIt() {
     var fileName = "banner.png";
     var mimeType = "image/png";
     long size = 1234L;
@@ -98,7 +97,7 @@ class ActivityResourceServiceImplTest {
   }
 
   @Test
-  void uploadBannerFor_shouldIncrementVersionAndDeactivateOldBanners() throws IOException {
+  void uploadBannerFor_shouldIncrementVersionAndDeactivateOldBanners() {
     var oldBanner =
         ActivityBanner.create(
             UUID.randomUUID(), "old.png", EFileType.PNG, 123, 1, "old-uri", user, activity);

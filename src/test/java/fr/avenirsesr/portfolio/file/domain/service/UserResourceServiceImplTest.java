@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.model.UserPhoto;
@@ -20,7 +21,6 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,7 +48,7 @@ public class UserResourceServiceImplTest {
   }
 
   @Test
-  void uploadPhoto_shouldSaveNewPhotoAndReturnIt() throws IOException {
+  void uploadPhoto_shouldSaveNewPhotoAndReturnIt() {
     BddLogger.given("a UserResourceServiceImpl service");
     var user = student.getUser();
     var category = EUserCategory.STUDENT;
@@ -135,7 +135,7 @@ public class UserResourceServiceImplTest {
   }
 
   @Test
-  void deletePhoto_shouldDeletePhotoSuccessfully() throws IOException {
+  void deletePhoto_shouldDeletePhotoSuccessfully() {
     BddLogger.given("a UserResourceServiceImpl service");
     var user = student.getUser();
     var photoId = UUID.fromString("3f102b67-acec-4328-ba4e-d7f1f0c42cbc");
@@ -202,7 +202,7 @@ public class UserResourceServiceImplTest {
   }
 
   @Test
-  void deletePhoto_shouldWrapIOExceptionInRuntimeException() throws IOException {
+  void deletePhoto_shouldPropagateFileStorageException() {
     BddLogger.given("a UserResourceServiceImpl service");
     var user = student.getUser();
     var photoId = UUID.randomUUID();
@@ -221,12 +221,14 @@ public class UserResourceServiceImplTest {
             EUserPhotoType.PROFILE);
     when(userPhotoRepository.findById(photoId)).thenReturn(Optional.of(photo));
 
-    BddLogger.when("and IO occurs");
-    doThrow(new IOException("IO error")).when(fileStorageService).delete(photo.getId());
+    BddLogger.when("and a FileStorageException occurs");
+    doThrow(new FileStorageException("IO error", null))
+        .when(fileStorageService)
+        .delete(photo.getId());
 
-    BddLogger.then("it should wrap an IOException in RuntimeException");
+    BddLogger.then("it should propagate the FileStorageException");
     org.junit.jupiter.api.Assertions.assertThrows(
-        RuntimeException.class, () -> service.deletePhoto(photoId));
+        FileStorageException.class, () -> service.deletePhoto(photoId));
     verify(userPhotoRepository).removeFromDatabase(photo);
   }
 }
