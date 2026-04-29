@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
@@ -25,14 +26,14 @@ public class FileStorageServiceMock implements FileStorageService {
   }
 
   @Override
-  public String upload(FileResource fileResource) throws IOException {
+  public String upload(FileResource fileResource) {
     log.debug(
         "Mocking upload of file resource {} and return placeholder file", fileResource.fileName());
     return placeholderPath(fileResource.fileType());
   }
 
   @Override
-  public byte[] get(String path) throws IOException {
+  public byte[] get(String path) {
     log.debug("Mocking get file resource {} return placeholder file", path);
     File file = new File(placeholderPath(EFileType.PNG));
 
@@ -40,11 +41,15 @@ public class FileStorageServiceMock implements FileStorageService {
       throw new FileNotFoundException();
     }
 
-    return java.nio.file.Files.readAllBytes(file.toPath());
+    try {
+      return java.nio.file.Files.readAllBytes(file.toPath());
+    } catch (IOException e) {
+      throw new FileStorageException("Failed to read placeholder file", e);
+    }
   }
 
   @Override
-  public void delete(UUID id) throws IOException {
+  public void delete(UUID id) {
     log.debug("Mocking delete file resource {}", id);
   }
 }

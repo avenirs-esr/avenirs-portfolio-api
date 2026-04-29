@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeeder
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.file.domain.model.UserPhoto;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.UserPhotoMapper;
@@ -17,7 +18,6 @@ import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -78,7 +78,7 @@ public class UserPhotoSeeder {
                 data.fileType().getMimeType(),
                 data.fileSize(),
                 null));
-      } catch (IOException e) {
+      } catch (FileStorageException e) {
         log.error("Error uploading user photo", e);
       }
     }

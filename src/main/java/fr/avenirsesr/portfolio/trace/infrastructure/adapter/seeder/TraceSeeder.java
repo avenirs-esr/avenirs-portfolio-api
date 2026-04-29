@@ -19,7 +19,6 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceAttachementCreationData;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceCreationData;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -88,16 +87,12 @@ public class TraceSeeder {
           data.attachements()
               .forEach(
                   attachment -> {
-                    try {
-                      traceAttachmentService.uploadTraceAttachment(
-                          trace.getId(),
-                          attachment.title(),
-                          attachment.fileType().getMimeType(),
-                          attachment.size(),
-                          null);
-                    } catch (IOException e) {
-                      throw new RuntimeException(e);
-                    }
+                    traceAttachmentService.uploadTraceAttachment(
+                        trace.getId(),
+                        attachment.title(),
+                        attachment.fileType().getMimeType(),
+                        attachment.size(),
+                        null);
                   });
         });
 

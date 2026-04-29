@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.AttachmentUploadDTOMapper;
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,22 +33,24 @@ public class TraceAttachmentController {
   public ResponseEntity<AttachmentUploadDTO> uploadAttachment(
       Principal principal,
       @Valid @PathVariable UUID traceId,
-      @RequestParam("file") MultipartFile file)
-      throws IOException {
+      @RequestParam("file") MultipartFile file) {
     log.debug(
         "Received attachment upload request from user [{}] for trace [{}]",
         principal.getName(),
         traceId);
-    var attachment =
-        service.uploadTraceAttachment(
-            traceId,
-            file.getOriginalFilename(),
-            file.getContentType(),
-            file.getSize(),
-            file.getBytes());
-
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(attachmentUploadDTOMapper.fromDomain(attachment));
+    try {
+      var attachment =
+          service.uploadTraceAttachment(
+              traceId,
+              file.getOriginalFilename(),
+              file.getContentType(),
+              file.getSize(),
+              file.getBytes());
+      return ResponseEntity.status(HttpStatus.CREATED)
+          .body(attachmentUploadDTOMapper.fromDomain(attachment));
+    } catch (IOException e) {
+      throw new FileStorageException("Failed to read uploaded file", e);
+    }
   }
 
   @GetMapping("/attachments/{attachmentId}")
@@ -65,8 +68,7 @@ public class TraceAttachmentController {
                     schema = @Schema(type = "string", format = "binary"))),
         @ApiResponse(responseCode = "404", description = "Attachment not found")
       })
-  public ResponseEntity<byte[]> downloadAttachment(@Valid @PathVariable UUID attachmentId)
-      throws IOException {
+  public ResponseEntity<byte[]> downloadAttachment(@Valid @PathVariable UUID attachmentId) {
     log.debug("Received attachment download request for attachment [{}]", attachmentId);
     var attachment = service.downloadTraceAttachment(attachmentId);
     return ResponseEntity.ok()

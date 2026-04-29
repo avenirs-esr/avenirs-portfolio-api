@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.model.UserPhoto;
-import java.io.IOException;
 import java.util.UUID;
 
 public interface UserResourceService {
@@ -13,7 +12,7 @@ public interface UserResourceService {
 
   UserPhoto getUserPhotoById(UUID fileId);
 
-  byte[] fetchContent(UserPhoto userPhoto) throws IOException;
+  byte[] fetchContent(UserPhoto userPhoto);
 
   UserPhoto uploadPhoto(
       EUserCategory category,
@@ -21,8 +20,7 @@ public interface UserResourceService {
       String fileName,
       String mimeType,
       long size,
-      byte[] content)
-      throws IOException;
+      byte[] content);
 
   void deletePhoto(UUID fileId);
 }
