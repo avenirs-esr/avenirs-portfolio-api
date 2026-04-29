@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class FileStorageServiceImpl implements FileStorageService {
 
   @Override
-  public String upload(FileResource fileResource) throws IOException {
+  public String upload(FileResource fileResource) {
     String uploadDir = System.getProperty("user.dir") + FileStorageConstants.STORAGE_PATH;
 
     File dir = new File(uploadDir);
@@ -29,6 +30,8 @@ public class FileStorageServiceImpl implements FileStorageService {
     String filePath = String.join("", uploadDir, "/", fileName);
     try (FileOutputStream fos = new FileOutputStream(filePath)) {
       fos.write(fileResource.content());
+    } catch (IOException e) {
+      throw new FileStorageException("Failed to upload file " + fileResource.fileName(), e);
     }
 
     log.info("File {} has been uploaded as {}", fileResource.fileName(), fileName);
@@ -36,18 +39,22 @@ public class FileStorageServiceImpl implements FileStorageService {
   }
 
   @Override
-  public byte[] get(String path) throws IOException {
+  public byte[] get(String path) {
     File file = new File(path);
 
     if (!file.exists()) {
       throw new FileNotFoundException();
     }
 
-    return java.nio.file.Files.readAllBytes(file.toPath());
+    try {
+      return java.nio.file.Files.readAllBytes(file.toPath());
+    } catch (IOException e) {
+      throw new FileStorageException("Failed to read file at path " + path, e);
+    }
   }
 
   @Override
-  public void delete(UUID id) throws IOException {
+  public void delete(UUID id) {
     String uploadDir = System.getProperty("user.dir") + FileStorageConstants.STORAGE_PATH;
 
     File dir = new File(uploadDir);
@@ -62,10 +69,9 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     File fileToDelete = matchingFiles[0];
-    if (fileToDelete.delete()) {
-      log.info("File with id {} has been deleted", id);
-    } else {
-      throw new IOException("Failed to delete file with id " + id);
+    if (!fileToDelete.delete()) {
+      throw new FileStorageException("Failed to delete file with id " + id, null);
     }
+    log.info("File with id {} has been deleted", id);
   }
 }

@@ -15,7 +15,6 @@ import fr.avenirsesr.portfolio.trace.domain.exception.InvalidTraceTypeException;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -32,8 +31,7 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
 
   @Override
   public TraceAttachment uploadTraceAttachment(
-      UUID traceId, String fileName, String mimeType, long size, byte[] content)
-      throws IOException {
+      UUID traceId, String fileName, String mimeType, long size, byte[] content) {
     Student loggedInStudent = loggedInUserService.getLoggedInStudent();
     var trace = traceService.getTraceById(traceId);
 
@@ -98,7 +96,7 @@ public class TraceAttachmentServiceImpl implements TraceAttachmentService {
   }
 
   @Override
-  public TraceAttachmentDownload downloadTraceAttachment(UUID attachmentId) throws IOException {
+  public TraceAttachmentDownload downloadTraceAttachment(UUID attachmentId) {
     var attachment = traceAttachmentRepository.findById(attachmentId);
     if (attachment.isEmpty()) {
       throw new AttachmentNotFoundException(attachmentId);

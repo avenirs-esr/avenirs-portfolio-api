@@ -18,7 +18,6 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig
 import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -93,16 +92,12 @@ public class ActivitySeeder {
                   data.description(),
                   data.executionPeriodInfo(),
                   data.executionPeriodInfoSummary().orElse(null));
-          try {
-            activityResourceService.uploadBannerFor(
-                activity,
-                data.banner().fileName(),
-                data.banner().fileType().getMimeType(),
-                data.banner().fileSize(),
-                null);
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
+          activityResourceService.uploadBannerFor(
+              activity,
+              data.banner().fileName(),
+              data.banner().fileType().getMimeType(),
+              data.banner().fileSize(),
+              null);
           activities.add(activity);
         });
 

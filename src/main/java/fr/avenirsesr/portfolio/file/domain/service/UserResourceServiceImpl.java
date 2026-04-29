@@ -16,7 +16,6 @@ import fr.avenirsesr.portfolio.file.domain.port.output.repository.UserPhotoRepos
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,7 +52,7 @@ public class UserResourceServiceImpl implements UserResourceService {
   }
 
   @Override
-  public byte[] fetchContent(UserPhoto userPhoto) throws IOException {
+  public byte[] fetchContent(UserPhoto userPhoto) {
     return fileStorageService.get(userPhoto.getUri());
   }
 
@@ -69,8 +68,7 @@ public class UserResourceServiceImpl implements UserResourceService {
       String fileName,
       String mimeType,
       long size,
-      byte[] content)
-      throws IOException {
+      byte[] content) {
     var loggedInUser = loggedInUserService.getLoggedInUser();
 
     var fileResource =
@@ -126,12 +124,8 @@ public class UserResourceServiceImpl implements UserResourceService {
       throw new UserNotAuthorizedException();
     }
 
-    try {
-      userPhotoRepository.removeFromDatabase(fileResource);
-      fileStorageService.delete(fileResource.getId());
-      log.info("User photo deleted: {}", fileResource);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    userPhotoRepository.removeFromDatabase(fileResource);
+    fileStorageService.delete(fileResource.getId());
+    log.info("User photo deleted: {}", fileResource);
   }
 }

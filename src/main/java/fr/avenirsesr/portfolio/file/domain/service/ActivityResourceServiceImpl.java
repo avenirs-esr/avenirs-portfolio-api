@@ -11,7 +11,6 @@ import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.ActivityBannerRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -29,8 +28,7 @@ public class ActivityResourceServiceImpl implements ActivityResourceService {
 
   @Override
   public ActivityBanner uploadBannerFor(
-      Activity activity, String fileName, String mimeType, long size, byte[] content)
-      throws IOException {
+      Activity activity, String fileName, String mimeType, long size, byte[] content) {
     var loggedInUser = loggedInUserService.getLoggedInUser();
 
     var fileResource =
@@ -73,7 +71,7 @@ public class ActivityResourceServiceImpl implements ActivityResourceService {
   }
 
   @Override
-  public byte[] fetchContent(ActivityBanner activityFile) throws IOException {
+  public byte[] fetchContent(ActivityBanner activityFile) {
     return fileStorageService.get(activityFile.getUri());
   }
 

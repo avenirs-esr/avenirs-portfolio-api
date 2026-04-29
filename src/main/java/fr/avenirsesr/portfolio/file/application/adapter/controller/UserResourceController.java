@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.file.application.adapter.controller;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.UserPhotoUploadDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.UserPhotoUploadDTOMapper;
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,18 +46,21 @@ public class UserResourceController {
               schema = @Schema(ref = "#/components/schemas/EUserPhotoType"))
           @PathVariable
           EUserPhotoType photoType,
-      @RequestParam("file") MultipartFile file)
-      throws IOException {
+      @RequestParam("file") MultipartFile file) {
     log.debug("Received request to upload profile picture of user [{}]", principal.getName());
-    var userPhoto =
-        userResourceService.uploadPhoto(
-            userCategory,
-            photoType,
-            file.getOriginalFilename(),
-            file.getContentType(),
-            file.getSize(),
-            file.getBytes());
-    return ResponseEntity.ok(userPhotoUploadDTOMapper.fromDomain(userPhoto));
+    try {
+      var userPhoto =
+          userResourceService.uploadPhoto(
+              userCategory,
+              photoType,
+              file.getOriginalFilename(),
+              file.getContentType(),
+              file.getSize(),
+              file.getBytes());
+      return ResponseEntity.ok(userPhotoUploadDTOMapper.fromDomain(userPhoto));
+    } catch (IOException e) {
+      throw new FileStorageException("Failed to read uploaded file", e);
+    }
   }
 
   @DeleteMapping(path = "/{fileId}")

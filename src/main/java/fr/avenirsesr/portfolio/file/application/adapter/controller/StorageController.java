@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +31,8 @@ public class StorageController {
   private final FileStorageService fileStorageService;
 
   @GetMapping("/users/{fileId}")
-  public ResponseEntity<ByteArrayResource> getUserResourceByFileId(@Valid @PathVariable UUID fileId)
-      throws IOException {
+  public ResponseEntity<ByteArrayResource> getUserResourceByFileId(
+      @Valid @PathVariable UUID fileId) {
     log.debug("Received request to get user photo id [{}]", fileId);
     var userPhoto = userResourceService.getUserPhotoById(fileId);
     byte[] photo = userResourceService.fetchContent(userPhoto);
@@ -52,8 +51,7 @@ public class StorageController {
               required = true,
               schema = @Schema(ref = "#/components/schemas/EUserPhotoType"))
           @PathVariable
-          EUserPhotoType photoType)
-      throws IOException {
+          EUserPhotoType photoType) {
     log.debug("Received request to get default {} photo", photoType);
     byte[] photo =
         fileStorageService.get(
@@ -75,7 +73,7 @@ public class StorageController {
 
   @GetMapping("/activities/{fileId}")
   public ResponseEntity<ByteArrayResource> getActivityResourceByFileId(
-      @Valid @PathVariable UUID fileId) throws IOException {
+      @Valid @PathVariable UUID fileId) {
     log.debug("Received request to get activity file id [{}]", fileId);
     var activityFile = activityResourceService.getActivityFile(fileId);
     byte[] photo = activityResourceService.fetchContent(activityFile);
