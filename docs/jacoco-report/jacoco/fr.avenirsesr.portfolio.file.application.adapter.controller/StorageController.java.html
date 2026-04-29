@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-<span class="fc" id="L25">@Slf4j</span>
+<span class="fc" id="L24">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/storage&quot;)
@@ -32,15 +31,15 @@ public class StorageController {
   private final FileStorageService fileStorageService;
 
   @GetMapping(&quot;/users/{fileId}&quot;)
-  public ResponseEntity&lt;ByteArrayResource&gt; getUserResourceByFileId(@Valid @PathVariable UUID fileId)
-      throws IOException {
-<span class="nc" id="L37">    log.debug(&quot;Received request to get user photo id [{}]&quot;, fileId);</span>
-<span class="nc" id="L38">    var userPhoto = userResourceService.getUserPhotoById(fileId);</span>
-<span class="nc" id="L39">    byte[] photo = userResourceService.fetchContent(userPhoto);</span>
+  public ResponseEntity&lt;ByteArrayResource&gt; getUserResourceByFileId(
+      @Valid @PathVariable UUID fileId) {
+<span class="nc" id="L36">    log.debug(&quot;Received request to get user photo id [{}]&quot;, fileId);</span>
+<span class="nc" id="L37">    var userPhoto = userResourceService.getUserPhotoById(fileId);</span>
+<span class="nc" id="L38">    byte[] photo = userResourceService.fetchContent(userPhoto);</span>
 
-<span class="nc" id="L41">    return ResponseEntity.ok()</span>
-<span class="nc" id="L42">        .contentType(MediaType.asMediaType(MimeType.valueOf(userPhoto.getFileType().getMimeType())))</span>
-<span class="nc" id="L43">        .body(new ByteArrayResource(photo));</span>
+<span class="nc" id="L40">    return ResponseEntity.ok()</span>
+<span class="nc" id="L41">        .contentType(MediaType.asMediaType(MimeType.valueOf(userPhoto.getFileType().getMimeType())))</span>
+<span class="nc" id="L42">        .body(new ByteArrayResource(photo));</span>
   }
 
   @GetMapping(&quot;/users/default/{photoType}&quot;)
@@ -52,37 +51,36 @@ public class StorageController {
               required = true,
               schema = @Schema(ref = &quot;#/components/schemas/EUserPhotoType&quot;))
           @PathVariable
-          EUserPhotoType photoType)
-      throws IOException {
-<span class="fc" id="L57">    log.debug(&quot;Received request to get default {} photo&quot;, photoType);</span>
-<span class="fc" id="L58">    byte[] photo =</span>
-<span class="fc" id="L59">        fileStorageService.get(</span>
-<span class="fc bfc" id="L60" title="All 2 branches covered.">            switch (photoType) {</span>
-<span class="fc" id="L61">              case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_PATH;</span>
-<span class="fc" id="L62">              case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_PATH;</span>
+          EUserPhotoType photoType) {
+<span class="fc" id="L55">    log.debug(&quot;Received request to get default {} photo&quot;, photoType);</span>
+<span class="fc" id="L56">    byte[] photo =</span>
+<span class="fc" id="L57">        fileStorageService.get(</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">            switch (photoType) {</span>
+<span class="fc" id="L59">              case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_PATH;</span>
+<span class="fc" id="L60">              case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_PATH;</span>
             });
 
-<span class="fc" id="L65">    var fileType =</span>
-<span class="fc bfc" id="L66" title="All 2 branches covered.">        switch (photoType) {</span>
-<span class="fc" id="L67">          case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_FILE_TYPE;</span>
-<span class="fc" id="L68">          case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_FILE_TYPE;</span>
+<span class="fc" id="L63">    var fileType =</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        switch (photoType) {</span>
+<span class="fc" id="L65">          case PROFILE -&gt; FileStorageConstants.USER_PROFILE_DEFAULT_FILE_TYPE;</span>
+<span class="fc" id="L66">          case COVER -&gt; FileStorageConstants.USER_COVER_DEFAULT_FILE_TYPE;</span>
         };
 
-<span class="fc" id="L71">    return ResponseEntity.ok()</span>
-<span class="fc" id="L72">        .contentType(MediaType.asMediaType(MimeType.valueOf(fileType.getMimeType())))</span>
-<span class="fc" id="L73">        .body(new ByteArrayResource(photo));</span>
+<span class="fc" id="L69">    return ResponseEntity.ok()</span>
+<span class="fc" id="L70">        .contentType(MediaType.asMediaType(MimeType.valueOf(fileType.getMimeType())))</span>
+<span class="fc" id="L71">        .body(new ByteArrayResource(photo));</span>
   }
 
   @GetMapping(&quot;/activities/{fileId}&quot;)
   public ResponseEntity&lt;ByteArrayResource&gt; getActivityResourceByFileId(
-      @Valid @PathVariable UUID fileId) throws IOException {
-<span class="nc" id="L79">    log.debug(&quot;Received request to get activity file id [{}]&quot;, fileId);</span>
-<span class="nc" id="L80">    var activityFile = activityResourceService.getActivityFile(fileId);</span>
-<span class="nc" id="L81">    byte[] photo = activityResourceService.fetchContent(activityFile);</span>
-<span class="nc" id="L82">    return ResponseEntity.ok()</span>
-<span class="nc" id="L83">        .contentType(</span>
-<span class="nc" id="L84">            MediaType.asMediaType(MimeType.valueOf(activityFile.getFileType().getMimeType())))</span>
-<span class="nc" id="L85">        .body(new ByteArrayResource(photo));</span>
+      @Valid @PathVariable UUID fileId) {
+<span class="nc" id="L77">    log.debug(&quot;Received request to get activity file id [{}]&quot;, fileId);</span>
+<span class="nc" id="L78">    var activityFile = activityResourceService.getActivityFile(fileId);</span>
+<span class="nc" id="L79">    byte[] photo = activityResourceService.fetchContent(activityFile);</span>
+<span class="nc" id="L80">    return ResponseEntity.ok()</span>
+<span class="nc" id="L81">        .contentType(</span>
+<span class="nc" id="L82">            MediaType.asMediaType(MimeType.valueOf(activityFile.getFileType().getMimeType())))</span>
+<span class="nc" id="L83">        .body(new ByteArrayResource(photo));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
