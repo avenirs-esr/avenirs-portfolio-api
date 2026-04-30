@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGene
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillTranslationEntity;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +26,7 @@ public class FakeSkill {
   }
 
   public static FakeSkill of(List<SkillLevelEntity> skillLevels) {
-    var entity = SkillEntity.of(dataGenerator.with("id").uuid());
+    var entity = SkillEntity.of(dataGenerator.with("id").uuid(), Instant.now(), Instant.now());
 
     skillLevels.forEach(skillLevel -> skillLevel.setSkill(entity));
 

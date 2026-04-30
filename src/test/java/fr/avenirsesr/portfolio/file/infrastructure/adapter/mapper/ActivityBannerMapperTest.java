@@ -106,10 +106,9 @@ class ActivityBannerMapperTest {
             activeVersion,
             uri,
             UserMapper.INSTANCE.fromDomain(user),
-            uploadedAt);
-
-    entity.setCreatedAt(createdAt);
-    entity.setUpdatedAt(updatedAt);
+            uploadedAt,
+            createdAt,
+            updatedAt);
 
     BddLogger.when("mapping an ActivityBannerEntity to domain ActivityBanner");
     ActivityBanner mapped = ActivityBannerMapper.INSTANCE.toDomain(entity);

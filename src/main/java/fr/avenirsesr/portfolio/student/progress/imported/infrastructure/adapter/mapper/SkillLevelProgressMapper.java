@@ -19,7 +19,9 @@ public class SkillLevelProgressMapper
         SkillLevelMapper.INSTANCE.fromDomain(skillLevelProgress.getSkillLevel()),
         skillLevelProgress.getStatus(),
         skillLevelProgress.getStartDate(),
-        skillLevelProgress.getEndDate());
+        skillLevelProgress.getEndDate(),
+        skillLevelProgress.getCreatedAt(),
+        skillLevelProgress.getUpdatedAt());
   }
 
   @Override

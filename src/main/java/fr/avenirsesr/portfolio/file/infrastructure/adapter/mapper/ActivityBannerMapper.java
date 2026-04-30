@@ -22,7 +22,9 @@ public class ActivityBannerMapper implements Mapper<ActivityBannerEntity, Activi
         domain.isActiveVersion(),
         domain.getUri(),
         UserMapper.INSTANCE.fromDomain(domain.getUploadedBy()),
-        domain.getUploadedAt());
+        domain.getUploadedAt(),
+        domain.getCreatedAt(),
+        domain.getUpdatedAt());
   }
 
   @Override

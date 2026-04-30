@@ -44,8 +44,12 @@ public class ActivityBannerEntity extends FileEntity {
       boolean isActiveVersion,
       String uri,
       UserEntity uploadedBy,
-      Instant uploadedAt) {
+      Instant uploadedAt,
+      Instant createdAt,
+      Instant updatedAt) {
     this.setId(id);
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
     this.activity = activity;
     this.fileName = fileName;
     this.setFileType(fileType);
@@ -67,7 +71,9 @@ public class ActivityBannerEntity extends FileEntity {
       boolean isActiveVersion,
       String uri,
       UserEntity uploadedBy,
-      Instant uploadedAt) {
+      Instant uploadedAt,
+      Instant createdAt,
+      Instant updatedAt) {
     return new ActivityBannerEntity(
         id,
         activity,
@@ -78,6 +84,8 @@ public class ActivityBannerEntity extends FileEntity {
         isActiveVersion,
         uri,
         uploadedBy,
-        uploadedAt);
+        uploadedAt,
+        createdAt,
+        updatedAt);
   }
 }

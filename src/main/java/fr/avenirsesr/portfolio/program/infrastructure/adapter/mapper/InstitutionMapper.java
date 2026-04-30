@@ -11,7 +11,9 @@ public class InstitutionMapper implements Mapper<InstitutionEntity, Institution>
 
   @Override
   public InstitutionEntity fromDomain(Institution institution) {
-    var entity = InstitutionEntity.of(institution.getId());
+    var entity =
+        InstitutionEntity.of(
+            institution.getId(), institution.getCreatedAt(), institution.getUpdatedAt());
     TranslationUtil.addTranslation(
         institution,
         entity,

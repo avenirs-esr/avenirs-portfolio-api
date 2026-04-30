@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.declaredskill.domain.port.output.seeder.DeclaredS
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.model.DeclaredSkillEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,7 +37,9 @@ public class FakeDeclaredSkillProgress {
             student,
             randomSkill,
             dataGenerator.with("EDeclaredSkillLevel").pickIn(EDeclaredSkillLevel.class),
-            declaredSkillProgressGenerator.with("sentence").reflection()));
+            declaredSkillProgressGenerator.with("sentence").reflection(),
+            Instant.now(),
+            Instant.now()));
   }
 
   public DeclaredSkillProgressEntity toEntity() {

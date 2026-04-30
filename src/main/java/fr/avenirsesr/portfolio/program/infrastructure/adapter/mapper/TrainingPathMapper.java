@@ -13,10 +13,12 @@ public class TrainingPathMapper implements Mapper<TrainingPathEntity, TrainingPa
   @Override
   public TrainingPathEntity fromDomain(TrainingPath trainingPath) {
     var entity =
-        new TrainingPathEntity(
+        TrainingPathEntity.of(
             trainingPath.getId(),
             ProgramMapper.INSTANCE.fromDomain(trainingPath.getProgram()),
-            Set.of());
+            Set.of(),
+            trainingPath.getCreatedAt(),
+            trainingPath.getUpdatedAt());
 
     entity.setSkillLevels(
         trainingPath.getSkillLevels().stream()

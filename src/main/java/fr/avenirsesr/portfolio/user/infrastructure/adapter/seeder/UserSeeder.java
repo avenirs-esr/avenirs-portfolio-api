@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
+import fr.avenirsesr.portfolio.shared.domain.port.input.ClockService;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -25,6 +26,7 @@ public class UserSeeder {
   private static final String PATH_FILE = "seeder/users.json";
   private final FileReader fileReader;
   private final UserService userService;
+  private final ClockService clockService;
 
   @Value("${seeder.source}")
   private ESeederSource seederSource;

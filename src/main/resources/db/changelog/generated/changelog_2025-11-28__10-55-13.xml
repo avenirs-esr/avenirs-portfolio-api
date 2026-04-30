@@ -151,15 +151,15 @@
         <createIndex indexName="idx_trace_user_deleted_created" tableName="trace">
             <column name="user_id"/>
             <column name="deleted_at"/>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at"/>
+            <column name="created_at"/>
         </createIndex>
     </changeSet>
     <changeSet author="nathp (generated)" id="1764327325076-29">
         <createIndex indexName="idx_trace_user_deleted_updated" tableName="trace">
             <column name="user_id"/>
             <column name="deleted_at"/>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="updated_at"/>
-            <column defaultValueComputed="CURRENT_TIMESTAMP" name="created_at"/>
+            <column name="updated_at"/>
+            <column name="created_at"/>
         </createIndex>
     </changeSet>
     <changeSet author="nathp (generated)" id="1764327325076-30">

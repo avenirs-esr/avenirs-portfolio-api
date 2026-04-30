@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsB
 import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,7 +56,9 @@ public class ExternalUserEntity extends AvenirsBaseEntity {
       EUserCategory category,
       String email,
       String firstName,
-      String lastName) {
+      String lastName,
+      Instant createdAt,
+      Instant updatedAt) {
     this.setId(id);
     this.externalId = externalId;
     this.source = source;
@@ -64,6 +67,8 @@ public class ExternalUserEntity extends AvenirsBaseEntity {
     this.email = email;
     this.firstName = firstName;
     this.lastName = lastName;
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
   }
 
   public static ExternalUserEntity of(
@@ -74,8 +79,10 @@ public class ExternalUserEntity extends AvenirsBaseEntity {
       EUserCategory category,
       String email,
       String firstName,
-      String lastName) {
+      String lastName,
+      Instant createdAt,
+      Instant updatedAt) {
     return new ExternalUserEntity(
-        id, externalId, source, user, category, email, firstName, lastName);
+        id, externalId, source, user, category, email, firstName, lastName, createdAt, updatedAt);
   }
 }

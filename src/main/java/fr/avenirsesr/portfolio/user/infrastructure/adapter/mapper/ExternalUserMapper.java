@@ -17,7 +17,9 @@ public class ExternalUserMapper implements Mapper<ExternalUserEntity, ExternalUs
         externalUser.getCategory(),
         externalUser.getEmail(),
         externalUser.getFirstName(),
-        externalUser.getLastName());
+        externalUser.getLastName(),
+        externalUser.getCreatedAt(),
+        externalUser.getUpdatedAt());
   }
 
   @Override

@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.temporal.domain.model.enums.EDurationUnit;
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -46,12 +47,16 @@ public class ProgramEntity extends AvenirsBaseEntity {
       boolean isAPC,
       InstitutionEntity institution,
       EDurationUnit durationUnit,
-      int durationCount) {
+      int durationCount,
+      Instant createdAt,
+      Instant updatedAt) {
     this.setId(id);
     this.institution = institution;
     this.isAPC = isAPC;
     this.durationUnit = durationUnit;
     this.durationCount = durationCount;
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
   }
 
   public static ProgramEntity of(
@@ -59,7 +64,10 @@ public class ProgramEntity extends AvenirsBaseEntity {
       boolean isAPC,
       InstitutionEntity institution,
       EDurationUnit durationUnit,
-      Integer durationCount) {
-    return new ProgramEntity(id, isAPC, institution, durationUnit, durationCount);
+      Integer durationCount,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new ProgramEntity(
+        id, isAPC, institution, durationUnit, durationCount, createdAt, updatedAt);
   }
 }

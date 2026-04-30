@@ -13,7 +13,9 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
     return StudentEntity.of(
         UserMapper.INSTANCE.fromDomain(student.getUser()),
         student.getInstitutionEmail(),
-        student.getBio());
+        student.getBio(),
+        student.getCreatedAt(),
+        student.getUpdatedAt());
   }
 
   @Override

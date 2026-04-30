@@ -30,8 +30,8 @@ class DeclaredSkillTest {
     assertEquals(libelle, skill.getLibelle());
     assertEquals(type, skill.getType());
     assertEquals(pathSegments, skill.getPathSegments());
-    assertNotNull(skill.getCreatedAt());
-    assertNotNull(skill.getUpdatedAt());
+    assertNull(skill.getCreatedAt());
+    assertNull(skill.getUpdatedAt());
   }
 
   @Test
@@ -44,24 +44,6 @@ class DeclaredSkillTest {
     BddLogger.then("it should generate an ID automatically");
     assertNotNull(skill.getId());
     assertNotEquals(UUID.fromString("00000000-0000-0000-0000-000000000000"), skill.getId());
-  }
-
-  @Test
-  void shouldSetTimestampsOnCreation() {
-    BddLogger.given("valid declared skill data");
-    Instant beforeCreation = Instant.now();
-
-    BddLogger.when("creating a new DeclaredSkill");
-    DeclaredSkill skill = DeclaredSkill.create(id, libelle, type, pathSegments);
-
-    BddLogger.then("it should set createdAt and updatedAt to current time");
-    assertNotNull(skill.getCreatedAt());
-    assertNotNull(skill.getUpdatedAt());
-    assertTrue(
-        skill.getCreatedAt().isAfter(beforeCreation.minusSeconds(1)), "createdAt should be recent");
-    assertTrue(
-        skill.getUpdatedAt().isAfter(beforeCreation.minusSeconds(1)), "updatedAt should be recent");
-    assertEquals(skill.getCreatedAt(), skill.getUpdatedAt());
   }
 
   @Test

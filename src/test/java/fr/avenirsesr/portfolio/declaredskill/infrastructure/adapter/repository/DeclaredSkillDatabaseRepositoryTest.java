@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.DeclaredSkill;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.model.DeclaredSkillEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,7 +66,12 @@ class DeclaredSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     BddLogger.given("a saved DeclaredSkill");
     DeclaredSkillEntity entity =
         DeclaredSkillEntity.create(
-            UUID.randomUUID(), "Test Skill", EExternalSkillType.ROME4, List.of("Domain", "Issue"));
+            UUID.randomUUID(),
+            "Test Skill",
+            EExternalSkillType.ROME4,
+            List.of("Domain", "Issue"),
+            Instant.now(),
+            Instant.now());
     DeclaredSkillEntity savedEntity = jpaRepository.save(entity);
 
     BddLogger.when("finding by ID");
@@ -224,7 +230,8 @@ class DeclaredSkillDatabaseRepositoryTest extends ContainerConfigurationTest {
     EExternalSkillType type = EExternalSkillType.ROME4;
 
     DeclaredSkillEntity existingEntity =
-        DeclaredSkillEntity.create(id, "Existing Skill", type, List.of("A", "B"));
+        DeclaredSkillEntity.create(
+            id, "Existing Skill", type, List.of("A", "B"), Instant.now(), Instant.now());
     existingEntity = jpaRepository.save(existingEntity);
 
     BddLogger.when("calling saveOrGet with a domain object having the same id and type");

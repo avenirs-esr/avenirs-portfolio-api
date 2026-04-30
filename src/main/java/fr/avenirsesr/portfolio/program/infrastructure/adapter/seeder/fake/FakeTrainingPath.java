@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGen
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.TrainingPathEntity;
+import java.time.Instant;
 import java.util.Set;
 
 public class FakeTrainingPath {
@@ -18,7 +19,9 @@ public class FakeTrainingPath {
   }
 
   public static FakeTrainingPath of(ProgramEntity program, Set<SkillLevelEntity> skillLevels) {
-    var entity = TrainingPathEntity.of(dataGenerator.with("id").uuid(), program, skillLevels);
+    var entity =
+        TrainingPathEntity.of(
+            dataGenerator.with("id").uuid(), program, skillLevels, Instant.now(), Instant.now());
     return new FakeTrainingPath(entity);
   }
 

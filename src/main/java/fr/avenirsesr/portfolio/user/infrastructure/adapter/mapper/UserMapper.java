@@ -10,7 +10,13 @@ public class UserMapper implements Mapper<UserEntity, User> {
   @Override
   public UserEntity fromDomain(User user) {
     return user != null
-        ? UserEntity.of(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail())
+        ? UserEntity.of(
+            user.getId(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getEmail(),
+            user.getCreatedAt(),
+            user.getUpdatedAt())
         : null;
   }
 

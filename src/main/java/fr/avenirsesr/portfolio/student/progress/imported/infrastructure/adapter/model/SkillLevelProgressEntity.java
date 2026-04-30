@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -42,13 +43,17 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
       SkillLevelEntity skillLevelEntity,
       ESkillLevelStatus status,
       LocalDate startDate,
-      LocalDate endDate) {
+      LocalDate endDate,
+      Instant createdAt,
+      Instant updatedAt) {
     setId(id);
     this.student = student;
     this.skillLevel = skillLevelEntity;
     this.status = status;
     this.startDate = startDate;
     this.endDate = endDate;
+    setCreatedAt(createdAt);
+    setUpdatedAt(updatedAt);
   }
 
   public static SkillLevelProgressEntity of(
@@ -57,8 +62,11 @@ public class SkillLevelProgressEntity extends PeriodEntity<LocalDate> {
       SkillLevelEntity skillLevelEntity,
       ESkillLevelStatus status,
       LocalDate startDate,
-      LocalDate endDate) {
-    return new SkillLevelProgressEntity(id, student, skillLevelEntity, status, startDate, endDate);
+      LocalDate endDate,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new SkillLevelProgressEntity(
+        id, student, skillLevelEntity, status, startDate, endDate, createdAt, updatedAt);
   }
 
   @Override

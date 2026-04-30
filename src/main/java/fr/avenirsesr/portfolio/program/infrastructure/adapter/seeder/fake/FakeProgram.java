@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGene
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.ProgramTranslationEntity;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +37,9 @@ public class FakeProgram {
             true,
             institution,
             randomDurationUnit(),
-            dataGenerator.with("skill-count").number(1, 5));
+            dataGenerator.with("skill-count").number(1, 5),
+            Instant.now(),
+            Instant.now());
 
     entity.setTranslations(
         Set.of(

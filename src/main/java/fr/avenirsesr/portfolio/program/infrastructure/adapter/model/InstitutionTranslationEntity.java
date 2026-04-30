@@ -38,6 +38,8 @@ public class InstitutionTranslationEntity extends TranslationEntity {
     this.language = language;
     this.name = name;
     this.institution = institutionEntity;
+    this.setCreatedAt(institutionEntity.getCreatedAt());
+    this.setUpdatedAt(institutionEntity.getUpdatedAt());
   }
 
   public static InstitutionTranslationEntity of(

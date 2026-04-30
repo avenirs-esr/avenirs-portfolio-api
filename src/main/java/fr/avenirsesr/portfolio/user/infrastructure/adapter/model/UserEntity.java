@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,14 +25,28 @@ public class UserEntity extends AvenirsBaseEntity {
 
   @Email @Column private String email;
 
-  private UserEntity(UUID id, String firstName, String lastName, String email) {
+  private UserEntity(
+      UUID id,
+      String firstName,
+      String lastName,
+      String email,
+      Instant createdAt,
+      Instant updatedAt) {
     this.setId(id);
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
   }
 
-  public static UserEntity of(UUID id, String firstName, String lastName, String email) {
-    return new UserEntity(id, firstName, lastName, email);
+  public static UserEntity of(
+      UUID id,
+      String firstName,
+      String lastName,
+      String email,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new UserEntity(id, firstName, lastName, email, createdAt, updatedAt);
   }
 }

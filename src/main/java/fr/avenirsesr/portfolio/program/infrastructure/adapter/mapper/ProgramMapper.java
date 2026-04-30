@@ -17,7 +17,9 @@ public class ProgramMapper implements Mapper<ProgramEntity, Program> {
         program.isAPC(),
         InstitutionMapper.INSTANCE.fromDomain(program.getInstitution()),
         program.getDurationUnit().orElse(null),
-        program.getDurationCount().orElse(null));
+        program.getDurationCount().orElse(null),
+        program.getCreatedAt(),
+        program.getUpdatedAt());
   }
 
   @Override

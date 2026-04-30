@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,14 +29,23 @@ public class StaffEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "institution_email")
   private String institutionEmail;
 
-  private StaffEntity(UUID id, UserEntity user, String institutionEmail, String bio) {
+  private StaffEntity(
+      UUID id,
+      UserEntity user,
+      String institutionEmail,
+      String bio,
+      Instant createdAt,
+      Instant updatedAt) {
     setId(id);
     this.user = user;
     this.bio = bio;
     this.institutionEmail = institutionEmail;
+    setCreatedAt(createdAt);
+    setUpdatedAt(updatedAt);
   }
 
-  public static StaffEntity of(UserEntity user, String institutionEmail, String bio) {
-    return new StaffEntity(user.getId(), user, institutionEmail, bio);
+  public static StaffEntity of(
+      UserEntity user, String institutionEmail, String bio, Instant createdAt, Instant updatedAt) {
+    return new StaffEntity(user.getId(), user, institutionEmail, bio, createdAt, updatedAt);
   }
 }

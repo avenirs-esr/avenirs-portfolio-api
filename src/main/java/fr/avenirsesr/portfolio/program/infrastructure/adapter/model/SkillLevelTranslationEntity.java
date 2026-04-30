@@ -43,6 +43,8 @@ public class SkillLevelTranslationEntity extends TranslationEntity {
     this.name = name;
     this.description = description;
     this.skillLevel = skillLevelEntity;
+    this.setCreatedAt(skillLevelEntity.getCreatedAt());
+    this.setUpdatedAt(skillLevelEntity.getUpdatedAt());
   }
 
   public static SkillLevelTranslationEntity of(

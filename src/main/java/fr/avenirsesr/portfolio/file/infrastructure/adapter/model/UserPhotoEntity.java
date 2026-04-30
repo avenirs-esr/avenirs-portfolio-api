@@ -53,7 +53,9 @@ public class UserPhotoEntity extends FileEntity {
       boolean isActiveVersion,
       String uri,
       UserEntity uploadedBy,
-      Instant uploadedAt) {
+      Instant uploadedAt,
+      Instant createdAt,
+      Instant updatedAt) {
     this.setId(id);
     this.name = name;
     this.user = user;
@@ -66,6 +68,8 @@ public class UserPhotoEntity extends FileEntity {
     this.setUri(uri);
     this.setUploadedBy(uploadedBy);
     this.setUploadedAt(uploadedAt);
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
   }
 
   public static UserPhotoEntity of(
@@ -80,7 +84,9 @@ public class UserPhotoEntity extends FileEntity {
       boolean isActiveVersion,
       String uri,
       UserEntity uploadedBy,
-      Instant uploadedAt) {
+      Instant uploadedAt,
+      Instant createdAt,
+      Instant updatedAt) {
     return new UserPhotoEntity(
         id,
         name,
@@ -93,6 +99,8 @@ public class UserPhotoEntity extends FileEntity {
         isActiveVersion,
         uri,
         uploadedBy,
-        uploadedAt);
+        uploadedAt,
+        createdAt,
+        updatedAt);
   }
 }

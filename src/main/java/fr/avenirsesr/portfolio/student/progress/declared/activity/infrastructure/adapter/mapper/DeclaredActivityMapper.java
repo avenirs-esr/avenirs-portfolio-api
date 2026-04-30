@@ -20,7 +20,9 @@ public class DeclaredActivityMapper implements Mapper<DeclaredActivityEntity, De
         declaredActivity.getReflection(),
         declaredActivity.getStartDate(),
         declaredActivity.getEndDate(),
-        declaredActivity.getFinishedAt().orElse(null));
+        declaredActivity.getFinishedAt().orElse(null),
+        declaredActivity.getCreatedAt(),
+        declaredActivity.getUpdatedAt());
   }
 
   @Override

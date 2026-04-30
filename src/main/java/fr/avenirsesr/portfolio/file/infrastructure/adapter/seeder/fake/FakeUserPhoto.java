@@ -45,6 +45,8 @@ public class FakeUserPhoto {
                     FileStorageConstants.PLACEHOLDER_FILE_UUID,
                     fileType.name().toLowerCase()),
             user,
+            Instant.now(),
+            Instant.now(),
             Instant.now()));
   }
 

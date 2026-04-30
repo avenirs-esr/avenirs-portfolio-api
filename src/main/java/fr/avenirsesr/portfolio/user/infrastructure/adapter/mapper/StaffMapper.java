@@ -12,7 +12,9 @@ public class StaffMapper implements Mapper<StaffEntity, Staff> {
     return StaffEntity.of(
         UserMapper.INSTANCE.fromDomain(staff.getUser()),
         staff.getInstitutionEmail(),
-        staff.getBio());
+        staff.getBio(),
+        staff.getCreatedAt(),
+        staff.getUpdatedAt());
   }
 
   @Override

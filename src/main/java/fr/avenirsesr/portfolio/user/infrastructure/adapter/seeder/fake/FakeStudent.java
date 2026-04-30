@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.user.domain.port.output.seeder.StudentDataGenerat
 import fr.avenirsesr.portfolio.user.domain.port.output.seeder.UserDataGenerator;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import java.time.Instant;
 
 public class FakeStudent {
   private static final DataGeneratorProvider<StudentDataGenerator> studentDataGenerator =
@@ -24,7 +25,9 @@ public class FakeStudent {
         StudentEntity.of(
             user,
             userDataGenerator.with("student-email").email(),
-            studentDataGenerator.with("student-bio").studentDescription()));
+            studentDataGenerator.with("student-bio").studentDescription(),
+            Instant.now(),
+            Instant.now()));
   }
 
   public FakeStudent withBio(String bio) {

@@ -22,7 +22,9 @@ public class UserPhotoMapper implements Mapper<UserPhotoEntity, UserPhoto> {
         userPhoto.isActiveVersion(),
         userPhoto.getUri(),
         UserMapper.INSTANCE.fromDomain(userPhoto.getUploadedBy()),
-        userPhoto.getUploadedAt());
+        userPhoto.getUploadedAt(),
+        userPhoto.getCreatedAt(),
+        userPhoto.getUpdatedAt());
   }
 
   @Override

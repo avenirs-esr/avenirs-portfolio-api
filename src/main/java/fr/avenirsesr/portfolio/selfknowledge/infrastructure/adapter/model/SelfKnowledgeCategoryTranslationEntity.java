@@ -47,6 +47,8 @@ public class SelfKnowledgeCategoryTranslationEntity extends TranslationEntity {
     this.title = title;
     this.description = description;
     this.category = category;
+    this.setCreatedAt(category.getCreatedAt());
+    this.setUpdatedAt(category.getUpdatedAt());
   }
 
   public static SelfKnowledgeCategoryTranslationEntity of(

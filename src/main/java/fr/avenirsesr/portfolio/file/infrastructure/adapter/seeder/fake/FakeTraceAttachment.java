@@ -56,7 +56,9 @@ public class FakeTraceAttachment {
                     FileStorageConstants.PLACEHOLDER_FILE_UUID,
                     fileType.name().toLowerCase()),
             trace.getUser(),
-            trace.getCreatedAt()));
+            trace.getCreatedAt(),
+            trace.getCreatedAt(),
+            trace.getUpdatedAt()));
   }
 
   public FakeTraceAttachment withIsActiveVersion(boolean isActiveVersion) {

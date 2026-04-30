@@ -49,7 +49,6 @@ public class ActivityEntity extends AvenirsBaseEntity {
       String executionPeriodInfoSummary,
       Instant createdAt,
       Instant updatedAt) {
-
     this.setId(id);
     this.title = title;
     this.thematic = thematic;

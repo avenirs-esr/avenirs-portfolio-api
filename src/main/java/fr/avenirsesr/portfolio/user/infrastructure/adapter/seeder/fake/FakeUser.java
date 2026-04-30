@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenera
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.user.domain.port.output.seeder.UserDataGenerator;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import java.time.Instant;
 
 public class FakeUser {
   private static final DataGeneratorProvider<SharedDataGenerator> dataGenerator =
@@ -24,7 +25,9 @@ public class FakeUser {
             dataGenerator.with("id").uuid(),
             userDataGenerator.with("firstName").firstName(),
             userDataGenerator.with("lastName").lastName(),
-            userDataGenerator.with("email").email()));
+            userDataGenerator.with("email").email(),
+            Instant.now(),
+            Instant.now()));
   }
 
   public FakeUser withEmail(String email) {

@@ -41,7 +41,9 @@ public class TraceAttachmentEntity extends FileEntity {
       boolean isActiveVersion,
       String uri,
       UserEntity uploadedBy,
-      Instant uploadedAt) {
+      Instant uploadedAt,
+      Instant createdAt,
+      Instant updatedAt) {
     this.setId(id);
     this.trace = trace;
     this.name = name;
@@ -52,6 +54,8 @@ public class TraceAttachmentEntity extends FileEntity {
     this.setUri(uri);
     this.setUploadedBy(uploadedBy);
     this.setUploadedAt(uploadedAt);
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
   }
 
   public static TraceAttachmentEntity of(
@@ -64,8 +68,21 @@ public class TraceAttachmentEntity extends FileEntity {
       boolean isActiveVersion,
       String uri,
       UserEntity uploadedBy,
-      Instant uploadedAt) {
+      Instant uploadedAt,
+      Instant createdAt,
+      Instant updatedAt) {
     return new TraceAttachmentEntity(
-        id, trace, name, fileType, size, version, isActiveVersion, uri, uploadedBy, uploadedAt);
+        id,
+        trace,
+        name,
+        fileType,
+        size,
+        version,
+        isActiveVersion,
+        uri,
+        uploadedBy,
+        uploadedAt,
+        createdAt,
+        updatedAt);
   }
 }

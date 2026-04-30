@@ -5,15 +5,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.temporal.infrastructure.adapter.model.PeriodEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -65,8 +57,12 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       String reflection,
       LocalDate startDate,
       LocalDate endDate,
-      Instant finishedAt) {
+      Instant finishedAt,
+      Instant createdAt,
+      Instant updatedAt) {
     setId(id);
+    setCreatedAt(createdAt);
+    setUpdatedAt(updatedAt);
     this.student = student;
     this.activity = activity;
     this.startedAt = startedAt;
@@ -84,9 +80,20 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       String reflection,
       LocalDate startDate,
       LocalDate endDate,
-      Instant finishedAt) {
+      Instant finishedAt,
+      Instant createdAt,
+      Instant updatedAt) {
     return new DeclaredActivityEntity(
-        id, student, activity, startedAt, reflection, startDate, endDate, finishedAt);
+        id,
+        student,
+        activity,
+        startedAt,
+        reflection,
+        startDate,
+        endDate,
+        finishedAt,
+        createdAt,
+        updatedAt);
   }
 
   @Override

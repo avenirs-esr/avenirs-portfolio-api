@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.util.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,13 +34,16 @@ public class SkillLevelEntity extends AvenirsBaseEntity {
       fetch = FetchType.LAZY)
   private Set<SkillLevelTranslationEntity> translations = new HashSet<>();
 
-  private SkillLevelEntity(UUID id, SkillEntity skill) {
+  private SkillLevelEntity(UUID id, SkillEntity skill, Instant createdAt, Instant updatedAt) {
     setId(id);
     this.skill = skill;
+    setCreatedAt(createdAt);
+    setUpdatedAt(updatedAt);
   }
 
-  public static SkillLevelEntity of(UUID id, SkillEntity skillEntity) {
-    return new SkillLevelEntity(id, skillEntity);
+  public static SkillLevelEntity of(
+      UUID id, SkillEntity skillEntity, Instant createdAt, Instant updatedAt) {
+    return new SkillLevelEntity(id, skillEntity, createdAt, updatedAt);
   }
 
   @Override

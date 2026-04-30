@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -22,12 +23,14 @@ public class SkillEntity extends AvenirsBaseEntity {
       fetch = FetchType.LAZY)
   private Set<SkillTranslationEntity> translations = new HashSet<>();
 
-  public SkillEntity(UUID id) {
+  public SkillEntity(UUID id, Instant createdAt, Instant updatedAt) {
     this.setId(id);
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
   }
 
-  public static SkillEntity of(UUID id) {
-    return new SkillEntity(id);
+  public static SkillEntity of(UUID id, Instant createdAt, Instant updatedAt) {
+    return new SkillEntity(id, createdAt, updatedAt);
   }
 
   @Override

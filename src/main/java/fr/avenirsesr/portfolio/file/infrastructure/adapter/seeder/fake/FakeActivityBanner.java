@@ -41,6 +41,8 @@ public class FakeActivityBanner {
                     FileStorageConstants.PLACEHOLDER_FILE_UUID,
                     fileType.name().toLowerCase()),
             null,
+            Instant.now(),
+            Instant.now(),
             Instant.now()));
   }
 

@@ -9,6 +9,7 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,8 @@ class DeclaredSkillEntityTest {
     BddLogger.given("valid entity data");
 
     BddLogger.when("creating entity with of method");
-    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, pathSegments);
+    DeclaredSkillEntity entity =
+        DeclaredSkillEntity.of(id, libelle, type, pathSegments, Instant.now(), Instant.now());
 
     BddLogger.then("it should create an entity with all fields set");
     assertNotNull(entity);
@@ -78,7 +80,8 @@ class DeclaredSkillEntityTest {
     BddLogger.given("entity data with null pathSegments");
 
     BddLogger.when("creating entity with null pathSegments");
-    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, null);
+    DeclaredSkillEntity entity =
+        DeclaredSkillEntity.of(id, libelle, type, null, Instant.now(), Instant.now());
 
     BddLogger.then("it should convert null pathSegments to empty list");
     assertNotNull(entity);
@@ -95,7 +98,8 @@ class DeclaredSkillEntityTest {
     List<String> emptyPathSegments = List.of();
 
     BddLogger.when("creating entity with empty pathSegments");
-    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, emptyPathSegments);
+    DeclaredSkillEntity entity =
+        DeclaredSkillEntity.of(id, libelle, type, emptyPathSegments, Instant.now(), Instant.now());
 
     BddLogger.then("it should accept empty pathSegments");
     assertNotNull(entity);

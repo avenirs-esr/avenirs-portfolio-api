@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGen
 import fr.avenirsesr.portfolio.program.domain.port.output.seeder.ProgramDataGenerator;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionEntity;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionTranslationEntity;
+import java.time.Instant;
 import java.util.Set;
 
 public class FakeInstitution {
@@ -23,7 +24,8 @@ public class FakeInstitution {
   }
 
   public static FakeInstitution create() {
-    var entity = InstitutionEntity.of(dataGenerator.with("id").uuid());
+    var entity =
+        InstitutionEntity.of(dataGenerator.with("id").uuid(), Instant.now(), Instant.now());
     var fakeInstitution = new FakeInstitution(entity);
 
     entity.setTranslations(

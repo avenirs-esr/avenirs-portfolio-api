@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
 import fr.avenirsesr.portfolio.user.domain.port.output.seeder.UserDataGenerator;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.ExternalUserEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,7 +35,9 @@ public class FakeExternalUser {
             category,
             userDataGenerator.with("email").email(),
             user.getFirstName(),
-            user.getLastName()));
+            user.getLastName(),
+            Instant.now(),
+            Instant.now()));
   }
 
   public ExternalUserEntity toEntity() {

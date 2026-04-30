@@ -26,7 +26,8 @@ class DeclaredSkillMapperTest {
   @Test
   void shouldMapEntityToDomain() {
     BddLogger.given("an DeclaredSkillEntity");
-    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, pathSegments);
+    DeclaredSkillEntity entity =
+        DeclaredSkillEntity.of(id, libelle, type, pathSegments, createdAt, updatedAt);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 
@@ -63,7 +64,8 @@ class DeclaredSkillMapperTest {
   @Test
   void shouldMapEntityToDomainWithNullPathSegments() {
     BddLogger.given("an entity with null pathSegments");
-    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, null);
+    DeclaredSkillEntity entity =
+        DeclaredSkillEntity.of(id, libelle, type, null, createdAt, updatedAt);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 
@@ -100,7 +102,8 @@ class DeclaredSkillMapperTest {
   void shouldMapEntityToDomainWithEmptyPathSegments() {
     BddLogger.given("an entity with empty pathSegments");
     List<String> emptyPathSegments = List.of();
-    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, emptyPathSegments);
+    DeclaredSkillEntity entity =
+        DeclaredSkillEntity.of(id, libelle, type, emptyPathSegments, createdAt, updatedAt);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 
@@ -139,7 +142,8 @@ class DeclaredSkillMapperTest {
   void shouldMapMultipleSegmentsCorrectly() {
     BddLogger.given("an entity with multiple path segments");
     List<String> multipleSegments = List.of("A", "B", "C", "D", "E");
-    DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, type, multipleSegments);
+    DeclaredSkillEntity entity =
+        DeclaredSkillEntity.of(id, libelle, type, multipleSegments, createdAt, updatedAt);
     entity.setCreatedAt(createdAt);
     entity.setUpdatedAt(updatedAt);
 
@@ -164,7 +168,8 @@ class DeclaredSkillMapperTest {
 
     for (EExternalSkillType skillType : types) {
       BddLogger.when("mapping entity with type " + skillType);
-      DeclaredSkillEntity entity = DeclaredSkillEntity.of(id, libelle, skillType, pathSegments);
+      DeclaredSkillEntity entity =
+          DeclaredSkillEntity.of(id, libelle, skillType, pathSegments, createdAt, updatedAt);
       entity.setCreatedAt(createdAt);
       entity.setUpdatedAt(updatedAt);
 

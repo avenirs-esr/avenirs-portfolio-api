@@ -14,7 +14,11 @@ public class SelfKnowledgeCategoryMapper
   public SelfKnowledgeCategoryEntity fromDomain(SelfKnowledgeCategory category) {
     var entity =
         SelfKnowledgeCategoryEntity.of(
-            category.getId(), category.getType(), category.isMandatory());
+            category.getId(),
+            category.getType(),
+            category.isMandatory(),
+            category.getCreatedAt(),
+            category.getUpdatedAt());
 
     TranslationUtil.addTranslation(
         category,

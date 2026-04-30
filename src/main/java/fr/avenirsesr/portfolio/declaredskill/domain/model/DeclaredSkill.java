@@ -33,8 +33,7 @@ public class DeclaredSkill extends AvenirsBaseModel {
 
   public static DeclaredSkill create(
       UUID id, String libelle, EExternalSkillType type, List<String> pathSegments) {
-    Instant now = Instant.now();
-    return new DeclaredSkill(id, libelle, type, pathSegments, now, now);
+    return new DeclaredSkill(id, libelle, type, pathSegments, null, null);
   }
 
   public static DeclaredSkill toDomain(

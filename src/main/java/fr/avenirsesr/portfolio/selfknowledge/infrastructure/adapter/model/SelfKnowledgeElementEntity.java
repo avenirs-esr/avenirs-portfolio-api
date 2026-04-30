@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -51,13 +52,17 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
       String title,
       String description,
       Integer rating,
-      SelfKnowledgeCategoryEntity selfKnowledgeCategory) {
+      SelfKnowledgeCategoryEntity selfKnowledgeCategory,
+      Instant createdAt,
+      Instant updatedAt) {
     this.setId(id);
     this.student = student;
     this.title = title;
     this.description = description;
     this.rating = rating;
     this.selfKnowledgeCategory = selfKnowledgeCategory;
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
   }
 
   public static SelfKnowledgeElementEntity of(
@@ -66,8 +71,10 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
       String title,
       String description,
       Integer rating,
-      SelfKnowledgeCategoryEntity selfKnowledgeCategory) {
+      SelfKnowledgeCategoryEntity selfKnowledgeCategory,
+      Instant createdAt,
+      Instant updatedAt) {
     return new SelfKnowledgeElementEntity(
-        id, student, title, description, rating, selfKnowledgeCategory);
+        id, student, title, description, rating, selfKnowledgeCategory, createdAt, updatedAt);
   }
 }

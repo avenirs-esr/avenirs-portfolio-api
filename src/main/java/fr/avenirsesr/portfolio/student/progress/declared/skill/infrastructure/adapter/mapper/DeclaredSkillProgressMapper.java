@@ -13,12 +13,14 @@ public class DeclaredSkillProgressMapper
 
   @Override
   public DeclaredSkillProgressEntity fromDomain(DeclaredSkillProgress declaredSkillProgress) {
-    return DeclaredSkillProgressEntity.create(
+    return DeclaredSkillProgressEntity.of(
         declaredSkillProgress.getId(),
         StudentMapper.INSTANCE.fromDomain(declaredSkillProgress.getStudent()),
         DeclaredSkillMapper.INSTANCE.fromDomain(declaredSkillProgress.getSkill()),
         declaredSkillProgress.getLevel(),
-        declaredSkillProgress.getReflection());
+        declaredSkillProgress.getReflection(),
+        declaredSkillProgress.getCreatedAt(),
+        declaredSkillProgress.getUpdatedAt());
   }
 
   @Override

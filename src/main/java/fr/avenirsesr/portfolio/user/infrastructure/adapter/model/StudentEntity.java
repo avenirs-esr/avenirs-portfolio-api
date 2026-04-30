@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsB
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -35,14 +36,23 @@ public class StudentEntity extends AvenirsBaseEntity {
       inverseJoinColumns = @JoinColumn(name = "category_id"))
   private Set<SelfKnowledgeCategoryEntity> selfKnowledgeCategories = new HashSet<>();
 
-  private StudentEntity(UUID id, UserEntity user, String institutionEmail, String bio) {
+  private StudentEntity(
+      UUID id,
+      UserEntity user,
+      String institutionEmail,
+      String bio,
+      Instant createdAt,
+      Instant updatedAt) {
     setId(id);
     this.user = user;
     this.bio = bio;
     this.institutionEmail = institutionEmail;
+    setCreatedAt(createdAt);
+    setUpdatedAt(updatedAt);
   }
 
-  public static StudentEntity of(UserEntity user, String institutionEmail, String bio) {
-    return new StudentEntity(user.getId(), user, institutionEmail, bio);
+  public static StudentEntity of(
+      UserEntity user, String institutionEmail, String bio, Instant createdAt, Instant updatedAt) {
+    return new StudentEntity(user.getId(), user, institutionEmail, bio, createdAt, updatedAt);
   }
 }

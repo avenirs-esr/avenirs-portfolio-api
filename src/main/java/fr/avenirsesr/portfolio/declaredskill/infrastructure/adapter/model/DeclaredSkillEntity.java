@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsB
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.converter.PathSegmentsConverter;
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -31,21 +32,38 @@ public class DeclaredSkillEntity extends AvenirsBaseEntity {
   private List<String> pathSegments;
 
   private DeclaredSkillEntity(
-      UUID id, String libelle, EExternalSkillType type, List<String> pathSegments) {
+      UUID id,
+      String libelle,
+      EExternalSkillType type,
+      List<String> pathSegments,
+      Instant createdAt,
+      Instant updatedAt) {
     setId(id);
+    setCreatedAt(createdAt);
+    setUpdatedAt(updatedAt);
     this.libelle = libelle;
     this.type = type;
     this.pathSegments = pathSegments != null ? pathSegments : List.of();
   }
 
   public static DeclaredSkillEntity of(
-      UUID id, String libelle, EExternalSkillType type, List<String> pathSegments) {
-    return new DeclaredSkillEntity(id, libelle, type, pathSegments);
+      UUID id,
+      String libelle,
+      EExternalSkillType type,
+      List<String> pathSegments,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new DeclaredSkillEntity(id, libelle, type, pathSegments, createdAt, updatedAt);
   }
 
   public static DeclaredSkillEntity create(
-      UUID id, String libelle, EExternalSkillType type, List<String> pathSegments) {
-    return new DeclaredSkillEntity(id, libelle, type, pathSegments);
+      UUID id,
+      String libelle,
+      EExternalSkillType type,
+      List<String> pathSegments,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new DeclaredSkillEntity(id, libelle, type, pathSegments, createdAt, updatedAt);
   }
 
   public void setPathSegments(List<String> pathSegments) {

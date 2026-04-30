@@ -21,7 +21,9 @@ public class TraceAttachmentMapper implements Mapper<TraceAttachmentEntity, Trac
         traceAttachment.isActiveVersion(),
         traceAttachment.getUri(),
         UserMapper.INSTANCE.fromDomain(traceAttachment.getUploadedBy()),
-        traceAttachment.getUploadedAt());
+        traceAttachment.getUploadedAt(),
+        traceAttachment.getCreatedAt(),
+        traceAttachment.getUpdatedAt());
   }
 
   @Override

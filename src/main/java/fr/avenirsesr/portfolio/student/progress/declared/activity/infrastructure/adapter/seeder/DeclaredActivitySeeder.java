@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeeder
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
+import fr.avenirsesr.portfolio.shared.domain.port.input.ClockService;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -42,6 +43,7 @@ public class DeclaredActivitySeeder {
   private static final String PATH_FILE = "seeder/declared-activities.json";
   private final FileReader fileReader;
   private final DeclaredActivityService declaredActivityService;
+  private final ClockService clockService;
 
   @Value("${seeder.source}")
   private ESeederSource seederSource;
@@ -116,7 +118,9 @@ public class DeclaredActivitySeeder {
             if (data.reflection().isEmpty()) {
               declaredActivityService.updateReflection(declaredActivity.getId(), null);
             }
+            clockService.fixed(data.finishedAt().get());
             declaredActivityService.finish(declaredActivity.getId());
+            clockService.clear();
           }
           declaredActivities.add(declaredActivity);
         });

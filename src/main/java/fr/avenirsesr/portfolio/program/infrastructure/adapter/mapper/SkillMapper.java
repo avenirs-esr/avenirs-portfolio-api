@@ -11,7 +11,7 @@ public class SkillMapper implements Mapper<SkillEntity, Skill> {
 
   @Override
   public SkillEntity fromDomain(Skill skill) {
-    return SkillEntity.of(skill.getId());
+    return SkillEntity.of(skill.getId(), skill.getCreatedAt(), skill.getUpdatedAt());
   }
 
   @Override

@@ -29,7 +29,9 @@ public class FakeDeclaredActivity {
             hasStarted ? faker.lorem().paragraph(3) : null,
             hasDate ? LocalDate.now().plusMonths(1) : null,
             hasDate ? LocalDate.now().plusMonths(2) : null,
-            hasFinished ? Instant.now() : null));
+            hasFinished ? Instant.now() : null,
+            Instant.now(),
+            Instant.now()));
   }
 
   public DeclaredActivityEntity toEntity() {

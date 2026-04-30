@@ -17,7 +17,9 @@ public class SelfKnowledgeElementMapper
         element.getTitle(),
         element.getDescription(),
         element.getRating(),
-        SelfKnowledgeCategoryMapper.INSTANCE.fromDomain(element.getSelfKnowledgeCategory()));
+        SelfKnowledgeCategoryMapper.INSTANCE.fromDomain(element.getSelfKnowledgeCategory()),
+        element.getCreatedAt(),
+        element.getUpdatedAt());
   }
 
   @Override

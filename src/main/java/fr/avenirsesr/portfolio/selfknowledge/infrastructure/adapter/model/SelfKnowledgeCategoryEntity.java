@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.Translat
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.enums.ESelfKnowledgeCategoryType;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -42,14 +43,25 @@ public class SelfKnowledgeCategoryEntity
   @ManyToMany(mappedBy = "selfKnowledgeCategories")
   private Set<StudentEntity> students = new HashSet<>();
 
-  private SelfKnowledgeCategoryEntity(UUID id, ESelfKnowledgeCategoryType type, boolean mandatory) {
+  private SelfKnowledgeCategoryEntity(
+      UUID id,
+      ESelfKnowledgeCategoryType type,
+      boolean mandatory,
+      Instant createdAt,
+      Instant updatedAt) {
     this.setId(id);
     this.type = type;
     this.mandatory = mandatory;
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
   }
 
   public static SelfKnowledgeCategoryEntity of(
-      UUID id, ESelfKnowledgeCategoryType type, boolean mandatory) {
-    return new SelfKnowledgeCategoryEntity(id, type, mandatory);
+      UUID id,
+      ESelfKnowledgeCategoryType type,
+      boolean mandatory,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new SelfKnowledgeCategoryEntity(id, type, mandatory, createdAt, updatedAt);
   }
 }

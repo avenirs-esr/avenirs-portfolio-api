@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.program.domain.model.enums.ESkillLevelStatus;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.SkillLevelEntity;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.model.SkillLevelProgressEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -30,7 +31,9 @@ public class FakeSkillLevelProgress {
             skillLevel,
             ESkillLevelStatus.NOT_STARTED,
             futureStartDate,
-            futureEndDate));
+            futureEndDate,
+            Instant.now(),
+            Instant.now()));
   }
 
   public FakeSkillLevelProgress withStatus(ESkillLevelStatus status) {

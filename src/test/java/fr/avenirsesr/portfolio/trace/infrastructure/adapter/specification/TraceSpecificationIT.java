@@ -185,13 +185,21 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
   }
 
   private UserEntity persistUser() {
-    UserEntity u = UserEntity.of(UUID.randomUUID(), "firstname", "lastname", "test@gmail.com");
+    UserEntity u =
+        UserEntity.of(
+            UUID.randomUUID(),
+            "firstname",
+            "lastname",
+            "test@gmail.com",
+            Instant.now(),
+            Instant.now());
     entityManager.persist(u);
     return u;
   }
 
   private StudentEntity persistStudent(UserEntity u) {
-    StudentEntity s = StudentEntity.of(u, "student@univ.com", "student");
+    StudentEntity s =
+        StudentEntity.of(u, "student@univ.com", "student", Instant.now(), Instant.now());
     entityManager.persist(s);
     return s;
   }
@@ -218,7 +226,18 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
       TraceEntity trace, String name, EFileType type, boolean active) {
     TraceAttachmentEntity att =
         TraceAttachmentEntity.of(
-            UUID.randomUUID(), trace, name, type, 1L, 1, active, "uri", user, Instant.now());
+            UUID.randomUUID(),
+            trace,
+            name,
+            type,
+            1L,
+            1,
+            active,
+            "uri",
+            user,
+            Instant.now(),
+            Instant.now(),
+            Instant.now());
     entityManager.persist(att);
     return att;
   }

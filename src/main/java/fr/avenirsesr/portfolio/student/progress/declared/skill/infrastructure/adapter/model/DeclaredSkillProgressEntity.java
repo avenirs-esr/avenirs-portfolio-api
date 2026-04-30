@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLe
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.model.DeclaredSkillEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,12 +43,16 @@ public class DeclaredSkillProgressEntity extends AvenirsBaseEntity {
       StudentEntity student,
       DeclaredSkillEntity declaredSkill,
       EDeclaredSkillLevel level,
-      String reflection) {
+      String reflection,
+      Instant createdAt,
+      Instant updatedAt) {
     setId(id);
     this.student = student;
     this.declaredSkill = declaredSkill;
     this.level = level;
     this.reflection = reflection;
+    setCreatedAt(createdAt);
+    setUpdatedAt(updatedAt);
   }
 
   public static DeclaredSkillProgressEntity of(
@@ -55,16 +60,10 @@ public class DeclaredSkillProgressEntity extends AvenirsBaseEntity {
       StudentEntity student,
       DeclaredSkillEntity declaredSkill,
       EDeclaredSkillLevel level,
-      String reflection) {
-    return new DeclaredSkillProgressEntity(id, student, declaredSkill, level, reflection);
-  }
-
-  public static DeclaredSkillProgressEntity create(
-      UUID id,
-      StudentEntity student,
-      DeclaredSkillEntity declaredSkill,
-      EDeclaredSkillLevel level,
-      String reflection) {
-    return new DeclaredSkillProgressEntity(id, student, declaredSkill, level, reflection);
+      String reflection,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new DeclaredSkillProgressEntity(
+        id, student, declaredSkill, level, reflection, createdAt, updatedAt);
   }
 }

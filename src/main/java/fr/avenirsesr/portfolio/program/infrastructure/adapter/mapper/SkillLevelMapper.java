@@ -13,7 +13,10 @@ public class SkillLevelMapper implements Mapper<SkillLevelEntity, SkillLevel> {
   @Override
   public SkillLevelEntity fromDomain(SkillLevel skillLevel) {
     return SkillLevelEntity.of(
-        skillLevel.getId(), SkillMapper.INSTANCE.fromDomain(skillLevel.getSkill()));
+        skillLevel.getId(),
+        SkillMapper.INSTANCE.fromDomain(skillLevel.getSkill()),
+        skillLevel.getCreatedAt(),
+        skillLevel.getUpdatedAt());
   }
 
   @Override

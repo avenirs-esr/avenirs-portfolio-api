@@ -22,6 +22,11 @@ public class DeclaredSkillMapper implements Mapper<DeclaredSkillEntity, Declared
   @Override
   public DeclaredSkillEntity fromDomain(DeclaredSkill domain) {
     return DeclaredSkillEntity.of(
-        domain.getId(), domain.getLibelle(), domain.getType(), domain.getPathSegments());
+        domain.getId(),
+        domain.getLibelle(),
+        domain.getType(),
+        domain.getPathSegments(),
+        domain.getCreatedAt(),
+        domain.getUpdatedAt());
   }
 }

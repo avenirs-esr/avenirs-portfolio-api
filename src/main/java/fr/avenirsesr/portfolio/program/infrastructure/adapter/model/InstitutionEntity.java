@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.TranslatableEntity;
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -22,11 +23,13 @@ public class InstitutionEntity extends TranslatableEntity<InstitutionTranslation
       fetch = FetchType.LAZY)
   private Set<InstitutionTranslationEntity> translations = new HashSet<>();
 
-  private InstitutionEntity(UUID id) {
+  private InstitutionEntity(UUID id, Instant createdAt, Instant updatedAt) {
     this.setId(id);
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
   }
 
-  public static InstitutionEntity of(UUID id) {
-    return new InstitutionEntity(id);
+  public static InstitutionEntity of(UUID id, Instant createdAt, Instant updatedAt) {
+    return new InstitutionEntity(id, createdAt, updatedAt);
   }
 }

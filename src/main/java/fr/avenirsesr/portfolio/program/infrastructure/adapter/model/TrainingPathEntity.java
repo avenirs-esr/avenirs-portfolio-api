@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.program.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import jakarta.persistence.*;
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
@@ -22,14 +23,25 @@ public class TrainingPathEntity extends AvenirsBaseEntity {
   @OneToMany(mappedBy = "trainingPath", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<SkillLevelEntity> skillLevels;
 
-  public TrainingPathEntity(UUID id, ProgramEntity program, Set<SkillLevelEntity> skillLevels) {
+  private TrainingPathEntity(
+      UUID id,
+      ProgramEntity program,
+      Set<SkillLevelEntity> skillLevels,
+      Instant createdAt,
+      Instant updatedAt) {
     this.setId(id);
     this.program = program;
     this.skillLevels = skillLevels;
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
   }
 
   public static TrainingPathEntity of(
-      UUID id, ProgramEntity program, Set<SkillLevelEntity> skillLevels) {
-    return new TrainingPathEntity(id, program, skillLevels);
+      UUID id,
+      ProgramEntity program,
+      Set<SkillLevelEntity> skillLevels,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new TrainingPathEntity(id, program, skillLevels, createdAt, updatedAt);
   }
 }
