@@ -319,7 +319,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         excludeAssociatedWithElementId,
         contextType.toClass(),
         associationType,
-        Association::getId2,
+        associationType.idExtractorFor(DeclaredExperience.class),
         experiences,
         AvenirsBaseModel::getId,
         DeclaredExperience::getTitle,

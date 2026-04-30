@@ -309,7 +309,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
         excludeAssociatedWithElementId,
         contextType.toClass(),
         associationType,
-        Association::getId2,
+        associationType.idExtractorFor(DeclaredSkillProgress.class),
         skills,
         AvenirsBaseModel::getId,
         ds -> ds.getSkill().getLibelle(),

@@ -507,11 +507,12 @@ public class TraceServiceImpl implements TraceService {
   public PagedResult<AssociationSearchResultData> searchDeclaredActivityForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
     checkTraceOwnership(traceId);
+    var associationType = EAssociationType.DECLARED_ACTIVITY_TRACE;
     return associationSearchHelper.searchForAssociation(
         traceId,
         Trace.class,
-        EAssociationType.DECLARED_ACTIVITY_TRACE,
-        Association::getId1,
+        associationType,
+        associationType.idExtractorFor(DeclaredActivity.class),
         declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),
         AvenirsBaseModel::getId,
         da -> da.getActivity().getTitle(),
@@ -523,11 +524,12 @@ public class TraceServiceImpl implements TraceService {
   public PagedResult<AssociationSearchResultData> searchDeclaredSkillForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
     checkTraceOwnership(traceId);
+    var associationType = EAssociationType.TRACE_DECLARED_SKILL;
     return associationSearchHelper.searchForAssociation(
         traceId,
         Trace.class,
-        EAssociationType.TRACE_DECLARED_SKILL,
-        Association::getId2,
+        associationType,
+        associationType.idExtractorFor(DeclaredSkillProgress.class),
         declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),
         AvenirsBaseModel::getId,
         ds -> ds.getSkill().getLibelle(),
@@ -539,11 +541,12 @@ public class TraceServiceImpl implements TraceService {
   public PagedResult<AssociationSearchResultData> searchDeclaredExperienceForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
     checkTraceOwnership(traceId);
+    var associationType = EAssociationType.TRACE_DECLARED_EXPERIENCE;
     return associationSearchHelper.searchForAssociation(
         traceId,
         Trace.class,
-        EAssociationType.TRACE_DECLARED_EXPERIENCE,
-        Association::getId2,
+        associationType,
+        associationType.idExtractorFor(DeclaredExperience.class),
         declaredExperienceService.search(keyword, pageCriteria),
         AvenirsBaseModel::getId,
         DeclaredExperience::getTitle,
