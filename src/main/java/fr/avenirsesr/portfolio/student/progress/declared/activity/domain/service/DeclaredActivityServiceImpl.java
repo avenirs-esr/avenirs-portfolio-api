@@ -292,11 +292,12 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public PagedResult<AssociationSearchResultData> searchTracesForAssociation(
       UUID declaredActivityId, String keyword, PageCriteria pageCriteria, Boolean isAssociated) {
     fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    var associationType = EAssociationType.DECLARED_ACTIVITY_TRACE;
     return associationSearchHelper.searchForAssociation(
         declaredActivityId,
         DeclaredActivity.class,
-        EAssociationType.DECLARED_ACTIVITY_TRACE,
-        Association::getId2,
+        associationType,
+        associationType.idExtractorFor(Trace.class),
         traceService.getTracesView(
             keyword, new TraceFilter(isAssociated, null, null, null), null, pageCriteria),
         TraceViewData::id,
@@ -332,7 +333,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
         excludeAssociatedWithElementId,
         contextType.toClass(),
         associationType,
-        Association::getId1,
+        associationType.idExtractorFor(DeclaredActivity.class),
         activities,
         AvenirsBaseModel::getId,
         da -> da.getActivity().getTitle(),

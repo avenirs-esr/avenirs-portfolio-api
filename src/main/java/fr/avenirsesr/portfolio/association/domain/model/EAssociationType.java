@@ -6,6 +6,8 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.Decl
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
 import lombok.Getter;
 
 @Getter
@@ -27,5 +29,11 @@ public enum EAssociationType {
     return Arrays.stream(values())
         .filter(type -> type.key1.equals(clazz) || type.key2.equals(clazz))
         .toList();
+  }
+
+  public Function<Association, UUID> idExtractorFor(Class<?> subjectClass) {
+    if (key1.equals(subjectClass)) return Association::getId1;
+    if (key2.equals(subjectClass)) return Association::getId2;
+    throw new IllegalArgumentException(subjectClass.getSimpleName() + " is not part of " + name());
   }
 }
