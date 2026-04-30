@@ -507,60 +507,63 @@ public class TraceServiceImpl implements TraceService {
   public PagedResult&lt;AssociationSearchResultData&gt; searchDeclaredActivityForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
 <span class="fc" id="L509">    checkTraceOwnership(traceId);</span>
-<span class="fc" id="L510">    return associationSearchHelper.searchForAssociation(</span>
+<span class="fc" id="L510">    var associationType = EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
+<span class="fc" id="L511">    return associationSearchHelper.searchForAssociation(</span>
         traceId,
         Trace.class,
-        EAssociationType.DECLARED_ACTIVITY_TRACE,
-        Association::getId1,
-<span class="fc" id="L515">        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),</span>
+        associationType,
+<span class="fc" id="L515">        associationType.idExtractorFor(DeclaredActivity.class),</span>
+<span class="fc" id="L516">        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),</span>
         AvenirsBaseModel::getId,
-<span class="fc" id="L517">        da -&gt; da.getActivity().getTitle(),</span>
-<span class="fc" id="L518">        da -&gt; da.getActivity().getThematic().name(),</span>
-<span class="fc" id="L519">        da -&gt; da.getFinishedAt().isPresent());</span>
+<span class="fc" id="L518">        da -&gt; da.getActivity().getTitle(),</span>
+<span class="fc" id="L519">        da -&gt; da.getActivity().getThematic().name(),</span>
+<span class="fc" id="L520">        da -&gt; da.getFinishedAt().isPresent());</span>
   }
 
   @Override
   public PagedResult&lt;AssociationSearchResultData&gt; searchDeclaredSkillForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L525">    checkTraceOwnership(traceId);</span>
-<span class="fc" id="L526">    return associationSearchHelper.searchForAssociation(</span>
+<span class="fc" id="L526">    checkTraceOwnership(traceId);</span>
+<span class="fc" id="L527">    var associationType = EAssociationType.TRACE_DECLARED_SKILL;</span>
+<span class="fc" id="L528">    return associationSearchHelper.searchForAssociation(</span>
         traceId,
         Trace.class,
-        EAssociationType.TRACE_DECLARED_SKILL,
-        Association::getId2,
-<span class="fc" id="L531">        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),</span>
+        associationType,
+<span class="fc" id="L532">        associationType.idExtractorFor(DeclaredSkillProgress.class),</span>
+<span class="fc" id="L533">        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),</span>
         AvenirsBaseModel::getId,
-<span class="fc" id="L533">        ds -&gt; ds.getSkill().getLibelle(),</span>
-<span class="fc" id="L534">        ds -&gt; ds.getSkill().getType().name(),</span>
-<span class="fc" id="L535">        ds -&gt; false);</span>
+<span class="fc" id="L535">        ds -&gt; ds.getSkill().getLibelle(),</span>
+<span class="fc" id="L536">        ds -&gt; ds.getSkill().getType().name(),</span>
+<span class="fc" id="L537">        ds -&gt; false);</span>
   }
 
   @Override
   public PagedResult&lt;AssociationSearchResultData&gt; searchDeclaredExperienceForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L541">    checkTraceOwnership(traceId);</span>
-<span class="fc" id="L542">    return associationSearchHelper.searchForAssociation(</span>
+<span class="fc" id="L543">    checkTraceOwnership(traceId);</span>
+<span class="fc" id="L544">    var associationType = EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
+<span class="fc" id="L545">    return associationSearchHelper.searchForAssociation(</span>
         traceId,
         Trace.class,
-        EAssociationType.TRACE_DECLARED_EXPERIENCE,
-        Association::getId2,
-<span class="fc" id="L547">        declaredExperienceService.search(keyword, pageCriteria),</span>
+        associationType,
+<span class="fc" id="L549">        associationType.idExtractorFor(DeclaredExperience.class),</span>
+<span class="fc" id="L550">        declaredExperienceService.search(keyword, pageCriteria),</span>
         AvenirsBaseModel::getId,
         DeclaredExperience::getTitle,
-<span class="fc" id="L550">        de -&gt; de.getExperienceType().name(),</span>
-<span class="fc" id="L551">        de -&gt; false);</span>
+<span class="fc" id="L553">        de -&gt; de.getExperienceType().name(),</span>
+<span class="fc" id="L554">        de -&gt; false);</span>
   }
 
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
-<span class="fc bfc" id="L555" title="All 2 branches covered.">    if (!trace.getUser().equals(user)) {</span>
-<span class="fc" id="L556">      throw new UserNotAuthorizedException(&quot;%s does not own this %s&quot;.formatted(user, trace));</span>
+<span class="fc bfc" id="L558" title="All 2 branches covered.">    if (!trace.getUser().equals(user)) {</span>
+<span class="fc" id="L559">      throw new UserNotAuthorizedException(&quot;%s does not own this %s&quot;.formatted(user, trace));</span>
     }
-<span class="fc" id="L558">  }</span>
+<span class="fc" id="L561">  }</span>
 
   private void checkTraceOwnership(UUID traceId) {
-<span class="fc" id="L561">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L562">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
-<span class="fc" id="L563">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
-<span class="fc" id="L564">  }</span>
+<span class="fc" id="L564">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L565">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L566">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
+<span class="fc" id="L567">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
