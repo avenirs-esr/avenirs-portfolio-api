@@ -37,6 +37,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.reposi
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,GenericUserJpaRepositoryAdapter,0,10,0,0,0,3,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service,DeclaredSkillProgressServiceImpl,100,466,9,22,21,124,19,28,14,17
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.infrastructure.adapter.specification,ActivitySpecification,33,10,4,0,8,1,7,2,5,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,CustomDateTimeProvider,0,11,0,0,0,4,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,PrometheusLogFilter,5,11,3,3,1,3,2,3,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.controller,DeclaredExperienceController,65,138,0,0,12,43,1,7,1,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,0,64,0,0,0,16,0,3,0,3
@@ -98,11 +99,13 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.infrastructure.adapter.re
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.repository,UserPhotoDatabaseRepository,0,32,0,0,0,10,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.repository,TraceAttachmentDatabaseRepository,0,12,0,0,0,3,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.repository,ActivityBannerDatabaseRepository,0,35,0,0,0,12,0,3,0,3
+avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.service,ClockServiceConfig,0,7,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.application.adapter.controller,StorageController,54,41,0,4,13,14,2,4,2,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.application.adapter.controller,TraceAttachmentController,7,58,0,0,2,18,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.application.adapter.controller,UserResourceController,14,35,0,0,4,11,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.domain.service,AssociationServiceImpl,0,88,0,4,0,20,0,8,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.domain.service,AssociationSearchHelper,2,68,2,6,0,19,2,4,0,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.service,ClockServiceImpl,7,24,0,0,3,8,2,5,2,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.service,LoggedInUserServiceImpl,4,21,1,1,1,5,1,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.infrastructure.adapter.specification,AssociationSpecification,6,126,3,7,2,23,4,11,1,9
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository,TraceDatabaseRepository,169,33,18,0,42,8,17,3,8,3
