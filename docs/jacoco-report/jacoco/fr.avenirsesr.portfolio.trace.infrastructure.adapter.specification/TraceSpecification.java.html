@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.mapper.DeclaredSkillProgressMapper;
 import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -15,117 +16,89 @@ import jakarta.persistence.criteria.*;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L18">public class TraceSpecification {</span>
+<span class="nc" id="L19">public class TraceSpecification {</span>
   public static Specification&lt;TraceEntity&gt; ofUser(User user) {
-<span class="fc" id="L20">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="fc" id="L21">        criteriaBuilder.equal(root.get(&quot;user&quot;), UserMapper.INSTANCE.fromDomain(user));</span>
+<span class="fc" id="L21">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="fc" id="L22">        criteriaBuilder.equal(root.get(&quot;user&quot;), UserMapper.INSTANCE.fromDomain(user));</span>
   }
 
   public static Specification&lt;TraceEntity&gt; unassociated() {
-<span class="nc" id="L25">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="nc" id="L26">        criteriaBuilder.not(associated().toPredicate(root, query, criteriaBuilder));</span>
+<span class="nc" id="L26">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="nc" id="L27">        criteriaBuilder.not(associated().toPredicate(root, query, criteriaBuilder));</span>
   }
 
   public static Specification&lt;TraceEntity&gt; associated() {
-<span class="fc" id="L30">    return (root, query, cb) -&gt; {</span>
-<span class="pc bpc" id="L31" title="1 of 2 branches missed.">      if (query == null) return null;</span>
+<span class="fc" id="L31">    return (root, query, cb) -&gt; {</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">      if (query == null) return null;</span>
 
-<span class="nc" id="L33">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
-<span class="nc" id="L34">      Root&lt;AssociationEntity&gt; associationRoot = subquery.from(AssociationEntity.class);</span>
+<span class="nc" id="L34">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
+<span class="nc" id="L35">      Root&lt;AssociationEntity&gt; associationRoot = subquery.from(AssociationEntity.class);</span>
 
-<span class="nc" id="L36">      var traceId = root.get(&quot;id&quot;);</span>
+<span class="nc" id="L37">      var traceId = root.get(&quot;id&quot;);</span>
 
-<span class="nc" id="L38">      var id1Match = cb.equal(associationRoot.get(&quot;id1&quot;), traceId);</span>
-<span class="nc" id="L39">      var id2Match = cb.equal(associationRoot.get(&quot;id2&quot;), traceId);</span>
+<span class="nc" id="L39">      var id1Match = cb.equal(associationRoot.get(&quot;id1&quot;), traceId);</span>
+<span class="nc" id="L40">      var id2Match = cb.equal(associationRoot.get(&quot;id2&quot;), traceId);</span>
 
-<span class="nc" id="L41">      var typeIn =</span>
-<span class="nc" id="L42">          associationRoot.get(&quot;associationType&quot;).in(EAssociationType.getAllBy(Trace.class));</span>
+<span class="nc" id="L42">      var typeIn =</span>
+<span class="nc" id="L43">          associationRoot.get(&quot;associationType&quot;).in(EAssociationType.getAllBy(Trace.class));</span>
 
-<span class="nc" id="L44">      subquery.select(associationRoot.get(&quot;id&quot;)).where(cb.and(cb.or(id1Match, id2Match), typeIn));</span>
+<span class="nc" id="L45">      subquery.select(associationRoot.get(&quot;id&quot;)).where(cb.and(cb.or(id1Match, id2Match), typeIn));</span>
 
-<span class="nc" id="L46">      query.distinct(true);</span>
+<span class="nc" id="L47">      query.distinct(true);</span>
 
-<span class="nc" id="L48">      return cb.exists(subquery);</span>
+<span class="nc" id="L49">      return cb.exists(subquery);</span>
     };
   }
 
   public static Specification&lt;TraceEntity&gt; notDeleted() {
-<span class="fc" id="L53">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;deletedAt&quot;));</span>
+<span class="fc" id="L54">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;deletedAt&quot;));</span>
   }
 
   public static Specification&lt;TraceEntity&gt; ofSkillLevelProgress(
       SkillLevelProgress skillLevelProgress) {
-<span class="nc" id="L58">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="nc" id="L59">        criteriaBuilder.isMember(</span>
-<span class="nc" id="L60">            SkillLevelProgressMapper.INSTANCE.fromDomain(skillLevelProgress),</span>
-<span class="nc" id="L61">            root.get(&quot;skillLevels&quot;));</span>
+<span class="nc" id="L59">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="nc" id="L60">        criteriaBuilder.isMember(</span>
+<span class="nc" id="L61">            SkillLevelProgressMapper.INSTANCE.fromDomain(skillLevelProgress),</span>
+<span class="nc" id="L62">            root.get(&quot;skillLevels&quot;));</span>
   }
 
   public static Specification&lt;TraceEntity&gt; ofDeclaredSkillProgress(
       DeclaredSkillProgress declaredSkillProgress) {
-<span class="nc" id="L66">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L67" title="All 2 branches missed.">      if (query == null) return null;</span>
-
-<span class="nc" id="L69">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
-<span class="nc" id="L70">      Root&lt;AssociationEntity&gt; associationRoot = subquery.from(AssociationEntity.class);</span>
-
-<span class="nc" id="L72">      var traceId = root.get(&quot;id&quot;);</span>
-<span class="nc" id="L73">      var declaredSkillProgressId = declaredSkillProgress.getId();</span>
-
-<span class="nc" id="L75">      var typeMatch =</span>
-<span class="nc" id="L76">          criteriaBuilder.equal(</span>
-<span class="nc" id="L77">              associationRoot.get(&quot;associationType&quot;), EAssociationType.TRACE_DECLARED_SKILL);</span>
-
-<span class="nc" id="L79">      var traceToDeclaredSkillMatch =</span>
-<span class="nc" id="L80">          criteriaBuilder.and(</span>
-<span class="nc" id="L81">              criteriaBuilder.equal(associationRoot.get(&quot;id1&quot;), traceId),</span>
-<span class="nc" id="L82">              criteriaBuilder.equal(associationRoot.get(&quot;id2&quot;), declaredSkillProgressId));</span>
-
-<span class="nc" id="L84">      var declaredSkillToTraceMatch =</span>
-<span class="nc" id="L85">          criteriaBuilder.and(</span>
-<span class="nc" id="L86">              criteriaBuilder.equal(associationRoot.get(&quot;id2&quot;), traceId),</span>
-<span class="nc" id="L87">              criteriaBuilder.equal(associationRoot.get(&quot;id1&quot;), declaredSkillProgressId));</span>
-
-<span class="nc" id="L89">      subquery</span>
-<span class="nc" id="L90">          .select(associationRoot.get(&quot;id&quot;))</span>
-<span class="nc" id="L91">          .where(</span>
-<span class="nc" id="L92">              criteriaBuilder.and(</span>
-                  typeMatch,
-<span class="nc" id="L94">                  criteriaBuilder.or(traceToDeclaredSkillMatch, declaredSkillToTraceMatch)));</span>
-
-<span class="nc" id="L96">      return criteriaBuilder.exists(subquery);</span>
-    };
+<span class="nc" id="L67">    return (root, query, criteriaBuilder) -&gt;</span>
+<span class="nc" id="L68">        criteriaBuilder.isMember(</span>
+<span class="nc" id="L69">            DeclaredSkillProgressMapper.INSTANCE.fromDomain(declaredSkillProgress),</span>
+<span class="nc" id="L70">            root.get(&quot;declaredSkillsProgresses&quot;));</span>
   }
 
   public static Specification&lt;TraceEntity&gt; search(String keyword, ELanguage language) {
-<span class="fc" id="L101">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc bfc" id="L102" title="All 6 branches covered.">      if (keyword == null || keyword.trim().isEmpty() || query == null) {</span>
-<span class="fc" id="L103">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L74">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L75" title="All 6 branches covered.">      if (keyword == null || keyword.trim().isEmpty() || query == null) {</span>
+<span class="fc" id="L76">        return criteriaBuilder.conjunction();</span>
       }
 
-<span class="fc" id="L106">      query.distinct(true);</span>
+<span class="fc" id="L79">      query.distinct(true);</span>
 
-<span class="fc" id="L108">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
+<span class="fc" id="L81">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
 
       // Trace
-<span class="fc" id="L111">      var titlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;title&quot;)), pattern);</span>
-<span class="fc" id="L112">      var aiUsePredicate =</span>
-<span class="fc" id="L113">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;aiUseJustification&quot;)), pattern);</span>
-<span class="fc" id="L114">      var personalNotePredicate =</span>
-<span class="fc" id="L115">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;personalNote&quot;)), pattern);</span>
+<span class="fc" id="L84">      var titlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;title&quot;)), pattern);</span>
+<span class="fc" id="L85">      var aiUsePredicate =</span>
+<span class="fc" id="L86">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;aiUseJustification&quot;)), pattern);</span>
+<span class="fc" id="L87">      var personalNotePredicate =</span>
+<span class="fc" id="L88">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;personalNote&quot;)), pattern);</span>
 
       // Attachment
-<span class="fc" id="L118">      Subquery&lt;TraceAttachmentEntity&gt; attachSub = query.subquery(TraceAttachmentEntity.class);</span>
-<span class="fc" id="L119">      Root&lt;TraceAttachmentEntity&gt; attachRoot = attachSub.from(TraceAttachmentEntity.class);</span>
-<span class="fc" id="L120">      attachSub</span>
-<span class="fc" id="L121">          .select(attachRoot)</span>
-<span class="fc" id="L122">          .where(</span>
-<span class="fc" id="L123">              criteriaBuilder.equal(attachRoot.get(&quot;trace&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
-<span class="fc" id="L124">              criteriaBuilder.isTrue(attachRoot.get(&quot;isActiveVersion&quot;)),</span>
-<span class="fc" id="L125">              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get(&quot;name&quot;)), pattern));</span>
-<span class="fc" id="L126">      Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);</span>
+<span class="fc" id="L91">      Subquery&lt;TraceAttachmentEntity&gt; attachSub = query.subquery(TraceAttachmentEntity.class);</span>
+<span class="fc" id="L92">      Root&lt;TraceAttachmentEntity&gt; attachRoot = attachSub.from(TraceAttachmentEntity.class);</span>
+<span class="fc" id="L93">      attachSub</span>
+<span class="fc" id="L94">          .select(attachRoot)</span>
+<span class="fc" id="L95">          .where(</span>
+<span class="fc" id="L96">              criteriaBuilder.equal(attachRoot.get(&quot;trace&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L97">              criteriaBuilder.isTrue(attachRoot.get(&quot;isActiveVersion&quot;)),</span>
+<span class="fc" id="L98">              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get(&quot;name&quot;)), pattern));</span>
+<span class="fc" id="L99">      Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);</span>
 
-<span class="fc" id="L128">      return criteriaBuilder.or(</span>
+<span class="fc" id="L101">      return criteriaBuilder.or(</span>
           titlePredicate, aiUsePredicate, personalNotePredicate, attachmentPredicate);
     };
   }
