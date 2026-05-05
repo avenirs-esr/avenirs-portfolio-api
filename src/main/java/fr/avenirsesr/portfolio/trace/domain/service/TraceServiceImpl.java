@@ -89,15 +89,6 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public List<Trace> getTracesLinkedWithDeclaredSkillProgress(
-      DeclaredSkillProgress declaredSkillProgress) {
-    User loggedInUser = loggedInUserService.getLoggedInUser();
-    List<Trace> traces = traceRepository.linkedWith(declaredSkillProgress);
-    traces.forEach(trace -> checkIfUserIsAuthorizedOnTrace(loggedInUser, trace));
-    return traces;
-  }
-
-  @Override
   public PagedResult<TraceViewData> getTracesView(
       String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria) {
     User loggedInUser = loggedInUserService.getLoggedInUser();

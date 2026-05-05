@@ -39,9 +39,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.Decl
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationData;
-import fr.avenirsesr.portfolio.trace.domain.data.TraceWithProjectNameData;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
-import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.*;
@@ -133,9 +131,6 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
       throw new UserNotAuthorizedException();
     }
 
-    List<Trace> traces =
-        traceService.getTracesLinkedWithDeclaredSkillProgress(declaredSkillProgress);
-
     UUID id = declaredSkillProgress.getSkill().getId();
     ExternalSkillDetailsDTO externalSkillDetails =
         externalSkillClient
@@ -143,13 +138,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
             .orElse(new ExternalSkillDetailsDTO(id, "", List.of(), null));
 
     return new DeclaredSkillProgressDetails(
-        declaredSkillProgress,
-        traces.stream()
-            .map(
-                trace ->
-                    new TraceWithProjectNameData(trace, traceService.programNameOfTrace(trace)))
-            .toList(),
-        externalSkillDetails.categoryPath());
+        declaredSkillProgress, externalSkillDetails.categoryPath());
   }
 
   @Override

@@ -5,8 +5,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericDeletableRepositoryPort;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import java.util.List;
@@ -23,12 +21,6 @@ public interface TraceRepository extends GenericDeletableRepositoryPort<Trace> {
       PageCriteria pageCriteria);
 
   List<Trace> findAll(User user, boolean isAssociated);
-
-  List<Trace> linkedWith(SkillLevelProgress skillLevelProgress);
-
-  Map<SkillLevelProgress, List<Trace>> linkedWith(List<SkillLevelProgress> skillLevelProgresses);
-
-  List<Trace> linkedWith(DeclaredSkillProgress declaredSkillProgress);
 
   Map<Trace, Boolean> isAssociated(List<Trace> traces);
 }
