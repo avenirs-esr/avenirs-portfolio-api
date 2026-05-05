@@ -2,9 +2,9 @@ package fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
+import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.input.DeclaredProgramService;
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.data.DeclaredProgramCreationData;
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.seeder.fake.FakeDeclaredProgram;

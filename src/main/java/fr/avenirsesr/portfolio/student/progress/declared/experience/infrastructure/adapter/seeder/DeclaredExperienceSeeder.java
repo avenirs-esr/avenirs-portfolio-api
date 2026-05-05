@@ -2,9 +2,9 @@ package fr.avenirsesr.portfolio.student.progress.declared.experience.infrastruct
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
+import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.mapper.DeclaredExperienceMapper;

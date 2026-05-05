@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
+import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
@@ -13,7 +14,6 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.UserPhotoMappe
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data.UserPhotoCreationData;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeUserPhoto;
-import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;

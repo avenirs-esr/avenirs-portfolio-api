@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
-import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
+import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.user.domain.model.ExternalUser;
 import fr.avenirsesr.portfolio.user.domain.port.input.ExternalUserService;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.ExternalUserMapper;

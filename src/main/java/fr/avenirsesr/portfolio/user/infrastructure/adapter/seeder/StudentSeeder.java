@@ -2,10 +2,10 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
+import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;

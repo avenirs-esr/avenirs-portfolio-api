@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
@@ -9,7 +10,6 @@ import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeServ
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.mapper.SelfKnowledgeCategoryMapper;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.model.SelfKnowledgeCategoryEntity;
 import fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.seeder.data.SelfKnowledgeCategoryCreationData;
-import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
