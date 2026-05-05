@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
+import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.program.domain.model.Institution;
@@ -12,7 +13,6 @@ import fr.avenirsesr.portfolio.program.infrastructure.adapter.model.InstitutionE
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.data.InstitutionCreationData;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.fake.FakeInstitution;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

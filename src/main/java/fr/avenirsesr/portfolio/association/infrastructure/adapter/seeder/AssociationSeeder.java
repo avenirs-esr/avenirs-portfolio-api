@@ -9,8 +9,8 @@ import fr.avenirsesr.portfolio.association.infrastructure.adapter.mapper.Associa
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder.data.AssociationCreationData;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
+import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
-import fr.avenirsesr.portfolio.shared.infrastructure.utils.FileReader;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.model.DeclaredExperienceEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.model.DeclaredSkillProgressEntity;
