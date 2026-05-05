@@ -73,7 +73,6 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,ExternalUserSe
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,UserServiceImpl,8,147,4,8,0,35,4,10,0,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StaffServiceImpl,24,55,1,3,4,12,3,4,2,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.service,StudentServiceImpl,6,106,1,3,2,27,2,9,1,8
-avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.utils,FileReader,53,17,1,1,13,3,3,1,2,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data,DeclaredSkillAssociationsData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data,DeclaredSkillProgressDetails,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data,DeclaredSkillAssociationData,0,9,0,0,0,1,0,1,0,1
