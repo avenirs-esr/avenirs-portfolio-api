@@ -5,10 +5,6 @@ import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.Associat
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.adapter.mapper.DeclaredSkillProgressMapper;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.mapper.SkillLevelProgressMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -52,22 +48,6 @@ public class TraceSpecification {
 
   public static Specification<TraceEntity> notDeleted() {
     return (root, query, cb) -> cb.isNull(root.get("deletedAt"));
-  }
-
-  public static Specification<TraceEntity> ofSkillLevelProgress(
-      SkillLevelProgress skillLevelProgress) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.isMember(
-            SkillLevelProgressMapper.INSTANCE.fromDomain(skillLevelProgress),
-            root.get("skillLevels"));
-  }
-
-  public static Specification<TraceEntity> ofDeclaredSkillProgress(
-      DeclaredSkillProgress declaredSkillProgress) {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.isMember(
-            DeclaredSkillProgressMapper.INSTANCE.fromDomain(declaredSkillProgress),
-            root.get("declaredSkillsProgresses"));
   }
 
   public static Specification<TraceEntity> search(String keyword, ELanguage language) {

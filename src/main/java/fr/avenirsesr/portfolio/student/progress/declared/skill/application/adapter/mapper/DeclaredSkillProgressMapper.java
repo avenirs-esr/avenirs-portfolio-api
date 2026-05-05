@@ -24,7 +24,6 @@ public interface DeclaredSkillProgressMapper {
   @Mapping(source = "declaredSkillProgress.reflection", target = "reflection")
   @Mapping(source = "declaredSkillProgress.skill.type", target = "type")
   @Mapping(source = "declaredSkillProgress.level", target = "level")
-  @Mapping(source = "tracesWithProjectName", target = "traceAssociations")
   @Mapping(source = "declaredSkillProgress.createdAt", target = "createdAt")
   @Mapping(source = "declaredSkillProgress.updatedAt", target = "updatedAt")
   DeclaredSkillProgressDetailsDTO toDeclaredSkillProgressDetailsDTO(

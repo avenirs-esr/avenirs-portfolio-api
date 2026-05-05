@@ -7,8 +7,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericDeletableJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.DateFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
@@ -118,21 +116,5 @@ public class TraceDatabaseRepository
             isAssociated ? TraceSpecification.associated() : TraceSpecification.unassociated());
 
     return findAll(specification);
-  }
-
-  @Override
-  public List<Trace> linkedWith(SkillLevelProgress skillLevelProgress) {
-    return findAll(TraceSpecification.ofSkillLevelProgress(skillLevelProgress));
-  }
-
-  @Override
-  public Map<SkillLevelProgress, List<Trace>> linkedWith(
-      List<SkillLevelProgress> skillLevelProgresses) {
-    return Map.of();
-  }
-
-  @Override
-  public List<Trace> linkedWith(DeclaredSkillProgress declaredSkillProgress) {
-    return findAll(TraceSpecification.ofDeclaredSkillProgress(declaredSkillProgress));
   }
 }

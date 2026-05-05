@@ -33,7 +33,6 @@ import fr.avenirsesr.portfolio.declaredskill.domain.port.input.DeclaredSkillSync
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client.ExternalSkillClient;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.fixture.DeclaredSkillProgressFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
-import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -45,7 +44,6 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.Decl
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.output.repository.DeclaredSkillProgressRepository;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.*;
@@ -119,27 +117,12 @@ public class DeclaredSkillProgressServiceImplTest {
       @Test
       void getDeclaredSkillProgressDetails_shouldReturnDeclaredSkillsProgressDetails() {
         BddLogger.given("the method getDeclaredSkillProgressDetails");
-        String programName = EPortfolioType.LIFE_PROJECT.name();
         DeclaredSkillProgress declaredSkillProgress =
             DeclaredSkillProgressFixture.create().withStudent(student).toModel();
-        Trace trace1 =
-            TraceFixture.create()
-                .withUser(student.getUser())
-                .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
-                .toModel();
-        Trace trace2 =
-            TraceFixture.create()
-                .withUser(student.getUser())
-                .withDeclaredSkillProgresses(List.of(declaredSkillProgress))
-                .toModel();
 
         BddLogger.when("calling the method with a given student and declaredSkillProgressId");
         when(declaredSkillProgressRepository.findById(any(), any()))
             .thenReturn(Optional.of(declaredSkillProgress));
-        when(traceService.getTracesLinkedWithDeclaredSkillProgress(declaredSkillProgress))
-            .thenReturn(List.of(trace1, trace2));
-        when(traceService.programNameOfTrace(trace1)).thenReturn(programName);
-        when(traceService.programNameOfTrace(trace2)).thenReturn(programName);
 
         List<ExternalSkillCategoryDTO> categories =
             List.of(
@@ -160,17 +143,6 @@ public class DeclaredSkillProgressServiceImplTest {
 
         BddLogger.then("it should return the expected declared skill progress details");
         assertEquals(declaredSkillProgressDetails.declaredSkillProgress(), declaredSkillProgress);
-        assertEquals(2, declaredSkillProgressDetails.tracesWithProjectName().size());
-        assertEquals(
-            trace1, declaredSkillProgressDetails.tracesWithProjectName().getFirst().trace());
-        assertEquals(
-            programName,
-            declaredSkillProgressDetails.tracesWithProjectName().getFirst().programName());
-        assertEquals(
-            trace2, declaredSkillProgressDetails.tracesWithProjectName().getLast().trace());
-        assertEquals(
-            programName,
-            declaredSkillProgressDetails.tracesWithProjectName().getLast().programName());
       }
 
       @Test
