@@ -52,6 +52,7 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
   private String location;
 
   @Size(max = DESCRIPTION_LENGTH, message = "description can not exceed {max} characters")
+  @Column(length = DESCRIPTION_LENGTH)
   private String description;
 
   @Size(
@@ -61,6 +62,7 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
   private String sourceOfInformation;
 
   @Size(max = SUMMARY_LENGTH, message = "summary can not exceed {max} characters")
+  @Column(length = SUMMARY_LENGTH)
   private String summary;
 
   @Column(name = "external_link")
