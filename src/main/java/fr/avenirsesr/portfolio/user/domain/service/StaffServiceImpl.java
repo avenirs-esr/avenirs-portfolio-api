@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.user.domain.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
-import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
@@ -25,7 +24,7 @@ public class StaffServiceImpl implements StaffService {
         .orElseThrow(
             () -> {
               log.error("Staff {} not found", id);
-              return new UserIsNotStudentException();
+              return new UserIsNotStaffException();
             });
   }
 

@@ -2,9 +2,7 @@ package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
 
-import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDetailsDTO;
-import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityNavigationDTO;
-import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityOverviewDTO;
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityDetailsDtoMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityNavigationMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
@@ -96,5 +94,17 @@ public class ActivityController {
   public ResponseEntity<List<ActivityNavigationDTO>> getActivityNavigation() {
     return ResponseEntity.ok(
         activityNavigationMapper.toDTO(activityService.getActivityNavigation()));
+  }
+
+  @PostMapping("/draft")
+  public ResponseEntity<ActivityDraftCreationResponse> createActivityDraft(
+      Principal principal, @RequestBody ActivityDraftCreationRequest body) {
+    log.debug(
+        "Received request to create activity draft of user [{}] body : {}",
+        principal.getName(),
+        body);
+
+    var draft = activityService.createActivityDraft(body.title());
+    return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
   }
 }

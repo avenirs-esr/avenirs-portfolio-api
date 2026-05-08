@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
@@ -33,6 +34,18 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
   @Value("${user.student.signature}")
   private String studentSignature;
+
+  @Value("${user.second.student.payload}")
+  private String secondStudentPayload;
+
+  @Value("${user.second.student.signature}")
+  private String secondStudentSignature;
+
+  @Value("${user.staff.payload}")
+  private String staffPayload;
+
+  @Value("${user.staff.signature}")
+  private String staffSignature;
 
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {
@@ -232,5 +245,117 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.code")
         .isEqualTo("ACTIVITY_NOT_FOUND");
+  }
+
+  @Test
+  void shouldCreateActivityDraftAndReturnItsId() throws Exception {
+    BddLogger.given("the " + BASE_PATH + "/draft endpoint");
+    BddLogger.when("performing a POST with a valid title");
+    BddLogger.then("it should return 200 with the created draft id");
+
+    String requestBody =
+        objectMapper.writeValueAsString(new ActivityDraftCreationRequest("Mon brouillon de test"));
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/draft")
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.draftId")
+        .exists()
+        .jsonPath("$.draftId")
+        .isNotEmpty();
+  }
+
+  @Test
+  void shouldReturn4xxWhenBodyIsMissing() {
+    BddLogger.given("the " + BASE_PATH + "/draft endpoint");
+    BddLogger.when("performing a POST without a body");
+    BddLogger.then("it should return a 4xx error");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/draft")
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .is4xxClientError();
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticated() throws Exception {
+    BddLogger.given("the " + BASE_PATH + "/draft endpoint");
+    BddLogger.when("performing a POST without authentication headers");
+    BddLogger.then("it should return 401");
+
+    String requestBody =
+        objectMapper.writeValueAsString(
+            new ActivityDraftCreationRequest("Brouillon non authentifié"));
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/draft")
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  @Test
+  void shouldReturn403WhenUserIsNotStaff() throws Exception {
+    BddLogger.given("the " + BASE_PATH + "/draft endpoint");
+    BddLogger.when("performing a POST with a student (non-staff) account");
+    BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+    String requestBody =
+        objectMapper.writeValueAsString(new ActivityDraftCreationRequest("Brouillon étudiant"));
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/draft")
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+  }
+
+  private String postDraftAndGetBody(String requestBody) {
+    return webTestClient
+        .post()
+        .uri(BASE_PATH + "/draft")
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .returnResult()
+        .getResponseBody();
   }
 }
