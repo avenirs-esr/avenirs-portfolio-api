@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.mapper.ActivityDraftMapper;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityDraftEntity;
@@ -90,7 +91,20 @@ public class ActivityDraftSeeder {
                   ELanguage.FRENCH));
 
           var draft = activityService.createActivityDraft(data.title());
-          drafts.add(draft);
+          var updatedDraft =
+              activityService.updateActivity(
+                  EActivityStatus.DRAFT,
+                  draft.getId(),
+                  data.title(),
+                  data.thematic(),
+                  data.summary().orElse(null),
+                  data.description().orElse(null),
+                  data.executionPeriodInfo().orElse(null),
+                  data.executionPeriodInfoSummary().orElse(null),
+                  data.traceAllowedAssociations().orElse(null),
+                  data.feedbackAllowedIterations().orElse(null),
+                  data.enableReflection());
+          drafts.add(updatedDraft);
         });
 
     log.info("✔ {} activities draft created", drafts.size());

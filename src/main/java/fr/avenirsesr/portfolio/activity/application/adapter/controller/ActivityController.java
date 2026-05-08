@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityNavig
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
@@ -100,11 +101,39 @@ public class ActivityController {
   public ResponseEntity<ActivityDraftCreationResponse> createActivityDraft(
       Principal principal, @RequestBody ActivityDraftCreationRequest body) {
     log.debug(
-        "Received request to create activity draft of user [{}] body : {}",
+        "Received request to create activity draft by user [{}] body : {}",
         principal.getName(),
         body);
 
     var draft = activityService.createActivityDraft(body.title());
+    return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
+  }
+
+  @PatchMapping("/{activityStatus}/{activityId}")
+  public ResponseEntity<ActivityDraftCreationResponse> updateActivity(
+      Principal principal,
+      @PathVariable EActivityStatus activityStatus,
+      @PathVariable UUID activityId,
+      @RequestBody ActivityDraftUpdateRequest body) {
+    log.debug(
+        "Received request to update activity by user [{}] for activity {} body : {}",
+        principal.getName(),
+        activityId,
+        body);
+
+    var draft =
+        activityService.updateActivity(
+            activityStatus,
+            activityId,
+            body.title(),
+            body.thematic(),
+            body.summary(),
+            body.description(),
+            body.executionPeriodInfo(),
+            body.executionPeriodInfoSummary(),
+            body.traceAllowedAssociations(),
+            body.feedbackAllowedIterations(),
+            body.enableReflection());
     return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
   }
 }

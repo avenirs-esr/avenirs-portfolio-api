@@ -5,15 +5,18 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
@@ -151,7 +154,85 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public ActivityDraft createActivityDraft(String title) {
     var staff = loggedInUserService.getLoggedInStaff();
+    requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     var draft = ActivityDraft.create(title, staff);
     return activityDraftRepository.save(draft);
+  }
+
+  @Override
+  public ActivityDraft updateActivity(
+      EActivityStatus status,
+      UUID id,
+      String title,
+      EActivityThematic thematic,
+      String summary,
+      String description,
+      String executionPeriodInfo,
+      String executionPeriodInfoSummary,
+      Integer traceAllowedAssociations,
+      Integer feedbackAllowedIterations,
+      Boolean enableReflection) {
+    return switch (status) {
+      case DRAFT ->
+          updateActivityDraft(
+              id,
+              title,
+              thematic,
+              summary,
+              description,
+              executionPeriodInfo,
+              executionPeriodInfoSummary,
+              traceAllowedAssociations,
+              feedbackAllowedIterations,
+              enableReflection);
+      case PUBLISHED -> throw new UnsupportedOperationException();
+    };
+  }
+
+  private ActivityDraft updateActivityDraft(
+      UUID id,
+      String title,
+      EActivityThematic thematic,
+      String summary,
+      String description,
+      String executionPeriodInfo,
+      String executionPeriodInfoSummary,
+      Integer traceAllowedAssociations,
+      Integer feedbackAllowedIterations,
+      Boolean enableReflection) {
+    var loggedInStaff = loggedInUserService.getLoggedInStaff();
+    var draft =
+        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
+
+    if (!draft.getAuthor().equals(loggedInStaff)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    validateOptionalTextMaxLength("summary", summary, SUMMARY_LENGTH);
+    validateOptionalTextMaxLength("description", description, RICH_TEXT_LENGTH);
+    validateOptionalTextMaxLength(
+        "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
+    validateOptionalTextMaxLength(
+        "executionPeriodInfoSummary", executionPeriodInfoSummary, TITLE_LENGTH);
+
+    if (title != null) {
+      requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
+      draft.setTitle(title);
+    }
+    if (thematic != null) draft.setThematic(thematic);
+    if (summary != null) draft.setSummary(summary);
+    if (description != null) draft.setDescription(description);
+    if (executionPeriodInfo != null) draft.setExecutionPeriodInfo(executionPeriodInfo);
+    if (executionPeriodInfoSummary != null)
+      draft.setExecutionPeriodInfoSummary(executionPeriodInfoSummary);
+    if (traceAllowedAssociations != null)
+      draft.setTraceAllowedAssociations(traceAllowedAssociations);
+    if (feedbackAllowedIterations != null)
+      draft.setFeedbackAllowedIterations(feedbackAllowedIterations);
+    if (enableReflection != null) draft.setEnableReflection(enableReflection);
+
+    var updatedDraft = activityDraftRepository.save(draft);
+    log.info("Updated activity draft with id: {}", id);
+    return updatedDraft;
   }
 }

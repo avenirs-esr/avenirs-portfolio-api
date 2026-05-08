@@ -11,8 +11,8 @@ import lombok.Setter;
 
 @Setter
 public class ActivityDraft extends AvenirsBaseModel {
+  @Getter private final Staff author;
   @Getter private String title;
-  @Getter private Staff author;
   @Getter private EActivityThematic thematic;
 
   private String summary;

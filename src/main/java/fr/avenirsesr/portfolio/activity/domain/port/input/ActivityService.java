@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -33,4 +34,17 @@ public interface ActivityService {
   PagedResult<ActivityWithStudentStatusData> latestActivitiesView(PageCriteria pageCriteria);
 
   ActivityDraft createActivityDraft(String title);
+
+  ActivityDraft updateActivity(
+      EActivityStatus status,
+      UUID id,
+      String title,
+      EActivityThematic thematic,
+      String summary,
+      String description,
+      String executionPeriodInfo,
+      String executionPeriodInfoSummary,
+      Integer traceAllowedAssociations,
+      Integer feedbackAllowedIterations,
+      Boolean enableReflection);
 }

@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDraftCreationRequest;
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
@@ -22,6 +23,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String BASE_PATH = "/me/activities";
   private static final String NAVIGATION_BASE_PATH = BASE_PATH + "/navigation";
   private static final String DETAIL_BASE_PATH = BASE_PATH + "/{activityId}";
+  private static final String DRAFT_BASE_PATH = BASE_PATH + "/draft";
+  private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/DRAFT/{draftId}";
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -341,10 +344,30 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
   }
 
-  private String postDraftAndGetBody(String requestBody) {
-    return webTestClient
-        .post()
-        .uri(BASE_PATH + "/draft")
+  @Test
+  void shouldUpdateActivityAndReturnItsId() throws Exception {
+    BddLogger.given("an existing activity draft");
+    UUID draftId = createDraftAndGetId("Brouillon à mettre à jour");
+
+    BddLogger.when("performing a PATCH with valid fields");
+    BddLogger.then("it should return 200 with the updated draft id");
+
+    String requestBody =
+        objectMapper.writeValueAsString(
+            new ActivityDraftUpdateRequest(
+                "Titre mis à jour",
+                EActivityThematic.EXPERIENCES,
+                "Nouveau summary",
+                "<p>Nouvelle description</p>",
+                "Avant entretien",
+                "Label court",
+                5,
+                3,
+                false));
+
+    webTestClient
+        .patch()
+        .uri(DRAFT_UPDATE_PATH, draftId)
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
@@ -354,8 +377,143 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isOk()
-        .expectBody(String.class)
-        .returnResult()
-        .getResponseBody();
+        .expectBody()
+        .jsonPath("$.draftId")
+        .isEqualTo(draftId.toString());
+  }
+
+  @Test
+  void shouldUpdateActivityWithPartialFields() throws Exception {
+    BddLogger.given("an existing activity draft");
+    UUID draftId = createDraftAndGetId("Brouillon mise à jour partielle");
+
+    BddLogger.when("performing a PATCH with only the title");
+    BddLogger.then("it should return 200 with the draft id");
+
+    String requestBody =
+        objectMapper.writeValueAsString(
+            new ActivityDraftUpdateRequest(
+                "Titre seul mis à jour", null, null, null, null, null, null, null, null));
+
+    webTestClient
+        .patch()
+        .uri(DRAFT_UPDATE_PATH, draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.draftId")
+        .isEqualTo(draftId.toString());
+  }
+
+  @Test
+  void shouldReturn404WhenDraftNotFound() throws Exception {
+    BddLogger.given("a non-existent draft id");
+    UUID unknownId = UUID.randomUUID();
+
+    BddLogger.when("performing a PATCH on an unknown draft");
+    BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND error code");
+
+    String requestBody =
+        objectMapper.writeValueAsString(
+            new ActivityDraftUpdateRequest(
+                "Titre", null, null, null, null, null, null, null, null));
+
+    webTestClient
+        .patch()
+        .uri(DRAFT_UPDATE_PATH, unknownId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
+  }
+
+  @Test
+  void shouldReturn403WhenStudentTriesToUpdateDraft() throws Exception {
+    BddLogger.given("an existing activity draft and a student (non-staff) account");
+    UUID draftId = createDraftAndGetId("Brouillon accès refusé");
+
+    BddLogger.when("performing a PATCH with a student account");
+    BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+    String requestBody =
+        objectMapper.writeValueAsString(
+            new ActivityDraftUpdateRequest(
+                "Titre étudiant", null, null, null, null, null, null, null, null));
+
+    webTestClient
+        .patch()
+        .uri(DRAFT_UPDATE_PATH, draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_NOT_AUTHORIZED");
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnUpdate() throws Exception {
+    BddLogger.given("the " + DRAFT_UPDATE_PATH + " endpoint");
+    BddLogger.when("performing a PATCH without authentication headers");
+    BddLogger.then("it should return 401");
+
+    String requestBody =
+        objectMapper.writeValueAsString(
+            new ActivityDraftUpdateRequest(
+                "Titre", null, null, null, null, null, null, null, null));
+
+    webTestClient
+        .patch()
+        .uri(DRAFT_UPDATE_PATH, UUID.randomUUID())
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  private UUID createDraftAndGetId(String title) throws Exception {
+    String requestBody = objectMapper.writeValueAsString(new ActivityDraftCreationRequest(title));
+
+    String body =
+        webTestClient
+            .post()
+            .uri(DRAFT_BASE_PATH)
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return UUID.fromString(objectMapper.readTree(body).get("draftId").asText());
   }
 }

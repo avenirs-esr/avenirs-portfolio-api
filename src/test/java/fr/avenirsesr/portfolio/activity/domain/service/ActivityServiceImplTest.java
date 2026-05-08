@@ -6,15 +6,18 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
@@ -522,5 +525,206 @@ class ActivityServiceImplTest {
     assertTrue(result.getDescription().isEmpty());
     assertTrue(result.getExecutionPeriodInfo().isEmpty());
     assertTrue(result.getExecutionPeriodInfoSummary().isEmpty());
+  }
+
+  @Test
+  void updateActivityDraft_shouldUpdateAllFieldsAndSave() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(staff);
+    when(activityDraftRepository.save(draft)).thenReturn(draft);
+
+    // When
+    ActivityDraft result =
+        activityService.updateActivity(
+            EActivityStatus.DRAFT,
+            draftId,
+            "Nouveau titre",
+            EActivityThematic.EXPERIENCES,
+            "Nouveau summary",
+            "<p>Nouvelle description</p>",
+            "Avant entretien",
+            "Label court",
+            5,
+            3,
+            false);
+
+    // Then
+    verify(draft).setTitle("Nouveau titre");
+    verify(draft).setThematic(EActivityThematic.EXPERIENCES);
+    verify(draft).setSummary("Nouveau summary");
+    verify(draft).setDescription("<p>Nouvelle description</p>");
+    verify(draft).setExecutionPeriodInfo("Avant entretien");
+    verify(draft).setExecutionPeriodInfoSummary("Label court");
+    verify(draft).setTraceAllowedAssociations(5);
+    verify(draft).setFeedbackAllowedIterations(3);
+    verify(draft).setEnableReflection(false);
+    verify(activityDraftRepository).save(draft);
+    assertEquals(draft, result);
+  }
+
+  @Test
+  void updateActivityDraft_shouldNotUpdateFieldsWhenNullIsPassed() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(staff);
+    when(activityDraftRepository.save(draft)).thenReturn(draft);
+
+    // When
+    activityService.updateActivity(
+        EActivityStatus.DRAFT, draftId, null, null, null, null, null, null, null, null, null);
+
+    // Then
+    verify(draft, never()).setTitle(any());
+    verify(draft, never()).setThematic(any());
+    verify(draft, never()).setSummary(any());
+    verify(draft, never()).setDescription(any());
+    verify(draft, never()).setExecutionPeriodInfo(any());
+    verify(draft, never()).setExecutionPeriodInfoSummary(any());
+    verify(draft, never()).setTraceAllowedAssociations(anyInt());
+    verify(draft, never()).setFeedbackAllowedIterations(anyInt());
+    verify(draft, never()).setEnableReflection(anyBoolean());
+    verify(activityDraftRepository).save(draft);
+  }
+
+  @Test
+  void updateActivityDraft_shouldOnlyUpdateProvidedFields() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(staff);
+    when(activityDraftRepository.save(draft)).thenReturn(draft);
+
+    // When
+    activityService.updateActivity(
+        EActivityStatus.DRAFT,
+        draftId,
+        "Titre seul",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
+
+    // Then
+    verify(draft).setTitle("Titre seul");
+    verify(draft, never()).setThematic(any());
+    verify(draft, never()).setSummary(any());
+    verify(draft, never()).setDescription(any());
+    verify(draft, never()).setExecutionPeriodInfo(any());
+    verify(draft, never()).setExecutionPeriodInfoSummary(any());
+    verify(draft, never()).setTraceAllowedAssociations(anyInt());
+    verify(draft, never()).setFeedbackAllowedIterations(anyInt());
+    verify(draft, never()).setEnableReflection(anyBoolean());
+  }
+
+  @Test
+  void updateActivityDraft_shouldThrowActivityDraftNotFoundException_whenDraftDoesNotExist() {
+    // Given
+    UUID unknownId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+    // When / Then
+    assertThrows(
+        ActivityDraftNotFoundException.class,
+        () ->
+            activityService.updateActivity(
+                EActivityStatus.DRAFT,
+                unknownId,
+                "Titre",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null));
+
+    verify(activityDraftRepository, never()).save(any());
+  }
+
+  @Test
+  void updateActivityDraft_shouldThrowUserNotAuthorizedException_whenStaffIsNotAuthor() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff loggedInStaff = mock(Staff.class);
+    Staff otherStaff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(otherStaff);
+
+    // When / Then
+    assertThrows(
+        UserNotAuthorizedException.class,
+        () ->
+            activityService.updateActivity(
+                EActivityStatus.DRAFT,
+                draftId,
+                "Titre",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null));
+
+    verify(activityDraftRepository, never()).save(any());
+  }
+
+  @Test
+  void updateActivityDraft_shouldReturnSavedDraft() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+    ActivityDraft savedDraft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(staff);
+    when(activityDraftRepository.save(draft)).thenReturn(savedDraft);
+
+    // When
+    ActivityDraft result =
+        activityService.updateActivity(
+            EActivityStatus.DRAFT,
+            draftId,
+            "Titre",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null);
+
+    // Then
+    assertEquals(savedDraft, result);
   }
 }
