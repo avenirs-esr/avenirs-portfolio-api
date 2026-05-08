@@ -78,7 +78,7 @@ public class ActivityFixture {
     return this;
   }
 
-  public ActivityFixture withFeedbackAllowedIterations(Integer feedbackAllowedIterations) {
+  public ActivityFixture withFeedbackAllowedIterations(int feedbackAllowedIterations) {
     this.feedbackAllowedIterations = feedbackAllowedIterations;
     return this;
   }

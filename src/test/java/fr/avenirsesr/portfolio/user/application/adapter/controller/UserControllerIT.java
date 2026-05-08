@@ -150,7 +150,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .isOk()
         .expectBody()
         .jsonPath("$.email")
-        .isEqualTo("lucas.tessier@university.com")
+        .isEqualTo("lucas.tessier@email.com")
         .jsonPath("$.bio")
         .exists();
   }
