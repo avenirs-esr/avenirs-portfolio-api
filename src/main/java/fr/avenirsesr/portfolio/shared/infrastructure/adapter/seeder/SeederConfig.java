@@ -53,6 +53,7 @@ public class SeederConfig {
 
   // Activities
   public static final int NB_OF_ACTIVITIES = 50;
+  public static final int NB_OF_ACTIVITIES_DRAFT = 20;
 
   // Declared Activities
   public static final int NB_DECLARED_ACTIVITIES_PER_STUDENT = 2;

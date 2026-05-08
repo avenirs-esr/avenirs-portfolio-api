@@ -1,0 +1,40 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1778232497752-1">
+        <createTable tableName="activity_draft">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_draftPK"/>
+            </column>
+            <column name="author_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(80)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="thematic" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="summary" type="VARCHAR(400)"/>
+            <column name="description" type="VARCHAR(4000)"/>
+            <column name="execution_period_info" type="VARCHAR(200)"/>
+            <column name="execution_period_info_summary" type="VARCHAR(80)"/>
+            <column name="enable_reflection" type="BOOLEAN"/>
+            <column name="feedback_allowed_iterations" type="INTEGER"/>
+            <column name="trace_allowed_associations" type="INTEGER"/>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1778232497752-2">
+        <createIndex indexName="idx_activity_draft_thematic" tableName="activity_draft">
+            <column name="thematic"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1778232497752-3">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="activity_draft" constraintName="FKcik6xujlp08fvwls3bqw46in" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="staff" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

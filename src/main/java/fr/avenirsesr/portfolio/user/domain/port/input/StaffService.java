@@ -5,6 +5,8 @@ import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.util.UUID;
 
 public interface StaffService {
+  Staff getStaffById(UUID id);
+
   String getBio(User user);
 
   String getInstitutionEmail(User user);

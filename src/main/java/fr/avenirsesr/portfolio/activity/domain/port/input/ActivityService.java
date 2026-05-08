@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.activity.domain.port.input;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -30,4 +31,6 @@ public interface ActivityService {
       EActivityThematic thematic, PageCriteria pageCriteria);
 
   PagedResult<ActivityWithStudentStatusData> latestActivitiesView(PageCriteria pageCriteria);
+
+  ActivityDraft createActivityDraft(String title);
 }

@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.domain.service.ActivityServiceImpl;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class ActivityServiceConfig {
   private final ActivityRepository activityRepository;
+  private final ActivityDraftRepository activityDraftRepository;
   private final DeclaredActivityService declaredActivityService;
   private final LoggedInUserService loggedInUserService;
   private final ActivityResourceService activityResourceService;
@@ -21,6 +23,10 @@ public class ActivityServiceConfig {
   @Bean
   public ActivityService activityService() {
     return new ActivityServiceImpl(
-        activityRepository, declaredActivityService, loggedInUserService, activityResourceService);
+        activityRepository,
+        activityDraftRepository,
+        declaredActivityService,
+        loggedInUserService,
+        activityResourceService);
   }
 }

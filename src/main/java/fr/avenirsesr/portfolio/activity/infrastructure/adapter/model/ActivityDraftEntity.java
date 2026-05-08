@@ -1,0 +1,115 @@
+package fr.avenirsesr.portfolio.activity.infrastructure.adapter.model;
+
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.ACTIVITY_EXECUTION_PERIOD_INFO;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
+
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
+import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.UUID;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(
+    name = "activity_draft",
+    indexes = {@Index(name = "idx_activity_draft_thematic", columnList = "thematic")})
+@NoArgsConstructor
+@Getter
+@Setter
+public class ActivityDraftEntity extends AvenirsBaseEntity {
+  @Column(nullable = false, length = TITLE_LENGTH)
+  private String title;
+
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "author_id", nullable = false)
+  private StaffEntity author;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private EActivityThematic thematic;
+
+  @Column(length = SUMMARY_LENGTH)
+  private String summary;
+
+  @Column(length = RICH_TEXT_LENGTH)
+  private String description;
+
+  @Column(name = "execution_period_info", length = ACTIVITY_EXECUTION_PERIOD_INFO)
+  private String executionPeriodInfo;
+
+  @Column(name = "execution_period_info_summary", length = TITLE_LENGTH)
+  private String executionPeriodInfoSummary;
+
+  @Column(name = "trace_allowed_associations")
+  private Integer traceAllowedAssociations;
+
+  @Column(name = "feedback_allowed_iterations")
+  private Integer feedbackAllowedIterations;
+
+  @Column(name = "enable_reflection")
+  private boolean enableReflection;
+
+  public ActivityDraftEntity(
+      UUID id,
+      String title,
+      StaffEntity author,
+      EActivityThematic thematic,
+      String summary,
+      String description,
+      String executionPeriodInfo,
+      String executionPeriodInfoSummary,
+      Integer traceAllowedAssociations,
+      Integer feedbackAllowedIterations,
+      boolean enableReflection,
+      Instant createdAt,
+      Instant updatedAt) {
+    this.setId(id);
+    this.title = title;
+    this.author = author;
+    this.thematic = thematic;
+    this.summary = summary;
+    this.description = description;
+    this.executionPeriodInfo = executionPeriodInfo;
+    this.executionPeriodInfoSummary = executionPeriodInfoSummary;
+    this.traceAllowedAssociations = traceAllowedAssociations;
+    this.enableReflection = enableReflection;
+    this.feedbackAllowedIterations = feedbackAllowedIterations;
+    this.setCreatedAt(createdAt);
+    this.setUpdatedAt(updatedAt);
+  }
+
+  public static ActivityDraftEntity of(
+      UUID id,
+      String title,
+      StaffEntity author,
+      EActivityThematic thematic,
+      String summary,
+      String description,
+      String executionPeriodInfo,
+      String executionPeriodInfoSummary,
+      Integer traceAllowedAssociations,
+      Integer feedbackAllowedIterations,
+      boolean enableReflection,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new ActivityDraftEntity(
+        id,
+        title,
+        author,
+        thematic,
+        summary,
+        description,
+        executionPeriodInfo,
+        executionPeriodInfoSummary,
+        traceAllowedAssociations,
+        feedbackAllowedIterations,
+        enableReflection,
+        createdAt,
+        updatedAt);
+  }
+}

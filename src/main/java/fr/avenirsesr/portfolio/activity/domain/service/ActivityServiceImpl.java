@@ -7,8 +7,10 @@ import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -36,6 +38,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   private static final Duration DURATION_FOR_LATEST = Duration.ofDays(90);
   private final ActivityRepository activityRepository;
+  private final ActivityDraftRepository activityDraftRepository;
   private final DeclaredActivityService declaredActivityService;
   private final LoggedInUserService loggedInUserService;
   private final ActivityResourceService activityResourceService;
@@ -143,5 +146,12 @@ public class ActivityServiceImpl implements ActivityService {
             .map(activity -> new ActivityWithStudentStatusData(activity, true, null))
             .toList(),
         pagedActivities.pageInfo());
+  }
+
+  @Override
+  public ActivityDraft createActivityDraft(String title) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var draft = ActivityDraft.create(title, staff);
+    return activityDraftRepository.save(draft);
   }
 }

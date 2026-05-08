@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.domain.service;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
+import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStudentException;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
@@ -16,6 +17,17 @@ import lombok.extern.slf4j.Slf4j;
 public class StaffServiceImpl implements StaffService {
   private final StaffRepository staffRepository;
   private final UserRepository userRepository;
+
+  @Override
+  public Staff getStaffById(UUID id) {
+    return staffRepository
+        .findById(id)
+        .orElseThrow(
+            () -> {
+              log.error("Staff {} not found", id);
+              return new UserIsNotStudentException();
+            });
+  }
 
   @Override
   public String getBio(User user) {

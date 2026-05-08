@@ -8,7 +8,9 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
@@ -20,6 +22,7 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,6 +34,7 @@ import org.mockito.*;
 class ActivityServiceImplTest {
 
   @Mock private ActivityRepository activityRepository;
+  @Mock private ActivityDraftRepository activityDraftRepository;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private ActivityResourceService activityResourceService;
@@ -458,5 +462,65 @@ class ActivityServiceImplTest {
 
     verify(activityRepository).findById(activityId);
     verifyNoInteractions(activityResourceService);
+  }
+
+  @Test
+  void createActivityDraft_shouldReturnDraftAndSaveIt() {
+    // Given
+    String title = "Mon brouillon d'activité";
+
+    Staff staff = mock(Staff.class);
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+
+    ArgumentCaptor<ActivityDraft> captor = ArgumentCaptor.forClass(ActivityDraft.class);
+    when(activityDraftRepository.save(captor.capture()))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    ActivityDraft result = activityService.createActivityDraft(title);
+
+    // Then
+    assertNotNull(result);
+    assertEquals(title, result.getTitle());
+    assertEquals(staff, result.getAuthor());
+
+    verify(loggedInUserService).getLoggedInStaff();
+    verify(activityDraftRepository).save(result);
+  }
+
+  @Test
+  void createActivityDraft_shouldInitializeWithDefaultValues() {
+    // Given
+    String title = "Brouillon avec valeurs par défaut";
+
+    Staff staff = mock(Staff.class);
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    ActivityDraft result = activityService.createActivityDraft(title);
+
+    // Then
+    assertEquals(EActivityThematic.TRANSVERSAL, result.getThematic());
+    assertEquals(10, result.getTraceAllowedAssociations().get());
+    assertEquals(10, result.getFeedbackAllowedIterations().get());
+    assertTrue(result.isEnableReflection());
+  }
+
+  @Test
+  void createActivityDraft_shouldInitializeNullableFieldsAsNull() {
+    // Given
+    Staff staff = mock(Staff.class);
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    ActivityDraft result = activityService.createActivityDraft("Brouillon");
+
+    // Then
+    assertTrue(result.getSummary().isEmpty());
+    assertTrue(result.getDescription().isEmpty());
+    assertTrue(result.getExecutionPeriodInfo().isEmpty());
+    assertTrue(result.getExecutionPeriodInfoSummary().isEmpty());
   }
 }

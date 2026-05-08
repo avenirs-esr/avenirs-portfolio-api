@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder;
 
+import fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.ActivityDraftSeeder;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.ActivitySeeder;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder.AssociationSeeder;
 import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
@@ -72,6 +73,7 @@ public class SeederOrchestrator {
   private final StudentProgressSeeder studentProgressSeeder;
 
   private final TraceSeeder traceSeeder;
+  private final ActivityDraftSeeder activityDraftSeeder;
   private final ActivitySeeder activitySeeder;
   private final DeclaredActivitySeeder declaredActivitySeeder;
   private final AssociationSeeder associationSeeder;
@@ -119,6 +121,7 @@ public class SeederOrchestrator {
 
       declaredProgramSeeder.seed(savedStudents);
 
+      activityDraftSeeder.seed(savedStaffs);
       var savedActivities = activitySeeder.seed(savedUsers.getFirst());
       var declaredActivities = declaredActivitySeeder.seed(savedStudents, savedActivities);
       associationSeeder.seed(
