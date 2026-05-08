@@ -122,7 +122,7 @@ public class SeederOrchestrator {
       declaredProgramSeeder.seed(savedStudents);
 
       activityDraftSeeder.seed(savedStaffs);
-      var savedActivities = activitySeeder.seed(savedUsers.getFirst());
+      var savedActivities = activitySeeder.seed(savedStaffs.getFirst());
       var declaredActivities = declaredActivitySeeder.seed(savedStudents, savedActivities);
       associationSeeder.seed(
           declaredActivities, savedTraces, savedDeclaredSkillProgresses, savedDeclaredExperiences);

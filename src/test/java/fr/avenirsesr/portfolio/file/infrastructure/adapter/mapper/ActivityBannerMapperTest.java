@@ -11,7 +11,11 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
 import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.ActivityBannerEntity;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeStaff;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,16 +43,23 @@ class ActivityBannerMapperTest {
 
   @BeforeEach
   void setUp() {
-
+    Staff author =
+        StaffMapper.INSTANCE.toDomain(
+            FakeStaff.create(UserMapper.INSTANCE.fromDomain(UserFixture.create().toModel()))
+                .toEntity());
     activity =
         Activity.toDomain(
             activityId,
+            author,
             "Activity Title",
             EActivityThematic.SELF_KNOWLEDGE,
             "Summary",
             "<h3>Objectives</h3><p>Activity description</p>",
             "2020 - 2022",
             "label 2020",
+            true,
+            10,
+            10,
             createdAt,
             updatedAt);
 

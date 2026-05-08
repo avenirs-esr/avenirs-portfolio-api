@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -15,12 +16,16 @@ import java.util.UUID;
 public interface ActivityService {
   Activity create(
       UUID id,
+      Staff author,
       String title,
       EActivityThematic thematic,
       String summary,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary);
+      String executionPeriodInfoSummary,
+      boolean enableReflection,
+      int traceAllowedAssociations,
+      int feedbackAllowedIterations);
 
   Activity getActivityById(UUID id);
 

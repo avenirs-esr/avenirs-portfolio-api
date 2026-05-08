@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.association.domain.exception.MaximumAssociationReachedException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
@@ -406,10 +407,12 @@ class DeclaredActivityServiceImplTest {
     UUID activityId = UUID.randomUUID();
 
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+    Activity activity = ActivityFixture.create().toModel();
     Student student = mock(Student.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivity.getStudent()).thenReturn(student);
+    when(declaredActivity.getActivity()).thenReturn(activity);
 
     when(declaredActivityRepository.findById(activityId)).thenReturn(Optional.of(declaredActivity));
 
@@ -1393,5 +1396,66 @@ class DeclaredActivityServiceImplTest {
     verify(associationSearchHelper)
         .searchForAssociation(
             eq(null), eq(null), eq(null), eq(null), any(), any(), any(), any(), any());
+  }
+
+  @Test
+  void updateReflection_should_throw_UserNotAuthorizedException_when_reflection_is_not_enabled() {
+    BddLogger.given("A logged-in student and a declared activity where enableReflection is false");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().withEnableRefection(false).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("He tries to update the reflection");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.updateReflection(declaredActivityId, "Ma réflexion"))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void
+      associateActivityWithTraces_should_throw_MaximumAssociationReachedException_when_limit_reached() {
+    BddLogger.given(
+        "A declared activity with traceAllowedAssociations=1 and already 1 existing association");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    UUID traceId = UUID.randomUUID();
+
+    Activity activity = ActivityFixture.create().withTraceAllowedAssociations(1).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    Trace trace = mock(Trace.class);
+    when(trace.getId()).thenReturn(traceId);
+    when(trace.getUser()).thenReturn(student.getUser());
+
+    Association existingAssociation = mock(Association.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
+    when(associationService.getAllOf(
+            declaredActivityId,
+            DeclaredActivity.class,
+            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
+        .thenReturn(List.of(existingAssociation));
+
+    BddLogger.when("He tries to associate a new trace");
+
+    BddLogger.then("A MaximumAssociationReachedException is thrown and no association is created");
+    assertThatThrownBy(
+            () -> service.associateActivityWithTraces(declaredActivityId, List.of(traceId)))
+        .isInstanceOf(MaximumAssociationReachedException.class);
+
+    verify(associationService, never()).createAll(any());
   }
 }

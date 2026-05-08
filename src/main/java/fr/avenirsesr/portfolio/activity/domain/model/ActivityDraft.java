@@ -19,12 +19,12 @@ public class ActivityDraft extends AvenirsBaseModel {
   private String description;
   private String executionPeriodInfo;
   private String executionPeriodInfoSummary;
-  private Integer traceAllowedAssociations;
-  private Integer feedbackAllowedIterations;
+  private int traceAllowedAssociations;
+  private int feedbackAllowedIterations;
   @Getter private boolean enableReflection;
 
-  private static final int DEFAULT_TRACE_ALLOWED_ASSOCIATION = 10;
-  private static final int DEFAULT_FEEDBACK_ALLOWED_ITERATIONS = 10;
+  private static final int DEFAULT_TRACE_ALLOWED_ASSOCIATION = -1;
+  private static final int DEFAULT_FEEDBACK_ALLOWED_ITERATIONS = -1;
 
   private ActivityDraft(
       UUID id,
@@ -37,8 +37,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
-      Integer traceAllowedAssociations,
-      Integer feedbackAllowedIterations,
+      int traceAllowedAssociations,
+      int feedbackAllowedIterations,
       boolean enableReflection) {
     super(id, createdAt, updatedAt);
     this.title = title;
@@ -81,8 +81,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
-      Integer traceAllowedAssociations,
-      Integer feedbackAllowedIterations,
+      int traceAllowedAssociations,
+      int feedbackAllowedIterations,
       boolean enableReflection) {
     return new ActivityDraft(
         id,

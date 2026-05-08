@@ -45,11 +45,11 @@ public class ActivityDraftEntity extends AvenirsBaseEntity {
   @Column(name = "execution_period_info_summary", length = TITLE_LENGTH)
   private String executionPeriodInfoSummary;
 
-  @Column(name = "trace_allowed_associations")
-  private Integer traceAllowedAssociations;
+  @Column(name = "trace_allowed_associations", nullable = false)
+  private int traceAllowedAssociations;
 
-  @Column(name = "feedback_allowed_iterations")
-  private Integer feedbackAllowedIterations;
+  @Column(name = "feedback_allowed_iterations", nullable = false)
+  private int feedbackAllowedIterations;
 
   @Column(name = "enable_reflection")
   private boolean enableReflection;
@@ -63,8 +63,8 @@ public class ActivityDraftEntity extends AvenirsBaseEntity {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
-      Integer traceAllowedAssociations,
-      Integer feedbackAllowedIterations,
+      int traceAllowedAssociations,
+      int feedbackAllowedIterations,
       boolean enableReflection,
       Instant createdAt,
       Instant updatedAt) {
@@ -92,8 +92,8 @@ public class ActivityDraftEntity extends AvenirsBaseEntity {
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
-      Integer traceAllowedAssociations,
-      Integer feedbackAllowedIterations,
+      int traceAllowedAssociations,
+      int feedbackAllowedIterations,
       boolean enableReflection,
       Instant createdAt,
       Instant updatedAt) {

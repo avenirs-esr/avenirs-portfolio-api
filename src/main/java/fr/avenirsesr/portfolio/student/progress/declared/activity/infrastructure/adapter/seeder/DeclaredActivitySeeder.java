@@ -115,9 +115,6 @@ public class DeclaredActivitySeeder {
                 declaredActivity.getId(), data.reflection().get());
 
           if (data.finishedAt().isPresent()) {
-            if (data.reflection().isEmpty()) {
-              declaredActivityService.updateReflection(declaredActivity.getId(), null);
-            }
             clockService.fixed(data.finishedAt().get());
             declaredActivityService.finish(declaredActivity.getId());
             clockService.clear();

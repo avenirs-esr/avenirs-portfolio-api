@@ -1,0 +1,66 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+                                       http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+                                       http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Étape 1 : Ajout des colonnes nullable pour ne pas bloquer les lignes existantes -->
+    <changeSet author="bilelbanelhaq (generated)" id="1778593983996-1">
+        <addColumn tableName="activity">
+            <column name="author_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bilelbanelhaq (generated)" id="1778593983996-2">
+        <addColumn tableName="activity">
+            <column name="enable_reflection" type="boolean"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bilelbanelhaq (generated)" id="1778593983996-3">
+        <addColumn tableName="activity">
+            <column name="feedback_allowed_iterations" type="integer"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bilelbanelhaq (generated)" id="1778593983996-4">
+        <addColumn tableName="activity">
+            <column name="trace_allowed_associations" type="integer"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Étape 2 : Migration des lignes existantes -->
+    <changeSet author="bilelbanelhaq (generated)" id="1778593983996-5">
+        <update tableName="activity">
+            <column name="author_id" value="57ff122f-ff76-4d95-b6c1-61a4efeabd80"/>
+            <column name="enable_reflection" valueBoolean="true"/>
+            <column name="feedback_allowed_iterations" valueNumeric="-1"/>
+            <column name="trace_allowed_associations" valueNumeric="-1"/>
+        </update>
+    </changeSet>
+
+    <!-- Étape 3 : Application des contraintes NOT NULL maintenant que les données sont migrées -->
+    <changeSet author="bilelbanelhaq (generated)" id="1778593983996-6">
+        <addNotNullConstraint tableName="activity" columnName="author_id" columnDataType="uuid"/>
+        <addNotNullConstraint tableName="activity" columnName="enable_reflection" columnDataType="boolean"/>
+        <addNotNullConstraint tableName="activity" columnName="feedback_allowed_iterations" columnDataType="integer"/>
+        <addNotNullConstraint tableName="activity" columnName="trace_allowed_associations" columnDataType="integer"/>
+    </changeSet>
+
+    <!-- Étape 4 : Clé étrangère -->
+    <changeSet author="bilelbanelhaq (generated)" id="1778593983996-7">
+        <addForeignKeyConstraint
+                baseColumnNames="author_id"
+                baseTableName="activity"
+                constraintName="FKubdu16c59lniaentuuks3ks9"
+                deferrable="false"
+                initiallyDeferred="false"
+                referencedColumnNames="id"
+                referencedTableName="staff"
+                validate="true"/>
+    </changeSet>
+
+</databaseChangeLog>

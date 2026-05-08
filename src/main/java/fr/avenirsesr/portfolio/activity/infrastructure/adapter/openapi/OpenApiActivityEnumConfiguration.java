@@ -9,7 +9,10 @@ public class OpenApiActivityEnumConfiguration {
   @Bean
   public OpenApiCustomizer activityEnumCustomizer() {
     return openApi -> {
-      openApi.getComponents().addSchemas("EActivityThematic", SwaggerSchema.activityThematicSchema);
+      openApi
+          .getComponents()
+          .addSchemas("EActivityThematic", SwaggerSchema.activityThematicSchema)
+          .addSchemas("EActivityStatus", SwaggerSchema.activityStatusSchema);
     };
   }
 }

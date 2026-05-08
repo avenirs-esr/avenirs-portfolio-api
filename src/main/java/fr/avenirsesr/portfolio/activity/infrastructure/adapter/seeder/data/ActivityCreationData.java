@@ -6,10 +6,14 @@ import java.util.UUID;
 
 public record ActivityCreationData(
     UUID id,
+    UUID authorStaffId,
     String title,
     EActivityThematic thematic,
     String summary,
     String description,
     String executionPeriodInfo,
     Optional<String> executionPeriodInfoSummary,
-    ActivityBannerCreationData banner) {}
+    ActivityBannerCreationData banner,
+    boolean enableReflection,
+    int traceAllowedAssociations,
+    int feedbackAllowedIterations) {}

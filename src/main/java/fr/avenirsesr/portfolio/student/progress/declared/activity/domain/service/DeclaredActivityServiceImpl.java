@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.association.domain.exception.MaximumAssociationReachedException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
@@ -20,12 +21,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityStartDateBeforeSubscriptionException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -148,10 +144,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     return declaredActivityRepository.save(declaredActivity);
   }
 
-  private static void fieldsValidation(String reflection) {
-    validateOptionalTextMaxLength("reflection", reflection, RICH_TEXT_LENGTH);
-  }
-
   @Override
   public void updateReflection(UUID declaredActivityId, String reflection) {
     Student student = loggedInUserService.getLoggedInStudent();
@@ -162,10 +154,14 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     if (!declaredActivity.getStudent().equals(student)) {
       throw new UserNotAuthorizedException();
     }
-    fieldsValidation(reflection);
     if (declaredActivity.getFinishedAt().isPresent()) {
       throw new DeclaredActivityAlreadyFinishedException();
     }
+    if (!declaredActivity.getActivity().isEnableReflection()) {
+      throw new UserNotAuthorizedException();
+    }
+    validateOptionalTextMaxLength("reflection", reflection, RICH_TEXT_LENGTH);
+
     declaredActivity.setReflection(reflection);
 
     if (declaredActivity.getStartedAt().isEmpty()) {
@@ -236,7 +232,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public DeclaredActivityAssociationsData associateActivityWithTraces(
       UUID declaredActivityId, List<UUID> traceIds) {
     Student student = loggedInUserService.getLoggedInStudent();
-    fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    DeclaredActivity declaredActivity =
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
     var traces = traceService.findAllTracesById(traceIds);
 
     if (!new HashSet<>(traces.stream().map(Trace::getId).toList()).containsAll(traceIds)) {
@@ -245,6 +242,17 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     if (!traces.stream().allMatch(trace -> trace.getUser().equals(student.getUser()))) {
       throw new UserNotAuthorizedException();
+    }
+
+    var traceAssociations =
+        associationService.getAllOf(
+            declaredActivityId,
+            DeclaredActivity.class,
+            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));
+    var activity = declaredActivity.getActivity();
+    if (activity.getTraceAllowedAssociations() != -1
+        && activity.getTraceAllowedAssociations() >= traceAssociations.size()) {
+      throw new MaximumAssociationReachedException();
     }
 
     associationService.createAll(

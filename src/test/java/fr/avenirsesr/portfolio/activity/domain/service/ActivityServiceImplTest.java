@@ -59,17 +59,22 @@ class ActivityServiceImplTest {
     String description = "<h3>Objectives</h3><p>Test activity description</p>";
     String executionPeriodInfo = "2026";
     String executionPeriodInfoSummary = "Short label";
+    var author = Mockito.mock(Staff.class);
 
     // When
     Activity createdActivity =
         activityService.create(
             id,
+            author,
             title,
             thematic,
             summary,
             description,
             executionPeriodInfo,
-            executionPeriodInfoSummary);
+            executionPeriodInfoSummary,
+            true,
+            -1,
+            -1);
 
     // Then
     assertNotNull(createdActivity);
@@ -89,16 +94,47 @@ class ActivityServiceImplTest {
 
   @Test
   void getActivityNavigation() {
+    var author = Mockito.mock(Staff.class);
     // Given
     Activity a1 =
         Activity.create(
-            UUID.randomUUID(), "A1", EActivityThematic.EXPERIENCES, "S1", "D1", "2026", "");
+            UUID.randomUUID(),
+            author,
+            "A1",
+            EActivityThematic.EXPERIENCES,
+            "S1",
+            "D1",
+            "2026",
+            "",
+            true,
+            -1,
+            -1);
     Activity a2 =
         Activity.create(
-            UUID.randomUUID(), "A2", EActivityThematic.EXPERIENCES, "S2", "D2", "2025", null);
+            UUID.randomUUID(),
+            author,
+            "A2",
+            EActivityThematic.EXPERIENCES,
+            "S2",
+            "D2",
+            "2025",
+            null,
+            true,
+            -1,
+            -1);
     Activity a3 =
         Activity.create(
-            UUID.randomUUID(), "A3", EActivityThematic.RESUMES, "S3", "D3", "2024", null);
+            UUID.randomUUID(),
+            author,
+            "A3",
+            EActivityThematic.RESUMES,
+            "S3",
+            "D3",
+            "2024",
+            null,
+            true,
+            -1,
+            -1);
 
     when(activityRepository.findAll()).thenReturn(List.of(a1, a2, a3));
 
@@ -130,9 +166,20 @@ class ActivityServiceImplTest {
   @Test
   void getActivityNavigation_shouldNotIncludeThematicsThatAreNotPresent() {
     // Given (only CV)
+    var author = Mockito.mock(Staff.class);
     Activity a1 =
         Activity.create(
-            UUID.randomUUID(), "A1", EActivityThematic.RESUMES, "S1", "D1", "2026", null);
+            UUID.randomUUID(),
+            author,
+            "A1",
+            EActivityThematic.RESUMES,
+            "S1",
+            "D1",
+            "2026",
+            null,
+            true,
+            -1,
+            -1);
 
     when(activityRepository.findAll()).thenReturn(List.of(a1));
 
@@ -505,8 +552,8 @@ class ActivityServiceImplTest {
 
     // Then
     assertEquals(EActivityThematic.TRANSVERSAL, result.getThematic());
-    assertEquals(10, result.getTraceAllowedAssociations().get());
-    assertEquals(10, result.getFeedbackAllowedIterations().get());
+    assertEquals(-1, result.getTraceAllowedAssociations().get());
+    assertEquals(-1, result.getFeedbackAllowedIterations().get());
     assertTrue(result.isEnableReflection());
   }
 

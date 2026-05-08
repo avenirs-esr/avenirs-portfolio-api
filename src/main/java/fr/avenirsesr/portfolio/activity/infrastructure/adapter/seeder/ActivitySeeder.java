@@ -16,8 +16,9 @@ import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeActivityBanner;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +50,7 @@ public class ActivitySeeder {
   }
 
   @Transactional
-  public List<ActivityEntity> seed(UserEntity uploader) {
+  public List<ActivityEntity> seed(StaffEntity uploader) {
     log.info("Seeding Activities...");
 
     List<ActivityCreationData> creationData =
@@ -58,12 +59,13 @@ public class ActivitySeeder {
               fileReader.readJSON(PATH_FILE, new TypeReference<List<ActivityCreationData>>() {});
           case FAKER ->
               IntStream.range(0, SeederConfig.NB_OF_ACTIVITIES)
-                  .mapToObj(i -> FakeActivity.create().toEntity())
+                  .mapToObj(i -> FakeActivity.create(uploader).toEntity())
                   .map(
                       fakeActivity -> {
                         var banner = FakeActivityBanner.create(fakeActivity).toEntity();
                         return new ActivityCreationData(
                             fakeActivity.getId(),
+                            uploader.getId(),
                             fakeActivity.getTitle(),
                             fakeActivity.getThematic(),
                             fakeActivity.getSummary(),
@@ -71,7 +73,10 @@ public class ActivitySeeder {
                             fakeActivity.getExecutionPeriodInfo(),
                             Optional.ofNullable(fakeActivity.getExecutionPeriodInfoSummary()),
                             new ActivityBannerCreationData(
-                                banner.getFileName(), banner.getFileType(), banner.getSize()));
+                                banner.getFileName(), banner.getFileType(), banner.getSize()),
+                            fakeActivity.isEnableReflection(),
+                            fakeActivity.getTraceAllowedAssociations(),
+                            fakeActivity.getFeedbackAllowedIterations());
                       })
                   .toList();
         };
@@ -80,18 +85,23 @@ public class ActivitySeeder {
 
     RequestContext.set(
         new RequestData(
-            Optional.ofNullable(UserMapper.INSTANCE.toDomain(uploader)), ELanguage.FRENCH));
+            Optional.ofNullable(UserMapper.INSTANCE.toDomain(uploader.getUser())),
+            ELanguage.FRENCH));
     creationData.forEach(
         data -> {
           var activity =
               activityService.create(
                   data.id(),
+                  StaffMapper.INSTANCE.toDomain(uploader),
                   data.title(),
                   data.thematic(),
                   data.summary(),
                   data.description(),
                   data.executionPeriodInfo(),
-                  data.executionPeriodInfoSummary().orElse(null));
+                  data.executionPeriodInfoSummary().orElse(null),
+                  data.enableReflection(),
+                  data.traceAllowedAssociations(),
+                  data.feedbackAllowedIterations());
           activityResourceService.uploadBannerFor(
               activity,
               data.banner().fileName(),

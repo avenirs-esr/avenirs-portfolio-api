@@ -23,6 +23,7 @@ import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.EnumMap;
@@ -49,12 +50,16 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public Activity create(
       UUID id,
+      Staff author,
       String title,
       EActivityThematic thematic,
       String summary,
       String description,
       String executionPeriodInfo,
-      String executionPeriodInfoSummary) {
+      String executionPeriodInfoSummary,
+      boolean enableReflection,
+      int traceAllowedAssociations,
+      int feedbackAllowedIterations) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     requireNotNull("thematic", thematic);
     requireNotBlankAndMaxLength("summary", summary, SUMMARY_LENGTH);
@@ -67,12 +72,16 @@ public class ActivityServiceImpl implements ActivityService {
     var activity =
         Activity.create(
             id,
+            author,
             title,
             thematic,
             summary,
             description,
             executionPeriodInfo,
-            executionPeriodInfoSummary);
+            executionPeriodInfoSummary,
+            enableReflection,
+            traceAllowedAssociations,
+            feedbackAllowedIterations);
     activityRepository.save(activity);
     return activity;
   }

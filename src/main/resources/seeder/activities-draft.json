@@ -32,7 +32,7 @@
     "executionPeriodInfoSummary": null,
     "authorStaffId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
     "traceAllowedAssociations": 1,
-    "feedbackAllowedIterations": null,
+    "feedbackAllowedIterations": -1,
     "enableReflection": false
   },
   {
@@ -43,7 +43,7 @@
     "executionPeriodInfo": "À effectuer avant une démarche d'exploration des métiers ou un échange avec un.e conseiller/ conseillère d'orientation.",
     "executionPeriodInfoSummary": "Avant démarche d'exploration",
     "authorStaffId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
-    "traceAllowedAssociations": null,
+    "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 4,
     "enableReflection": true
   },
@@ -56,7 +56,7 @@
     "executionPeriodInfoSummary": "Avant rendez-vous d'orientation",
     "authorStaffId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
     "traceAllowedAssociations": 7,
-    "feedbackAllowedIterations": null,
+    "feedbackAllowedIterations": -1,
     "enableReflection": false
   },
   {
@@ -79,8 +79,8 @@
     "executionPeriodInfo": "À réaliser avant un entretien d'orientation ou dans la phase exploratoire d'un parcours Cofolio dédié au projet professionnel.",
     "executionPeriodInfoSummary": "Avant entretien d'orientation",
     "authorStaffId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
-    "traceAllowedAssociations": null,
-    "feedbackAllowedIterations": null,
+    "traceAllowedAssociations": -1,
+    "feedbackAllowedIterations": -1,
     "enableReflection": false
   },
   {
@@ -104,7 +104,7 @@
     "executionPeriodInfoSummary": "Avant bilan pédagogique",
     "authorStaffId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
     "traceAllowedAssociations": 2,
-    "feedbackAllowedIterations": null,
+    "feedbackAllowedIterations": -1,
     "enableReflection": false
   },
   {
@@ -115,7 +115,7 @@
     "executionPeriodInfo": null,
     "executionPeriodInfoSummary": "Avant dossier académique",
     "authorStaffId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
-    "traceAllowedAssociations": null,
+    "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 6,
     "enableReflection": true
   },
@@ -139,8 +139,8 @@
     "executionPeriodInfo": "À effectuer avant la préparation d'un CV ou d'un entretien lié à une candidature professionnelle.",
     "executionPeriodInfoSummary": "Avant préparation de CV",
     "authorStaffId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
-    "traceAllowedAssociations": null,
-    "feedbackAllowedIterations": null,
+    "traceAllowedAssociations": -1,
+    "feedbackAllowedIterations": -1,
     "enableReflection": false
   },
   {
@@ -163,7 +163,7 @@
     "executionPeriodInfo": "À réaliser avant un entretien d'accompagnement ou pour structurer un travail global sur la cohérence du parcours.",
     "executionPeriodInfoSummary": null,
     "authorStaffId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
-    "traceAllowedAssociations": null,
+    "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 7,
     "enableReflection": false
   },
@@ -176,7 +176,7 @@
     "executionPeriodInfoSummary": "Avant bilan de parcours",
     "authorStaffId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
     "traceAllowedAssociations": 6,
-    "feedbackAllowedIterations": null,
+    "feedbackAllowedIterations": -1,
     "enableReflection": true
   },
   {
@@ -199,7 +199,7 @@
     "executionPeriodInfo": null,
     "executionPeriodInfoSummary": "Avant candidature spécifique",
     "authorStaffId": "5fcd76c5-017c-4d61-99d2-62a6f199c94e",
-    "traceAllowedAssociations": null,
+    "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 3,
     "enableReflection": false
   },
@@ -211,8 +211,8 @@
     "executionPeriodInfo": "À réaliser avant un bilan de compétences ou dans un parcours global visant à renforcer l'employabilité.",
     "executionPeriodInfoSummary": null,
     "authorStaffId": "5fcd76c5-017c-4d61-99d2-62a6f199c94e",
-    "traceAllowedAssociations": null,
-    "feedbackAllowedIterations": null,
+    "traceAllowedAssociations": -1,
+    "feedbackAllowedIterations": -1,
     "enableReflection": true
   }
 ]

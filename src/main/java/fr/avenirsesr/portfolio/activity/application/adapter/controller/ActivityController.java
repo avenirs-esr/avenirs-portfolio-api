@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.List;
@@ -112,7 +113,8 @@ public class ActivityController {
   @PatchMapping("/{activityStatus}/{activityId}")
   public ResponseEntity<ActivityDraftCreationResponse> updateActivity(
       Principal principal,
-      @PathVariable EActivityStatus activityStatus,
+      @PathVariable @Schema(ref = "#/components/schemas/EActivityStatus")
+          EActivityStatus activityStatus,
       @PathVariable UUID activityId,
       @RequestBody ActivityDraftUpdateRequest body) {
     log.debug(

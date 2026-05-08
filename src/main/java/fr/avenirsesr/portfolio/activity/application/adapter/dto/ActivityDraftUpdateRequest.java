@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema()
 public record ActivityDraftUpdateRequest(
     String title,
-    EActivityThematic thematic,
+    @Schema(ref = "#/components/schemas/EActivityThematic") EActivityThematic thematic,
     String summary,
     String description,
     String executionPeriodInfo,
