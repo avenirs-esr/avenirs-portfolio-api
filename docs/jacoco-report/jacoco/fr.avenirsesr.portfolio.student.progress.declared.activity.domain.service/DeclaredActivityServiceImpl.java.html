@@ -250,8 +250,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
             DeclaredActivity.class,
 <span class="fc" id="L251">            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));</span>
 <span class="fc" id="L252">    var activity = declaredActivity.getActivity();</span>
-<span class="pc bpc" id="L253" title="1 of 2 branches missed.">    if (activity.getTraceAllowedAssociations().isPresent()</span>
-<span class="pc bpc" id="L254" title="1 of 2 branches missed.">        &amp;&amp; activity.getTraceAllowedAssociations().get() &gt;= traceAssociations.size()) {</span>
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">    if (activity.getTraceAllowedAssociations() != -1</span>
+<span class="pc bpc" id="L254" title="1 of 2 branches missed.">        &amp;&amp; activity.getTraceAllowedAssociations() &gt;= traceAssociations.size()) {</span>
 <span class="fc" id="L255">      throw new MaximumAssociationReachedException();</span>
     }
 

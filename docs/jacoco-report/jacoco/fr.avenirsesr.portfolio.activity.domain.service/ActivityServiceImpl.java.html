@@ -58,8 +58,8 @@ public class ActivityServiceImpl implements ActivityService {
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
       boolean enableReflection,
-      Integer traceAllowedAssociations,
-      Integer feedbackAllowedIterations) {
+      int traceAllowedAssociations,
+      int feedbackAllowedIterations) {
 <span class="fc" id="L63">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
 <span class="fc" id="L64">    requireNotNull(&quot;thematic&quot;, thematic);</span>
 <span class="fc" id="L65">    requireNotBlankAndMaxLength(&quot;summary&quot;, summary, SUMMARY_LENGTH);</span>
