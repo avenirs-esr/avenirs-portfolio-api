@@ -18,36 +18,47 @@ public class StaffServiceImpl implements StaffService {
   private final UserRepository userRepository;
 
   @Override
+  public Staff getStaffById(UUID id) {
+<span class="fc" id="L22">    return staffRepository</span>
+<span class="fc" id="L23">        .findById(id)</span>
+<span class="fc" id="L24">        .orElseThrow(</span>
+            () -&gt; {
+<span class="fc" id="L26">              log.error(&quot;Staff {} not found&quot;, id);</span>
+<span class="fc" id="L27">              return new UserIsNotStaffException();</span>
+            });
+  }
+
+  @Override
   public String getBio(User user) {
-<span class="nc" id="L22">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
-<span class="nc" id="L23">    return staff.getBio();</span>
+<span class="nc" id="L33">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
+<span class="nc" id="L34">    return staff.getBio();</span>
   }
 
   @Override
   public String getInstitutionEmail(User user) {
-<span class="nc" id="L28">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
-<span class="nc" id="L29">    return staff.getInstitutionEmail();</span>
+<span class="nc" id="L39">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
+<span class="nc" id="L40">    return staff.getInstitutionEmail();</span>
   }
 
   @Override
   public void updateProfile(User user, String bio) {
-<span class="fc" id="L34">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
+<span class="fc" id="L45">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
 
-<span class="pc bpc" id="L36" title="1 of 2 branches missed.">    if (bio != null) staff.setBio(bio);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">    if (bio != null) staff.setBio(bio);</span>
 
-<span class="fc" id="L38">    staffRepository.save(staff);</span>
-<span class="fc" id="L39">  }</span>
+<span class="fc" id="L49">    staffRepository.save(staff);</span>
+<span class="fc" id="L50">  }</span>
 
   @Override
   public Staff createStaff(UUID userId, String institutionEmail, String bio) {
-<span class="fc" id="L43">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L44">    var staff = Staff.create(user, institutionEmail, bio);</span>
-<span class="fc" id="L45">    staffRepository.save(staff);</span>
-<span class="fc bfc" id="L46" title="All 2 branches covered.">    if (user.getEmail() == null) {</span>
-<span class="fc" id="L47">      user.setEmail(institutionEmail);</span>
-<span class="fc" id="L48">      userRepository.save(user);</span>
+<span class="fc" id="L54">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L55">    var staff = Staff.create(user, institutionEmail, bio);</span>
+<span class="fc" id="L56">    staffRepository.save(staff);</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">    if (user.getEmail() == null) {</span>
+<span class="fc" id="L58">      user.setEmail(institutionEmail);</span>
+<span class="fc" id="L59">      userRepository.save(user);</span>
     }
-<span class="fc" id="L50">    return staff;</span>
+<span class="fc" id="L61">    return staff;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
