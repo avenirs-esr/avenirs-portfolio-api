@@ -16,6 +16,7 @@ import java.util.UUID;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class SelfKnowledgeElementDatabaseRepository
@@ -45,6 +46,7 @@ public class SelfKnowledgeElementDatabaseRepository
   }
 
   @Override
+  @Transactional
   public void deleteAllByStudentAndCategory(Student student, SelfKnowledgeCategory category) {
     jpaRepository.deleteByStudentAndSelfKnowledgeCategory(
         StudentMapper.INSTANCE.fromDomain(student),
