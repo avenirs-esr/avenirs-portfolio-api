@@ -55,14 +55,13 @@ public class UserServiceImpl implements UserService {
           case STUDENT -> studentService.getBio(user);
           case STAFF -> staffService.getBio(user);
         };
-    var institutionEmail =
+    var email =
         switch (userCategory) {
-          case STUDENT -> studentService.getInstitutionEmail(user);
+          case STUDENT -> user.getEmail();
           case STAFF -> staffService.getInstitutionEmail(user);
         };
 
-    return new UserProfileOverviewData(
-        user.getFirstName(), user.getLastName(), institutionEmail, bio);
+    return new UserProfileOverviewData(user.getFirstName(), user.getLastName(), email, bio);
   }
 
   @Override
