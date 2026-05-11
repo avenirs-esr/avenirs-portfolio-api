@@ -2,16 +2,16 @@ package fr.avenirsesr.portfolio.activity.application.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDTO;
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
-class ActivityDtoMapperTest {
+class ActivityContentDtoMapperTest {
 
-  private final ActivityDtoMapper mapper = Mappers.getMapper(ActivityDtoMapper.class);
+  private final ActivityContentDtoMapper mapper = Mappers.getMapper(ActivityContentDtoMapper.class);
 
   @Test
   void shouldMapActivityToDTO() {
@@ -19,7 +19,7 @@ class ActivityDtoMapperTest {
     Activity activity = ActivityFixture.create().toModel();
 
     BddLogger.when("mapping to ActivityDTO");
-    ActivityDTO dto = mapper.toDTO(activity);
+    ActivityContentDTO dto = mapper.toDTO(activity);
 
     BddLogger.then("it should return a correct ActivityDTO");
     assertNotNull(dto);

@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDraftCreationRequest;
-import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDraftUpdateRequest;
+import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftCreationRequest;
+import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;

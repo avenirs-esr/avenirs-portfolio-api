@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.activity.application.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityDetailsDTO;
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityPresentationDTO;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -13,9 +13,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
-class ActivityDetailsDtoMapperTest {
+class ActivityPresentationDtoMapperTest {
 
-  private final ActivityDetailsDtoMapper mapper = Mappers.getMapper(ActivityDetailsDtoMapper.class);
+  private final ActivityPresentationDtoMapper mapper = Mappers.getMapper(ActivityPresentationDtoMapper.class);
 
   @Test
   void shouldMapActivityDetailDataToDTO() {
@@ -37,7 +37,7 @@ class ActivityDetailsDtoMapperTest {
             Instant.now());
 
     BddLogger.when("mapping to ActivityDetailsDTO with base URL");
-    ActivityDetailsDTO dto = mapper.toDTO(data, baseUrl);
+    ActivityPresentationDTO dto = mapper.toDTO(data, baseUrl);
 
     BddLogger.then("it should build the full banner URL and map all fields");
     assertNotNull(dto);

@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.application.a
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityDtoMapper;
+import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -20,9 +20,9 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DeclaredActivityDetailsDTOMapperTest {
+class DeclaredActivityPresentationDTOMapperTest {
 
-  @Spy private ActivityDtoMapper activityDtoMapper = Mappers.getMapper(ActivityDtoMapper.class);
+  @Spy private ActivityContentDtoMapper activityContentDtoMapper = Mappers.getMapper(ActivityContentDtoMapper.class);
 
   @InjectMocks private DeclaredActivityDetailsDTOMapperImpl mapper;
 

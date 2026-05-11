@@ -17,6 +17,6 @@ public interface ActivityOverviewDtoMapper {
   ActivityOverviewDTO toDTO(ActivityWithStudentStatusData activityStatus);
 
   default String unwrap(Optional<String> value) {
-    return value == null ? null : value.orElse(null);
+    return value.orElse(null);
   }
 }

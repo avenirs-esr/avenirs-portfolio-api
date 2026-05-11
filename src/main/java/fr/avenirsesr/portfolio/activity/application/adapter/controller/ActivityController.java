@@ -3,9 +3,13 @@ package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
 
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.*;
-import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityDetailsDtoMapper;
+import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityContentDtoMapper;
+import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityPresentationDtoMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityNavigationMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
+import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftCreationRequest;
+import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftUpdateRequest;
+import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftCreationResponse;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
@@ -31,18 +35,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/activities")
 public class ActivityController {
   private final ActivityService activityService;
-  private final ActivityDetailsDtoMapper activityDetailsDtoMapper;
+  private final ActivityPresentationDtoMapper activityPresentationDtoMapper;
+  private final ActivityContentDtoMapper activityContentDtoMapper;
   private final ActivityNavigationMapper activityNavigationMapper;
   private final ActivityOverviewDtoMapper activityOverviewDtoMapper;
 
   @GetMapping("/{activityId}")
-  public ResponseEntity<ActivityDetailsDTO> getActivityDetail(
+  public ResponseEntity<ActivityPresentationDTO> getActivityDetail(
       HttpServletRequest request, @PathVariable UUID activityId) {
     log.debug("Received request to get activity [{}] detail", activityId);
 
     ActivityDetailData activityDetail = activityService.getActivityDetail(activityId);
     String baseUrl = extractOrigin(request);
-    return ResponseEntity.ok(activityDetailsDtoMapper.toDTO(activityDetail, baseUrl));
+    return ResponseEntity.ok(activityPresentationDtoMapper.toDTO(activityDetail, baseUrl));
   }
 
   @GetMapping
@@ -111,7 +116,7 @@ public class ActivityController {
   }
 
   @PatchMapping("/{activityStatus}/{activityId}")
-  public ResponseEntity<ActivityDraftCreationResponse> updateActivity(
+  public ResponseEntity<ActivityContentDTO> updateActivity(
       Principal principal,
       @PathVariable @Schema(ref = "#/components/schemas/EActivityStatus")
           EActivityStatus activityStatus,
@@ -136,6 +141,6 @@ public class ActivityController {
             body.traceAllowedAssociations(),
             body.feedbackAllowedIterations(),
             body.enableReflection());
-    return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
+    return ResponseEntity.ok(activityContentDtoMapper.toDTO(draft));
   }
 }
