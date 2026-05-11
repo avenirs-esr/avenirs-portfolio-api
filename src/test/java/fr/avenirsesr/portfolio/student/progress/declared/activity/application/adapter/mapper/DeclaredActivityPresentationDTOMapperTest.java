@@ -22,7 +22,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DeclaredActivityPresentationDTOMapperTest {
 
-  @Spy private ActivityContentDtoMapper activityContentDtoMapper = Mappers.getMapper(ActivityContentDtoMapper.class);
+  @Spy
+  private ActivityContentDtoMapper activityContentDtoMapper =
+      Mappers.getMapper(ActivityContentDtoMapper.class);
 
   @InjectMocks private DeclaredActivityDetailsDTOMapperImpl mapper;
 

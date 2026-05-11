@@ -22,7 +22,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/activities";
   private static final String NAVIGATION_BASE_PATH = BASE_PATH + "/navigation";
-  private static final String DETAIL_BASE_PATH = BASE_PATH + "/{activityId}";
+  private static final String PRESENTATION_BASE_PATH =
+      BASE_PATH + "/PUBLISHED/{activityId}" + "/presentation";
   private static final String DRAFT_BASE_PATH = BASE_PATH + "/draft";
   private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/DRAFT/{draftId}";
 
@@ -176,13 +177,13 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldGetActivityDetail() throws Exception {
+  void shouldGetActivityPresentation() throws Exception {
     BddLogger.given("an existing activity");
     UUID activityId = getFirstActivityIdFromOverview();
 
     webTestClient
         .get()
-        .uri(DETAIL_BASE_PATH, activityId)
+        .uri(PRESENTATION_BASE_PATH, activityId)
         .header("Accept-Language", ELanguage.FRENCH.getCode())
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
@@ -236,7 +237,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(DETAIL_BASE_PATH, unknownId)
+        .uri(PRESENTATION_BASE_PATH, unknownId)
         .header("Accept-Language", ELanguage.FRENCH.getCode())
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)

@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.activity.domain.port.input;
 
-import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,15 @@ public interface ActivityService {
       int traceAllowedAssociations,
       int feedbackAllowedIterations);
 
+  FileData getActivityBanner(Activity activity);
+
+  FileData getActivityBanner(ActivityDraft activity);
+
   Activity getActivityById(UUID id);
 
-  ActivityDetailData getActivityDetail(UUID id);
+  ActivityDraft getActivityDraftById(UUID id);
+
+  ActivityPresentationData getActivityPresentation(EActivityStatus activityStatus, UUID id);
 
   Map<EActivityThematic, List<Activity>> getActivityNavigation();
 

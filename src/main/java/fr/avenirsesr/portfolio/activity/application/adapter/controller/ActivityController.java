@@ -4,13 +4,14 @@ import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOr
 
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityContentDtoMapper;
-import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityPresentationDtoMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityNavigationMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
+import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityPresentationDtoMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftCreationResponse;
-import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
+import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftUpdateResponse;
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
@@ -40,14 +41,49 @@ public class ActivityController {
   private final ActivityNavigationMapper activityNavigationMapper;
   private final ActivityOverviewDtoMapper activityOverviewDtoMapper;
 
-  @GetMapping("/{activityId}")
-  public ResponseEntity<ActivityPresentationDTO> getActivityDetail(
-      HttpServletRequest request, @PathVariable UUID activityId) {
-    log.debug("Received request to get activity [{}] detail", activityId);
+  @GetMapping("/{activityStatus}/{activityId}/presentation")
+  public ResponseEntity<ActivityPresentationDTO> getActivityPresentation(
+      HttpServletRequest request,
+      @PathVariable @Schema(ref = "#/components/schemas/EActivityStatus")
+          EActivityStatus activityStatus,
+      @PathVariable UUID activityId) {
+    log.debug("Received request to get activity [{}] presentation", activityId);
 
-    ActivityDetailData activityDetail = activityService.getActivityDetail(activityId);
-    String baseUrl = extractOrigin(request);
-    return ResponseEntity.ok(activityPresentationDtoMapper.toDTO(activityDetail, baseUrl));
+    var dto =
+        switch (activityStatus) {
+          case PUBLISHED -> {
+            ActivityPresentationData activityPresentation =
+                activityService.getActivityPresentation(activityStatus, activityId);
+            var banner = activityService.getActivityBanner(activityPresentation.activity());
+            String baseUrl = extractOrigin(request);
+            yield activityPresentationDtoMapper.toDTO(
+                activityPresentation.activity(),
+                banner,
+                activityPresentation.subscribedDeclaredActivity(),
+                baseUrl);
+          }
+          case DRAFT -> {
+            var draft = activityService.getActivityDraftById(activityId);
+            yield activityPresentationDtoMapper.toDTO(draft);
+          }
+        };
+    return ResponseEntity.ok(dto);
+  }
+
+  @GetMapping("/{activityStatus}/{activityId}/content")
+  public ResponseEntity<ActivityContentDTO> getActivityContent(
+      @PathVariable @Schema(ref = "#/components/schemas/EActivityStatus")
+          EActivityStatus activityStatus,
+      @PathVariable UUID activityId) {
+    log.debug("Received request to get activity [{}] content", activityId);
+    ActivityContentDTO dto =
+        switch (activityStatus) {
+          case PUBLISHED ->
+              activityContentDtoMapper.toDTO(activityService.getActivityById(activityId));
+          case DRAFT ->
+              activityContentDtoMapper.toDTO(activityService.getActivityDraftById(activityId));
+        };
+    return ResponseEntity.ok(dto);
   }
 
   @GetMapping
@@ -116,7 +152,7 @@ public class ActivityController {
   }
 
   @PatchMapping("/{activityStatus}/{activityId}")
-  public ResponseEntity<ActivityContentDTO> updateActivity(
+  public ResponseEntity<ActivityDraftUpdateResponse> updateActivity(
       Principal principal,
       @PathVariable @Schema(ref = "#/components/schemas/EActivityStatus")
           EActivityStatus activityStatus,
@@ -141,6 +177,6 @@ public class ActivityController {
             body.traceAllowedAssociations(),
             body.feedbackAllowedIterations(),
             body.enableReflection());
-    return ResponseEntity.ok(activityContentDtoMapper.toDTO(draft));
+    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));
   }
 }

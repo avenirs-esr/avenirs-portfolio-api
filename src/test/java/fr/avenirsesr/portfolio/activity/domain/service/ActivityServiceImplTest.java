@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
@@ -19,6 +19,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -480,19 +481,22 @@ class ActivityServiceImplTest {
     when(banner.getFileName()).thenReturn("filename.png");
 
     BddLogger.when("getActivityDetail is called for the activity ID");
-    ActivityDetailData result = activityService.getActivityDetail(activityId);
+    ActivityPresentationData result =
+        activityService.getActivityPresentation(EActivityStatus.PUBLISHED, activityId);
+    FileData resBanner = activityService.getActivityBanner(result.activity());
 
     BddLogger.then("the service returns the correct activity detail data");
     assertNotNull(result);
-    assertEquals(activityId, result.id());
-    assertEquals("Activity", result.title());
-    assertEquals(EActivityThematic.EXPERIENCES, result.thematic());
-    assertEquals("is a test activity", result.summary());
-    assertEquals("<h3>Objectives</h3><p>Test activity description</p>", result.description());
-    assertEquals("2026", result.executionPeriodInfo());
-    assertTrue(result.activityBanner().id().isPresent());
-    assertEquals(bannerId, result.activityBanner().id().get());
-    assertEquals("filename.png", result.activityBanner().name().get());
+    assertEquals(activityId, result.activity().getId());
+    assertEquals("Activity", result.activity().getTitle());
+    assertEquals(EActivityThematic.EXPERIENCES, result.activity().getThematic());
+    assertEquals("is a test activity", result.activity().getSummary());
+    assertEquals(
+        "<h3>Objectives</h3><p>Test activity description</p>", result.activity().getDescription());
+    assertEquals("2026", result.activity().getExecutionPeriodInfo());
+    assertTrue(resBanner.id().isPresent());
+    assertEquals(bannerId, resBanner.id().get());
+    assertEquals("filename.png", resBanner.name().get());
 
     verify(activityRepository).findById(activityId);
     verify(activityResourceService).getActivityBanner(activity);
@@ -508,7 +512,8 @@ class ActivityServiceImplTest {
     BddLogger.when("getActivityDetail is called for the non-existent activity ID");
     BddLogger.then("the service throws ActivityNotFoundException");
     assertThrows(
-        ActivityNotFoundException.class, () -> activityService.getActivityDetail(activityId));
+        ActivityNotFoundException.class,
+        () -> activityService.getActivityPresentation(EActivityStatus.PUBLISHED, activityId));
 
     verify(activityRepository).findById(activityId);
     verifyNoInteractions(activityResourceService);

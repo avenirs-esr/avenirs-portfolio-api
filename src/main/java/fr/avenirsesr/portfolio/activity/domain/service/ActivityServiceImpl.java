@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.activity.domain.service;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
-import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
@@ -92,23 +92,41 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public ActivityDetailData getActivityDetail(UUID id) {
-    Activity activity = activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
+  public ActivityDraft getActivityDraftById(UUID id) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var draft = activityDraftRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
+    if (!draft.getAuthor().equals(staff)) {
+      throw new UserNotAuthorizedException();
+    }
+    return draft;
+  }
+
+  @Override
+  public FileData getActivityBanner(Activity activity) {
     ActivityBanner activityBanner = activityResourceService.getActivityBanner(activity);
-    return new ActivityDetailData(
-        activity.getId(),
-        activity.getTitle(),
-        activity.getThematic(),
-        declaredActivityService.getByActivity(activity).map(DeclaredActivity::getId),
-        new FileData(
-            Optional.of(activityBanner.getId()),
-            Optional.of(activityBanner.getFileName()),
-            ACTIVITY_BANNER_PATH + activityBanner.getId()),
-        activity.getSummary(),
-        activity.getDescription(),
-        activity.getExecutionPeriodInfo(),
-        activity.getCreatedAt(),
-        activity.getUpdatedAt());
+    return new FileData(
+        Optional.of(activityBanner.getId()),
+        Optional.of(activityBanner.getFileName()),
+        ACTIVITY_BANNER_PATH + activityBanner.getId());
+  }
+
+  @Override
+  public FileData getActivityBanner(ActivityDraft activity) {
+    // todo will be refactored when draft banner will supported
+    return null;
+  }
+
+  @Override
+  public ActivityPresentationData getActivityPresentation(EActivityStatus activityStatus, UUID id) {
+    return switch (activityStatus) {
+      case PUBLISHED -> {
+        Activity activity =
+            activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
+        yield new ActivityPresentationData(
+            activity, declaredActivityService.getByActivity(activity).map(DeclaredActivity::getId));
+      }
+      case DRAFT -> null;
+    };
   }
 
   @Override

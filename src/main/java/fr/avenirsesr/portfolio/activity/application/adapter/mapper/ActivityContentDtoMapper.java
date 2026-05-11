@@ -3,9 +3,8 @@ package fr.avenirsesr.portfolio.activity.application.adapter.mapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
-import org.mapstruct.Mapper;
-
 import java.util.Optional;
+import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface ActivityContentDtoMapper {

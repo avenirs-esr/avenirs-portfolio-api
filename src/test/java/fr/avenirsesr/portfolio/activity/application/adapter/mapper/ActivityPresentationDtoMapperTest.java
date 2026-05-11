@@ -3,11 +3,11 @@ package fr.avenirsesr.portfolio.activity.application.adapter.mapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityPresentationDTO;
-import fr.avenirsesr.portfolio.activity.domain.data.ActivityDetailData;
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,8 @@ import org.mapstruct.factory.Mappers;
 
 class ActivityPresentationDtoMapperTest {
 
-  private final ActivityPresentationDtoMapper mapper = Mappers.getMapper(ActivityPresentationDtoMapper.class);
+  private final ActivityPresentationDtoMapper mapper =
+      Mappers.getMapper(ActivityPresentationDtoMapper.class);
 
   @Test
   void shouldMapActivityDetailDataToDTO() {
@@ -23,21 +24,19 @@ class ActivityPresentationDtoMapperTest {
     UUID id = UUID.randomUUID();
     UUID bannerId = UUID.randomUUID();
     String baseUrl = "https://cdn.example.com/";
-    ActivityDetailData data =
-        new ActivityDetailData(
-            id,
-            "Activity Title",
-            EActivityThematic.EXPERIENCES,
-            Optional.empty(),
-            new FileData(Optional.of(bannerId), Optional.of("banner.png"), "banners/banner.png"),
-            "Summary",
-            "Description",
-            "Every week",
-            Instant.now(),
-            Instant.now());
+    var activity =
+        ActivityFixture.create()
+            .withId(id)
+            .withTitle("Activity Title")
+            .withThematic(EActivityThematic.EXPERIENCES)
+            .toModel();
+    var banner =
+        new FileData(Optional.of(bannerId), Optional.of("banner.png"), "banners/banner.png");
+    ActivityPresentationData data = new ActivityPresentationData(activity, Optional.empty());
 
     BddLogger.when("mapping to ActivityDetailsDTO with base URL");
-    ActivityPresentationDTO dto = mapper.toDTO(data, baseUrl);
+    ActivityPresentationDTO dto =
+        mapper.toDTO(data.activity(), banner, data.subscribedDeclaredActivity(), baseUrl);
 
     BddLogger.then("it should build the full banner URL and map all fields");
     assertNotNull(dto);
