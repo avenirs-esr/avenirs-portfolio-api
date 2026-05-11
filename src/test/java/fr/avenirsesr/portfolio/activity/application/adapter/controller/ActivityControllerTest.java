@@ -43,11 +43,13 @@ class ActivityControllerTest {
   private User user;
   private Activity activity;
   private Principal principal;
+  private static ActivityOverviewDTO.AuthorDTO AUTHOR;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
     user = UserFixture.create().withId(userId).toModel();
+    AUTHOR = new ActivityOverviewDTO.AuthorDTO(userId, "staff firstname", "staff lastname");
     activity = ActivityFixture.create().toModel();
     principal = () -> userId.toString();
   }
@@ -69,6 +71,7 @@ class ActivityControllerTest {
         .thenReturn(
             new ActivityOverviewDTO(
                 activity.getId(),
+                AUTHOR,
                 null,
                 null,
                 EDeclaredActivityStatus.SUBSCRIBED,
@@ -107,7 +110,8 @@ class ActivityControllerTest {
     when(activityService.activitiesView(eq(EActivityThematic.EXPERIENCES), any(PageCriteria.class)))
         .thenReturn(pagedResult);
     when(activityOverviewDtoMapper.toDTO(data))
-        .thenReturn(new ActivityOverviewDTO(activity.getId(), null, null, null, null, null, false));
+        .thenReturn(
+            new ActivityOverviewDTO(activity.getId(), AUTHOR, null, null, null, null, null, false));
 
     BddLogger.when("getting activities view with thematic");
     var response = controller.getActivitiesView(principal, 0, 10, EActivityThematic.EXPERIENCES);
@@ -161,7 +165,8 @@ class ActivityControllerTest {
 
     when(activityService.latestActivitiesView(any(PageCriteria.class))).thenReturn(pagedResult);
     when(activityOverviewDtoMapper.toDTO(data))
-        .thenReturn(new ActivityOverviewDTO(activity.getId(), null, null, null, null, null, false));
+        .thenReturn(
+            new ActivityOverviewDTO(activity.getId(), AUTHOR, null, null, null, null, null, false));
 
     BddLogger.when("getting latest activities view");
     var response = controller.getLatestActivitiesView(principal, 0, 10);
@@ -192,7 +197,8 @@ class ActivityControllerTest {
 
     when(activityService.latestActivitiesView(any(PageCriteria.class))).thenReturn(pagedResult);
     when(activityOverviewDtoMapper.toDTO(data))
-        .thenReturn(new ActivityOverviewDTO(activity.getId(), null, null, null, null, null, false));
+        .thenReturn(
+            new ActivityOverviewDTO(activity.getId(), AUTHOR, null, null, null, null, null, false));
 
     BddLogger.when("getting latest activities view");
     var response = controller.getLatestActivitiesView(principal, 0, 10);
@@ -227,10 +233,12 @@ class ActivityControllerTest {
 
     when(activityService.latestActivitiesView(any(PageCriteria.class))).thenReturn(pagedResult);
     when(activityOverviewDtoMapper.toDTO(dataList.get(0)))
-        .thenReturn(new ActivityOverviewDTO(activity.getId(), null, null, null, null, null, false));
+        .thenReturn(
+            new ActivityOverviewDTO(activity.getId(), AUTHOR, null, null, null, null, null, false));
     when(activityOverviewDtoMapper.toDTO(dataList.get(1)))
         .thenReturn(
-            new ActivityOverviewDTO(activity2.getId(), null, null, null, null, null, false));
+            new ActivityOverviewDTO(
+                activity2.getId(), AUTHOR, null, null, null, null, null, false));
 
     BddLogger.when("getting latest activities view");
     var response = controller.getLatestActivitiesView(principal, 0, 10);

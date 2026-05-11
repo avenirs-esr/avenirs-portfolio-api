@@ -6,8 +6,12 @@ import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityOverview
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -19,7 +23,15 @@ class ActivityOverviewDtoMapperTest {
   @Test
   void shouldMapActivityWithStatusToOverviewDTO() {
     BddLogger.given("an activity with student status data");
-    Activity activity = ActivityFixture.create().toModel();
+    UUID userId = UUID.randomUUID();
+    User user =
+        UserFixture.create()
+            .withId(userId)
+            .withFirstName("firstname")
+            .withLastName("Lastname")
+            .toModel();
+    var staff = Staff.create(user, "staff@email.com", "bio");
+    Activity activity = ActivityFixture.create().withAuthor(staff).toModel();
     ActivityWithStudentStatusData data =
         new ActivityWithStudentStatusData(activity, true, EDeclaredActivityStatus.SUBSCRIBED);
 
@@ -29,6 +41,8 @@ class ActivityOverviewDtoMapperTest {
     BddLogger.then("it should map nested activity fields correctly");
     assertNotNull(dto);
     assertEquals(activity.getId(), dto.id());
+    assertEquals(
+        new ActivityOverviewDTO.AuthorDTO(staff.getId(), "firstname", "Lastname"), dto.author());
     assertEquals(activity.getTitle(), dto.title());
     assertEquals(activity.getThematic(), dto.thematic());
     assertEquals(activity.getSummary(), dto.summary());
