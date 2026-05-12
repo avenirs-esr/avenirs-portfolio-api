@@ -234,9 +234,10 @@ public class TraceController {
 <span class="nc" id="L234">            updateTraceDTO.language(),</span>
 <span class="nc" id="L235">            updateTraceDTO.isGroup(),</span>
 <span class="nc" id="L236">            updateTraceDTO.personalNote(),</span>
-<span class="nc" id="L237">            updateTraceDTO.iaJustification());</span>
+<span class="nc" id="L237">            updateTraceDTO.iaJustification(),</span>
+<span class="nc" id="L238">            updateTraceDTO.link());</span>
 
-<span class="nc" id="L239">    return ResponseEntity.ok(traceDetailMapper.toDTO(trace));</span>
+<span class="nc" id="L240">    return ResponseEntity.ok(traceDetailMapper.toDTO(trace));</span>
   }
 
   @PostMapping(&quot;/{traceId}/associate/activities&quot;)
@@ -244,14 +245,14 @@ public class TraceController {
       Principal principal,
       @Valid @PathVariable UUID traceId,
       @Valid @RequestBody AssociationsCreationRequest body) {
-<span class="nc" id="L247">    log.debug(</span>
+<span class="nc" id="L248">    log.debug(</span>
         &quot;Received request to associate Trace[{}] with activities [{}] by student [{}]&quot;,
         traceId,
-<span class="nc" id="L250">        body.idsToAssociate(),</span>
-<span class="nc" id="L251">        principal.getName());</span>
-<span class="nc" id="L252">    var traceAssociations =</span>
-<span class="nc" id="L253">        traceService.associateTraceWithActivities(traceId, body.idsToAssociate());</span>
-<span class="nc" id="L254">    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));</span>
+<span class="nc" id="L251">        body.idsToAssociate(),</span>
+<span class="nc" id="L252">        principal.getName());</span>
+<span class="nc" id="L253">    var traceAssociations =</span>
+<span class="nc" id="L254">        traceService.associateTraceWithActivities(traceId, body.idsToAssociate());</span>
+<span class="nc" id="L255">    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 
   @PostMapping(&quot;/{traceId}/associate/declared-skill&quot;)
@@ -259,14 +260,14 @@ public class TraceController {
       Principal principal,
       @Valid @PathVariable UUID traceId,
       @Valid @RequestBody AssociationsCreationRequest body) {
-<span class="fc" id="L262">    log.debug(</span>
+<span class="fc" id="L263">    log.debug(</span>
         &quot;Received request to associate Trace[{}] with declared skill [{}] by student [{}]&quot;,
         traceId,
-<span class="fc" id="L265">        body.idsToAssociate(),</span>
-<span class="fc" id="L266">        principal.getName());</span>
-<span class="fc" id="L267">    var traceAssociations =</span>
-<span class="fc" id="L268">        traceService.associateTraceWithDeclaredSkill(traceId, body.idsToAssociate());</span>
-<span class="fc" id="L269">    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));</span>
+<span class="fc" id="L266">        body.idsToAssociate(),</span>
+<span class="fc" id="L267">        principal.getName());</span>
+<span class="fc" id="L268">    var traceAssociations =</span>
+<span class="fc" id="L269">        traceService.associateTraceWithDeclaredSkill(traceId, body.idsToAssociate());</span>
+<span class="fc" id="L270">    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 
   @PostMapping(&quot;/{traceId}/associate/declared-experiences&quot;)
@@ -274,14 +275,14 @@ public class TraceController {
       Principal principal,
       @Valid @PathVariable UUID traceId,
       @Valid @RequestBody AssociationsCreationRequest body) {
-<span class="fc" id="L277">    log.debug(</span>
+<span class="fc" id="L278">    log.debug(</span>
         &quot;Received request to associate Trace[{}] with declared experiences [{}] by student [{}]&quot;,
         traceId,
-<span class="fc" id="L280">        body.idsToAssociate(),</span>
-<span class="fc" id="L281">        principal.getName());</span>
-<span class="fc" id="L282">    var traceAssociations =</span>
-<span class="fc" id="L283">        traceService.associateTraceWithDeclaredExperience(traceId, body.idsToAssociate());</span>
-<span class="fc" id="L284">    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));</span>
+<span class="fc" id="L281">        body.idsToAssociate(),</span>
+<span class="fc" id="L282">        principal.getName());</span>
+<span class="fc" id="L283">    var traceAssociations =</span>
+<span class="fc" id="L284">        traceService.associateTraceWithDeclaredExperience(traceId, body.idsToAssociate());</span>
+<span class="fc" id="L285">    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 
   @GetMapping(&quot;/{traceId}/associations&quot;)
@@ -289,16 +290,16 @@ public class TraceController {
       Principal principal,
       @PathVariable UUID traceId,
       @RequestParam(required = false, defaultValue = &quot;false&quot;) boolean onlyNotCompleted) {
-<span class="nc" id="L292">    log.debug(</span>
+<span class="nc" id="L293">    log.debug(</span>
         &quot;Received request to get Trace[{}] associations by student [{}]&quot;
             + &quot; (onlyNotCompleted= {})&quot;,
         traceId,
-<span class="nc" id="L296">        principal.getName(),</span>
-<span class="nc" id="L297">        onlyNotCompleted);</span>
+<span class="nc" id="L297">        principal.getName(),</span>
+<span class="nc" id="L298">        onlyNotCompleted);</span>
 
-<span class="nc" id="L299">    var traceAssociations = traceService.getTraceAssociations(traceId, onlyNotCompleted);</span>
+<span class="nc" id="L300">    var traceAssociations = traceService.getTraceAssociations(traceId, onlyNotCompleted);</span>
 
-<span class="nc" id="L301">    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));</span>
+<span class="nc" id="L302">    return ResponseEntity.ok(traceAssociationsMapper.toDTO(traceAssociations));</span>
   }
 
   @DeleteMapping(&quot;/{traceId}/associations&quot;)
@@ -306,15 +307,15 @@ public class TraceController {
       Principal principal,
       @Valid @PathVariable UUID traceId,
       @RequestBody List&lt;UUID&gt; associationIds) {
-<span class="fc" id="L309">    log.debug(</span>
+<span class="fc" id="L310">    log.debug(</span>
         &quot;Received request to unassociate associations [{}] to trace [{}] for student [{}]&quot;,
         associationIds,
         traceId,
-<span class="fc" id="L313">        principal.getName());</span>
+<span class="fc" id="L314">        principal.getName());</span>
 
-<span class="fc" id="L315">    traceService.unassociate(traceId, associationIds);</span>
+<span class="fc" id="L316">    traceService.unassociate(traceId, associationIds);</span>
 
-<span class="fc" id="L317">    return ResponseEntity.ok(&quot;Associations successfully deleted.&quot;);</span>
+<span class="fc" id="L318">    return ResponseEntity.ok(&quot;Associations successfully deleted.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
