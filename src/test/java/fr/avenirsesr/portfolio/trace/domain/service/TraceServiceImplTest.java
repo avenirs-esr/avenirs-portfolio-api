@@ -270,8 +270,8 @@ public class TraceServiceImplTest {
     }
 
     @Test
-    void shouldUpdateAndSaveTrace() {
-      BddLogger.given("a TraceServiceImpl service and a valid trace");
+    void shouldUpdateAndSaveTraceWithFile() {
+      BddLogger.given("a TraceServiceImpl service and a valid trace with file");
       User user = student.getUser();
       String title = "Test Title";
       String titleUpdated = "Test Title - Updated";
@@ -324,6 +324,68 @@ public class TraceServiceImplTest {
 
       assertTrue(captorTrace.getAiUseJustification().isPresent());
       assertEquals(aiJustificationUpdated, captorTrace.getAiUseJustification().get());
+    }
+
+    @Test
+    void shouldUpdateAndSaveTraceWithLink() {
+      BddLogger.given("a TraceServiceImpl service and a valid trace with link");
+      User user = student.getUser();
+      String title = "Test Title";
+      String titleUpdated = "Test Title - Updated";
+      ELanguage language = ELanguage.ENGLISH;
+      ELanguage languageUpdated = ELanguage.FRENCH;
+      boolean isGroup = false;
+      boolean isGroupUpdated = true;
+      String personalNote = "Some personal note";
+      String personalNoteUpdated = "Some personal note - Updated";
+      String aiJustification = "Justified by AI";
+      String aiJustificationUpdated = "Justified by AI - Updated";
+      String link = "https://example.com";
+      String linkUpdated = "https://example.com/updated";
+
+      Trace trace =
+          TraceFixture.create()
+              .withUser(user)
+              .withTitle(title)
+              .withLanguage(language)
+              .withGroup(isGroup)
+              .withPersonalNote(personalNote)
+              .withAiUseJustification(aiJustification)
+              .withLink(link)
+              .toModel();
+      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+      when(traceRepository.save(trace)).thenReturn(trace);
+      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+
+      BddLogger.when("update trace");
+      traceService.updateTrace(
+          trace.getId(),
+          titleUpdated,
+          languageUpdated,
+          isGroupUpdated,
+          personalNoteUpdated,
+          aiJustificationUpdated,
+          linkUpdated);
+
+      BddLogger.then("it should update and save the trace");
+      ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+      verify(traceRepository).save(captor.capture());
+
+      Trace captorTrace = captor.getValue();
+
+      assertEquals(user, captorTrace.getUser());
+      assertEquals(titleUpdated, captorTrace.getTitle());
+      assertEquals(languageUpdated, captorTrace.getLanguage());
+      assertEquals(isGroupUpdated, captorTrace.isGroup());
+
+      assertTrue(captorTrace.getPersonalNote().isPresent());
+      assertEquals(personalNoteUpdated, captorTrace.getPersonalNote().get());
+
+      assertTrue(captorTrace.getAiUseJustification().isPresent());
+      assertEquals(aiJustificationUpdated, captorTrace.getAiUseJustification().get());
+
+      assertTrue(captorTrace.getLink().isPresent());
+      assertEquals(linkUpdated, captorTrace.getLink().get());
     }
 
     @Test
@@ -382,7 +444,9 @@ public class TraceServiceImplTest {
       TraceNotFoundException ex =
           assertThrows(
               TraceNotFoundException.class,
-              () -> traceService.updateTrace(unknownId, "t", ELanguage.FRENCH, false, null, null));
+              () ->
+                  traceService.updateTrace(
+                      unknownId, "t", ELanguage.FRENCH, false, null, null, null));
 
       BddLogger.then("it should throw TRACE_NOT_FOUND");
       assertEquals(EErrorCode.TRACE_NOT_FOUND, ex.getErrorCode());
@@ -401,7 +465,7 @@ public class TraceServiceImplTest {
               UserNotAuthorizedException.class,
               () ->
                   traceService.updateTrace(
-                      trace.getId(), "x", ELanguage.FRENCH, false, null, null));
+                      trace.getId(), "x", ELanguage.FRENCH, false, null, null, null));
 
       BddLogger.then("it should throw USER_NOT_AUTHORIZED");
       assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
@@ -420,7 +484,9 @@ public class TraceServiceImplTest {
       BddLogger.when("updating the trace");
       assertThrows(
           FileNotFoundException.class,
-          () -> traceService.updateTrace(trace.getId(), "x", ELanguage.FRENCH, false, null, null));
+          () ->
+              traceService.updateTrace(
+                  trace.getId(), "x", ELanguage.FRENCH, false, null, null, null));
 
       BddLogger.then("it should throw FileNotFoundException");
     }

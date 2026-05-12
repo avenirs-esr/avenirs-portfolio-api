@@ -234,7 +234,8 @@ public class TraceController {
             updateTraceDTO.language(),
             updateTraceDTO.isGroup(),
             updateTraceDTO.personalNote(),
-            updateTraceDTO.iaJustification());
+            updateTraceDTO.iaJustification(),
+            updateTraceDTO.link());
 
     return ResponseEntity.ok(traceDetailMapper.toDTO(trace));
   }
