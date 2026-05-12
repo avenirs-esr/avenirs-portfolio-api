@@ -53,6 +53,15 @@ public interface TraceService {
       ELanguage language,
       boolean isGroup,
       String personalNote,
+      String aiJustification,
+      String link);
+
+  TraceDetailData updateTrace(
+      UUID traceId,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String personalNote,
       String aiJustification);
 
   TraceAssociationsData associateTraceWithActivities(UUID traceId, List<UUID> activityIds);

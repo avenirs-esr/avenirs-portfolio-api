@@ -316,7 +316,8 @@ public class TraceServiceImpl implements TraceService {
       ELanguage language,
       boolean isGroup,
       String personalNote,
-      String aiJustification) {
+      String aiJustification,
+      String link) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
@@ -327,9 +328,26 @@ public class TraceServiceImpl implements TraceService {
     trace.setPersonalNote(personalNote);
     trace.setAiUseJustification(aiJustification);
 
+    if (link != null) {
+      validateOptionalTextMaxLength("link", link, LINK_LENGTH);
+      validateUrl(link);
+      trace.setLink(link);
+    }
+
     var savedTrace = traceRepository.save(trace);
     var isTraceAssociated = traceRepository.isAssociated(List.of(savedTrace)).get(savedTrace);
     return buildTraceDetailData(savedTrace, isTraceAssociated);
+  }
+
+  @Override
+  public TraceDetailData updateTrace(
+      UUID traceId,
+      String title,
+      ELanguage language,
+      boolean isGroup,
+      String personalNote,
+      String aiJustification) {
+    return updateTrace(traceId, title, language, isGroup, personalNote, aiJustification, null);
   }
 
   private TraceAttachment getTraceAttachment(Trace trace) {

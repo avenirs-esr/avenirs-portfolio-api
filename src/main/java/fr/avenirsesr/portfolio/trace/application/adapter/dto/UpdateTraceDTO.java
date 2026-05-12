@@ -13,4 +13,5 @@ public record UpdateTraceDTO(
     @Schema(ref = "#/components/schemas/ELanguage") ELanguage language,
     boolean isGroup,
     String personalNote,
-    String iaJustification) {}
+    String iaJustification,
+    String link) {}
