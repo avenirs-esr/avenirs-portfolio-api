@@ -76,7 +76,7 @@ public class ActivityController {
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to latest activities view of user [{}] (page= {}, fileSize= {})",
+        "Received request to latest activities view by user [{}] (page= {}, fileSize= {})",
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());
