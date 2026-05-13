@@ -54,7 +54,7 @@ public class StaffServiceImpl implements StaffService {
 <span class="fc" id="L54">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
 <span class="fc" id="L55">    var staff = Staff.create(user, institutionEmail, bio);</span>
 <span class="fc" id="L56">    staffRepository.save(staff);</span>
-<span class="fc bfc" id="L57" title="All 2 branches covered.">    if (user.getEmail() == null) {</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">    if (user.getEmail() == null) {</span>
 <span class="fc" id="L58">      user.setEmail(institutionEmail);</span>
 <span class="fc" id="L59">      userRepository.save(user);</span>
     }
