@@ -2,10 +2,12 @@ package fr.avenirsesr.portfolio.student.progress.declared.program.domain.port.ou
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.DeclaredProgram;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 
 public interface DeclaredProgramRepository extends GenericRepositoryPort<DeclaredProgram> {
-  PagedResult<DeclaredProgram> findAllByStudent(Student student, PageCriteria pageCriteria);
+  PagedResult<DeclaredProgram> findAllByStudent(
+      Student student, PageCriteria pageCriteria, SortCriteria... sortCriterias);
 }
