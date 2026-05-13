@@ -5,6 +5,9 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.exception.DeclaredProgramNotFoundException;
@@ -137,7 +140,11 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
   @Override
   public PagedResult<DeclaredProgram> getDeclaredPrograms(PageCriteria pageCriteria) {
     Student student = loggedInUserService.getLoggedInStudent();
-    return declaredProgramRepository.findAllByStudent(student, pageCriteria);
+    return declaredProgramRepository.findAllByStudent(
+        student,
+        pageCriteria,
+        new SortCriteria(ESortField.DATE, ESortOrder.DESC),
+        new SortCriteria(ESortField.NAME, ESortOrder.ASC));
   }
 
   @Override

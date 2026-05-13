@@ -7,6 +7,9 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortField;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -412,6 +415,8 @@ class DeclaredProgramServiceImplTest {
       private Student loggedStudent;
       private int nbElements = 5;
       private PageCriteria pageCriteria = new PageCriteria(0, 8);
+      private SortCriteria sortByDate = new SortCriteria(ESortField.DATE, ESortOrder.DESC);
+      private SortCriteria sortByName = new SortCriteria(ESortField.NAME, ESortOrder.ASC);
       private PageInfo pageInfo = new PageInfo(0, 8, nbElements);
 
       @BeforeEach
@@ -422,7 +427,8 @@ class DeclaredProgramServiceImplTest {
                 .collect(Collectors.toList());
         loggedStudent = mock(Student.class);
         when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedStudent);
-        when(declaredProgramRepository.findAllByStudent(loggedStudent, pageCriteria))
+        when(declaredProgramRepository.findAllByStudent(
+                loggedStudent, pageCriteria, sortByDate, sortByName))
             .thenReturn(new PagedResult<>(declaredProgramList, pageInfo));
       }
 
@@ -448,7 +454,8 @@ class DeclaredProgramServiceImplTest {
         assertEquals(pageInfo.totalElements(), resultPageInfo.totalElements());
 
         verify(loggedInUserService).getLoggedInStudent();
-        verify(declaredProgramRepository).findAllByStudent(loggedStudent, pageCriteria);
+        verify(declaredProgramRepository)
+            .findAllByStudent(loggedStudent, pageCriteria, sortByDate, sortByName);
       }
     }
 
