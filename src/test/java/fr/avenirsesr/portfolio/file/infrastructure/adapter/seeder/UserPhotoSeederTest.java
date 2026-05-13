@@ -31,8 +31,8 @@ class UserPhotoSeederTest extends ContainerConfigurationTest {
   void setUp() {
     // Seed des utilisateurs avec UserSeeder
     this.users = userSeeder.seed();
-    this.students = studentSeeder.seed(users);
     this.staffs = staffSeeder.seed(users);
+    this.students = studentSeeder.seed(users);
   }
 
   @Test

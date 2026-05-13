@@ -459,9 +459,9 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     webTestClient
         .patch()
         .uri(DRAFT_UPDATE_PATH, draftId)
-        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(requestBody)
         .accept(MediaType.APPLICATION_JSON)
@@ -470,7 +470,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isForbidden()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("USER_NOT_AUTHORIZED");
+        .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
   }
 
   @Test
