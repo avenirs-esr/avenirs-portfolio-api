@@ -60,7 +60,7 @@ public class StudentServiceImpl implements StudentService {
   public Student createStudent(UUID userId, String institutionEmail, String bio) {
 <span class="fc" id="L61">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
 <span class="fc" id="L62">    var student = Student.create(user, institutionEmail, bio);</span>
-<span class="pc bpc" id="L63" title="1 of 2 branches missed.">    if (user.getEmail() == null) {</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">    if (user.getEmail() == null) {</span>
 <span class="fc" id="L64">      user.setEmail(institutionEmail);</span>
 <span class="fc" id="L65">      userRepository.save(user);</span>
     }
