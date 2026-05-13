@@ -20,7 +20,7 @@ public class DeclaredExperienceSpecification {
           cb.<Integer>selectCase().when(cb.isNull(root.get("endDate")), 1).otherwise(0);
 
       orders.add(cb.desc(endDateOrder));
-      orders.add(cb.desc(root.get("startDate")));
+      orders.add(cb.desc(root.get("endDate")));
       orders.add(cb.asc(cb.lower(root.get("title"))));
 
       query.orderBy(orders);
