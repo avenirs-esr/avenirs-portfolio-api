@@ -58,7 +58,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria) {
     Student student = loggedInUserService.getLoggedInStudent();
-    var graph = FetchGraph.init().fetch("activity");
+    var graph = FetchGraph.init().add("activity").fetch("author");
 
     return declaredActivityRepository.findStudentActivitiesByProgressAndDate(
         student, pageCriteria, graph);
@@ -66,7 +66,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public List<DeclaredActivity> getAllDeclaredActivitiesOf(Student student) {
-    var graph = FetchGraph.init().fetch("activity");
+    var graph = FetchGraph.init().add("activity").fetch("author");
     return declaredActivityRepository.findAllByStudent(student, graph);
   }
 
