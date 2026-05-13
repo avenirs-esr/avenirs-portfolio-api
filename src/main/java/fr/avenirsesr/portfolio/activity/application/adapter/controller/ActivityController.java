@@ -20,6 +20,8 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
@@ -44,7 +46,12 @@ public class ActivityController {
   @GetMapping("/{activityStatus}/{activityId}/presentation")
   public ResponseEntity<ActivityPresentationDTO> getActivityPresentation(
       HttpServletRequest request,
-      @PathVariable @Schema(ref = "#/components/schemas/EActivityStatus")
+      @PathVariable
+          @Parameter(
+              name = "activityStatus",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
           EActivityStatus activityStatus,
       @PathVariable UUID activityId) {
     log.debug("Received request to get activity [{}] presentation", activityId);
@@ -72,7 +79,12 @@ public class ActivityController {
 
   @GetMapping("/{activityStatus}/{activityId}/content")
   public ResponseEntity<ActivityContentDTO> getActivityContent(
-      @PathVariable @Schema(ref = "#/components/schemas/EActivityStatus")
+      @PathVariable
+          @Parameter(
+              name = "activityStatus",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
           EActivityStatus activityStatus,
       @PathVariable UUID activityId) {
     log.debug("Received request to get activity [{}] content", activityId);
@@ -154,7 +166,12 @@ public class ActivityController {
   @PatchMapping("/{activityStatus}/{activityId}")
   public ResponseEntity<ActivityDraftUpdateResponse> updateActivity(
       Principal principal,
-      @PathVariable @Schema(ref = "#/components/schemas/EActivityStatus")
+      @PathVariable
+          @Parameter(
+              name = "activityStatus",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
           EActivityStatus activityStatus,
       @PathVariable UUID activityId,
       @RequestBody ActivityDraftUpdateRequest body) {
