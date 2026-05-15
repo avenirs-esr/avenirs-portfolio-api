@@ -3,15 +3,13 @@ package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
 
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.*;
-import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityContentDtoMapper;
-import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityNavigationMapper;
-import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
-import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityPresentationDtoMapper;
+import fr.avenirsesr.portfolio.activity.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftCreationResponse;
 import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftUpdateResponse;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
@@ -43,6 +41,7 @@ public class ActivityController {
   private final ActivityContentDtoMapper activityContentDtoMapper;
   private final ActivityNavigationMapper activityNavigationMapper;
   private final ActivityOverviewDtoMapper activityOverviewDtoMapper;
+  private final ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
 
   @GetMapping("/{activityStatus}/{activityId}/presentation")
   public ResponseEntity<ActivityPresentationDTO> getActivityPresentation(
@@ -97,6 +96,29 @@ public class ActivityController {
               activityContentDtoMapper.toDTO(activityService.getActivityDraftById(activityId));
         };
     return ResponseEntity.ok(dto);
+  }
+
+  @GetMapping("/staff/working-space")
+  public ResponseEntity<PagedResponse<ActivityStaffOverviewDTO>> getStaffActivityWorkingSpace(
+      Principal principal,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to activity working space view of user [{}] (page= {}, fileSize= {})",
+        principal.getName(),
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<ActivityStaffOverviewData> pagedResult =
+        activityService.staffActivityWorkingSpace(pageCriteria);
+
+    var viewResponse =
+        new PagedResponse<>(
+            pagedResult.content().stream().map(activityStaffOverviewDtoMapper::toDTO).toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+
+    return ResponseEntity.ok(viewResponse);
   }
 
   @GetMapping

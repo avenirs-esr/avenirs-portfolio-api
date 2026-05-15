@@ -4,6 +4,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
@@ -14,6 +15,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
@@ -45,6 +47,7 @@ public class ActivityServiceImpl implements ActivityService {
   private final DeclaredActivityService declaredActivityService;
   private final LoggedInUserService loggedInUserService;
   private final ActivityResourceService activityResourceService;
+  private final StaffActivityOverviewRepository staffActivityOverviewRepository;
 
   @Override
   public Activity create(
@@ -167,6 +170,27 @@ public class ActivityServiceImpl implements ActivityService {
                 Activity::getThematic,
                 () -> new EnumMap<>(EActivityThematic.class),
                 Collectors.toList()));
+  }
+
+  @Override
+  public PagedResult<ActivityStaffOverviewData> staffActivityWorkingSpace(
+      PageCriteria pageCriteria) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var pagedActivities = staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria);
+
+    return new PagedResult<>(
+        pagedActivities.content().stream()
+            .map(
+                a ->
+                    new ActivityStaffOverviewData(
+                        a.activityId(),
+                        a.title(),
+                        a.thematic(),
+                        a.author(),
+                        a.activityStatus(),
+                        a.updatedAt()))
+            .toList(),
+        pagedActivities.pageInfo());
   }
 
   @Override

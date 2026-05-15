@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityOverviewDTO;
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.AuthorDTO;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.util.Optional;
@@ -22,8 +23,8 @@ public interface ActivityOverviewDtoMapper {
     return value.orElse(null);
   }
 
-  default ActivityOverviewDTO.AuthorDTO unwrap(Staff author) {
-    return new ActivityOverviewDTO.AuthorDTO(
+  default AuthorDTO unwrap(Staff author) {
+    return new AuthorDTO(
         author.getId(), author.getUser().getFirstName(), author.getUser().getLastName());
   }
 }

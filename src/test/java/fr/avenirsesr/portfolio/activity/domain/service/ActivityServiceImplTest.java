@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
@@ -14,6 +15,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -42,6 +44,7 @@ class ActivityServiceImplTest {
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private ActivityResourceService activityResourceService;
+  @Mock private StaffActivityOverviewRepository staffActivityOverviewRepository;
 
   @InjectMocks private ActivityServiceImpl activityService;
 
@@ -779,6 +782,167 @@ class ActivityServiceImplTest {
 
     // Then
     assertEquals(savedDraft, result);
+  }
+
+  @Test
+  void staffActivityWorkingSpace_shouldReturnPagedResult() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 8, 1);
+    var staff = mock(Staff.class);
+
+    var overviewData =
+        new ActivityStaffOverviewData(
+            UUID.randomUUID(),
+            "Mon activité",
+            EActivityThematic.EXPERIENCES,
+            staff,
+            EActivityStatus.PUBLISHED,
+            Instant.now());
+
+    var pagedActivities = new PagedResult<>(List.of(overviewData), pageInfo);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria))
+        .thenReturn(pagedActivities);
+
+    // When
+    var result = activityService.staffActivityWorkingSpace(pageCriteria);
+
+    // Then
+    assertNotNull(result);
+    assertEquals(1, result.content().size());
+    assertEquals(pageInfo, result.pageInfo());
+
+    var data = result.content().getFirst();
+    assertEquals(overviewData.activityId(), data.activityId());
+    assertEquals(overviewData.title(), data.title());
+    assertEquals(overviewData.thematic(), data.thematic());
+    assertEquals(overviewData.author(), data.author());
+    assertEquals(overviewData.activityStatus(), data.activityStatus());
+    assertEquals(overviewData.updatedAt(), data.updatedAt());
+
+    verify(loggedInUserService).getLoggedInStaff();
+    verify(staffActivityOverviewRepository).findAllByAuthor(staff, pageCriteria);
+  }
+
+  @Test
+  void staffActivityWorkingSpace_shouldReturnEmpty_whenNoActivities() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 8, 0);
+    var staff = mock(Staff.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria))
+        .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+    // When
+    var result = activityService.staffActivityWorkingSpace(pageCriteria);
+
+    // Then
+    assertNotNull(result);
+    assertTrue(result.content().isEmpty());
+    assertEquals(pageInfo, result.pageInfo());
+
+    verify(loggedInUserService).getLoggedInStaff();
+    verify(staffActivityOverviewRepository).findAllByAuthor(staff, pageCriteria);
+  }
+
+  @Test
+  void staffActivityWorkingSpace_shouldReturnMultipleActivities() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 8, 2);
+    var staff = mock(Staff.class);
+
+    var draft =
+        new ActivityStaffOverviewData(
+            UUID.randomUUID(),
+            "Brouillon",
+            EActivityThematic.RESUMES,
+            staff,
+            EActivityStatus.DRAFT,
+            Instant.now());
+    var published =
+        new ActivityStaffOverviewData(
+            UUID.randomUUID(),
+            "Publiée",
+            EActivityThematic.EXPERIENCES,
+            staff,
+            EActivityStatus.PUBLISHED,
+            Instant.now().minusSeconds(3600));
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria))
+        .thenReturn(new PagedResult<>(List.of(draft, published), pageInfo));
+
+    // When
+    var result = activityService.staffActivityWorkingSpace(pageCriteria);
+
+    // Then
+    assertEquals(2, result.content().size());
+
+    var statuses =
+        result.content().stream().map(ActivityStaffOverviewData::activityStatus).toList();
+    assertTrue(statuses.contains(EActivityStatus.DRAFT));
+    assertTrue(statuses.contains(EActivityStatus.PUBLISHED));
+  }
+
+  @Test
+  void staffActivityWorkingSpace_shouldUseLoggedInStaff_asFilter() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 8, 0);
+    var staff = mock(Staff.class);
+    var otherStaff = mock(Staff.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria))
+        .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+    // When
+    activityService.staffActivityWorkingSpace(pageCriteria);
+
+    // Then — on vérifie que le repo est appelé avec le bon staff, pas n'importe lequel
+    verify(staffActivityOverviewRepository).findAllByAuthor(staff, pageCriteria);
+    verify(staffActivityOverviewRepository, never()).findAllByAuthor(eq(otherStaff), any());
+  }
+
+  @Test
+  void staffActivityWorkingSpace_shouldMapAllFieldsCorrectly() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 8, 1);
+    var staff = mock(Staff.class);
+
+    UUID expectedId = UUID.randomUUID();
+    Instant expectedUpdatedAt = Instant.parse("2024-01-15T10:00:00Z");
+
+    var overviewData =
+        new ActivityStaffOverviewData(
+            expectedId,
+            "Titre précis",
+            EActivityThematic.SELF_KNOWLEDGE,
+            staff,
+            EActivityStatus.DRAFT,
+            expectedUpdatedAt);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria))
+        .thenReturn(new PagedResult<>(List.of(overviewData), pageInfo));
+
+    // When
+    var result = activityService.staffActivityWorkingSpace(pageCriteria);
+
+    // Then — chaque champ est mappé sans transformation
+    var data = result.content().getFirst();
+    assertEquals(expectedId, data.activityId());
+    assertEquals("Titre précis", data.title());
+    assertEquals(EActivityThematic.SELF_KNOWLEDGE, data.thematic());
+    assertEquals(staff, data.author());
+    assertEquals(EActivityStatus.DRAFT, data.activityStatus());
+    assertEquals(expectedUpdatedAt, data.updatedAt());
   }
 
   @Test
