@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StaffActivityOverviewQueryRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository</a> &gt; <span class="el_source">StaffActivityOverviewQueryRepository.java</span></div><h1>StaffActivityOverviewQueryRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository;
+
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.StaffActivityOverviewRepository;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.stereotype.Repository;
+
+@Repository
+<span class="fc" id="L24">public class StaffActivityOverviewQueryRepository implements StaffActivityOverviewRepository {</span>
+  @PersistenceContext private EntityManager em;
+
+  @Override
+  public PagedResult&lt;ActivityStaffOverviewData&gt; findAllByAuthor(
+      Staff author, PageCriteria pageCriteria) {
+
+<span class="fc" id="L31">    String unionSql =</span>
+        &quot;&quot;&quot;
+        SELECT *
+          FROM (
+              SELECT
+                  a.id            AS activity_id,
+                  a.title         AS title,
+                  a.thematic      AS thematic,
+                  a.author_id     AS author_id,
+                  'PUBLISHED'     AS status,
+                  a.updated_at    AS updated_at
+              FROM activity a
+              WHERE a.author_id = :authorId
+
+              UNION ALL
+
+              SELECT
+                  d.id            AS activity_id,
+                  d.title         AS title,
+                  d.thematic      AS thematic,
+                  d.author_id     AS author_id,
+                  'DRAFT'         AS status,
+                  d.updated_at    AS updated_at
+              FROM activity_draft d
+              WHERE d.author_id = :authorId
+          ) AS unified
+
+          ORDER BY updated_at DESC
+        &quot;&quot;&quot;;
+
+<span class="fc" id="L61">    String countSql =</span>
+        &quot;&quot;&quot;
+            SELECT COUNT(*) FROM (
+                SELECT id FROM activity       WHERE author_id = :authorId
+                UNION ALL
+                SELECT id FROM activity_draft WHERE author_id = :authorId
+            ) AS total
+        &quot;&quot;&quot;;
+
+<span class="fc" id="L70">    Query dataQuery =</span>
+<span class="fc" id="L71">        em.createNativeQuery(unionSql)</span>
+<span class="fc" id="L72">            .setParameter(&quot;authorId&quot;, author.getId())</span>
+<span class="fc" id="L73">            .setFirstResult(pageCriteria.page() * pageCriteria.pageSize())</span>
+<span class="fc" id="L74">            .setMaxResults(pageCriteria.pageSize());</span>
+
+<span class="fc" id="L76">    Query countQuery = em.createNativeQuery(countSql).setParameter(&quot;authorId&quot;, author.getId());</span>
+
+<span class="fc" id="L78">    List&lt;Object[]&gt; rows = dataQuery.getResultList();</span>
+<span class="fc" id="L79">    long total = ((Number) countQuery.getSingleResult()).longValue();</span>
+
+<span class="fc" id="L81">    List&lt;ActivityStaffOverviewData&gt; content =</span>
+<span class="fc" id="L82">        rows.stream().map(row -&gt; mapRow(row, author)).toList();</span>
+
+<span class="fc" id="L84">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L85">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));</span>
+  }
+
+  private ActivityStaffOverviewData mapRow(Object[] row, Staff author) {
+<span class="fc" id="L89">    return new ActivityStaffOverviewData(</span>
+<span class="fc" id="L90">        toUUID(row[0]),</span>
+<span class="fc" id="L91">        toString(row[1]),</span>
+<span class="fc" id="L92">        EActivityThematic.valueOf(toString(row[2])),</span>
+        author,
+<span class="fc" id="L94">        EActivityStatus.valueOf(toString(row[4])),</span>
+<span class="fc" id="L95">        toInstant(row[5]));</span>
+  }
+
+  private String toString(Object value) {
+<span class="pc bpc" id="L99" title="2 of 3 branches missed.">    return switch (value) {</span>
+<span class="fc" id="L100">      case String s -&gt; s;</span>
+<span class="nc" id="L101">      case byte[] b -&gt; new String(b, StandardCharsets.UTF_8);</span>
+      default -&gt;
+<span class="nc" id="L103">          throw new IllegalArgumentException(&quot;Type inattendu pour String : &quot; + value.getClass());</span>
+    };
+  }
+
+  private UUID toUUID(Object value) {
+<span class="pc bpc" id="L108" title="3 of 4 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L109">      case UUID u -&gt; u;</span>
+<span class="nc" id="L110">      case String s -&gt; UUID.fromString(s);</span>
+<span class="fc" id="L111">      case byte[] b -&gt; {</span>
+<span class="fc" id="L112">        ByteBuffer bb = ByteBuffer.wrap(b);</span>
+<span class="fc" id="L113">        yield new UUID(bb.getLong(), bb.getLong());</span>
+      }
+      default -&gt;
+<span class="nc" id="L116">          throw new IllegalArgumentException(&quot;Type inattendu pour UUID : &quot; + value.getClass());</span>
+    };
+  }
+
+  private Instant toInstant(Object value) {
+<span class="pc bpc" id="L121" title="4 of 5 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L122">      case Instant i -&gt; i;</span>
+<span class="nc" id="L123">      case Timestamp ts -&gt; ts.getTimestamp().toInstant();</span>
+<span class="fc" id="L124">      case OffsetDateTime odt -&gt; odt.toInstant();</span>
+<span class="nc" id="L125">      case byte[] b -&gt; Instant.parse(new String(b, StandardCharsets.UTF_8));</span>
+      default -&gt;
+<span class="nc" id="L127">          throw new IllegalArgumentException(&quot;Type inattendu pour Instant : &quot; + value.getClass());</span>
+    };
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
