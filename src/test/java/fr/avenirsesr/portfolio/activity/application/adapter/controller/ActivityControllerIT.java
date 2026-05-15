@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftCreationRequest;
@@ -26,6 +28,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       BASE_PATH + "/PUBLISHED/{activityId}" + "/presentation";
   private static final String DRAFT_BASE_PATH = BASE_PATH + "/draft";
   private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/DRAFT/{draftId}";
+  private static final String WORKING_SPACE_PATH = BASE_PATH + "/staff/working-space";
   private static final String PUBLISH_PATH = BASE_PATH + "/publish/{draftId}";
 
   @Autowired private WebTestClient webTestClient;
@@ -717,6 +720,214 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .getResponseBody();
 
     return UUID.fromString(objectMapper.readTree(body).get("draftId").asText());
+  }
+
+  @Test
+  void shouldReturnStaffActivityWorkingSpace() {
+    BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
+    BddLogger.when("performing a GET as a staff user");
+    BddLogger.then("it should return paged activities with data and page info");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(WORKING_SPACE_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8)
+        .jsonPath("$.page.totalElements")
+        .exists();
+  }
+
+  @Test
+  void shouldReturnWorkingSpaceWithDefaultPaginationWhenNoParamsProvided() {
+    BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
+    BddLogger.when("performing a GET without pagination params");
+    BddLogger.then("it should return 200 with default pagination applied");
+
+    webTestClient
+        .get()
+        .uri(WORKING_SPACE_PATH)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8) // default page size
+        .jsonPath("$.page.totalElements")
+        .exists();
+  }
+
+  @Test
+  void shouldReturnOnlyStaffOwnActivities() throws Exception {
+    BddLogger.given("a staff user with created drafts");
+    createDraftAndGetId("Mon brouillon working space");
+
+    BddLogger.when("performing a GET on working space");
+    BddLogger.then("it should return at least one activity belonging to the staff");
+
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(WORKING_SPACE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "12")
+                        .build())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode json = objectMapper.readTree(body);
+    JsonNode data = json.get("data");
+
+    assertTrue(data.isArray());
+    assertTrue(data.size() > 0);
+
+    JsonNode first = data.get(0);
+    assertTrue(first.hasNonNull("activityId"));
+    assertTrue(first.hasNonNull("title"));
+    assertTrue(first.hasNonNull("activityStatus"));
+  }
+
+  @Test
+  void shouldReturnItemsWithExpectedShape() throws Exception {
+    BddLogger.given("a staff user with at least one activity or draft");
+    createDraftAndGetId("Brouillon pour vérifier la shape");
+
+    BddLogger.when("performing a GET on working space");
+    BddLogger.then("each item should have activityId, title, thematic and activityStatus fields");
+
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(WORKING_SPACE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "12")
+                        .build())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode data = objectMapper.readTree(body).get("data");
+
+    if (data.isEmpty()) return;
+
+    for (JsonNode item : data) {
+      assertTrue(item.hasNonNull("activityId"), "missing activityId");
+      assertTrue(item.hasNonNull("title"), "missing title");
+      assertTrue(item.hasNonNull("activityStatus"), "missing activityStatus");
+
+      String status = item.get("activityStatus").asText();
+      assertTrue(
+          status.equals("DRAFT") || status.equals("PUBLISHED"), "unexpected status: " + status);
+    }
+  }
+
+  @Test
+  void shouldRespectPageSizeLimit() {
+    BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
+    BddLogger.when("performing a GET with pageSize exceeding the max allowed (12)");
+    BddLogger.then("it should cap the pageSize to the maximum allowed value");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(WORKING_SPACE_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "999")
+                    .build())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(12); // MAX_PAGE_SIZE du PageCriteria
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnWorkingSpace() {
+    BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
+    BddLogger.when("performing a GET without authentication headers");
+    BddLogger.then("it should return 401");
+
+    webTestClient
+        .get()
+        .uri(WORKING_SPACE_PATH)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  @Test
+  void shouldReturn403WhenUserIsNotStaffOnWorkingSpace() {
+    BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
+    BddLogger.when("performing a GET with a student account");
+    BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+    webTestClient
+        .get()
+        .uri(WORKING_SPACE_PATH)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
   }
 
   private void fillDraftWithSummary(UUID draftId) throws Exception {

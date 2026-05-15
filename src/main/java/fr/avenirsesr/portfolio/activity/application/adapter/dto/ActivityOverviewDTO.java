@@ -5,7 +5,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.e
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"id", "title", "thematic", "summary", "isNew"})
+@Schema(requiredProperties = {"id", "title", "author", "thematic", "summary", "isNew"})
 public record ActivityOverviewDTO(
     UUID id,
     AuthorDTO author,
@@ -14,7 +14,4 @@ public record ActivityOverviewDTO(
     @Schema(ref = "#/components/schemas/EDeclaredActivityStatus") EDeclaredActivityStatus status,
     String summary,
     String executionPeriodInfoSummary,
-    boolean isNew) {
-  @Schema(requiredProperties = {"userId", "firstName", "lastName"})
-  public record AuthorDTO(UUID userId, String firstName, String lastName) {}
-}
+    boolean isNew) {}

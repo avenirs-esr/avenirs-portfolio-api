@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.activity.domain.port.input;
 
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
@@ -44,6 +45,8 @@ public interface ActivityService {
 
   PagedResult<ActivityWithStudentStatusData> activitiesView(
       EActivityThematic thematic, PageCriteria pageCriteria);
+
+  PagedResult<ActivityStaffOverviewData> staffActivityWorkingSpace(PageCriteria pageCriteria);
 
   PagedResult<ActivityWithStudentStatusData> latestActivitiesView(PageCriteria pageCriteria);
 
