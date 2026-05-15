@@ -17,10 +17,10 @@ import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRe
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
-import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -83,8 +83,8 @@ class ActivityServiceImplTest {
     assertEquals(title, createdActivity.getTitle());
     assertEquals(thematic, createdActivity.getThematic());
     assertEquals(summary, createdActivity.getSummary());
-    assertEquals(description, createdActivity.getDescription());
-    assertEquals(executionPeriodInfo, createdActivity.getExecutionPeriodInfo());
+    assertEquals(description, createdActivity.getDescription().get());
+    assertEquals(executionPeriodInfo, createdActivity.getExecutionPeriodInfo().get());
 
     // Verify repository was called
     ArgumentCaptor<Activity> captor = ArgumentCaptor.forClass(Activity.class);
@@ -472,8 +472,8 @@ class ActivityServiceImplTest {
     when(activity.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
     when(activity.getSummary()).thenReturn("is a test activity");
     when(activity.getDescription())
-        .thenReturn("<h3>Objectives</h3><p>Test activity description</p>");
-    when(activity.getExecutionPeriodInfo()).thenReturn("2026");
+        .thenReturn(Optional.of("<h3>Objectives</h3><p>Test activity description</p>"));
+    when(activity.getExecutionPeriodInfo()).thenReturn(Optional.of("2026"));
     when(activity.getCreatedAt()).thenReturn(Instant.now());
     when(activity.getUpdatedAt()).thenReturn(Instant.now());
 
@@ -492,8 +492,9 @@ class ActivityServiceImplTest {
     assertEquals(EActivityThematic.EXPERIENCES, result.activity().getThematic());
     assertEquals("is a test activity", result.activity().getSummary());
     assertEquals(
-        "<h3>Objectives</h3><p>Test activity description</p>", result.activity().getDescription());
-    assertEquals("2026", result.activity().getExecutionPeriodInfo());
+        "<h3>Objectives</h3><p>Test activity description</p>",
+        result.activity().getDescription().get());
+    assertEquals("2026", result.activity().getExecutionPeriodInfo().get());
     assertTrue(resBanner.id().isPresent());
     assertEquals(bannerId, resBanner.id().get());
     assertEquals("filename.png", resBanner.name().get());
@@ -557,8 +558,8 @@ class ActivityServiceImplTest {
 
     // Then
     assertEquals(EActivityThematic.TRANSVERSAL, result.getThematic());
-    assertEquals(-1, result.getTraceAllowedAssociations().get());
-    assertEquals(-1, result.getFeedbackAllowedIterations().get());
+    assertEquals(-1, result.getTraceAllowedAssociations());
+    assertEquals(-1, result.getFeedbackAllowedIterations());
     assertTrue(result.isEnableReflection());
   }
 
@@ -778,5 +779,203 @@ class ActivityServiceImplTest {
 
     // Then
     assertEquals(savedDraft, result);
+  }
+
+  @Test
+  void publish_shouldCreateActivityFromDraftAndSaveIt() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(staff);
+    when(draft.getId()).thenReturn(draftId);
+    when(draft.getTitle()).thenReturn("Mon activité");
+    when(draft.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+    when(draft.getSummary()).thenReturn(Optional.of("Un résumé"));
+    when(draft.getDescription()).thenReturn(Optional.of("<p>Description</p>"));
+    when(draft.getExecutionPeriodInfo()).thenReturn(Optional.of("2026"));
+    when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.empty());
+    when(draft.isEnableReflection()).thenReturn(true);
+    when(draft.getTraceAllowedAssociations()).thenReturn(-1);
+    when(draft.getFeedbackAllowedIterations()).thenReturn(-1);
+
+    ArgumentCaptor<Activity> captor = ArgumentCaptor.forClass(Activity.class);
+    when(activityRepository.save(captor.capture()))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    Activity result = activityService.publish(draftId);
+
+    // Then
+    assertNotNull(result);
+    assertEquals(draftId, result.getId());
+    assertEquals("Mon activité", result.getTitle());
+    assertEquals(EActivityThematic.EXPERIENCES, result.getThematic());
+    assertEquals("Un résumé", result.getSummary());
+
+    verify(activityRepository).save(any(Activity.class));
+    verify(activityDraftRepository).removeFromDatabase(draft);
+  }
+
+  @Test
+  void publish_shouldRemoveDraftAfterPublishing() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(staff);
+    when(draft.getId()).thenReturn(draftId);
+    when(draft.getTitle()).thenReturn("Titre");
+    when(draft.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+    when(draft.getSummary()).thenReturn(Optional.of("Résumé"));
+    when(draft.getDescription()).thenReturn(Optional.empty());
+    when(draft.getExecutionPeriodInfo()).thenReturn(Optional.empty());
+    when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.empty());
+    when(draft.isEnableReflection()).thenReturn(true);
+    when(draft.getTraceAllowedAssociations()).thenReturn(-1);
+    when(draft.getFeedbackAllowedIterations()).thenReturn(-1);
+    when(activityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    activityService.publish(draftId);
+
+    // Then — le draft est bien supprimé après publication
+    InOrder inOrder = inOrder(activityRepository, activityDraftRepository);
+    inOrder.verify(activityRepository).save(any(Activity.class));
+    inOrder.verify(activityDraftRepository).removeFromDatabase(draft);
+  }
+
+  @Test
+  void publish_shouldThrowActivityDraftNotFoundException_whenDraftDoesNotExist() {
+    // Given
+    UUID unknownId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+    // When / Then
+    assertThrows(ActivityDraftNotFoundException.class, () -> activityService.publish(unknownId));
+
+    verify(activityRepository, never()).save(any());
+    verify(activityDraftRepository, never()).removeFromDatabase(any());
+  }
+
+  @Test
+  void publish_shouldThrowUserNotAuthorizedException_whenStaffIsNotAuthor() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff loggedInStaff = mock(Staff.class);
+    Staff otherStaff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(otherStaff);
+
+    // When / Then
+    assertThrows(UserNotAuthorizedException.class, () -> activityService.publish(draftId));
+
+    verify(activityRepository, never()).save(any());
+    verify(activityDraftRepository, never()).removeFromDatabase(any());
+  }
+
+  @Test
+  void publish_shouldThrowFieldValidationException_whenSummaryIsEmpty() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(staff);
+    when(draft.getSummary()).thenReturn(Optional.empty());
+
+    // When / Then
+    assertThrows(FieldValidationException.class, () -> activityService.publish(draftId));
+
+    verify(activityRepository, never()).save(any());
+    verify(activityDraftRepository, never()).removeFromDatabase(any());
+  }
+
+  @Test
+  void publish_shouldMapOptionalFieldsAsNull_whenNotPresent() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(staff);
+    when(draft.getId()).thenReturn(draftId);
+    when(draft.getTitle()).thenReturn("Titre");
+    when(draft.getThematic()).thenReturn(EActivityThematic.RESUMES);
+    when(draft.getSummary()).thenReturn(Optional.of("Résumé"));
+    when(draft.getDescription()).thenReturn(Optional.empty());
+    when(draft.getExecutionPeriodInfo()).thenReturn(Optional.empty());
+    when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.empty());
+    when(draft.isEnableReflection()).thenReturn(false);
+    when(draft.getTraceAllowedAssociations()).thenReturn(3);
+    when(draft.getFeedbackAllowedIterations()).thenReturn(5);
+
+    ArgumentCaptor<Activity> captor = ArgumentCaptor.forClass(Activity.class);
+    when(activityRepository.save(captor.capture()))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    Activity result = activityService.publish(draftId);
+
+    // Then — les champs optionnels absents du draft donnent des Optional vides sur l'activité
+    assertNotNull(result);
+    assertTrue(result.getDescription().isEmpty());
+    assertTrue(result.getExecutionPeriodInfo().isEmpty());
+    assertTrue(result.getExecutionPeriodInfoSummary().isEmpty());
+  }
+
+  @Test
+  void publish_shouldPreserveAllDraftFields() {
+    // Given
+    UUID draftId = UUID.randomUUID();
+    Staff staff = mock(Staff.class);
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+    when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+    when(draft.getAuthor()).thenReturn(staff);
+    when(draft.getId()).thenReturn(draftId);
+    when(draft.getTitle()).thenReturn("Titre complet");
+    when(draft.getThematic()).thenReturn(EActivityThematic.SELF_KNOWLEDGE);
+    when(draft.getSummary()).thenReturn(Optional.of("Résumé complet"));
+    when(draft.getDescription()).thenReturn(Optional.of("<p>Description complète</p>"));
+    when(draft.getExecutionPeriodInfo()).thenReturn(Optional.of("Avant entretien"));
+    when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.of("Label court"));
+    when(draft.isEnableReflection()).thenReturn(false);
+    when(draft.getTraceAllowedAssociations()).thenReturn(3);
+    when(draft.getFeedbackAllowedIterations()).thenReturn(5);
+
+    when(activityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    Activity result = activityService.publish(draftId);
+
+    // Then
+    assertEquals(draftId, result.getId());
+    assertEquals("Titre complet", result.getTitle());
+    assertEquals(EActivityThematic.SELF_KNOWLEDGE, result.getThematic());
+    assertEquals("Résumé complet", result.getSummary());
+    assertEquals("<p>Description complète</p>", result.getDescription().get());
+    assertEquals("Avant entretien", result.getExecutionPeriodInfo().get());
+    assertEquals("Label court", result.getExecutionPeriodInfoSummary().get());
+    assertFalse(result.isEnableReflection());
+    assertEquals(3, result.getTraceAllowedAssociations());
+    assertEquals(5, result.getFeedbackAllowedIterations());
   }
 }

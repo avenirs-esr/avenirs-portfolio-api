@@ -26,6 +26,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       BASE_PATH + "/PUBLISHED/{activityId}" + "/presentation";
   private static final String DRAFT_BASE_PATH = BASE_PATH + "/draft";
   private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/DRAFT/{draftId}";
+  private static final String PUBLISH_PATH = BASE_PATH + "/publish/{draftId}";
 
   @Autowired private WebTestClient webTestClient;
   @Autowired private ObjectMapper objectMapper;
@@ -495,6 +496,206 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isUnauthorized();
   }
 
+  @Test
+  void shouldPublishActivityDraftAndReturnActivityId() throws Exception {
+    BddLogger.given("an existing activity draft with a summary");
+    UUID draftId = createDraftAndGetId("Brouillon à publier");
+    fillDraftWithSummary(draftId);
+
+    BddLogger.when("performing a POST on publish endpoint");
+    BddLogger.then("it should return 200 with the published activity id");
+
+    webTestClient
+        .post()
+        .uri(PUBLISH_PATH, draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.createdItemId")
+        .exists()
+        .jsonPath("$.createdItemId")
+        .isNotEmpty();
+  }
+
+  @Test
+  void shouldPublishActivityDraftAndReturnSameIdAsDraft() throws Exception {
+    BddLogger.given("an existing activity draft with a summary");
+    UUID draftId = createDraftAndGetId("Brouillon id conservé");
+    fillDraftWithSummary(draftId);
+
+    BddLogger.when("performing a POST on publish endpoint");
+    BddLogger.then("it should return the same id as the draft");
+
+    webTestClient
+        .post()
+        .uri(PUBLISH_PATH, draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.createdItemId")
+        .isEqualTo(draftId.toString());
+  }
+
+  @Test
+  void shouldDeleteDraftAfterPublishing() throws Exception {
+    BddLogger.given("an existing activity draft with a summary");
+    UUID draftId = createDraftAndGetId("Brouillon supprimé après publication");
+    fillDraftWithSummary(draftId);
+
+    BddLogger.when("performing a POST on publish endpoint");
+    webTestClient
+        .post()
+        .uri(PUBLISH_PATH, draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    BddLogger.then("the draft should no longer exist");
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/DRAFT/{draftId}/presentation", draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+
+  @Test
+  void shouldReturn404WhenDraftToPublishNotFound() {
+    BddLogger.given("a non-existent draft id");
+    UUID unknownId = UUID.randomUUID();
+
+    BddLogger.when("performing a POST on publish endpoint with unknown id");
+    BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND error code");
+
+    webTestClient
+        .post()
+        .uri(PUBLISH_PATH, unknownId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
+  }
+
+  @Test
+  void shouldReturn422WhenDraftHasNoSummary() throws Exception {
+    BddLogger.given("an existing draft without a summary");
+    UUID draftId = createDraftAndGetId("Brouillon sans résumé");
+
+    BddLogger.when("performing a POST on publish endpoint");
+    BddLogger.then("it should return 400 because summary is required to publish");
+
+    webTestClient
+        .post()
+        .uri(PUBLISH_PATH, draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(400)
+        .expectBody()
+        .jsonPath("$.code")
+        .exists();
+  }
+
+  @Test
+  void shouldReturn403WhenStudentTriesToPublish() throws Exception {
+    BddLogger.given("an existing draft and a student (non-staff) account");
+    UUID draftId = createDraftAndGetId("Brouillon publication refusée");
+    fillDraftWithSummary(draftId);
+
+    BddLogger.when("performing a POST on publish endpoint with a student account");
+    BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+    webTestClient
+        .post()
+        .uri(PUBLISH_PATH, draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnPublish() {
+    BddLogger.given("the " + PUBLISH_PATH + " endpoint");
+    BddLogger.when("performing a POST without authentication headers");
+    BddLogger.then("it should return 401");
+
+    webTestClient
+        .post()
+        .uri(PUBLISH_PATH, UUID.randomUUID())
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  @Test
+  void shouldMakeActivityAccessibleAfterPublishing() throws Exception {
+    BddLogger.given("an existing draft with a summary");
+    UUID draftId = createDraftAndGetId("Brouillon accessible après publication");
+    fillDraftWithSummary(draftId);
+
+    BddLogger.when("performing a POST on publish endpoint");
+    webTestClient
+        .post()
+        .uri(PUBLISH_PATH, draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    BddLogger.then("the published activity should be accessible via the presentation endpoint");
+    webTestClient
+        .get()
+        .uri(PRESENTATION_BASE_PATH, draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(draftId.toString());
+  }
+
   private UUID createDraftAndGetId(String title) throws Exception {
     String requestBody = objectMapper.writeValueAsString(new ActivityDraftCreationRequest(title));
 
@@ -516,5 +717,33 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .getResponseBody();
 
     return UUID.fromString(objectMapper.readTree(body).get("draftId").asText());
+  }
+
+  private void fillDraftWithSummary(UUID draftId) throws Exception {
+    String requestBody =
+        objectMapper.writeValueAsString(
+            new ActivityDraftUpdateRequest(
+                null,
+                EActivityThematic.EXPERIENCES,
+                "Un résumé valide pour la publication",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null));
+
+    webTestClient
+        .patch()
+        .uri(DRAFT_UPDATE_PATH, draftId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
   }
 }

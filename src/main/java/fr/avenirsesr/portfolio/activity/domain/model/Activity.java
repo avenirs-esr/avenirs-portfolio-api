@@ -17,11 +17,15 @@ public class Activity extends AvenirsBaseModel {
   private String title;
   private EActivityThematic thematic;
   private String summary;
-  private String description;
-  private String executionPeriodInfo;
   private boolean enableReflection;
   private int traceAllowedAssociations;
   private int feedbackAllowedIterations;
+
+  @Getter(AccessLevel.NONE)
+  private String description;
+
+  @Getter(AccessLevel.NONE)
+  private String executionPeriodInfo;
 
   @Getter(AccessLevel.NONE)
   private String executionPeriodInfoSummary;
@@ -114,5 +118,13 @@ public class Activity extends AvenirsBaseModel {
 
   public Optional<String> getExecutionPeriodInfoSummary() {
     return Optional.ofNullable(executionPeriodInfoSummary);
+  }
+
+  public Optional<String> getExecutionPeriodInfo() {
+    return Optional.ofNullable(executionPeriodInfo);
+  }
+
+  public Optional<String> getDescription() {
+    return Optional.ofNullable(description);
   }
 }

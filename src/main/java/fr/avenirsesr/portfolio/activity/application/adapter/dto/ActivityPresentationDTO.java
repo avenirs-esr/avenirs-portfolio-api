@@ -13,8 +13,6 @@ import java.util.UUID;
       "thematic",
       "banner",
       "summary",
-      "description",
-      "executionPeriodInfo"
     })
 public record ActivityPresentationDTO(
     UUID id,

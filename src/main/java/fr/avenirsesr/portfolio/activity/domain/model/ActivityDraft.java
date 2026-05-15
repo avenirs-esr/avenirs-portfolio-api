@@ -19,8 +19,8 @@ public class ActivityDraft extends AvenirsBaseModel {
   private String description;
   private String executionPeriodInfo;
   private String executionPeriodInfoSummary;
-  private int traceAllowedAssociations;
-  private int feedbackAllowedIterations;
+  @Getter private int traceAllowedAssociations;
+  @Getter private int feedbackAllowedIterations;
   @Getter private boolean enableReflection;
 
   private static final int DEFAULT_TRACE_ALLOWED_ASSOCIATION = -1;
@@ -114,13 +114,5 @@ public class ActivityDraft extends AvenirsBaseModel {
 
   public Optional<String> getExecutionPeriodInfoSummary() {
     return Optional.ofNullable(executionPeriodInfoSummary);
-  }
-
-  public Optional<Integer> getTraceAllowedAssociations() {
-    return Optional.ofNullable(traceAllowedAssociations);
-  }
-
-  public Optional<Integer> getFeedbackAllowedIterations() {
-    return Optional.ofNullable(feedbackAllowedIterations);
   }
 }

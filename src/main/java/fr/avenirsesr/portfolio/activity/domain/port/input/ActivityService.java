@@ -28,6 +28,8 @@ public interface ActivityService {
       int traceAllowedAssociations,
       int feedbackAllowedIterations);
 
+  Activity publish(UUID activityDraftId);
+
   FileData getActivityBanner(Activity activity);
 
   FileData getActivityBanner(ActivityDraft activity);

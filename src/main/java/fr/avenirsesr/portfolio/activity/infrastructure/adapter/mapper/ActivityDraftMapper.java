@@ -20,8 +20,8 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
         activityDraft.getDescription().orElse(null),
         activityDraft.getExecutionPeriodInfo().orElse(null),
         activityDraft.getExecutionPeriodInfoSummary().orElse(null),
-        activityDraft.getTraceAllowedAssociations().orElse(null),
-        activityDraft.getFeedbackAllowedIterations().orElse(null),
+        activityDraft.getTraceAllowedAssociations(),
+        activityDraft.getFeedbackAllowedIterations(),
         activityDraft.isEnableReflection(),
         activityDraft.getCreatedAt(),
         activityDraft.getUpdatedAt());

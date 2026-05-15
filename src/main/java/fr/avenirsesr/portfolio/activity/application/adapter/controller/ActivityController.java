@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -161,6 +162,18 @@ public class ActivityController {
 
     var draft = activityService.createActivityDraft(body.title());
     return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
+  }
+
+  @PostMapping("/publish/{activityDraftId}")
+  public ResponseEntity<CreationResponse> publishActivityDraft(
+      Principal principal, @PathVariable UUID activityDraftId) {
+    log.debug(
+        "Received request to publish activity draft {} by user [{}]",
+        activityDraftId,
+        principal.getName());
+
+    var activity = activityService.publish(activityDraftId);
+    return ResponseEntity.ok(new CreationResponse(activity.getId()));
   }
 
   @PatchMapping("/{activityStatus}/{activityId}")

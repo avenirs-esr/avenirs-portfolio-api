@@ -23,8 +23,8 @@ public interface ActivityPresentationDtoMapper {
         subscribedDeclaredActivity.orElse(null),
         new FileDTO(banner.id().orElse(null), banner.name().orElse(null), baseUrl + banner.url()),
         activity.getSummary(),
-        activity.getDescription(),
-        activity.getExecutionPeriodInfo(),
+        activity.getDescription().orElse(null),
+        activity.getExecutionPeriodInfo().orElse(null),
         activity.getCreatedAt(),
         activity.getUpdatedAt());
   }

@@ -16,9 +16,10 @@ import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDr
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
+import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
-import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -29,7 +30,6 @@ import java.time.Instant;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -82,6 +82,41 @@ public class ActivityServiceImpl implements ActivityService {
             traceAllowedAssociations,
             feedbackAllowedIterations);
     activityRepository.save(activity);
+    return activity;
+  }
+
+  @Override
+  public Activity publish(UUID activityDraftId) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var draft =
+        activityDraftRepository
+            .findById(activityDraftId)
+            .orElseThrow(ActivityDraftNotFoundException::new);
+    if (!draft.getAuthor().equals(staff)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    if (draft.getSummary().isEmpty()) {
+      throw new FieldValidationException(
+          EErrorCode.NOT_BLANK, "summary must be defined to publish an activity");
+    }
+
+    var activity =
+        activityRepository.save(
+            Activity.create(
+                draft.getId(),
+                draft.getAuthor(),
+                draft.getTitle(),
+                draft.getThematic(),
+                draft.getSummary().get(),
+                draft.getDescription().orElse(null),
+                draft.getExecutionPeriodInfo().orElse(null),
+                draft.getExecutionPeriodInfoSummary().orElse(null),
+                draft.isEnableReflection(),
+                draft.getTraceAllowedAssociations(),
+                draft.getFeedbackAllowedIterations()));
+
+    activityDraftRepository.removeFromDatabase(draft);
     return activity;
   }
 

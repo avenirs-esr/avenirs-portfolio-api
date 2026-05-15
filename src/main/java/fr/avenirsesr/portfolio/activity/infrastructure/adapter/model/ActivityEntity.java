@@ -35,10 +35,10 @@ public class ActivityEntity extends AvenirsBaseEntity {
   @Column(nullable = false, length = SUMMARY_LENGTH)
   private String summary;
 
-  @Column(nullable = false, length = RICH_TEXT_LENGTH)
+  @Column(length = RICH_TEXT_LENGTH)
   private String description;
 
-  @Column(name = "execution_period_info", nullable = false, length = ACTIVITY_EXECUTION_PERIOD_INFO)
+  @Column(name = "execution_period_info", length = ACTIVITY_EXECUTION_PERIOD_INFO)
   private String executionPeriodInfo;
 
   @Column(name = "execution_period_info_summary", length = TITLE_LENGTH)
