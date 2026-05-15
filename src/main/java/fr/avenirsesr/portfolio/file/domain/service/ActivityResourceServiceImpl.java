@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.file.domain.service;
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
@@ -10,8 +11,10 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.ActivityBannerRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class ActivityResourceServiceImpl implements ActivityResourceService {
+  private static final String ACTIVITY_BANNER_PATH = "/storage/activities/";
   public static final List<EFileType> ALLOWED_FILE_TYPES =
       List.of(EFileType.PNG, EFileType.JPEG, EFileType.GIF, EFileType.WEBP, EFileType.PJPEG);
 
@@ -76,9 +80,17 @@ public class ActivityResourceServiceImpl implements ActivityResourceService {
   }
 
   @Override
-  public ActivityBanner getActivityBanner(Activity activity) {
-    return activityBannerRepository
-        .findActiveByActivity(activity)
-        .orElseThrow(FileNotFoundException::new);
+  public FileData getActivityBanner(Activity activity) {
+    var banner = activityBannerRepository.findActiveByActivity(activity);
+    return banner
+        .map(
+            b ->
+                new FileData(
+                    Optional.of(b.getId()),
+                    Optional.of(b.getFileName()),
+                    ACTIVITY_BANNER_PATH + b.getId()))
+        .orElse(
+            new FileData(
+                Optional.empty(), Optional.empty(), FileStorageConstants.DEFAULT_COVER_FILE_URL));
   }
 }

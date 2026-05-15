@@ -38,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @AllArgsConstructor
 public class ActivityServiceImpl implements ActivityService {
-  private static final String ACTIVITY_BANNER_PATH = "/storage/activities/";
 
   private static final Duration DURATION_FOR_LATEST = Duration.ofDays(90);
   private final ActivityRepository activityRepository;
@@ -103,11 +102,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public FileData getActivityBanner(Activity activity) {
-    ActivityBanner activityBanner = activityResourceService.getActivityBanner(activity);
-    return new FileData(
-        Optional.of(activityBanner.getId()),
-        Optional.of(activityBanner.getFileName()),
-        ACTIVITY_BANNER_PATH + activityBanner.getId());
+    return activityResourceService.getActivityBanner(activity);
   }
 
   @Override

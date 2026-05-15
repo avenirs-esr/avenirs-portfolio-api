@@ -459,7 +459,7 @@ class ActivityServiceImplTest {
     BddLogger.given("an activity exists with ID " + activityId);
 
     Activity activity = mock(Activity.class);
-    ActivityBanner banner = mock(ActivityBanner.class);
+    FileData banner = mock(FileData.class);
 
     when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
 
@@ -477,8 +477,8 @@ class ActivityServiceImplTest {
     when(activity.getCreatedAt()).thenReturn(Instant.now());
     when(activity.getUpdatedAt()).thenReturn(Instant.now());
 
-    when(banner.getId()).thenReturn(bannerId);
-    when(banner.getFileName()).thenReturn("filename.png");
+    when(banner.id()).thenReturn(Optional.of(bannerId));
+    when(banner.name()).thenReturn(Optional.of("filename.png"));
 
     BddLogger.when("getActivityDetail is called for the activity ID");
     ActivityPresentationData result =
