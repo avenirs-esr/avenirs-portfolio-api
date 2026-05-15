@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActivityResourceServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.file.domain.service</a> &gt; <span class="el_source">ActivityResourceServiceImpl.java</span></div><h1>ActivityResourceServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.file.domain.service;
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
@@ -10,17 +11,20 @@ import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.ActivityBannerRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
+import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L19">@Slf4j</span>
+<span class="fc" id="L22">@Slf4j</span>
 @AllArgsConstructor
 public class ActivityResourceServiceImpl implements ActivityResourceService {
-<span class="fc" id="L22">  public static final List&lt;EFileType&gt; ALLOWED_FILE_TYPES =</span>
-<span class="fc" id="L23">      List.of(EFileType.PNG, EFileType.JPEG, EFileType.GIF, EFileType.WEBP, EFileType.PJPEG);</span>
+  private static final String ACTIVITY_BANNER_PATH = &quot;/storage/activities/&quot;;
+<span class="fc" id="L26">  public static final List&lt;EFileType&gt; ALLOWED_FILE_TYPES =</span>
+<span class="fc" id="L27">      List.of(EFileType.PNG, EFileType.JPEG, EFileType.GIF, EFileType.WEBP, EFileType.PJPEG);</span>
 
   private final FileStorageService fileStorageService;
   private final LoggedInUserService loggedInUserService;
@@ -29,57 +33,65 @@ public class ActivityResourceServiceImpl implements ActivityResourceService {
   @Override
   public ActivityBanner uploadBannerFor(
       Activity activity, String fileName, String mimeType, long size, byte[] content) {
-<span class="fc" id="L32">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L36">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
 
-<span class="fc" id="L34">    var fileResource =</span>
+<span class="fc" id="L38">    var fileResource =</span>
         new FileResource(
-<span class="fc" id="L36">            UUID.randomUUID(), fileName, EFileType.fromMimeType(mimeType), size, content);</span>
+<span class="fc" id="L40">            UUID.randomUUID(), fileName, EFileType.fromMimeType(mimeType), size, content);</span>
 
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">    if (!ALLOWED_FILE_TYPES.contains(fileResource.fileType())) {</span>
-<span class="nc" id="L39">      throw new FileTypeNotSupportedException();</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">    if (!ALLOWED_FILE_TYPES.contains(fileResource.fileType())) {</span>
+<span class="nc" id="L43">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="fc bfc" id="L41" title="All 2 branches covered.">    if (fileResource.fileType().getSizeLimit().isLessThan(size)) {</span>
-<span class="fc" id="L42">      throw new FileSizeTooBigException();</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">    if (fileResource.fileType().getSizeLimit().isLessThan(size)) {</span>
+<span class="fc" id="L46">      throw new FileSizeTooBigException();</span>
     }
 
-<span class="fc" id="L45">    var uri = fileStorageService.upload(fileResource);</span>
+<span class="fc" id="L49">    var uri = fileStorageService.upload(fileResource);</span>
 
-<span class="fc" id="L47">    var allBanners = activityBannerRepository.findAllByActivity(activity);</span>
-<span class="fc" id="L48">    var version =</span>
-<span class="fc" id="L49">        allBanners.stream().map(ActivityBanner::getVersion).max(Integer::compareTo).orElse(0) + 1;</span>
-<span class="fc" id="L50">    allBanners.forEach(a -&gt; a.setActiveVersion(false));</span>
+<span class="fc" id="L51">    var allBanners = activityBannerRepository.findAllByActivity(activity);</span>
+<span class="fc" id="L52">    var version =</span>
+<span class="fc" id="L53">        allBanners.stream().map(ActivityBanner::getVersion).max(Integer::compareTo).orElse(0) + 1;</span>
+<span class="fc" id="L54">    allBanners.forEach(a -&gt; a.setActiveVersion(false));</span>
 
-<span class="fc" id="L52">    var banner =</span>
-<span class="fc" id="L53">        ActivityBanner.create(</span>
-<span class="fc" id="L54">            fileResource.id(),</span>
+<span class="fc" id="L56">    var banner =</span>
+<span class="fc" id="L57">        ActivityBanner.create(</span>
+<span class="fc" id="L58">            fileResource.id(),</span>
             fileName,
-<span class="fc" id="L56">            fileResource.fileType(),</span>
-<span class="fc" id="L57">            fileResource.size(),</span>
+<span class="fc" id="L60">            fileResource.fileType(),</span>
+<span class="fc" id="L61">            fileResource.size(),</span>
             version,
             uri,
             loggedInUser,
             activity);
 
-<span class="fc" id="L63">    activityBannerRepository.save(banner);</span>
-<span class="fc" id="L64">    log.info(&quot;New banner {} saved for activity: {}&quot;, banner, activity);</span>
-<span class="fc" id="L65">    return banner;</span>
+<span class="fc" id="L67">    activityBannerRepository.save(banner);</span>
+<span class="fc" id="L68">    log.info(&quot;New banner {} saved for activity: {}&quot;, banner, activity);</span>
+<span class="fc" id="L69">    return banner;</span>
   }
 
   @Override
   public ActivityBanner getActivityFile(UUID fileID) {
-<span class="nc" id="L70">    return activityBannerRepository.findById(fileID).orElseThrow(FileNotFoundException::new);</span>
+<span class="nc" id="L74">    return activityBannerRepository.findById(fileID).orElseThrow(FileNotFoundException::new);</span>
   }
 
   @Override
   public byte[] fetchContent(ActivityBanner activityFile) {
-<span class="nc" id="L75">    return fileStorageService.get(activityFile.getUri());</span>
+<span class="nc" id="L79">    return fileStorageService.get(activityFile.getUri());</span>
   }
 
   @Override
-  public ActivityBanner getActivityBanner(Activity activity) {
-<span class="fc" id="L80">    return activityBannerRepository</span>
-<span class="fc" id="L81">        .findActiveByActivity(activity)</span>
-<span class="fc" id="L82">        .orElseThrow(FileNotFoundException::new);</span>
+  public FileData getActivityBanner(Activity activity) {
+<span class="fc" id="L84">    var banner = activityBannerRepository.findActiveByActivity(activity);</span>
+<span class="fc" id="L85">    return banner</span>
+<span class="fc" id="L86">        .map(</span>
+            b -&gt;
+<span class="nc" id="L88">                new FileData(</span>
+<span class="nc" id="L89">                    Optional.of(b.getId()),</span>
+<span class="nc" id="L90">                    Optional.of(b.getFileName()),</span>
+<span class="nc" id="L91">                    ACTIVITY_BANNER_PATH + b.getId()))</span>
+<span class="fc" id="L92">        .orElse(</span>
+            new FileData(
+<span class="fc" id="L94">                Optional.empty(), Optional.empty(), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
