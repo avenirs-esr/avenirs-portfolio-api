@@ -198,6 +198,19 @@ public class ActivityController {
     return ResponseEntity.ok(new CreationResponse(activity.getId()));
   }
 
+  @DeleteMapping("/draft/{activityDraftId}")
+  public ResponseEntity<String> deleteActivityDraft(
+      Principal principal, @PathVariable UUID activityDraftId) {
+    log.debug(
+        "Received request to delete activity draft {} by user [{}]",
+        activityDraftId,
+        principal.getName());
+
+    activityService.deleteDraft(activityDraftId);
+
+    return ResponseEntity.ok("Activity draft successfully deleted");
+  }
+
   @PatchMapping("/{activityStatus}/{activityId}")
   public ResponseEntity<ActivityDraftUpdateResponse> updateActivity(
       Principal principal,

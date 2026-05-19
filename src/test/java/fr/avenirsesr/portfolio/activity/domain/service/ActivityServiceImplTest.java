@@ -1,6 +1,9 @@
 package fr.avenirsesr.portfolio.activity.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -34,6 +37,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
@@ -1141,5 +1145,98 @@ class ActivityServiceImplTest {
     assertFalse(result.isEnableReflection());
     assertEquals(3, result.getTraceAllowedAssociations());
     assertEquals(5, result.getFeedbackAllowedIterations());
+  }
+
+  @Nested
+  class GivenAnActivityService {
+
+    @BeforeEach
+    void setupGiven() {
+      BddLogger.given("an activity service");
+    }
+
+    @Nested
+    class WhenDeletingAnActivityDraft {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("deleting an activity draft");
+      }
+
+      @Nested
+      class AndTheDraftExists {
+
+        ActivityDraft draft = mock(ActivityDraft.class);
+        UUID draftId = UUID.randomUUID();
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the draft exists");
+          when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+        }
+
+        @Nested
+        class AndTheLoggedInStaffIsTheAuthor {
+
+          Staff staff = mock(Staff.class);
+
+          @BeforeEach
+          void setupAnd() {
+            BddLogger.and("the logged-in staff is the author of the draft");
+            when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+            when(draft.getAuthor()).thenReturn(staff);
+          }
+
+          @Test
+          void thenItShouldBeDeleted() {
+
+            BddLogger.then("the draft should be deleted");
+            activityService.deleteDraft(draftId);
+            verify(activityDraftRepository).removeFromDatabase(draft);
+          }
+        }
+
+        @Nested
+        class AndTheLoggedInStaffIsNotTheAuthor {
+
+          Staff staff = mock(Staff.class);
+          Staff author = mock(Staff.class);
+
+          @BeforeEach
+          void setupAnd() {
+            BddLogger.and("the logged-in staff is not the author of the draft");
+            when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+            when(draft.getAuthor()).thenReturn(author);
+          }
+
+          @Test
+          void thenItShouldThrowUserNotAuthorizedException() {
+            BddLogger.then("the service should throw UserNotAuthorizedException");
+            assertThrows(
+                UserNotAuthorizedException.class, () -> activityService.deleteDraft(draftId));
+            verify(activityDraftRepository, never()).removeFromDatabase(any());
+          }
+        }
+      }
+
+      @Nested
+      class AndTheDraftDoesNotExist {
+        UUID unknownId = UUID.randomUUID();
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the draft does not exist");
+          when(activityDraftRepository.findById(unknownId)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void thenItShouldThrowActivityDraftNotFoundException() {
+          BddLogger.then("the service should throw ActivityDraftNotFoundException");
+          assertThrows(
+              ActivityDraftNotFoundException.class, () -> activityService.deleteDraft(unknownId));
+          verify(activityDraftRepository, never()).removeFromDatabase(any());
+        }
+      }
+    }
   }
 }

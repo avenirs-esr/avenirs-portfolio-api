@@ -124,14 +124,30 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public void deleteDraft(UUID activityDraftId) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var draft =
+        activityDraftRepository
+            .findById(activityDraftId)
+            .orElseThrow(ActivityDraftNotFoundException::new);
+    if (!draft.getAuthor().equals(staff)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    activityDraftRepository.removeFromDatabase(draft);
+    log.info("Deleted activity draft with id: {}", activityDraftId);
+  }
+
+  @Override
   public Activity getActivityById(UUID id) {
-    return activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
+    return activityRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
   }
 
   @Override
   public ActivityDraft getActivityDraftById(UUID id) {
     var staff = loggedInUserService.getLoggedInStaff();
-    var draft = activityDraftRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
+    var draft =
+        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
     if (!draft.getAuthor().equals(staff)) {
       throw new UserNotAuthorizedException();
     }
