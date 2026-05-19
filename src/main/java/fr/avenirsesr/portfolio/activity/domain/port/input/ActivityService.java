@@ -48,6 +48,9 @@ public interface ActivityService {
 
   PagedResult<ActivityStaffOverviewData> staffActivityWorkingSpace(PageCriteria pageCriteria);
 
+  PagedResult<ActivityStaffOverviewData> staffActivityLibrary(
+      EActivityThematic thematic, PageCriteria pageCriteria);
+
   PagedResult<ActivityWithStudentStatusData> latestActivitiesView(PageCriteria pageCriteria);
 
   ActivityDraft createActivityDraft(String title);

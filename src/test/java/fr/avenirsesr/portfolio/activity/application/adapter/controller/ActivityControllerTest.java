@@ -441,6 +441,141 @@ class ActivityControllerTest {
   }
 
   @Test
+  void shouldReturnStaffActivityLibrary() {
+    BddLogger.given("an ActivityController for staff library");
+
+    PageInfo pageInfo = new PageInfo(0, 8, 1);
+    var staff = mock(Staff.class);
+
+    var overviewData =
+        new ActivityStaffOverviewData(
+            UUID.randomUUID(),
+            "Mon activité",
+            EActivityThematic.EXPERIENCES,
+            staff,
+            EActivityStatus.PUBLISHED,
+            Instant.now());
+
+    var pagedResult = new PagedResult<>(List.of(overviewData), pageInfo);
+
+    when(activityService.staffActivityLibrary(eq(null), any(PageCriteria.class)))
+        .thenReturn(pagedResult);
+
+    var expectedDto =
+        new ActivityStaffOverviewDTO(
+            overviewData.activityId(),
+            AUTHOR,
+            "title",
+            EActivityThematic.EXPERIENCES,
+            EActivityStatus.PUBLISHED,
+            Instant.now());
+    when(activityStaffOverviewDtoMapper.toDTO(overviewData)).thenReturn(expectedDto);
+
+    BddLogger.when("getting staff activity library");
+    var response = controller.getStaffActivityLibrary(principal, 0, 8, null);
+
+    BddLogger.then("it should return the library with correct data");
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().data().size());
+
+    var dto = response.getBody().data().getFirst();
+    assertEquals(overviewData.activityId(), dto.activityId());
+    assertEquals(EActivityStatus.PUBLISHED, dto.activityStatus());
+
+    verify(activityService).staffActivityLibrary(eq(null), any(PageCriteria.class));
+    verify(activityStaffOverviewDtoMapper).toDTO(overviewData);
+  }
+
+  @Test
+  void shouldReturnStaffActivityLibraryWithThematic() {
+    BddLogger.given("an ActivityController for staff library with thematic filter");
+
+    PageInfo pageInfo = new PageInfo(0, 8, 1);
+    var staff = mock(Staff.class);
+
+    var overviewData =
+        new ActivityStaffOverviewData(
+            UUID.randomUUID(),
+            "Mon activité",
+            EActivityThematic.EXPERIENCES,
+            staff,
+            EActivityStatus.PUBLISHED,
+            Instant.now());
+
+    var pagedResult = new PagedResult<>(List.of(overviewData), pageInfo);
+
+    when(activityService.staffActivityLibrary(
+            eq(EActivityThematic.EXPERIENCES), any(PageCriteria.class)))
+        .thenReturn(pagedResult);
+
+    when(activityStaffOverviewDtoMapper.toDTO(overviewData))
+        .thenReturn(
+            new ActivityStaffOverviewDTO(
+                overviewData.activityId(),
+                AUTHOR,
+                "title",
+                EActivityThematic.EXPERIENCES,
+                EActivityStatus.PUBLISHED,
+                Instant.now()));
+
+    BddLogger.when("getting staff activity library with thematic");
+    var response =
+        controller.getStaffActivityLibrary(principal, 0, 8, EActivityThematic.EXPERIENCES);
+
+    BddLogger.then("it should return filtered activities");
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().data().size());
+
+    verify(activityService)
+        .staffActivityLibrary(eq(EActivityThematic.EXPERIENCES), any(PageCriteria.class));
+  }
+
+  @Test
+  void shouldReturnEmptyStaffActivityLibrary() {
+    BddLogger.given("an ActivityController with no activities in library");
+
+    PageInfo pageInfo = new PageInfo(0, 8, 0);
+
+    when(activityService.staffActivityLibrary(any(), any(PageCriteria.class)))
+        .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+    BddLogger.when("getting staff activity library with no results");
+    var response = controller.getStaffActivityLibrary(principal, 0, 8, null);
+
+    BddLogger.then("it should return empty content");
+
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().data().isEmpty());
+
+    verify(activityService).staffActivityLibrary(any(), any(PageCriteria.class));
+    verifyNoInteractions(activityStaffOverviewDtoMapper);
+  }
+
+  @Test
+  void shouldForwardPageCriteriaToLibraryService() {
+    BddLogger.given("an ActivityController receiving specific pagination params");
+
+    PageInfo pageInfo = new PageInfo(2, 5, 0);
+
+    when(activityService.staffActivityLibrary(any(), any(PageCriteria.class)))
+        .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+    BddLogger.when("getting staff activity library with page=2 and pageSize=5");
+    controller.getStaffActivityLibrary(principal, 2, 5, null);
+
+    BddLogger.then("it should forward the pagination params to the service");
+
+    verify(activityService)
+        .staffActivityLibrary(
+            any(), argThat(criteria -> criteria.page() == 2 && criteria.pageSize() == 5));
+  }
+
+  @Test
   void shouldApplyMapperToEachItem() {
     BddLogger.given("an ActivityController with multiple activities to map");
 

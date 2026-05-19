@@ -121,12 +121,40 @@ public class ActivityController {
     return ResponseEntity.ok(viewResponse);
   }
 
+  @GetMapping("/staff/library")
+  public ResponseEntity<PagedResponse<ActivityStaffOverviewDTO>> getStaffActivityLibrary(
+      Principal principal,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityThematic"))
+          @RequestParam(required = false)
+          EActivityThematic thematic) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to get activity library view of user [{}] (page= {}, fileSize= {})",
+        principal.getName(),
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+
+    PagedResult<ActivityStaffOverviewData> pagedResult =
+        activityService.staffActivityLibrary(thematic, pageCriteria);
+
+    var viewResponse =
+        new PagedResponse<>(
+            pagedResult.content().stream().map(activityStaffOverviewDtoMapper::toDTO).toList(),
+            PageInfoDTO.fromDomain(pagedResult.pageInfo()));
+
+    return ResponseEntity.ok(viewResponse);
+  }
+
   @GetMapping
   public ResponseEntity<PagedResponse<ActivityOverviewDTO>> getActivitiesView(
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
-      @RequestParam(required = false) EActivityThematic thematic) {
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityThematic"))
+          @RequestParam(required = false)
+          EActivityThematic thematic) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to activities view of user [{}] (page= {}, fileSize= {})",

@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.mapper.ActivityMapper;
@@ -30,6 +32,25 @@ public class ActivityDatabaseRepository
 
     return findAll(
         specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));
+  }
+
+  @Override
+  public PagedResult<ActivityStaffOverviewData> findAllStaffOverview(
+      EActivityThematic thematic, PageCriteria pageCriteria) {
+    var pagedActivities = findAll(thematic, pageCriteria);
+    return new PagedResult<>(
+        pagedActivities.content().stream()
+            .map(
+                a ->
+                    new ActivityStaffOverviewData(
+                        a.getId(),
+                        a.getTitle(),
+                        a.getThematic(),
+                        a.getAuthor(),
+                        EActivityStatus.PUBLISHED,
+                        a.getUpdatedAt()))
+            .toList(),
+        pagedActivities.pageInfo());
   }
 
   @Override
