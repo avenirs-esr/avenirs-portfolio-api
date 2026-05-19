@@ -31,6 +31,8 @@ public interface ActivityService {
 
   Activity publish(UUID activityDraftId);
 
+  void deleteDraft(UUID activityDraftId);
+
   FileData getActivityBanner(Activity activity);
 
   FileData getActivityBanner(ActivityDraft activity);
