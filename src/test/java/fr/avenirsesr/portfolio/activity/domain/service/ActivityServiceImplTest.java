@@ -950,6 +950,84 @@ class ActivityServiceImplTest {
   }
 
   @Test
+  void staffActivityLibrary_shouldReturnPagedResult() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 8, 1);
+    var staff = mock(Staff.class);
+
+    var overviewData =
+        new ActivityStaffOverviewData(
+            UUID.randomUUID(),
+            "Mon activité",
+            EActivityThematic.EXPERIENCES,
+            staff,
+            EActivityStatus.PUBLISHED,
+            Instant.now());
+
+    var pagedActivities = new PagedResult<>(List.of(overviewData), pageInfo);
+
+    when(activityRepository.findAllStaffOverview(null, pageCriteria)).thenReturn(pagedActivities);
+
+    // When
+    var result = activityService.staffActivityLibrary(null, pageCriteria);
+
+    // Then
+    assertNotNull(result);
+    assertEquals(1, result.content().size());
+    assertEquals(pageInfo, result.pageInfo());
+
+    var data = result.content().getFirst();
+    assertEquals(overviewData.activityId(), data.activityId());
+    assertEquals(overviewData.title(), data.title());
+    assertEquals(overviewData.thematic(), data.thematic());
+    assertEquals(overviewData.author(), data.author());
+    assertEquals(overviewData.activityStatus(), data.activityStatus());
+    assertEquals(overviewData.updatedAt(), data.updatedAt());
+
+    verify(loggedInUserService).getLoggedInStaff();
+    verify(activityRepository).findAllStaffOverview(null, pageCriteria);
+  }
+
+  @Test
+  void staffActivityLibrary_shouldReturnEmpty_whenNoActivities() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 8, 0);
+
+    when(activityRepository.findAllStaffOverview(null, pageCriteria))
+        .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+    // When
+    var result = activityService.staffActivityLibrary(null, pageCriteria);
+
+    // Then
+    assertNotNull(result);
+    assertTrue(result.content().isEmpty());
+    assertEquals(pageInfo, result.pageInfo());
+
+    verify(loggedInUserService).getLoggedInStaff();
+    verify(activityRepository).findAllStaffOverview(null, pageCriteria);
+  }
+
+  @Test
+  void staffActivityLibrary_shouldForwardThematicToRepository() {
+    // Given
+    var pageCriteria = mock(PageCriteria.class);
+    var pageInfo = new PageInfo(0, 8, 0);
+
+    when(activityRepository.findAllStaffOverview(EActivityThematic.EXPERIENCES, pageCriteria))
+        .thenReturn(new PagedResult<>(List.of(), pageInfo));
+
+    // When
+    activityService.staffActivityLibrary(EActivityThematic.EXPERIENCES, pageCriteria);
+
+    // Then
+    verify(loggedInUserService).getLoggedInStaff();
+    verify(activityRepository).findAllStaffOverview(EActivityThematic.EXPERIENCES, pageCriteria);
+  }
+
+  @Test
   void publish_shouldCreateActivityFromDraftAndSaveIt() {
     // Given
     UUID draftId = UUID.randomUUID();

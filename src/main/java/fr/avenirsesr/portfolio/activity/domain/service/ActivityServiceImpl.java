@@ -210,6 +210,13 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public PagedResult<ActivityStaffOverviewData> staffActivityLibrary(
+      EActivityThematic thematic, PageCriteria pageCriteria) {
+    loggedInUserService.getLoggedInStaff();
+    return activityRepository.findAllStaffOverview(thematic, pageCriteria);
+  }
+
+  @Override
   public PagedResult<ActivityWithStudentStatusData> activitiesView(
       EActivityThematic thematic, PageCriteria pageCriteria) {
     var pagedActivities = activityRepository.findAll(thematic, pageCriteria);

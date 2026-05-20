@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.activity.domain.port.output.repository;
 
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -10,6 +11,9 @@ import java.util.List;
 
 public interface ActivityRepository extends GenericRepositoryPort<Activity> {
   PagedResult<Activity> findAll(EActivityThematic thematic, PageCriteria pageCriteria);
+
+  PagedResult<ActivityStaffOverviewData> findAllStaffOverview(
+      EActivityThematic thematic, PageCriteria pageCriteria);
 
   PagedResult<Activity> findLatest(
       Duration durationForLate, List<Activity> activityToExclude, PageCriteria pageCriteria);

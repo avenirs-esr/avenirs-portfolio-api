@@ -29,6 +29,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String DRAFT_BASE_PATH = BASE_PATH + "/draft";
   private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/DRAFT/{draftId}";
   private static final String WORKING_SPACE_PATH = BASE_PATH + "/staff/working-space";
+  private static final String LIBRARY_PATH = BASE_PATH + "/staff/library";
   private static final String PUBLISH_PATH = BASE_PATH + "/publish/{draftId}";
 
   @Autowired private WebTestClient webTestClient;
@@ -783,6 +784,100 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
+  void shouldReturnStaffActivityLibrary() {
+    BddLogger.given("the " + LIBRARY_PATH + " endpoint");
+    BddLogger.when("performing a GET as a staff user");
+    BddLogger.then("it should return paged activities with data and page info");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(LIBRARY_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8)
+        .jsonPath("$.page.totalElements")
+        .exists();
+  }
+
+  @Test
+  void shouldReturnStaffActivityLibraryFilteredByThematic() {
+    BddLogger.given("the " + LIBRARY_PATH + " endpoint with thematic filter");
+    BddLogger.when("performing a GET with thematic filter");
+    BddLogger.then("it should return filtered paged activities");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(LIBRARY_PATH)
+                    .queryParam("thematic", EActivityThematic.SELF_KNOWLEDGE.name())
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8)
+        .jsonPath("$.page.totalElements")
+        .exists();
+  }
+
+  @Test
+  void shouldReturnStaffActivityLibraryWithDefaultPaginationWhenNoParamsProvided() {
+    BddLogger.given("the " + LIBRARY_PATH + " endpoint");
+    BddLogger.when("performing a GET without pagination params");
+    BddLogger.then("it should return 200 with default pagination applied");
+
+    webTestClient
+        .get()
+        .uri(LIBRARY_PATH)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8)
+        .jsonPath("$.page.totalElements")
+        .exists();
+  }
+
+  @Test
   void shouldReturnOnlyStaffOwnActivities() throws Exception {
     BddLogger.given("a staff user with created drafts");
     createDraftAndGetId("Mon brouillon working space");
@@ -918,6 +1013,42 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     webTestClient
         .get()
         .uri(WORKING_SPACE_PATH)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnLibrary() {
+    BddLogger.given("the " + LIBRARY_PATH + " endpoint");
+    BddLogger.when("performing a GET without authentication headers");
+    BddLogger.then("it should return 401");
+
+    webTestClient
+        .get()
+        .uri(LIBRARY_PATH)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  @Test
+  void shouldReturn403WhenUserIsNotStaffOnLibrary() {
+    BddLogger.given("the " + LIBRARY_PATH + " endpoint");
+    BddLogger.when("performing a GET with a student account");
+    BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+    webTestClient
+        .get()
+        .uri(LIBRARY_PATH)
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
