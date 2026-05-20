@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.activity.infrastructure.adapter.specification.Act
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
@@ -19,30 +20,47 @@ import org.springframework.stereotype.Repository;
 public class ActivityDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;Activity, ActivityEntity&gt; implements ActivityRepository {
   protected ActivityDatabaseRepository(ActivityJpaRepository jpaRepository) {
-<span class="fc" id="L22">    super(jpaRepository, jpaRepository, ActivityEntity.class, ActivityMapper.INSTANCE);</span>
-<span class="fc" id="L23">  }</span>
+<span class="fc" id="L23">    super(jpaRepository, jpaRepository, ActivityEntity.class, ActivityMapper.INSTANCE);</span>
+<span class="fc" id="L24">  }</span>
 
   @Override
   public PagedResult&lt;Activity&gt; findAll(EActivityThematic thematic, PageCriteria pageCriteria) {
-<span class="fc bfc" id="L27" title="All 2 branches covered.">    var specification = thematic != null ? ActivitySpecification.withThematic(thematic) : null;</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">    var specification = thematic != null ? ActivitySpecification.withThematic(thematic) : null;</span>
 
-<span class="fc" id="L29">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
+<span class="fc" id="L30">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
 
-<span class="fc" id="L31">    return findAll(</span>
-<span class="fc" id="L32">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+<span class="fc" id="L32">    return findAll(</span>
+<span class="fc" id="L33">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+  }
+
+  @Override
+  public PagedResult&lt;Activity&gt; findAllByInstitution(
+      Staff staff, EActivityThematic thematic, PageCriteria pageCriteria) {
+<span class="fc" id="L39">    var institutionDomain =</span>
+<span class="fc" id="L40">        staff.getInstitutionEmail().substring(staff.getInstitutionEmail().lastIndexOf(&quot;@&quot;) + 1);</span>
+<span class="fc" id="L41">    var specification = ActivitySpecification.withInstitution(institutionDomain);</span>
+
+<span class="fc bfc" id="L43" title="All 2 branches covered.">    if (thematic != null) {</span>
+<span class="fc" id="L44">      specification = specification.and(ActivitySpecification.withThematic(thematic));</span>
+    }
+
+<span class="fc" id="L47">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;).and(Sort.by(Sort.Direction.ASC, &quot;title&quot;));</span>
+
+<span class="fc" id="L49">    return findAll(</span>
+<span class="fc" id="L50">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
   }
 
   @Override
   public PagedResult&lt;Activity&gt; findLatest(
       Duration durationForLate, List&lt;Activity&gt; activityToExclude, PageCriteria pageCriteria) {
-<span class="nc" id="L38">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
-<span class="nc" id="L39">    var specification =</span>
-<span class="nc" id="L40">        ActivitySpecification.latest(durationForLate)</span>
-<span class="nc" id="L41">            .and(</span>
-<span class="nc" id="L42">                ActivitySpecification.exclude(</span>
-<span class="nc" id="L43">                    activityToExclude.stream().map(ActivityMapper.INSTANCE::fromDomain).toList()));</span>
-<span class="nc" id="L44">    return findAll(</span>
-<span class="nc" id="L45">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+<span class="nc" id="L56">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
+<span class="nc" id="L57">    var specification =</span>
+<span class="nc" id="L58">        ActivitySpecification.latest(durationForLate)</span>
+<span class="nc" id="L59">            .and(</span>
+<span class="nc" id="L60">                ActivitySpecification.exclude(</span>
+<span class="nc" id="L61">                    activityToExclude.stream().map(ActivityMapper.INSTANCE::fromDomain).toList()));</span>
+<span class="nc" id="L62">    return findAll(</span>
+<span class="nc" id="L63">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

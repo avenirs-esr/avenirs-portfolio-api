@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.activity.domain.port.output.repository.StaffActiv
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -22,14 +21,14 @@ import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 @Repository
-<span class="fc" id="L25">public class StaffActivityOverviewQueryRepository implements StaffActivityOverviewRepository {</span>
+<span class="fc" id="L24">public class StaffActivityOverviewQueryRepository implements StaffActivityOverviewRepository {</span>
   @PersistenceContext private EntityManager em;
 
   @Override
   public PagedResult&lt;ActivityStaffOverviewData&gt; findAllByAuthor(
       Staff author, PageCriteria pageCriteria) {
 
-<span class="fc" id="L32">    String unionSql =</span>
+<span class="fc" id="L31">    String unionSql =</span>
         &quot;&quot;&quot;
         SELECT *
           FROM (
@@ -59,7 +58,7 @@ import org.springframework.stereotype.Repository;
           ORDER BY updated_at DESC
         &quot;&quot;&quot;;
 
-<span class="fc" id="L62">    String countSql =</span>
+<span class="fc" id="L61">    String countSql =</span>
         &quot;&quot;&quot;
             SELECT COUNT(*) FROM (
                 SELECT id FROM activity       WHERE author_id = :authorId
@@ -68,156 +67,64 @@ import org.springframework.stereotype.Repository;
             ) AS total
         &quot;&quot;&quot;;
 
-<span class="fc" id="L71">    Query dataQuery =</span>
-<span class="fc" id="L72">        em.createNativeQuery(unionSql)</span>
-<span class="fc" id="L73">            .setParameter(&quot;authorId&quot;, author.getId())</span>
-<span class="fc" id="L74">            .setFirstResult(pageCriteria.page() * pageCriteria.pageSize())</span>
-<span class="fc" id="L75">            .setMaxResults(pageCriteria.pageSize());</span>
+<span class="fc" id="L70">    Query dataQuery =</span>
+<span class="fc" id="L71">        em.createNativeQuery(unionSql)</span>
+<span class="fc" id="L72">            .setParameter(&quot;authorId&quot;, author.getId())</span>
+<span class="fc" id="L73">            .setFirstResult(pageCriteria.page() * pageCriteria.pageSize())</span>
+<span class="fc" id="L74">            .setMaxResults(pageCriteria.pageSize());</span>
 
-<span class="fc" id="L77">    Query countQuery = em.createNativeQuery(countSql).setParameter(&quot;authorId&quot;, author.getId());</span>
+<span class="fc" id="L76">    Query countQuery = em.createNativeQuery(countSql).setParameter(&quot;authorId&quot;, author.getId());</span>
 
-<span class="fc" id="L79">    List&lt;Object[]&gt; rows = dataQuery.getResultList();</span>
-<span class="fc" id="L80">    long total = ((Number) countQuery.getSingleResult()).longValue();</span>
+<span class="fc" id="L78">    List&lt;Object[]&gt; rows = dataQuery.getResultList();</span>
+<span class="fc" id="L79">    long total = ((Number) countQuery.getSingleResult()).longValue();</span>
 
-<span class="fc" id="L82">    List&lt;ActivityStaffOverviewData&gt; content =</span>
-<span class="fc" id="L83">        rows.stream().map(row -&gt; mapRow(row, author)).toList();</span>
+<span class="fc" id="L81">    List&lt;ActivityStaffOverviewData&gt; content =</span>
+<span class="fc" id="L82">        rows.stream().map(row -&gt; mapRow(row, author)).toList();</span>
 
-<span class="fc" id="L85">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L86">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));</span>
-  }
-
-  @Override
-  public PagedResult&lt;ActivityStaffOverviewData&gt; findAllPublished(
-      Staff staff, EActivityThematic thematic, PageCriteria pageCriteria) {
-<span class="fc" id="L92">    String institutionDomain =</span>
-<span class="fc" id="L93">        &quot;%&quot; + staff.getInstitutionEmail().substring(staff.getInstitutionEmail().lastIndexOf(&quot;@&quot;));</span>
-    String thematicFilter =
-<span class="fc bfc" id="L95" title="All 2 branches covered.">        thematic != null ? &quot; AND a.thematic = CAST(:thematic_type AS VARCHAR)&quot; : &quot;&quot;;</span>
-
-<span class="fc" id="L97">    String dataSql =</span>
-        &quot;&quot;&quot;
-        SELECT
-            a.id              AS activity_id,
-            a.title           AS title,
-            a.thematic        AS thematic,
-            'PUBLISHED'       AS status,
-            a.updated_at      AS updated_at,
-            u.id              AS user_id,
-            u.first_name      AS first_name,
-            u.last_name       AS last_name,
-            u.email           AS email,
-            u.created_at      AS user_created_at,
-            u.updated_at      AS user_updated_at,
-            s.institution_email AS institution_email,
-            s.bio             AS bio,
-            s.created_at      AS staff_created_at,
-            s.updated_at      AS staff_updated_at
-        FROM activity a
-        JOIN staff s ON s.id = a.author_id
-        JOIN &quot;user&quot; u ON u.id = s.id
-        WHERE s.institution_email LIKE :institution_domain
-        &quot;&quot;&quot;
-            + thematicFilter
-            + &quot;&quot;&quot;
-            ORDER BY a.created_at DESC, a.title ASC
-            &quot;&quot;&quot;;
-
-<span class="fc" id="L125">    String countSql =</span>
-        &quot;&quot;&quot;
-        SELECT COUNT(*)
-        FROM activity a
-        JOIN staff s ON s.id = a.author_id
-        WHERE s.institution_email LIKE :institution_domain
-        &quot;&quot;&quot;
-            + thematicFilter;
-
-<span class="fc" id="L134">    Query dataQuery =</span>
-<span class="fc" id="L135">        em.createNativeQuery(dataSql)</span>
-<span class="fc" id="L136">            .setParameter(&quot;institution_domain&quot;, institutionDomain)</span>
-<span class="fc" id="L137">            .setFirstResult(pageCriteria.page() * pageCriteria.pageSize())</span>
-<span class="fc" id="L138">            .setMaxResults(pageCriteria.pageSize());</span>
-
-<span class="fc" id="L140">    Query countQuery =</span>
-<span class="fc" id="L141">        em.createNativeQuery(countSql).setParameter(&quot;institution_domain&quot;, institutionDomain);</span>
-
-<span class="fc bfc" id="L143" title="All 2 branches covered.">    if (thematic != null) {</span>
-<span class="fc" id="L144">      String thematicType = thematic.name();</span>
-<span class="fc" id="L145">      dataQuery.setParameter(&quot;thematic_type&quot;, thematicType);</span>
-<span class="fc" id="L146">      countQuery.setParameter(&quot;thematic_type&quot;, thematicType);</span>
-    }
-
-<span class="fc" id="L149">    List&lt;Object[]&gt; rows = dataQuery.getResultList();</span>
-<span class="fc" id="L150">    long total = ((Number) countQuery.getSingleResult()).longValue();</span>
-
-<span class="fc" id="L152">    List&lt;ActivityStaffOverviewData&gt; content = rows.stream().map(this::mapRowWithAuthor).toList();</span>
-
-<span class="fc" id="L154">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L155">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));</span>
+<span class="fc" id="L84">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L85">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));</span>
   }
 
   private ActivityStaffOverviewData mapRow(Object[] row, Staff author) {
-<span class="fc" id="L159">    return new ActivityStaffOverviewData(</span>
-<span class="fc" id="L160">        toUUID(row[0]),</span>
-<span class="fc" id="L161">        toString(row[1]),</span>
-<span class="fc" id="L162">        EActivityThematic.valueOf(toString(row[2])),</span>
+<span class="fc" id="L89">    return new ActivityStaffOverviewData(</span>
+<span class="fc" id="L90">        toUUID(row[0]),</span>
+<span class="fc" id="L91">        toString(row[1]),</span>
+<span class="fc" id="L92">        EActivityThematic.valueOf(toString(row[2])),</span>
         author,
-<span class="fc" id="L164">        EActivityStatus.valueOf(toString(row[4])),</span>
-<span class="fc" id="L165">        toInstant(row[5]));</span>
-  }
-
-  private ActivityStaffOverviewData mapRowWithAuthor(Object... row) {
-<span class="fc" id="L169">    User user =</span>
-<span class="fc" id="L170">        User.toDomain(</span>
-<span class="fc" id="L171">            toUUID(row[5]),</span>
-<span class="fc" id="L172">            toString(row[6]),</span>
-<span class="fc" id="L173">            toString(row[7]),</span>
-<span class="fc" id="L174">            toString(row[8]),</span>
-<span class="fc" id="L175">            toInstant(row[9]),</span>
-<span class="fc" id="L176">            toInstant(row[10]));</span>
-
-<span class="fc" id="L178">    Staff author =</span>
-<span class="fc" id="L179">        Staff.toDomain(</span>
-<span class="fc" id="L180">            user, toString(row[11]), toString(row[12]), toInstant(row[13]), toInstant(row[14]));</span>
-
-<span class="fc" id="L182">    return new ActivityStaffOverviewData(</span>
-<span class="fc" id="L183">        toUUID(row[0]),</span>
-<span class="fc" id="L184">        toString(row[1]),</span>
-<span class="fc" id="L185">        EActivityThematic.valueOf(toString(row[2])),</span>
-        author,
-<span class="fc" id="L187">        EActivityStatus.valueOf(toString(row[3])),</span>
-<span class="fc" id="L188">        toInstant(row[4]));</span>
+<span class="fc" id="L94">        EActivityStatus.valueOf(toString(row[4])),</span>
+<span class="fc" id="L95">        toInstant(row[5]));</span>
   }
 
   private String toString(Object value) {
-<span class="pc bpc" id="L192" title="2 of 3 branches missed.">    return switch (value) {</span>
-<span class="fc" id="L193">      case String s -&gt; s;</span>
-<span class="nc" id="L194">      case byte[] b -&gt; new String(b, StandardCharsets.UTF_8);</span>
+<span class="pc bpc" id="L99" title="2 of 3 branches missed.">    return switch (value) {</span>
+<span class="fc" id="L100">      case String s -&gt; s;</span>
+<span class="nc" id="L101">      case byte[] b -&gt; new String(b, StandardCharsets.UTF_8);</span>
       default -&gt;
-<span class="nc" id="L196">          throw new IllegalArgumentException(&quot;Type inattendu pour String : &quot; + value.getClass());</span>
+<span class="nc" id="L103">          throw new IllegalArgumentException(&quot;Type inattendu pour String : &quot; + value.getClass());</span>
     };
   }
 
   private UUID toUUID(Object value) {
-<span class="pc bpc" id="L201" title="3 of 4 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L202">      case UUID u -&gt; u;</span>
-<span class="nc" id="L203">      case String s -&gt; UUID.fromString(s);</span>
-<span class="fc" id="L204">      case byte[] b -&gt; {</span>
-<span class="fc" id="L205">        ByteBuffer bb = ByteBuffer.wrap(b);</span>
-<span class="fc" id="L206">        yield new UUID(bb.getLong(), bb.getLong());</span>
+<span class="pc bpc" id="L108" title="3 of 4 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L109">      case UUID u -&gt; u;</span>
+<span class="nc" id="L110">      case String s -&gt; UUID.fromString(s);</span>
+<span class="fc" id="L111">      case byte[] b -&gt; {</span>
+<span class="fc" id="L112">        ByteBuffer bb = ByteBuffer.wrap(b);</span>
+<span class="fc" id="L113">        yield new UUID(bb.getLong(), bb.getLong());</span>
       }
       default -&gt;
-<span class="nc" id="L209">          throw new IllegalArgumentException(&quot;Type inattendu pour UUID : &quot; + value.getClass());</span>
+<span class="nc" id="L116">          throw new IllegalArgumentException(&quot;Type inattendu pour UUID : &quot; + value.getClass());</span>
     };
   }
 
   private Instant toInstant(Object value) {
-<span class="pc bpc" id="L214" title="4 of 5 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L215">      case Instant i -&gt; i;</span>
-<span class="nc" id="L216">      case Timestamp ts -&gt; ts.getTimestamp().toInstant();</span>
-<span class="fc" id="L217">      case OffsetDateTime odt -&gt; odt.toInstant();</span>
-<span class="nc" id="L218">      case byte[] b -&gt; Instant.parse(new String(b, StandardCharsets.UTF_8));</span>
+<span class="pc bpc" id="L121" title="4 of 5 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L122">      case Instant i -&gt; i;</span>
+<span class="nc" id="L123">      case Timestamp ts -&gt; ts.getTimestamp().toInstant();</span>
+<span class="fc" id="L124">      case OffsetDateTime odt -&gt; odt.toInstant();</span>
+<span class="nc" id="L125">      case byte[] b -&gt; Instant.parse(new String(b, StandardCharsets.UTF_8));</span>
       default -&gt;
-<span class="nc" id="L220">          throw new IllegalArgumentException(&quot;Type inattendu pour Instant : &quot; + value.getClass());</span>
+<span class="nc" id="L127">          throw new IllegalArgumentException(&quot;Type inattendu pour Instant : &quot; + value.getClass());</span>
     };
   }
 }
