@@ -2,40 +2,29 @@
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L13">public class ActivitySpecification {</span>
+<span class="nc" id="L10">public class ActivitySpecification {</span>
   public static Specification&lt;ActivityEntity&gt; withThematic(EActivityThematic thematic) {
-<span class="fc" id="L15">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;thematic&quot;), thematic);</span>
+<span class="fc" id="L12">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;thematic&quot;), thematic);</span>
   }
 
   public static Specification&lt;ActivityEntity&gt; latest(Duration duration) {
-<span class="nc" id="L19">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc" id="L20">      Instant threshold = Instant.now().minus(duration);</span>
-<span class="nc" id="L21">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
-    };
-  }
-
-  public static Specification&lt;ActivityEntity&gt; withInstitution(String institution) {
-<span class="fc" id="L26">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc" id="L27">      Join&lt;ActivityEntity, StaffEntity&gt; authorJoin = root.join(&quot;author&quot;, JoinType.INNER);</span>
-<span class="fc" id="L28">      return criteriaBuilder.like(</span>
-<span class="fc" id="L29">          criteriaBuilder.lower(authorJoin.get(&quot;institutionEmail&quot;)), &quot;%@&quot; + institution);</span>
+<span class="nc" id="L16">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc" id="L17">      Instant threshold = Instant.now().minus(duration);</span>
+<span class="nc" id="L18">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
     };
   }
 
   public static Specification&lt;ActivityEntity&gt; exclude(List&lt;ActivityEntity&gt; activities) {
-<span class="nc" id="L34">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L35" title="All 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
-<span class="nc" id="L36">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L23">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L24" title="All 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
+<span class="nc" id="L25">        return criteriaBuilder.conjunction();</span>
       }
-<span class="nc" id="L38">      return root.in(activities).not();</span>
+<span class="nc" id="L27">      return root.in(activities).not();</span>
     };
   }
 }
