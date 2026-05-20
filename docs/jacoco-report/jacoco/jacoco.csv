@@ -11,7 +11,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.ap
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,179,351,0,0,40,77,6,11,6,11
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller,SelfKnowledgeController,75,88,0,0,17,26,3,7,3,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.specification,DeclaredProgramSpecification,5,34,1,5,2,5,2,3,1,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.service,ActivityServiceImpl,23,524,4,28,7,143,4,35,1,22
+avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.service,ActivityServiceImpl,26,491,4,26,7,133,4,33,1,21
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.infrastructure.adapter.repository,AssociationDatabaseRepository,24,97,1,7,6,22,2,7,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,ActivityResourceServiceConfig,0,10,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,TraceAttachmentServiceConfig,0,11,0,0,0,1,0,1,0,1
@@ -30,7 +30,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceWithProject
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TracesSummaryData,0,15,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceViewData,0,21,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceAssociationData,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.application.adapter.controller,ActivityController,51,346,3,1,11,81,4,10,2,10
+avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.application.adapter.controller,ActivityController,38,346,3,1,7,81,3,10,1,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.specification,StudentSpecification,0,12,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,ExternalUserDatabaseRepository,0,7,0,0,0,2,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,StudentDatabaseRepository,33,38,2,0,9,10,3,2,2,2

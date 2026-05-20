@@ -222,19 +222,6 @@ public class ActivityController {
 <span class="fc" id="L222">    return ResponseEntity.ok(new CreationResponse(activity.getId()));</span>
   }
 
-  @DeleteMapping(&quot;/draft/{activityDraftId}&quot;)
-  public ResponseEntity&lt;String&gt; deleteActivityDraft(
-      Principal principal, @PathVariable UUID activityDraftId) {
-<span class="nc" id="L228">    log.debug(</span>
-        &quot;Received request to delete activity draft {} by user [{}]&quot;,
-        activityDraftId,
-<span class="nc" id="L231">        principal.getName());</span>
-
-<span class="nc" id="L233">    activityService.deleteDraft(activityDraftId);</span>
-
-<span class="nc" id="L235">    return ResponseEntity.ok(&quot;Activity draft successfully deleted&quot;);</span>
-  }
-
   @PatchMapping(&quot;/{activityStatus}/{activityId}&quot;)
   public ResponseEntity&lt;ActivityDraftUpdateResponse&gt; updateActivity(
       Principal principal,
@@ -247,26 +234,26 @@ public class ActivityController {
           EActivityStatus activityStatus,
       @PathVariable UUID activityId,
       @RequestBody ActivityDraftUpdateRequest body) {
-<span class="fc" id="L250">    log.debug(</span>
+<span class="fc" id="L237">    log.debug(</span>
         &quot;Received request to update activity by user [{}] for activity {} body : {}&quot;,
-<span class="fc" id="L252">        principal.getName(),</span>
+<span class="fc" id="L239">        principal.getName(),</span>
         activityId,
         body);
 
-<span class="fc" id="L256">    var draft =</span>
-<span class="fc" id="L257">        activityService.updateActivity(</span>
+<span class="fc" id="L243">    var draft =</span>
+<span class="fc" id="L244">        activityService.updateActivity(</span>
             activityStatus,
             activityId,
-<span class="fc" id="L260">            body.title(),</span>
-<span class="fc" id="L261">            body.thematic(),</span>
-<span class="fc" id="L262">            body.summary(),</span>
-<span class="fc" id="L263">            body.description(),</span>
-<span class="fc" id="L264">            body.executionPeriodInfo(),</span>
-<span class="fc" id="L265">            body.executionPeriodInfoSummary(),</span>
-<span class="fc" id="L266">            body.traceAllowedAssociations(),</span>
-<span class="fc" id="L267">            body.feedbackAllowedIterations(),</span>
-<span class="fc" id="L268">            body.enableReflection());</span>
-<span class="fc" id="L269">    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));</span>
+<span class="fc" id="L247">            body.title(),</span>
+<span class="fc" id="L248">            body.thematic(),</span>
+<span class="fc" id="L249">            body.summary(),</span>
+<span class="fc" id="L250">            body.description(),</span>
+<span class="fc" id="L251">            body.executionPeriodInfo(),</span>
+<span class="fc" id="L252">            body.executionPeriodInfoSummary(),</span>
+<span class="fc" id="L253">            body.traceAllowedAssociations(),</span>
+<span class="fc" id="L254">            body.feedbackAllowedIterations(),</span>
+<span class="fc" id="L255">            body.enableReflection());</span>
+<span class="fc" id="L256">    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
