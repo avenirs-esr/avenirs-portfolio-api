@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActivityDatabaseRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository</a> &gt; <span class="el_source">ActivityDatabaseRepository.java</span></div><h1>ActivityDatabaseRepository.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.mapper.ActivityMapper;
@@ -19,30 +21,55 @@ import org.springframework.stereotype.Repository;
 public class ActivityDatabaseRepository
     extends GenericJpaRepositoryAdapter&lt;Activity, ActivityEntity&gt; implements ActivityRepository {
   protected ActivityDatabaseRepository(ActivityJpaRepository jpaRepository) {
-<span class="fc" id="L22">    super(jpaRepository, jpaRepository, ActivityEntity.class, ActivityMapper.INSTANCE);</span>
-<span class="fc" id="L23">  }</span>
+<span class="fc" id="L24">    super(jpaRepository, jpaRepository, ActivityEntity.class, ActivityMapper.INSTANCE);</span>
+<span class="fc" id="L25">  }</span>
 
   @Override
   public PagedResult&lt;Activity&gt; findAll(EActivityThematic thematic, PageCriteria pageCriteria) {
-<span class="fc bfc" id="L27" title="All 2 branches covered.">    var specification = thematic != null ? ActivitySpecification.withThematic(thematic) : null;</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">    var specification = thematic != null ? ActivitySpecification.withThematic(thematic) : null;</span>
 
-<span class="fc" id="L29">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
+<span class="fc" id="L31">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
 
-<span class="fc" id="L31">    return findAll(</span>
-<span class="fc" id="L32">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+<span class="fc" id="L33">    return findAll(</span>
+<span class="fc" id="L34">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+  }
+
+  @Override
+  public PagedResult&lt;ActivityStaffOverviewData&gt; findAllStaffOverview(
+      EActivityThematic thematic, PageCriteria pageCriteria) {
+<span class="fc bfc" id="L40" title="All 2 branches covered.">    var specification = thematic != null ? ActivitySpecification.withThematic(thematic) : null;</span>
+
+<span class="fc" id="L42">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
+
+<span class="fc" id="L44">    var pagedActivities =</span>
+<span class="fc" id="L45">        findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+
+<span class="fc" id="L47">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L48">        pagedActivities.content().stream()</span>
+<span class="fc" id="L49">            .map(</span>
+                a -&gt;
+<span class="fc" id="L51">                    new ActivityStaffOverviewData(</span>
+<span class="fc" id="L52">                        a.getId(),</span>
+<span class="fc" id="L53">                        a.getTitle(),</span>
+<span class="fc" id="L54">                        a.getThematic(),</span>
+<span class="fc" id="L55">                        a.getAuthor(),</span>
+                        EActivityStatus.PUBLISHED,
+<span class="fc" id="L57">                        a.getUpdatedAt()))</span>
+<span class="fc" id="L58">            .toList(),</span>
+<span class="fc" id="L59">        pagedActivities.pageInfo());</span>
   }
 
   @Override
   public PagedResult&lt;Activity&gt; findLatest(
       Duration durationForLate, List&lt;Activity&gt; activityToExclude, PageCriteria pageCriteria) {
-<span class="nc" id="L38">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
-<span class="nc" id="L39">    var specification =</span>
-<span class="nc" id="L40">        ActivitySpecification.latest(durationForLate)</span>
-<span class="nc" id="L41">            .and(</span>
-<span class="nc" id="L42">                ActivitySpecification.exclude(</span>
-<span class="nc" id="L43">                    activityToExclude.stream().map(ActivityMapper.INSTANCE::fromDomain).toList()));</span>
-<span class="nc" id="L44">    return findAll(</span>
-<span class="nc" id="L45">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+<span class="nc" id="L65">    var sort = Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;);</span>
+<span class="nc" id="L66">    var specification =</span>
+<span class="nc" id="L67">        ActivitySpecification.latest(durationForLate)</span>
+<span class="nc" id="L68">            .and(</span>
+<span class="nc" id="L69">                ActivitySpecification.exclude(</span>
+<span class="nc" id="L70">                    activityToExclude.stream().map(ActivityMapper.INSTANCE::fromDomain).toList()));</span>
+<span class="nc" id="L71">    return findAll(</span>
+<span class="nc" id="L72">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
