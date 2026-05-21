@@ -126,7 +126,9 @@ public class ActivityController {
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
-      @RequestParam(required = false) EActivityThematic thematic) {
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityThematic"))
+          @RequestParam(required = false)
+          EActivityThematic thematic) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to get activity library view of user [{}] (page= {}, fileSize= {})",
@@ -150,7 +152,9 @@ public class ActivityController {
       Principal principal,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize,
-      @RequestParam(required = false) EActivityThematic thematic) {
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityThematic"))
+          @RequestParam(required = false)
+          EActivityThematic thematic) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to activities view of user [{}] (page= {}, fileSize= {})",
