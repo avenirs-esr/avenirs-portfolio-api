@@ -30,7 +30,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceWithProject
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TracesSummaryData,0,15,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceViewData,0,21,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceAssociationData,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.application.adapter.controller,ActivityController,38,346,3,1,7,81,3,10,1,10
+avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.application.adapter.controller,ActivityController,51,346,3,1,11,81,4,10,2,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.specification,StudentSpecification,0,12,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,ExternalUserDatabaseRepository,0,7,0,0,0,2,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,StudentDatabaseRepository,33,38,2,0,9,10,3,2,2,2
