@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.openapi;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.domain.model.enums.EContextType;
-import fr.avenirsesr.portfolio.user.domain.model.enums.EExternalSource;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
 import java.util.Arrays;
@@ -15,12 +14,6 @@ public final class SwaggerSchema {
           .name("EContextType")
           ._enum(Arrays.stream(EContextType.values()).map(Enum::name).toList())
           .description("Enum for context type");
-
-  public static final Schema<String> userExternalSourceSchema =
-      new StringSchema()
-          .name("EExternalSource")
-          ._enum(Arrays.stream(EExternalSource.values()).map(Enum::name).toList())
-          .description("Enum for external source");
 
   public static final Schema<String> userCategorySchema =
       new StringSchema()
