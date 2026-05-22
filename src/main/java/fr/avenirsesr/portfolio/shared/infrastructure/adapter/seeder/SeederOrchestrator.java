@@ -20,7 +20,6 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.infrastructure.ad
 import fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.seeder.StudentProgressSeeder;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.ExternalUserSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StaffSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
@@ -53,7 +52,6 @@ public class SeederOrchestrator {
   private final DependencyChecker dependencyChecker;
 
   private final UserSeeder userSeeder;
-  private final ExternalUserSeeder externalUserSeeder;
   private final StudentSeeder studentSeeder;
   private final StaffSeeder staffSeeder;
   private final UserPhotoSeeder userPhotoSeeder;
@@ -92,7 +90,6 @@ public class SeederOrchestrator {
       var savedSelfKnowledgeMandatoryCategories = selfKnowledgeCategorySeeder.seed();
 
       var savedUsers = userSeeder.seed();
-      externalUserSeeder.seed(savedUsers);
 
       var savedStaffs = staffSeeder.seed(savedUsers);
       var savedStudents = studentSeeder.seed(savedUsers, savedSelfKnowledgeMandatoryCategories);
