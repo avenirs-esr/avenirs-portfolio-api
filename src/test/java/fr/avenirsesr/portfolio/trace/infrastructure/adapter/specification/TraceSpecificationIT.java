@@ -5,8 +5,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
+import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.trace.domain.filter.ETraceFilterKey;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
@@ -215,6 +216,7 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             null,
             null,
             null,
+            null,
             Instant.now(),
             Instant.now(),
             null);
@@ -222,18 +224,19 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
     return trace;
   }
 
-  private TraceAttachmentEntity persistAttachment(
+  private FileEntity persistAttachment(
       TraceEntity trace, String name, EFileType type, boolean active) {
-    TraceAttachmentEntity att =
-        TraceAttachmentEntity.of(
+    FileEntity att =
+        FileEntity.of(
             UUID.randomUUID(),
-            trace,
-            name,
             type,
+            EFileCategory.TRACE_ATTACHEMENT,
+            name,
             1L,
             1,
             active,
             "uri",
+            trace.getId(),
             user,
             Instant.now(),
             Instant.now(),

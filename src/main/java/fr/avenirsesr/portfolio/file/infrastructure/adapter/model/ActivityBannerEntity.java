@@ -1,7 +1,8 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
@@ -25,14 +26,37 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ActivityBannerEntity extends FileEntity {
+public class ActivityBannerEntity extends AvenirsBaseEntity {
 
   @ManyToOne(optional = false)
   @JoinColumn(name = "activity_id", nullable = false)
   private ActivityEntity activity;
 
+  @Column(nullable = false, name = "file_type")
+  @Enumerated(EnumType.STRING)
+  private EFileType fileType;
+
   @Column(nullable = false, name = "file_name")
   private String fileName;
+
+  @Column(nullable = false)
+  private long size;
+
+  @Column(nullable = false)
+  private int version;
+
+  @Column(nullable = false, name = "is_active_version")
+  private boolean isActiveVersion;
+
+  @Column(nullable = false)
+  private String uri;
+
+  @ManyToOne()
+  @JoinColumn(name = "uploaded_by", nullable = false)
+  private UserEntity uploadedBy;
+
+  @Column(nullable = false, name = "uploaded_at")
+  private Instant uploadedAt;
 
   private ActivityBannerEntity(
       UUID id,

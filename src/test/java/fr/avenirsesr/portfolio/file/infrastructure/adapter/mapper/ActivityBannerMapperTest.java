@@ -9,7 +9,7 @@ import fr.avenirsesr.portfolio.activity.infrastructure.adapter.mapper.ActivityMa
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.ActivityBanner;
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.ActivityBannerEntity;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;

@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data;
 
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.DataGenerator;
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
 import java.util.Locale;
 import net.datafaker.Faker;

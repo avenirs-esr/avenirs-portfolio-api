@@ -2,15 +2,14 @@ package fr.avenirsesr.portfolio.trace.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
+import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.FakeTrace;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class TraceFixture {
@@ -18,8 +17,6 @@ public class TraceFixture {
   private UUID id;
   private User user;
   private String title;
-  private List<SkillLevelProgress> skillLevels;
-  private List<DeclaredSkillProgress> declaredSkillProgresses;
   private Instant createdAt;
   private Instant updatedAt;
   private Instant deletedAt;
@@ -27,6 +24,7 @@ public class TraceFixture {
   private String aiUseJustification;
   private String personalNote;
   private String link;
+  private File attachment;
   private ELanguage language = ELanguage.FRENCH;
 
   private TraceFixture() {
@@ -39,6 +37,18 @@ public class TraceFixture {
     this.updatedAt = base.getUpdatedAt();
     this.deletedAt = base.getDeletedAt();
     this.isGroup = base.isGroup();
+    this.attachment =
+        File.create(
+            UUID.randomUUID(),
+            id,
+            EFileCategory.TRACE_ATTACHEMENT,
+            EFileType.PDF,
+            "my fake pdf",
+            1000L,
+            1,
+            true,
+            "fake-url",
+            user);
   }
 
   public static TraceFixture create() {
@@ -57,17 +67,6 @@ public class TraceFixture {
 
   public TraceFixture withTitle(String title) {
     this.title = title;
-    return this;
-  }
-
-  public TraceFixture withSkillLevels(List<SkillLevelProgress> skillLevels) {
-    this.skillLevels = skillLevels;
-    return this;
-  }
-
-  public TraceFixture withDeclaredSkillProgresses(
-      List<DeclaredSkillProgress> declaredSkillProgresses) {
-    this.declaredSkillProgresses = declaredSkillProgresses;
     return this;
   }
 
@@ -106,12 +105,9 @@ public class TraceFixture {
     return this;
   }
 
-  public List<Trace> withCount(int count) {
-    List<Trace> traces = new ArrayList<>();
-    for (int i = 0; i < count; i++) {
-      traces.add(create().toModel());
-    }
-    return traces;
+  public TraceFixture withAttachment(File attachment) {
+    this.attachment = attachment;
+    return this;
   }
 
   public TraceFixture withLanguage(ELanguage language) {
@@ -128,6 +124,7 @@ public class TraceFixture {
         aiUseJustification,
         personalNote,
         link,
+        attachment,
         createdAt,
         updatedAt,
         deletedAt,

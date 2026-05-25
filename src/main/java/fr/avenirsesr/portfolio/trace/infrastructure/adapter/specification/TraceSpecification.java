@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -68,14 +68,14 @@ public class TraceSpecification {
           criteriaBuilder.like(criteriaBuilder.lower(root.get("personalNote")), pattern);
 
       // Attachment
-      Subquery<TraceAttachmentEntity> attachSub = query.subquery(TraceAttachmentEntity.class);
-      Root<TraceAttachmentEntity> attachRoot = attachSub.from(TraceAttachmentEntity.class);
+      Subquery<FileEntity> attachSub = query.subquery(FileEntity.class);
+      Root<FileEntity> attachRoot = attachSub.from(FileEntity.class);
       attachSub
           .select(attachRoot)
           .where(
-              criteriaBuilder.equal(attachRoot.get("trace").get("id"), root.get("id")),
+              criteriaBuilder.equal(attachRoot.get("elementId"), root.get("id")),
               criteriaBuilder.isTrue(attachRoot.get("isActiveVersion")),
-              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get("name")), pattern));
+              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get("fileName")), pattern));
       Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);
 
       return criteriaBuilder.or(

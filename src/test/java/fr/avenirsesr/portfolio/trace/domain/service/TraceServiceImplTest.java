@@ -19,9 +19,6 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
-import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
-import fr.avenirsesr.portfolio.file.infrastructure.fixture.TraceAttachmentFixture;
 import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -32,8 +29,6 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.model.SkillLevelProgress;
-import fr.avenirsesr.portfolio.student.progress.imported.domain.port.input.StudentProgressService;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceViewData;
@@ -68,8 +63,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class TraceServiceImplTest {
   @Mock private TraceRepository traceRepository;
-  @Mock private TraceAttachmentService traceAttachmentService;
-  @Mock private StudentProgressService studentProgressService;
   @Mock private AssociationService associationService;
   @Mock private AssociationSearchHelper associationSearchHelper;
 
@@ -296,8 +289,6 @@ public class TraceServiceImplTest {
       when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
       when(traceRepository.save(trace)).thenReturn(trace);
       when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-      when(traceAttachmentService.findByTrace(any()))
-          .thenReturn(List.of(TraceAttachmentFixture.create().toModel()));
 
       BddLogger.when("update trace");
       traceService.updateTrace(
@@ -413,8 +404,6 @@ public class TraceServiceImplTest {
       when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
       when(traceRepository.save(trace)).thenReturn(trace);
       when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-      when(traceAttachmentService.findByTrace(any()))
-          .thenReturn(List.of(TraceAttachmentFixture.create().toModel()));
 
       BddLogger.when("update trace with null fields");
       traceService.updateTrace(
@@ -473,25 +462,6 @@ public class TraceServiceImplTest {
     }
 
     @Test
-    void shouldThrowFileNotFoundWhenUpdatingTraceAndNoActiveAttachment() {
-      BddLogger.given("a TraceServiceImpl service and a trace without active attachment");
-      Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-      when(traceRepository.save(any())).thenReturn(trace);
-      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-      when(traceAttachmentService.findByTrace(any())).thenReturn(List.of());
-
-      BddLogger.when("updating the trace");
-      assertThrows(
-          FileNotFoundException.class,
-          () ->
-              traceService.updateTrace(
-                  trace.getId(), "x", ELanguage.FRENCH, false, null, null, null));
-
-      BddLogger.then("it should throw FileNotFoundException");
-    }
-
-    @Test
     void givenLoggedInUser_shouldReturnLastTracesOverview() {
       BddLogger.given("a TraceServiceImpl service");
       List<Trace> traces =
@@ -512,24 +482,16 @@ public class TraceServiceImplTest {
     void givenExistingTrace_shouldReturnTraceDetailData_withAssociations() {
       BddLogger.given(
           "a TraceServiceImpl service and a trace with associations and an active attachment");
-      SkillLevelProgress slp = mock(SkillLevelProgress.class);
-      DeclaredSkillProgress dsp = mock(DeclaredSkillProgress.class);
-
       Trace trace =
           TraceFixture.create()
               .withUser(student.getUser())
               .withTitle("Trace title")
               .withLanguage(ELanguage.FRENCH)
               .withGroup(true)
-              .withSkillLevels(List.of(slp))
-              .withDeclaredSkillProgresses(List.of(dsp))
               .toModel();
 
       when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
       when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-
-      var activeAttachment = TraceAttachmentFixture.create().toModel();
-      when(traceAttachmentService.findByTrace(trace)).thenReturn(List.of(activeAttachment));
 
       BddLogger.when("getting trace detail");
       TraceDetailData detail = traceService.getTraceDetail(trace.getId());
@@ -539,20 +501,6 @@ public class TraceServiceImplTest {
       assertEquals("Trace title", detail.title());
       assertEquals(EPortfolioType.LIFE_PROJECT.name(), detail.programName());
       assertNotNull(detail.attachment());
-    }
-
-    @Test
-    void givenTraceWithoutActiveAttachment_shouldThrowFileNotFoundException_onGetTraceDetail() {
-      BddLogger.given("a TraceServiceImpl service and a trace without active attachment");
-      Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
-      when(traceAttachmentService.findByTrace(trace)).thenReturn(List.of());
-
-      BddLogger.when("getting trace detail");
-      assertThrows(FileNotFoundException.class, () -> traceService.getTraceDetail(trace.getId()));
-
-      BddLogger.then("it should throw FileNotFoundException");
     }
 
     @Test

@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.file.domain.port.output.service;
 
 import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
-import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
+import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import java.util.UUID;
 
 public interface FileStorageService {

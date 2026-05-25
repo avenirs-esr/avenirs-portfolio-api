@@ -1,5 +1,5 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.data;
 
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 
 public record ActivityBannerCreationData(String fileName, EFileType fileType, long fileSize) {}

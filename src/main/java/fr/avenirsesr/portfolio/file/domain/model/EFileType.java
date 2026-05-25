@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.file.domain.model.shared;
+package fr.avenirsesr.portfolio.file.domain.model;
 
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import java.util.Arrays;

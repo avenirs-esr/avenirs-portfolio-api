@@ -9,7 +9,8 @@ import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
-import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
+import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeTraceAttachment;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -39,7 +40,7 @@ public class TraceSeeder {
   private static final String PATH_FILE = "seeder/traces.json";
   private final FileReader fileReader;
   private final TraceService traceService;
-  private final TraceAttachmentService traceAttachmentService;
+  private final FileResourceService fileResourceService;
 
   @Value("${seeder.source}")
   private ESeederSource seederSource;
@@ -47,10 +48,10 @@ public class TraceSeeder {
   public TraceSeeder(
       FileReader fileReader,
       TraceService traceService,
-      @Qualifier("MockTraceAttachmentService") TraceAttachmentService traceAttachmentService) {
+      @Qualifier("MockFileResourceService") FileResourceService fileResourceService) {
     this.fileReader = fileReader;
     this.traceService = traceService;
-    this.traceAttachmentService = traceAttachmentService;
+    this.fileResourceService = fileResourceService;
   }
 
   @Transactional
@@ -87,8 +88,9 @@ public class TraceSeeder {
           data.attachements()
               .forEach(
                   attachment -> {
-                    traceAttachmentService.uploadTraceAttachment(
+                    fileResourceService.upload(
                         trace.getId(),
+                        EFileCategory.TRACE_ATTACHEMENT,
                         attachment.title(),
                         attachment.fileType().getMimeType(),
                         attachment.size(),
@@ -125,7 +127,7 @@ public class TraceSeeder {
                             .map(
                                 attachmentEntity ->
                                     new TraceAttachementCreationData(
-                                        attachmentEntity.getName(),
+                                        attachmentEntity.getFileName(),
                                         attachmentEntity.getFileType(),
                                         attachmentEntity.getSize(),
                                         attachmentEntity.getUploadedAt()))

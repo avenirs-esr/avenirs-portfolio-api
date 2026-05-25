@@ -18,10 +18,6 @@ import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfigurat
 import fr.avenirsesr.portfolio.common.data.domain.model.*;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
-import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
-import fr.avenirsesr.portfolio.file.domain.model.shared.File;
-import fr.avenirsesr.portfolio.file.domain.port.input.TraceAttachmentService;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationData;
@@ -58,7 +54,6 @@ import lombok.extern.slf4j.Slf4j;
 public class TraceServiceImpl implements TraceService {
   private final TraceRepository traceRepository;
   private final UserService userService;
-  private final TraceAttachmentService traceAttachmentService;
   private final DeclaredActivityService declaredActivityService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final DeclaredExperienceService declaredExperienceService;
@@ -179,9 +174,6 @@ public class TraceServiceImpl implements TraceService {
   }
 
   private TraceDetailData buildTraceDetailData(Trace trace, boolean isAssociated) {
-    Optional<TraceAttachment> traceAttachment =
-        trace.getLink().isPresent() ? Optional.empty() : Optional.of(getTraceAttachment(trace));
-
     return new TraceDetailData(
         trace.getId(),
         trace.getTitle(),
@@ -191,7 +183,7 @@ public class TraceServiceImpl implements TraceService {
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
         trace.getLink(),
-        traceAttachment,
+        trace.getAttachment(),
         trace.getCreatedAt(),
         trace.getUpdatedAt());
   }
@@ -304,7 +296,8 @@ public class TraceServiceImpl implements TraceService {
     validateOptionalTextMaxLength("link", link, LINK_LENGTH);
     validateUrl(link);
     var trace =
-        Trace.create(traceId, user, title, language, isGroup, aiJustification, personalNote, link);
+        Trace.create(
+            traceId, user, title, language, isGroup, aiJustification, personalNote, link, null);
 
     return traceRepository.save(trace);
   }
@@ -348,13 +341,6 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification) {
     return updateTrace(traceId, title, language, isGroup, personalNote, aiJustification, null);
-  }
-
-  private TraceAttachment getTraceAttachment(Trace trace) {
-    return traceAttachmentService.findByTrace(trace).stream()
-        .filter(File::isActiveVersion)
-        .findFirst()
-        .orElseThrow(FileNotFoundException::new);
   }
 
   @Override

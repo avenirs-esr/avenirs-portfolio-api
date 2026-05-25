@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.FilterSpecificationBuilder;
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.trace.domain.filter.ETraceFilterKey;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
@@ -37,10 +37,10 @@ public class TraceFilterSpecificationBuilder
     return (root, query, cb) -> {
       if (fileTypes == null || fileTypes.isEmpty() || query == null) return null;
 
-      Subquery<TraceAttachmentEntity> attachSub = query.subquery(TraceAttachmentEntity.class);
-      Root<TraceAttachmentEntity> attachRoot = attachSub.from(TraceAttachmentEntity.class);
+      Subquery<FileEntity> attachSub = query.subquery(FileEntity.class);
+      Root<FileEntity> attachRoot = attachSub.from(FileEntity.class);
       Predicate fileTypePredicate = attachRoot.get("fileType").in(fileTypes);
-      Predicate belongsToTrace = cb.equal(attachRoot.get("trace").get("id"), root.get("id"));
+      Predicate belongsToTrace = cb.equal(attachRoot.get("elementId"), root.get("id"));
       Predicate isActive = cb.isTrue(attachRoot.get("isActiveVersion"));
       attachSub.where(cb.and(belongsToTrace, isActive, fileTypePredicate));
 

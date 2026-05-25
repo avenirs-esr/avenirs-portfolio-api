@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
-import fr.avenirsesr.portfolio.file.domain.model.shared.FileResource;
+import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import java.io.File;

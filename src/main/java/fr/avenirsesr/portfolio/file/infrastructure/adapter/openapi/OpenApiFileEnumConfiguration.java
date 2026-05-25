@@ -12,6 +12,7 @@ public class OpenApiFileEnumConfiguration {
       openApi
           .getComponents()
           .addSchemas("EFileType", SwaggerSchema.fileTypeSchema)
+          .addSchemas("EFileCategory", SwaggerSchema.fileCategorySchema)
           .addSchemas("EUserPhotoType", SwaggerSchema.fileUserPhotoTypeSchema);
     };
   }

@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.dto;
 
-import fr.avenirsesr.portfolio.file.application.adapter.dto.AttachmentUploadDTO;
+import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
@@ -26,6 +26,6 @@ public record TraceDetailDTO(
     String aiUseJustification,
     String personalNote,
     String link,
-    AttachmentUploadDTO attachment,
+    FileDTO attachment,
     Instant createdAt,
     Instant updatedAt) {}

@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -20,6 +21,7 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
         trace.getLink().orElse(null),
+        trace.getAttachment().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         trace.getCreatedAt(),
         trace.getUpdatedAt(),
         trace.getDeletedAt().orElse(null));
@@ -35,6 +37,9 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
         traceEntity.getAiUseJustification(),
         traceEntity.getPersonalNote(),
         traceEntity.getLink(),
+        traceEntity.getAttachment() == null
+            ? null
+            : FileMapper.INSTANCE.toDomain(traceEntity.getAttachment()),
         traceEntity.getCreatedAt(),
         traceEntity.getUpdatedAt(),
         traceEntity.getDeletedAt(),
@@ -52,6 +57,9 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
         traceEntity.getAiUseJustification(),
         traceEntity.getPersonalNote(),
         traceEntity.getLink(),
+        attributes.contains("attachment")
+            ? FileMapper.INSTANCE.toDomain(traceEntity.getAttachment())
+            : null,
         traceEntity.getCreatedAt(),
         traceEntity.getUpdatedAt(),
         traceEntity.getDeletedAt(),

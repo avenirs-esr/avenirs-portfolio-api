@@ -2,8 +2,6 @@ package fr.avenirsesr.portfolio.file.domain.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
-import fr.avenirsesr.portfolio.file.domain.model.shared.File;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
@@ -34,6 +32,9 @@ public class UserPhoto extends File {
       Instant updatedAt) {
     super(
         id,
+        null,
+        EFileCategory.TRACE_ATTACHEMENT,
+        name,
         fileType,
         size,
         version,

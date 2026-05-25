@@ -31,6 +31,7 @@ public class FakeTrace {
                 null,
                 null,
                 null,
+                null,
                 Instant.now(),
                 Instant.now(),
                 null));

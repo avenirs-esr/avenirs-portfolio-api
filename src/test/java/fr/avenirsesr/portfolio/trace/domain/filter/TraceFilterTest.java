@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.trace.domain.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import java.util.List;
 import java.util.Map;

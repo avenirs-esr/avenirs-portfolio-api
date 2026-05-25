@@ -2,9 +2,10 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import java.time.Instant;
@@ -19,9 +20,9 @@ public class FakeTraceAttachment {
       new DataGeneratorProvider<FileDataGenerator>()
           .init(FakeTraceAttachment.class, FileDataGenerator.class);
 
-  private final TraceAttachmentEntity attachment;
+  private final FileEntity attachment;
 
-  private FakeTraceAttachment(TraceAttachmentEntity attachment) {
+  private FakeTraceAttachment(FileEntity attachment) {
     this.attachment = attachment;
   }
 
@@ -42,11 +43,11 @@ public class FakeTraceAttachment {
                     EFileType.XLS));
     var id = dataGenerator.with("id").uuid();
     return new FakeTraceAttachment(
-        TraceAttachmentEntity.of(
+        FileEntity.of(
             id,
-            trace,
-            fileDataGenerator.with("filename").fileName(fileType),
             fileType,
+            EFileCategory.TRACE_ATTACHEMENT,
+            fileDataGenerator.with("filename").fileName(fileType),
             dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,
             true,
@@ -55,6 +56,7 @@ public class FakeTraceAttachment {
                     FileStorageConstants.STORAGE_PATH,
                     FileStorageConstants.PLACEHOLDER_FILE_UUID,
                     fileType.name().toLowerCase()),
+            trace.getId(),
             trace.getUser(),
             trace.getCreatedAt(),
             trace.getCreatedAt(),
@@ -91,7 +93,7 @@ public class FakeTraceAttachment {
     return this;
   }
 
-  public TraceAttachmentEntity toEntity() {
+  public FileEntity toEntity() {
     return attachment;
   }
 }

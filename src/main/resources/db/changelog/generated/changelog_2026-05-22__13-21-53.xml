@@ -1,0 +1,80 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1779456115618-8">
+        <dropForeignKeyConstraint baseTableName="trace_attachment" constraintName="FK249g8ba5miupuq3fw7iy3s21p"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779456115618-9">
+        <dropForeignKeyConstraint baseTableName="trace_attachment" constraintName="FKqxfqnwoko4b9abtru6kno7uic"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779456115618-1">
+        <createTable tableName="file">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="filePK"/>
+            </column>
+            <column name="element_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_category" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active_version" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="size" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uri" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_by" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779456115618-2">
+        <addColumn tableName="trace">
+            <column name="attachment_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779456115618-3">
+        <addUniqueConstraint columnNames="attachment_id" constraintName="UC_TRACEATTACHMENT_ID_COL" tableName="trace"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779456115618-4">
+        <createIndex indexName="idx_file_active" tableName="file">
+            <column name="id"/>
+            <column name="is_active_version"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779456115618-5">
+        <createIndex indexName="idx_file_element_id" tableName="file">
+            <column name="element_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779456115618-6">
+        <addForeignKeyConstraint baseColumnNames="attachment_id" baseTableName="trace" constraintName="FKfox3sic6o3hpe85dgvomt3c3o" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="file" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779456115618-7">
+        <addForeignKeyConstraint baseColumnNames="uploaded_by" baseTableName="file" constraintName="FKj9th1p06bn6hnlwbtafeowlch" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779456115618-10">
+        <dropTable tableName="trace_attachment"/>
+    </changeSet>
+</databaseChangeLog>

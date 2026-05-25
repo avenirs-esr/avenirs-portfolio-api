@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.file.domain.model.shared;
+package fr.avenirsesr.portfolio.file.domain.model;
 
 public class FileSize {
   private final long bytes;

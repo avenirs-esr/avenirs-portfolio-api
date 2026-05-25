@@ -4,6 +4,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.DeletableAvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -56,6 +57,8 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
   @Column(name = "link")
   private String link;
 
+  @OneToOne private FileEntity attachment;
+
   private TraceEntity(
       UUID id,
       UserEntity user,
@@ -65,6 +68,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       String aiUseJustification,
       String personalNote,
       String link,
+      FileEntity attachment,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
@@ -79,6 +83,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
     this.link = link;
+    this.attachment = attachment;
   }
 
   public static TraceEntity of(
@@ -90,6 +95,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       String aiUseJustification,
       String personalNote,
       String link,
+      FileEntity attachment,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
@@ -102,6 +108,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
         aiUseJustification,
         personalNote,
         link,
+        attachment,
         createdAt,
         updatedAt,
         deletedAt);

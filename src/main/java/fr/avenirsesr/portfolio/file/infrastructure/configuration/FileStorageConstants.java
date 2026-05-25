@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.file.infrastructure.configuration;
 
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import jakarta.annotation.PostConstruct;
 import java.util.UUID;
 import lombok.Getter;

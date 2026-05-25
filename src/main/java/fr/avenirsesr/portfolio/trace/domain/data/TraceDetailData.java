@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.trace.domain.data;
 
-import fr.avenirsesr.portfolio.file.domain.model.TraceAttachment;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +14,6 @@ public record TraceDetailData(
     String aiUseJustification,
     String personalNote,
     Optional<String> link,
-    Optional<TraceAttachment> attachment,
+    Optional<File> attachment,
     Instant createdAt,
     Instant updatedAt) {}

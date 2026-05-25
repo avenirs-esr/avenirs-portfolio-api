@@ -1,8 +1,9 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
@@ -24,8 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserPhotoEntity extends FileEntity {
-
+public class UserPhotoEntity extends AvenirsBaseEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
@@ -40,6 +40,29 @@ public class UserPhotoEntity extends FileEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, name = "user_photo_type")
   private EUserPhotoType userPhotoType;
+
+  @Column(nullable = false, name = "file_type")
+  @Enumerated(EnumType.STRING)
+  private EFileType fileType;
+
+  @Column(nullable = false)
+  private long size;
+
+  @Column(nullable = false)
+  private int version;
+
+  @Column(nullable = false, name = "is_active_version")
+  private boolean isActiveVersion;
+
+  @Column(nullable = false)
+  private String uri;
+
+  @ManyToOne()
+  @JoinColumn(name = "uploaded_by", nullable = false)
+  private UserEntity uploadedBy;
+
+  @Column(nullable = false, name = "uploaded_at")
+  private Instant uploadedAt;
 
   private UserPhotoEntity(
       UUID id,

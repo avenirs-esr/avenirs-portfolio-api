@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.trace.domain.model;
 import fr.avenirsesr.portfolio.common.data.domain.model.DeletableAvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +26,9 @@ public class Trace extends DeletableAvenirsBaseModel {
   private String personalNote;
 
   @Getter(AccessLevel.NONE)
+  private File attachment;
+
+  @Getter(AccessLevel.NONE)
   private String link;
 
   private Trace(
@@ -36,6 +40,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       String aiUseJustification,
       String personalNote,
       String link,
+      File attachment,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt) {
@@ -47,6 +52,7 @@ public class Trace extends DeletableAvenirsBaseModel {
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
     this.link = link;
+    this.attachment = attachment;
   }
 
   public static Trace create(
@@ -57,7 +63,8 @@ public class Trace extends DeletableAvenirsBaseModel {
       boolean isGroup,
       String aiUseJustification,
       String personalNote,
-      String link) {
+      String link,
+      File attachment) {
 
     return new Trace(
         id,
@@ -68,6 +75,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         aiUseJustification,
         personalNote,
         link,
+        attachment,
         Instant.now(),
         Instant.now(),
         null);
@@ -81,6 +89,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       String aiUseJustification,
       String personalNote,
       String link,
+      File attachment,
       Instant createdAt,
       Instant updatedAt,
       Instant deletedAt,
@@ -94,6 +103,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         aiUseJustification,
         personalNote,
         link,
+        attachment,
         createdAt,
         updatedAt,
         deletedAt);
@@ -109,5 +119,9 @@ public class Trace extends DeletableAvenirsBaseModel {
 
   public Optional<String> getLink() {
     return Optional.ofNullable(link);
+  }
+
+  public Optional<File> getAttachment() {
+    return Optional.ofNullable(attachment);
   }
 }
