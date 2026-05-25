@@ -32,7 +32,8 @@ class ActivityPresentationDtoMapperTest {
             .toModel();
     var banner =
         new FileData(Optional.of(bannerId), Optional.of("banner.png"), "banners/banner.png");
-    ActivityPresentationData data = new ActivityPresentationData(activity, Optional.empty());
+    ActivityPresentationData data =
+        new ActivityPresentationData(activity, Optional.empty(), banner);
 
     BddLogger.when("mapping to ActivityDetailsDTO with base URL");
     ActivityPresentationDTO dto =

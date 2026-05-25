@@ -5,7 +5,6 @@ import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDr
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.activity.domain.service.ActivityServiceImpl;
-import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,6 @@ public class ActivityServiceConfig {
   private final ActivityDraftRepository activityDraftRepository;
   private final DeclaredActivityService declaredActivityService;
   private final LoggedInUserService loggedInUserService;
-  private final ActivityResourceService activityResourceService;
   private final StaffActivityOverviewRepository staffActivityOverviewRepository;
 
   @Bean
@@ -29,7 +27,6 @@ public class ActivityServiceConfig {
         activityDraftRepository,
         declaredActivityService,
         loggedInUserService,
-        activityResourceService,
         staffActivityOverviewRepository);
   }
 }

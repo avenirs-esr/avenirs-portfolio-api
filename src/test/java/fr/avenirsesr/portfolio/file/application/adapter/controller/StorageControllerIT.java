@@ -5,10 +5,8 @@ import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
-import fr.avenirsesr.portfolio.file.domain.port.output.repository.ActivityBannerRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
-import fr.avenirsesr.portfolio.file.domain.service.ActivityResourceServiceImpl;
 import fr.avenirsesr.portfolio.file.domain.service.FileResourceServiceImpl;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
@@ -42,7 +40,6 @@ class StorageControllerIT extends ContainerConfigurationTest {
   @Autowired private StudentRepository studentRepository;
   @Autowired private StaffRepository staffRepository;
   @Autowired private TraceService traceService;
-  @Autowired private ActivityBannerRepository activityBannerRepository;
   @Autowired private LoggedInUserService loggedInUserService;
 
   @Value("${hmac.secret-key}")
@@ -73,8 +70,6 @@ class StorageControllerIT extends ContainerConfigurationTest {
                 studentRepository,
                 loggedInUserService,
                 traceService),
-            new ActivityResourceServiceImpl(
-                fileStorageService, loggedInUserService, activityBannerRepository),
             fileStorageService);
 
     webTestClient =

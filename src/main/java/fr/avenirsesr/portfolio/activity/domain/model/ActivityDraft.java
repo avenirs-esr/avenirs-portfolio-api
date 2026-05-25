@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.domain.model;
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
 import java.util.Optional;
@@ -19,6 +20,7 @@ public class ActivityDraft extends AvenirsBaseModel {
   private String description;
   private String executionPeriodInfo;
   private String executionPeriodInfoSummary;
+  private File banner;
   @Getter private int traceAllowedAssociations;
   @Getter private int feedbackAllowedIterations;
   @Getter private boolean enableReflection;
@@ -39,7 +41,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       String executionPeriodInfoSummary,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
-      boolean enableReflection) {
+      boolean enableReflection,
+      File banner) {
     super(id, createdAt, updatedAt);
     this.title = title;
     this.author = author;
@@ -51,6 +54,7 @@ public class ActivityDraft extends AvenirsBaseModel {
     this.traceAllowedAssociations = traceAllowedAssociations;
     this.enableReflection = enableReflection;
     this.feedbackAllowedIterations = feedbackAllowedIterations;
+    this.banner = banner;
   }
 
   public static ActivityDraft create(String title, Staff createdBy) {
@@ -67,7 +71,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         null,
         DEFAULT_TRACE_ALLOWED_ASSOCIATION,
         DEFAULT_FEEDBACK_ALLOWED_ITERATIONS,
-        true);
+        true,
+        null);
   }
 
   public static ActivityDraft toDomain(
@@ -83,7 +88,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       String executionPeriodInfoSummary,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
-      boolean enableReflection) {
+      boolean enableReflection,
+      File banner) {
     return new ActivityDraft(
         id,
         createdAt,
@@ -97,7 +103,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         executionPeriodInfoSummary,
         traceAllowedAssociations,
         feedbackAllowedIterations,
-        enableReflection);
+        enableReflection,
+        banner);
   }
 
   public Optional<String> getSummary() {
@@ -114,5 +121,9 @@ public class ActivityDraft extends AvenirsBaseModel {
 
   public Optional<String> getExecutionPeriodInfoSummary() {
     return Optional.ofNullable(executionPeriodInfoSummary);
+  }
+
+  public Optional<File> getBanner() {
+    return Optional.ofNullable(banner);
   }
 }

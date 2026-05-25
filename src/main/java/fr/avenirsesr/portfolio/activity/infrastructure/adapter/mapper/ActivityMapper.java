@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
 
 public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
@@ -23,6 +24,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         domain.getTraceAllowedAssociations(),
         domain.getFeedbackAllowedIterations(),
         domain.isEnableReflection(),
+        domain.getBanner().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         domain.getCreatedAt(),
         domain.getUpdatedAt());
   }
@@ -41,6 +43,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         entity.isEnableReflection(),
         entity.getTraceAllowedAssociations(),
         entity.getFeedbackAllowedIterations(),
+        entity.getBanner() == null ? null : FileMapper.INSTANCE.toDomain(entity.getBanner()),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -60,6 +63,9 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         entity.isEnableReflection(),
         entity.getTraceAllowedAssociations(),
         entity.getFeedbackAllowedIterations(),
+        attributes.contains("banner") && entity.getBanner() != null
+            ? FileMapper.INSTANCE.toDomain(entity.getBanner(), graph)
+            : null,
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }

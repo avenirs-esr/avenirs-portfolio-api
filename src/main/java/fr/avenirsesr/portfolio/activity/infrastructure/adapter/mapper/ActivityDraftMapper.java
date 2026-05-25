@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityDraftEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
 
 public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, ActivityDraft> {
@@ -23,6 +24,7 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
         activityDraft.getTraceAllowedAssociations(),
         activityDraft.getFeedbackAllowedIterations(),
         activityDraft.isEnableReflection(),
+        activityDraft.getBanner().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         activityDraft.getCreatedAt(),
         activityDraft.getUpdatedAt());
   }
@@ -42,7 +44,8 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
         entity.getExecutionPeriodInfoSummary(),
         entity.getTraceAllowedAssociations(),
         entity.getFeedbackAllowedIterations(),
-        entity.isEnableReflection());
+        entity.isEnableReflection(),
+        entity.getBanner() == null ? null : FileMapper.INSTANCE.toDomain(entity.getBanner()));
   }
 
   @Override
@@ -63,6 +66,9 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
         entity.getExecutionPeriodInfoSummary(),
         entity.getTraceAllowedAssociations(),
         entity.getFeedbackAllowedIterations(),
-        entity.isEnableReflection());
+        entity.isEnableReflection(),
+        attributes.contains("banner") && entity.getBanner() != null
+            ? FileMapper.INSTANCE.toDomain(entity.getBanner(), graph)
+            : null);
   }
 }

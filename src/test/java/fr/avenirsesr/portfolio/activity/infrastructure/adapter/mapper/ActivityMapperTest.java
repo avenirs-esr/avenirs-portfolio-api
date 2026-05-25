@@ -7,6 +7,9 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -34,6 +37,18 @@ class ActivityMapperTest {
   private final int traceAllowedAssociations = 10;
   private final int feedbackAllowedIterations = 10;
   private final boolean enableRefection = true;
+  private final File banner =
+      File.create(
+          UUID.randomUUID(),
+          id,
+          EFileCategory.ACTIVITY_BANNER,
+          EFileType.PNG,
+          "activity banner",
+          1000L,
+          1,
+          true,
+          "exemple.com/image.png",
+          author.getUser());
   private final Instant createdAt = Instant.parse("2023-01-01T00:00:00Z");
   private final Instant updatedAt = Instant.parse("2023-12-31T23:59:59Z");
 
@@ -52,6 +67,7 @@ class ActivityMapperTest {
             enableRefection,
             traceAllowedAssociations,
             feedbackAllowedIterations,
+            banner,
             createdAt,
             updatedAt);
   }

@@ -22,17 +22,14 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
-import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
+import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +43,6 @@ public class ActivityServiceImpl implements ActivityService {
   private final ActivityDraftRepository activityDraftRepository;
   private final DeclaredActivityService declaredActivityService;
   private final LoggedInUserService loggedInUserService;
-  private final ActivityResourceService activityResourceService;
   private final StaffActivityOverviewRepository staffActivityOverviewRepository;
 
   @Override
@@ -83,7 +79,8 @@ public class ActivityServiceImpl implements ActivityService {
             executionPeriodInfoSummary,
             enableReflection,
             traceAllowedAssociations,
-            feedbackAllowedIterations);
+            feedbackAllowedIterations,
+            null);
     activityRepository.save(activity);
     return activity;
   }
@@ -117,7 +114,8 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getExecutionPeriodInfoSummary().orElse(null),
                 draft.isEnableReflection(),
                 draft.getTraceAllowedAssociations(),
-                draft.getFeedbackAllowedIterations()));
+                draft.getFeedbackAllowedIterations(),
+                draft.getBanner().orElse(null)));
 
     activityDraftRepository.removeFromDatabase(draft);
     return activity;
@@ -155,24 +153,27 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public FileData getActivityBanner(Activity activity) {
-    return activityResourceService.getActivityBanner(activity);
-  }
-
-  @Override
-  public FileData getActivityBanner(ActivityDraft activity) {
-    // todo will be refactored when draft banner will supported
-    return null;
-  }
-
-  @Override
   public ActivityPresentationData getActivityPresentation(EActivityStatus activityStatus, UUID id) {
     return switch (activityStatus) {
       case PUBLISHED -> {
         Activity activity =
             activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
         yield new ActivityPresentationData(
-            activity, declaredActivityService.getByActivity(activity).map(DeclaredActivity::getId));
+            activity,
+            declaredActivityService.getByActivity(activity).map(DeclaredActivity::getId),
+            activity
+                .getBanner()
+                .map(
+                    file ->
+                        new FileData(
+                            Optional.of(file.getId()),
+                            Optional.of(file.getFileName()),
+                            file.getUri()))
+                .orElse(
+                    new FileData(
+                        Optional.empty(),
+                        Optional.empty(),
+                        FileStorageConstants.DEFAULT_COVER_FILE_URL)));
       }
       case DRAFT -> null;
     };

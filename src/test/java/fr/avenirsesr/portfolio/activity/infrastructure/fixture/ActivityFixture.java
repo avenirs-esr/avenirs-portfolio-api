@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -26,6 +27,7 @@ public class ActivityFixture {
   private int traceAllowedAssociations = 10;
   private int feedbackAllowedIterations = 10;
   private boolean enableRefection = true;
+  private final File banner = ActivityBannerFixture.create().toModel();
   private Instant createdAt = Instant.now();
   private Instant updatedAt = Instant.now();
 
@@ -111,6 +113,7 @@ public class ActivityFixture {
         enableRefection,
         traceAllowedAssociations,
         feedbackAllowedIterations,
+        banner,
         createdAt,
         updatedAt);
   }

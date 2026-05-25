@@ -13,7 +13,8 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeeder
 import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
-import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
+import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeActivityBanner;
 import fr.avenirsesr.portfolio.shared.domain.port.input.ClockService;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
@@ -37,7 +38,7 @@ public class ActivitySeeder {
 
   private final FileReader fileReader;
   private final ActivityService activityService;
-  private final ActivityResourceService activityResourceService;
+  private final FileResourceService fileResourceService;
   private final ClockService clockService;
 
   @Value("${seeder.source}")
@@ -46,11 +47,11 @@ public class ActivitySeeder {
   public ActivitySeeder(
       FileReader fileReader,
       ActivityService activityService,
-      @Qualifier("MockActivityResourceService") ActivityResourceService activityResourceService,
+      @Qualifier("MockFileResourceService") FileResourceService fileResourceService,
       ClockService clockService) {
     this.fileReader = fileReader;
     this.activityService = activityService;
-    this.activityResourceService = activityResourceService;
+    this.fileResourceService = fileResourceService;
     this.clockService = clockService;
   }
 
@@ -116,8 +117,9 @@ public class ActivitySeeder {
                     data.traceAllowedAssociations(),
                     data.feedbackAllowedIterations());
 
-            activityResourceService.uploadBannerFor(
-                activity,
+            fileResourceService.upload(
+                activity.getId(),
+                EFileCategory.ACTIVITY_BANNER,
                 data.banner().fileName(),
                 data.banner().fileType().getMimeType(),
                 data.banner().fileSize(),

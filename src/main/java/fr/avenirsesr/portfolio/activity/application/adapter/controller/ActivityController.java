@@ -61,11 +61,10 @@ public class ActivityController {
           case PUBLISHED -> {
             ActivityPresentationData activityPresentation =
                 activityService.getActivityPresentation(activityStatus, activityId);
-            var banner = activityService.getActivityBanner(activityPresentation.activity());
             String baseUrl = extractOrigin(request);
             yield activityPresentationDtoMapper.toDTO(
                 activityPresentation.activity(),
-                banner,
+                activityPresentation.banner(),
                 activityPresentation.subscribedDeclaredActivity(),
                 baseUrl);
           }

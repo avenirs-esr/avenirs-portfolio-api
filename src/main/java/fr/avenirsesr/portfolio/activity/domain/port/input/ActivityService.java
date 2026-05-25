@@ -9,7 +9,6 @@ import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.util.List;
 import java.util.Map;
@@ -32,10 +31,6 @@ public interface ActivityService {
   Activity publish(UUID activityDraftId);
 
   void deleteDraft(UUID activityDraftId);
-
-  FileData getActivityBanner(Activity activity);
-
-  FileData getActivityBanner(ActivityDraft activity);
 
   Activity getActivityById(UUID id);
 

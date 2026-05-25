@@ -6,6 +6,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
@@ -54,6 +55,10 @@ public class ActivityDraftEntity extends AvenirsBaseEntity {
   @Column(name = "enable_reflection")
   private boolean enableReflection;
 
+  @OneToOne
+  @JoinColumn(name = "banner_id")
+  private FileEntity banner;
+
   public ActivityDraftEntity(
       UUID id,
       String title,
@@ -66,6 +71,7 @@ public class ActivityDraftEntity extends AvenirsBaseEntity {
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       boolean enableReflection,
+      FileEntity banner,
       Instant createdAt,
       Instant updatedAt) {
     this.setId(id);
@@ -79,6 +85,7 @@ public class ActivityDraftEntity extends AvenirsBaseEntity {
     this.traceAllowedAssociations = traceAllowedAssociations;
     this.enableReflection = enableReflection;
     this.feedbackAllowedIterations = feedbackAllowedIterations;
+    this.banner = banner;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
   }
@@ -95,6 +102,7 @@ public class ActivityDraftEntity extends AvenirsBaseEntity {
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       boolean enableReflection,
+      FileEntity banner,
       Instant createdAt,
       Instant updatedAt) {
     return new ActivityDraftEntity(
@@ -109,6 +117,7 @@ public class ActivityDraftEntity extends AvenirsBaseEntity {
         traceAllowedAssociations,
         feedbackAllowedIterations,
         enableReflection,
+        banner,
         createdAt,
         updatedAt);
   }

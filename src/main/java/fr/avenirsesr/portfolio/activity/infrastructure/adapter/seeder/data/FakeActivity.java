@@ -29,6 +29,7 @@ public class FakeActivity {
             faker.number().numberBetween(-1, 10),
             faker.number().numberBetween(-1, 10),
             faker.bool().bool(),
+            null,
             Instant.now(),
             Instant.now()));
   }

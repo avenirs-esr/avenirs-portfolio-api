@@ -46,6 +46,8 @@ public class FileResourceServiceImpl implements FileResourceService {
           EFileCategory.STUDENT_COVER_PICTURE,
           ALLOWED_IMAGE_FILE_TYPES,
           EFileCategory.STAFF_COVER_PICTURE,
+          ALLOWED_IMAGE_FILE_TYPES,
+          EFileCategory.ACTIVITY_BANNER,
           ALLOWED_IMAGE_FILE_TYPES);
 
   @Override
@@ -197,7 +199,8 @@ public class FileResourceServiceImpl implements FileResourceService {
       case STUDENT_PROFILE_PICTURE,
           STUDENT_COVER_PICTURE,
           STAFF_PROFILE_PICTURE,
-          STAFF_COVER_PICTURE ->
+          STAFF_COVER_PICTURE,
+          ACTIVITY_BANNER ->
           throw new UserNotAuthorizedException();
     }
   }

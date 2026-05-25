@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.domain.model;
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
 import java.util.Optional;
@@ -30,6 +31,9 @@ public class Activity extends AvenirsBaseModel {
   @Getter(AccessLevel.NONE)
   private String executionPeriodInfoSummary;
 
+  @Getter(AccessLevel.NONE)
+  private File banner;
+
   private Activity(
       UUID id,
       Staff author,
@@ -42,6 +46,7 @@ public class Activity extends AvenirsBaseModel {
       boolean enableReflection,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
+      File banner,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -55,6 +60,7 @@ public class Activity extends AvenirsBaseModel {
     this.enableReflection = enableReflection;
     this.traceAllowedAssociations = traceAllowedAssociations;
     this.feedbackAllowedIterations = feedbackAllowedIterations;
+    this.banner = banner;
   }
 
   public static Activity create(
@@ -68,7 +74,8 @@ public class Activity extends AvenirsBaseModel {
       String executionPeriodInfoSummary,
       boolean enableReflection,
       int traceAllowedAssociations,
-      int feedbackAllowedIterations) {
+      int feedbackAllowedIterations,
+      File banner) {
     Instant now = Instant.now();
     return new Activity(
         id,
@@ -82,6 +89,7 @@ public class Activity extends AvenirsBaseModel {
         enableReflection,
         traceAllowedAssociations,
         feedbackAllowedIterations,
+        banner,
         now,
         now);
   }
@@ -98,6 +106,7 @@ public class Activity extends AvenirsBaseModel {
       boolean enableReflection,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
+      File banner,
       Instant createdAt,
       Instant updatedAt) {
     return new Activity(
@@ -112,6 +121,7 @@ public class Activity extends AvenirsBaseModel {
         enableReflection,
         traceAllowedAssociations,
         feedbackAllowedIterations,
+        banner,
         createdAt,
         updatedAt);
   }
@@ -126,5 +136,9 @@ public class Activity extends AvenirsBaseModel {
 
   public Optional<String> getDescription() {
     return Optional.ofNullable(description);
+  }
+
+  public Optional<File> getBanner() {
+    return Optional.ofNullable(banner);
   }
 }

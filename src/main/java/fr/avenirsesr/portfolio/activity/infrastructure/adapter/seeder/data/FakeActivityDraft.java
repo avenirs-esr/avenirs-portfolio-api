@@ -29,6 +29,7 @@ public class FakeActivityDraft {
             faker.number().numberBetween(0, 10),
             faker.number().numberBetween(0, 10),
             faker.bool().bool(),
+            null,
             Instant.now(),
             Instant.now()));
   }

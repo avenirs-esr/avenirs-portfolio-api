@@ -25,8 +25,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.domain.data.FileData;
-import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -47,7 +46,6 @@ class ActivityServiceImplTest {
   @Mock private ActivityDraftRepository activityDraftRepository;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private DeclaredActivityService declaredActivityService;
-  @Mock private ActivityResourceService activityResourceService;
   @Mock private StaffActivityOverviewRepository staffActivityOverviewRepository;
 
   @InjectMocks private ActivityServiceImpl activityService;
@@ -116,7 +114,8 @@ class ActivityServiceImplTest {
             "",
             true,
             -1,
-            -1);
+            -1,
+            null);
     Activity a2 =
         Activity.create(
             UUID.randomUUID(),
@@ -129,7 +128,8 @@ class ActivityServiceImplTest {
             null,
             true,
             -1,
-            -1);
+            -1,
+            null);
     Activity a3 =
         Activity.create(
             UUID.randomUUID(),
@@ -142,7 +142,8 @@ class ActivityServiceImplTest {
             null,
             true,
             -1,
-            -1);
+            -1,
+            null);
 
     when(activityRepository.findAll()).thenReturn(List.of(a1, a2, a3));
 
@@ -187,7 +188,8 @@ class ActivityServiceImplTest {
             null,
             true,
             -1,
-            -1);
+            -1,
+            null);
 
     when(activityRepository.findAll()).thenReturn(List.of(a1));
 
@@ -466,11 +468,11 @@ class ActivityServiceImplTest {
     BddLogger.given("an activity exists with ID " + activityId);
 
     Activity activity = mock(Activity.class);
-    FileData banner = mock(FileData.class);
+    File banner = mock(File.class);
 
     when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
 
-    when(activityResourceService.getActivityBanner(activity)).thenReturn(banner);
+    when(activity.getBanner()).thenReturn(Optional.ofNullable(banner));
 
     when(declaredActivityService.getByActivity(activity)).thenReturn(Optional.empty());
 
@@ -484,13 +486,12 @@ class ActivityServiceImplTest {
     when(activity.getCreatedAt()).thenReturn(Instant.now());
     when(activity.getUpdatedAt()).thenReturn(Instant.now());
 
-    when(banner.id()).thenReturn(Optional.of(bannerId));
-    when(banner.name()).thenReturn(Optional.of("filename.png"));
+    when(banner.getId()).thenReturn(bannerId);
+    when(banner.getFileName()).thenReturn("filename.png");
 
     BddLogger.when("getActivityDetail is called for the activity ID");
     ActivityPresentationData result =
         activityService.getActivityPresentation(EActivityStatus.PUBLISHED, activityId);
-    FileData resBanner = activityService.getActivityBanner(result.activity());
 
     BddLogger.then("the service returns the correct activity detail data");
     assertNotNull(result);
@@ -502,12 +503,11 @@ class ActivityServiceImplTest {
         "<h3>Objectives</h3><p>Test activity description</p>",
         result.activity().getDescription().get());
     assertEquals("2026", result.activity().getExecutionPeriodInfo().get());
-    assertTrue(resBanner.id().isPresent());
-    assertEquals(bannerId, resBanner.id().get());
-    assertEquals("filename.png", resBanner.name().get());
+    assertTrue(result.banner().id().isPresent());
+    assertEquals(bannerId, result.banner().id().get());
+    assertEquals("filename.png", result.banner().name().get());
 
     verify(activityRepository).findById(activityId);
-    verify(activityResourceService).getActivityBanner(activity);
   }
 
   @Test
@@ -524,7 +524,6 @@ class ActivityServiceImplTest {
         () -> activityService.getActivityPresentation(EActivityStatus.PUBLISHED, activityId));
 
     verify(activityRepository).findById(activityId);
-    verifyNoInteractions(activityResourceService);
   }
 
   @Test

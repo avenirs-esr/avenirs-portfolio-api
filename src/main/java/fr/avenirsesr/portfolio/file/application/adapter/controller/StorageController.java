@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.model.FileResource;
-import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/storage")
 public class StorageController {
   private final FileResourceService fileResourceService;
-  private final ActivityResourceService activityResourceService;
   private final FileStorageService fileStorageService;
 
   @GetMapping("/{fileId}")
@@ -67,18 +65,6 @@ public class StorageController {
 
     return ResponseEntity.ok()
         .contentType(MediaType.asMediaType(MimeType.valueOf(fileType.getMimeType())))
-        .body(new ByteArrayResource(photo));
-  }
-
-  @GetMapping("/activities/{fileId}")
-  public ResponseEntity<ByteArrayResource> getActivityResourceByFileId(
-      @Valid @PathVariable UUID fileId) {
-    log.debug("Received request to get activity file id [{}]", fileId);
-    var activityFile = activityResourceService.getActivityFile(fileId);
-    byte[] photo = activityResourceService.fetchContent(activityFile);
-    return ResponseEntity.ok()
-        .contentType(
-            MediaType.asMediaType(MimeType.valueOf(activityFile.getFileType().getMimeType())))
         .body(new ByteArrayResource(photo));
   }
 }
