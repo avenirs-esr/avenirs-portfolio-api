@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.EntityGrapher;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.mapper.Mapper;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 
@@ -14,6 +15,8 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
         UserMapper.INSTANCE.fromDomain(student.getUser()),
         student.getInstitutionEmail(),
         student.getBio(),
+        student.getCoverPicture().map(FileMapper.INSTANCE::fromDomain).orElse(null),
+        student.getProfilePicture().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         student.getCreatedAt(),
         student.getUpdatedAt());
   }
@@ -24,6 +27,12 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
         UserMapper.INSTANCE.toDomain(studentEntity.getUser()),
         studentEntity.getInstitutionEmail(),
         studentEntity.getBio(),
+        studentEntity.getCoverPicture() == null
+            ? null
+            : FileMapper.INSTANCE.toDomain(studentEntity.getCoverPicture()),
+        studentEntity.getProfilePicture() == null
+            ? null
+            : FileMapper.INSTANCE.toDomain(studentEntity.getProfilePicture()),
         studentEntity.getCreatedAt(),
         studentEntity.getUpdatedAt());
   }
@@ -35,6 +44,12 @@ public class StudentMapper implements Mapper<StudentEntity, Student> {
         attributes.contains("user") ? UserMapper.INSTANCE.toDomain(studentEntity.getUser()) : null,
         studentEntity.getInstitutionEmail(),
         studentEntity.getBio(),
+        studentEntity.getCoverPicture() == null || !attributes.contains("coverPicture")
+            ? null
+            : FileMapper.INSTANCE.toDomain(studentEntity.getCoverPicture()),
+        studentEntity.getProfilePicture() == null || !attributes.contains("profilePicture")
+            ? null
+            : FileMapper.INSTANCE.toDomain(studentEntity.getProfilePicture()),
         studentEntity.getCreatedAt(),
         studentEntity.getUpdatedAt());
   }

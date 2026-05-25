@@ -1,12 +1,11 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
+import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.model.EFileType;
-import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.UserPhotoEntity;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
@@ -19,9 +18,9 @@ public class FakeUserPhoto {
   private static final DataGeneratorProvider<FileDataGenerator> fileDataGenerator =
       new DataGeneratorProvider<FileDataGenerator>()
           .init(FakeUserPhoto.class, FileDataGenerator.class);
-  private final UserPhotoEntity userPhoto;
+  private final FileEntity userPhoto;
 
-  private FakeUserPhoto(UserPhotoEntity userPhoto) {
+  private FakeUserPhoto(FileEntity userPhoto) {
     this.userPhoto = userPhoto;
   }
 
@@ -29,13 +28,18 @@ public class FakeUserPhoto {
     var fileType = dataGenerator.with("file-type").pickIn(List.of(EFileType.PNG, EFileType.JPEG));
     var id = dataGenerator.with("id").uuid();
     return new FakeUserPhoto(
-        UserPhotoEntity.of(
+        FileEntity.of(
             id,
-            fileDataGenerator.with("file-name").fileName(fileType),
-            user,
-            dataGenerator.with("category").pickIn(EUserCategory.class),
-            dataGenerator.with("file-type").pickIn(EUserPhotoType.class),
             fileType,
+            dataGenerator
+                .with("category")
+                .pickIn(
+                    List.of(
+                        EFileCategory.STUDENT_COVER_PICTURE,
+                        EFileCategory.STUDENT_PROFILE_PICTURE,
+                        EFileCategory.STAFF_COVER_PICTURE,
+                        EFileCategory.STAFF_PROFILE_PICTURE)),
+            fileDataGenerator.with("file-name").fileName(fileType),
             dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,
             true,
@@ -44,13 +48,14 @@ public class FakeUserPhoto {
                     FileStorageConstants.STORAGE_PATH,
                     FileStorageConstants.PLACEHOLDER_FILE_UUID,
                     fileType.name().toLowerCase()),
+            user.getId(),
             user,
             Instant.now(),
             Instant.now(),
             Instant.now()));
   }
 
-  public UserPhotoEntity toEntity() {
+  public FileEntity toEntity() {
     return userPhoto;
   }
 }

@@ -13,6 +13,8 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.trace.domain.exception.InvalidTraceTypeException;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +29,24 @@ public class FileResourceServiceImpl implements FileResourceService {
   private final FileStorageService fileStorageService;
   private final FileRepository fileRepository;
   private final TraceRepository traceRepository;
+  private final StaffRepository staffRepository;
+  private final StudentRepository studentRepository;
   private final LoggedInUserService loggedInUserService;
   private final TraceService traceService;
+  private static final List<EFileType> ALLOWED_IMAGE_FILE_TYPES =
+      List.of(EFileType.PNG, EFileType.JPEG, EFileType.GIF, EFileType.WEBP, EFileType.PJPEG);
   private static final Map<EFileCategory, List<EFileType>> ALLOWED_FILE_TYPES_BY_CATEGORY =
-      Map.of(EFileCategory.TRACE_ATTACHEMENT, Arrays.stream(EFileType.values()).toList());
+      Map.of(
+          EFileCategory.TRACE_ATTACHEMENT,
+          Arrays.stream(EFileType.values()).toList(),
+          EFileCategory.STUDENT_PROFILE_PICTURE,
+          ALLOWED_IMAGE_FILE_TYPES,
+          EFileCategory.STAFF_PROFILE_PICTURE,
+          ALLOWED_IMAGE_FILE_TYPES,
+          EFileCategory.STUDENT_COVER_PICTURE,
+          ALLOWED_IMAGE_FILE_TYPES,
+          EFileCategory.STAFF_COVER_PICTURE,
+          ALLOWED_IMAGE_FILE_TYPES);
 
   @Override
   public File upload(
@@ -41,9 +57,8 @@ public class FileResourceServiceImpl implements FileResourceService {
       long size,
       byte[] content) {
     var loggedInUser = loggedInUserService.getLoggedInUser();
-    switch (fileCategory) {
-      case TRACE_ATTACHEMENT -> chekTraceAttachementUploadRG(loggedInUser, elementId);
-    }
+
+    chekUploadRG(loggedInUser, elementId, fileCategory);
 
     var fileResource =
         new FileResource(
@@ -75,9 +90,7 @@ public class FileResourceServiceImpl implements FileResourceService {
     var savedFiles =
         fileRepository.saveAll(Stream.concat(allFiles.stream(), Stream.of(file)).toList());
 
-    switch (fileCategory) {
-      case TRACE_ATTACHEMENT -> saveFileOnTrace(elementId, file);
-    }
+    saveFileOnElement(elementId, fileCategory, file);
 
     return savedFiles.stream()
         .filter(f -> f.getId().equals(file.getId()))
@@ -85,48 +98,107 @@ public class FileResourceServiceImpl implements FileResourceService {
         .orElseThrow();
   }
 
-  private void saveFileOnTrace(UUID traceId, File file) {
-    var trace = traceService.getTraceById(traceId);
-    trace.setAttachment(file);
-    traceRepository.save(trace);
-  }
-
-  private void chekTraceAttachementUploadRG(User loggedInUser, UUID traceId) {
-    var trace = traceService.getTraceById(traceId);
-
-    if (!trace.getUser().equals(loggedInUser)) {
-      throw new UserNotAuthorizedException();
-    }
-
-    if (trace.getLink().isPresent()) {
-      throw new InvalidTraceTypeException();
-    }
-  }
-
   @Override
-  public File getFile(UUID fileId) {
-    return null;
-  }
-
-  @Override
-  public byte[] fetchContent(UUID fileId) {
-    return new byte[0];
+  public FileResource fetchContent(UUID fileId) {
+    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
+    byte[] content = fileStorageService.get(file.getUri());
+    return new FileResource(
+        file.getId(), file.getFileName(), file.getFileType(), file.getSize(), content);
   }
 
   @Override
   public FileDownload download(UUID fileId) {
     var loggedInUser = loggedInUserService.getLoggedInUser();
     var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
-    switch (file.getFileCategory()) {
-      case TRACE_ATTACHEMENT -> chekTraceAttachementDownloadRG(loggedInUser, file.getElementId());
-    }
+    chekDownloadRG(loggedInUser, file.getElementId(), file.getFileCategory());
     return new FileDownload(file.getFileName(), fileStorageService.get(file.getUri()));
   }
 
-  private void chekTraceAttachementDownloadRG(User loggedInUser, UUID traceId) {
-    var trace = traceService.getTraceById(traceId);
-    if (!trace.getUser().equals(loggedInUser)) {
-      throw new UserNotAuthorizedException();
+  @Override
+  public void delete(UUID fileId) {
+    var loggedInUser = loggedInUserService.getLoggedInUser();
+    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
+    chekDeleteRG(loggedInUser, file.getElementId(), file.getFileCategory());
+    fileRepository.removeFromDatabase(file);
+    fileStorageService.delete(file.getId());
+    log.info("File deleted: {}", file);
+  }
+
+  private void saveFileOnElement(UUID elementId, EFileCategory fileCategory, File file) {
+    switch (fileCategory) {
+      case TRACE_ATTACHEMENT -> {
+        var trace = traceService.getTraceById(elementId);
+        trace.setAttachment(file);
+        traceRepository.save(trace);
+      }
+      case STUDENT_COVER_PICTURE -> {
+        var student = studentRepository.findById(elementId).orElseThrow();
+        student.setCoverPicture(file);
+        studentRepository.save(student);
+      }
+      case STUDENT_PROFILE_PICTURE -> {
+        var student = studentRepository.findById(elementId).orElseThrow();
+        student.setProfilePicture(file);
+        studentRepository.save(student);
+      }
+      case STAFF_COVER_PICTURE -> {
+        var staff = staffRepository.findById(elementId).orElseThrow();
+        staff.setCoverPicture(file);
+        staffRepository.save(staff);
+      }
+      case STAFF_PROFILE_PICTURE -> {
+        var staff = staffRepository.findById(elementId).orElseThrow();
+        staff.setProfilePicture(file);
+        staffRepository.save(staff);
+      }
+    }
+  }
+
+  private void chekUploadRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
+    switch (fileCategory) {
+      case TRACE_ATTACHEMENT -> {
+        var trace = traceService.getTraceById(elementId);
+        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
+        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();
+      }
+      case STUDENT_COVER_PICTURE, STUDENT_PROFILE_PICTURE -> {
+        var student = studentRepository.findById(elementId).orElseThrow();
+        if (!student.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
+      }
+      case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -> {
+        var staff = staffRepository.findById(elementId).orElseThrow();
+        if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
+      }
+    }
+  }
+
+  private void chekDeleteRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
+    switch (fileCategory) {
+      case TRACE_ATTACHEMENT -> throw new UserNotAuthorizedException();
+      case STUDENT_COVER_PICTURE, STUDENT_PROFILE_PICTURE -> {
+        var student = studentRepository.findById(elementId).orElseThrow();
+        if (!student.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
+      }
+      case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -> {
+        var staff = staffRepository.findById(elementId).orElseThrow();
+        if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
+      }
+    }
+  }
+
+  private void chekDownloadRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
+    switch (fileCategory) {
+      case TRACE_ATTACHEMENT -> {
+        var trace = traceService.getTraceById(elementId);
+        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
+        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();
+        if (trace.getAttachment().isEmpty()) throw new InvalidTraceTypeException();
+      }
+      case STUDENT_PROFILE_PICTURE,
+          STUDENT_COVER_PICTURE,
+          STAFF_PROFILE_PICTURE,
+          STAFF_COVER_PICTURE ->
+          throw new UserNotAuthorizedException();
     }
   }
 }

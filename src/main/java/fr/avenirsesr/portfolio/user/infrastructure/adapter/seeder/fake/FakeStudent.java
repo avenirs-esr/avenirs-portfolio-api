@@ -26,6 +26,8 @@ public class FakeStudent {
             user,
             userDataGenerator.with("student-email").email(),
             studentDataGenerator.with("student-bio").studentDescription(),
+            null,
+            null,
             Instant.now(),
             Instant.now()));
   }

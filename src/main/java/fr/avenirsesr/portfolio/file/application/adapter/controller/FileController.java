@@ -76,4 +76,13 @@ public class FileController {
             "attachment; filename=\"" + downloadedFile.fileName() + "\"")
         .body(downloadedFile.content());
   }
+
+  @DeleteMapping(path = "/{fileId}")
+  public ResponseEntity<String> deleteFile(Principal principal, @Valid @PathVariable UUID fileId) {
+    log.debug("Received request to delete file [{}] by user [{}]", fileId, principal.getName());
+
+    fileResourceService.delete(fileId);
+
+    return ResponseEntity.ok("Resource successfully deleted");
+  }
 }

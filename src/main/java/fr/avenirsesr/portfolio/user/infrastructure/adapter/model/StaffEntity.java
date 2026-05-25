@@ -3,10 +3,8 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.model;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.BIO_LENGTH;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import java.time.Instant;
 import java.util.UUID;
@@ -29,23 +27,49 @@ public class StaffEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "institution_email")
   private String institutionEmail;
 
+  @OneToOne
+  @JoinColumn(name = "cover_picture_id")
+  private FileEntity coverPicture;
+
+  @OneToOne
+  @JoinColumn(name = "profile_picture_id")
+  private FileEntity profilePicture;
+
   private StaffEntity(
       UUID id,
       UserEntity user,
       String institutionEmail,
       String bio,
+      FileEntity coverPicture,
+      FileEntity profilePicture,
       Instant createdAt,
       Instant updatedAt) {
     setId(id);
     this.user = user;
     this.bio = bio;
     this.institutionEmail = institutionEmail;
+    this.coverPicture = coverPicture;
+    this.profilePicture = profilePicture;
     setCreatedAt(createdAt);
     setUpdatedAt(updatedAt);
   }
 
   public static StaffEntity of(
-      UserEntity user, String institutionEmail, String bio, Instant createdAt, Instant updatedAt) {
-    return new StaffEntity(user.getId(), user, institutionEmail, bio, createdAt, updatedAt);
+      UserEntity user,
+      String institutionEmail,
+      String bio,
+      FileEntity coverPicture,
+      FileEntity profilePicture,
+      Instant createdAt,
+      Instant updatedAt) {
+    return new StaffEntity(
+        user.getId(),
+        user,
+        institutionEmail,
+        bio,
+        coverPicture,
+        profilePicture,
+        createdAt,
+        updatedAt);
   }
 }

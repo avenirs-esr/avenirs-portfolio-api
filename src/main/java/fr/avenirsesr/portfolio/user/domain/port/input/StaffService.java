@@ -1,15 +1,14 @@
 package fr.avenirsesr.portfolio.user.domain.port.input;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.util.UUID;
 
 public interface StaffService {
   Staff getStaffById(UUID id);
 
-  String getBio(User user);
-
-  String getInstitutionEmail(User user);
+  UserProfileOverviewData getStaffProfile();
 
   void updateProfile(User user, String bio);
 

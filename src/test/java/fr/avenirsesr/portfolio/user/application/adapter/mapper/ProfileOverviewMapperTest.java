@@ -3,8 +3,8 @@ package fr.avenirsesr.portfolio.user.application.adapter.mapper;
 import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
-import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,21 +18,17 @@ class ProfileOverviewMapperTest {
   @Test
   void shouldMapUserProfileOverviewDataToDTO() {
     BddLogger.given("a user profile overview data and user photos data");
-    UserProfileOverviewData overview =
-        new UserProfileOverviewData("Jane", "Doe", "jane@example.com", "My bio");
     UUID profileFileId = UUID.randomUUID();
     UUID coverFileId = UUID.randomUUID();
-    UserPhotosData photos =
-        new UserPhotosData(
-            Optional.of(profileFileId),
-            Optional.of("profile.jpg"),
-            "https://cdn.example.com/profile.jpg",
-            Optional.of(coverFileId),
-            Optional.of("cover.jpg"),
-            "https://cdn.example.com/cover.jpg");
+    var profile =
+        new FileData(Optional.of(profileFileId), Optional.of("profile.jpg"), "profile.jpg");
+
+    var cover = new FileData(Optional.of(coverFileId), Optional.of("cover.jpg"), "cover.jpg");
+    UserProfileOverviewData overview =
+        new UserProfileOverviewData("Jane", "Doe", "jane@example.com", "My bio", cover, profile);
 
     BddLogger.when("mapping to ProfileOverviewDTO");
-    ProfileOverviewDTO dto = mapper.userDomainToDto(overview, photos);
+    ProfileOverviewDTO dto = mapper.userDomainToDto(overview, "https://cdn.example.com/");
 
     BddLogger.then("it should map all fields including file DTOs");
     assertNotNull(dto);
@@ -50,19 +46,14 @@ class ProfileOverviewMapperTest {
   @Test
   void shouldHandleEmptyOptionalPhotoIds() {
     BddLogger.given("a user profile with no photo IDs");
+    var profile = new FileData(Optional.empty(), Optional.empty(), "default.jpg");
+
+    var cover = new FileData(Optional.empty(), Optional.empty(), "default-cover.jpg");
     UserProfileOverviewData overview =
-        new UserProfileOverviewData("John", "Smith", "john@example.com", null);
-    UserPhotosData photos =
-        new UserPhotosData(
-            Optional.empty(),
-            Optional.empty(),
-            "https://cdn.example.com/default.jpg",
-            Optional.empty(),
-            Optional.empty(),
-            "https://cdn.example.com/default-cover.jpg");
+        new UserProfileOverviewData("John", "Smith", "john@example.com", null, cover, profile);
 
     BddLogger.when("mapping to ProfileOverviewDTO");
-    ProfileOverviewDTO dto = mapper.userDomainToDto(overview, photos);
+    ProfileOverviewDTO dto = mapper.userDomainToDto(overview, "https://cdn.example.com/");
 
     BddLogger.then("it should return null for optional file IDs and names");
     assertNotNull(dto);

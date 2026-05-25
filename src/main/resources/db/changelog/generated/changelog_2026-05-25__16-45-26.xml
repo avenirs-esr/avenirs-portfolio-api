@@ -1,0 +1,56 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-13">
+        <dropForeignKeyConstraint baseTableName="user_photo" constraintName="FK1dr5y1gcwjmh8x5anpcx8biqd"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-14">
+        <dropForeignKeyConstraint baseTableName="user_photo" constraintName="FKdj350o542h23lyb0pm69osut3"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-1">
+        <addColumn tableName="staff">
+            <column name="cover_picture_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-2">
+        <addColumn tableName="student">
+            <column name="cover_picture_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-3">
+        <addColumn tableName="staff">
+            <column name="profile_picture_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-4">
+        <addColumn tableName="student">
+            <column name="profile_picture_id" type="uuid"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-5">
+        <addUniqueConstraint columnNames="cover_picture_id" constraintName="UC_STAFFCOVER_PICTURE_ID_COL" tableName="staff"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-6">
+        <addUniqueConstraint columnNames="profile_picture_id" constraintName="UC_STAFFPROFILE_PICTURE_ID_COL" tableName="staff"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-7">
+        <addUniqueConstraint columnNames="cover_picture_id" constraintName="UC_STUDENTCOVER_PICTURE_ID_COL" tableName="student"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-8">
+        <addUniqueConstraint columnNames="profile_picture_id" constraintName="UC_STUDENTPROFILE_PICTURE_ID_COL" tableName="student"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-9">
+        <addForeignKeyConstraint baseColumnNames="cover_picture_id" baseTableName="student" constraintName="FK8pf0a78iyic5a1pxgwyg8oaf0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="file" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-10">
+        <addForeignKeyConstraint baseColumnNames="profile_picture_id" baseTableName="staff" constraintName="FKmqd83phwsrau8vndwac7d44us" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="file" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-11">
+        <addForeignKeyConstraint baseColumnNames="profile_picture_id" baseTableName="student" constraintName="FKougyb88c2jl7owq652g98f878" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="file" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-12">
+        <addForeignKeyConstraint baseColumnNames="cover_picture_id" baseTableName="staff" constraintName="FKp3j38kweigq5r231srnobkahr" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="file" validate="true"/>
+    </changeSet>
+    <changeSet author="bilelbanelhaq (generated)" id="1779727530553-15">
+        <dropTable tableName="user_photo"/>
+    </changeSet>
+</databaseChangeLog>

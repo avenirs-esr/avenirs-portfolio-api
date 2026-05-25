@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
@@ -17,7 +18,10 @@ public class StudentServiceConfig {
   private final UserRepository userRepository;
 
   @Bean
-  public StudentService studentService(@Lazy SelfKnowledgeService selfKnowledgeService) {
-    return new StudentServiceImpl(studentRepository, userRepository, selfKnowledgeService);
+  public StudentService studentService(
+      @Lazy SelfKnowledgeService selfKnowledgeService,
+      @Lazy LoggedInUserService loggedInUserService) {
+    return new StudentServiceImpl(
+        studentRepository, userRepository, selfKnowledgeService, loggedInUserService);
   }
 }

@@ -1,8 +1,9 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
+import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
-import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,20 +27,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/storage")
 public class StorageController {
-  private final UserResourceService userResourceService;
+  private final FileResourceService fileResourceService;
   private final ActivityResourceService activityResourceService;
   private final FileStorageService fileStorageService;
 
-  @GetMapping("/users/{fileId}")
-  public ResponseEntity<ByteArrayResource> getUserResourceByFileId(
-      @Valid @PathVariable UUID fileId) {
+  @GetMapping("/{fileId}")
+  public ResponseEntity<ByteArrayResource> getResourceByFileId(@Valid @PathVariable UUID fileId) {
     log.debug("Received request to get user photo id [{}]", fileId);
-    var userPhoto = userResourceService.getUserPhotoById(fileId);
-    byte[] photo = userResourceService.fetchContent(userPhoto);
+    FileResource file = fileResourceService.fetchContent(fileId);
 
     return ResponseEntity.ok()
-        .contentType(MediaType.asMediaType(MimeType.valueOf(userPhoto.getFileType().getMimeType())))
-        .body(new ByteArrayResource(photo));
+        .contentType(MediaType.asMediaType(MimeType.valueOf(file.fileType().getMimeType())))
+        .body(new ByteArrayResource(file.content()));
   }
 
   @GetMapping("/users/default/{photoType}")

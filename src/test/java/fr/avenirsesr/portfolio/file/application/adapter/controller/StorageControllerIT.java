@@ -6,13 +6,17 @@ import static org.mockito.Mockito.when;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.ActivityBannerRepository;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.domain.service.ActivityResourceServiceImpl;
-import fr.avenirsesr.portfolio.file.domain.service.UserResourceServiceImpl;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.UserPhotoDatabaseRepository;
+import fr.avenirsesr.portfolio.file.domain.service.FileResourceServiceImpl;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,7 +37,11 @@ class StorageControllerIT extends ContainerConfigurationTest {
 
   @Mock private FileStorageService fileStorageService;
 
-  @Autowired private UserPhotoDatabaseRepository userPhotoDatabaseRepository;
+  @Autowired private FileRepository fileRepository;
+  @Autowired private TraceRepository traceRepository;
+  @Autowired private StudentRepository studentRepository;
+  @Autowired private StaffRepository staffRepository;
+  @Autowired private TraceService traceService;
   @Autowired private ActivityBannerRepository activityBannerRepository;
   @Autowired private LoggedInUserService loggedInUserService;
 
@@ -57,8 +65,14 @@ class StorageControllerIT extends ContainerConfigurationTest {
 
     StorageController storageController =
         new StorageController(
-            new UserResourceServiceImpl(
-                fileStorageService, userPhotoDatabaseRepository, loggedInUserService),
+            new FileResourceServiceImpl(
+                fileStorageService,
+                fileRepository,
+                traceRepository,
+                staffRepository,
+                studentRepository,
+                loggedInUserService,
+                traceService),
             new ActivityResourceServiceImpl(
                 fileStorageService, loggedInUserService, activityBannerRepository),
             fileStorageService);

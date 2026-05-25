@@ -5,10 +5,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
-import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
-import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
-import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
-import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -21,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
-  private final UserResourceService userResourceService;
   private final StaffService staffService;
   private final StudentService studentService;
 
@@ -34,34 +29,6 @@ public class UserServiceImpl implements UserService {
               log.error("User {} not found", id);
               return new UserNotFoundException();
             });
-  }
-
-  @Override
-  public UserPhotosData getUserPhotos(UUID userId, EUserCategory userCategory) {
-    var user = getUser(userId);
-    var profile = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.PROFILE);
-    var cover = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.COVER);
-
-    return new UserPhotosData(
-        profile.id(), profile.name(), profile.url(), cover.id(), cover.name(), cover.url());
-  }
-
-  @Override
-  public UserProfileOverviewData getUserProfileOverviewDTO(
-      UUID userId, EUserCategory userCategory) {
-    var user = getUser(userId);
-    var bio =
-        switch (userCategory) {
-          case STUDENT -> studentService.getBio(user);
-          case STAFF -> staffService.getBio(user);
-        };
-    var email =
-        switch (userCategory) {
-          case STUDENT -> user.getEmail();
-          case STAFF -> staffService.getInstitutionEmail(user);
-        };
-
-    return new UserProfileOverviewData(user.getFirstName(), user.getLastName(), email, bio);
   }
 
   @Override

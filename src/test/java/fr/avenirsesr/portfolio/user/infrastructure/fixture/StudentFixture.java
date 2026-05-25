@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.user.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.util.UUID;
@@ -9,6 +10,8 @@ public class StudentFixture {
   private UUID id;
   private String bio;
   private User user;
+  private File profilePicture;
+  private File coverPicture;
   private Instant createdAt;
   private Instant updatedAt;
 
@@ -51,6 +54,7 @@ public class StudentFixture {
   }
 
   public Student toModel() {
-    return Student.toDomain(user, bio, user.getEmail(), createdAt, updatedAt);
+    return Student.toDomain(
+        user, bio, user.getEmail(), coverPicture, profilePicture, createdAt, updatedAt);
   }
 }
