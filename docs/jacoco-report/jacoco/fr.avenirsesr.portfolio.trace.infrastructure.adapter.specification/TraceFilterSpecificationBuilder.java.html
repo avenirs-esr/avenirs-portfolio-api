@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TraceFilterSpecificationBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification</a> &gt; <span class="el_source">TraceFilterSpecificationBuilder.java</span></div><h1>TraceFilterSpecificationBuilder.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.FilterSpecificationBuilder;
-import fr.avenirsesr.portfolio.file.domain.model.shared.EFileType;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
+import fr.avenirsesr.portfolio.file.domain.model.EFileType;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.trace.domain.filter.ETraceFilterKey;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
@@ -37,10 +37,10 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="fc" id="L37">    return (root, query, cb) -&gt; {</span>
 <span class="fc bfc" id="L38" title="All 6 branches covered.">      if (fileTypes == null || fileTypes.isEmpty() || query == null) return null;</span>
 
-<span class="fc" id="L40">      Subquery&lt;TraceAttachmentEntity&gt; attachSub = query.subquery(TraceAttachmentEntity.class);</span>
-<span class="fc" id="L41">      Root&lt;TraceAttachmentEntity&gt; attachRoot = attachSub.from(TraceAttachmentEntity.class);</span>
+<span class="fc" id="L40">      Subquery&lt;FileEntity&gt; attachSub = query.subquery(FileEntity.class);</span>
+<span class="fc" id="L41">      Root&lt;FileEntity&gt; attachRoot = attachSub.from(FileEntity.class);</span>
 <span class="fc" id="L42">      Predicate fileTypePredicate = attachRoot.get(&quot;fileType&quot;).in(fileTypes);</span>
-<span class="fc" id="L43">      Predicate belongsToTrace = cb.equal(attachRoot.get(&quot;trace&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;));</span>
+<span class="fc" id="L43">      Predicate belongsToTrace = cb.equal(attachRoot.get(&quot;elementId&quot;), root.get(&quot;id&quot;));</span>
 <span class="fc" id="L44">      Predicate isActive = cb.isTrue(attachRoot.get(&quot;isActiveVersion&quot;));</span>
 <span class="fc" id="L45">      attachSub.where(cb.and(belongsToTrace, isActive, fileTypePredicate));</span>
 
