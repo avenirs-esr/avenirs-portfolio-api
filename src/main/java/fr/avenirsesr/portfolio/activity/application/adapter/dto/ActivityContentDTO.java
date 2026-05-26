@@ -5,7 +5,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"id", "title", "thematic", "summary", "createdAt", "updatedAt"})
+@Schema(
+    requiredProperties = {
+      "id",
+      "title",
+      "thematic",
+      "summary",
+      "enableReflection",
+      "traceAllowedAssociations",
+      "feedbackAllowedIterations",
+      "createdAt",
+      "updatedAt"
+    })
 public record ActivityContentDTO(
     UUID id,
     String title,
