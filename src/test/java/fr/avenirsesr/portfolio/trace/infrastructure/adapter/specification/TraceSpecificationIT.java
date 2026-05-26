@@ -46,31 +46,6 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldFilterByFileType_onlyActiveAttachmentCounts() {
-    TraceEntity pdfActive = persistTrace("pdfActive");
-    persistAttachment(pdfActive, "doc.pdf", EFileType.PDF, true);
-
-    TraceEntity pdfInactive = persistTrace("pdfInactive");
-    persistAttachment(pdfInactive, "old.pdf", EFileType.PDF, false);
-
-    TraceEntity pngActive = persistTrace("pngActive");
-    persistAttachment(pngActive, "img.png", EFileType.PNG, true);
-
-    entityManager.flush();
-    entityManager.clear();
-
-    TraceFilterSpecificationBuilder builder = new TraceFilterSpecificationBuilder();
-    Specification<TraceEntity> spec =
-        builder.getSpecification(ETraceFilterKey.FILE_TYPE, List.of(EFileType.PDF));
-
-    List<TraceEntity> result = traceJpaRepository.findAll(ofTestUser(user.getId()).and(spec));
-
-    assertThat(result).extracting(TraceEntity::getId).contains(pdfActive.getId());
-    assertThat(result).extracting(TraceEntity::getId).doesNotContain(pdfInactive.getId());
-    assertThat(result).extracting(TraceEntity::getId).doesNotContain(pngActive.getId());
-  }
-
-  @Test
   void shouldReturnAllWhenFileTypeIsNullOrEmpty() {
     TraceEntity t1 = persistTrace("t1");
     TraceEntity t2 = persistTrace("t2");
@@ -235,7 +210,6 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             name,
             1L,
             1,
-            active,
             "uri",
             trace.getId(),
             user,

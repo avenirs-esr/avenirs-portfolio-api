@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,7 +75,6 @@ public class FileResourceServiceImpl implements FileResourceService {
     var uri = fileStorageService.upload(fileResource);
     var allFiles = fileRepository.findAllByElement(elementId);
     var version = allFiles.stream().map(File::getVersion).max(Integer::compareTo).orElse(0) + 1;
-    allFiles.forEach(a -> a.setActiveVersion(false));
     var file =
         File.create(
             fileResource.id(),
@@ -86,18 +84,11 @@ public class FileResourceServiceImpl implements FileResourceService {
             fileResource.fileName(),
             fileResource.size(),
             version,
-            true,
             uri,
             loggedInUser);
-    var savedFiles =
-        fileRepository.saveAll(Stream.concat(allFiles.stream(), Stream.of(file)).toList());
-
+    var savedFile = fileRepository.save(file);
     saveFileOnElement(elementId, fileCategory, file);
-
-    return savedFiles.stream()
-        .filter(f -> f.getId().equals(file.getId()))
-        .findFirst()
-        .orElseThrow();
+    return savedFile;
   }
 
   @Override

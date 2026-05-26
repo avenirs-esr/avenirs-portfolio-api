@@ -9,9 +9,4 @@ public interface FileSpecification {
     return (root, query, criteriaBuilder) ->
         criteriaBuilder.and(criteriaBuilder.equal(root.get("elementId"), elementId));
   }
-
-  static Specification<FileEntity> onlyActiveVersion() {
-    return (root, query, criteriaBuilder) ->
-        criteriaBuilder.equal(root.get("isActiveVersion"), true);
-  }
 }

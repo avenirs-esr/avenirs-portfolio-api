@@ -7,7 +7,6 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.specification.FileSpecification;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
@@ -23,12 +22,5 @@ public class FileDatabaseRepository extends GenericJpaRepositoryAdapter<File, Fi
     return jpaSpecificationExecutor.findAll(FileSpecification.ofElement(elementId)).stream()
         .map(FileMapper.INSTANCE::toDomain)
         .toList();
-  }
-
-  @Override
-  public Optional<File> findActiveByElement(UUID elementId) {
-    return jpaSpecificationExecutor
-        .findOne(FileSpecification.ofElement(elementId).and(FileSpecification.onlyActiveVersion()))
-        .map(FileMapper.INSTANCE::toDomain);
   }
 }

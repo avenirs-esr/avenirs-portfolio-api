@@ -15,7 +15,6 @@ public class ActivityBannerFixture {
   private final String fileName = "activity banner";
   private final long size = 1000L;
   private final int version = 1;
-  private boolean isActiveVersion = true;
   private final String uri = "exemple.com/image.png";
   private final User uploadedBy = UserFixture.create().toModel();
   private final Instant uploadedAt = Instant.now();
@@ -34,7 +33,6 @@ public class ActivityBannerFixture {
         fileName,
         size,
         version,
-        isActiveVersion,
         uri,
         uploadedBy,
         uploadedAt,

@@ -16,10 +16,7 @@ import lombok.Setter;
 @Entity
 @Table(
     name = "file",
-    indexes = {
-      @Index(name = "idx_file_element_id", columnList = "element_id"),
-      @Index(name = "idx_file_active", columnList = "id, is_active_version")
-    })
+    indexes = {@Index(name = "idx_file_element_id", columnList = "element_id")})
 @NoArgsConstructor
 public class FileEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "file_type")
@@ -38,9 +35,6 @@ public class FileEntity extends AvenirsBaseEntity {
 
   @Column(nullable = false)
   private int version;
-
-  @Column(nullable = false, name = "is_active_version")
-  private boolean isActiveVersion;
 
   @Column(nullable = false)
   private String uri;
@@ -62,7 +56,6 @@ public class FileEntity extends AvenirsBaseEntity {
       String fileName,
       long size,
       int version,
-      boolean isActiveVersion,
       String uri,
       UUID elementId,
       UserEntity uploadedBy,
@@ -75,7 +68,6 @@ public class FileEntity extends AvenirsBaseEntity {
     this.fileName = fileName;
     this.size = size;
     this.version = version;
-    this.isActiveVersion = isActiveVersion;
     this.uri = uri;
     this.elementId = elementId;
     this.uploadedBy = uploadedBy;
@@ -91,7 +83,6 @@ public class FileEntity extends AvenirsBaseEntity {
       String fileName,
       long size,
       int version,
-      boolean isActiveVersion,
       String uri,
       UUID elementId,
       UserEntity uploadedBy,
@@ -105,7 +96,6 @@ public class FileEntity extends AvenirsBaseEntity {
         fileName,
         size,
         version,
-        isActiveVersion,
         uri,
         elementId,
         uploadedBy,

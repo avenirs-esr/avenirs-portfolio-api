@@ -42,7 +42,6 @@ public class FakeUserPhoto {
             fileDataGenerator.with("file-name").fileName(fileType),
             dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,
-            true,
             "/workspace/app%s/%s.%s"
                 .formatted(
                     FileStorageConstants.STORAGE_PATH,

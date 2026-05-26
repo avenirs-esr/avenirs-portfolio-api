@@ -41,8 +41,7 @@ public class TraceFilterSpecificationBuilder
       Root<FileEntity> attachRoot = attachSub.from(FileEntity.class);
       Predicate fileTypePredicate = attachRoot.get("fileType").in(fileTypes);
       Predicate belongsToTrace = cb.equal(attachRoot.get("elementId"), root.get("id"));
-      Predicate isActive = cb.isTrue(attachRoot.get("isActiveVersion"));
-      attachSub.where(cb.and(belongsToTrace, isActive, fileTypePredicate));
+      attachSub.where(cb.and(belongsToTrace, fileTypePredicate));
 
       return cb.exists(attachSub);
     };

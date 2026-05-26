@@ -74,7 +74,6 @@ public class TraceSpecification {
           .select(attachRoot)
           .where(
               criteriaBuilder.equal(attachRoot.get("elementId"), root.get("id")),
-              criteriaBuilder.isTrue(attachRoot.get("isActiveVersion")),
               criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get("fileName")), pattern));
       Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);
 

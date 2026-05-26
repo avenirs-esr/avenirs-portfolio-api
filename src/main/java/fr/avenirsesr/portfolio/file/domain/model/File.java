@@ -15,7 +15,6 @@ public class File extends AvenirsBaseModel {
   private final String fileName;
   private final long size;
   private final int version;
-  private boolean isActiveVersion;
   private final String uri;
   private final User uploadedBy;
   private final Instant uploadedAt;
@@ -29,7 +28,6 @@ public class File extends AvenirsBaseModel {
       EFileType fileType,
       long size,
       int version,
-      boolean isActiveVersion,
       String uri,
       User uploadedBy,
       Instant uploadedAt,
@@ -42,7 +40,6 @@ public class File extends AvenirsBaseModel {
     this.fileType = fileType;
     this.size = size;
     this.version = version;
-    this.isActiveVersion = isActiveVersion;
     this.uri = uri;
     this.uploadedBy = uploadedBy;
     this.uploadedAt = uploadedAt;
@@ -56,7 +53,6 @@ public class File extends AvenirsBaseModel {
       String fileName,
       long size,
       int version,
-      boolean isActiveVersion,
       String uri,
       User uploadedBy) {
     return new File(
@@ -67,7 +63,6 @@ public class File extends AvenirsBaseModel {
         fileType,
         size,
         version,
-        isActiveVersion,
         uri,
         uploadedBy,
         Instant.now(),
@@ -83,7 +78,6 @@ public class File extends AvenirsBaseModel {
       String fileName,
       long size,
       int version,
-      boolean isActiveVersion,
       String uri,
       User uploadedBy,
       Instant uploadedAt,
@@ -97,7 +91,6 @@ public class File extends AvenirsBaseModel {
         fileType,
         size,
         version,
-        isActiveVersion,
         uri,
         uploadedBy,
         uploadedAt,

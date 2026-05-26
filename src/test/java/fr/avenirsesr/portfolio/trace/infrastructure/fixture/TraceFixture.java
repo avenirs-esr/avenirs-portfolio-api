@@ -46,7 +46,6 @@ public class TraceFixture {
             "my fake pdf",
             1000L,
             1,
-            true,
             "fake-url",
             user);
   }

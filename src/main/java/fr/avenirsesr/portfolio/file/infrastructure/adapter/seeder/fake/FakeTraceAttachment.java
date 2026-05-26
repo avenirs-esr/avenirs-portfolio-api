@@ -50,7 +50,6 @@ public class FakeTraceAttachment {
             fileDataGenerator.with("filename").fileName(fileType),
             dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,
-            true,
             "/workspace/app%s/%s.%s"
                 .formatted(
                     FileStorageConstants.STORAGE_PATH,
@@ -61,11 +60,6 @@ public class FakeTraceAttachment {
             trace.getCreatedAt(),
             trace.getCreatedAt(),
             trace.getUpdatedAt()));
-  }
-
-  public FakeTraceAttachment withIsActiveVersion(boolean isActiveVersion) {
-    attachment.setActiveVersion(isActiveVersion);
-    return this;
   }
 
   public FakeTraceAttachment withVersion(int version) {
