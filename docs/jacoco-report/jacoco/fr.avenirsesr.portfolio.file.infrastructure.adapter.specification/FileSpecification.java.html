@@ -9,10 +9,5 @@ public interface FileSpecification {
 <span class="fc" id="L9">    return (root, query, criteriaBuilder) -&gt;</span>
 <span class="fc" id="L10">        criteriaBuilder.and(criteriaBuilder.equal(root.get(&quot;elementId&quot;), elementId));</span>
   }
-
-  static Specification&lt;FileEntity&gt; onlyActiveVersion() {
-<span class="nc" id="L14">    return (root, query, criteriaBuilder) -&gt;</span>
-<span class="nc" id="L15">        criteriaBuilder.equal(root.get(&quot;isActiveVersion&quot;), true);</span>
-  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
