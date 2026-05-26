@@ -2,8 +2,8 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
-import fr.avenirsesr.portfolio.file.domain.model.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
@@ -47,7 +47,7 @@ public class FakeTraceAttachment {
             id,
             fileType,
             EFileCategory.TRACE_ATTACHEMENT,
-            fileDataGenerator.with("filename").fileName(fileType),
+            fileDataGenerator.with("file-name").fileName(fileType),
             dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,
             "/workspace/app%s/%s.%s"

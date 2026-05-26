@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.file.domain.port.input;
 
-import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.file.domain.model.FileResource;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import java.util.UUID;
 
 public interface FileResourceService {

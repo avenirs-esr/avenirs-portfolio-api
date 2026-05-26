@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.domain.service.FileResourceServiceImpl;
@@ -29,7 +28,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 class StorageControllerIT extends ContainerConfigurationTest {
 
-  private static final String DEFAULT_BASE_PATH = "/storage/users/default/{photoType}";
+  private static final String DEFAULT_BASE_PATH = "/storage/default";
+  private static final String DEFAULT_COVER = DEFAULT_BASE_PATH + "/cover-picture";
+  private static final String DEFAULT_PROFILE = DEFAULT_BASE_PATH + "/profile-picture";
 
   private WebTestClient webTestClient;
 
@@ -77,8 +78,8 @@ class StorageControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldGetDefaultUserProfilePhoto() throws IOException {
-    BddLogger.given("the " + DEFAULT_BASE_PATH + " endpoint");
+  void shouldGetDefaultUserProfilePhoto() {
+    BddLogger.given("the " + DEFAULT_PROFILE + " endpoint");
 
     when(fileStorageService.get(anyString()))
         .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
@@ -88,7 +89,7 @@ class StorageControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(DEFAULT_BASE_PATH, EUserPhotoType.PROFILE)
+        .uri(DEFAULT_PROFILE)
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
@@ -101,7 +102,7 @@ class StorageControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldGetDefaultUserCoverPhoto() throws IOException {
-    BddLogger.given("the " + DEFAULT_BASE_PATH + " endpoint");
+    BddLogger.given("the " + DEFAULT_COVER + " endpoint");
 
     when(fileStorageService.get(anyString()))
         .thenReturn("Contenu du fichier de test".getBytes(StandardCharsets.UTF_8));
@@ -111,7 +112,7 @@ class StorageControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(DEFAULT_BASE_PATH, EUserPhotoType.COVER)
+        .uri(DEFAULT_COVER)
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)

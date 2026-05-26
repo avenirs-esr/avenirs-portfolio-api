@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.file.application.adapter.controller;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
 import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
-import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;

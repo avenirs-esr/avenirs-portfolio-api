@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.user.domain.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.file.domain.data.FileData;
+import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
@@ -14,7 +14,6 @@ import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,32 +46,11 @@ public class StudentServiceImpl implements StudentService {
         student.getUser().getLastName(),
         student.getUser().getEmail(),
         student.getBio(),
-        student
-            .getCoverPicture()
-            .map(
-                file ->
-                    new FileData(
-                        Optional.ofNullable(file.getId()),
-                        Optional.ofNullable(file.getFileName()),
-                        file.getUri()))
-            .orElse(
-                new FileData(
-                    Optional.empty(),
-                    Optional.empty(),
-                    FileStorageConstants.DEFAULT_COVER_FILE_URL)),
-        student
-            .getProfilePicture()
-            .map(
-                file ->
-                    new FileData(
-                        Optional.ofNullable(file.getId()),
-                        Optional.ofNullable(file.getFileName()),
-                        file.getUri()))
-            .orElse(
-                new FileData(
-                    Optional.empty(),
-                    Optional.empty(),
-                    FileStorageConstants.DEFAULT_PROFILE_FILE_URL)));
+        FileDataMapper.mapFileData(
+            student.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),
+        FileDataMapper.mapFileData(
+            student.getProfilePicture().orElse(null),
+            FileStorageConstants.DEFAULT_PROFILE_FILE_URL));
   }
 
   @Override

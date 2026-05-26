@@ -9,7 +9,7 @@ import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
-import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeTraceAttachment;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;

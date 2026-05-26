@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
-import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.util.UUID;

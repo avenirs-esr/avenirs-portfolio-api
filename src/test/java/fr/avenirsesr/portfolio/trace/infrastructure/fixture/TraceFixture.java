@@ -2,9 +2,9 @@ package fr.avenirsesr.portfolio.trace.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
-import fr.avenirsesr.portfolio.file.domain.model.EFileType;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.FakeTrace;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;

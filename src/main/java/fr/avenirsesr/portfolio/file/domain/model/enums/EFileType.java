@@ -1,6 +1,7 @@
-package fr.avenirsesr.portfolio.file.domain.model;
+package fr.avenirsesr.portfolio.file.domain.model.enums;
 
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
+import fr.avenirsesr.portfolio.file.domain.model.FileSize;
 import java.util.Arrays;
 import lombok.Getter;
 

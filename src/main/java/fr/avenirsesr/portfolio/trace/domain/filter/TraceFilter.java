@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.trace.domain.filter;
 
-import fr.avenirsesr.portfolio.file.domain.model.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
 import java.util.*;
 

@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.FilterSpecificationBuilder;
-import fr.avenirsesr.portfolio.file.domain.model.EFileType;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.trace.domain.filter.ETraceFilterKey;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;

@@ -2,7 +2,7 @@
   {
     "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "userCategory": "STUDENT",
-    "photoType": "COVER",
+    "photoType": "STUDENT_COVER_PICTURE",
     "fileName": "cover-picture.png",
     "fileType": "PNG",
     "fileSize": 4276564
@@ -10,7 +10,7 @@
   {
     "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "userCategory": "STUDENT",
-    "photoType": "COVER",
+    "photoType": "STUDENT_COVER_PICTURE",
     "fileName": "cover-picture-2.png",
     "fileType": "PNG",
     "fileSize": 4276564
@@ -18,7 +18,7 @@
   {
     "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "userCategory": "STUDENT",
-    "photoType": "PROFILE",
+    "photoType": "STUDENT_PROFILE_PICTURE",
     "fileName": "cover-picture.png",
     "fileType": "PNG",
     "fileSize": 4276564

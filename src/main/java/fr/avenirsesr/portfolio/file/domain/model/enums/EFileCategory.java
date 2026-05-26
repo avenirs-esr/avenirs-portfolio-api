@@ -1,4 +1,4 @@
-package fr.avenirsesr.portfolio.file.domain.model;
+package fr.avenirsesr.portfolio.file.domain.model.enums;
 
 public enum EFileCategory {
   TRACE_ATTACHEMENT,

@@ -9,8 +9,6 @@ import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.Va
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
-import fr.avenirsesr.portfolio.file.domain.model.EFileCategory;
-import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
@@ -25,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -74,12 +71,11 @@ public class UserPhotoSeeder {
       try {
         var user = userRepository.findById(data.userId());
         RequestContext.set(new RequestData(user, ELanguage.FRENCH));
-        EFileCategory fileCategory = getEFileCategory(data);
 
         userPhotos.add(
             fileResourceService.upload(
                 data.userId(),
-                fileCategory,
+                data.photoType(),
                 data.fileName(),
                 data.fileType().getMimeType(),
                 data.fileSize(),
@@ -91,21 +87,6 @@ public class UserPhotoSeeder {
 
     log.info("✔ {} user photos created", userPhotos.size());
     return userPhotos.stream().map(FileMapper.INSTANCE::fromDomain).toList();
-  }
-
-  private static @Nullable EFileCategory getEFileCategory(UserPhotoCreationData data) {
-    EFileCategory fileCategory = null;
-    if (data.photoType() == EUserPhotoType.PROFILE && data.userCategory() == EUserCategory.STUDENT)
-      fileCategory = EFileCategory.STUDENT_PROFILE_PICTURE;
-    else if (data.photoType() == EUserPhotoType.PROFILE
-        && data.userCategory() == EUserCategory.STAFF)
-      fileCategory = EFileCategory.STAFF_PROFILE_PICTURE;
-    else if (data.photoType() == EUserPhotoType.COVER
-        && data.userCategory() == EUserCategory.STUDENT)
-      fileCategory = EFileCategory.STUDENT_COVER_PICTURE;
-    else if (data.photoType() == EUserPhotoType.COVER && data.userCategory() == EUserCategory.STAFF)
-      fileCategory = EFileCategory.STAFF_COVER_PICTURE;
-    return fileCategory;
   }
 
   private List<UserPhotoCreationData> buildFakePhotos(List<UserEntity> users) {
@@ -120,11 +101,7 @@ public class UserPhotoSeeder {
                 case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -> EUserCategory.STAFF;
                 default -> throw new IllegalStateException("Unexpected value: " + fakePhoto);
               },
-              switch (fakePhoto.getFileCategory()) {
-                case STAFF_PROFILE_PICTURE, STUDENT_PROFILE_PICTURE -> EUserPhotoType.PROFILE;
-                case STAFF_COVER_PICTURE, STUDENT_COVER_PICTURE -> EUserPhotoType.COVER;
-                default -> throw new IllegalStateException("Unexpected value: " + fakePhoto);
-              },
+              fakePhoto.getFileCategory(),
               fakePhoto.getFileName(),
               fakePhoto.getFileType(),
               fakePhoto.getSize()));

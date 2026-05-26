@@ -1,13 +1,9 @@
 package fr.avenirsesr.portfolio.file.application.adapter.controller;
 
-import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
 import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -39,32 +35,27 @@ public class StorageController {
         .body(new ByteArrayResource(file.content()));
   }
 
-  @GetMapping("/users/default/{photoType}")
-  public ResponseEntity<ByteArrayResource> getDefaultResource(
-      @Valid
-          @Parameter(
-              name = "photoType",
-              in = ParameterIn.PATH,
-              required = true,
-              schema = @Schema(ref = "#/components/schemas/EUserPhotoType"))
-          @PathVariable
-          EUserPhotoType photoType) {
-    log.debug("Received request to get default {} photo", photoType);
-    byte[] photo =
-        fileStorageService.get(
-            switch (photoType) {
-              case PROFILE -> FileStorageConstants.USER_PROFILE_DEFAULT_PATH;
-              case COVER -> FileStorageConstants.USER_COVER_DEFAULT_PATH;
-            });
-
-    var fileType =
-        switch (photoType) {
-          case PROFILE -> FileStorageConstants.USER_PROFILE_DEFAULT_FILE_TYPE;
-          case COVER -> FileStorageConstants.USER_COVER_DEFAULT_FILE_TYPE;
-        };
+  @GetMapping("/default/cover-picture")
+  public ResponseEntity<ByteArrayResource> getDefaultCoverPicture() {
+    log.debug("Received request to get default cover photo");
+    byte[] photo = fileStorageService.get(FileStorageConstants.COVER_DEFAULT_PATH);
 
     return ResponseEntity.ok()
-        .contentType(MediaType.asMediaType(MimeType.valueOf(fileType.getMimeType())))
+        .contentType(
+            MediaType.asMediaType(
+                MimeType.valueOf(FileStorageConstants.COVER_DEFAULT_FILE_TYPE.getMimeType())))
+        .body(new ByteArrayResource(photo));
+  }
+
+  @GetMapping("/default/profile-picture")
+  public ResponseEntity<ByteArrayResource> getDefaultProfilePicture() {
+    log.debug("Received request to get default profile photo");
+    byte[] photo = fileStorageService.get(FileStorageConstants.PROFILE_DEFAULT_PATH);
+
+    return ResponseEntity.ok()
+        .contentType(
+            MediaType.asMediaType(
+                MimeType.valueOf(FileStorageConstants.PROFILE_DEFAULT_FILE_TYPE.getMimeType())))
         .body(new ByteArrayResource(photo));
   }
 }

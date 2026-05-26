@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface FileDtoMapper {
   @Mapping(source = "size", target = "fileSize")
+  @Mapping(source = "uri", target = "url")
   FileDTO fromDomain(File file);
 
   default FileDTO fromDomain(Optional<File> file) {
