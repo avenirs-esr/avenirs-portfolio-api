@@ -11,5 +11,5 @@ public interface UserService extends BaseUserService {
 
   void updateProfile(EUserCategory userCategory, String email, String bio);
 
-  User createUser(UUID id, String firstname, String lastname, String email);
+  User createUser(UUID id, String firstname, String lastname, String email, String eppn);
 }

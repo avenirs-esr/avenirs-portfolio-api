@@ -1,0 +1,40 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="nathp (generated)" id="1779961186732-5">
+        <dropForeignKeyConstraint baseTableName="external_user" constraintName="FKal8pfemrd8yc55d3gt7phxx7i"/>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1779961186732-1">
+        <createTable tableName="user_principal">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_principalPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP(6) WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="eppn" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1779961186732-2">
+        <addUniqueConstraint columnNames="eppn" constraintName="UC_USER_PRINCIPALEPPN_COL" tableName="user_principal"/>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1779961186732-3">
+        <addUniqueConstraint columnNames="user_id" constraintName="UC_USER_PRINCIPALUSER_ID_COL" tableName="user_principal"/>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1779961186732-4">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_principal" constraintName="FK1setcnsgcc6ijlkibu90yppx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user" validate="true"/>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1779961186732-6">
+        <dropUniqueConstraint constraintName="UKiqmhgee6pmpujonjcuwcrxjy6" tableName="external_user"/>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1779961186732-7">
+        <dropTable tableName="external_user"/>
+    </changeSet>
+</databaseChangeLog>
