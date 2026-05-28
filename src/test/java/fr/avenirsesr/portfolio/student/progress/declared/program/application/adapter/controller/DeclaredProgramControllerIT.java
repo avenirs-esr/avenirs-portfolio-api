@@ -49,9 +49,6 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.signature}")
   private String studentSignature;
 
-  @Value("${user.student.id}")
-  private String studentId;
-
   @Value("${user.second.student.signature}")
   private String secondStudentSignature;
 

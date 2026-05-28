@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.ActivityDr
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.ActivitySeeder;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.seeder.AssociationSeeder;
 import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChecker;
+import fr.avenirsesr.portfolio.common.seeder.domain.model.enums.ESeedMode;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.configuration.SeedingState;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
@@ -22,9 +23,12 @@ import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.TraceSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StaffSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.StudentSeeder;
+import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserPrincipalSeeder;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.UserSeeder;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +56,7 @@ public class SeederOrchestrator {
   private final DependencyChecker dependencyChecker;
 
   private final UserSeeder userSeeder;
+  private final UserPrincipalSeeder userPrincipalSeeder;
   private final StudentSeeder studentSeeder;
   private final StaffSeeder staffSeeder;
   private final UserPhotoSeeder userPhotoSeeder;
@@ -173,5 +178,18 @@ public class SeederOrchestrator {
     } finally {
       lock.unlock();
     }
+  }
+
+  public int seedTable(String tableName, ESeedMode mode) {
+    Map<String, Function<ESeedMode, Integer>> seeders =
+        Map.of(userPrincipalSeeder.tableName(), userPrincipalSeeder::seedAlone);
+
+    var seeder = seeders.get(tableName);
+
+    if (seeder == null) {
+      throw new IllegalArgumentException("No standalone seeder found for table: " + tableName);
+    }
+
+    return seeder.apply(mode);
   }
 }

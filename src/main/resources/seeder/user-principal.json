@@ -1,0 +1,402 @@
+[
+  {
+    "userId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "eppn": "lucas.tessier@university.com"
+  },
+  {
+    "userId": "7c508ac3-d7a8-4f00-9989-0f677f4f9dea",
+    "eppn": "arthur.lambert@university.com"
+  },
+  {
+    "userId": "0bdebb55-0c48-45d4-9490-a6f85423e87b",
+    "eppn": "sophie.charpentier@university.com"
+  },
+  {
+    "userId": "c25498db-525f-4322-90ec-517582295718",
+    "eppn": "ethan.perrin@university.com"
+  },
+  {
+    "userId": "57ff122f-ff76-4d95-b6c1-61a4efeabd80",
+    "eppn": "camille.fournier@university.com"
+  },
+  {
+    "userId": "ddc4a3cf-2843-4497-99d4-daa6fdfab16b",
+    "eppn": "anais.marchand@university.com"
+  },
+  {
+    "userId": "12947983-0266-47b1-a355-d6b1b31051aa",
+    "eppn": "valentin.favre@university.com"
+  },
+  {
+    "userId": "cdf03b3f-b76d-40a6-a9e6-069f15fc5af7",
+    "eppn": "lina.boucher@university.com"
+  },
+  {
+    "userId": "9b9c49f8-e537-4649-a035-67920cb643fb",
+    "eppn": "jules.carpentier@university.com"
+  },
+  {
+    "userId": "31820daa-0e02-48e4-9804-a0c79a760e86",
+    "eppn": "eva.lamy@university.com"
+  },
+  {
+    "userId": "772645d7-7b84-4b09-8c27-9a2e0e28ada7",
+    "eppn": "martin.fabre@university.com"
+  },
+  {
+    "userId": "5fcd76c5-017c-4d61-99d2-62a6f199c94e",
+    "eppn": "zoe.cousin@university.com"
+  },
+  {
+    "userId": "d6d2040d-2b96-46ea-9d92-2c221e4d60bf",
+    "eppn": "noah.lefebvre@university.com"
+  },
+  {
+    "userId": "e7fb5f27-3d58-4321-af3d-02792030f39d",
+    "eppn": "aya.paris@university.com"
+  },
+  {
+    "userId": "72aba383-5fb0-4268-8821-a241f3dbe8ee",
+    "eppn": "tom.renaud@university.com"
+  },
+  {
+    "userId": "ba6d41cf-7d2d-408c-b230-aa0f966e7795",
+    "eppn": "sarah.baron@university.com"
+  },
+  {
+    "userId": "d999193b-1835-43ee-b739-bd3209e95756",
+    "eppn": "lea.richard@university.com"
+  },
+  {
+    "userId": "77662aa9-3800-430d-bd0d-1f4d0690189c",
+    "eppn": "adam.hubert@university.com"
+  },
+  {
+    "userId": "66e64c71-5664-4c75-b69a-2afdabb8e851",
+    "eppn": "emma.gaillard@university.com"
+  },
+  {
+    "userId": "8b3c06da-3529-4aac-891e-4358c39f0b05",
+    "eppn": "hugo.mahe@university.com"
+  },
+  {
+    "userId": "ecd18c24-96fc-4abb-949b-f62a254c0096",
+    "eppn": "chloe.lebrun@university.com"
+  },
+  {
+    "userId": "ce2d4be7-1c70-46d2-b55e-ba3692cb171d",
+    "eppn": "louis.arnaud@university.com"
+  },
+  {
+    "userId": "a630487e-76ef-4afc-92f9-2c8d80d0aae6",
+    "eppn": "ines.blanc@university.com"
+  },
+  {
+    "userId": "25be402a-4130-4fc1-8cff-f3f55841ed67",
+    "eppn": "nathan.rolland@university.com"
+  },
+  {
+    "userId": "c2c20f28-36f2-4584-afa2-33efbf5b134b",
+    "eppn": "manon.hoareau@university.com"
+  },
+  {
+    "userId": "9cdfa9b4-81ee-4efa-8574-f1725b8d57e3",
+    "eppn": "alex.poirier@university.com"
+  },
+  {
+    "userId": "152adf1d-62ae-4925-aea3-fd3c149a18c8",
+    "eppn": "julie.teixeira@university.com"
+  },
+  {
+    "userId": "284797b5-4b58-458f-b345-9f0a4e844a06",
+    "eppn": "maxime.grondin@university.com"
+  },
+  {
+    "userId": "2c7c3160-5361-4cda-a8bc-4714d985541e",
+    "eppn": "paul.lemoine@university.com"
+  },
+  {
+    "userId": "603d7c13-76d3-476a-a3fb-8d474b2bc79d",
+    "eppn": "clara.renault@university.com"
+  },
+  {
+    "userId": "6511e45d-961b-47c4-94e5-b45a3de1a965",
+    "eppn": "baptiste.royer@university.com"
+  },
+  {
+    "userId": "c1c3f21c-6eb7-44e6-aa19-61b219d5fd28",
+    "eppn": "ines.barre@university.com"
+  },
+  {
+    "userId": "d40670a4-8755-4b5c-9c4e-aed33b64e127",
+    "eppn": "alexandre.perret@university.com"
+  },
+  {
+    "userId": "573bf121-0071-4490-8bae-d4d8e6dfa233",
+    "eppn": "marine.carlier@university.com"
+  },
+  {
+    "userId": "33392218-dc7f-4eb1-a837-d5cde0b691bf",
+    "eppn": "yaniss.rodier@university.com"
+  },
+  {
+    "userId": "5cb65d4f-2e16-41a3-acbf-8f3376c3c7c6",
+    "eppn": "maya.peltier@university.com"
+  },
+  {
+    "userId": "8652c8c0-2d62-4d41-819c-b59fb07e6e4e",
+    "eppn": "olivier.bodin@university.com"
+  },
+  {
+    "userId": "5f2a889c-8370-4381-99ea-d2467cddbe0b",
+    "eppn": "salome.thierry@university.com"
+  },
+  {
+    "userId": "75e1b526-e0df-40c2-951f-9f64ce5e1bf2",
+    "eppn": "timeo.bertin@university.com"
+  },
+  {
+    "userId": "e6ed511d-5c6e-48f5-a64b-01e517267e3d",
+    "eppn": "giulia.laporte@university.com"
+  },
+  {
+    "userId": "ffa5d38f-5f44-4ec0-ad3b-5bc0417688a3",
+    "eppn": "malo.riviere@university.com"
+  },
+  {
+    "userId": "f1e8ac22-315d-4d1a-a8b5-11bd8b7b3c7f",
+    "eppn": "elisa.monnier@university.com"
+  },
+  {
+    "userId": "5e943b52-fe79-4d53-bf16-5b7a4e3146fc",
+    "eppn": "mathis.descamps@university.com"
+  },
+  {
+    "userId": "33a0106b-9f1a-45dd-bc3d-9773f87d3820",
+    "eppn": "camille.delorme@university.com"
+  },
+  {
+    "userId": "f9eae3a6-4052-4ebf-8c79-8e72811733cc",
+    "eppn": "thelma.normand@university.com"
+  },
+  {
+    "userId": "812dc165-ddc8-4318-b008-8833ff14d33e",
+    "eppn": "noah.maury@university.com"
+  },
+  {
+    "userId": "4937316b-7228-4be8-9a16-30c5bc91364c",
+    "eppn": "louna.barreau@university.com"
+  },
+  {
+    "userId": "34d07d33-2a85-43d2-809e-1711507fa22c",
+    "eppn": "leo.ledoux@university.com"
+  },
+  {
+    "userId": "a2e03560-2f5f-4520-8769-5380c7b47532",
+    "eppn": "ambre.becker@university.com"
+  },
+  {
+    "userId": "af7caf7e-39fb-4d1b-bcea-bc7cb44bf939",
+    "eppn": "oscar.mary@university.com"
+  },
+  {
+    "userId": "b3d94fc7-d9a0-4fb6-a91e-3c492729da90",
+    "eppn": "agathe.peron@university.com"
+  },
+  {
+    "userId": "d0ee44a0-86e1-4f30-bb44-1b2c0795734c",
+    "eppn": "sami.barbier@university.com"
+  },
+  {
+    "userId": "291da9ec-612b-434c-aeb5-d3833dcceddf",
+    "eppn": "elodie.chretien@university.com"
+  },
+  {
+    "userId": "738fdd7a-5820-4981-8d6f-59c64f2e8740",
+    "eppn": "evan.raynaud@university.com"
+  },
+  {
+    "userId": "98ece75e-2250-45ca-99e7-c55b4c894ee5",
+    "eppn": "helena.weber@university.com"
+  },
+  {
+    "userId": "0825882e-863a-44cf-ac89-83189237ee6e",
+    "eppn": "simon.roy@university.com"
+  },
+  {
+    "userId": "cf811300-ef77-4c34-b4fb-1899714e643a",
+    "eppn": "nina.philippe@university.com"
+  },
+  {
+    "userId": "01364957-0423-4331-bbea-f8b7451cca84",
+    "eppn": "ilian.gilbert@university.com"
+  },
+  {
+    "userId": "9b8abe7a-fa8b-4864-997d-b7f9e6ee7c86",
+    "eppn": "axel.poulain@university.com"
+  },
+  {
+    "userId": "f7887898-db0b-4408-a812-dd037884cbcf",
+    "eppn": "jade.caillet@university.com"
+  },
+  {
+    "userId": "9078924c-2511-4511-99ca-880e9c5da27c",
+    "eppn": "david.camus@university.com"
+  },
+  {
+    "userId": "2186ee87-738d-4513-ba67-c101390f9203",
+    "eppn": "lise.bonneau@university.com"
+  },
+  {
+    "userId": "e8e279eb-64d2-439a-a57d-7987095af58c",
+    "eppn": "yanis.prevost@university.com"
+  },
+  {
+    "userId": "fb0c2e88-e72f-43b3-99eb-ebc984cdfbd2",
+    "eppn": "lola.brunet@university.com"
+  },
+  {
+    "userId": "178074a4-63dc-432e-b9e3-f67349ef3bb0",
+    "eppn": "ismael.aubert@university.com"
+  },
+  {
+    "userId": "153acbbd-cb8f-449b-9ffc-9bebe11811b9",
+    "eppn": "eline.guillot@university.com"
+  },
+  {
+    "userId": "7d2ae791-bed3-4537-b27c-9b34096c8fba",
+    "eppn": "leo.blot@university.com"
+  },
+  {
+    "userId": "13602e30-cbd3-4987-b95b-116e9aeee859",
+    "eppn": "nour.denis@university.com"
+  },
+  {
+    "userId": "ee0a829f-f11e-4f50-9c43-85e13e2519cd",
+    "eppn": "alicia.navarro@university.com"
+  },
+  {
+    "userId": "d9a6a85b-412e-4c21-8eea-067c9b863445",
+    "eppn": "mael.masson@university.com"
+  },
+  {
+    "userId": "3689a0f5-96ec-4a4a-a85a-e5c8d548dbcb",
+    "eppn": "louise.lacombe@university.com"
+  },
+  {
+    "userId": "e052e2e2-4bb2-4c2b-a16d-92f358fde460",
+    "eppn": "victor.schmitt@university.com"
+  },
+  {
+    "userId": "6b0c55ff-5105-42cc-b731-f5c6ea859751",
+    "eppn": "anael.hardy@university.com"
+  },
+  {
+    "userId": "b494950c-dc2b-4828-8471-238bfce2a214",
+    "eppn": "sofia.godard@university.com"
+  },
+  {
+    "userId": "165e8477-7104-45ac-8e49-c0a487820b3c",
+    "eppn": "nolan.guichard@university.com"
+  },
+  {
+    "userId": "b32a0a92-ce6d-4e6f-b2b7-0341991a30fe",
+    "eppn": "mila.bruneau@university.com"
+  },
+  {
+    "userId": "741d213a-e60f-445e-a9d9-8be984a1d892",
+    "eppn": "ilyes.lapeyre@university.com"
+  },
+  {
+    "userId": "8670afa9-d11d-4127-ad2d-ee120a273dab",
+    "eppn": "romy.launay@university.com"
+  },
+  {
+    "userId": "538d6cc8-fe65-4e84-950e-96e2047778ea",
+    "eppn": "iris.barre@university.com"
+  },
+  {
+    "userId": "9254ca76-da0c-4ece-bb52-ab2658903426",
+    "eppn": "maelys.descartes@university.com"
+  },
+  {
+    "userId": "bab6dfff-f7a3-43c6-bf6c-4196da91c723",
+    "eppn": "elias.langlois@university.com"
+  },
+  {
+    "userId": "da09009b-0995-4627-951d-b0be526bfdae",
+    "eppn": "mya.jacquet@university.com"
+  },
+  {
+    "userId": "b1bb1bcc-4dbb-42f1-81ad-6a49cfbc4752",
+    "eppn": "owen.parent@university.com"
+  },
+  {
+    "userId": "5404ddcf-3b41-4e18-bf44-ab6c7574d387",
+    "eppn": "nora.thiery@university.com"
+  },
+  {
+    "userId": "13a73d3b-169c-479b-b3a5-74f3a8eab269",
+    "eppn": "idriss.pineau@university.com"
+  },
+  {
+    "userId": "04475a63-8517-422d-b2d2-497a3eab3bf5",
+    "eppn": "lila.daniel@university.com"
+  },
+  {
+    "userId": "ca231ab6-784d-490f-b792-5babc8b4a5ae",
+    "eppn": "eden.perrault@university.com"
+  },
+  {
+    "userId": "6d5bebe7-73b0-4fb2-af4b-8375ef5ff3f5",
+    "eppn": "talia.hoquet@university.com"
+  },
+  {
+    "userId": "1f1a9cd0-7fe1-468e-a594-bf9af5e7dc0d",
+    "eppn": "marin.legendre@university.com"
+  },
+  {
+    "userId": "6230d671-fedb-45b1-b2e4-e0fb9c897a64",
+    "eppn": "nils.chauvet@university.com"
+  },
+  {
+    "userId": "278a7243-1f93-4a50-88a1-ab5b12470ab5",
+    "eppn": "ava.perrot@university.com"
+  },
+  {
+    "userId": "9ea8bd9a-5118-4947-a7af-488347e2f3fa",
+    "eppn": "titouan.savary@university.com"
+  },
+  {
+    "userId": "17097ae8-c8e4-4098-bd54-a158138f47a0",
+    "eppn": "dorian.poulain@university.com"
+  },
+  {
+    "userId": "c88775c1-9d98-4e85-b603-ee0f538e2c4a",
+    "eppn": "jenna.marchal@university.com"
+  },
+  {
+    "userId": "ef653a6b-b265-44ba-aaad-2d256f58bb26",
+    "eppn": "ali.meunier@university.com"
+  },
+  {
+    "userId": "1d6c418c-11a2-4e2f-a010-ff78f2f2fb91",
+    "eppn": "selena.pineau@university.com"
+  },
+  {
+    "userId": "2a32a73f-648b-4a2d-b87d-cd57d174d8c9",
+    "eppn": "ilan.picard@university.com"
+  },
+  {
+    "userId": "6103dac8-530b-4984-a1b2-303cba5cd4d3",
+    "eppn": "maud.bonnard@university.com"
+  },
+  {
+    "userId": "cfb2021d-0fc5-4ed0-b926-adb8d6ac1ef1",
+    "eppn": "kenzo.roche@university.com"
+  },
+  {
+    "userId": "ee3937de-d232-47ac-861d-a334893264d9",
+    "eppn": "aya.germain@university.com"
+  }
+]
