@@ -5,6 +5,10 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.file.domain.model.EUserPhotoType;
+import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
+import fr.avenirsesr.portfolio.user.domain.data.UserPhotosData;
+import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -13,46 +17,75 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L16">@Slf4j</span>
+<span class="fc" id="L20">@Slf4j</span>
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
+  private final UserResourceService userResourceService;
   private final StaffService staffService;
   private final StudentService studentService;
 
   @Override
   public User getUser(UUID id) {
-<span class="fc" id="L25">    return userRepository</span>
-<span class="fc" id="L26">        .findById(id)</span>
-<span class="fc" id="L27">        .orElseThrow(</span>
+<span class="fc" id="L30">    return userRepository</span>
+<span class="fc" id="L31">        .findById(id)</span>
+<span class="fc" id="L32">        .orElseThrow(</span>
             () -&gt; {
-<span class="fc" id="L29">              log.error(&quot;User {} not found&quot;, id);</span>
-<span class="fc" id="L30">              return new UserNotFoundException();</span>
+<span class="fc" id="L34">              log.error(&quot;User {} not found&quot;, id);</span>
+<span class="fc" id="L35">              return new UserNotFoundException();</span>
             });
   }
 
   @Override
+  public UserPhotosData getUserPhotos(UUID userId, EUserCategory userCategory) {
+<span class="fc" id="L41">    var user = getUser(userId);</span>
+<span class="fc" id="L42">    var profile = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.PROFILE);</span>
+<span class="fc" id="L43">    var cover = userResourceService.getUserPhotoUrl(user, userCategory, EUserPhotoType.COVER);</span>
+
+<span class="fc" id="L45">    return new UserPhotosData(</span>
+<span class="fc" id="L46">        profile.id(), profile.name(), profile.url(), cover.id(), cover.name(), cover.url());</span>
+  }
+
+  @Override
+  public UserProfileOverviewData getUserProfileOverviewDTO(
+      UUID userId, EUserCategory userCategory) {
+<span class="fc" id="L52">    var user = getUser(userId);</span>
+<span class="fc" id="L53">    var bio =</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        switch (userCategory) {</span>
+<span class="fc" id="L55">          case STUDENT -&gt; studentService.getBio(user);</span>
+<span class="pc" id="L56">          case STAFF -&gt; staffService.getBio(user);</span>
+        };
+<span class="fc" id="L58">    var email =</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        switch (userCategory) {</span>
+<span class="fc" id="L60">          case STUDENT -&gt; user.getEmail();</span>
+<span class="pc" id="L61">          case STAFF -&gt; staffService.getInstitutionEmail(user);</span>
+        };
+
+<span class="fc" id="L64">    return new UserProfileOverviewData(user.getFirstName(), user.getLastName(), email, bio);</span>
+  }
+
+  @Override
   public void updateProfile(EUserCategory userCategory, String email, String bio) {
-<span class="fc" id="L36">    var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);</span>
-<span class="fc bfc" id="L37" title="All 2 branches covered.">    if (email != null) {</span>
-<span class="pc bpc" id="L38" title="1 of 3 branches missed.">      switch (userCategory) {</span>
-<span class="fc" id="L39">        case STUDENT -&gt; user.setEmail(email);</span>
-<span class="fc" id="L40">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L69">    var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">    if (email != null) {</span>
+<span class="pc bpc" id="L71" title="1 of 3 branches missed.">      switch (userCategory) {</span>
+<span class="fc" id="L72">        case STUDENT -&gt; user.setEmail(email);</span>
+<span class="fc" id="L73">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
       }
     }
-<span class="fc" id="L43">    userRepository.save(user);</span>
+<span class="fc" id="L76">    userRepository.save(user);</span>
 
-<span class="pc bpc" id="L45" title="1 of 3 branches missed.">    switch (userCategory) {</span>
-<span class="fc" id="L46">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
-<span class="fc" id="L47">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
+<span class="pc bpc" id="L78" title="1 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="fc" id="L79">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
+<span class="fc" id="L80">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
     }
-<span class="fc" id="L49">  }</span>
+<span class="fc" id="L82">  }</span>
 
   @Override
   public User createUser(UUID id, String firstname, String lastname, String email) {
-<span class="fc" id="L53">    var user = User.create(id, firstname, lastname, email);</span>
-<span class="fc" id="L54">    userRepository.save(user);</span>
-<span class="fc" id="L55">    return user;</span>
+<span class="fc" id="L86">    var user = User.create(id, firstname, lastname, email);</span>
+<span class="fc" id="L87">    userRepository.save(user);</span>
+<span class="fc" id="L88">    return user;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

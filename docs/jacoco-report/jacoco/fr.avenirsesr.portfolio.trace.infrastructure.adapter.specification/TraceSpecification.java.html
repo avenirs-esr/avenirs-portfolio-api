@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.TraceAttachmentEntity;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -68,16 +68,17 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="fc" id="L68">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;personalNote&quot;)), pattern);</span>
 
       // Attachment
-<span class="fc" id="L71">      Subquery&lt;FileEntity&gt; attachSub = query.subquery(FileEntity.class);</span>
-<span class="fc" id="L72">      Root&lt;FileEntity&gt; attachRoot = attachSub.from(FileEntity.class);</span>
+<span class="fc" id="L71">      Subquery&lt;TraceAttachmentEntity&gt; attachSub = query.subquery(TraceAttachmentEntity.class);</span>
+<span class="fc" id="L72">      Root&lt;TraceAttachmentEntity&gt; attachRoot = attachSub.from(TraceAttachmentEntity.class);</span>
 <span class="fc" id="L73">      attachSub</span>
 <span class="fc" id="L74">          .select(attachRoot)</span>
 <span class="fc" id="L75">          .where(</span>
-<span class="fc" id="L76">              criteriaBuilder.equal(attachRoot.get(&quot;elementId&quot;), root.get(&quot;id&quot;)),</span>
-<span class="fc" id="L77">              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get(&quot;fileName&quot;)), pattern));</span>
-<span class="fc" id="L78">      Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);</span>
+<span class="fc" id="L76">              criteriaBuilder.equal(attachRoot.get(&quot;trace&quot;).get(&quot;id&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L77">              criteriaBuilder.isTrue(attachRoot.get(&quot;isActiveVersion&quot;)),</span>
+<span class="fc" id="L78">              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get(&quot;name&quot;)), pattern));</span>
+<span class="fc" id="L79">      Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);</span>
 
-<span class="fc" id="L80">      return criteriaBuilder.or(</span>
+<span class="fc" id="L81">      return criteriaBuilder.or(</span>
           titlePredicate, aiUsePredicate, personalNotePredicate, attachmentPredicate);
     };
   }
