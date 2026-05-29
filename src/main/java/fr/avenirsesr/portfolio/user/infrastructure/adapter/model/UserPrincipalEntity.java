@@ -1,11 +1,7 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.model;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
@@ -13,7 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "user_principal")
+@Table(
+    name = "user_principal",
+    indexes = {@Index(name = "idx_user_principal_eppn", columnList = "eppn")})
 @NoArgsConstructor
 @Getter
 @Setter
