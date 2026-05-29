@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.repository;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
-import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserPrincipalMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserPrincipalEntity;
 import java.time.Instant;
 import java.util.Optional;
@@ -20,7 +19,10 @@ public class UserPrincipalDatabaseRepository implements UserPrincipalRepository 
 
   @Override
   public Optional<User> findByEppn(String eppn) {
-    return jpaRepository.findByEppn(eppn).map(UserPrincipalMapper.INSTANCE::toDomain);
+    return jpaRepository
+        .findByEppn(eppn)
+        .map(UserPrincipalEntity::getUser)
+        .map(UserMapper.INSTANCE::toDomain);
   }
 
   @Override

@@ -19,13 +19,12 @@ public class SeedingAdminController {
   private String adminToken;
 
   @PostMapping("/run")
-  public ResponseEntity<String> run(
-      @RequestHeader(name = "X-ADMIN-TOKEN", required = false) String token) {
+  public ResponseEntity<String> run(@RequestHeader(name = "X-ADMIN-TOKEN") String token) {
     if (adminToken == null || adminToken.isBlank()) {
       return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
     }
 
-    if (token == null || !token.equals(adminToken)) {
+    if (!token.equals(adminToken)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
     try {
@@ -41,13 +40,13 @@ public class SeedingAdminController {
   public ResponseEntity<String> runTable(
       @PathVariable String table,
       @RequestParam(defaultValue = "false") boolean overwrite,
-      @RequestHeader(name = "X-ADMIN-TOKEN", required = false) String token) {
+      @RequestHeader(name = "X-ADMIN-TOKEN") String token) {
 
     if (adminToken == null || adminToken.isBlank()) {
       return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
     }
 
-    if (token == null || !token.equals(adminToken)) {
+    if (!token.equals(adminToken)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
