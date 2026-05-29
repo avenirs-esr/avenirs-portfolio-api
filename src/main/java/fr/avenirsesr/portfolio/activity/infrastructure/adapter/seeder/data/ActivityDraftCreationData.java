@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.data;
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,4 +15,6 @@ public record ActivityDraftCreationData(
     Optional<String> executionPeriodInfoSummary,
     Optional<Integer> traceAllowedAssociations,
     Optional<Integer> feedbackAllowedIterations,
-    boolean enableReflection) {}
+    boolean enableReflection,
+    Instant createdAt,
+    Instant updatedAt) {}
