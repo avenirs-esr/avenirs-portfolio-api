@@ -33,11 +33,20 @@ class ActivityPresentationDtoMapperTest {
     var banner =
         new FileData(Optional.of(bannerId), Optional.of("banner.png"), "banners/banner.png");
     ActivityPresentationData data =
-        new ActivityPresentationData(activity, Optional.empty(), banner);
+        new ActivityPresentationData(
+            activity.getId(),
+            activity.getTitle(),
+            activity.getThematic(),
+            Optional.empty(),
+            activity.getSummary(),
+            activity.getDescription().orElse(null),
+            activity.getExecutionPeriodInfo().orElse(null),
+            banner,
+            activity.getCreatedAt(),
+            activity.getUpdatedAt());
 
     BddLogger.when("mapping to ActivityDetailsDTO with base URL");
-    ActivityPresentationDTO dto =
-        mapper.toDTO(data.activity(), banner, data.subscribedDeclaredActivity(), baseUrl);
+    ActivityPresentationDTO dto = mapper.toDTO(data, baseUrl);
 
     BddLogger.then("it should build the full banner URL and map all fields");
     assertNotNull(dto);

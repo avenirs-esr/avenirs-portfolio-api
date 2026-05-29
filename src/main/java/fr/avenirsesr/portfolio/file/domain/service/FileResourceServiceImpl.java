@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.file.domain.service;
 
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -33,6 +35,7 @@ public class FileResourceServiceImpl implements FileResourceService {
   private final TraceRepository traceRepository;
   private final StaffRepository staffRepository;
   private final StudentRepository studentRepository;
+  private final ActivityDraftRepository activityDraftRepository;
   private final LoggedInUserService loggedInUserService;
   private final TraceService traceService;
   private static final List<EFileType> ALLOWED_IMAGE_FILE_TYPES =
@@ -147,6 +150,14 @@ public class FileResourceServiceImpl implements FileResourceService {
         staff.setProfilePicture(file);
         staffRepository.save(staff);
       }
+      case ACTIVITY_BANNER -> {
+        var draft =
+            activityDraftRepository
+                .findById(elementId)
+                .orElseThrow(ActivityDraftNotFoundException::new);
+        draft.setBanner(file);
+        activityDraftRepository.save(draft);
+      }
     }
   }
 
@@ -164,6 +175,14 @@ public class FileResourceServiceImpl implements FileResourceService {
       case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -> {
         var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
         if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
+      }
+      case ACTIVITY_BANNER -> {
+        var draft =
+            activityDraftRepository
+                .findById(elementId)
+                .orElseThrow(ActivityDraftNotFoundException::new);
+        if (!draft.getAuthor().getUser().equals(loggedInUser))
+          throw new UserNotAuthorizedException();
       }
     }
   }

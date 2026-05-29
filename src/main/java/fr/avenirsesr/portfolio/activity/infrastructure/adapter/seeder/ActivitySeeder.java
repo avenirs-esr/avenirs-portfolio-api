@@ -13,7 +13,6 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeeder
 import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeActivityBanner;
 import fr.avenirsesr.portfolio.shared.domain.port.input.ClockService;
@@ -116,14 +115,6 @@ public class ActivitySeeder {
                     data.enableReflection(),
                     data.traceAllowedAssociations(),
                     data.feedbackAllowedIterations());
-
-            fileResourceService.upload(
-                activity.getId(),
-                EFileCategory.ACTIVITY_BANNER,
-                data.banner().fileName(),
-                data.banner().fileType().getMimeType(),
-                data.banner().fileSize(),
-                null);
 
             activities.add(activity);
           } finally {

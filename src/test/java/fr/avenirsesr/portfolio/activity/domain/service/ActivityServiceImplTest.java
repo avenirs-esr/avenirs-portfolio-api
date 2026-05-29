@@ -495,14 +495,12 @@ class ActivityServiceImplTest {
 
     BddLogger.then("the service returns the correct activity detail data");
     assertNotNull(result);
-    assertEquals(activityId, result.activity().getId());
-    assertEquals("Activity", result.activity().getTitle());
-    assertEquals(EActivityThematic.EXPERIENCES, result.activity().getThematic());
-    assertEquals("is a test activity", result.activity().getSummary());
-    assertEquals(
-        "<h3>Objectives</h3><p>Test activity description</p>",
-        result.activity().getDescription().get());
-    assertEquals("2026", result.activity().getExecutionPeriodInfo().get());
+    assertEquals(activityId, result.id());
+    assertEquals("Activity", result.title());
+    assertEquals(EActivityThematic.EXPERIENCES, result.thematic());
+    assertEquals("is a test activity", result.summary());
+    assertEquals("<h3>Objectives</h3><p>Test activity description</p>", result.description());
+    assertEquals("2026", result.executionPeriodInfo());
     assertTrue(result.banner().id().isPresent());
     assertEquals(bannerId, result.banner().id().get());
     assertEquals("filename.png", result.banner().name().get());

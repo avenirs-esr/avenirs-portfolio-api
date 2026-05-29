@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
+import fr.avenirsesr.portfolio.activity.domain.mapper.ActivityPresentationDataMapper;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
@@ -22,6 +23,7 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -158,25 +160,40 @@ public class ActivityServiceImpl implements ActivityService {
       case PUBLISHED -> {
         Activity activity =
             activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
-        yield new ActivityPresentationData(
+        yield ActivityPresentationDataMapper.toData(
             activity,
-            declaredActivityService.getByActivity(activity).map(DeclaredActivity::getId),
+            declaredActivityService
+                .getByActivity(activity)
+                .map(DeclaredActivity::getId)
+                .orElse(null),
             activity
                 .getBanner()
-                .map(
-                    file ->
-                        new FileData(
-                            Optional.of(file.getId()),
-                            Optional.of(file.getFileName()),
-                            file.getUri()))
+                .map(this::fileDataMapper)
                 .orElse(
                     new FileData(
                         Optional.empty(),
                         Optional.empty(),
                         FileStorageConstants.DEFAULT_COVER_FILE_URL)));
       }
-      case DRAFT -> null;
+      case DRAFT -> {
+        var draft =
+            activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
+        yield ActivityPresentationDataMapper.toData(
+            draft,
+            draft
+                .getBanner()
+                .map(this::fileDataMapper)
+                .orElse(
+                    new FileData(
+                        Optional.empty(),
+                        Optional.empty(),
+                        FileStorageConstants.DEFAULT_COVER_FILE_URL)));
+      }
     };
+  }
+
+  private FileData fileDataMapper(File file) {
+    return new FileData(Optional.of(file.getId()), Optional.of(file.getFileName()), file.getUri());
   }
 
   @Override

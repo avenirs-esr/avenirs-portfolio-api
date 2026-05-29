@@ -1,9 +1,19 @@
 package fr.avenirsesr.portfolio.activity.domain.data;
 
-import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
 public record ActivityPresentationData(
-    Activity activity, Optional<UUID> subscribedDeclaredActivity, FileData banner) {}
+    UUID id,
+    String title,
+    EActivityThematic thematic,
+    Optional<UUID> subscribedDeclaredActivity,
+    String summary,
+    String description,
+    String executionPeriodInfo,
+    FileData banner,
+    Instant createdAt,
+    Instant updatedAt) {}

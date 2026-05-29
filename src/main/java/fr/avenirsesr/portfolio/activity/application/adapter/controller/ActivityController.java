@@ -56,23 +56,10 @@ public class ActivityController {
       @PathVariable UUID activityId) {
     log.debug("Received request to get activity [{}] presentation", activityId);
 
-    var dto =
-        switch (activityStatus) {
-          case PUBLISHED -> {
-            ActivityPresentationData activityPresentation =
-                activityService.getActivityPresentation(activityStatus, activityId);
-            String baseUrl = extractOrigin(request);
-            yield activityPresentationDtoMapper.toDTO(
-                activityPresentation.activity(),
-                activityPresentation.banner(),
-                activityPresentation.subscribedDeclaredActivity(),
-                baseUrl);
-          }
-          case DRAFT -> {
-            var draft = activityService.getActivityDraftById(activityId);
-            yield activityPresentationDtoMapper.toDTO(draft);
-          }
-        };
+    String baseUrl = extractOrigin(request);
+    ActivityPresentationData activityPresentation =
+        activityService.getActivityPresentation(activityStatus, activityId);
+    var dto = activityPresentationDtoMapper.toDTO(activityPresentation, baseUrl);
     return ResponseEntity.ok(dto);
   }
 
