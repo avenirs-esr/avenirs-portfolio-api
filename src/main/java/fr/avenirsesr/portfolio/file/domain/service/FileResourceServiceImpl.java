@@ -198,6 +198,15 @@ public class FileResourceServiceImpl implements FileResourceService {
         var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
         if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
       }
+      case ACTIVITY_BANNER -> {
+        var draft =
+            activityDraftRepository
+                .findById(elementId)
+                .orElseThrow(ActivityDraftNotFoundException::new);
+        if (!draft.getAuthor().getUser().equals(loggedInUser))
+          throw new UserNotAuthorizedException();
+      }
+      default -> throw new IllegalArgumentException();
     }
   }
 
