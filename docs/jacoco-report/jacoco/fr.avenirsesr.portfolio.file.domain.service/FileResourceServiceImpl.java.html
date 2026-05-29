@@ -188,7 +188,7 @@ public class FileResourceServiceImpl implements FileResourceService {
 <span class="fc" id="L188">  }</span>
 
   private void chekDeleteRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
-<span class="nc bnc" id="L191" title="All 4 branches missed.">    switch (fileCategory) {</span>
+<span class="nc bnc" id="L191" title="All 5 branches missed.">    switch (fileCategory) {</span>
 <span class="nc" id="L192">      case TRACE_ATTACHEMENT -&gt; throw new UserNotAuthorizedException();</span>
       case STUDENT_COVER_PICTURE, STUDENT_PROFILE_PICTURE -&gt; {
 <span class="nc" id="L194">        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
@@ -197,25 +197,34 @@ public class FileResourceServiceImpl implements FileResourceService {
       case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -&gt; {
 <span class="nc" id="L198">        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
 <span class="nc bnc" id="L199" title="All 2 branches missed.">        if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
-      }
+<span class="nc" id="L200">      }</span>
+      case ACTIVITY_BANNER -&gt; {
+<span class="nc" id="L202">        var draft =</span>
+            activityDraftRepository
+<span class="nc" id="L204">                .findById(elementId)</span>
+<span class="nc" id="L205">                .orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        if (!draft.getAuthor().getUser().equals(loggedInUser))</span>
+<span class="nc" id="L207">          throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L208">      }</span>
+<span class="nc" id="L209">      default -&gt; throw new IllegalArgumentException();</span>
     }
-<span class="nc" id="L202">  }</span>
+<span class="nc" id="L211">  }</span>
 
   private void chekDownloadRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
-<span class="nc bnc" id="L205" title="All 3 branches missed.">    switch (fileCategory) {</span>
+<span class="nc bnc" id="L214" title="All 3 branches missed.">    switch (fileCategory) {</span>
       case TRACE_ATTACHEMENT -&gt; {
-<span class="nc" id="L207">        var trace = traceService.getTraceById(elementId);</span>
-<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
-<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();</span>
-<span class="nc bnc" id="L210" title="All 2 branches missed.">        if (trace.getAttachment().isEmpty()) throw new InvalidTraceTypeException();</span>
-<span class="nc" id="L211">      }</span>
+<span class="nc" id="L216">        var trace = traceService.getTraceById(elementId);</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (trace.getAttachment().isEmpty()) throw new InvalidTraceTypeException();</span>
+<span class="nc" id="L220">      }</span>
       case STUDENT_PROFILE_PICTURE,
           STUDENT_COVER_PICTURE,
           STAFF_PROFILE_PICTURE,
           STAFF_COVER_PICTURE,
           ACTIVITY_BANNER -&gt;
-<span class="nc" id="L217">          throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L226">          throw new UserNotAuthorizedException();</span>
     }
-<span class="nc" id="L219">  }</span>
+<span class="nc" id="L228">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
