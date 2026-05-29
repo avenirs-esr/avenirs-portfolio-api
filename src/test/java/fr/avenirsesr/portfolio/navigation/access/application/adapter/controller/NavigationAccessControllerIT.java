@@ -115,12 +115,12 @@ class NavigationAccessControllerIT extends ContainerConfigurationTest {
         .header("Accept-Language", language.getCode())
         .exchange()
         .expectStatus()
-        .isNotFound()
+        .isUnauthorized()
         .expectBody()
         .jsonPath("$.message")
-        .isEqualTo("User not found")
+        .isEqualTo("User not authorized")
         .jsonPath("$.code")
-        .isEqualTo("USER_NOT_FOUND");
+        .isEqualTo("USER_NOT_AUTHORIZED");
   }
 
   @Test

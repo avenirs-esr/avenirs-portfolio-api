@@ -95,12 +95,12 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
-        .isNotFound()
+        .isUnauthorized()
         .expectBody()
         .jsonPath("$.message")
-        .isEqualTo("User not found")
+        .isEqualTo("User not authorized")
         .jsonPath("$.code")
-        .isEqualTo("USER_NOT_FOUND");
+        .isEqualTo("USER_NOT_AUTHORIZED");
   }
 
   @Test
@@ -193,12 +193,12 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
-        .isNotFound()
+        .isUnauthorized()
         .expectBody()
         .jsonPath("$.message")
-        .isEqualTo("User not found")
+        .isEqualTo("User not authorized")
         .jsonPath("$.code")
-        .isEqualTo("USER_NOT_FOUND");
+        .isEqualTo("USER_NOT_AUTHORIZED");
   }
 
   @Test
@@ -293,12 +293,12 @@ class StudentProgressControllerIT extends ContainerConfigurationTest {
         .accept(MediaType.APPLICATION_JSON)
         .exchange()
         .expectStatus()
-        .isNotFound()
+        .isUnauthorized()
         .expectBody()
         .jsonPath("$.message")
-        .isEqualTo("User not found")
+        .isEqualTo("User not authorized")
         .jsonPath("$.code")
-        .isEqualTo("USER_NOT_FOUND");
+        .isEqualTo("USER_NOT_AUTHORIZED");
   }
 
   @Test

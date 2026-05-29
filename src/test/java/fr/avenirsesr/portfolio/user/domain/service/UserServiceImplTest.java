@@ -1,7 +1,7 @@
 package fr.avenirsesr.portfolio.user.domain.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
@@ -10,11 +10,14 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundExcepti
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.common.user.application.adapter.dto.ExternalUserDTO;
+import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
+import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
-import fr.avenirsesr.portfolio.file.domain.port.input.UserResourceService;
-import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
+import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -30,29 +33,25 @@ class UserServiceImplTest {
 
   @Mock private UserRepository userRepository;
   @Mock private UserPrincipalRepository userPrincipalRepository;
-  @Mock private UserResourceService userResourceService;
-  @Mock private StaffServiceImpl staffService;
-  @Mock private StudentServiceImpl studentService;
-  @Mock private LoggedInUserService loggedInUserService;
+  @Mock private StaffService staffService;
+  @Mock private StudentService studentService;
+  @Mock private ExternalUserClient externalUserClient;
 
   private UserServiceImpl userService;
-  private Student student;
   private User loggedUser;
   private MockedStatic<RequestContext> mockedRequestContext;
 
   @BeforeEach
   void setUp() {
-    student = StudentFixture.create().toModel();
-    loggedUser = student.getUser();
+    loggedUser = StudentFixture.create().toModel().getUser();
 
     userService =
         new UserServiceImpl(
             userRepository,
             userPrincipalRepository,
-            userResourceService,
             staffService,
             studentService,
-            loggedInUserService);
+            externalUserClient);
 
     mockedRequestContext = mockStatic(RequestContext.class);
     mockedRequestContext
@@ -84,7 +83,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenUserNotFound() {
+    void shouldThrowExceptionWhenUserDoesNotExist() {
       UUID userId = UUID.randomUUID();
 
       BddLogger.given("an unknown user id");
@@ -102,10 +101,10 @@ class UserServiceImplTest {
   class GetUserByEppn {
 
     @Test
-    void shouldReturnUserWhenEppnExists() {
+    void shouldReturnUserWhenUserPrincipalExists() {
       String eppn = "lucas.tessier@university.com";
 
-      BddLogger.given("an existing eppn");
+      BddLogger.given("an existing user principal for the eppn");
       when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.of(loggedUser));
 
       BddLogger.when("getting the user by eppn");
@@ -114,20 +113,133 @@ class UserServiceImplTest {
       BddLogger.then("it should return the matching user");
       assertEquals(loggedUser, result);
       verify(userPrincipalRepository).findByEppn(eppn);
+      verifyNoInteractions(externalUserClient);
     }
 
     @Test
-    void shouldThrowExceptionWhenEppnNotFound() {
-      String eppn = "unknown@university.com";
+    void shouldCreateStudentUserWhenUserPrincipalDoesNotExistAndExternalUserExists() {
+      String eppn = "lucas.tessier@university.com";
+      ExternalUserDTO externalUser = externalUser(EUserCategory.STUDENT, EUserStatus.ACTIVE, eppn);
 
-      BddLogger.given("an unknown eppn");
+      BddLogger.given("no user principal exists for the eppn");
       when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.empty());
 
-      BddLogger.when("getting the user by eppn");
-      BddLogger.then("it should throw UserNotFoundException");
-      assertThrows(UserNotFoundException.class, () -> userService.getUserByEppn(eppn));
+      BddLogger.given("an enabled student external user exists for the eppn");
+      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.of(externalUser));
 
-      verify(userPrincipalRepository).findByEppn(eppn);
+      BddLogger.when("getting the user by eppn");
+      User result = userService.getUserByEppn(eppn);
+
+      BddLogger.then("it should create and save the user");
+      ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+      verify(userRepository).save(userCaptor.capture());
+
+      User savedUser = userCaptor.getValue();
+      assertEquals(externalUser.firstName(), savedUser.getFirstName());
+      assertEquals(externalUser.lastName(), savedUser.getLastName());
+      assertEquals(externalUser.email(), savedUser.getEmail());
+      assertEquals(savedUser, result);
+
+      BddLogger.then("it should create the user principal");
+      verify(userPrincipalRepository).saveOrUpdate(savedUser, eppn);
+
+      BddLogger.then("it should create the student profile");
+      verify(studentService).createStudent(savedUser.getId(), externalUser.email(), null);
+      verifyNoInteractions(staffService);
+
+      BddLogger.then("it should activate the external user");
+      verify(externalUserClient).activateByEppn(eppn);
+    }
+
+    @Test
+    void shouldCreateStaffUserWhenUserPrincipalDoesNotExistAndExternalUserExists() {
+      String eppn = "staff@university.com";
+      ExternalUserDTO externalUser = externalUser(EUserCategory.STAFF, EUserStatus.ACTIVE, eppn);
+
+      BddLogger.given("no user principal exists for the eppn");
+      when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.empty());
+
+      BddLogger.given("an enabled staff external user exists for the eppn");
+      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.of(externalUser));
+
+      BddLogger.when("getting the user by eppn");
+      User result = userService.getUserByEppn(eppn);
+
+      BddLogger.then("it should create and save the user");
+      ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+      verify(userRepository).save(userCaptor.capture());
+
+      User savedUser = userCaptor.getValue();
+      assertEquals(savedUser, result);
+
+      BddLogger.then("it should create the staff profile");
+      verify(staffService).createStaff(savedUser.getId(), externalUser.email(), null);
+      verifyNoInteractions(studentService);
+
+      BddLogger.then("it should activate the external user");
+      verify(externalUserClient).activateByEppn(eppn);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenExternalUserDoesNotExist() {
+      String eppn = "unknown@university.com";
+
+      BddLogger.given("no user principal exists for the eppn");
+      when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.empty());
+
+      BddLogger.given("no external user exists for the eppn");
+      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.empty());
+
+      BddLogger.when("getting the user by eppn");
+      BddLogger.then("it should throw ExternalUserNotFoundException");
+      assertThrows(ExternalUserNotFoundException.class, () -> userService.getUserByEppn(eppn));
+
+      verify(userRepository, never()).save(any());
+      verify(userPrincipalRepository, never()).saveOrUpdate(any(), anyString());
+      verifyNoInteractions(studentService, staffService);
+      verify(externalUserClient, never()).activateByEppn(anyString());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenExternalUserIsBlocked() {
+      String eppn = "blocked@university.com";
+      ExternalUserDTO externalUser = externalUser(EUserCategory.STUDENT, EUserStatus.BLOCKED, eppn);
+
+      BddLogger.given("no user principal exists for the eppn");
+      when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.empty());
+
+      BddLogger.given("a blocked external user exists for the eppn");
+      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.of(externalUser));
+
+      BddLogger.when("getting the user by eppn");
+      BddLogger.then("it should throw ExternalUserNotFoundException");
+      assertThrows(ExternalUserNotFoundException.class, () -> userService.getUserByEppn(eppn));
+
+      verify(userRepository, never()).save(any());
+      verify(userPrincipalRepository, never()).saveOrUpdate(any(), anyString());
+      verifyNoInteractions(studentService, staffService);
+      verify(externalUserClient, never()).activateByEppn(anyString());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenExternalUserIsRemoved() {
+      String eppn = "removed@university.com";
+      ExternalUserDTO externalUser = externalUser(EUserCategory.STUDENT, EUserStatus.REMOVED, eppn);
+
+      BddLogger.given("no user principal exists for the eppn");
+      when(userPrincipalRepository.findByEppn(eppn)).thenReturn(Optional.empty());
+
+      BddLogger.given("a removed external user exists for the eppn");
+      when(externalUserClient.getByEppn(eppn)).thenReturn(Optional.of(externalUser));
+
+      BddLogger.when("getting the user by eppn");
+      BddLogger.then("it should throw ExternalUserNotFoundException");
+      assertThrows(ExternalUserNotFoundException.class, () -> userService.getUserByEppn(eppn));
+
+      verify(userRepository, never()).save(any());
+      verify(userPrincipalRepository, never()).saveOrUpdate(any(), anyString());
+      verifyNoInteractions(studentService, staffService);
+      verify(externalUserClient, never()).activateByEppn(anyString());
     }
   }
 
@@ -173,14 +285,14 @@ class UserServiceImplTest {
       BddLogger.given("a logged student user");
 
       BddLogger.when("updating student email and bio");
-      userService.updateProfile(EUserCategory.STUDENT, "RandomEmail", "RandomBio");
+      userService.updateProfile(EUserCategory.STUDENT, "random@email.com", "RandomBio");
 
       BddLogger.then("it should save the updated user");
       ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
       verify(userRepository).save(userCaptor.capture());
 
       User savedUser = userCaptor.getValue();
-      assertEquals("RandomEmail", savedUser.getEmail());
+      assertEquals("random@email.com", savedUser.getEmail());
 
       BddLogger.then("it should update the student profile");
       verify(studentService).updateProfile(savedUser, "RandomBio");
@@ -189,22 +301,22 @@ class UserServiceImplTest {
 
     @Test
     void shouldUpdateStaffProfileWithoutChangingEmail() {
-      String savedEmail = loggedUser.getEmail();
+      String initialEmail = loggedUser.getEmail();
 
       BddLogger.given("a logged staff user");
 
       BddLogger.when("updating staff profile without email");
-      userService.updateProfile(EUserCategory.STAFF, null, null);
+      userService.updateProfile(EUserCategory.STAFF, null, "RandomBio");
 
       BddLogger.then("it should save the user without changing email");
       ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
       verify(userRepository).save(userCaptor.capture());
 
       User savedUser = userCaptor.getValue();
-      assertEquals(savedEmail, savedUser.getEmail());
+      assertEquals(initialEmail, savedUser.getEmail());
 
       BddLogger.then("it should update the staff profile");
-      verify(staffService).updateProfile(savedUser, null);
+      verify(staffService).updateProfile(savedUser, "RandomBio");
       verifyNoInteractions(studentService);
     }
 
@@ -221,5 +333,9 @@ class UserServiceImplTest {
       verify(userRepository, never()).save(any());
       verifyNoInteractions(staffService, studentService);
     }
+  }
+
+  private ExternalUserDTO externalUser(EUserCategory category, EUserStatus status, String eppn) {
+    return new ExternalUserDTO(eppn, "Lucas", "Tessier", eppn, category, eppn, "PEGASE", status);
   }
 }
