@@ -9,19 +9,23 @@
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": 3,
     "feedbackAllowedIterations": 5,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T18:00:00Z",
+    "updatedAt": "2024-06-01T18:10:00Z"
   },
   {
     "title": "Identifier ses motivations profondes",
     "thematic": "SELF_KNOWLEDGE",
-    "summary": null,
+    "summary": "Activité de connaissance de soi visant à explorer les motivations profondes qui guident les actions et les choix. L'étudiant.e analyse les sources d'engagement et de satisfaction personnelle afin d'orienter ses décisions d'orientation et de développement personnel.",
     "description": "<h3>Objectifs de l'activité</h3><ul><li>Explorer les motivations profondes qui guident les actions et les choix.</li><li>Comprendre les sources d'engagement et de satisfaction personnelle.</li><li>Utiliser cette compréhension pour orienter les décisions d'orientation et de développement personnel.</li></ul><h3>Déroulement de l'activité</h3><p>L'étudiant.e est invité.e à réaliser des exercices de réflexion personnelle, tels que des questionnaires d'auto-évaluation ou des analyses de situations vécues.</p>",
     "executionPeriodInfo": "À effectuer avant un entretien d'accompagnement ou en introduction d'un parcours d'activités dédié à l'orientation.",
     "executionPeriodInfoSummary": "Avant entretien d'accompagnement",
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 2,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Clarifier son identité personnelle",
@@ -33,7 +37,9 @@
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": 1,
     "feedbackAllowedIterations": -1,
-    "enableReflection": false
+    "enableReflection": false,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Identifier ses centres d'intérêt",
@@ -45,19 +51,23 @@
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 4,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Explorer ses pistes d'orientation",
     "thematic": "FUTURE_PLANS",
-    "summary": null,
+    "summary": "Activité d'exploration des pistes d'orientation. L'étudiant.e analyse les domaines professionnels correspondant à ses compétences et intérêts, en examinant les conditions d'accès, les environnements de travail et les perspectives d'évolution.",
     "description": "<h3>Objectifs de l'activité</h3><ul><li>Identifier les domaines professionnels correspondant à ses compétences et intérêts.</li><li>Analyser les conditions d'accès, les environnements de travail et les perspectives d'évolution.</li><li>Utiliser ces informations pour orienter la construction d'un projet professionnel cohérent.</li></ul><h3>Déroulement de l'activité</h3><p>L'étudiant.e est invité.e à réaliser des recherches et des analyses de situations professionnelles afin de mieux comprendre les opportunités et les contraintes liées à chaque domaine.</p>",
     "executionPeriodInfo": "À réaliser avant un rendez-vous d'orientation ou dans la phase exploratoire d'un parcours Cofolio consacré au projet professionnel.",
     "executionPeriodInfoSummary": "Avant rendez-vous d'orientation",
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": 7,
     "feedbackAllowedIterations": -1,
-    "enableReflection": false
+    "enableReflection": false,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Formuler un projet professionnel provisoire",
@@ -69,7 +79,9 @@
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": 0,
     "feedbackAllowedIterations": 3,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Explorer les métiers d'un secteur",
@@ -81,19 +93,23 @@
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": -1,
-    "enableReflection": false
+    "enableReflection": false,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Comparer plusieurs projets possibles",
     "thematic": "FUTURE_PLANS",
-    "summary": null,
+    "summary": "Activité de comparaison de projets professionnels. L'étudiant.e met en perspective différentes options, analyse les avantages, contraintes et perspectives de chaque scénario, afin d'orienter ses décisions de manière éclairée et cohérente avec ses aspirations.",
     "description": "<h3>Objectifs de l'activité</h3><ul><li>Mettre en perspective différents scénarios professionnels.</li><li>Analyser les avantages, contraintes et perspectives de chaque option.</li><li>Orienter les décisions de manière éclairée et cohérente avec ses aspirations.</li></ul><h3>Déroulement de l'activité</h3><p>L'étudiant.e est invité.e à comparer plusieurs projets possibles et à évaluer leur adéquation avec ses aspirations et objectifs professionnels.</p>",
     "executionPeriodInfo": "À effectuer avant un choix d'orientation ou un entretien visant à valider une hypothèse de projet.",
     "executionPeriodInfoSummary": null,
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": 5,
     "feedbackAllowedIterations": 1,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Analyser son parcours de formation",
@@ -105,19 +121,23 @@
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": 2,
     "feedbackAllowedIterations": -1,
-    "enableReflection": false
+    "enableReflection": false,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Identifier les compétences acquises en formation",
     "thematic": "PROGRAMS",
-    "summary": null,
+    "summary": "Activité d'identification des compétences développées au sein des enseignements suivis. L'étudiant.e met en évidence les savoirs, savoir-faire et méthodes acquis, valorisant ainsi son parcours et envisageant les applications de ces compétences dans différents contextes.",
     "description": "<h3>Objectifs de l'activité</h3><ul><li>Identifier les compétences développées au sein des enseignements suivis.</li><li>Mettre en évidence les savoirs, savoir-faire et méthodes acquis.</li><li>Valoriser son parcours et envisager les applications des compétences dans différents contextes.</li></ul><h3>Déroulement de l'activité</h3><p>L'étudiant.e est invité.e à réaliser des exercices d'identification des compétences, tels que des bilans de compétences ou des entretiens avec des enseignants.</p>",
     "executionPeriodInfo": null,
     "executionPeriodInfoSummary": "Avant dossier académique",
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 6,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Analyser une expérience significative",
@@ -129,19 +149,23 @@
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": 4,
     "feedbackAllowedIterations": 4,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Valoriser une expérience professionnelle",
     "thematic": "EXPERIENCES",
-    "summary": null,
+    "summary": "Activité de valorisation d'une expérience professionnelle. L'étudiant.e met en lumière les missions réalisées, les compétences mobilisées et les résultats obtenus, afin de renforcer la présentation de son parcours dans le cadre de candidatures ou d'entretiens professionnels.",
     "description": null,
     "executionPeriodInfo": "À effectuer avant la préparation d'un CV ou d'un entretien lié à une candidature professionnelle.",
     "executionPeriodInfoSummary": "Avant préparation de CV",
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": -1,
-    "enableReflection": false
+    "enableReflection": false,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Identifier ses réussites marquantes",
@@ -153,7 +177,9 @@
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": 8,
     "feedbackAllowedIterations": 2,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Cartographier son parcours",
@@ -165,19 +191,23 @@
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 7,
-    "enableReflection": false
+    "enableReflection": false,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Identifier les tournants décisifs",
     "thematic": "TRAJECTORIES",
-    "summary": null,
+    "summary": "Activité d'analyse de trajectoire centrée sur les tournants décisifs. L'étudiant.e identifie les moments clés ayant influencé son parcours, analyse les décisions prises et leurs impacts sur son évolution personnelle et professionnelle.",
     "description": "<h3>Objectifs de l'activité</h3><ul><li>Identifier les moments clés ayant influencé le parcours.</li><li>Analyser les décisions prises et leurs impacts sur l'évolution personnelle et professionnelle.</li></ul><h3>Déroulement de l'activité</h3><p>L'étudiant.e est invité.e à réfléchir sur les moments décisifs de son parcours en identifiant les choix effectués et leurs conséquences.</p>",
     "executionPeriodInfo": "À effectuer dans le cadre d'un bilan de parcours ou avant un échange approfondi sur l'évolution professionnelle.",
     "executionPeriodInfoSummary": "Avant bilan de parcours",
     "authorStaffId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "traceAllowedAssociations": 6,
     "feedbackAllowedIterations": -1,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Rédiger un CV structuré",
@@ -189,19 +219,23 @@
     "authorStaffId": "5fcd76c5-017c-4d61-99d2-62a6f199c94e",
     "traceAllowedAssociations": 9,
     "feedbackAllowedIterations": 10,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Adapter son CV à une offre",
     "thematic": "RESUMES",
-    "summary": null,
+    "summary": "Activité d'adaptation du CV à une offre spécifique. L'étudiant.e analyse les exigences de l'offre, identifie les compétences clés demandées et ajuste la présentation de son parcours pour maximiser l'impact auprès des recruteurs.",
     "description": "<h3>Objectifs de l'activité</h3><ul><li>Adapter le CV en fonction des exigences spécifiques d'une offre.</li><li>Mettre en avant les expériences et compétences les plus pertinentes.</li><li>Optimiser la présentation pour maximiser l'impact auprès des recruteurs.</li></ul><h3>Déroulement de l'activité</h3><p>L'étudiant.e est invité.e à analyser une offre d'emploi, identifier les compétences clés demandées, et ajuster son CV en conséquence.</p>",
     "executionPeriodInfo": null,
     "executionPeriodInfoSummary": "Avant candidature spécifique",
     "authorStaffId": "5fcd76c5-017c-4d61-99d2-62a6f199c94e",
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 3,
-    "enableReflection": false
+    "enableReflection": false,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   },
   {
     "title": "Développer ses compétences transversales",
@@ -213,6 +247,8 @@
     "authorStaffId": "5fcd76c5-017c-4d61-99d2-62a6f199c94e",
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": -1,
-    "enableReflection": true
+    "enableReflection": true,
+    "createdAt": "2024-06-01T10:00:00Z",
+    "updatedAt": "2024-06-01T10:00:00Z"
   }
 ]

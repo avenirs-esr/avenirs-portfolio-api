@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.file.domain.port.input.ActivityResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeActivityBanner;
+import fr.avenirsesr.portfolio.shared.domain.port.input.ClockService;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -33,9 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class ActivitySeeder {
   private static final String PATH_FILE = "seeder/activities.json";
+
   private final FileReader fileReader;
   private final ActivityService activityService;
   private final ActivityResourceService activityResourceService;
+  private final ClockService clockService;
 
   @Value("${seeder.source}")
   private ESeederSource seederSource;
@@ -43,10 +46,12 @@ public class ActivitySeeder {
   public ActivitySeeder(
       FileReader fileReader,
       ActivityService activityService,
-      @Qualifier("MockActivityResourceService") ActivityResourceService activityResourceService) {
+      @Qualifier("MockActivityResourceService") ActivityResourceService activityResourceService,
+      ClockService clockService) {
     this.fileReader = fileReader;
     this.activityService = activityService;
     this.activityResourceService = activityResourceService;
+    this.clockService = clockService;
   }
 
   @Transactional
@@ -63,6 +68,8 @@ public class ActivitySeeder {
                   .map(
                       fakeActivity -> {
                         var banner = FakeActivityBanner.create(fakeActivity).toEntity();
+                        var now = clockService.now();
+
                         return new ActivityCreationData(
                             fakeActivity.getId(),
                             uploader.getId(),
@@ -76,7 +83,9 @@ public class ActivitySeeder {
                                 banner.getFileName(), banner.getFileType(), banner.getSize()),
                             fakeActivity.isEnableReflection(),
                             fakeActivity.getTraceAllowedAssociations(),
-                            fakeActivity.getFeedbackAllowedIterations());
+                            fakeActivity.getFeedbackAllowedIterations(),
+                            now,
+                            now);
                       })
                   .toList();
         };
@@ -87,28 +96,37 @@ public class ActivitySeeder {
         new RequestData(
             Optional.ofNullable(UserMapper.INSTANCE.toDomain(uploader.getUser())),
             ELanguage.FRENCH));
+
     creationData.forEach(
         data -> {
-          var activity =
-              activityService.create(
-                  data.id(),
-                  StaffMapper.INSTANCE.toDomain(uploader),
-                  data.title(),
-                  data.thematic(),
-                  data.summary(),
-                  data.description(),
-                  data.executionPeriodInfo(),
-                  data.executionPeriodInfoSummary().orElse(null),
-                  data.enableReflection(),
-                  data.traceAllowedAssociations(),
-                  data.feedbackAllowedIterations());
-          activityResourceService.uploadBannerFor(
-              activity,
-              data.banner().fileName(),
-              data.banner().fileType().getMimeType(),
-              data.banner().fileSize(),
-              null);
-          activities.add(activity);
+          try {
+            clockService.fixed(data.createdAt());
+
+            var activity =
+                activityService.create(
+                    data.id(),
+                    StaffMapper.INSTANCE.toDomain(uploader),
+                    data.title(),
+                    data.thematic(),
+                    data.summary(),
+                    data.description(),
+                    data.executionPeriodInfo(),
+                    data.executionPeriodInfoSummary().orElse(null),
+                    data.enableReflection(),
+                    data.traceAllowedAssociations(),
+                    data.feedbackAllowedIterations());
+
+            activityResourceService.uploadBannerFor(
+                activity,
+                data.banner().fileName(),
+                data.banner().fileType().getMimeType(),
+                data.banner().fileSize(),
+                null);
+
+            activities.add(activity);
+          } finally {
+            clockService.clear();
+          }
         });
 
     log.info("✔ {} activities created", activities.size());
