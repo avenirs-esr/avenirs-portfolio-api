@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.security.Principal;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-<span class="fc" id="L29">@Slf4j</span>
+<span class="fc" id="L28">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/users&quot;)
@@ -36,7 +35,6 @@ public class UserController {
 
   @GetMapping(&quot;/{userCategory}/overview&quot;)
   public ResponseEntity&lt;ProfileOverviewDTO&gt; getProfile(
-      Principal principal,
       HttpServletRequest request,
       @Valid
           @Parameter(
@@ -46,22 +44,20 @@ public class UserController {
               schema = @Schema(ref = &quot;#/components/schemas/EUserCategory&quot;))
           @PathVariable
           EUserCategory userCategory) {
-<span class="fc" id="L49">    UUID userId = UUID.fromString(principal.getName());</span>
+<span class="fc" id="L47">    UserProfileOverviewData overview = userService.getUserProfileOverviewDTO(userCategory);</span>
+<span class="fc" id="L48">    var userPhotos = userService.getUserPhotos(userCategory);</span>
+<span class="fc" id="L49">    String baseUrl = extractOrigin(request);</span>
 
-<span class="fc" id="L51">    UserProfileOverviewData overview = userService.getUserProfileOverviewDTO(userId, userCategory);</span>
-<span class="fc" id="L52">    var userPhotos = userService.getUserPhotos(userId, userCategory);</span>
-<span class="fc" id="L53">    String baseUrl = extractOrigin(request);</span>
-
-<span class="fc" id="L55">    return ResponseEntity.ok(</span>
-<span class="fc" id="L56">        profileOverviewMapper.userDomainToDto(</span>
+<span class="fc" id="L51">    return ResponseEntity.ok(</span>
+<span class="fc" id="L52">        profileOverviewMapper.userDomainToDto(</span>
             overview,
             new UserPhotosData(
-<span class="fc" id="L59">                userPhotos.profileFileId(),</span>
-<span class="fc" id="L60">                userPhotos.profileFileName(),</span>
-<span class="fc" id="L61">                baseUrl + userPhotos.profileFileUrl(),</span>
-<span class="fc" id="L62">                userPhotos.coverFileId(),</span>
-<span class="fc" id="L63">                userPhotos.coverFileName(),</span>
-<span class="fc" id="L64">                baseUrl + userPhotos.coverFileUrl())));</span>
+<span class="fc" id="L55">                userPhotos.profileFileId(),</span>
+<span class="fc" id="L56">                userPhotos.profileFileName(),</span>
+<span class="fc" id="L57">                baseUrl + userPhotos.profileFileUrl(),</span>
+<span class="fc" id="L58">                userPhotos.coverFileId(),</span>
+<span class="fc" id="L59">                userPhotos.coverFileName(),</span>
+<span class="fc" id="L60">                baseUrl + userPhotos.coverFileUrl())));</span>
   }
 
   @PutMapping(&quot;/{userCategory}/update&quot;)
@@ -76,9 +72,9 @@ public class UserController {
           @PathVariable
           EUserCategory userCategory,
       @RequestBody ProfileUpdateRequest request) {
-<span class="fc" id="L79">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
-<span class="fc" id="L80">    userService.updateProfile(userCategory, request.getEmail(), request.getBio());</span>
-<span class="fc" id="L81">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
+<span class="fc" id="L75">    log.debug(&quot;Received request to update profile of user [{}]&quot;, principal.getName());</span>
+<span class="fc" id="L76">    userService.updateProfile(userCategory, request.getEmail(), request.getBio());</span>
+<span class="fc" id="L77">    return ResponseEntity.ok(&quot;Mise à jour faite.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
