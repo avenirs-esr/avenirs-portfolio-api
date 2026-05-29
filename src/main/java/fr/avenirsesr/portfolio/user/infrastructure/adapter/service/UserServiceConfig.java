@@ -1,9 +1,9 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.service;
 
-import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
+import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.domain.service.UserServiceImpl;
@@ -19,15 +19,16 @@ public class UserServiceConfig {
   private final UserPrincipalRepository userPrincipalRepository;
   private final StaffService staffService;
   private final StudentService studentService;
-  private final LoggedInUserService loggedInUserService;
+  private final ExternalUserClient externalUserClient;
 
   @Bean
   public UserService userService() {
-    return new UserServiceImpl(
-        userRepository,
-        userPrincipalRepository,
-        staffService,
-        studentService,
-        loggedInUserService);
+    return new TransactionalUserService(
+        new UserServiceImpl(
+            userRepository,
+            userPrincipalRepository,
+            staffService,
+            studentService,
+            externalUserClient));
   }
 }

@@ -127,10 +127,10 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .header("X-Context-Signature", unknownSignature)
         .exchange()
         .expectStatus()
-        .isNotFound()
+        .isUnauthorized()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("USER_NOT_FOUND");
+        .isEqualTo("USER_NOT_AUTHORIZED");
   }
 
   @Test

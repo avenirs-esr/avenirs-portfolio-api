@@ -148,10 +148,10 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
         .header("X-Context-Signature", unknownUserSignature)
         .exchange()
         .expectStatus()
-        .isNotFound()
+        .isUnauthorized()
         .expectBody()
         .jsonPath("$.code")
-        .isEqualTo("USER_NOT_FOUND");
+        .isEqualTo("USER_NOT_AUTHORIZED");
   }
 
   @Test

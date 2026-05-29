@@ -158,12 +158,12 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
             .exchange()
             .expectStatus()
-            .isNotFound()
+            .isUnauthorized()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_NOT_FOUND")
+            .isEqualTo("USER_NOT_AUTHORIZED")
             .jsonPath("$.message")
-            .isEqualTo("User not found");
+            .isEqualTo("User not authorized");
       }
 
       @Test
@@ -768,10 +768,10 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
             .exchange()
             .expectStatus()
-            .isNotFound()
+            .isUnauthorized()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_NOT_FOUND");
+            .isEqualTo("USER_NOT_AUTHORIZED");
       }
     }
 
@@ -905,10 +905,10 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, unknownUserSignature)
             .exchange()
             .expectStatus()
-            .isNotFound()
+            .isUnauthorized()
             .expectBody()
             .jsonPath("$.code")
-            .isEqualTo("USER_NOT_FOUND");
+            .isEqualTo("USER_NOT_AUTHORIZED");
       }
 
       @Test
