@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FileResourceServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.file.domain.service</a> &gt; <span class="el_source">FileResourceServiceImpl.java</span></div><h1>FileResourceServiceImpl.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.file.domain.service;
 
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
@@ -25,7 +27,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L28">@Slf4j</span>
+<span class="fc" id="L30">@Slf4j</span>
 @AllArgsConstructor
 public class FileResourceServiceImpl implements FileResourceService {
   private final FileStorageService fileStorageService;
@@ -33,14 +35,15 @@ public class FileResourceServiceImpl implements FileResourceService {
   private final TraceRepository traceRepository;
   private final StaffRepository staffRepository;
   private final StudentRepository studentRepository;
+  private final ActivityDraftRepository activityDraftRepository;
   private final LoggedInUserService loggedInUserService;
   private final TraceService traceService;
-<span class="fc" id="L38">  private static final List&lt;EFileType&gt; ALLOWED_IMAGE_FILE_TYPES =</span>
-<span class="fc" id="L39">      List.of(EFileType.PNG, EFileType.JPEG, EFileType.GIF, EFileType.WEBP, EFileType.PJPEG);</span>
-<span class="fc" id="L40">  private static final Map&lt;EFileCategory, List&lt;EFileType&gt;&gt; ALLOWED_FILE_TYPES_BY_CATEGORY =</span>
-<span class="fc" id="L41">      Map.of(</span>
+<span class="fc" id="L41">  private static final List&lt;EFileType&gt; ALLOWED_IMAGE_FILE_TYPES =</span>
+<span class="fc" id="L42">      List.of(EFileType.PNG, EFileType.JPEG, EFileType.GIF, EFileType.WEBP, EFileType.PJPEG);</span>
+<span class="fc" id="L43">  private static final Map&lt;EFileCategory, List&lt;EFileType&gt;&gt; ALLOWED_FILE_TYPES_BY_CATEGORY =</span>
+<span class="fc" id="L44">      Map.of(</span>
           EFileCategory.TRACE_ATTACHEMENT,
-<span class="fc" id="L43">          Arrays.stream(EFileType.values()).toList(),</span>
+<span class="fc" id="L46">          Arrays.stream(EFileType.values()).toList(),</span>
           EFileCategory.STUDENT_PROFILE_PICTURE,
           ALLOWED_IMAGE_FILE_TYPES,
           EFileCategory.STAFF_PROFILE_PICTURE,
@@ -60,143 +63,159 @@ public class FileResourceServiceImpl implements FileResourceService {
       String mimeType,
       long size,
       byte[] content) {
-<span class="fc" id="L63">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L66">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
 
-<span class="fc" id="L65">    chekUploadRG(loggedInUser, elementId, fileCategory);</span>
+<span class="fc" id="L68">    chekUploadRG(loggedInUser, elementId, fileCategory);</span>
 
-<span class="fc" id="L67">    var fileResource =</span>
+<span class="fc" id="L70">    var fileResource =</span>
         new FileResource(
-<span class="fc" id="L69">            UUID.randomUUID(), fileName, EFileType.fromMimeType(mimeType), size, content);</span>
+<span class="fc" id="L72">            UUID.randomUUID(), fileName, EFileType.fromMimeType(mimeType), size, content);</span>
 
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">    if (!ALLOWED_FILE_TYPES_BY_CATEGORY.get(fileCategory).contains(fileResource.fileType())) {</span>
-<span class="nc" id="L72">      throw new FileTypeNotSupportedException();</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">    if (!ALLOWED_FILE_TYPES_BY_CATEGORY.get(fileCategory).contains(fileResource.fileType())) {</span>
+<span class="nc" id="L75">      throw new FileTypeNotSupportedException();</span>
     }
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">    if (fileResource.fileType().getSizeLimit().isLessThan(size)) {</span>
-<span class="nc" id="L75">      throw new FileSizeTooBigException();</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">    if (fileResource.fileType().getSizeLimit().isLessThan(size)) {</span>
+<span class="nc" id="L78">      throw new FileSizeTooBigException();</span>
     }
 
-<span class="fc" id="L78">    var uri = fileStorageService.upload(fileResource);</span>
-<span class="fc" id="L79">    var allFiles = fileRepository.findAllByElement(elementId);</span>
-<span class="fc" id="L80">    var version = allFiles.stream().map(File::getVersion).max(Integer::compareTo).orElse(0) + 1;</span>
-<span class="fc" id="L81">    var file =</span>
-<span class="fc" id="L82">        File.create(</span>
-<span class="fc" id="L83">            fileResource.id(),</span>
+<span class="fc" id="L81">    var uri = fileStorageService.upload(fileResource);</span>
+<span class="fc" id="L82">    var allFiles = fileRepository.findAllByElement(elementId);</span>
+<span class="fc" id="L83">    var version = allFiles.stream().map(File::getVersion).max(Integer::compareTo).orElse(0) + 1;</span>
+<span class="fc" id="L84">    var file =</span>
+<span class="fc" id="L85">        File.create(</span>
+<span class="fc" id="L86">            fileResource.id(),</span>
             elementId,
             fileCategory,
-<span class="fc" id="L86">            fileResource.fileType(),</span>
-<span class="fc" id="L87">            fileResource.fileName(),</span>
-<span class="fc" id="L88">            fileResource.size(),</span>
+<span class="fc" id="L89">            fileResource.fileType(),</span>
+<span class="fc" id="L90">            fileResource.fileName(),</span>
+<span class="fc" id="L91">            fileResource.size(),</span>
             version,
             uri,
             loggedInUser);
-<span class="fc" id="L92">    var savedFile = fileRepository.save(file);</span>
-<span class="fc" id="L93">    saveFileOnElement(elementId, fileCategory, file);</span>
-<span class="fc" id="L94">    return savedFile;</span>
+<span class="fc" id="L95">    var savedFile = fileRepository.save(file);</span>
+<span class="fc" id="L96">    saveFileOnElement(elementId, fileCategory, file);</span>
+<span class="fc" id="L97">    return savedFile;</span>
   }
 
   @Override
   public FileResource fetchContent(UUID fileId) {
-<span class="nc" id="L99">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
-<span class="nc" id="L100">    byte[] content = fileStorageService.get(file.getUri());</span>
-<span class="nc" id="L101">    return new FileResource(</span>
-<span class="nc" id="L102">        file.getId(), file.getFileName(), file.getFileType(), file.getSize(), content);</span>
+<span class="nc" id="L102">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
+<span class="nc" id="L103">    byte[] content = fileStorageService.get(file.getUri());</span>
+<span class="nc" id="L104">    return new FileResource(</span>
+<span class="nc" id="L105">        file.getId(), file.getFileName(), file.getFileType(), file.getSize(), content);</span>
   }
 
   @Override
   public FileDownload download(UUID fileId) {
-<span class="nc" id="L107">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="nc" id="L108">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
-<span class="nc" id="L109">    chekDownloadRG(loggedInUser, file.getElementId(), file.getFileCategory());</span>
-<span class="nc" id="L110">    return new FileDownload(file.getFileName(), fileStorageService.get(file.getUri()));</span>
+<span class="nc" id="L110">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="nc" id="L111">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
+<span class="nc" id="L112">    chekDownloadRG(loggedInUser, file.getElementId(), file.getFileCategory());</span>
+<span class="nc" id="L113">    return new FileDownload(file.getFileName(), fileStorageService.get(file.getUri()));</span>
   }
 
   @Override
   public void delete(UUID fileId) {
-<span class="nc" id="L115">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="nc" id="L116">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
-<span class="nc" id="L117">    chekDeleteRG(loggedInUser, file.getElementId(), file.getFileCategory());</span>
-<span class="nc" id="L118">    fileRepository.removeFromDatabase(file);</span>
-<span class="nc" id="L119">    fileStorageService.delete(file.getId());</span>
-<span class="nc" id="L120">    log.info(&quot;File deleted: {}&quot;, file);</span>
-<span class="nc" id="L121">  }</span>
+<span class="nc" id="L118">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="nc" id="L119">    var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);</span>
+<span class="nc" id="L120">    chekDeleteRG(loggedInUser, file.getElementId(), file.getFileCategory());</span>
+<span class="nc" id="L121">    fileRepository.removeFromDatabase(file);</span>
+<span class="nc" id="L122">    fileStorageService.delete(file.getId());</span>
+<span class="nc" id="L123">    log.info(&quot;File deleted: {}&quot;, file);</span>
+<span class="nc" id="L124">  }</span>
 
   private void saveFileOnElement(UUID elementId, EFileCategory fileCategory, File file) {
-<span class="pc bpc" id="L124" title="2 of 6 branches missed.">    switch (fileCategory) {</span>
+<span class="pc bpc" id="L127" title="4 of 7 branches missed.">    switch (fileCategory) {</span>
       case TRACE_ATTACHEMENT -&gt; {
-<span class="fc" id="L126">        var trace = traceService.getTraceById(elementId);</span>
-<span class="fc" id="L127">        trace.setAttachment(file);</span>
-<span class="fc" id="L128">        traceRepository.save(trace);</span>
-<span class="fc" id="L129">      }</span>
+<span class="fc" id="L129">        var trace = traceService.getTraceById(elementId);</span>
+<span class="fc" id="L130">        trace.setAttachment(file);</span>
+<span class="fc" id="L131">        traceRepository.save(trace);</span>
+<span class="fc" id="L132">      }</span>
       case STUDENT_COVER_PICTURE -&gt; {
-<span class="fc" id="L131">        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L132">        student.setCoverPicture(file);</span>
-<span class="fc" id="L133">        studentRepository.save(student);</span>
-<span class="fc" id="L134">      }</span>
+<span class="fc" id="L134">        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L135">        student.setCoverPicture(file);</span>
+<span class="fc" id="L136">        studentRepository.save(student);</span>
+<span class="fc" id="L137">      }</span>
       case STUDENT_PROFILE_PICTURE -&gt; {
-<span class="fc" id="L136">        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L137">        student.setProfilePicture(file);</span>
-<span class="fc" id="L138">        studentRepository.save(student);</span>
-<span class="fc" id="L139">      }</span>
+<span class="fc" id="L139">        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L140">        student.setProfilePicture(file);</span>
+<span class="fc" id="L141">        studentRepository.save(student);</span>
+<span class="fc" id="L142">      }</span>
       case STAFF_COVER_PICTURE -&gt; {
-<span class="nc" id="L141">        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
-<span class="nc" id="L142">        staff.setCoverPicture(file);</span>
-<span class="nc" id="L143">        staffRepository.save(staff);</span>
-<span class="nc" id="L144">      }</span>
+<span class="nc" id="L144">        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
+<span class="nc" id="L145">        staff.setCoverPicture(file);</span>
+<span class="nc" id="L146">        staffRepository.save(staff);</span>
+<span class="nc" id="L147">      }</span>
       case STAFF_PROFILE_PICTURE -&gt; {
-<span class="nc" id="L146">        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
-<span class="nc" id="L147">        staff.setProfilePicture(file);</span>
-<span class="nc" id="L148">        staffRepository.save(staff);</span>
+<span class="nc" id="L149">        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
+<span class="nc" id="L150">        staff.setProfilePicture(file);</span>
+<span class="nc" id="L151">        staffRepository.save(staff);</span>
+<span class="nc" id="L152">      }</span>
+      case ACTIVITY_BANNER -&gt; {
+<span class="nc" id="L154">        var draft =</span>
+            activityDraftRepository
+<span class="nc" id="L156">                .findById(elementId)</span>
+<span class="nc" id="L157">                .orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="nc" id="L158">        draft.setBanner(file);</span>
+<span class="nc" id="L159">        activityDraftRepository.save(draft);</span>
       }
     }
-<span class="fc" id="L151">  }</span>
+<span class="fc" id="L162">  }</span>
 
   private void chekUploadRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
-<span class="pc bpc" id="L154" title="1 of 4 branches missed.">    switch (fileCategory) {</span>
+<span class="pc bpc" id="L165" title="3 of 5 branches missed.">    switch (fileCategory) {</span>
       case TRACE_ATTACHEMENT -&gt; {
-<span class="fc" id="L156">        var trace = traceService.getTraceById(elementId);</span>
-<span class="pc bpc" id="L157" title="1 of 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
-<span class="pc bpc" id="L158" title="1 of 2 branches missed.">        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();</span>
-<span class="fc" id="L159">      }</span>
+<span class="fc" id="L167">        var trace = traceService.getTraceById(elementId);</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();</span>
+<span class="fc" id="L170">      }</span>
       case STUDENT_COVER_PICTURE, STUDENT_PROFILE_PICTURE -&gt; {
-<span class="fc" id="L161">        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
-<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        if (!student.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
-<span class="fc" id="L163">      }</span>
+<span class="fc" id="L172">        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">        if (!student.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L174">      }</span>
       case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -&gt; {
-<span class="nc" id="L165">        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
-<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L176">        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L178">      }</span>
+      case ACTIVITY_BANNER -&gt; {
+<span class="nc" id="L180">        var draft =</span>
+            activityDraftRepository
+<span class="nc" id="L182">                .findById(elementId)</span>
+<span class="nc" id="L183">                .orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">        if (!draft.getAuthor().getUser().equals(loggedInUser))</span>
+<span class="nc" id="L185">          throw new UserNotAuthorizedException();</span>
       }
     }
-<span class="fc" id="L169">  }</span>
+<span class="fc" id="L188">  }</span>
 
   private void chekDeleteRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
-<span class="nc bnc" id="L172" title="All 4 branches missed.">    switch (fileCategory) {</span>
-<span class="nc" id="L173">      case TRACE_ATTACHEMENT -&gt; throw new UserNotAuthorizedException();</span>
+<span class="nc bnc" id="L191" title="All 4 branches missed.">    switch (fileCategory) {</span>
+<span class="nc" id="L192">      case TRACE_ATTACHEMENT -&gt; throw new UserNotAuthorizedException();</span>
       case STUDENT_COVER_PICTURE, STUDENT_PROFILE_PICTURE -&gt; {
-<span class="nc" id="L175">        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
-<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (!student.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
-<span class="nc" id="L177">      }</span>
+<span class="nc" id="L194">        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        if (!student.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L196">      }</span>
       case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -&gt; {
-<span class="nc" id="L179">        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
-<span class="nc bnc" id="L180" title="All 2 branches missed.">        if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L198">        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
       }
     }
-<span class="nc" id="L183">  }</span>
+<span class="nc" id="L202">  }</span>
 
   private void chekDownloadRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
-<span class="nc bnc" id="L186" title="All 3 branches missed.">    switch (fileCategory) {</span>
+<span class="nc bnc" id="L205" title="All 3 branches missed.">    switch (fileCategory) {</span>
       case TRACE_ATTACHEMENT -&gt; {
-<span class="nc" id="L188">        var trace = traceService.getTraceById(elementId);</span>
-<span class="nc bnc" id="L189" title="All 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
-<span class="nc bnc" id="L190" title="All 2 branches missed.">        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();</span>
-<span class="nc bnc" id="L191" title="All 2 branches missed.">        if (trace.getAttachment().isEmpty()) throw new InvalidTraceTypeException();</span>
-<span class="nc" id="L192">      }</span>
+<span class="nc" id="L207">        var trace = traceService.getTraceById(elementId);</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        if (trace.getAttachment().isEmpty()) throw new InvalidTraceTypeException();</span>
+<span class="nc" id="L211">      }</span>
       case STUDENT_PROFILE_PICTURE,
           STUDENT_COVER_PICTURE,
           STAFF_PROFILE_PICTURE,
           STAFF_COVER_PICTURE,
           ACTIVITY_BANNER -&gt;
-<span class="nc" id="L198">          throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L217">          throw new UserNotAuthorizedException();</span>
     }
-<span class="nc" id="L200">  }</span>
+<span class="nc" id="L219">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
