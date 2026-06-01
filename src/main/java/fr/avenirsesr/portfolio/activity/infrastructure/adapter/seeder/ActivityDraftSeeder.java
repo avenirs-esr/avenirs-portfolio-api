@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.mapper.ActivityDraftMapper;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityDraftEntity;
@@ -20,6 +21,7 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import jakarta.persistence.EntityManager;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -110,11 +112,15 @@ public class ActivityDraftSeeder {
                   ELanguage.FRENCH));
 
           try {
-            clockService.fixed(data.createdAt());
+            var now = clockService.now();
+            var createdAt = now.minus(20, ChronoUnit.DAYS);
+            clockService.fixed(createdAt);
 
             var draft = activityService.createActivityDraft(data.title());
 
-            clockService.fixed(data.updatedAt());
+            if (data.thematic() == EActivityThematic.SELF_KNOWLEDGE) {
+              clockService.fixed(createdAt.plus(1, ChronoUnit.DAYS));
+            }
 
             var updatedDraft =
                 activityService.updateActivity(

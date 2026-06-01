@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -100,7 +101,8 @@ public class ActivitySeeder {
     creationData.forEach(
         data -> {
           try {
-            clockService.fixed(data.createdAt());
+            var now = clockService.now();
+            clockService.fixed(now.minus(20, ChronoUnit.DAYS));
 
             var activity =
                 activityService.create(
