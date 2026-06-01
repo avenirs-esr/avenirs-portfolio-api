@@ -63,7 +63,7 @@ public class FileController {
     }
   }
 
-  @GetMapping(value = &quot;/{fileId}/download&quot;)
+  @GetMapping(value = &quot;/{fileId}/download&quot;, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity&lt;byte[]&gt; downloadFile(
       Principal principal, @Valid @PathVariable UUID fileId) {
 <span class="nc" id="L69">    log.debug(</span>
