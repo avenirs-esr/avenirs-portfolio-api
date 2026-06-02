@@ -8,7 +8,6 @@ import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraf
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftCreationResponse;
 import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftUpdateResponse;
-import fr.avenirsesr.portfolio.activity.domain.data.ActivityContentData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
@@ -32,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-<span class="fc" id="L35">@Slf4j</span>
+<span class="fc" id="L34">@Slf4j</span>
 @AllArgsConstructor
 @RestController
 @RequestMapping(&quot;/me/activities&quot;)
@@ -55,18 +54,17 @@ public class ActivityController {
               schema = @Schema(ref = &quot;#/components/schemas/EActivityStatus&quot;))
           EActivityStatus activityStatus,
       @PathVariable UUID activityId) {
-<span class="fc" id="L58">    log.debug(&quot;Received request to get activity [{}] presentation&quot;, activityId);</span>
+<span class="fc" id="L57">    log.debug(&quot;Received request to get activity [{}] presentation&quot;, activityId);</span>
 
-<span class="fc" id="L60">    String baseUrl = extractOrigin(request);</span>
-<span class="fc" id="L61">    ActivityPresentationData activityPresentation =</span>
-<span class="fc" id="L62">        activityService.getActivityPresentation(activityStatus, activityId);</span>
-<span class="fc" id="L63">    var dto = activityPresentationDtoMapper.toDTO(activityPresentation, baseUrl);</span>
-<span class="fc" id="L64">    return ResponseEntity.ok(dto);</span>
+<span class="fc" id="L59">    String baseUrl = extractOrigin(request);</span>
+<span class="fc" id="L60">    ActivityPresentationData activityPresentation =</span>
+<span class="fc" id="L61">        activityService.getActivityPresentation(activityStatus, activityId);</span>
+<span class="fc" id="L62">    var dto = activityPresentationDtoMapper.toDTO(activityPresentation, baseUrl);</span>
+<span class="fc" id="L63">    return ResponseEntity.ok(dto);</span>
   }
 
   @GetMapping(&quot;/{activityStatus}/{activityId}/content&quot;)
   public ResponseEntity&lt;ActivityContentDTO&gt; getActivityContent(
-      HttpServletRequest request,
       @PathVariable
           @Parameter(
               name = &quot;activityStatus&quot;,
@@ -75,12 +73,14 @@ public class ActivityController {
               schema = @Schema(ref = &quot;#/components/schemas/EActivityStatus&quot;))
           EActivityStatus activityStatus,
       @PathVariable UUID activityId) {
-<span class="nc" id="L78">    log.debug(&quot;Received request to get activity [{}] content&quot;, activityId);</span>
-
-<span class="nc" id="L80">    String baseUrl = extractOrigin(request);</span>
-<span class="nc" id="L81">    ActivityContentData activityContent =</span>
-<span class="nc" id="L82">        activityService.getActivityContent(activityStatus, activityId);</span>
-<span class="nc" id="L83">    ActivityContentDTO dto = activityContentDtoMapper.toDTO(activityContent, baseUrl);</span>
+<span class="nc" id="L76">    log.debug(&quot;Received request to get activity [{}] content&quot;, activityId);</span>
+<span class="nc" id="L77">    ActivityContentDTO dto =</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        switch (activityStatus) {</span>
+          case PUBLISHED -&gt;
+<span class="nc" id="L80">              activityContentDtoMapper.toDTO(activityService.getActivityById(activityId));</span>
+          case DRAFT -&gt;
+<span class="nc" id="L82">              activityContentDtoMapper.toDTO(activityService.getActivityDraftById(activityId));</span>
+        };
 <span class="nc" id="L84">    return ResponseEntity.ok(dto);</span>
   }
 
