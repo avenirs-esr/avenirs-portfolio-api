@@ -127,8 +127,8 @@ public class FileResourceServiceImpl implements FileResourceService {
 <span class="nc" id="L127">          loggedInUser.getId(),</span>
           fileId);
 
-<span class="nc" id="L130">      fileRepository.removeFromDatabase(file);</span>
-<span class="nc" id="L131">      fileStorageService.delete(file.getId());</span>
+<span class="nc" id="L130">      fileStorageService.delete(file.getId());</span>
+<span class="nc" id="L131">      fileRepository.removeFromDatabase(file);</span>
     }
 
 <span class="nc" id="L134">    log.info(&quot;File deleted: {}&quot;, file);</span>
