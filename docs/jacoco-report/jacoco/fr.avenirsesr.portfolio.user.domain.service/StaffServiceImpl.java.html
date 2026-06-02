@@ -38,35 +38,36 @@ public class StaffServiceImpl implements StaffService {
 <span class="nc" id="L38">    var staff = loggedInUserService.getLoggedInStaff();</span>
 
 <span class="nc" id="L40">    return new UserProfileOverviewData(</span>
-<span class="nc" id="L41">        staff.getUser().getFirstName(),</span>
-<span class="nc" id="L42">        staff.getUser().getLastName(),</span>
-<span class="nc" id="L43">        staff.getInstitutionEmail(),</span>
-<span class="nc" id="L44">        staff.getBio(),</span>
-<span class="nc" id="L45">        FileDataMapper.mapFileData(</span>
-<span class="nc" id="L46">            staff.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
-<span class="nc" id="L47">        FileDataMapper.mapFileData(</span>
-<span class="nc" id="L48">            staff.getProfilePicture().orElse(null), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));</span>
+<span class="nc" id="L41">        staff.getId(),</span>
+<span class="nc" id="L42">        staff.getUser().getFirstName(),</span>
+<span class="nc" id="L43">        staff.getUser().getLastName(),</span>
+<span class="nc" id="L44">        staff.getInstitutionEmail(),</span>
+<span class="nc" id="L45">        staff.getBio(),</span>
+<span class="nc" id="L46">        FileDataMapper.mapFileData(</span>
+<span class="nc" id="L47">            staff.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
+<span class="nc" id="L48">        FileDataMapper.mapFileData(</span>
+<span class="nc" id="L49">            staff.getProfilePicture().orElse(null), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));</span>
   }
 
   @Override
   public void updateProfile(User user, String bio) {
-<span class="fc" id="L53">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
+<span class="fc" id="L54">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
 
-<span class="pc bpc" id="L55" title="1 of 2 branches missed.">    if (bio != null) staff.setBio(bio);</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">    if (bio != null) staff.setBio(bio);</span>
 
-<span class="fc" id="L57">    staffRepository.save(staff);</span>
-<span class="fc" id="L58">  }</span>
+<span class="fc" id="L58">    staffRepository.save(staff);</span>
+<span class="fc" id="L59">  }</span>
 
   @Override
   public Staff createStaff(UUID userId, String institutionEmail, String bio) {
-<span class="fc" id="L62">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L63">    var staff = Staff.create(user, institutionEmail, bio);</span>
-<span class="fc" id="L64">    staffRepository.save(staff);</span>
-<span class="pc bpc" id="L65" title="1 of 2 branches missed.">    if (user.getEmail() == null) {</span>
-<span class="fc" id="L66">      user.setEmail(institutionEmail);</span>
-<span class="fc" id="L67">      userRepository.save(user);</span>
+<span class="fc" id="L63">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L64">    var staff = Staff.create(user, institutionEmail, bio);</span>
+<span class="fc" id="L65">    staffRepository.save(staff);</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">    if (user.getEmail() == null) {</span>
+<span class="fc" id="L67">      user.setEmail(institutionEmail);</span>
+<span class="fc" id="L68">      userRepository.save(user);</span>
     }
-<span class="fc" id="L69">    return staff;</span>
+<span class="fc" id="L70">    return staff;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
