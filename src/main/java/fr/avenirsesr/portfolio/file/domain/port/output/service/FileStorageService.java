@@ -10,4 +10,6 @@ public interface FileStorageService {
   String upload(FileResource fileResource) throws FileStorageException;
 
   void delete(UUID fileId) throws FileStorageException;
+
+  void deleteByPath(String path) throws FileStorageException;
 }

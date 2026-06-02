@@ -74,4 +74,20 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
     log.info("File with id {} has been deleted", id);
   }
+
+  @Override
+  public void deleteByPath(String path) {
+    File file = new File(path);
+
+    if (!file.exists()) {
+      log.error("No file found at path {}", path);
+      throw new FileNotFoundException();
+    }
+
+    if (!file.delete()) {
+      throw new FileStorageException("Failed to delete file at path " + path, null);
+    }
+
+    log.info("File at path {} has been deleted", path);
+  }
 }

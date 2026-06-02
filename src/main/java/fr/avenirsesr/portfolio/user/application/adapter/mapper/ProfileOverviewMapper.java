@@ -10,6 +10,7 @@ public interface ProfileOverviewMapper {
 
   default ProfileOverviewDTO userDomainToDto(UserProfileOverviewData overview, String baseUrl) {
     return new ProfileOverviewDTO(
+        overview.id(),
         overview.firstName(),
         overview.lastName(),
         overview.bio(),

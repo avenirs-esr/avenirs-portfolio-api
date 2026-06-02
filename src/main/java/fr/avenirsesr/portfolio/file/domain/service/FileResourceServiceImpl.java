@@ -118,9 +118,57 @@ public class FileResourceServiceImpl implements FileResourceService {
     var loggedInUser = loggedInUserService.getLoggedInUser();
     var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
     chekDeleteRG(loggedInUser, file.getElementId(), file.getFileCategory());
-    fileRepository.removeFromDatabase(file);
-    fileStorageService.delete(file.getId());
+
+    unlinkFileFromElement(file);
+
+    if (file.getUploadedBy().getId().equals(loggedInUser.getId())) {
+      log.debug(
+          "User {} is deleting their own file {}, this action is allowed but should be monitored",
+          loggedInUser.getId(),
+          fileId);
+      fileStorageService.deleteByPath(file.getUri());
+      fileRepository.removeFromDatabase(file);
+    }
+
     log.info("File deleted: {}", file);
+  }
+
+  private void unlinkFileFromElement(File file) {
+    switch (file.getFileCategory()) {
+      case STUDENT_PROFILE_PICTURE -> {
+        var student =
+            studentRepository.findById(file.getElementId()).orElseThrow(UserNotFoundException::new);
+        student.setProfilePicture(null);
+        studentRepository.save(student);
+      }
+      case STUDENT_COVER_PICTURE -> {
+        var student =
+            studentRepository.findById(file.getElementId()).orElseThrow(UserNotFoundException::new);
+        student.setCoverPicture(null);
+        studentRepository.save(student);
+      }
+      case STAFF_PROFILE_PICTURE -> {
+        var staff =
+            staffRepository.findById(file.getElementId()).orElseThrow(UserNotFoundException::new);
+        staff.setProfilePicture(null);
+        staffRepository.save(staff);
+      }
+      case STAFF_COVER_PICTURE -> {
+        var staff =
+            staffRepository.findById(file.getElementId()).orElseThrow(UserNotFoundException::new);
+        staff.setCoverPicture(null);
+        staffRepository.save(staff);
+      }
+      case ACTIVITY_BANNER -> {
+        var draft =
+            activityDraftRepository
+                .findById(file.getElementId())
+                .orElseThrow(ActivityDraftNotFoundException::new);
+        draft.setBanner(null);
+        activityDraftRepository.save(draft);
+      }
+      case TRACE_ATTACHEMENT -> throw new UserNotAuthorizedException();
+    }
   }
 
   private void saveFileOnElement(UUID elementId, EFileCategory fileCategory, File file) {

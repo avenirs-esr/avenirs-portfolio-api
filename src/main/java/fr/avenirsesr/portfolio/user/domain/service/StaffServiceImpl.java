@@ -38,6 +38,7 @@ public class StaffServiceImpl implements StaffService {
     var staff = loggedInUserService.getLoggedInStaff();
 
     return new UserProfileOverviewData(
+        staff.getId(),
         staff.getUser().getFirstName(),
         staff.getUser().getLastName(),
         staff.getInstitutionEmail(),
