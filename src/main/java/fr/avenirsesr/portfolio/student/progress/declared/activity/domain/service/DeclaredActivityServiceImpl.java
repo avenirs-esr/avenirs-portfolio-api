@@ -4,6 +4,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateDateOrder;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
+import fr.avenirsesr.portfolio.activity.domain.mapper.ActivityContentDataMapper;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
@@ -19,9 +20,15 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.file.domain.data.FileData;
+import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.mapper.DeclaredActivityDetailsDataMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -77,8 +84,14 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public DeclaredActivity subscribe(UUID activityId, LocalDate startDate, LocalDate endDate) {
-    return subscribe(UUID.randomUUID(), activityId, startDate, endDate);
+  public DeclaredActivityDetailsData subscribe(
+      UUID activityId, LocalDate startDate, LocalDate endDate) {
+    DeclaredActivity declaredActivity =
+        subscribe(UUID.randomUUID(), activityId, startDate, endDate);
+    Activity activity = declaredActivity.getActivity();
+    return DeclaredActivityDetailsDataMapper.toData(
+        declaredActivity,
+        ActivityContentDataMapper.toData(activity, toBannerData(activity.getBanner())));
   }
 
   @Override
@@ -120,7 +133,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public DeclaredActivity finish(UUID declaredActivityId) {
+  public DeclaredActivityDetailsData finish(UUID declaredActivityId) {
     Student student = loggedInUserService.getLoggedInStudent();
     DeclaredActivity declaredActivity =
         declaredActivityRepository
@@ -141,7 +154,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     declaredActivity.setFinishedAt(Instant.now());
 
-    return declaredActivityRepository.save(declaredActivity);
+    Activity activity = declaredActivity.getActivity();
+    return DeclaredActivityDetailsDataMapper.toData(
+        declaredActivityRepository.save(declaredActivity),
+        ActivityContentDataMapper.toData(activity, toBannerData(activity.getBanner())));
   }
 
   @Override
@@ -171,8 +187,13 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId) {
-    return fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+  public DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId) {
+    DeclaredActivity declaredActivity =
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    Activity activity = declaredActivity.getActivity();
+    return DeclaredActivityDetailsDataMapper.toData(
+        declaredActivity,
+        ActivityContentDataMapper.toData(activity, toBannerData(activity.getBanner())));
   }
 
   private void validateActivityDates(LocalDate startDate, LocalDate endDate, Instant subscribedAt) {
@@ -459,5 +480,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       case DECLARED_SKILL -> EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;
       case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -> throw new UnsupportedOperationException();
     };
+  }
+
+  private FileData toBannerData(Optional<File> banner) {
+    return FileDataMapper.mapFileData(
+        banner.orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL);
   }
 }
