@@ -42,6 +42,7 @@ public class StudentServiceImpl implements StudentService {
     var student = loggedInUserService.getLoggedInStudent();
 
     return new UserProfileOverviewData(
+        student.getId(),
         student.getUser().getFirstName(),
         student.getUser().getLastName(),
         student.getUser().getEmail(),

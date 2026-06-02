@@ -54,7 +54,7 @@ class ActivityPresentationDtoMapperTest {
     assertEquals("Activity Title", dto.title());
     assertEquals(EActivityThematic.EXPERIENCES, dto.thematic());
     assertNotNull(dto.banner());
-    assertEquals(bannerId, dto.banner().fileId());
+    assertEquals(bannerId, dto.banner().id());
     assertEquals("banner.png", dto.banner().fileName());
     assertEquals(baseUrl + "banners/banner.png", dto.banner().url());
   }

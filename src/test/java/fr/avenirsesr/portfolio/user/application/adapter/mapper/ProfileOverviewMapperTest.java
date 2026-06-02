@@ -25,7 +25,8 @@ class ProfileOverviewMapperTest {
 
     var cover = new FileData(Optional.of(coverFileId), Optional.of("cover.jpg"), "cover.jpg");
     UserProfileOverviewData overview =
-        new UserProfileOverviewData("Jane", "Doe", "jane@example.com", "My bio", cover, profile);
+        new UserProfileOverviewData(
+            UUID.randomUUID(), "Jane", "Doe", "jane@example.com", "My bio", cover, profile);
 
     BddLogger.when("mapping to ProfileOverviewDTO");
     ProfileOverviewDTO dto = mapper.userDomainToDto(overview, "https://cdn.example.com/");
@@ -37,10 +38,10 @@ class ProfileOverviewMapperTest {
     assertEquals("jane@example.com", dto.email());
     assertEquals("My bio", dto.bio());
     assertNotNull(dto.profilePicture());
-    assertEquals(profileFileId, dto.profilePicture().fileId());
+    assertEquals(profileFileId, dto.profilePicture().id());
     assertEquals("profile.jpg", dto.profilePicture().fileName());
     assertNotNull(dto.coverPicture());
-    assertEquals(coverFileId, dto.coverPicture().fileId());
+    assertEquals(coverFileId, dto.coverPicture().id());
   }
 
   @Test
@@ -50,7 +51,8 @@ class ProfileOverviewMapperTest {
 
     var cover = new FileData(Optional.empty(), Optional.empty(), "default-cover.jpg");
     UserProfileOverviewData overview =
-        new UserProfileOverviewData("John", "Smith", "john@example.com", null, cover, profile);
+        new UserProfileOverviewData(
+            UUID.randomUUID(), "John", "Smith", "john@example.com", null, cover, profile);
 
     BddLogger.when("mapping to ProfileOverviewDTO");
     ProfileOverviewDTO dto = mapper.userDomainToDto(overview, "https://cdn.example.com/");
@@ -58,7 +60,7 @@ class ProfileOverviewMapperTest {
     BddLogger.then("it should return null for optional file IDs and names");
     assertNotNull(dto);
     assertNotNull(dto.profilePicture());
-    assertNull(dto.profilePicture().fileId());
+    assertNull(dto.profilePicture().id());
     assertNull(dto.profilePicture().fileName());
     assertEquals("https://cdn.example.com/default.jpg", dto.profilePicture().url());
   }

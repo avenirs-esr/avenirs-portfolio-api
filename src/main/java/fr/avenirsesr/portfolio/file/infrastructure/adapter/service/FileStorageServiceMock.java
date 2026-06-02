@@ -52,4 +52,9 @@ public class FileStorageServiceMock implements FileStorageService {
   public void delete(UUID id) {
     log.debug("Mocking delete file resource {}", id);
   }
+
+  @Override
+  public void deleteByPath(String path) throws FileStorageException {
+    log.debug("Mocking delete file resource by path {}", path);
+  }
 }
