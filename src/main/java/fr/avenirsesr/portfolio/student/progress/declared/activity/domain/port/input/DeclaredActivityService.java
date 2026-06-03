@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
 import java.util.List;
@@ -59,4 +60,6 @@ public interface DeclaredActivityService {
   List<DeclaredActivity> findAllDeclaredActivitiesByIds(List<UUID> ids);
 
   List<DeclaredActivity> findAllNotCompletedActivitiesByIds(List<UUID> ids);
+
+  Feedback createFeedback(UUID declaredActivityId);
 }

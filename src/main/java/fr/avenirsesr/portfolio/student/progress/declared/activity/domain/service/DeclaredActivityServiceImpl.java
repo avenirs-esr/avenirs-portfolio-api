@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
+import fr.avenirsesr.portfolio.association.domain.utils.AssociationUtils;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
@@ -23,8 +24,10 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationData;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
@@ -54,6 +57,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final AssociationService associationService;
   private final AssociationSearchHelper associationSearchHelper;
   private final LoggedInUserService loggedInUserService;
+  private final FeedbackRepository feedbackRepository;
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria) {
@@ -375,19 +379,15 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     var traces =
         traceService.findAllTracesById(
-            associations.stream()
-                .filter(a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)
-                .map(Association::getId2)
-                .toList());
+            AssociationUtils.getIdsOf(
+                associations, EAssociationType.DECLARED_ACTIVITY_TRACE, Trace.class));
 
     var declaredSkills =
         declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(
-            associations.stream()
-                .filter(
-                    a ->
-                        a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)
-                .map(Association::getId2)
-                .toList());
+            AssociationUtils.getIdsOf(
+                associations,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+                DeclaredSkillProgress.class));
 
     return new DeclaredActivityAssociationsData(
         associations.stream()
@@ -440,7 +440,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(
       UUID declaredActivityId) {
     Student student = loggedInUserService.getLoggedInStudent();
-    var graph = FetchGraph.init().fetch("activity").add("student").fetch("user");
+    var graph =
+        FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");
 
     DeclaredActivity declaredActivity =
         declaredActivityRepository
@@ -451,6 +452,40 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new UserNotAuthorizedException();
     }
     return declaredActivity;
+  }
+
+  @Override
+  public Feedback createFeedback(UUID declaredActivityId) {
+    DeclaredActivity declaredActivity =
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+
+    validateOptionalTextMaxLength("reflexion", declaredActivity.getReflection(), RICH_TEXT_LENGTH);
+
+    var allAssociations =
+        associationService.getAllOf(
+            declaredActivityId,
+            DeclaredActivity.class,
+            List.of(
+                EAssociationType.DECLARED_ACTIVITY_TRACE,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL));
+
+    var traceIds =
+        AssociationUtils.getIdsOf(
+            allAssociations, EAssociationType.DECLARED_ACTIVITY_TRACE, Trace.class);
+
+    var declaredSkillsIds =
+        AssociationUtils.getIdsOf(
+            allAssociations,
+            EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL,
+            DeclaredSkillProgress.class);
+
+    List<Trace> traces = traceService.findAllTracesById(traceIds);
+    List<DeclaredSkillProgress> declaredSkills =
+        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillsIds);
+
+    Feedback feedback =
+        Feedback.create(declaredActivity, declaredActivity.getReflection(), traces, declaredSkills);
+    return feedbackRepository.save(feedback);
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {

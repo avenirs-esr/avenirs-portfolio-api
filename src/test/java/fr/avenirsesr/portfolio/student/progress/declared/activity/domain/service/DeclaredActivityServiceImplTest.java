@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -34,9 +35,11 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.excepti
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityStartDateBeforeSubscriptionException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
@@ -72,12 +75,14 @@ class DeclaredActivityServiceImplTest {
   @Mock private TraceService traceService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private LoggedInUserService loggedInUserService;
+  @Mock private FeedbackRepository feedbackRepository;
 
   @InjectMocks private DeclaredActivityServiceImpl service;
 
   private DeclaredActivityService declaredActivityService;
 
   @Captor private ArgumentCaptor<DeclaredActivity> activityCaptor;
+  @Captor private ArgumentCaptor<Feedback> feedbackCaptor;
 
   private Student student;
 
@@ -92,7 +97,8 @@ class DeclaredActivityServiceImplTest {
             declaredSkillProgressService,
             associationService,
             associationSearchHelper,
-            loggedInUserService);
+            loggedInUserService,
+            feedbackRepository);
   }
 
   @Test
@@ -1418,6 +1424,155 @@ class DeclaredActivityServiceImplTest {
         .isInstanceOf(UserNotAuthorizedException.class);
 
     verify(declaredActivityRepository, never()).save(any());
+  }
+
+  // ── createFeedback ────────────────────────────────────────────────────────
+
+  @Test
+  void createFeedback_should_save_feedback_with_empty_associations_when_none_linked() {
+    BddLogger.given(
+        "A logged-in student, his declared activity with null reflexion and no associations");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(associationService.getAllOf(any(), any(), any())).thenReturn(List.of());
+    when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
+        .thenReturn(List.of());
+    when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+
+    BddLogger.when("createFeedback is called");
+    service.createFeedback(declaredActivityId);
+
+    BddLogger.then("A feedback with empty associations and null reflexion is saved");
+    verify(feedbackRepository).save(feedbackCaptor.capture());
+    Feedback captured = feedbackCaptor.getValue();
+    assertThat(captured.getAssociatedTraces()).isEmpty();
+    assertThat(captured.getAssociatedDeclaredSkills()).isEmpty();
+    assertThat(captured.getReflexion()).isNull();
+  }
+
+  @Test
+  void
+      createFeedback_should_save_feedback_with_reflexion_and_associations_from_declared_activity() {
+    BddLogger.given(
+        "A logged-in student, his declared activity with a reflexion, 1 trace association and 1"
+            + " skill association");
+    UUID declaredActivityId = UUID.randomUUID();
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+    String reflexion = "Ma réflexion sur cette activité.";
+
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(), student, activity, null, reflexion, null, null, null);
+
+    Association traceAssociation = mock(Association.class);
+    Association skillAssociation = mock(Association.class);
+    Trace trace = mock(Trace.class);
+    DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    when(traceAssociation.getAssociationType())
+        .thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
+    when(traceAssociation.getId2()).thenReturn(traceId);
+    when(skillAssociation.getAssociationType())
+        .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
+    when(skillAssociation.getId2()).thenReturn(skillId);
+
+    when(associationService.getAllOf(any(), any(), any()))
+        .thenReturn(List.of(traceAssociation, skillAssociation));
+    when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+        .thenReturn(List.of(skill));
+    when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+
+    BddLogger.when("createFeedback is called");
+    service.createFeedback(declaredActivityId);
+
+    BddLogger.then(
+        "A feedback is saved with the activity's reflexion, 1 trace and 1 declared skill");
+    verify(feedbackRepository).save(feedbackCaptor.capture());
+    Feedback captured = feedbackCaptor.getValue();
+    assertThat(captured.getReflexion()).isEqualTo(reflexion);
+    assertThat(captured.getAssociatedTraces()).containsExactly(trace);
+    assertThat(captured.getAssociatedDeclaredSkills()).containsExactly(skill);
+  }
+
+  @Test
+  void createFeedback_should_throw_DeclaredActivityNotFoundException_when_activity_not_found() {
+    BddLogger.given("A logged-in student and a non-existent declared activity ID");
+    UUID declaredActivityId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.empty());
+
+    BddLogger.when("createFeedback is called");
+
+    BddLogger.then("A DeclaredActivityNotFoundException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
+        .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+    verify(feedbackRepository, never()).save(any());
+  }
+
+  @Test
+  void
+      createFeedback_should_throw_UserNotAuthorizedException_when_activity_belongs_to_another_student() {
+    BddLogger.given("A logged-in student and a declared activity belonging to another student");
+    UUID declaredActivityId = UUID.randomUUID();
+    Student anotherStudent = StudentFixture.create().toModel();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(), anotherStudent, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("createFeedback is called");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(feedbackRepository, never()).save(any());
+  }
+
+  @Test
+  void createFeedback_should_throw_FieldValidationException_when_reflexion_exceeds_max_length() {
+    BddLogger.given(
+        "A logged-in student and his declared activity with a reflexion exceeding"
+            + " RICH_TEXT_LENGTH");
+    UUID declaredActivityId = UUID.randomUUID();
+    String tooLongReflexion = "a".repeat(RICH_TEXT_LENGTH + 1);
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(), student, activity, null, tooLongReflexion, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+
+    BddLogger.when("createFeedback is called");
+
+    BddLogger.then("A FieldValidationException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
+        .isInstanceOf(FieldValidationException.class);
+
+    verify(feedbackRepository, never()).save(any());
   }
 
   @Test
