@@ -1,8 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -27,6 +29,7 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
@@ -104,6 +107,8 @@ class DeclaredActivityServiceImplTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findByActivity(student, activity)).thenReturn(Optional.empty());
     when(activityService.getActivityById(activityId)).thenReturn(activity);
+    when(declaredActivityRepository.save(any(DeclaredActivity.class)))
+        .thenAnswer(i -> i.getArguments()[0]);
 
     BddLogger.when("He tries to subscribe to this activity without dates");
     service.subscribe(activityId, null, null);
@@ -306,10 +311,10 @@ class DeclaredActivityServiceImplTest {
         .thenAnswer(i -> i.getArguments()[0]);
 
     BddLogger.when("He tries to finish this activity");
-    DeclaredActivity result = service.finish(declaredActivityId);
+    DeclaredActivityDetailsData result = service.finish(declaredActivityId);
 
     BddLogger.then("The declared activity is marked as finished and saved");
-    assertThat(result.getFinishedAt()).isPresent();
+    assertThat(result.finishedAt()).isNotNull();
     verify(declaredActivityRepository).save(declaredActivity);
   }
 
@@ -447,10 +452,17 @@ class DeclaredActivityServiceImplTest {
         .thenReturn(Optional.of(declaredActivity));
 
     BddLogger.when("He requests declared activity details");
-    DeclaredActivity result = service.getDeclaredActivityDetails(declaredActivityId);
+    DeclaredActivityDetailsData result = service.getDeclaredActivityDetails(declaredActivityId);
 
     BddLogger.then("The declared activity is returned and no save is performed");
-    assertThat(result).isSameAs(declaredActivity);
+    assertEquals(declaredActivity.getId(), result.id());
+    assertEquals(declaredActivity.getActivity().getId(), result.activity().id());
+    assertEquals(declaredActivity.getActivity().getTitle(), result.activity().title());
+    assertEquals(declaredActivity.getStatus(), result.status());
+    assertEquals(declaredActivity.getReflection(), result.reflection());
+    assertEquals(declaredActivity.getStartDate(), result.startDate());
+    assertEquals(declaredActivity.getEndDate(), result.endDate());
+    assertEquals(declaredActivity.getCreatedAt(), result.createdAt());
     verify(declaredActivityRepository).findById(eq(declaredActivityId), any(FetchGraph.class));
     verify(declaredActivityRepository, never()).save(any());
   }
