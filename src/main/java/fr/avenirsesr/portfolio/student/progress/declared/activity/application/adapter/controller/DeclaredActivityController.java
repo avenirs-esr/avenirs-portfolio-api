@@ -1,7 +1,5 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller;
 
-import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
-
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultTraceDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
@@ -15,12 +13,10 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreati
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.*;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -30,6 +26,13 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
@@ -66,10 +69,8 @@ public class DeclaredActivityController {
 
   @PostMapping("/subscribe/{activityId}")
   public ResponseEntity<DeclaredActivityDetailsDTO> subscribeActivity(
-      HttpServletRequest request,
       @Valid @PathVariable UUID activityId,
       @Valid @RequestBody SubscribeDeclaredActivityRequest subscribeDeclaredActivityRequest) {
-    String baseUrl = extractOrigin(request);
     LocalDate startDate =
         subscribeDeclaredActivityRequest.period() != null
             ? subscribeDeclaredActivityRequest.period().startDate()
@@ -78,11 +79,9 @@ public class DeclaredActivityController {
         subscribeDeclaredActivityRequest.period() != null
             ? subscribeDeclaredActivityRequest.period().endDate()
             : null;
-    DeclaredActivityDetailsData declaredActivityDetails =
+    DeclaredActivity declaredActivity =
         declaredActivityService.subscribe(activityId, startDate, endDate);
-    DeclaredActivityDetailsDTO dto =
-        declaredActivityDetailsDTOMapper.toDTO(declaredActivityDetails, baseUrl);
-    return ResponseEntity.ok(dto);
+    return ResponseEntity.ok(declaredActivityDetailsDTOMapper.toDTO(declaredActivity));
   }
 
   @DeleteMapping("/unsubscribe")
@@ -96,20 +95,13 @@ public class DeclaredActivityController {
 
   @PutMapping("/finish/{declaredActivityId}")
   public ResponseEntity<DeclaredActivityDetailsDTO> finish(
-      HttpServletRequest request,
-      Principal principal,
-      @Valid @PathVariable UUID declaredActivityId) {
+      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
     log.debug(
         "Received request to finish declared activity [{}] for student [{}]",
         declaredActivityId,
         principal.getName());
-
-    String baseUrl = extractOrigin(request);
-    DeclaredActivityDetailsData declaredActivityDetails =
-        declaredActivityService.finish(declaredActivityId);
-    DeclaredActivityDetailsDTO dto =
-        declaredActivityDetailsDTOMapper.toDTO(declaredActivityDetails, baseUrl);
-    return ResponseEntity.ok(dto);
+    DeclaredActivity declaredActivity = declaredActivityService.finish(declaredActivityId);
+    return ResponseEntity.ok(declaredActivityDetailsDTOMapper.toDTO(declaredActivity));
   }
 
   @PutMapping("/{activityId}/reflection")
@@ -123,20 +115,14 @@ public class DeclaredActivityController {
 
   @GetMapping("/{declaredActivityId}")
   public ResponseEntity<DeclaredActivityDetailsDTO> getDeclaredActivityDetails(
-      HttpServletRequest request,
-      Principal principal,
-      @Valid @PathVariable UUID declaredActivityId) {
+      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
     log.debug(
         "Received request to get declared activity [{}] details for student [{}]",
         declaredActivityId,
         principal.getName());
-
-    String baseUrl = extractOrigin(request);
-    DeclaredActivityDetailsData declaredActivityDetails =
-        declaredActivityService.getDeclaredActivityDetails(declaredActivityId);
-    DeclaredActivityDetailsDTO dto =
-        declaredActivityDetailsDTOMapper.toDTO(declaredActivityDetails, baseUrl);
-    return ResponseEntity.ok(dto);
+    return ResponseEntity.ok(
+        declaredActivityDetailsDTOMapper.toDTO(
+            declaredActivityService.getDeclaredActivityDetails(declaredActivityId)));
   }
 
   @GetMapping("/{declaredActivityId}/associations")

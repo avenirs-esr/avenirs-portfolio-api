@@ -3,13 +3,11 @@ package fr.avenirsesr.portfolio.activity.domain.service;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
-import fr.avenirsesr.portfolio.activity.domain.data.ActivityContentData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
-import fr.avenirsesr.portfolio.activity.domain.mapper.ActivityContentDataMapper;
 import fr.avenirsesr.portfolio.activity.domain.mapper.ActivityPresentationDataMapper;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
@@ -25,7 +23,6 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
-import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
@@ -143,7 +140,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public Activity getActivityById(UUID id) {
-    return activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
+    return activityRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
   }
 
   @Override
@@ -161,39 +158,42 @@ public class ActivityServiceImpl implements ActivityService {
   public ActivityPresentationData getActivityPresentation(EActivityStatus activityStatus, UUID id) {
     return switch (activityStatus) {
       case PUBLISHED -> {
-        Activity activity = getActivityById(id);
+        Activity activity =
+            activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
         yield ActivityPresentationDataMapper.toData(
             activity,
             declaredActivityService
                 .getByActivity(activity)
                 .map(DeclaredActivity::getId)
                 .orElse(null),
-            toBannerData(activity.getBanner()));
+            activity
+                .getBanner()
+                .map(this::fileDataMapper)
+                .orElse(
+                    new FileData(
+                        Optional.empty(),
+                        Optional.empty(),
+                        FileStorageConstants.DEFAULT_COVER_FILE_URL)));
       }
       case DRAFT -> {
-        ActivityDraft draft = getActivityDraftById(id);
-        yield ActivityPresentationDataMapper.toData(draft, toBannerData(draft.getBanner()));
+        var draft =
+            activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
+        yield ActivityPresentationDataMapper.toData(
+            draft,
+            draft
+                .getBanner()
+                .map(this::fileDataMapper)
+                .orElse(
+                    new FileData(
+                        Optional.empty(),
+                        Optional.empty(),
+                        FileStorageConstants.DEFAULT_COVER_FILE_URL)));
       }
     };
   }
 
-  @Override
-  public ActivityContentData getActivityContent(EActivityStatus activityStatus, UUID id) {
-    return switch (activityStatus) {
-      case PUBLISHED -> {
-        Activity activity = this.getActivityById(id);
-        yield ActivityContentDataMapper.toData(activity, toBannerData(activity.getBanner()));
-      }
-      case DRAFT -> {
-        ActivityDraft draft = this.getActivityDraftById(id);
-        yield ActivityContentDataMapper.toData(draft, toBannerData(draft.getBanner()));
-      }
-    };
-  }
-
-  private FileData toBannerData(Optional<File> banner) {
-    return FileDataMapper.mapFileData(
-        banner.orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL);
+  private FileData fileDataMapper(File file) {
+    return new FileData(Optional.of(file.getId()), Optional.of(file.getFileName()), file.getUri());
   }
 
   @Override

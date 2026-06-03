@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.activity.domain.port.input;
 
-import fr.avenirsesr.portfolio.activity.domain.data.ActivityContentData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
@@ -38,8 +37,6 @@ public interface ActivityService {
   ActivityDraft getActivityDraftById(UUID id);
 
   ActivityPresentationData getActivityPresentation(EActivityStatus activityStatus, UUID id);
-
-  ActivityContentData getActivityContent(EActivityStatus activityStatus, UUID id);
 
   Map<EActivityThematic, List<Activity>> getActivityNavigation();
 
