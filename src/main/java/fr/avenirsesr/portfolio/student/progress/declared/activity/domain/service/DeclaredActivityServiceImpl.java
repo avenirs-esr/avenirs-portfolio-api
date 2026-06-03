@@ -22,6 +22,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
@@ -124,7 +125,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public DeclaredActivity finish(UUID declaredActivityId) {
+  public void finish(UUID declaredActivityId) {
     Student student = loggedInUserService.getLoggedInStudent();
     DeclaredActivity declaredActivity =
         declaredActivityRepository
@@ -145,7 +146,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     declaredActivity.setFinishedAt(Instant.now());
 
-    return declaredActivityRepository.save(declaredActivity);
+    declaredActivityRepository.save(declaredActivity);
   }
 
   @Override
@@ -175,8 +176,11 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public DeclaredActivity getDeclaredActivityDetails(UUID declaredActivityId) {
-    return fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+  public DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId) {
+    DeclaredActivity declaredActivity =
+        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+    List<Feedback> feedbacks = feedbackRepository.findAllByDeclaredActivityId(declaredActivityId);
+    return new DeclaredActivityDetailsData(declaredActivity, feedbacks);
   }
 
   private void validateActivityDates(LocalDate startDate, LocalDate endDate, Instant subscribedAt) {

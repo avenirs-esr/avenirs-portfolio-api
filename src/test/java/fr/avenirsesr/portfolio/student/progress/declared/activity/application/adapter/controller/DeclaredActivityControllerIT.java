@@ -58,13 +58,13 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
             .bodyValue("{}")
             .exchange()
             .expectStatus()
-            .isOk()
+            .isCreated()
             .expectBody(String.class)
             .returnResult()
             .getResponseBody();
 
     JsonNode jsonNode = objectMapper.readTree(response);
-    return jsonNode.get("id").asText();
+    return jsonNode.get("createdItemId").asText();
   }
 
   @Test

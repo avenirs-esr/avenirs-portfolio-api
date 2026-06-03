@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -70,7 +71,7 @@ public class DeclaredActivityController {
   }
 
   @PostMapping("/subscribe/{activityId}")
-  public ResponseEntity<DeclaredActivityDetailsDTO> subscribeActivity(
+  public ResponseEntity<CreationResponse> subscribeActivity(
       @Valid @PathVariable UUID activityId,
       @Valid @RequestBody SubscribeDeclaredActivityRequest subscribeDeclaredActivityRequest) {
     LocalDate startDate =
@@ -83,7 +84,8 @@ public class DeclaredActivityController {
             : null;
     DeclaredActivity declaredActivity =
         declaredActivityService.subscribe(activityId, startDate, endDate);
-    return ResponseEntity.ok(declaredActivityDetailsDTOMapper.toDTO(declaredActivity));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(new CreationResponse(declaredActivity.getId()));
   }
 
   @DeleteMapping("/unsubscribe")
@@ -96,14 +98,14 @@ public class DeclaredActivityController {
   }
 
   @PutMapping("/finish/{declaredActivityId}")
-  public ResponseEntity<DeclaredActivityDetailsDTO> finish(
+  public ResponseEntity<Void> finish(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
     log.debug(
         "Received request to finish declared activity [{}] for student [{}]",
         declaredActivityId,
         principal.getName());
-    DeclaredActivity declaredActivity = declaredActivityService.finish(declaredActivityId);
-    return ResponseEntity.ok(declaredActivityDetailsDTOMapper.toDTO(declaredActivity));
+    declaredActivityService.finish(declaredActivityId);
+    return ResponseEntity.noContent().build();
   }
 
   @PutMapping("/{activityId}/reflection")

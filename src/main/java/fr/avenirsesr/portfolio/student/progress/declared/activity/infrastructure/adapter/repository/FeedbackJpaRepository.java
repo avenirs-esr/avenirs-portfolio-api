@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface FeedbackJpaRepository
     extends JpaRepository<FeedbackEntity, UUID>, JpaSpecificationExecutor<FeedbackEntity> {
-  List<FeedbackEntity> findAllByDeclaredActivity_IdOrderByCreatedAtAsc(UUID declaredActivityId);
+  List<FeedbackEntity> findAllByDeclaredActivity_IdOrderByCreatedAtDesc(UUID declaredActivityId);
 }

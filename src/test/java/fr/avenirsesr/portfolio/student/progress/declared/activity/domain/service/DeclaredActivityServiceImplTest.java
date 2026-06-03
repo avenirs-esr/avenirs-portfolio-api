@@ -28,14 +28,8 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityStartDateBeforeSubscriptionException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackInProcessException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackMaximumIterationReachedException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -315,10 +309,9 @@ class DeclaredActivityServiceImplTest {
         .thenAnswer(i -> i.getArguments()[0]);
 
     BddLogger.when("He tries to finish this activity");
-    DeclaredActivity result = service.finish(declaredActivityId);
+    service.finish(declaredActivityId);
 
     BddLogger.then("The declared activity is marked as finished and saved");
-    assertThat(result.getFinishedAt()).isPresent();
     verify(declaredActivityRepository).save(declaredActivity);
   }
 
@@ -454,14 +447,64 @@ class DeclaredActivityServiceImplTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId)).thenReturn(List.of());
 
     BddLogger.when("He requests declared activity details");
-    DeclaredActivity result = service.getDeclaredActivityDetails(declaredActivityId);
+    DeclaredActivityDetailsData result = service.getDeclaredActivityDetails(declaredActivityId);
 
     BddLogger.then("The declared activity is returned and no save is performed");
-    assertThat(result).isSameAs(declaredActivity);
+    assertThat(result.declaredActivity()).isSameAs(declaredActivity);
     verify(declaredActivityRepository).findById(eq(declaredActivityId), any(FetchGraph.class));
     verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void getDeclaredActivityDetails_should_include_feedbacks_fetched_from_repository() {
+    BddLogger.given(
+        "A logged-in student, his declared activity, and 2 feedbacks in the repository");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    Feedback feedback1 = mock(Feedback.class);
+    Feedback feedback2 = mock(Feedback.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+        .thenReturn(List.of(feedback1, feedback2));
+
+    BddLogger.when("getDeclaredActivityDetails is called");
+    DeclaredActivityDetailsData result = service.getDeclaredActivityDetails(declaredActivityId);
+
+    BddLogger.then("The result contains the declared activity and its 2 feedbacks");
+    assertThat(result.declaredActivity()).isSameAs(declaredActivity);
+    assertThat(result.feedbacks()).containsExactly(feedback1, feedback2);
+    verify(feedbackRepository).findAllByDeclaredActivityId(declaredActivityId);
+  }
+
+  @Test
+  void getDeclaredActivityDetails_should_return_empty_feedbacks_when_none_exist() {
+    BddLogger.given("A logged-in student and his declared activity with no feedbacks yet");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId)).thenReturn(List.of());
+
+    BddLogger.when("getDeclaredActivityDetails is called");
+    DeclaredActivityDetailsData result = service.getDeclaredActivityDetails(declaredActivityId);
+
+    BddLogger.then("The result contains the declared activity and an empty feedbacks list");
+    assertThat(result.declaredActivity()).isSameAs(declaredActivity);
+    assertThat(result.feedbacks()).isEmpty();
+    verify(feedbackRepository).findAllByDeclaredActivityId(declaredActivityId);
   }
 
   @Test
@@ -1506,7 +1549,7 @@ class DeclaredActivityServiceImplTest {
         "A feedback is saved with the activity's reflexion, 1 trace and 1 declared skill");
     verify(feedbackRepository).save(feedbackCaptor.capture());
     Feedback captured = feedbackCaptor.getValue();
-    assertThat(captured.getReflexion().get()).isEqualTo(reflexion);
+    assertThat(captured.getReflexion().orElse(null)).isEqualTo(reflexion);
     assertThat(captured.getAssociatedTraces()).containsExactly(trace);
     assertThat(captured.getAssociatedDeclaredSkills()).containsExactly(skill);
   }

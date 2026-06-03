@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.e
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Schema(requiredProperties = {"id", "activity", "status", "createdAt", "updatedAt"})
@@ -17,4 +18,5 @@ public record DeclaredActivityDetailsDTO(
     LocalDate endDate,
     Instant finishedAt,
     Instant createdAt,
-    Instant updatedAt) {}
+    Instant updatedAt,
+    List<FeedbackOverviewDTO> feedbacks) {}
