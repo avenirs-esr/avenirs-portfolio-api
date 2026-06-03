@@ -16,6 +16,8 @@ import lombok.Setter;
 @Setter
 public class Feedback extends AvenirsBaseModel {
   private final DeclaredActivity declaredActivity;
+
+  @Getter(AccessLevel.NONE)
   private String reflexion;
 
   @Getter(AccessLevel.NONE)
@@ -81,6 +83,10 @@ public class Feedback extends AvenirsBaseModel {
         status,
         associatedTraces,
         associatedDeclaredSkills);
+  }
+
+  public Optional<String> getReflexion() {
+    return Optional.ofNullable(reflexion);
   }
 
   public Optional<String> getFeedback() {

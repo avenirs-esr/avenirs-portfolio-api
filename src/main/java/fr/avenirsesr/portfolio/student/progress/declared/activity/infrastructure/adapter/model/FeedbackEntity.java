@@ -30,7 +30,7 @@ public class FeedbackEntity extends AvenirsBaseEntity {
   private DeclaredActivityEntity declaredActivity;
 
   @Size(max = RICH_TEXT_LENGTH, message = "reflection can not exceed {max} characters")
-  @Column(columnDefinition = "TEXT", nullable = false)
+  @Column(columnDefinition = "TEXT")
   private String reflection;
 
   @Size(max = RICH_TEXT_LENGTH, message = "feedback can not exceed {max} characters")

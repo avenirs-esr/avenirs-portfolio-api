@@ -1454,7 +1454,7 @@ class DeclaredActivityServiceImplTest {
     Feedback captured = feedbackCaptor.getValue();
     assertThat(captured.getAssociatedTraces()).isEmpty();
     assertThat(captured.getAssociatedDeclaredSkills()).isEmpty();
-    assertThat(captured.getReflexion()).isNull();
+    assertThat(captured.getReflexion()).isEmpty();
   }
 
   @Test
@@ -1503,7 +1503,7 @@ class DeclaredActivityServiceImplTest {
         "A feedback is saved with the activity's reflexion, 1 trace and 1 declared skill");
     verify(feedbackRepository).save(feedbackCaptor.capture());
     Feedback captured = feedbackCaptor.getValue();
-    assertThat(captured.getReflexion()).isEqualTo(reflexion);
+    assertThat(captured.getReflexion().get()).isEqualTo(reflexion);
     assertThat(captured.getAssociatedTraces()).containsExactly(trace);
     assertThat(captured.getAssociatedDeclaredSkills()).containsExactly(skill);
   }

@@ -24,7 +24,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
     FeedbackEntity entity =
         new FeedbackEntity(
             DeclaredActivityMapper.INSTANCE.fromDomain(feedback.getDeclaredActivity()),
-            feedback.getReflexion(),
+            feedback.getReflexion().orElse(null),
             feedback.getFeedback().orElse(null),
             feedback.getStatus(),
             buildAssociations(feedback));
