@@ -8,7 +8,6 @@ import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraf
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftCreationResponse;
 import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftUpdateResponse;
-import fr.avenirsesr.portfolio.activity.domain.data.ActivityContentData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
@@ -66,7 +65,6 @@ public class ActivityController {
 
   @GetMapping("/{activityStatus}/{activityId}/content")
   public ResponseEntity<ActivityContentDTO> getActivityContent(
-      HttpServletRequest request,
       @PathVariable
           @Parameter(
               name = "activityStatus",
@@ -76,11 +74,13 @@ public class ActivityController {
           EActivityStatus activityStatus,
       @PathVariable UUID activityId) {
     log.debug("Received request to get activity [{}] content", activityId);
-
-    String baseUrl = extractOrigin(request);
-    ActivityContentData activityContent =
-        activityService.getActivityContent(activityStatus, activityId);
-    ActivityContentDTO dto = activityContentDtoMapper.toDTO(activityContent, baseUrl);
+    ActivityContentDTO dto =
+        switch (activityStatus) {
+          case PUBLISHED ->
+              activityContentDtoMapper.toDTO(activityService.getActivityById(activityId));
+          case DRAFT ->
+              activityContentDtoMapper.toDTO(activityService.getActivityDraftById(activityId));
+        };
     return ResponseEntity.ok(dto);
   }
 
