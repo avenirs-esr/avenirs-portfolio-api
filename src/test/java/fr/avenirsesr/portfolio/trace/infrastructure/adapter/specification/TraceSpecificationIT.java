@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.trace.domain.filter.ETraceFilterKey;
 import fr.avenirsesr.portfolio.trace.domain.model.ETraceStatus;
+import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository.TraceJpaRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
@@ -188,7 +189,7 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             user,
             title,
             ELanguage.FRENCH,
-            false,
+            ETraceAuthorType.PERSONAL,
             null,
             null,
             null,

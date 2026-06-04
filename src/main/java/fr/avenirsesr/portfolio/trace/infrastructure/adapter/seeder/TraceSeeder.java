@@ -77,7 +77,7 @@ public class TraceSeeder {
                   data.userId(),
                   data.title(),
                   data.language(),
-                  data.isGroup(),
+                  data.traceAuthorType(),
                   data.personalNote(),
                   data.aiJustification(),
                   data.link());
@@ -112,7 +112,7 @@ public class TraceSeeder {
                     entity.getId(),
                     entity.getUser().getId(),
                     entity.getTitle(),
-                    entity.isGroup(),
+                    entity.getTraceAuthorType(),
                     entity.getLanguage(),
                     entity.getAiUseJustification(),
                     entity.getPersonalNote(),

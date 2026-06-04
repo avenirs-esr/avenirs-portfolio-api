@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
+import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.FakeTrace;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
@@ -20,7 +21,7 @@ public class TraceFixture {
   private Instant createdAt;
   private Instant updatedAt;
   private Instant deletedAt;
-  private boolean isGroup;
+  private ETraceAuthorType traceAuthorType;
   private String aiUseJustification;
   private String personalNote;
   private String link;
@@ -36,7 +37,7 @@ public class TraceFixture {
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
     this.deletedAt = base.getDeletedAt();
-    this.isGroup = base.isGroup();
+    this.traceAuthorType = base.getTraceAuthorType();
     this.attachment =
         File.create(
             UUID.randomUUID(),
@@ -84,8 +85,8 @@ public class TraceFixture {
     return this;
   }
 
-  public TraceFixture withGroup(boolean isGroup) {
-    this.isGroup = isGroup;
+  public TraceFixture withTraceAuthorType(ETraceAuthorType traceAuthorType) {
+    this.traceAuthorType = traceAuthorType;
     return this;
   }
 
@@ -119,7 +120,7 @@ public class TraceFixture {
         id,
         user,
         title,
-        isGroup,
+        traceAuthorType,
         aiUseJustification,
         personalNote,
         link,

@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder;
 
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.time.Instant;
@@ -27,7 +28,7 @@ public class FakeTrace {
                 user,
                 "Trace %s".formatted(faker().lorem().word()),
                 ELanguage.FALLBACK,
-                false,
+                ETraceAuthorType.PERSONAL,
                 null,
                 null,
                 null,
@@ -36,10 +37,12 @@ public class FakeTrace {
                 Instant.now(),
                 null));
 
+    ETraceAuthorType[] types = ETraceAuthorType.values();
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.withAiUseJustification();
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.withPersonalNote();
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.withLink();
-    if (new Random().nextBoolean()) fakeTrace = fakeTrace.isGroup();
+    if (new Random().nextBoolean())
+      fakeTrace = fakeTrace.withTraceAuthorType(types[new Random().nextInt(types.length)]);
 
     return fakeTrace;
   }
@@ -54,8 +57,8 @@ public class FakeTrace {
     return this;
   }
 
-  public FakeTrace isGroup() {
-    trace.setGroup(true);
+  public FakeTrace withTraceAuthorType(ETraceAuthorType traceAuthorType) {
+    trace.setTraceAuthorType(traceAuthorType);
     return this;
   }
 
