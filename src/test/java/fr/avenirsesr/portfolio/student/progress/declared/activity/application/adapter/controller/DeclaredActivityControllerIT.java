@@ -269,4 +269,77 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
     BddLogger.then("it should return 403");
   }
+
+  @Test
+  @Transactional
+  void shouldAskForFeedbackSuccessfully() {
+    BddLogger.given("a declared activity owned by the logged-in student");
+    String id = declaredActivityId;
+
+    BddLogger.when("the student asks for feedback on this activity");
+    BddLogger.then("it should return 201 CREATED with a FeedbackDetailsDTO");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + id + "/ask-for-feedback")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isCreated()
+        .expectBody()
+        .jsonPath("$.id")
+        .isNotEmpty()
+        .jsonPath("$.declaredActivityId")
+        .isEqualTo(id)
+        .jsonPath("$.status")
+        .isEqualTo("NEW")
+        .jsonPath("$.student")
+        .isNotEmpty()
+        .jsonPath("$.student.id")
+        .isNotEmpty()
+        .jsonPath("$.associatedTraces")
+        .isArray()
+        .jsonPath("$.associatedDeclaredSkills")
+        .isArray();
+  }
+
+  @Test
+  void shouldReturn404WhenAskingForFeedbackOnNonExistentActivity() {
+    BddLogger.given("a non-existent declared activity ID");
+
+    BddLogger.when("the student asks for feedback");
+    BddLogger.then("it should return 404");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + notFoundId + "/ask-for-feedback")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn403WhenAskingForFeedbackOnAnotherStudentActivity() {
+    BddLogger.given("a declared activity belonging to the first student");
+    String id = declaredActivityId;
+
+    BddLogger.when("another student asks for feedback on this activity");
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + id + "/ask-for-feedback")
+        .header("X-Signed-Context", otherStudentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
 }

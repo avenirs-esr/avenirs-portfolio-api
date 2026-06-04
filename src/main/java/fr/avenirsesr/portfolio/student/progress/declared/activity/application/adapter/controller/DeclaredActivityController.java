@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +45,7 @@ public class DeclaredActivityController {
   private final DeclaredActivityDetailsDTOMapper declaredActivityDetailsDTOMapper;
   private final DeclaredActivityAssociationsDTOMapper declaredActivityAssociationsDTOMapper;
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
+  private final FeedbackDetailsDTOMapper feedbackDetailsDTOMapper;
 
   @GetMapping
   public ResponseEntity<PagedResponse<DeclaredActivityViewDTO>> getDeclaredActivitiesView(
@@ -232,6 +234,19 @@ public class DeclaredActivityController {
                 .map(associationSearchResultDTOMapper::toDeclaredActivityDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
+  }
+
+  @PostMapping("/{declaredActivityId}/ask-for-feedback")
+  public ResponseEntity<FeedbackDetailsDTO> askForFeedback(
+      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
+    log.debug(
+        "Received request to ask for feedback on declared activity [{}] by student [{}]",
+        declaredActivityId,
+        principal.getName());
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(
+            feedbackDetailsDTOMapper.toDTO(
+                declaredActivityService.createFeedback(declaredActivityId)));
   }
 
   @GetMapping("/{declaredActivityId}/search-for-association/traces")
