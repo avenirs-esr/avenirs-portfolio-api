@@ -34,9 +34,12 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.excepti
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityStartDateBeforeSubscriptionException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackInProcessException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackMaximumIterationReachedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
@@ -1571,6 +1574,201 @@ class DeclaredActivityServiceImplTest {
     BddLogger.then("A FieldValidationException is thrown and nothing is saved");
     assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
         .isInstanceOf(FieldValidationException.class);
+
+    verify(feedbackRepository, never()).save(any());
+  }
+
+  @Test
+  void createFeedback_should_throw_FeedbackInProcessException_when_last_feedback_is_IN_PROCESS() {
+    BddLogger.given(
+        "A logged-in student whose last feedback on the declared activity is IN_PROCESS");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    Feedback inProcessFeedback =
+        Feedback.toDomain(
+            UUID.randomUUID(),
+            Instant.now(),
+            Instant.now(),
+            declaredActivity,
+            null,
+            null,
+            EFeedbackStatus.IN_PROCESS,
+            List.of(),
+            List.of());
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+        .thenReturn(List.of(inProcessFeedback));
+
+    BddLogger.when("createFeedback is called");
+
+    BddLogger.then("A FeedbackInProcessException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
+        .isInstanceOf(FeedbackInProcessException.class);
+
+    verify(feedbackRepository, never()).save(any());
+  }
+
+  @Test
+  void createFeedback_should_update_existing_feedback_when_last_feedback_is_NEW() {
+    BddLogger.given(
+        "A logged-in student whose last feedback is NEW, and the declared activity has a reflexion"
+            + " and associations");
+    UUID declaredActivityId = UUID.randomUUID();
+    UUID traceId = UUID.randomUUID();
+    UUID skillId = UUID.randomUUID();
+    String updatedReflexion = "Nouvelle réflexion mise à jour.";
+
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(
+            UUID.randomUUID(), student, activity, null, updatedReflexion, null, null, null);
+
+    UUID existingFeedbackId = UUID.randomUUID();
+    Feedback existingFeedback =
+        Feedback.toDomain(
+            existingFeedbackId,
+            Instant.now(),
+            Instant.now(),
+            declaredActivity,
+            "Ancienne réflexion",
+            null,
+            EFeedbackStatus.NEW,
+            List.of(),
+            List.of());
+
+    Association traceAssociation = mock(Association.class);
+    Association skillAssociation = mock(Association.class);
+    Trace trace = mock(Trace.class);
+    DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+        .thenReturn(List.of(existingFeedback));
+
+    when(traceAssociation.getAssociationType())
+        .thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
+    when(traceAssociation.getId2()).thenReturn(traceId);
+    when(skillAssociation.getAssociationType())
+        .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
+    when(skillAssociation.getId2()).thenReturn(skillId);
+    when(associationService.getAllOf(any(), any(), any()))
+        .thenReturn(List.of(traceAssociation, skillAssociation));
+    when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+        .thenReturn(List.of(skill));
+    when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+
+    BddLogger.when("createFeedback is called");
+    service.createFeedback(declaredActivityId);
+
+    BddLogger.then(
+        "The existing feedback is updated and saved — same ID, updated reflexion, traces and"
+            + " skills, status stays NEW");
+    verify(feedbackRepository).save(feedbackCaptor.capture());
+    Feedback saved = feedbackCaptor.getValue();
+    assertThat(saved.getId()).isEqualTo(existingFeedbackId);
+    assertThat(saved.getReflexion()).contains(updatedReflexion);
+    assertThat(saved.getAssociatedTraces()).containsExactly(trace);
+    assertThat(saved.getAssociatedDeclaredSkills()).containsExactly(skill);
+    assertThat(saved.getStatus()).isEqualTo(EFeedbackStatus.NEW);
+  }
+
+  @Test
+  void
+      createFeedback_should_create_new_feedback_when_last_feedback_is_SUBMITTED_and_limit_not_reached() {
+    BddLogger.given(
+        "A logged-in student with 1 SUBMITTED feedback and feedbackAllowedIterations=2");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().withFeedbackAllowedIterations(2).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    Feedback submittedFeedback =
+        Feedback.toDomain(
+            UUID.randomUUID(),
+            Instant.now(),
+            Instant.now(),
+            declaredActivity,
+            null,
+            "Retour du formateur",
+            EFeedbackStatus.SUBMITTED,
+            List.of(),
+            List.of());
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+        .thenReturn(List.of(submittedFeedback));
+    when(associationService.getAllOf(any(), any(), any())).thenReturn(List.of());
+    when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
+    when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
+        .thenReturn(List.of());
+    when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+
+    BddLogger.when("createFeedback is called");
+    service.createFeedback(declaredActivityId);
+
+    BddLogger.then(
+        "A new feedback is created with a different ID from the submitted one and status NEW");
+    verify(feedbackRepository).save(feedbackCaptor.capture());
+    Feedback saved = feedbackCaptor.getValue();
+    assertThat(saved.getId()).isNotEqualTo(submittedFeedback.getId());
+    assertThat(saved.getStatus()).isEqualTo(EFeedbackStatus.NEW);
+  }
+
+  @Test
+  void
+      createFeedback_should_throw_FeedbackMaximumIterationReachedException_when_limit_is_reached() {
+    BddLogger.given(
+        "A logged-in student with 2 SUBMITTED feedbacks and feedbackAllowedIterations=2");
+    UUID declaredActivityId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().withFeedbackAllowedIterations(2).toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    Feedback feedback1 =
+        Feedback.toDomain(
+            UUID.randomUUID(),
+            Instant.now().minusSeconds(120),
+            Instant.now().minusSeconds(120),
+            declaredActivity,
+            null,
+            "Retour 1",
+            EFeedbackStatus.SUBMITTED,
+            List.of(),
+            List.of());
+    Feedback feedback2 =
+        Feedback.toDomain(
+            UUID.randomUUID(),
+            Instant.now(),
+            Instant.now(),
+            declaredActivity,
+            null,
+            "Retour 2",
+            EFeedbackStatus.SUBMITTED,
+            List.of(),
+            List.of());
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
+        .thenReturn(Optional.of(declaredActivity));
+    when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+        .thenReturn(List.of(feedback1, feedback2));
+
+    BddLogger.when("createFeedback is called");
+
+    BddLogger.then("A FeedbackMaximumIterationReachedException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
+        .isInstanceOf(FeedbackMaximumIterationReachedException.class);
 
     verify(feedbackRepository, never()).save(any());
   }

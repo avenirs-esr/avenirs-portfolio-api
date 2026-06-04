@@ -483,6 +483,28 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     List<DeclaredSkillProgress> declaredSkills =
         declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(declaredSkillsIds);
 
+    List<Feedback> existingFeedbacks =
+        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId);
+
+    if (!existingFeedbacks.isEmpty()) {
+      Feedback lastFeedback = existingFeedbacks.getLast();
+      switch (lastFeedback.getStatus()) {
+        case IN_PROCESS -> throw new FeedbackInProcessException();
+        case NEW -> {
+          lastFeedback.setReflexion(declaredActivity.getReflection());
+          lastFeedback.setAssociatedTraces(traces);
+          lastFeedback.setAssociatedDeclaredSkills(declaredSkills);
+          return feedbackRepository.save(lastFeedback);
+        }
+        case SUBMITTED -> {
+          if (existingFeedbacks.size()
+              >= declaredActivity.getActivity().getFeedbackAllowedIterations()) {
+            throw new FeedbackMaximumIterationReachedException();
+          }
+        }
+      }
+    }
+
     Feedback feedback =
         Feedback.create(declaredActivity, declaredActivity.getReflection(), traces, declaredSkills);
     return feedbackRepository.save(feedback);

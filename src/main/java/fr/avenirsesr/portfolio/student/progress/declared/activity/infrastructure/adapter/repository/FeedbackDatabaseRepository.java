@@ -85,6 +85,15 @@ public class FeedbackDatabaseRepository
     return jpaRepository.findAll().stream().map(this::toDomainWithDependencies).toList();
   }
 
+  @Override
+  public List<Feedback> findAllByDeclaredActivityId(UUID declaredActivityId) {
+    return jpaRepository
+        .findAllByDeclaredActivity_IdOrderByCreatedAtAsc(declaredActivityId)
+        .stream()
+        .map(this::toDomainWithDependencies)
+        .toList();
+  }
+
   private Feedback toDomainWithDependencies(FeedbackEntity entity) {
     AssociationsJson associations = entity.getAssociations();
 
