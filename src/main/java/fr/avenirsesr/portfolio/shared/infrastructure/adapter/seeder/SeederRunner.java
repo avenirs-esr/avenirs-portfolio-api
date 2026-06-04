@@ -37,10 +37,9 @@ public class SeederRunner implements CommandLineRunner {
       long userPrincipalCount = userPrincipalRepository.countAll();
       if (userPrincipalCount < userCount) {
         seederOrchestrator.seedTable("user-principal", ESeedMode.INSERT_ONLY);
-        seedingState.markCompleted();
-        return;
+      } else {
+        log.info("{} user principal found. Seeder skipped.", userPrincipalCount);
       }
-      log.info("{} user principal found. Seeder skipped.", userPrincipalCount);
       seedingState.markCompleted();
       return;
     }

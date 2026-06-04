@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserSeeder {
 
   private static final String USERS_PATH_FILE = "seeder/users.json";
-  private static final String USER_PRINCIPALS_PATH_FILE = "seeder/user-principal.json";
+  private static final String USER_PRINCIPAL_PATH_FILE = "seeder/user-principal.json";
 
   private final FileReader fileReader;
   private final UserService userService;
@@ -86,7 +86,7 @@ public class UserSeeder {
   private Map<UUID, String> loadEppnByUserId() {
     List<UserPrincipalCreationData> userPrincipals =
         fileReader.readJSON(
-            USER_PRINCIPALS_PATH_FILE, new TypeReference<List<UserPrincipalCreationData>>() {});
+            USER_PRINCIPAL_PATH_FILE, new TypeReference<List<UserPrincipalCreationData>>() {});
 
     return userPrincipals.stream()
         .collect(

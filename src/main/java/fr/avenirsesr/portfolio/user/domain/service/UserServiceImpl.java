@@ -73,13 +73,7 @@ public class UserServiceImpl implements UserService {
 
   private User createUserFromExternalUser(String eppn) {
     var externalUser =
-        externalUserClient
-            .getByEppn(eppn)
-            .orElseThrow(
-                () -> {
-                  log.error("No external user found for eppn {}", eppn);
-                  return new ExternalUserNotFoundException();
-                });
+        externalUserClient.getByEppn(eppn).orElseThrow(ExternalUserNotFoundException::new);
 
     if (externalUser.status() == EUserStatus.BLOCKED) {
       throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_BLOCKED);
