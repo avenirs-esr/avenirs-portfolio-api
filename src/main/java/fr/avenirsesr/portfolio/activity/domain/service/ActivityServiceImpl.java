@@ -63,7 +63,7 @@ public class ActivityServiceImpl implements ActivityService {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     requireNotNull("thematic", thematic);
     requireNotBlankAndMaxLength("summary", summary, SUMMARY_LENGTH);
-    requireNotBlankAndMaxLength("description", description, RICH_TEXT_LENGTH);
+    requireNotBlankAndMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
     requireNotBlankAndMaxLength(
         "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
     validateOptionalTextMaxLength(
@@ -331,7 +331,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     validateOptionalTextMaxLength("summary", summary, SUMMARY_LENGTH);
-    validateOptionalTextMaxLength("description", description, RICH_TEXT_LENGTH);
+    validateOptionalTextMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
     validateOptionalTextMaxLength(
         "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
     validateOptionalTextMaxLength(

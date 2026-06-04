@@ -37,7 +37,7 @@ public class ActivityDraftEntity extends AvenirsBaseEntity {
   @Column(length = SUMMARY_LENGTH)
   private String summary;
 
-  @Column(length = RICH_TEXT_LENGTH)
+  @Column(length = RICH_DESCRIPTION_LENGTH)
   private String description;
 
   @Column(name = "execution_period_info", length = ACTIVITY_EXECUTION_PERIOD_INFO)
