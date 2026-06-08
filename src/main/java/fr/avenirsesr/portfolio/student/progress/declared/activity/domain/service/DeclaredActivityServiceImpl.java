@@ -20,6 +20,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.AskForFeedbackNotification;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
@@ -60,6 +62,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final AssociationSearchHelper associationSearchHelper;
   private final LoggedInUserService loggedInUserService;
   private final FeedbackRepository feedbackRepository;
+  private final NotificationService notificationService;
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria) {
@@ -514,7 +517,12 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     Feedback feedback =
         Feedback.create(
             declaredActivity, declaredActivity.getReflection(), traces, declaredSkills, iteration);
-    return feedbackRepository.save(feedback);
+    var savedFeedback = feedbackRepository.save(feedback);
+
+    var author = savedFeedback.getDeclaredActivity().getActivity().getAuthor().getUser();
+    notificationService.notify(new AskForFeedbackNotification(author, savedFeedback));
+
+    return savedFeedback;
   }
 
   @Override

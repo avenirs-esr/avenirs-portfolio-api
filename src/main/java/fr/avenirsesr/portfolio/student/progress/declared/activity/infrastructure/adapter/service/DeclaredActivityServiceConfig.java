@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructur
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -26,6 +27,7 @@ public class DeclaredActivityServiceConfig {
   private final AssociationService associationService;
   private final AssociationSearchHelper associationSearchHelper;
   private final FeedbackRepository feedbackRepository;
+  private final NotificationService notificationService;
 
   @Bean
   public DeclaredActivityService declaredActivityService(
@@ -38,6 +40,7 @@ public class DeclaredActivityServiceConfig {
         associationService,
         associationSearchHelper,
         loggedInUserService,
-        feedbackRepository);
+        feedbackRepository,
+        notificationService);
   }
 }

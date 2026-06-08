@@ -27,6 +27,7 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
@@ -79,6 +80,7 @@ class DeclaredActivityServiceImplTest {
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private FeedbackRepository feedbackRepository;
+  @Mock private NotificationService notificationService;
 
   @InjectMocks private DeclaredActivityServiceImpl service;
 
@@ -101,7 +103,8 @@ class DeclaredActivityServiceImplTest {
             associationService,
             associationSearchHelper,
             loggedInUserService,
-            feedbackRepository);
+            feedbackRepository,
+            notificationService);
   }
 
   @Test
