@@ -12,7 +12,6 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreati
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import java.util.List;
 import java.util.UUID;
@@ -194,12 +193,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
   void shouldCreateNewTrace() throws Exception {
     CreateTraceDTO dto =
         new CreateTraceDTO(
-            "Nouvelle trace",
-            ELanguage.FRENCH,
-            ETraceAuthorType.PERSONAL,
-            "Note",
-            "Justification",
-            null);
+            "Nouvelle trace", ELanguage.FRENCH, false, "Note", "Justification", null);
 
     webTestClient
         .post()

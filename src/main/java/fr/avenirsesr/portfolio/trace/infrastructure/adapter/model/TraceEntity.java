@@ -5,7 +5,6 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.DeletableAvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -41,9 +40,8 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private ELanguage language;
 
-  @Column(nullable = false, name = "trace_author_type")
-  @Enumerated(EnumType.STRING)
-  private ETraceAuthorType traceAuthorType;
+  @Column(nullable = false, name = "is_group")
+  private boolean isGroup;
 
   @Size(
       max = AI_JUSTIFICATION_LENGTH,
@@ -66,7 +64,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      boolean isGroup,
       String aiUseJustification,
       String personalNote,
       String link,
@@ -81,7 +79,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
     this.user = user;
     this.title = title;
     this.language = language;
-    this.traceAuthorType = traceAuthorType;
+    this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
     this.link = link;
@@ -93,7 +91,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      boolean isGroup,
       String aiUseJustification,
       String personalNote,
       String link,
@@ -106,7 +104,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
         user,
         title,
         language,
-        traceAuthorType,
+        isGroup,
         aiUseJustification,
         personalNote,
         link,
