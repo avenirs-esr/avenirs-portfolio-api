@@ -33,7 +33,7 @@ public interface TraceService {
   Trace createTrace(
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
       String link);
@@ -43,7 +43,7 @@ public interface TraceService {
       UUID userId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
       String link);
@@ -52,7 +52,7 @@ public interface TraceService {
       UUID traceId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
       String link);
@@ -61,7 +61,7 @@ public interface TraceService {
       UUID traceId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String personalNote,
       String aiJustification);
 

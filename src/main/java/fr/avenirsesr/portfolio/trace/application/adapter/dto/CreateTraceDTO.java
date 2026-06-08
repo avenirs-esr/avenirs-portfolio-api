@@ -6,11 +6,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-@Schema(requiredProperties = {"title", "language", "traceAuthorType"})
+@Schema(requiredProperties = {"title", "language", "authorType"})
 public record CreateTraceDTO(
     @NotBlank @Size(max = 70) String title,
     @Schema(ref = "#/components/schemas/ELanguage") ELanguage language,
-    @Schema(ref = "#/components/schemas/ETraceAuthorType") ETraceAuthorType traceAuthorType,
+    @Schema(ref = "#/components/schemas/ETraceAuthorType") ETraceAuthorType authorType,
     String personalNote,
     String iaJustification,
     String link) {}

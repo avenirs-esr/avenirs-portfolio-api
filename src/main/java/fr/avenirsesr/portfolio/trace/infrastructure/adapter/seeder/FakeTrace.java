@@ -42,7 +42,7 @@ public class FakeTrace {
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.withPersonalNote();
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.withLink();
     if (new Random().nextBoolean())
-      fakeTrace = fakeTrace.withTraceAuthorType(types[new Random().nextInt(types.length)]);
+      fakeTrace = fakeTrace.withAuthorType(types[new Random().nextInt(types.length)]);
 
     return fakeTrace;
   }
@@ -57,8 +57,8 @@ public class FakeTrace {
     return this;
   }
 
-  public FakeTrace withTraceAuthorType(ETraceAuthorType traceAuthorType) {
-    trace.setTraceAuthorType(traceAuthorType);
+  public FakeTrace withAuthorType(ETraceAuthorType authorType) {
+    trace.setAuthorType(authorType);
     return this;
   }
 

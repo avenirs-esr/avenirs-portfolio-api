@@ -41,9 +41,9 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   private ELanguage language;
 
-  @Column(nullable = false, name = "trace_author_type")
+  @Column(nullable = false, name = "author_type")
   @Enumerated(EnumType.STRING)
-  private ETraceAuthorType traceAuthorType;
+  private ETraceAuthorType authorType;
 
   @Size(
       max = AI_JUSTIFICATION_LENGTH,
@@ -66,7 +66,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String aiUseJustification,
       String personalNote,
       String link,
@@ -81,7 +81,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
     this.user = user;
     this.title = title;
     this.language = language;
-    this.traceAuthorType = traceAuthorType;
+    this.authorType = authorType;
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
     this.link = link;
@@ -93,7 +93,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       UserEntity user,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String aiUseJustification,
       String personalNote,
       String link,
@@ -106,7 +106,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
         user,
         title,
         language,
-        traceAuthorType,
+        authorType,
         aiUseJustification,
         personalNote,
         link,

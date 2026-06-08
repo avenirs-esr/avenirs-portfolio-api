@@ -17,7 +17,7 @@ import lombok.Setter;
 public class Trace extends DeletableAvenirsBaseModel {
   private final User user;
   private String title;
-  private ETraceAuthorType traceAuthorType;
+  private ETraceAuthorType authorType;
   private ELanguage language;
 
   @Getter(AccessLevel.NONE)
@@ -37,7 +37,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       User user,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String aiUseJustification,
       String personalNote,
       String link,
@@ -49,7 +49,7 @@ public class Trace extends DeletableAvenirsBaseModel {
     this.user = user;
     this.title = title;
     this.language = language;
-    this.traceAuthorType = traceAuthorType;
+    this.authorType = authorType;
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
     this.link = link;
@@ -61,7 +61,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       User user,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String aiUseJustification,
       String personalNote,
       String link,
@@ -72,7 +72,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         user,
         title,
         language,
-        traceAuthorType,
+        authorType,
         aiUseJustification,
         personalNote,
         link,
@@ -86,7 +86,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       UUID id,
       User user,
       String title,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String aiUseJustification,
       String personalNote,
       String link,
@@ -100,7 +100,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         user,
         title,
         language,
-        traceAuthorType,
+        authorType,
         aiUseJustification,
         personalNote,
         link,

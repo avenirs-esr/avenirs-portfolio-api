@@ -15,7 +15,7 @@ public final class SwaggerSchema {
           ._enum(Arrays.stream(ETraceStatus.values()).map(Enum::name).toList())
           .description("Enum for trace status");
 
-  public static final Schema<String> traceAuthorTypeSchema =
+  public static final Schema<String> authorTypeSchema =
       new StringSchema()
           .name("ETraceAuthorType")
           ._enum(Arrays.stream(ETraceAuthorType.values()).map(Enum::name).toList())

@@ -10,7 +10,7 @@ public class OpenApiTraceEnumConfiguration {
   public OpenApiCustomizer traceEnumCustomizer() {
     return openApi -> {
       openApi.getComponents().addSchemas("ETraceStatus", SwaggerSchema.traceStatusSchema);
-      openApi.getComponents().addSchemas("ETraceAuthorType", SwaggerSchema.traceAuthorTypeSchema);
+      openApi.getComponents().addSchemas("ETraceAuthorType", SwaggerSchema.authorTypeSchema);
     };
   }
 }

@@ -180,7 +180,7 @@ public class TraceServiceImpl implements TraceService {
         trace.getTitle(),
         isAssociated,
         programNameOfTrace(trace),
-        trace.getTraceAuthorType(),
+        trace.getAuthorType(),
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
         trace.getLink(),
@@ -249,7 +249,7 @@ public class TraceServiceImpl implements TraceService {
       UUID userId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
       String link) {
@@ -258,7 +258,7 @@ public class TraceServiceImpl implements TraceService {
         userService.getUser(userId),
         title,
         language,
-        traceAuthorType,
+        authorType,
         personalNote,
         aiJustification,
         link);
@@ -268,7 +268,7 @@ public class TraceServiceImpl implements TraceService {
   public Trace createTrace(
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
       String link) {
@@ -278,7 +278,7 @@ public class TraceServiceImpl implements TraceService {
         loggedInUser,
         title,
         language,
-        traceAuthorType,
+        authorType,
         personalNote,
         aiJustification,
         link);
@@ -289,7 +289,7 @@ public class TraceServiceImpl implements TraceService {
       User user,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
       String link) {
@@ -298,15 +298,7 @@ public class TraceServiceImpl implements TraceService {
     validateUrl(link);
     var trace =
         Trace.create(
-            traceId,
-            user,
-            title,
-            language,
-            traceAuthorType,
-            aiJustification,
-            personalNote,
-            link,
-            null);
+            traceId, user, title, language, authorType, aiJustification, personalNote, link, null);
 
     return traceRepository.save(trace);
   }
@@ -316,7 +308,7 @@ public class TraceServiceImpl implements TraceService {
       UUID traceId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
       String link) {
@@ -326,7 +318,7 @@ public class TraceServiceImpl implements TraceService {
 
     trace.setTitle(title);
     trace.setLanguage(language);
-    trace.setTraceAuthorType(traceAuthorType);
+    trace.setAuthorType(authorType);
     trace.setPersonalNote(personalNote);
     trace.setAiUseJustification(aiJustification);
 
@@ -346,11 +338,10 @@ public class TraceServiceImpl implements TraceService {
       UUID traceId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String personalNote,
       String aiJustification) {
-    return updateTrace(
-        traceId, title, language, traceAuthorType, personalNote, aiJustification, null);
+    return updateTrace(traceId, title, language, authorType, personalNote, aiJustification, null);
   }
 
   @Override

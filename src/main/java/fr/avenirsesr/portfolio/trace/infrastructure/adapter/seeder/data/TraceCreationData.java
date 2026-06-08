@@ -9,7 +9,7 @@ public record TraceCreationData(
     UUID traceId,
     UUID userId,
     String title,
-    ETraceAuthorType traceAuthorType,
+    ETraceAuthorType authorType,
     ELanguage language,
     String aiJustification,
     String personalNote,

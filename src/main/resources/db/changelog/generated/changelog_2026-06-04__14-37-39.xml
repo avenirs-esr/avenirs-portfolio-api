@@ -2,18 +2,18 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
     <changeSet author="syphax-fennouch (generated)" id="1780583870894-1">
         <addColumn tableName="trace">
-            <column name="trace_author_type" type="varchar(255)">
+            <column name="author_type" type="varchar(255)">
                 <constraints nullable="true"/>
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet author="syphax-fennouch (generated)" id="1780583870894-2">
-        <sql>UPDATE trace SET trace_author_type = CASE WHEN is_group = true THEN 'COLLECTIVE' ELSE 'PERSONAL' END</sql>
+        <sql>UPDATE trace SET author_type = CASE WHEN is_group = true THEN 'COLLECTIVE' ELSE 'PERSONAL' END</sql>
     </changeSet>
 
     <changeSet author="syphax-fennouch (generated)" id="1780583870894-3">
-        <addNotNullConstraint tableName="trace" columnName="trace_author_type" columnDataType="varchar(255)"/>
+        <addNotNullConstraint tableName="trace" columnName="author_type" columnDataType="varchar(255)"/>
     </changeSet>
 
     <changeSet author="syphax-fennouch (generated)" id="1780583870894-5">

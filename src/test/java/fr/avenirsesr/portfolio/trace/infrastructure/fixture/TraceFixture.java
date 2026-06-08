@@ -21,7 +21,7 @@ public class TraceFixture {
   private Instant createdAt;
   private Instant updatedAt;
   private Instant deletedAt;
-  private ETraceAuthorType traceAuthorType;
+  private ETraceAuthorType authorType;
   private String aiUseJustification;
   private String personalNote;
   private String link;
@@ -37,7 +37,7 @@ public class TraceFixture {
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
     this.deletedAt = base.getDeletedAt();
-    this.traceAuthorType = base.getTraceAuthorType();
+    this.authorType = base.getAuthorType();
     this.attachment =
         File.create(
             UUID.randomUUID(),
@@ -85,8 +85,8 @@ public class TraceFixture {
     return this;
   }
 
-  public TraceFixture withTraceAuthorType(ETraceAuthorType traceAuthorType) {
-    this.traceAuthorType = traceAuthorType;
+  public TraceFixture withAuthorType(ETraceAuthorType authorType) {
+    this.authorType = authorType;
     return this;
   }
 
@@ -120,7 +120,7 @@ public class TraceFixture {
         id,
         user,
         title,
-        traceAuthorType,
+        authorType,
         aiUseJustification,
         personalNote,
         link,

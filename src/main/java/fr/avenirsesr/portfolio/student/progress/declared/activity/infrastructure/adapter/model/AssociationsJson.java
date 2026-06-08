@@ -15,7 +15,7 @@ public record AssociationsJson(
       UUID attachmentId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      ETraceAuthorType authorType,
       String aiUseJustification,
       String personalNote,
       String link,

@@ -10,7 +10,7 @@ import java.util.UUID;
       "traceId",
       "title",
       "programName",
-      "traceAuthorType",
+      "authorType",
       "createdAt",
       "updatedAt"
     })
@@ -18,6 +18,6 @@ public record TraceOverviewDTO(
     UUID traceId,
     String title,
     String programName,
-    @Schema(ref = "#/components/schemas/ETraceAuthorType") ETraceAuthorType traceAuthorType,
+    @Schema(ref = "#/components/schemas/ETraceAuthorType") ETraceAuthorType authorType,
     Instant createdAt,
     Instant updatedAt) {}

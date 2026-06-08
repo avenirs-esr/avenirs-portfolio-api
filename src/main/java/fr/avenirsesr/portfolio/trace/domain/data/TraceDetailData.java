@@ -11,7 +11,7 @@ public record TraceDetailData(
     String title,
     boolean isAssociated,
     String programName,
-    ETraceAuthorType traceAuthorType,
+    ETraceAuthorType authorType,
     String aiUseJustification,
     String personalNote,
     Optional<String> link,
