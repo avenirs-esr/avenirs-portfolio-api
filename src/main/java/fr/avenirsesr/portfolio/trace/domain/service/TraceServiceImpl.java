@@ -37,6 +37,7 @@ import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.*;
+import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
@@ -179,7 +180,7 @@ public class TraceServiceImpl implements TraceService {
         trace.getTitle(),
         isAssociated,
         programNameOfTrace(trace),
-        trace.isGroup(),
+        trace.getTraceAuthorType(),
         trace.getAiUseJustification().orElse(null),
         trace.getPersonalNote().orElse(null),
         trace.getLink(),
@@ -248,7 +249,7 @@ public class TraceServiceImpl implements TraceService {
       UUID userId,
       String title,
       ELanguage language,
-      boolean isGroup,
+      ETraceAuthorType traceAuthorType,
       String personalNote,
       String aiJustification,
       String link) {
@@ -257,7 +258,7 @@ public class TraceServiceImpl implements TraceService {
         userService.getUser(userId),
         title,
         language,
-        isGroup,
+        traceAuthorType,
         personalNote,
         aiJustification,
         link);
@@ -267,7 +268,7 @@ public class TraceServiceImpl implements TraceService {
   public Trace createTrace(
       String title,
       ELanguage language,
-      boolean isGroup,
+      ETraceAuthorType traceAuthorType,
       String personalNote,
       String aiJustification,
       String link) {
@@ -277,7 +278,7 @@ public class TraceServiceImpl implements TraceService {
         loggedInUser,
         title,
         language,
-        isGroup,
+        traceAuthorType,
         personalNote,
         aiJustification,
         link);
@@ -288,7 +289,7 @@ public class TraceServiceImpl implements TraceService {
       User user,
       String title,
       ELanguage language,
-      boolean isGroup,
+      ETraceAuthorType traceAuthorType,
       String personalNote,
       String aiJustification,
       String link) {
@@ -297,7 +298,15 @@ public class TraceServiceImpl implements TraceService {
     validateUrl(link);
     var trace =
         Trace.create(
-            traceId, user, title, language, isGroup, aiJustification, personalNote, link, null);
+            traceId,
+            user,
+            title,
+            language,
+            traceAuthorType,
+            aiJustification,
+            personalNote,
+            link,
+            null);
 
     return traceRepository.save(trace);
   }
@@ -307,7 +316,7 @@ public class TraceServiceImpl implements TraceService {
       UUID traceId,
       String title,
       ELanguage language,
-      boolean isGroup,
+      ETraceAuthorType traceAuthorType,
       String personalNote,
       String aiJustification,
       String link) {
@@ -317,7 +326,7 @@ public class TraceServiceImpl implements TraceService {
 
     trace.setTitle(title);
     trace.setLanguage(language);
-    trace.setGroup(isGroup);
+    trace.setTraceAuthorType(traceAuthorType);
     trace.setPersonalNote(personalNote);
     trace.setAiUseJustification(aiJustification);
 
@@ -337,10 +346,11 @@ public class TraceServiceImpl implements TraceService {
       UUID traceId,
       String title,
       ELanguage language,
-      boolean isGroup,
+      ETraceAuthorType traceAuthorType,
       String personalNote,
       String aiJustification) {
-    return updateTrace(traceId, title, language, isGroup, personalNote, aiJustification, null);
+    return updateTrace(
+        traceId, title, language, traceAuthorType, personalNote, aiJustification, null);
   }
 
   @Override

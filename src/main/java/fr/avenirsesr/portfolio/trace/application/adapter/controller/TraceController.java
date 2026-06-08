@@ -212,7 +212,7 @@ public class TraceController {
         traceService.createTrace(
             createTraceDTO.title(),
             createTraceDTO.language(),
-            createTraceDTO.isGroup(),
+            createTraceDTO.traceAuthorType(),
             createTraceDTO.personalNote(),
             createTraceDTO.iaJustification(),
             createTraceDTO.link());
@@ -232,7 +232,7 @@ public class TraceController {
             traceId,
             updateTraceDTO.title(),
             updateTraceDTO.language(),
-            updateTraceDTO.isGroup(),
+            updateTraceDTO.traceAuthorType(),
             updateTraceDTO.personalNote(),
             updateTraceDTO.iaJustification(),
             updateTraceDTO.link());
