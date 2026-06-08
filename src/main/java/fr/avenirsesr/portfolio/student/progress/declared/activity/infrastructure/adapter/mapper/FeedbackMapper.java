@@ -43,7 +43,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
                         t.getAttachment().map(File::getId).orElse(null),
                         t.getTitle(),
                         t.getLanguage(),
-                        t.getTraceAuthorType(),
+                        t.isGroup(),
                         t.getAiUseJustification().orElse(null),
                         t.getPersonalNote().orElse(null),
                         t.getLink().orElse(null),

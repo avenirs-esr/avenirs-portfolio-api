@@ -36,7 +36,6 @@ import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
@@ -200,14 +199,13 @@ public class TraceServiceImplTest {
       User user = student.getUser();
       String title = "Test Title";
       ELanguage language = ELanguage.FRENCH;
-      ETraceAuthorType traceAuthorType = ETraceAuthorType.PERSONAL;
+      boolean isGroup = true;
       String personalNote = "Some personal note";
       String iaJustification = "Justified by AI";
       String link = "https://example.com";
 
       BddLogger.when("creating a new trace");
-      traceService.createTrace(
-          title, language, traceAuthorType, personalNote, iaJustification, link);
+      traceService.createTrace(title, language, isGroup, personalNote, iaJustification, link);
 
       BddLogger.then("it should create and save the new trace");
       ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
@@ -220,7 +218,7 @@ public class TraceServiceImplTest {
       assertNotNull(trace.getId());
       assertEquals(title, trace.getTitle());
       assertEquals(language, trace.getLanguage());
-      assertEquals(traceAuthorType, trace.getTraceAuthorType());
+      assertEquals(isGroup, trace.isGroup());
 
       assertTrue(trace.getPersonalNote().isPresent());
       assertEquals(personalNote, trace.getPersonalNote().get());
@@ -238,8 +236,7 @@ public class TraceServiceImplTest {
       String title = "Trace with null fields";
 
       BddLogger.when("creating a new trace with null fields");
-      traceService.createTrace(
-          title, ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null);
+      traceService.createTrace(title, ELanguage.FRENCH, false, null, null, null);
 
       BddLogger.then("it should create and save the new trace with null fields");
       ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
@@ -260,9 +257,7 @@ public class TraceServiceImplTest {
       BddLogger.when("creating a new trace with a blank title");
       assertThrows(
           Exception.class,
-          () ->
-              traceService.createTrace(
-                  "   ", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null));
+          () -> traceService.createTrace("   ", ELanguage.FRENCH, false, null, null, null));
       BddLogger.then("it should throw a validation exception");
       verify(traceRepository, never()).save(any());
     }
@@ -275,8 +270,8 @@ public class TraceServiceImplTest {
       String titleUpdated = "Test Title - Updated";
       ELanguage language = ELanguage.ENGLISH;
       ELanguage languageUpdated = ELanguage.FRENCH;
-      ETraceAuthorType traceAuthorType = ETraceAuthorType.PERSONAL;
-      ETraceAuthorType traceAuthorTypeUpdated = ETraceAuthorType.COLLECTIVE;
+      boolean isGroup = false;
+      boolean isGroupUpdated = true;
       String personalNote = "Some personal note";
       String personalNoteUpdated = "Some personal note - Updated";
       String aiJustification = "Justified by AI";
@@ -287,7 +282,7 @@ public class TraceServiceImplTest {
               .withUser(user)
               .withTitle(title)
               .withLanguage(language)
-              .withTraceAuthorType(traceAuthorType)
+              .withGroup(isGroup)
               .withPersonalNote(personalNote)
               .withAiUseJustification(aiJustification)
               .toModel();
@@ -300,7 +295,7 @@ public class TraceServiceImplTest {
           trace.getId(),
           titleUpdated,
           languageUpdated,
-          traceAuthorTypeUpdated,
+          isGroupUpdated,
           personalNoteUpdated,
           aiJustificationUpdated);
 
@@ -313,7 +308,7 @@ public class TraceServiceImplTest {
       assertEquals(user, captorTrace.getUser());
       assertEquals(titleUpdated, captorTrace.getTitle());
       assertEquals(languageUpdated, captorTrace.getLanguage());
-      assertEquals(traceAuthorTypeUpdated, captorTrace.getTraceAuthorType());
+      assertEquals(isGroupUpdated, captorTrace.isGroup());
 
       assertTrue(captorTrace.getPersonalNote().isPresent());
       assertEquals(personalNoteUpdated, captorTrace.getPersonalNote().get());
@@ -330,8 +325,8 @@ public class TraceServiceImplTest {
       String titleUpdated = "Test Title - Updated";
       ELanguage language = ELanguage.ENGLISH;
       ELanguage languageUpdated = ELanguage.FRENCH;
-      ETraceAuthorType traceAuthorType = ETraceAuthorType.PERSONAL;
-      ETraceAuthorType traceAuthorTypeUpdated = ETraceAuthorType.COLLECTIVE;
+      boolean isGroup = false;
+      boolean isGroupUpdated = true;
       String personalNote = "Some personal note";
       String personalNoteUpdated = "Some personal note - Updated";
       String aiJustification = "Justified by AI";
@@ -344,7 +339,7 @@ public class TraceServiceImplTest {
               .withUser(user)
               .withTitle(title)
               .withLanguage(language)
-              .withTraceAuthorType(traceAuthorType)
+              .withGroup(isGroup)
               .withPersonalNote(personalNote)
               .withAiUseJustification(aiJustification)
               .withLink(link)
@@ -358,7 +353,7 @@ public class TraceServiceImplTest {
           trace.getId(),
           titleUpdated,
           languageUpdated,
-          traceAuthorTypeUpdated,
+          isGroupUpdated,
           personalNoteUpdated,
           aiJustificationUpdated,
           linkUpdated);
@@ -372,7 +367,7 @@ public class TraceServiceImplTest {
       assertEquals(user, captorTrace.getUser());
       assertEquals(titleUpdated, captorTrace.getTitle());
       assertEquals(languageUpdated, captorTrace.getLanguage());
-      assertEquals(traceAuthorTypeUpdated, captorTrace.getTraceAuthorType());
+      assertEquals(isGroupUpdated, captorTrace.isGroup());
 
       assertTrue(captorTrace.getPersonalNote().isPresent());
       assertEquals(personalNoteUpdated, captorTrace.getPersonalNote().get());
@@ -392,8 +387,8 @@ public class TraceServiceImplTest {
       String titleUpdated = "Test Title with null fields";
       ELanguage language = ELanguage.ENGLISH;
       ELanguage languageUpdated = ELanguage.FRENCH;
-      ETraceAuthorType traceAuthorType = ETraceAuthorType.PERSONAL;
-      ETraceAuthorType traceAuthorTypeUpdated = ETraceAuthorType.THIRD_PARTY;
+      boolean isGroup = false;
+      boolean isGroupUpdated = true;
       String personalNote = "Some personal note";
       String aiJustification = "Justified by AI";
 
@@ -402,7 +397,7 @@ public class TraceServiceImplTest {
               .withUser(user)
               .withTitle(title)
               .withLanguage(language)
-              .withTraceAuthorType(traceAuthorType)
+              .withGroup(isGroup)
               .withPersonalNote(personalNote)
               .withAiUseJustification(aiJustification)
               .toModel();
@@ -412,7 +407,7 @@ public class TraceServiceImplTest {
 
       BddLogger.when("update trace with null fields");
       traceService.updateTrace(
-          trace.getId(), titleUpdated, languageUpdated, traceAuthorTypeUpdated, null, null);
+          trace.getId(), titleUpdated, languageUpdated, isGroupUpdated, null, null);
 
       BddLogger.then("it should update and save the trace with null fields");
       ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
@@ -423,7 +418,7 @@ public class TraceServiceImplTest {
       assertEquals(user, captorTrace.getUser());
       assertEquals(titleUpdated, captorTrace.getTitle());
       assertEquals(languageUpdated, captorTrace.getLanguage());
-      assertEquals(traceAuthorTypeUpdated, captorTrace.getTraceAuthorType());
+      assertEquals(isGroupUpdated, captorTrace.isGroup());
       assertFalse(captorTrace.getPersonalNote().isPresent());
       assertFalse(captorTrace.getAiUseJustification().isPresent());
     }
@@ -440,13 +435,7 @@ public class TraceServiceImplTest {
               TraceNotFoundException.class,
               () ->
                   traceService.updateTrace(
-                      unknownId,
-                      "t",
-                      ELanguage.FRENCH,
-                      ETraceAuthorType.PERSONAL,
-                      null,
-                      null,
-                      null));
+                      unknownId, "t", ELanguage.FRENCH, false, null, null, null));
 
       BddLogger.then("it should throw TRACE_NOT_FOUND");
       assertEquals(EErrorCode.TRACE_NOT_FOUND, ex.getErrorCode());
@@ -465,13 +454,7 @@ public class TraceServiceImplTest {
               UserNotAuthorizedException.class,
               () ->
                   traceService.updateTrace(
-                      trace.getId(),
-                      "x",
-                      ELanguage.FRENCH,
-                      ETraceAuthorType.PERSONAL,
-                      null,
-                      null,
-                      null));
+                      trace.getId(), "x", ELanguage.FRENCH, false, null, null, null));
 
       BddLogger.then("it should throw USER_NOT_AUTHORIZED");
       assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
@@ -504,7 +487,7 @@ public class TraceServiceImplTest {
               .withUser(student.getUser())
               .withTitle("Trace title")
               .withLanguage(ELanguage.FRENCH)
-              .withTraceAuthorType(ETraceAuthorType.PERSONAL)
+              .withGroup(true)
               .toModel();
 
       when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));

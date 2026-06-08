@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.dto;
 
 import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
@@ -10,8 +9,9 @@ import java.util.UUID;
     requiredProperties = {
       "id",
       "title",
+      "status",
       "programName",
-      "traceAuthorType",
+      "isGroup",
       "aiUseJustification",
       "personalNote",
       "createdAt",
@@ -22,7 +22,7 @@ public record TraceDetailDTO(
     String title,
     boolean isAssociated,
     String programName,
-    @Schema(ref = "#/components/schemas/ETraceAuthorType") ETraceAuthorType traceAuthorType,
+    boolean isGroup,
     String aiUseJustification,
     String personalNote,
     String link,

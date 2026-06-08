@@ -8,7 +8,6 @@ import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +32,7 @@ public interface TraceService {
   Trace createTrace(
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      boolean isGroup,
       String personalNote,
       String aiJustification,
       String link);
@@ -43,7 +42,7 @@ public interface TraceService {
       UUID userId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      boolean isGroup,
       String personalNote,
       String aiJustification,
       String link);
@@ -52,7 +51,7 @@ public interface TraceService {
       UUID traceId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      boolean isGroup,
       String personalNote,
       String aiJustification,
       String link);
@@ -61,7 +60,7 @@ public interface TraceService {
       UUID traceId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      boolean isGroup,
       String personalNote,
       String aiJustification);
 

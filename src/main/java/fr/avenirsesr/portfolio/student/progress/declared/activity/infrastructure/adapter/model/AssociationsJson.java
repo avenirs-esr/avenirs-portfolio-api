@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructur
 
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +14,7 @@ public record AssociationsJson(
       UUID attachmentId,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      boolean traceAuthorType,
       String aiUseJustification,
       String personalNote,
       String link,

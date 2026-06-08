@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.DeletableAvenirsBaseMode
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,7 +16,7 @@ import lombok.Setter;
 public class Trace extends DeletableAvenirsBaseModel {
   private final User user;
   private String title;
-  private ETraceAuthorType traceAuthorType;
+  private boolean isGroup;
   private ELanguage language;
 
   @Getter(AccessLevel.NONE)
@@ -37,7 +36,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       User user,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      boolean isGroup,
       String aiUseJustification,
       String personalNote,
       String link,
@@ -49,7 +48,7 @@ public class Trace extends DeletableAvenirsBaseModel {
     this.user = user;
     this.title = title;
     this.language = language;
-    this.traceAuthorType = traceAuthorType;
+    this.isGroup = isGroup;
     this.aiUseJustification = aiUseJustification;
     this.personalNote = personalNote;
     this.link = link;
@@ -61,7 +60,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       User user,
       String title,
       ELanguage language,
-      ETraceAuthorType traceAuthorType,
+      boolean isGroup,
       String aiUseJustification,
       String personalNote,
       String link,
@@ -72,7 +71,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         user,
         title,
         language,
-        traceAuthorType,
+        isGroup,
         aiUseJustification,
         personalNote,
         link,
@@ -86,7 +85,7 @@ public class Trace extends DeletableAvenirsBaseModel {
       UUID id,
       User user,
       String title,
-      ETraceAuthorType traceAuthorType,
+      boolean group,
       String aiUseJustification,
       String personalNote,
       String link,
@@ -100,7 +99,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         user,
         title,
         language,
-        traceAuthorType,
+        group,
         aiUseJustification,
         personalNote,
         link,

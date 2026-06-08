@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.trace.domain.data;
 
 import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,7 +10,7 @@ public record TraceDetailData(
     String title,
     boolean isAssociated,
     String programName,
-    ETraceAuthorType traceAuthorType,
+    boolean isGroup,
     String aiUseJustification,
     String personalNote,
     Optional<String> link,

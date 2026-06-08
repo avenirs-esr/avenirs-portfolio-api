@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -14,7 +15,6 @@ import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.infrastructure.fixture.TraceFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
@@ -56,12 +56,7 @@ class TraceControllerTest {
     when(traceOverviewMapper.toDTO(trace, "Program Name"))
         .thenReturn(
             new TraceOverviewDTO(
-                trace.getId(),
-                trace.getTitle(),
-                "Program Name",
-                ETraceAuthorType.PERSONAL,
-                null,
-                null));
+                trace.getId(), trace.getTitle(), "Program Name", false, null, null));
 
     BddLogger.when("getting the trace overview");
     ResponseEntity<List<TraceOverviewDTO>> response = controller.getTraceOverview(principal);
@@ -86,19 +81,14 @@ class TraceControllerTest {
   void shouldCreateTraceSuccessfully() {
     BddLogger.given("a TraceController");
     when(traceService.createTrace(
-            anyString(),
-            any(ELanguage.class),
-            any(ETraceAuthorType.class),
-            anyString(),
-            anyString(),
-            anyString()))
+            anyString(), any(ELanguage.class), anyBoolean(), anyString(), anyString(), anyString()))
         .thenReturn(trace);
 
     CreateTraceDTO dto =
         new CreateTraceDTO(
             "My Trace",
             ELanguage.FRENCH,
-            ETraceAuthorType.COLLECTIVE,
+            true,
             "Personal note",
             "Justification IA",
             "https://example.com");
@@ -115,7 +105,7 @@ class TraceControllerTest {
         .createTrace(
             eq("My Trace"),
             eq(ELanguage.FRENCH),
-            eq(ETraceAuthorType.COLLECTIVE),
+            eq(true),
             eq("Personal note"),
             eq("Justification IA"),
             eq("https://example.com"));
@@ -124,13 +114,11 @@ class TraceControllerTest {
   @Test
   void shouldCreateTraceWithNullFields() {
     BddLogger.given("a TraceController");
-    when(traceService.createTrace(
-            "Trace sans IA", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null))
+    when(traceService.createTrace("Trace sans IA", ELanguage.FRENCH, false, null, null, null))
         .thenReturn(trace);
 
     CreateTraceDTO dto =
-        new CreateTraceDTO(
-            "Trace sans IA", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null);
+        new CreateTraceDTO("Trace sans IA", ELanguage.FRENCH, false, null, null, null);
 
     BddLogger.when("creating a trace with null fields");
     ResponseEntity<TracesCreationResponse> response = controller.createTrace(principal, dto);
@@ -138,8 +126,6 @@ class TraceControllerTest {
     BddLogger.then("it should create the trace with null fields successfully");
     assertEquals(201, response.getStatusCode().value());
 
-    verify(traceService)
-        .createTrace(
-            "Trace sans IA", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null);
+    verify(traceService).createTrace("Trace sans IA", ELanguage.FRENCH, false, null, null, null);
   }
 }
