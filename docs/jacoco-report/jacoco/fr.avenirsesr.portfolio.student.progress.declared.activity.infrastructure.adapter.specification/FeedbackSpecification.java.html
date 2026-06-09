@@ -20,5 +20,12 @@ public final class FeedbackSpecification {
 <span class="fc" id="L20">      return cb.equal(root.get(&quot;status&quot;), status);</span>
     };
   }
+
+  public static Specification&lt;FeedbackEntity&gt; hasActivityId(UUID activityId) {
+<span class="fc" id="L25">    return (root, query, cb) -&gt; {</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">      if (activityId == null) return cb.conjunction();</span>
+<span class="fc" id="L27">      return cb.equal(root.get(&quot;declaredActivity&quot;).get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
+    };
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

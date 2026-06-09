@@ -519,9 +519,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public PagedResult&lt;Feedback&gt; getStaffFeedbacks(
-      EFeedbackStatus statusFilter, PageCriteria pageCriteria) {
+      EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria) {
 <span class="fc" id="L523">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L524">    return feedbackRepository.findByStaff(staff.getId(), statusFilter, pageCriteria);</span>
+<span class="fc" id="L524">    return feedbackRepository.findByStaff(staff.getId(), statusFilter, activityId, pageCriteria);</span>
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {

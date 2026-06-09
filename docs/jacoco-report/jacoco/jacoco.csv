@@ -1,8 +1,8 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository,FeedbackDatabaseRepository,51,234,0,2,7,58,5,11,5,10
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository,FeedbackDatabaseRepository,51,237,0,2,7,59,5,11,5,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository,DeclaredActivityDatabaseRepository,22,83,4,0,5,16,4,5,2,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.controller,DeclaredProgramController,0,114,0,0,0,37,0,6,0,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller,DeclaredActivityController,186,273,6,2,45,61,10,10,6,10
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller,DeclaredActivityController,186,278,6,2,45,61,10,10,6,10
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.client,TraceConfigurationClient,0,57,0,0,0,17,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.filter,ETraceFilterKey,0,27,0,0,0,5,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.filter,TraceFilter,0,67,0,12,0,10,0,8,0,2
@@ -43,7 +43,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,Prom
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.controller,DeclaredExperienceController,65,138,0,0,12,43,1,7,1,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.application.adapter.controller,UserController,3,40,1,1,0,10,1,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.program.infrastructure.adapter.client,InstitutionConfigClientImpl,50,10,0,0,13,4,1,2,1,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.specification,FeedbackSpecification,0,31,0,2,0,5,0,5,0,4
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.specification,FeedbackSpecification,0,50,0,4,0,8,0,8,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.specification,DeclaredActivitySpecification,34,25,1,3,5,6,8,3,7,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.client,ExternalUserClientImpl,50,40,0,0,17,13,1,3,1,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.domain.data,SkillProgressData,0,45,0,4,0,11,0,6,0,4
@@ -53,7 +53,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data,DeclaredActivityAssociationsData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data,DeclaredActivityDetailsData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data,DeclaredActivityAssociationData,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service,DeclaredActivityServiceImpl,90,846,10,53,22,215,20,57,10,34
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service,DeclaredActivityServiceImpl,90,847,10,53,22,215,20,57,10,34
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.specification,SkillLevelProgressSpecification,69,31,4,0,18,6,5,2,3,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.specification,StudentProgressSpecification,3,16,0,0,1,3,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.converter,PathSegmentsConverter,0,27,0,8,0,7,0,7,0,3
