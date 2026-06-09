@@ -1,5 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository,FeedbackDatabaseRepository,51,164,0,2,7,42,5,8,5,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository,FeedbackDatabaseRepository,51,174,0,2,7,47,5,9,5,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository,DeclaredActivityDatabaseRepository,22,83,4,0,5,16,4,5,2,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.controller,DeclaredProgramController,0,114,0,0,0,37,0,6,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller,DeclaredActivityController,203,202,6,2,49,47,11,8,7,8
@@ -51,7 +51,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapt
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.domain.service,DeclaredProgramServiceImpl,0,254,0,9,0,56,0,16,0,11
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data,DeclaredActivityAssociationsData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data,DeclaredActivityAssociationData,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service,DeclaredActivityServiceImpl,90,769,9,46,22,194,19,52,10,33
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service,DeclaredActivityServiceImpl,90,817,10,53,22,207,20,56,10,33
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.specification,SkillLevelProgressSpecification,69,31,4,0,18,6,5,2,3,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.specification,StudentProgressSpecification,3,16,0,0,1,3,1,2,1,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.converter,PathSegmentsConverter,0,27,0,8,0,7,0,7,0,3
