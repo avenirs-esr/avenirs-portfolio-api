@@ -27,6 +27,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
             feedback.getReflexion().orElse(null),
             feedback.getFeedback().orElse(null),
             feedback.getStatus(),
+            feedback.getIteration(),
             buildAssociations(feedback));
     entity.setId(feedback.getId());
     return entity;
@@ -132,6 +133,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
         entity.getReflection(),
         entity.getFeedback(),
         entity.getStatus(),
+        entity.getIteration(),
         traces,
         progresses);
   }

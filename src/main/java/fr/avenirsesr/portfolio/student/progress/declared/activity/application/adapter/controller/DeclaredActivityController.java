@@ -15,6 +15,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,6 +48,7 @@ public class DeclaredActivityController {
   private final DeclaredActivityAssociationsDTOMapper declaredActivityAssociationsDTOMapper;
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
   private final FeedbackDetailsDTOMapper feedbackDetailsDTOMapper;
+  private final FeedbackStaffListItemDTOMapper feedbackStaffListItemDTOMapper;
 
   @GetMapping
   public ResponseEntity<PagedResponse<DeclaredActivityViewDTO>> getDeclaredActivitiesView(
@@ -236,6 +238,28 @@ public class DeclaredActivityController {
                 .map(associationSearchResultDTOMapper::toDeclaredActivityDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
+  }
+
+  @GetMapping("/feedback")
+  public ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> getStaffFeedbacks(
+      Principal principal,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EFeedbackStatus"))
+          @RequestParam(required = false)
+          EFeedbackStatus status,
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer pageSize) {
+    var pageCriteria = new PageCriteria(page, pageSize);
+    log.debug(
+        "Received request to get staff feedbacks for user [{}] (status={}, page={}, pageSize={})",
+        principal.getName(),
+        status,
+        pageCriteria.page(),
+        pageCriteria.pageSize());
+    var result = declaredActivityService.getStaffFeedbacks(status, pageCriteria);
+    return ResponseEntity.ok(
+        new PagedResponse<>(
+            result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),
+            PageInfoDTO.fromDomain(result.pageInfo())));
   }
 
   @PostMapping("/{declaredActivityId}/ask-for-feedback")

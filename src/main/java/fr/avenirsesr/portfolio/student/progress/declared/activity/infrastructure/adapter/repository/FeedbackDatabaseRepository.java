@@ -1,6 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
@@ -11,10 +14,12 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.FileJpaRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.mapper.FeedbackMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.AssociationsJson;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.FeedbackEntity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.specification.FeedbackSpecification;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -22,6 +27,9 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.StudentJpa
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.repository.UserJpaRepository;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -93,6 +101,34 @@ public class FeedbackDatabaseRepository
         .map(this::toDomainWithDependencies)
         .toList();
   }
+
+  @Override
+  public PagedResult<Feedback> findByStaff(
+      UUID staffId, EFeedbackStatus statusFilter, PageCriteria pageCriteria) {
+    var specification =
+        FeedbackSpecification.hasStaffAuthor(staffId)
+            .and(FeedbackSpecification.hasStatus(statusFilter));
+    // Status strings sort alphabetically in the required priority order:
+    // "IN_PROCESS" < "NEW" < "SUBMITTED"
+    var sort = Sort.by("status").ascending().and(Sort.by("createdAt").ascending());
+    return findAll(
+        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));
+  }
+
+  // ── pagination ──────────────────────────────────────────────────────
+
+  @Override
+  protected PagedResult<Feedback> toPagedResult(Page<FeedbackEntity> page) {
+    var content = page.getContent().stream().map(this::toDomainWithDependencies).toList();
+    return new PagedResult<>(
+        content,
+        new PageInfo(
+            page.getPageable().getPageNumber(),
+            page.getPageable().getPageSize(),
+            page.getTotalElements()));
+  }
+
+  // ── private helpers ─────────────────────────────────────────────────
 
   private Feedback toDomainWithDependencies(FeedbackEntity entity) {
     AssociationsJson associations = entity.getAssociations();

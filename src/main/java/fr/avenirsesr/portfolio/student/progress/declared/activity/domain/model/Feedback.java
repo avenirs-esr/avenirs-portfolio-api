@@ -24,6 +24,7 @@ public class Feedback extends AvenirsBaseModel {
   private String feedback;
 
   private EFeedbackStatus status;
+  private int iteration;
   private List<Trace> associatedTraces;
   private List<DeclaredSkillProgress> associatedDeclaredSkills;
 
@@ -35,12 +36,14 @@ public class Feedback extends AvenirsBaseModel {
       String reflexion,
       String feedback,
       EFeedbackStatus status,
+      int iteration,
       List<Trace> associatedTraces,
       List<DeclaredSkillProgress> associatedDeclaredSkills) {
     super(id, createdAt, updatedAt);
     this.reflexion = reflexion;
     this.feedback = feedback;
     this.status = status;
+    this.iteration = iteration;
     this.associatedTraces = associatedTraces;
     this.associatedDeclaredSkills = associatedDeclaredSkills;
     this.declaredActivity = declaredActivity;
@@ -50,7 +53,8 @@ public class Feedback extends AvenirsBaseModel {
       DeclaredActivity declaredActivity,
       String reflexion,
       List<Trace> associatedTraces,
-      List<DeclaredSkillProgress> associatedDeclaredSkills) {
+      List<DeclaredSkillProgress> associatedDeclaredSkills,
+      int iteration) {
     return new Feedback(
         UUID.randomUUID(),
         Instant.now(),
@@ -59,6 +63,7 @@ public class Feedback extends AvenirsBaseModel {
         reflexion,
         null,
         EFeedbackStatus.NEW,
+        iteration,
         associatedTraces,
         associatedDeclaredSkills);
   }
@@ -71,6 +76,7 @@ public class Feedback extends AvenirsBaseModel {
       String reflexion,
       String feedback,
       EFeedbackStatus status,
+      int iteration,
       List<Trace> associatedTraces,
       List<DeclaredSkillProgress> associatedDeclaredSkills) {
     return new Feedback(
@@ -81,6 +87,7 @@ public class Feedback extends AvenirsBaseModel {
         reflexion,
         feedback,
         status,
+        iteration,
         associatedTraces,
         associatedDeclaredSkills);
   }

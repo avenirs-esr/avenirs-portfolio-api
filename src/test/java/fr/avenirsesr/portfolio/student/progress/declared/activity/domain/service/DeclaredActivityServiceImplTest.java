@@ -30,6 +30,12 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityStartDateBeforeSubscriptionException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -1639,6 +1645,7 @@ class DeclaredActivityServiceImplTest {
             null,
             null,
             EFeedbackStatus.IN_PROCESS,
+            1,
             List.of(),
             List.of());
 
@@ -1682,6 +1689,7 @@ class DeclaredActivityServiceImplTest {
             "Ancienne réflexion",
             null,
             EFeedbackStatus.NEW,
+            1,
             List.of(),
             List.of());
 
@@ -1743,6 +1751,7 @@ class DeclaredActivityServiceImplTest {
             null,
             "Retour du formateur",
             EFeedbackStatus.SUBMITTED,
+            1,
             List.of(),
             List.of());
 
@@ -1787,6 +1796,7 @@ class DeclaredActivityServiceImplTest {
             null,
             "Retour 1",
             EFeedbackStatus.SUBMITTED,
+            1,
             List.of(),
             List.of());
     Feedback feedback2 =
@@ -1798,6 +1808,7 @@ class DeclaredActivityServiceImplTest {
             null,
             "Retour 2",
             EFeedbackStatus.SUBMITTED,
+            1,
             List.of(),
             List.of());
 

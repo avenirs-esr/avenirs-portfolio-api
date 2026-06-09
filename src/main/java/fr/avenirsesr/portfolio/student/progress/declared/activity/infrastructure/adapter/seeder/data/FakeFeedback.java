@@ -23,6 +23,7 @@ public class FakeFeedback {
             faker.lorem().paragraph(3),
             null,
             EFeedbackStatus.NEW,
+            1,
             new AssociationsJson(List.of(), List.of()));
     entity.setId(UUID.fromString(faker.internet().uuid()));
     return new FakeFeedback(entity);

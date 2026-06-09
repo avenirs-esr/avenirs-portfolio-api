@@ -40,6 +40,7 @@ class FeedbackOverviewDTOMapperTest {
             null,
             null,
             EFeedbackStatus.NEW,
+            1,
             List.of(),
             List.of());
 
@@ -84,6 +85,7 @@ class FeedbackOverviewDTOMapperTest {
             null,
             "Voici mon retour détaillé",
             EFeedbackStatus.SUBMITTED,
+            1,
             List.of(),
             List.of());
 
@@ -118,6 +120,7 @@ class FeedbackOverviewDTOMapperTest {
             null,
             null,
             EFeedbackStatus.NEW,
+            1,
             List.of(),
             List.of());
 

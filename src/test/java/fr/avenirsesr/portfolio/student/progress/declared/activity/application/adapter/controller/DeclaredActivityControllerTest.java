@@ -1,19 +1,26 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
+import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.SubscribeDeclaredActivityRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityAssociationsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackDetailsDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackStaffListItemDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
@@ -41,6 +48,7 @@ class DeclaredActivityControllerTest {
   @Mock private DeclaredActivityAssociationsDTOMapper declaredActivityAssociationsDTOMapper;
   @Mock private AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
   @Mock private FeedbackDetailsDTOMapper feedbackDetailsDTOMapper;
+  @Mock private FeedbackStaffListItemDTOMapper feedbackStaffListItemDTOMapper;
 
   @InjectMocks private DeclaredActivityController controller;
 
@@ -162,5 +170,80 @@ class DeclaredActivityControllerTest {
     BddLogger.then("The service is called exactly once with the right ID");
     verify(declaredActivityService, times(1)).createFeedback(declaredActivityId);
     verifyNoMoreInteractions(declaredActivityService);
+  }
+
+  @Test
+  void getStaffFeedbacks_should_return_200_with_paged_result_when_no_status_filter() {
+    BddLogger.given("A logged-in staff with two feedbacks");
+    Feedback feedback1 = mock(Feedback.class);
+    Feedback feedback2 = mock(Feedback.class);
+    FeedbackStaffListItemDTO dto1 = mock(FeedbackStaffListItemDTO.class);
+    FeedbackStaffListItemDTO dto2 = mock(FeedbackStaffListItemDTO.class);
+
+    PagedResult<Feedback> pagedResult =
+        new PagedResult<>(List.of(feedback1, feedback2), new PageInfo(0, 8, 2));
+
+    when(declaredActivityService.getStaffFeedbacks(isNull(), any())).thenReturn(pagedResult);
+    when(feedbackStaffListItemDTOMapper.toDTO(feedback1)).thenReturn(dto1);
+    when(feedbackStaffListItemDTOMapper.toDTO(feedback2)).thenReturn(dto2);
+
+    BddLogger.when("getStaffFeedbacks is called without status filter");
+    ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
+        controller.getStaffFeedbacks(principal, null, null, null);
+
+    BddLogger.then("200 OK is returned with 2 items and pagination info");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().data()).hasSize(2);
+    assertThat(response.getBody().data()).containsExactly(dto1, dto2);
+    assertThat(response.getBody().page().totalElements()).isEqualTo(2);
+
+    verify(declaredActivityService).getStaffFeedbacks(isNull(), any());
+    verify(feedbackStaffListItemDTOMapper).toDTO(feedback1);
+    verify(feedbackStaffListItemDTOMapper).toDTO(feedback2);
+  }
+
+  @Test
+  void getStaffFeedbacks_should_forward_status_filter_to_service() {
+    BddLogger.given("A logged-in staff requesting only IN_PROCESS feedbacks");
+    Feedback feedback = mock(Feedback.class);
+    FeedbackStaffListItemDTO dto = mock(FeedbackStaffListItemDTO.class);
+
+    PagedResult<Feedback> pagedResult = new PagedResult<>(List.of(feedback), new PageInfo(0, 8, 1));
+
+    when(declaredActivityService.getStaffFeedbacks(eq(EFeedbackStatus.IN_PROCESS), any()))
+        .thenReturn(pagedResult);
+    when(feedbackStaffListItemDTOMapper.toDTO(feedback)).thenReturn(dto);
+
+    BddLogger.when("getStaffFeedbacks is called with status=IN_PROCESS");
+    ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
+        controller.getStaffFeedbacks(principal, EFeedbackStatus.IN_PROCESS, 0, 8);
+
+    BddLogger.then("service is called with IN_PROCESS and result has 1 item");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().data()).hasSize(1);
+
+    verify(declaredActivityService).getStaffFeedbacks(eq(EFeedbackStatus.IN_PROCESS), any());
+  }
+
+  @Test
+  void getStaffFeedbacks_should_return_empty_list_when_staff_has_no_feedbacks() {
+    BddLogger.given("A logged-in staff with no feedbacks");
+    PagedResult<Feedback> emptyResult = new PagedResult<>(List.of(), new PageInfo(0, 8, 0));
+
+    when(declaredActivityService.getStaffFeedbacks(isNull(), any())).thenReturn(emptyResult);
+
+    BddLogger.when("getStaffFeedbacks is called");
+    ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
+        controller.getStaffFeedbacks(principal, null, 0, 8);
+
+    BddLogger.then("200 OK is returned with empty data and totalElements=0");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().data()).isEmpty();
+    assertThat(response.getBody().page().totalElements()).isZero();
+
+    verifyNoInteractions(feedbackStaffListItemDTOMapper);
   }
 }

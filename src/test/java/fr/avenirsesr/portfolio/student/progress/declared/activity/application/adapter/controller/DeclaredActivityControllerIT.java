@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -35,6 +37,12 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
   @Value("${user.second.student.signature}")
   private String otherStudentSignature;
+
+  @Value("${user.staff.payload}")
+  private String staffPayload;
+
+  @Value("${user.staff.signature}")
+  private String staffSignature;
 
   private final String notFoundId = "00000000-0000-0000-0000-000000000000";
   private final String activityId = "3f7c9a2e-5d44-4b7a-9c6f-2a6e8e91b1a1";
@@ -321,6 +329,156 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+  }
+
+  // ── GET /me/activity-progress/feedback ──────────────────────────────
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnStaffFeedbackEndpoint() {
+    BddLogger.given("the GET /me/activity-progress/feedback endpoint");
+    BddLogger.when("performing a GET without authentication headers");
+    BddLogger.then("it should return 401");
+
+    webTestClient.get().uri(BASE_PATH + "/feedback").exchange().expectStatus().isUnauthorized();
+  }
+
+  @Test
+  void shouldReturn403WhenStudentTriesToAccessStaffFeedbackEndpoint() {
+    BddLogger.given("a user who is not registered as staff");
+    BddLogger.when("performing a GET on the staff feedback endpoint");
+    BddLogger.then("it should return 403");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/feedback")
+        .header("X-Signed-Context", otherStudentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturnPagedStructureWhenStaffHasNoFeedbacks() {
+    BddLogger.given("a staff user who is not the author of any activity with feedbacks");
+    BddLogger.when("performing a GET on the staff feedback endpoint");
+    BddLogger.then("it should return 200 with empty data and a valid pagination structure");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/feedback")
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8)
+        .jsonPath("$.page.totalElements")
+        .isEqualTo(0);
+  }
+
+  @Test
+  void shouldReturnSeededFeedbacksForStaffWhoAuthoredActivities() {
+    BddLogger.given("a staff user who has authored activities for which feedbacks were seeded");
+    BddLogger.when("performing a GET on the staff feedback endpoint");
+    BddLogger.then("it should return feedbacks with correct shape");
+
+    webTestClient
+        .get()
+        .uri(uriBuilder -> uriBuilder.path(BASE_PATH + "/feedback").queryParam("page", 0).build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.page.totalElements")
+        .isNumber()
+        .jsonPath("$.data[0].id")
+        .exists()
+        .jsonPath("$.data[0].status")
+        .exists()
+        .jsonPath("$.data[0].iteration")
+        .exists()
+        .jsonPath("$.data[0].student")
+        .exists()
+        .jsonPath("$.data[0].activity")
+        .exists();
+  }
+
+  @Test
+  void shouldReturnDefaultPaginationOnStaffFeedbackEndpoint() {
+    BddLogger.given("the staff feedback endpoint called without pagination params");
+    BddLogger.when("performing a GET without page/pageSize");
+    BddLogger.then("it should return 200 with default pagination (page=0, pageSize=8)");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/feedback")
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8);
+  }
+
+  @Test
+  @Transactional
+  void shouldReturnOnlyFeedbacksMatchingStatusFilter() throws Exception {
+    BddLogger.given(
+        "a staff/student who asks for feedback on their declared activity, creating a NEW"
+            + " feedback");
+    String id = declaredActivityId;
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + id + "/ask-for-feedback")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isCreated();
+
+    BddLogger.when("filtering staff feedbacks by status=NEW");
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder.path(BASE_PATH + "/feedback").queryParam("status", "NEW").build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("all returned feedbacks have status NEW");
+    JsonNode data = objectMapper.readTree(body).get("data");
+    assertThat(data.isArray()).isTrue();
+    for (JsonNode item : data) {
+      assertThat(item.get("status").asText()).isEqualTo("NEW");
+    }
   }
 
   @Test

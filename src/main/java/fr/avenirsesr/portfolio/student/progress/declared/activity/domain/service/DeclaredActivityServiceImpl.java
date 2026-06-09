@@ -26,6 +26,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.De
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
@@ -509,9 +510,18 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       }
     }
 
+    int iteration = existingFeedbacks.size() + 1;
     Feedback feedback =
-        Feedback.create(declaredActivity, declaredActivity.getReflection(), traces, declaredSkills);
+        Feedback.create(
+            declaredActivity, declaredActivity.getReflection(), traces, declaredSkills, iteration);
     return feedbackRepository.save(feedback);
+  }
+
+  @Override
+  public PagedResult<Feedback> getStaffFeedbacks(
+      EFeedbackStatus statusFilter, PageCriteria pageCriteria) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    return feedbackRepository.findByStaff(staff.getId(), statusFilter, pageCriteria);
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {

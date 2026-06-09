@@ -41,6 +41,9 @@ public class FeedbackEntity extends AvenirsBaseEntity {
   @Column(nullable = false)
   private EFeedbackStatus status;
 
+  @Column(nullable = false)
+  private int iteration;
+
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(nullable = false)
   private AssociationsJson associations;

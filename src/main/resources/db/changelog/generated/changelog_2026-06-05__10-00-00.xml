@@ -1,0 +1,39 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="
+                       http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+                       http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+                       http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="bilelbanelhaq" id="2026-06-05-feedback-iteration-1">
+
+        <addColumn tableName="feedback">
+            <column name="iteration" type="INT"/>
+        </addColumn>
+
+        <sql>
+            UPDATE feedback f
+            SET iteration = ranked.iteration
+                FROM (
+                SELECT
+                    id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY declared_activity
+                        ORDER BY created_at
+                    ) AS iteration
+                FROM feedback
+            ) ranked
+            WHERE ranked.id = f.id;
+        </sql>
+
+        <addNotNullConstraint
+                tableName="feedback"
+                columnName="iteration"
+                columnDataType="INT"/>
+
+    </changeSet>
+
+</databaseChangeLog>

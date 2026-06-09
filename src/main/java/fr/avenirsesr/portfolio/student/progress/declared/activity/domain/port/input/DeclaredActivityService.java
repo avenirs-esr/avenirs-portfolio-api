@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.De
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
 import java.util.List;
@@ -63,4 +64,6 @@ public interface DeclaredActivityService {
   List<DeclaredActivity> findAllNotCompletedActivitiesByIds(List<UUID> ids);
 
   Feedback createFeedback(UUID declaredActivityId);
+
+  PagedResult<Feedback> getStaffFeedbacks(EFeedbackStatus statusFilter, PageCriteria pageCriteria);
 }
