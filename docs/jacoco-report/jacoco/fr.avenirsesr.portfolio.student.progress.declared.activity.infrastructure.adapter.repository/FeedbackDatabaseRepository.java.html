@@ -88,7 +88,7 @@ public class FeedbackDatabaseRepository
   @Override
   public List&lt;Feedback&gt; findAllByDeclaredActivityId(UUID declaredActivityId) {
 <span class="fc" id="L90">    return jpaRepository</span>
-<span class="fc" id="L91">        .findAllByDeclaredActivity_IdOrderByCreatedAtAsc(declaredActivityId)</span>
+<span class="fc" id="L91">        .findAllByDeclaredActivity_IdOrderByCreatedAtDesc(declaredActivityId)</span>
 <span class="fc" id="L92">        .stream()</span>
 <span class="fc" id="L93">        .map(this::toDomainWithDependencies)</span>
 <span class="fc" id="L94">        .toList();</span>
