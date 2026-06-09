@@ -2,7 +2,7 @@ GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository,FeedbackDatabaseRepository,51,164,0,2,7,42,5,8,5,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository,DeclaredActivityDatabaseRepository,22,83,4,0,5,16,4,5,2,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.controller,DeclaredProgramController,0,114,0,0,0,37,0,6,0,6
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller,DeclaredActivityController,203,185,6,2,49,41,11,7,7,7
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller,DeclaredActivityController,203,202,6,2,49,47,11,8,7,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.client,TraceConfigurationClient,0,57,0,0,0,17,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.filter,ETraceFilterKey,0,27,0,0,0,5,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.filter,TraceFilter,0,67,0,12,0,10,0,8,0,2
