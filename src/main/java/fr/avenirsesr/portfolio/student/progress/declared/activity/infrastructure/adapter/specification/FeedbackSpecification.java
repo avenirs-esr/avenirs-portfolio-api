@@ -20,4 +20,11 @@ public final class FeedbackSpecification {
       return cb.equal(root.get("status"), status);
     };
   }
+
+  public static Specification<FeedbackEntity> hasActivityId(UUID activityId) {
+    return (root, query, cb) -> {
+      if (activityId == null) return cb.conjunction();
+      return cb.equal(root.get("declaredActivity").get("activity").get("id"), activityId);
+    };
+  }
 }

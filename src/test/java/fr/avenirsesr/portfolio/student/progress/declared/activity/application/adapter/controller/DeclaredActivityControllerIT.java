@@ -350,7 +350,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(BASE_PATH + "/feedback")
+        .uri(BASE_PATH + "/feedbacks")
         .header("X-Signed-Context", otherStudentPayload)
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", otherStudentSignature)
@@ -367,7 +367,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(BASE_PATH + "/feedback")
+        .uri(BASE_PATH + "/feedbacks")
         .header("X-Signed-Context", staffPayload)
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", staffSignature)
@@ -393,7 +393,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(uriBuilder -> uriBuilder.path(BASE_PATH + "/feedback").queryParam("page", 0).build())
+        .uri(uriBuilder -> uriBuilder.path(BASE_PATH + "/feedbacks").queryParam("page", 0).build())
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
@@ -425,7 +425,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(BASE_PATH + "/feedback")
+        .uri(BASE_PATH + "/feedbacks")
         .header("X-Signed-Context", staffPayload)
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", staffSignature)
@@ -462,7 +462,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
             .get()
             .uri(
                 uriBuilder ->
-                    uriBuilder.path(BASE_PATH + "/feedback").queryParam("status", "NEW").build())
+                    uriBuilder.path(BASE_PATH + "/feedbacks").queryParam("status", "NEW").build())
             .header("X-Signed-Context", studentPayload)
             .header("X-Context-Kid", secretKey)
             .header("X-Context-Signature", studentSignature)
@@ -478,6 +478,52 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     assertThat(data.isArray()).isTrue();
     for (JsonNode item : data) {
       assertThat(item.get("status").asText()).isEqualTo("NEW");
+    }
+  }
+
+  @Test
+  @Transactional
+  void shouldReturnOnlyFeedbacksMatchingActivityIdFilter() throws Exception {
+    BddLogger.given(
+        "a staff/student who asks for feedback, creating a feedback linked to activity "
+            + activityId);
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + declaredActivityId + "/ask-for-feedback")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isCreated();
+
+    BddLogger.when("filtering staff feedbacks by activityId=" + activityId);
+    String body =
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH + "/feedbacks")
+                        .queryParam("activityId", activityId)
+                        .build())
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then(
+        "all returned feedbacks belong to declared activities linked to activity " + activityId);
+    JsonNode data = objectMapper.readTree(body).get("data");
+    assertThat(data.isArray()).isTrue();
+    assertThat(data.size()).isGreaterThan(0);
+    for (JsonNode item : data) {
+      assertThat(item.get("activity").get("activityId").asText()).isEqualTo(activityId);
     }
   }
 

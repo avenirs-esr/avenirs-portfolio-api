@@ -240,22 +240,25 @@ public class DeclaredActivityController {
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
   }
 
-  @GetMapping("/feedback")
+  @GetMapping("/feedbacks")
   public ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> getStaffFeedbacks(
       Principal principal,
       @Parameter(schema = @Schema(ref = "#/components/schemas/EFeedbackStatus"))
           @RequestParam(required = false)
           EFeedbackStatus status,
+      @RequestParam(required = false) UUID activityId,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to get staff feedbacks for user [{}] (status={}, page={}, pageSize={})",
+        "Received request to get staff feedbacks for user [{}] (status={}, activityId={}, page={},"
+            + " pageSize={})",
         principal.getName(),
         status,
+        activityId,
         pageCriteria.page(),
         pageCriteria.pageSize());
-    var result = declaredActivityService.getStaffFeedbacks(status, pageCriteria);
+    var result = declaredActivityService.getStaffFeedbacks(status, activityId, pageCriteria);
     return ResponseEntity.ok(
         new PagedResponse<>(
             result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),

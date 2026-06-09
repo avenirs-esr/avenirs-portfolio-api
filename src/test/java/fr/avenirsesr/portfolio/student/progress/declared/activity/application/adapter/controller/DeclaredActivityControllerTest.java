@@ -173,8 +173,8 @@ class DeclaredActivityControllerTest {
   }
 
   @Test
-  void getStaffFeedbacks_should_return_200_with_paged_result_when_no_status_filter() {
-    BddLogger.given("A logged-in staff with two feedbacks");
+  void getStaffFeedbacks_should_return_200_with_paged_result_when_no_filters() {
+    BddLogger.given("A logged-in staff with two feedbacks and no filter applied");
     Feedback feedback1 = mock(Feedback.class);
     Feedback feedback2 = mock(Feedback.class);
     FeedbackStaffListItemDTO dto1 = mock(FeedbackStaffListItemDTO.class);
@@ -183,22 +183,22 @@ class DeclaredActivityControllerTest {
     PagedResult<Feedback> pagedResult =
         new PagedResult<>(List.of(feedback1, feedback2), new PageInfo(0, 8, 2));
 
-    when(declaredActivityService.getStaffFeedbacks(isNull(), any())).thenReturn(pagedResult);
+    when(declaredActivityService.getStaffFeedbacks(isNull(), isNull(), any()))
+        .thenReturn(pagedResult);
     when(feedbackStaffListItemDTOMapper.toDTO(feedback1)).thenReturn(dto1);
     when(feedbackStaffListItemDTOMapper.toDTO(feedback2)).thenReturn(dto2);
 
-    BddLogger.when("getStaffFeedbacks is called without status filter");
+    BddLogger.when("getStaffFeedbacks is called without any filter");
     ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
-        controller.getStaffFeedbacks(principal, null, null, null);
+        controller.getStaffFeedbacks(principal, null, null, null, null);
 
     BddLogger.then("200 OK is returned with 2 items and pagination info");
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isNotNull();
-    assertThat(response.getBody().data()).hasSize(2);
     assertThat(response.getBody().data()).containsExactly(dto1, dto2);
     assertThat(response.getBody().page().totalElements()).isEqualTo(2);
 
-    verify(declaredActivityService).getStaffFeedbacks(isNull(), any());
+    verify(declaredActivityService).getStaffFeedbacks(isNull(), isNull(), any());
     verify(feedbackStaffListItemDTOMapper).toDTO(feedback1);
     verify(feedbackStaffListItemDTOMapper).toDTO(feedback2);
   }
@@ -211,20 +211,44 @@ class DeclaredActivityControllerTest {
 
     PagedResult<Feedback> pagedResult = new PagedResult<>(List.of(feedback), new PageInfo(0, 8, 1));
 
-    when(declaredActivityService.getStaffFeedbacks(eq(EFeedbackStatus.IN_PROCESS), any()))
+    when(declaredActivityService.getStaffFeedbacks(eq(EFeedbackStatus.IN_PROCESS), isNull(), any()))
         .thenReturn(pagedResult);
     when(feedbackStaffListItemDTOMapper.toDTO(feedback)).thenReturn(dto);
 
     BddLogger.when("getStaffFeedbacks is called with status=IN_PROCESS");
     ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
-        controller.getStaffFeedbacks(principal, EFeedbackStatus.IN_PROCESS, 0, 8);
+        controller.getStaffFeedbacks(principal, EFeedbackStatus.IN_PROCESS, null, 0, 8);
 
     BddLogger.then("service is called with IN_PROCESS and result has 1 item");
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().data()).hasSize(1);
 
-    verify(declaredActivityService).getStaffFeedbacks(eq(EFeedbackStatus.IN_PROCESS), any());
+    verify(declaredActivityService)
+        .getStaffFeedbacks(eq(EFeedbackStatus.IN_PROCESS), isNull(), any());
+  }
+
+  @Test
+  void getStaffFeedbacks_should_forward_activity_id_filter_to_service() {
+    BddLogger.given("A logged-in staff requesting feedbacks for a specific activity");
+    UUID activityId = UUID.randomUUID();
+    Feedback feedback = mock(Feedback.class);
+    FeedbackStaffListItemDTO dto = mock(FeedbackStaffListItemDTO.class);
+
+    PagedResult<Feedback> pagedResult = new PagedResult<>(List.of(feedback), new PageInfo(0, 8, 1));
+
+    when(declaredActivityService.getStaffFeedbacks(isNull(), eq(activityId), any()))
+        .thenReturn(pagedResult);
+    when(feedbackStaffListItemDTOMapper.toDTO(feedback)).thenReturn(dto);
+
+    BddLogger.when("getStaffFeedbacks is called with activityId");
+    ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
+        controller.getStaffFeedbacks(principal, null, activityId, null, null);
+
+    BddLogger.then("service is called with the activityId and result has 1 item");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody().data()).hasSize(1);
+
+    verify(declaredActivityService).getStaffFeedbacks(isNull(), eq(activityId), any());
   }
 
   @Test
@@ -232,15 +256,15 @@ class DeclaredActivityControllerTest {
     BddLogger.given("A logged-in staff with no feedbacks");
     PagedResult<Feedback> emptyResult = new PagedResult<>(List.of(), new PageInfo(0, 8, 0));
 
-    when(declaredActivityService.getStaffFeedbacks(isNull(), any())).thenReturn(emptyResult);
+    when(declaredActivityService.getStaffFeedbacks(isNull(), isNull(), any()))
+        .thenReturn(emptyResult);
 
     BddLogger.when("getStaffFeedbacks is called");
     ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> response =
-        controller.getStaffFeedbacks(principal, null, 0, 8);
+        controller.getStaffFeedbacks(principal, null, null, 0, 8);
 
     BddLogger.then("200 OK is returned with empty data and totalElements=0");
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().data()).isEmpty();
     assertThat(response.getBody().page().totalElements()).isZero();
 
