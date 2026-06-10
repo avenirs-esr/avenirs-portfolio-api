@@ -75,7 +75,7 @@ public class FeedbackDatabaseRepository
 
   @Override
   public Optional&lt;Feedback&gt; findById(UUID id) {
-<span class="nc" id="L78">    return jpaRepository.findById(id).map(this::toDomainWithDependencies);</span>
+<span class="fc" id="L78">    return jpaRepository.findById(id).map(this::toDomainWithDependencies);</span>
   }
 
   @Override

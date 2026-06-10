@@ -518,17 +518,33 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public Feedback getFeedbackDetails(UUID feedbackId) {
+<span class="fc" id="L522">    Feedback feedback =</span>
+<span class="fc" id="L523">        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);</span>
+
+<span class="fc" id="L525">    UUID loggedInUserId = loggedInUserService.getLoggedInUser().getId();</span>
+<span class="fc" id="L526">    UUID studentId = feedback.getDeclaredActivity().getStudent().getId();</span>
+<span class="fc" id="L527">    UUID authorId = feedback.getDeclaredActivity().getActivity().getAuthor().getId();</span>
+
+<span class="pc bpc" id="L529" title="1 of 4 branches missed.">    if (!loggedInUserId.equals(studentId) || !loggedInUserId.equals(authorId)) {</span>
+<span class="fc" id="L530">      throw new UserNotAuthorizedException();</span>
+    }
+
+<span class="fc" id="L533">    return feedback;</span>
+  }
+
+  @Override
   public PagedResult&lt;Feedback&gt; getStaffFeedbacks(
       EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria) {
-<span class="fc" id="L523">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L524">    return feedbackRepository.findByStaff(staff.getId(), statusFilter, activityId, pageCriteria);</span>
+<span class="fc" id="L539">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L540">    return feedbackRepository.findByStaff(staff.getId(), statusFilter, activityId, pageCriteria);</span>
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
-<span class="pc bpc" id="L528" title="1 of 3 branches missed.">    return switch (contextType) {</span>
-<span class="fc" id="L529">      case TRACE -&gt; EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
-<span class="fc" id="L530">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
-<span class="nc" id="L531">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
+<span class="pc bpc" id="L544" title="1 of 3 branches missed.">    return switch (contextType) {</span>
+<span class="fc" id="L545">      case TRACE -&gt; EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
+<span class="fc" id="L546">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
+<span class="nc" id="L547">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
     };
   }
 }
