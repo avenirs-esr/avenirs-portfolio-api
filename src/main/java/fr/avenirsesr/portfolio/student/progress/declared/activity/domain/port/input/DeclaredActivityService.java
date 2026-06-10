@@ -65,6 +65,8 @@ public interface DeclaredActivityService {
 
   Feedback createFeedback(UUID declaredActivityId);
 
+  Feedback getFeedbackDetails(UUID feedbackId);
+
   PagedResult<Feedback> getStaffFeedbacks(
       EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria);
 }

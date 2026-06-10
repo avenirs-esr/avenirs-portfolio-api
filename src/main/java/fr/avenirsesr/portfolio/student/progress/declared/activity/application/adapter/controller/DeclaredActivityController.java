@@ -265,6 +265,17 @@ public class DeclaredActivityController {
             PageInfoDTO.fromDomain(result.pageInfo())));
   }
 
+  @GetMapping("/feedback/{feedbackId}")
+  public ResponseEntity<FeedbackDetailsDTO> getFeedbackDetails(
+      Principal principal, @Valid @PathVariable UUID feedbackId) {
+    log.debug(
+        "Received request to get feedback details [{}] by user [{}]",
+        feedbackId,
+        principal.getName());
+    return ResponseEntity.ok(
+        feedbackDetailsDTOMapper.toDTO(declaredActivityService.getFeedbackDetails(feedbackId)));
+  }
+
   @PostMapping("/{declaredActivityId}/ask-for-feedback")
   public ResponseEntity<FeedbackDetailsDTO> askForFeedback(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {

@@ -156,6 +156,56 @@ class DeclaredActivityControllerTest {
   }
 
   @Test
+  void getFeedbackDetails_should_return_200_with_mapped_dto() {
+    BddLogger.given("A feedback ID and a service returning the feedback");
+    UUID feedbackId = UUID.randomUUID();
+    Feedback feedback = mock(Feedback.class);
+    FeedbackDetailsDTO expectedDto =
+        new FeedbackDetailsDTO(
+            feedbackId,
+            UUID.randomUUID(),
+            null,
+            null,
+            null,
+            EFeedbackStatus.NEW,
+            List.of(),
+            List.of(),
+            Instant.now(),
+            Instant.now());
+
+    when(declaredActivityService.getFeedbackDetails(feedbackId)).thenReturn(feedback);
+    when(feedbackDetailsDTOMapper.toDTO(feedback)).thenReturn(expectedDto);
+
+    BddLogger.when("getFeedbackDetails is called");
+    ResponseEntity<FeedbackDetailsDTO> response =
+        controller.getFeedbackDetails(principal, feedbackId);
+
+    BddLogger.then("200 OK is returned with the mapped FeedbackDetailsDTO");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isSameAs(expectedDto);
+
+    verify(declaredActivityService).getFeedbackDetails(feedbackId);
+    verify(feedbackDetailsDTOMapper).toDTO(feedback);
+  }
+
+  @Test
+  void getFeedbackDetails_should_delegate_to_service_with_correct_id() {
+    BddLogger.given("A feedback ID");
+    UUID feedbackId = UUID.randomUUID();
+    Feedback feedback = mock(Feedback.class);
+
+    when(declaredActivityService.getFeedbackDetails(feedbackId)).thenReturn(feedback);
+    when(feedbackDetailsDTOMapper.toDTO(feedback)).thenReturn(mock(FeedbackDetailsDTO.class));
+
+    BddLogger.when("getFeedbackDetails is called");
+    controller.getFeedbackDetails(principal, feedbackId);
+
+    BddLogger.then("The service is called exactly once with the right feedback ID");
+    verify(declaredActivityService, times(1)).getFeedbackDetails(feedbackId);
+    verifyNoMoreInteractions(declaredActivityService);
+  }
+
+  @Test
   void askForFeedback_should_delegate_to_service_with_correct_declared_activity_id() {
     BddLogger.given("A declared activity ID");
     UUID declaredActivityId = UUID.randomUUID();

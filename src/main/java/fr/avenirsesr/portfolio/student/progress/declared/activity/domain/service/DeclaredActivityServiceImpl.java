@@ -518,6 +518,22 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
+  public Feedback getFeedbackDetails(UUID feedbackId) {
+    Feedback feedback =
+        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);
+
+    UUID loggedInUserId = loggedInUserService.getLoggedInUser().getId();
+    UUID studentId = feedback.getDeclaredActivity().getStudent().getId();
+    UUID authorId = feedback.getDeclaredActivity().getActivity().getAuthor().getId();
+
+    if (!loggedInUserId.equals(studentId) || !loggedInUserId.equals(authorId)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    return feedback;
+  }
+
+  @Override
   public PagedResult<Feedback> getStaffFeedbacks(
       EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria) {
     var staff = loggedInUserService.getLoggedInStaff();

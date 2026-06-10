@@ -331,6 +331,136 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isNotFound();
   }
 
+  // ── GET /me/activity-progress/feedback/{feedbackId} ─────────────────
+
+  @Test
+  @Transactional
+  void shouldReturnFeedbackDetailsWhenStudentOwnsTheDeclaredActivity() throws Exception {
+    BddLogger.given("a student who asked for feedback — the feedback ID is known");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("the student fetches the feedback details");
+    BddLogger.then("200 OK is returned with the full feedback details");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/feedback/" + feedbackId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(feedbackId)
+        .jsonPath("$.declaredActivityId")
+        .isEqualTo(declaredActivityId)
+        .jsonPath("$.status")
+        .isEqualTo("NEW")
+        .jsonPath("$.student")
+        .exists()
+        .jsonPath("$.associatedTraces")
+        .isArray()
+        .jsonPath("$.associatedDeclaredSkills")
+        .isArray();
+  }
+
+  @Test
+  @Transactional
+  void shouldReturnFeedbackDetailsWhenStaffIsAuthorOfTheActivity() throws Exception {
+    BddLogger.given(
+        "a feedback on a declared activity whose activity is authored by the student/staff user");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("the staff author fetches the feedback details");
+    BddLogger.then("200 OK is returned — the user is both the student and the staff author here");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/feedback/" + feedbackId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(feedbackId);
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn403WhenUserIsNeitherStudentNorStaffAuthorOfFeedback() throws Exception {
+    BddLogger.given("a feedback belonging to another student on activity authored by another user");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("a third user (otherStudent) tries to fetch the feedback details");
+    BddLogger.then("403 Forbidden is returned");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/feedback/" + feedbackId)
+        .header("X-Signed-Context", otherStudentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturn404WhenFeedbackDoesNotExist() {
+    BddLogger.given("a non-existent feedback ID");
+    BddLogger.when("fetching the feedback details");
+    BddLogger.then("404 Not Found is returned with FEEDBACK_NOT_FOUND code");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/feedback/" + notFoundId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("FEEDBACK_NOT_FOUND");
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnFeedbackDetailsEndpoint() {
+    BddLogger.given("the GET /me/activity-progress/feedback/{feedbackId} endpoint");
+    BddLogger.when("performing a GET without authentication headers");
+    BddLogger.then("401 Unauthorized is returned");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/feedback/" + notFoundId)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  private String askForFeedbackAndGetId(String declaredActivityId) throws Exception {
+    String body =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/" + declaredActivityId + "/ask-for-feedback")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    return objectMapper.readTree(body).get("id").asText();
+  }
+
   // ── GET /me/activity-progress/feedback ──────────────────────────────
 
   @Test
