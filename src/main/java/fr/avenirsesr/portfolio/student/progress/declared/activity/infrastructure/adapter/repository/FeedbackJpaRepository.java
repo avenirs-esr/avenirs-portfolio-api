@@ -13,11 +13,12 @@ public interface FeedbackJpaRepository
   List<FeedbackEntity> findAllByDeclaredActivity_IdOrderByCreatedAtDesc(UUID declaredActivityId);
 
   @Query(
-    """
-    select distinct f.declaredActivity.id
-    from FeedbackEntity f
-    where f.declaredActivity.id in :declaredActivityIds
-    """)
-  List<UUID> findDeclaredActivityIdsHavingFeedbacks(
+      """
+      select distinct f.declaredActivity.id
+      from FeedbackEntity f
+      where f.declaredActivity.id in :declaredActivityIds
+      and f.status != 'SUBMITTED'
+      """)
+  List<UUID> findDeclaredActivityIdsWithActiveFeedbacks(
       @Param("declaredActivityIds") List<UUID> declaredActivityIds);
 }

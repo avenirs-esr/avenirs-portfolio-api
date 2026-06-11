@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.time.LocalDate;
@@ -22,6 +23,7 @@ class DeclaredActivityViewDTOMapperTest {
   @Test
   void shouldMapDeclaredActivityToViewDTO() {
     BddLogger.given("a declared activity");
+
     Student student = StudentFixture.create().toModel();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
@@ -36,14 +38,18 @@ class DeclaredActivityViewDTOMapperTest {
             null);
 
     BddLogger.when("mapping to DeclaredActivityViewDTO");
-    DeclaredActivityViewDTO dto = mapper.toDTO(declaredActivity);
+
+    DeclaredActivityViewDTO dto =
+        mapper.toDTO(declaredActivity, EDeclaredActivityStatus.SUBSCRIBED);
 
     BddLogger.then("it should map nested activity fields to top-level DTO fields");
+
     assertNotNull(dto);
     assertEquals(activity.getId(), dto.activityId());
     assertEquals(activity.getTitle(), dto.title());
     assertEquals(activity.getThematic(), dto.thematic());
     assertEquals(activity.getSummary(), dto.summary());
     assertEquals(activity.getDescription().get(), dto.description());
+    assertEquals(EDeclaredActivityStatus.SUBSCRIBED, dto.status());
   }
 }

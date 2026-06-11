@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model;
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -47,26 +46,6 @@ public class DeclaredActivity extends AvenirsBaseModel {
     this.startDate = startDate;
     this.endDate = endDate;
     this.finishedAt = finishedAt;
-  }
-
-  public EDeclaredActivityStatus getStatus(boolean hasFeedback) {
-    if (finishedAt != null) {
-      return EDeclaredActivityStatus.COMPLETED;
-    }
-
-    if (hasFeedback) {
-      return EDeclaredActivityStatus.SUBMITTED;
-    }
-
-    if (startedAt != null && startedAt.isBefore(Instant.now())) {
-      return EDeclaredActivityStatus.IN_PROGRESS;
-    }
-
-    return EDeclaredActivityStatus.SUBSCRIBED;
-  }
-
-  public EDeclaredActivityStatus getStatus() {
-    return getStatus(false);
   }
 
   public static DeclaredActivity create(

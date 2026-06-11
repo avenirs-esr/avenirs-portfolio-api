@@ -275,7 +275,8 @@ class ActivityServiceImplTest {
 
     var declaredActivity = mock(DeclaredActivity.class);
     when(declaredActivity.getActivity()).thenReturn(activity);
-    when(declaredActivity.getStatus()).thenReturn(EDeclaredActivityStatus.SUBSCRIBED);
+    when(declaredActivityService.getDeclaredActivityStatus(List.of(declaredActivity)))
+        .thenReturn(Map.of(declaredActivity, EDeclaredActivityStatus.SUBSCRIBED));
 
     when(declaredActivityService.getAllDeclaredActivitiesOf(student))
         .thenReturn(java.util.List.of(declaredActivity));

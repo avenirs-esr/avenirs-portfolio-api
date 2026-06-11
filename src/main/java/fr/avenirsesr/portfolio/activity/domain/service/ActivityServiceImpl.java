@@ -240,18 +240,23 @@ public class ActivityServiceImpl implements ActivityService {
     var pagedActivities = activityRepository.findAll(thematic, pageCriteria);
     var student = loggedInUserService.getLoggedInStudent();
     var subscribedActivities = declaredActivityService.getAllDeclaredActivitiesOf(student);
+    var statusByDeclaredActivity =
+        declaredActivityService.getDeclaredActivityStatus(subscribedActivities);
+
     return new PagedResult<>(
         pagedActivities.content().stream()
             .map(
-                activity ->
-                    new ActivityWithStudentStatusData(
-                        activity,
-                        activity.getCreatedAt().isAfter(Instant.now().minus(DURATION_FOR_LATEST)),
-                        subscribedActivities.stream()
-                            .filter(a -> a.getActivity().equals(activity))
-                            .map(DeclaredActivity::getStatus)
-                            .findFirst()
-                            .orElse(null)))
+                activity -> {
+                  var declaredActivity =
+                      subscribedActivities.stream()
+                          .filter(a -> a.getActivity().equals(activity))
+                          .findFirst();
+
+                  return new ActivityWithStudentStatusData(
+                      activity,
+                      activity.getCreatedAt().isAfter(Instant.now().minus(DURATION_FOR_LATEST)),
+                      declaredActivity.map(statusByDeclaredActivity::get).orElse(null));
+                })
             .toList(),
         pagedActivities.pageInfo());
   }

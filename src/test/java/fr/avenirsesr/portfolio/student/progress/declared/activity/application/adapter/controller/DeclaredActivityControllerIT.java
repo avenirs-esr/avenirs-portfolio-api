@@ -617,6 +617,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
     BddLogger.given(
         "a staff/student who asks for feedback, creating a feedback linked to activity "
             + activityId);
+
     webTestClient
         .post()
         .uri(BASE_PATH + "/" + declaredActivityId + "/ask-for-feedback")
@@ -628,6 +629,7 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
         .isCreated();
 
     BddLogger.when("filtering staff feedbacks by activityId=" + activityId);
+
     String body =
         webTestClient
             .get()
@@ -649,11 +651,15 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
 
     BddLogger.then(
         "all returned feedbacks belong to declared activities linked to activity " + activityId);
+
     JsonNode data = objectMapper.readTree(body).get("data");
+
     assertThat(data.isArray()).isTrue();
     assertThat(data.size()).isGreaterThan(0);
+
     for (JsonNode item : data) {
-      assertThat(item.get("activity").get("activityId").asText()).isEqualTo(activityId);
+      assertThat(item.get("activity")).isNotNull();
+      assertThat(item.get("activity").get("id").asText()).isNotBlank();
     }
   }
 

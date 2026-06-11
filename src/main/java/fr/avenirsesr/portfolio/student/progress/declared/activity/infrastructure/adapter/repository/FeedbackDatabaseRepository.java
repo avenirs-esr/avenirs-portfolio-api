@@ -130,12 +130,12 @@ public class FeedbackDatabaseRepository
   }
 
   @Override
-  public List<UUID> findDeclaredActivityIdsHavingFeedbacks(List<UUID> declaredActivityIds) {
+  public List<UUID> findDeclaredActivityIdsHavingActiveFeedbacks(List<UUID> declaredActivityIds) {
     if (declaredActivityIds.isEmpty()) {
       return List.of();
     }
 
-    return jpaRepository.findDeclaredActivityIdsHavingFeedbacks(declaredActivityIds);
+    return jpaRepository.findDeclaredActivityIdsWithActiveFeedbacks(declaredActivityIds);
   }
 
   // ── private helpers ─────────────────────────────────────────────────
