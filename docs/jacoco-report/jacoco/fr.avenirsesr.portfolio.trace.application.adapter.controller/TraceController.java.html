@@ -64,22 +64,22 @@ public class TraceController {
       @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) LocalDate fromDate,
       @RequestParam(required = false) LocalDate toDate) {
-<span class="fc" id="L67">    var dateFilter = new DateFilter(fromDate, toDate);</span>
-<span class="fc" id="L68">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L69">    log.debug(</span>
+<span class="nc" id="L67">    var dateFilter = new DateFilter(fromDate, toDate);</span>
+<span class="nc" id="L68">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="nc" id="L69">    log.debug(</span>
         &quot;Received request to trace view of user [{}] (page= {}, fileSize= {})&quot;,
-<span class="fc" id="L71">        principal.getName(),</span>
-<span class="fc" id="L72">        pageCriteria.page(),</span>
-<span class="fc" id="L73">        pageCriteria.pageSize());</span>
-<span class="fc" id="L74">    PagedResult&lt;TraceViewData&gt; tracesResult =</span>
-<span class="fc" id="L75">        traceService.getTracesView(keyword, traceFilter, dateFilter, pageCriteria);</span>
+<span class="nc" id="L71">        principal.getName(),</span>
+<span class="nc" id="L72">        pageCriteria.page(),</span>
+<span class="nc" id="L73">        pageCriteria.pageSize());</span>
+<span class="nc" id="L74">    PagedResult&lt;TraceViewData&gt; tracesResult =</span>
+<span class="nc" id="L75">        traceService.getTracesView(keyword, traceFilter, dateFilter, pageCriteria);</span>
 
-<span class="fc" id="L77">    var tracesViewResponse =</span>
+<span class="nc" id="L77">    var tracesViewResponse =</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L79">            traceViewMapper.toDTOs(tracesResult.content()),</span>
-<span class="fc" id="L80">            PageInfoDTO.fromDomain(tracesResult.pageInfo()));</span>
+<span class="nc" id="L79">            traceViewMapper.toDTOs(tracesResult.content()),</span>
+<span class="nc" id="L80">            PageInfoDTO.fromDomain(tracesResult.pageInfo()));</span>
 
-<span class="fc" id="L82">    return ResponseEntity.ok(tracesViewResponse);</span>
+<span class="nc" id="L82">    return ResponseEntity.ok(tracesViewResponse);</span>
   }
 
   @DeleteMapping(&quot;/{traceId}&quot;)
@@ -103,12 +103,12 @@ public class TraceController {
   @GetMapping(&quot;/{traceId}/detail&quot;)
   public ResponseEntity&lt;TraceDetailDTO&gt; getTraceDetail(
       Principal principal, @PathVariable UUID traceId) {
-<span class="fc" id="L106">    log.debug(</span>
-<span class="fc" id="L107">        &quot;Received request to get trace [{}] detail of user [{}]&quot;, traceId, principal.getName());</span>
+<span class="nc" id="L106">    log.debug(</span>
+<span class="nc" id="L107">        &quot;Received request to get trace [{}] detail of user [{}]&quot;, traceId, principal.getName());</span>
 
-<span class="fc" id="L109">    TraceDetailData traceDetail = traceService.getTraceDetail(traceId);</span>
+<span class="nc" id="L109">    TraceDetailData traceDetail = traceService.getTraceDetail(traceId);</span>
 
-<span class="fc" id="L111">    return ResponseEntity.ok(traceDetailMapper.toDTO(traceDetail));</span>
+<span class="nc" id="L111">    return ResponseEntity.ok(traceDetailMapper.toDTO(traceDetail));</span>
   }
 
   @GetMapping(&quot;/{traceId}/search-for-association/declared-activities&quot;)

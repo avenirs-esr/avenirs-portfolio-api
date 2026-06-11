@@ -12,7 +12,6 @@ import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultDa
 import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
-import fr.avenirsesr.portfolio.association.domain.port.input.AssociationCheckService;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
@@ -51,7 +50,7 @@ import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L54">@Slf4j</span>
+<span class="fc" id="L53">@Slf4j</span>
 @AllArgsConstructor
 public class TraceServiceImpl implements TraceService {
   private final TraceRepository traceRepository;
@@ -62,191 +61,186 @@ public class TraceServiceImpl implements TraceService {
   private final TraceConfigurationClient traceConfigurationClient;
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
-  private final AssociationCheckService associationCheckService;
   private final AssociationSearchHelper associationSearchHelper;
 
   @Override
   public Trace getTraceById(UUID id) {
-<span class="fc" id="L70">    return traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L68">    return traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
   }
 
   @Override
   public List&lt;Trace&gt; findAllTracesById(List&lt;UUID&gt; ids) {
-<span class="fc" id="L75">    return traceRepository.findAllById(ids);</span>
+<span class="fc" id="L73">    return traceRepository.findAllById(ids);</span>
   }
 
   @Override
   public String programNameOfTrace(Trace trace) {
-<span class="fc" id="L80">    return EPortfolioType.LIFE_PROJECT.name();</span>
+<span class="fc" id="L78">    return EPortfolioType.LIFE_PROJECT.name();</span>
   }
 
   @Override
   public List&lt;Trace&gt; lastTracesOf() {
-<span class="fc" id="L85">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L86">    return traceRepository.findLastsOf(loggedInUser, MAX_TRACES_OVERVIEW);</span>
+<span class="fc" id="L83">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L84">    return traceRepository.findLastsOf(loggedInUser, MAX_TRACES_OVERVIEW);</span>
   }
 
   @Override
   public PagedResult&lt;TraceViewData&gt; getTracesView(
       String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria) {
-<span class="fc" id="L92">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L93">    var config = traceConfigurationClient.getTraceConfiguration();</span>
-<span class="fc" id="L94">    PagedResult&lt;Trace&gt; pagedResult =</span>
-<span class="fc" id="L95">        traceRepository.findAll(loggedInUser, keyword, filter, dateFilter, pageCriteria);</span>
-<span class="fc" id="L96">    Map&lt;Trace, Boolean&gt; traceAssociated = traceRepository.isAssociated(pagedResult.content());</span>
-<span class="fc" id="L97">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L98">        pagedResult.content().stream()</span>
-<span class="fc" id="L99">            .map(</span>
+<span class="fc" id="L90">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L91">    var config = traceConfigurationClient.getTraceConfiguration();</span>
+<span class="fc" id="L92">    PagedResult&lt;Trace&gt; pagedResult =</span>
+<span class="fc" id="L93">        traceRepository.findAll(loggedInUser, keyword, filter, dateFilter, pageCriteria);</span>
+<span class="fc" id="L94">    Map&lt;Trace, Boolean&gt; traceAssociated = traceRepository.isAssociated(pagedResult.content());</span>
+<span class="fc" id="L95">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L96">        pagedResult.content().stream()</span>
+<span class="fc" id="L97">            .map(</span>
                 trace -&gt;
-<span class="fc" id="L101">                    new TraceViewData(</span>
-<span class="fc" id="L102">                        trace.getId(),</span>
-<span class="fc" id="L103">                        trace.getTitle(),</span>
-<span class="fc" id="L104">                        traceAssociated.get(trace),</span>
-<span class="fc" id="L105">                        trace.getCreatedAt(),</span>
-<span class="fc" id="L106">                        trace.getUpdatedAt(),</span>
-<span class="fc bfc" id="L107" title="All 2 branches covered.">                        traceAssociated.get(trace)</span>
-<span class="fc" id="L108">                            ? Optional.empty()</span>
-<span class="fc" id="L109">                            : Optional.of(computeDeletionDateForUnassociatedTrace(trace, config))))</span>
-<span class="fc" id="L110">            .toList(),</span>
-<span class="fc" id="L111">        pagedResult.pageInfo());</span>
+<span class="fc" id="L99">                    new TraceViewData(</span>
+<span class="fc" id="L100">                        trace.getId(),</span>
+<span class="fc" id="L101">                        trace.getTitle(),</span>
+<span class="fc" id="L102">                        traceAssociated.get(trace),</span>
+<span class="fc" id="L103">                        trace.getCreatedAt(),</span>
+<span class="fc" id="L104">                        trace.getUpdatedAt(),</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">                        traceAssociated.get(trace)</span>
+<span class="fc" id="L106">                            ? Optional.empty()</span>
+<span class="fc" id="L107">                            : Optional.of(computeDeletionDateForUnassociatedTrace(trace, config))))</span>
+<span class="fc" id="L108">            .toList(),</span>
+<span class="fc" id="L109">        pagedResult.pageInfo());</span>
   }
 
   private LocalDate computeDeletionDateForUnassociatedTrace(
       Trace unassociatedTrace, TraceConfiguration configuration) {
-<span class="fc" id="L116">    return unassociatedTrace</span>
-<span class="fc" id="L117">        .getCreatedAt()</span>
-<span class="fc" id="L118">        .plus(Duration.ofDays(configuration.maxRemainingDays()))</span>
-<span class="fc" id="L119">        .atZone(ZoneId.systemDefault())</span>
-<span class="fc" id="L120">        .toLocalDate();</span>
+<span class="fc" id="L114">    return unassociatedTrace</span>
+<span class="fc" id="L115">        .getCreatedAt()</span>
+<span class="fc" id="L116">        .plus(Duration.ofDays(configuration.maxRemainingDays()))</span>
+<span class="fc" id="L117">        .atZone(ZoneId.systemDefault())</span>
+<span class="fc" id="L118">        .toLocalDate();</span>
   }
 
   @Override
   public void deleteById(UUID id) {
-<span class="fc" id="L125">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L126">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
-<span class="fc" id="L127">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
+<span class="fc" id="L123">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L124">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L125">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
 
-<span class="fc" id="L129">    trace.setDeletedAt(Instant.now());</span>
+<span class="fc" id="L127">    trace.setDeletedAt(Instant.now());</span>
 
-<span class="fc" id="L131">    associationCheckService.checkAssociationsLockedOf(trace.getId(), Trace.class);</span>
+<span class="fc" id="L129">    associationService.deleteAllOf(List.of(trace.getId()), Trace.class);</span>
 
-<span class="fc" id="L133">    associationService.deleteAllOf(List.of(trace.getId()), Trace.class);</span>
-<span class="fc" id="L134">    traceRepository.save(trace);</span>
-<span class="fc" id="L135">    log.info(&quot;Deleted trace {}&quot;, trace);</span>
-<span class="fc" id="L136">  }</span>
+<span class="fc" id="L131">    traceRepository.save(trace);</span>
+<span class="fc" id="L132">    log.info(&quot;Deleted trace {}&quot;, trace);</span>
+<span class="fc" id="L133">  }</span>
 
   @Override
   public TracesSummaryData getTracesSummary() {
-<span class="fc" id="L140">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L141">    List&lt;Trace&gt; associatedTraces = traceRepository.findAll(loggedInUser, true);</span>
-<span class="fc" id="L142">    List&lt;Trace&gt; unassociatedTraces = traceRepository.findAll(loggedInUser, false);</span>
-<span class="fc" id="L143">    TraceConfiguration traceConfiguration = traceConfigurationClient.getTraceConfiguration();</span>
+<span class="fc" id="L137">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L138">    List&lt;Trace&gt; associatedTraces = traceRepository.findAll(loggedInUser, true);</span>
+<span class="fc" id="L139">    List&lt;Trace&gt; unassociatedTraces = traceRepository.findAll(loggedInUser, false);</span>
+<span class="fc" id="L140">    TraceConfiguration traceConfiguration = traceConfigurationClient.getTraceConfiguration();</span>
 
-<span class="fc" id="L145">    int criticalCount =</span>
-<span class="fc" id="L146">        unassociatedTraces.stream()</span>
-<span class="fc" id="L147">            .filter(</span>
+<span class="fc" id="L142">    int criticalCount =</span>
+<span class="fc" id="L143">        unassociatedTraces.stream()</span>
+<span class="fc" id="L144">            .filter(</span>
                 t -&gt;
-<span class="fc" id="L149">                    Duration.between(t.getCreatedAt(), Instant.now())</span>
-<span class="fc" id="L150">                        .minus(Duration.ofDays(traceConfiguration.maxRemainingDays()))</span>
-<span class="fc" id="L151">                        .plus(Duration.ofDays(traceConfiguration.maxRemainingDaysBeforeCritical()))</span>
-<span class="fc" id="L152">                        .isPositive())</span>
-<span class="fc" id="L153">            .toList()</span>
-<span class="fc" id="L154">            .size();</span>
+<span class="fc" id="L146">                    Duration.between(t.getCreatedAt(), Instant.now())</span>
+<span class="fc" id="L147">                        .minus(Duration.ofDays(traceConfiguration.maxRemainingDays()))</span>
+<span class="fc" id="L148">                        .plus(Duration.ofDays(traceConfiguration.maxRemainingDaysBeforeCritical()))</span>
+<span class="fc" id="L149">                        .isPositive())</span>
+<span class="fc" id="L150">            .toList()</span>
+<span class="fc" id="L151">            .size();</span>
 
-<span class="fc" id="L156">    int warningCount =</span>
-<span class="fc" id="L157">        unassociatedTraces.stream()</span>
-<span class="fc" id="L158">            .filter(</span>
+<span class="fc" id="L153">    int warningCount =</span>
+<span class="fc" id="L154">        unassociatedTraces.stream()</span>
+<span class="fc" id="L155">            .filter(</span>
                 t -&gt;
-<span class="fc" id="L160">                    Duration.between(t.getCreatedAt(), Instant.now())</span>
-<span class="fc" id="L161">                        .minus(Duration.ofDays(traceConfiguration.maxRemainingDays()))</span>
-<span class="fc" id="L162">                        .plus(Duration.ofDays(traceConfiguration.maxRemainingDaysBeforeWarning()))</span>
-<span class="fc" id="L163">                        .isPositive())</span>
-<span class="fc" id="L164">            .toList()</span>
-<span class="fc" id="L165">            .size();</span>
+<span class="fc" id="L157">                    Duration.between(t.getCreatedAt(), Instant.now())</span>
+<span class="fc" id="L158">                        .minus(Duration.ofDays(traceConfiguration.maxRemainingDays()))</span>
+<span class="fc" id="L159">                        .plus(Duration.ofDays(traceConfiguration.maxRemainingDaysBeforeWarning()))</span>
+<span class="fc" id="L160">                        .isPositive())</span>
+<span class="fc" id="L161">            .toList()</span>
+<span class="fc" id="L162">            .size();</span>
 
-<span class="fc" id="L167">    return new TracesSummaryData(</span>
-<span class="fc" id="L168">        associatedTraces.size(), unassociatedTraces.size(), warningCount, criticalCount);</span>
+<span class="fc" id="L164">    return new TracesSummaryData(</span>
+<span class="fc" id="L165">        associatedTraces.size(), unassociatedTraces.size(), warningCount, criticalCount);</span>
   }
 
   @Override
   public TraceDetailData getTraceDetail(UUID id) {
-<span class="fc" id="L173">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L174">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
-<span class="fc" id="L175">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
-<span class="fc" id="L176">    var isTraceAssociated = traceRepository.isAssociated(List.of(trace)).get(trace);</span>
-<span class="fc" id="L177">    return buildTraceDetailData(</span>
-<span class="fc" id="L178">        trace, isTraceAssociated, isTraceDeletable(trace, isTraceAssociated));</span>
+<span class="fc" id="L170">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L171">    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L172">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
+<span class="fc" id="L173">    var isTraceAssociated = traceRepository.isAssociated(List.of(trace)).get(trace);</span>
+<span class="fc" id="L174">    return buildTraceDetailData(trace, isTraceAssociated);</span>
   }
 
-  private TraceDetailData buildTraceDetailData(
-      Trace trace, boolean isAssociated, boolean isDeletable) {
-<span class="fc" id="L183">    return new TraceDetailData(</span>
-<span class="fc" id="L184">        trace.getId(),</span>
-<span class="fc" id="L185">        trace.getTitle(),</span>
+  private TraceDetailData buildTraceDetailData(Trace trace, boolean isAssociated) {
+<span class="fc" id="L178">    return new TraceDetailData(</span>
+<span class="fc" id="L179">        trace.getId(),</span>
+<span class="fc" id="L180">        trace.getTitle(),</span>
         isAssociated,
-        isDeletable,
-<span class="fc" id="L188">        programNameOfTrace(trace),</span>
-<span class="fc" id="L189">        trace.getAuthorType(),</span>
-<span class="fc" id="L190">        trace.getAiUseJustification().orElse(null),</span>
-<span class="fc" id="L191">        trace.getPersonalNote().orElse(null),</span>
-<span class="fc" id="L192">        trace.getLink(),</span>
-<span class="fc" id="L193">        trace.getAttachment(),</span>
-<span class="fc" id="L194">        trace.getCreatedAt(),</span>
-<span class="fc" id="L195">        trace.getUpdatedAt());</span>
+<span class="fc" id="L182">        programNameOfTrace(trace),</span>
+<span class="fc" id="L183">        trace.getAuthorType(),</span>
+<span class="fc" id="L184">        trace.getAiUseJustification().orElse(null),</span>
+<span class="fc" id="L185">        trace.getPersonalNote().orElse(null),</span>
+<span class="fc" id="L186">        trace.getLink(),</span>
+<span class="fc" id="L187">        trace.getAttachment(),</span>
+<span class="fc" id="L188">        trace.getCreatedAt(),</span>
+<span class="fc" id="L189">        trace.getUpdatedAt());</span>
   }
 
   @Override
   public TraceAssociationsData getTraceAssociations(UUID traceId, boolean onlyNotCompleted) {
-<span class="fc" id="L200">    var userLoggedIn = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L201">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L194">    var userLoggedIn = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L195">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
 
-<span class="fc" id="L203">    checkIfUserIsAuthorizedOnTrace(userLoggedIn, trace);</span>
+<span class="fc" id="L197">    checkIfUserIsAuthorizedOnTrace(userLoggedIn, trace);</span>
 
-<span class="fc" id="L205">    var associations =</span>
-<span class="fc" id="L206">        associationService.getAllOf(</span>
-<span class="fc" id="L207">            trace.getId(), Trace.class, EAssociationType.getAllBy(Trace.class));</span>
+<span class="fc" id="L199">    var associations =</span>
+<span class="fc" id="L200">        associationService.getAllOf(</span>
+<span class="fc" id="L201">            trace.getId(), Trace.class, EAssociationType.getAllBy(Trace.class));</span>
 
-<span class="fc" id="L209">    var declaredActivityAssociations =</span>
-<span class="fc" id="L210">        associations.stream()</span>
-<span class="fc bfc" id="L211" title="All 2 branches covered.">            .filter(a -&gt; a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)</span>
-<span class="fc" id="L212">            .toList();</span>
+<span class="fc" id="L203">    var declaredActivityAssociations =</span>
+<span class="fc" id="L204">        associations.stream()</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">            .filter(a -&gt; a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)</span>
+<span class="fc" id="L206">            .toList();</span>
 
     List&lt;DeclaredActivity&gt; activities;
 
-<span class="fc bfc" id="L216" title="All 2 branches covered.">    if (onlyNotCompleted) {</span>
-<span class="fc" id="L217">      activities =</span>
-<span class="fc" id="L218">          declaredActivityService.findAllNotCompletedActivitiesByIds(</span>
-<span class="fc" id="L219">              declaredActivityAssociations.stream().map(Association::getId1).toList());</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">    if (onlyNotCompleted) {</span>
+<span class="fc" id="L211">      activities =</span>
+<span class="fc" id="L212">          declaredActivityService.findAllNotCompletedActivitiesByIds(</span>
+<span class="fc" id="L213">              declaredActivityAssociations.stream().map(Association::getId1).toList());</span>
     } else {
-<span class="fc" id="L221">      activities =</span>
-<span class="fc" id="L222">          declaredActivityService.findAllDeclaredActivitiesByIds(</span>
-<span class="fc" id="L223">              declaredActivityAssociations.stream().map(Association::getId1).toList());</span>
+<span class="fc" id="L215">      activities =</span>
+<span class="fc" id="L216">          declaredActivityService.findAllDeclaredActivitiesByIds(</span>
+<span class="fc" id="L217">              declaredActivityAssociations.stream().map(Association::getId1).toList());</span>
     }
 
-<span class="fc" id="L226">    var declaredSkillAssociations =</span>
-<span class="fc" id="L227">        associations.stream()</span>
-<span class="fc bfc" id="L228" title="All 2 branches covered.">            .filter(a -&gt; a.getAssociationType() == EAssociationType.TRACE_DECLARED_SKILL)</span>
-<span class="fc" id="L229">            .toList();</span>
-<span class="fc" id="L230">    var skills =</span>
-<span class="fc" id="L231">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(</span>
-<span class="fc" id="L232">            declaredSkillAssociations.stream().map(Association::getId2).toList());</span>
+<span class="fc" id="L220">    var declaredSkillAssociations =</span>
+<span class="fc" id="L221">        associations.stream()</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">            .filter(a -&gt; a.getAssociationType() == EAssociationType.TRACE_DECLARED_SKILL)</span>
+<span class="fc" id="L223">            .toList();</span>
+<span class="fc" id="L224">    var skills =</span>
+<span class="fc" id="L225">        declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(</span>
+<span class="fc" id="L226">            declaredSkillAssociations.stream().map(Association::getId2).toList());</span>
 
-<span class="fc" id="L234">    var declaredExperienceAssociations =</span>
-<span class="fc" id="L235">        associations.stream()</span>
-<span class="fc bfc" id="L236" title="All 2 branches covered.">            .filter(a -&gt; a.getAssociationType() == EAssociationType.TRACE_DECLARED_EXPERIENCE)</span>
-<span class="fc" id="L237">            .toList();</span>
-<span class="fc" id="L238">    var experiences =</span>
-<span class="fc" id="L239">        declaredExperienceService.findAllByIds(</span>
-<span class="fc" id="L240">            declaredExperienceAssociations.stream().map(Association::getId2).toList());</span>
+<span class="fc" id="L228">    var declaredExperienceAssociations =</span>
+<span class="fc" id="L229">        associations.stream()</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">            .filter(a -&gt; a.getAssociationType() == EAssociationType.TRACE_DECLARED_EXPERIENCE)</span>
+<span class="fc" id="L231">            .toList();</span>
+<span class="fc" id="L232">    var experiences =</span>
+<span class="fc" id="L233">        declaredExperienceService.findAllByIds(</span>
+<span class="fc" id="L234">            declaredExperienceAssociations.stream().map(Association::getId2).toList());</span>
 
-<span class="fc" id="L242">    return new TraceAssociationsData(</span>
-<span class="fc" id="L243">        declaredActivityAssociations.stream()</span>
-<span class="fc" id="L244">            .map(a -&gt; declaredActivityMapper(a, activities))</span>
-<span class="fc" id="L245">            .toList(),</span>
-<span class="fc" id="L246">        declaredSkillAssociations.stream().map(a -&gt; declaredSkillMapper(a, skills)).toList(),</span>
-<span class="fc" id="L247">        declaredExperienceAssociations.stream()</span>
-<span class="fc" id="L248">            .map(a -&gt; declaredExperienceMapper(a, experiences))</span>
-<span class="fc" id="L249">            .toList());</span>
+<span class="fc" id="L236">    return new TraceAssociationsData(</span>
+<span class="fc" id="L237">        declaredActivityAssociations.stream()</span>
+<span class="fc" id="L238">            .map(a -&gt; declaredActivityMapper(a, activities))</span>
+<span class="fc" id="L239">            .toList(),</span>
+<span class="fc" id="L240">        declaredSkillAssociations.stream().map(a -&gt; declaredSkillMapper(a, skills)).toList(),</span>
+<span class="fc" id="L241">        declaredExperienceAssociations.stream()</span>
+<span class="fc" id="L242">            .map(a -&gt; declaredExperienceMapper(a, experiences))</span>
+<span class="fc" id="L243">            .toList());</span>
   }
 
   @Override
@@ -259,9 +253,9 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification,
       String link) {
-<span class="fc" id="L262">    return createTrace(</span>
+<span class="fc" id="L256">    return createTrace(</span>
         traceId,
-<span class="fc" id="L264">        userService.getUser(userId),</span>
+<span class="fc" id="L258">        userService.getUser(userId),</span>
         title,
         language,
         authorType,
@@ -278,9 +272,9 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification,
       String link) {
-<span class="fc" id="L281">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L282">    return createTrace(</span>
-<span class="fc" id="L283">        UUID.randomUUID(),</span>
+<span class="fc" id="L275">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L276">    return createTrace(</span>
+<span class="fc" id="L277">        UUID.randomUUID(),</span>
         loggedInUser,
         title,
         language,
@@ -299,14 +293,14 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification,
       String link) {
-<span class="fc" id="L302">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
-<span class="fc" id="L303">    validateOptionalTextMaxLength(&quot;link&quot;, link, LINK_LENGTH);</span>
-<span class="fc" id="L304">    validateUrl(link);</span>
-<span class="fc" id="L305">    var trace =</span>
-<span class="fc" id="L306">        Trace.create(</span>
+<span class="fc" id="L296">    requireNotBlankAndMaxLength(&quot;title&quot;, title, TITLE_LENGTH);</span>
+<span class="fc" id="L297">    validateOptionalTextMaxLength(&quot;link&quot;, link, LINK_LENGTH);</span>
+<span class="fc" id="L298">    validateUrl(link);</span>
+<span class="fc" id="L299">    var trace =</span>
+<span class="fc" id="L300">        Trace.create(</span>
             traceId, user, title, language, authorType, aiJustification, personalNote, link, null);
 
-<span class="fc" id="L309">    return traceRepository.save(trace);</span>
+<span class="fc" id="L303">    return traceRepository.save(trace);</span>
   }
 
   @Override
@@ -318,26 +312,25 @@ public class TraceServiceImpl implements TraceService {
       String personalNote,
       String aiJustification,
       String link) {
-<span class="fc" id="L321">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L322">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
-<span class="fc" id="L323">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
+<span class="fc" id="L315">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L316">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L317">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
 
-<span class="fc" id="L325">    trace.setTitle(title);</span>
-<span class="fc" id="L326">    trace.setLanguage(language);</span>
-<span class="fc" id="L327">    trace.setAuthorType(authorType);</span>
-<span class="fc" id="L328">    trace.setPersonalNote(personalNote);</span>
-<span class="fc" id="L329">    trace.setAiUseJustification(aiJustification);</span>
+<span class="fc" id="L319">    trace.setTitle(title);</span>
+<span class="fc" id="L320">    trace.setLanguage(language);</span>
+<span class="fc" id="L321">    trace.setAuthorType(authorType);</span>
+<span class="fc" id="L322">    trace.setPersonalNote(personalNote);</span>
+<span class="fc" id="L323">    trace.setAiUseJustification(aiJustification);</span>
 
-<span class="fc bfc" id="L331" title="All 2 branches covered.">    if (link != null) {</span>
-<span class="fc" id="L332">      validateOptionalTextMaxLength(&quot;link&quot;, link, LINK_LENGTH);</span>
-<span class="fc" id="L333">      validateUrl(link);</span>
-<span class="fc" id="L334">      trace.setLink(link);</span>
+<span class="fc bfc" id="L325" title="All 2 branches covered.">    if (link != null) {</span>
+<span class="fc" id="L326">      validateOptionalTextMaxLength(&quot;link&quot;, link, LINK_LENGTH);</span>
+<span class="fc" id="L327">      validateUrl(link);</span>
+<span class="fc" id="L328">      trace.setLink(link);</span>
     }
 
-<span class="fc" id="L337">    var savedTrace = traceRepository.save(trace);</span>
-<span class="fc" id="L338">    var isTraceAssociated = traceRepository.isAssociated(List.of(savedTrace)).get(savedTrace);</span>
-<span class="fc" id="L339">    return buildTraceDetailData(</span>
-<span class="fc" id="L340">        savedTrace, isTraceAssociated, isTraceDeletable(trace, isTraceAssociated));</span>
+<span class="fc" id="L331">    var savedTrace = traceRepository.save(trace);</span>
+<span class="fc" id="L332">    var isTraceAssociated = traceRepository.isAssociated(List.of(savedTrace)).get(savedTrace);</span>
+<span class="fc" id="L333">    return buildTraceDetailData(savedTrace, isTraceAssociated);</span>
   }
 
   @Override
@@ -348,230 +341,225 @@ public class TraceServiceImpl implements TraceService {
       ETraceAuthorType authorType,
       String personalNote,
       String aiJustification) {
-<span class="fc" id="L351">    return updateTrace(traceId, title, language, authorType, personalNote, aiJustification, null);</span>
+<span class="fc" id="L344">    return updateTrace(traceId, title, language, authorType, personalNote, aiJustification, null);</span>
   }
 
   @Override
   public TraceAssociationsData associateTraceWithActivities(UUID traceId, List&lt;UUID&gt; activityIds) {
-<span class="nc" id="L356">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="nc" id="L357">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
-<span class="nc" id="L358">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
+<span class="nc" id="L349">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="nc" id="L350">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="nc" id="L351">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
 
-<span class="nc" id="L360">    var activities = declaredActivityService.findAllDeclaredActivitiesByIds(activityIds);</span>
+<span class="nc" id="L353">    var activities = declaredActivityService.findAllDeclaredActivitiesByIds(activityIds);</span>
 
-<span class="nc" id="L362">    if (!new HashSet&lt;&gt;(activities.stream().map(DeclaredActivity::getId).toList())</span>
-<span class="nc bnc" id="L363" title="All 2 branches missed.">        .containsAll(activityIds)) {</span>
-<span class="nc" id="L364">      throw new DeclaredActivityNotFoundException();</span>
+<span class="nc" id="L355">    if (!new HashSet&lt;&gt;(activities.stream().map(DeclaredActivity::getId).toList())</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">        .containsAll(activityIds)) {</span>
+<span class="nc" id="L357">      throw new DeclaredActivityNotFoundException();</span>
     }
 
-<span class="nc bnc" id="L367" title="All 2 branches missed.">    if (!activities.stream().allMatch(a -&gt; a.getStudent().getUser().equals(loggedInUser))) {</span>
-<span class="nc" id="L368">      throw new UserNotAuthorizedException();</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">    if (!activities.stream().allMatch(a -&gt; a.getStudent().getUser().equals(loggedInUser))) {</span>
+<span class="nc" id="L361">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="nc" id="L371">    associationService.createAll(</span>
-<span class="nc" id="L372">        activityIds.stream()</span>
-<span class="nc" id="L373">            .map(</span>
+<span class="nc" id="L364">    associationService.createAll(</span>
+<span class="nc" id="L365">        activityIds.stream()</span>
+<span class="nc" id="L366">            .map(</span>
                 activityId -&gt;
-<span class="nc" id="L375">                    new AssociationData(</span>
+<span class="nc" id="L368">                    new AssociationData(</span>
                         activityId, traceId, EAssociationType.DECLARED_ACTIVITY_TRACE))
-<span class="nc" id="L377">            .toList());</span>
+<span class="nc" id="L370">            .toList());</span>
 
-<span class="nc" id="L379">    return getTraceAssociations(traceId, false);</span>
+<span class="nc" id="L372">    return getTraceAssociations(traceId, false);</span>
   }
 
   private DeclaredActivityAssociationData declaredActivityMapper(
       Association association, List&lt;DeclaredActivity&gt; activities) {
-<span class="fc" id="L384">    return new DeclaredActivityAssociationData(</span>
-<span class="fc" id="L385">        association.getId(),</span>
-<span class="fc" id="L386">        activities.stream()</span>
-<span class="fc" id="L387">            .filter(activity -&gt; activity.getId().equals(association.getId1()))</span>
-<span class="fc" id="L388">            .findAny()</span>
-<span class="fc" id="L389">            .orElseThrow(DeclaredActivityNotFoundException::new));</span>
+<span class="fc" id="L377">    return new DeclaredActivityAssociationData(</span>
+<span class="fc" id="L378">        association.getId(),</span>
+<span class="fc" id="L379">        activities.stream()</span>
+<span class="fc" id="L380">            .filter(activity -&gt; activity.getId().equals(association.getId1()))</span>
+<span class="fc" id="L381">            .findAny()</span>
+<span class="fc" id="L382">            .orElseThrow(DeclaredActivityNotFoundException::new));</span>
   }
 
   private DeclaredSkillAssociationData declaredSkillMapper(
       Association association, List&lt;DeclaredSkillProgress&gt; skills) {
-<span class="fc" id="L394">    return new DeclaredSkillAssociationData(</span>
-<span class="fc" id="L395">        association.getId(),</span>
-<span class="fc" id="L396">        skills.stream()</span>
-<span class="fc" id="L397">            .filter(skill -&gt; skill.getId().equals(association.getId2()))</span>
-<span class="fc" id="L398">            .findAny()</span>
-<span class="fc" id="L399">            .orElseThrow(DeclaredSkillProgressNotFoundException::new));</span>
+<span class="fc" id="L387">    return new DeclaredSkillAssociationData(</span>
+<span class="fc" id="L388">        association.getId(),</span>
+<span class="fc" id="L389">        skills.stream()</span>
+<span class="fc" id="L390">            .filter(skill -&gt; skill.getId().equals(association.getId2()))</span>
+<span class="fc" id="L391">            .findAny()</span>
+<span class="fc" id="L392">            .orElseThrow(DeclaredSkillProgressNotFoundException::new));</span>
   }
 
   private DeclaredExperienceAssociationData declaredExperienceMapper(
       Association association, List&lt;DeclaredExperience&gt; experiences) {
-<span class="fc" id="L404">    return new DeclaredExperienceAssociationData(</span>
-<span class="fc" id="L405">        association.getId(),</span>
-<span class="fc" id="L406">        experiences.stream()</span>
-<span class="fc" id="L407">            .filter(experience -&gt; experience.getId().equals(association.getId2()))</span>
-<span class="fc" id="L408">            .findAny()</span>
-<span class="fc" id="L409">            .orElseThrow(DeclaredExperienceNotFoundException::new));</span>
+<span class="fc" id="L397">    return new DeclaredExperienceAssociationData(</span>
+<span class="fc" id="L398">        association.getId(),</span>
+<span class="fc" id="L399">        experiences.stream()</span>
+<span class="fc" id="L400">            .filter(experience -&gt; experience.getId().equals(association.getId2()))</span>
+<span class="fc" id="L401">            .findAny()</span>
+<span class="fc" id="L402">            .orElseThrow(DeclaredExperienceNotFoundException::new));</span>
   }
 
   @Override
   public TraceAssociationsData associateTraceWithDeclaredSkill(UUID traceId, List&lt;UUID&gt; skillIds) {
-<span class="fc" id="L414">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L415">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
-<span class="fc" id="L416">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
+<span class="fc" id="L407">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L408">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L409">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
 
-<span class="fc" id="L418">    var declaredSkills = declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(skillIds);</span>
+<span class="fc" id="L411">    var declaredSkills = declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(skillIds);</span>
 
-<span class="fc" id="L420">    if (!new HashSet&lt;&gt;(declaredSkills.stream().map(DeclaredSkillProgress::getId).toList())</span>
-<span class="fc bfc" id="L421" title="All 2 branches covered.">        .containsAll(skillIds)) {</span>
-<span class="fc" id="L422">      throw new DeclaredSkillProgressNotFoundException();</span>
+<span class="fc" id="L413">    if (!new HashSet&lt;&gt;(declaredSkills.stream().map(DeclaredSkillProgress::getId).toList())</span>
+<span class="fc bfc" id="L414" title="All 2 branches covered.">        .containsAll(skillIds)) {</span>
+<span class="fc" id="L415">      throw new DeclaredSkillProgressNotFoundException();</span>
     }
 
-<span class="fc bfc" id="L425" title="All 2 branches covered.">    if (!declaredSkills.stream().allMatch(a -&gt; a.getStudent().getUser().equals(loggedInUser))) {</span>
-<span class="fc" id="L426">      throw new UserNotAuthorizedException();</span>
+<span class="fc bfc" id="L418" title="All 2 branches covered.">    if (!declaredSkills.stream().allMatch(a -&gt; a.getStudent().getUser().equals(loggedInUser))) {</span>
+<span class="fc" id="L419">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L429">    associationService.createAll(</span>
-<span class="fc" id="L430">        skillIds.stream()</span>
-<span class="fc" id="L431">            .map(</span>
+<span class="fc" id="L422">    associationService.createAll(</span>
+<span class="fc" id="L423">        skillIds.stream()</span>
+<span class="fc" id="L424">            .map(</span>
                 skillId -&gt;
-<span class="fc" id="L433">                    new AssociationData(traceId, skillId, EAssociationType.TRACE_DECLARED_SKILL))</span>
-<span class="fc" id="L434">            .toList());</span>
+<span class="fc" id="L426">                    new AssociationData(traceId, skillId, EAssociationType.TRACE_DECLARED_SKILL))</span>
+<span class="fc" id="L427">            .toList());</span>
 
-<span class="fc" id="L436">    return getTraceAssociations(traceId, false);</span>
+<span class="fc" id="L429">    return getTraceAssociations(traceId, false);</span>
   }
 
   @Override
   public TraceAssociationsData associateTraceWithDeclaredExperience(
       UUID traceId, List&lt;UUID&gt; experienceIds) {
-<span class="fc" id="L442">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L443">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
-<span class="fc" id="L444">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
+<span class="fc" id="L435">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L436">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L437">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
 
-<span class="fc" id="L446">    var declaredExperiences = declaredExperienceService.findAllByIds(experienceIds);</span>
+<span class="fc" id="L439">    var declaredExperiences = declaredExperienceService.findAllByIds(experienceIds);</span>
 
-<span class="fc" id="L448">    if (!new HashSet&lt;&gt;(declaredExperiences.stream().map(DeclaredExperience::getId).toList())</span>
-<span class="fc bfc" id="L449" title="All 2 branches covered.">        .containsAll(experienceIds)) {</span>
-<span class="fc" id="L450">      throw new DeclaredExperienceNotFoundException();</span>
+<span class="fc" id="L441">    if (!new HashSet&lt;&gt;(declaredExperiences.stream().map(DeclaredExperience::getId).toList())</span>
+<span class="fc bfc" id="L442" title="All 2 branches covered.">        .containsAll(experienceIds)) {</span>
+<span class="fc" id="L443">      throw new DeclaredExperienceNotFoundException();</span>
     }
 
-<span class="fc" id="L453">    if (!declaredExperiences.stream()</span>
-<span class="fc bfc" id="L454" title="All 2 branches covered.">        .allMatch(a -&gt; a.getStudent().getUser().equals(loggedInUser))) {</span>
-<span class="fc" id="L455">      throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L446">    if (!declaredExperiences.stream()</span>
+<span class="fc bfc" id="L447" title="All 2 branches covered.">        .allMatch(a -&gt; a.getStudent().getUser().equals(loggedInUser))) {</span>
+<span class="fc" id="L448">      throw new UserNotAuthorizedException();</span>
     }
 
-<span class="fc" id="L458">    associationService.createAll(</span>
-<span class="fc" id="L459">        experienceIds.stream()</span>
-<span class="fc" id="L460">            .map(</span>
+<span class="fc" id="L451">    associationService.createAll(</span>
+<span class="fc" id="L452">        experienceIds.stream()</span>
+<span class="fc" id="L453">            .map(</span>
                 experienceId -&gt;
-<span class="fc" id="L462">                    new AssociationData(</span>
+<span class="fc" id="L455">                    new AssociationData(</span>
                         traceId, experienceId, EAssociationType.TRACE_DECLARED_EXPERIENCE))
-<span class="fc" id="L464">            .toList());</span>
+<span class="fc" id="L457">            .toList());</span>
 
-<span class="fc" id="L466">    return getTraceAssociations(traceId, false);</span>
+<span class="fc" id="L459">    return getTraceAssociations(traceId, false);</span>
   }
 
   @Override
   public void unassociate(UUID traceId, List&lt;UUID&gt; associationIds) {
-<span class="fc" id="L471">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L472">    Trace trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L464">    User loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L465">    Trace trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
 
-<span class="fc" id="L474">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
+<span class="fc" id="L467">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
 
-<span class="fc" id="L476">    List&lt;Association&gt; associationList =</span>
+<span class="fc" id="L469">    List&lt;Association&gt; associationList =</span>
         associationService
-<span class="fc" id="L478">            .getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class))</span>
-<span class="fc" id="L479">            .stream()</span>
-<span class="fc" id="L480">            .filter(association -&gt; associationIds.contains(association.getId()))</span>
-<span class="fc" id="L481">            .toList();</span>
+<span class="fc" id="L471">            .getAllOf(traceId, Trace.class, EAssociationType.getAllBy(Trace.class))</span>
+<span class="fc" id="L472">            .stream()</span>
+<span class="fc" id="L473">            .filter(association -&gt; associationIds.contains(association.getId()))</span>
+<span class="fc" id="L474">            .toList();</span>
 
-<span class="fc" id="L483">    if (!new HashSet&lt;&gt;(associationList.stream().map(Association::getId).toList())</span>
-<span class="fc bfc" id="L484" title="All 2 branches covered.">        .containsAll(associationIds)) {</span>
-<span class="fc" id="L485">      throw new AssociationDoesNotExistException();</span>
+<span class="fc" id="L476">    if (!new HashSet&lt;&gt;(associationList.stream().map(Association::getId).toList())</span>
+<span class="fc bfc" id="L477" title="All 2 branches covered.">        .containsAll(associationIds)) {</span>
+<span class="fc" id="L478">      throw new AssociationDoesNotExistException();</span>
     }
 
-<span class="fc" id="L488">    checkIfDeclaredActivitiesAssociationsAreDeletable(associationList);</span>
+<span class="fc" id="L481">    checkIfDeclaredActivitiesAssociationsAreDeletable(associationList);</span>
 
-<span class="fc" id="L490">    associationService.deleteAllByIds(associationIds);</span>
-<span class="fc" id="L491">  }</span>
+<span class="fc" id="L483">    associationService.deleteAllByIds(associationIds);</span>
+<span class="fc" id="L484">  }</span>
 
   private void checkIfDeclaredActivitiesAssociationsAreDeletable(
       List&lt;Association&gt; associationList) {
-<span class="fc" id="L495">    List&lt;UUID&gt; declaredActivityIds =</span>
-<span class="fc" id="L496">        associationList.stream()</span>
-<span class="fc" id="L497">            .filter(</span>
+<span class="fc" id="L488">    List&lt;UUID&gt; declaredActivityIds =</span>
+<span class="fc" id="L489">        associationList.stream()</span>
+<span class="fc" id="L490">            .filter(</span>
                 association -&gt;
-<span class="fc bfc" id="L499" title="All 2 branches covered.">                    association.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)</span>
-<span class="fc" id="L500">            .map(Association::getId1)</span>
-<span class="fc" id="L501">            .toList();</span>
+<span class="pc bpc" id="L492" title="1 of 2 branches missed.">                    association.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_TRACE)</span>
+<span class="fc" id="L493">            .map(Association::getId1)</span>
+<span class="fc" id="L494">            .toList();</span>
 
-<span class="fc" id="L503">    if (declaredActivityService.findAllDeclaredActivitiesByIds(declaredActivityIds).stream()</span>
-<span class="fc bfc" id="L504" title="All 2 branches covered.">        .anyMatch(a -&gt; a.getFinishedAt().isPresent())) {</span>
-<span class="fc" id="L505">      throw new DeclaredActivityAlreadyFinishedException();</span>
+<span class="fc" id="L496">    if (declaredActivityService.findAllDeclaredActivitiesByIds(declaredActivityIds).stream()</span>
+<span class="pc bpc" id="L497" title="1 of 2 branches missed.">        .anyMatch(a -&gt; a.getFinishedAt().isPresent())) {</span>
+<span class="nc" id="L498">      throw new DeclaredActivityAlreadyFinishedException();</span>
     }
-<span class="fc" id="L507">  }</span>
+<span class="fc" id="L500">  }</span>
 
   @Override
   public PagedResult&lt;AssociationSearchResultData&gt; searchDeclaredActivityForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L512">    checkTraceOwnership(traceId);</span>
-<span class="fc" id="L513">    var associationType = EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
-<span class="fc" id="L514">    return associationSearchHelper.searchForAssociation(</span>
+<span class="fc" id="L505">    checkTraceOwnership(traceId);</span>
+<span class="fc" id="L506">    var associationType = EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
+<span class="fc" id="L507">    return associationSearchHelper.searchForAssociation(</span>
         traceId,
         Trace.class,
         associationType,
-<span class="fc" id="L518">        associationType.idExtractorFor(DeclaredActivity.class),</span>
-<span class="fc" id="L519">        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),</span>
+<span class="fc" id="L511">        associationType.idExtractorFor(DeclaredActivity.class),</span>
+<span class="fc" id="L512">        declaredActivityService.searchDeclaredActivity(keyword, pageCriteria),</span>
         AvenirsBaseModel::getId,
-<span class="fc" id="L521">        da -&gt; da.getActivity().getTitle(),</span>
-<span class="fc" id="L522">        da -&gt; da.getActivity().getThematic().name(),</span>
-<span class="fc" id="L523">        da -&gt; da.getFinishedAt().isPresent());</span>
+<span class="fc" id="L514">        da -&gt; da.getActivity().getTitle(),</span>
+<span class="fc" id="L515">        da -&gt; da.getActivity().getThematic().name(),</span>
+<span class="fc" id="L516">        da -&gt; da.getFinishedAt().isPresent());</span>
   }
 
   @Override
   public PagedResult&lt;AssociationSearchResultData&gt; searchDeclaredSkillForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L529">    checkTraceOwnership(traceId);</span>
-<span class="fc" id="L530">    var associationType = EAssociationType.TRACE_DECLARED_SKILL;</span>
-<span class="fc" id="L531">    return associationSearchHelper.searchForAssociation(</span>
+<span class="fc" id="L522">    checkTraceOwnership(traceId);</span>
+<span class="fc" id="L523">    var associationType = EAssociationType.TRACE_DECLARED_SKILL;</span>
+<span class="fc" id="L524">    return associationSearchHelper.searchForAssociation(</span>
         traceId,
         Trace.class,
         associationType,
-<span class="fc" id="L535">        associationType.idExtractorFor(DeclaredSkillProgress.class),</span>
-<span class="fc" id="L536">        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),</span>
+<span class="fc" id="L528">        associationType.idExtractorFor(DeclaredSkillProgress.class),</span>
+<span class="fc" id="L529">        declaredSkillProgressService.searchDeclaredSkill(keyword, pageCriteria),</span>
         AvenirsBaseModel::getId,
-<span class="fc" id="L538">        ds -&gt; ds.getSkill().getLibelle(),</span>
-<span class="fc" id="L539">        ds -&gt; ds.getSkill().getType().name(),</span>
-<span class="fc" id="L540">        ds -&gt; false);</span>
+<span class="fc" id="L531">        ds -&gt; ds.getSkill().getLibelle(),</span>
+<span class="fc" id="L532">        ds -&gt; ds.getSkill().getType().name(),</span>
+<span class="fc" id="L533">        ds -&gt; false);</span>
   }
 
   @Override
   public PagedResult&lt;AssociationSearchResultData&gt; searchDeclaredExperienceForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria) {
-<span class="fc" id="L546">    checkTraceOwnership(traceId);</span>
-<span class="fc" id="L547">    var associationType = EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
-<span class="fc" id="L548">    return associationSearchHelper.searchForAssociation(</span>
+<span class="fc" id="L539">    checkTraceOwnership(traceId);</span>
+<span class="fc" id="L540">    var associationType = EAssociationType.TRACE_DECLARED_EXPERIENCE;</span>
+<span class="fc" id="L541">    return associationSearchHelper.searchForAssociation(</span>
         traceId,
         Trace.class,
         associationType,
-<span class="fc" id="L552">        associationType.idExtractorFor(DeclaredExperience.class),</span>
-<span class="fc" id="L553">        declaredExperienceService.search(keyword, pageCriteria),</span>
+<span class="fc" id="L545">        associationType.idExtractorFor(DeclaredExperience.class),</span>
+<span class="fc" id="L546">        declaredExperienceService.search(keyword, pageCriteria),</span>
         AvenirsBaseModel::getId,
         DeclaredExperience::getTitle,
-<span class="fc" id="L556">        de -&gt; de.getExperienceType().name(),</span>
-<span class="fc" id="L557">        de -&gt; false);</span>
+<span class="fc" id="L549">        de -&gt; de.getExperienceType().name(),</span>
+<span class="fc" id="L550">        de -&gt; false);</span>
   }
 
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
-<span class="fc bfc" id="L561" title="All 2 branches covered.">    if (!trace.getUser().equals(user)) {</span>
-<span class="fc" id="L562">      throw new UserNotAuthorizedException(&quot;%s does not own this %s&quot;.formatted(user, trace));</span>
+<span class="fc bfc" id="L554" title="All 2 branches covered.">    if (!trace.getUser().equals(user)) {</span>
+<span class="fc" id="L555">      throw new UserNotAuthorizedException(&quot;%s does not own this %s&quot;.formatted(user, trace));</span>
     }
-<span class="fc" id="L564">  }</span>
+<span class="fc" id="L557">  }</span>
 
   private void checkTraceOwnership(UUID traceId) {
-<span class="fc" id="L567">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L568">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
-<span class="fc" id="L569">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
-<span class="fc" id="L570">  }</span>
-
-  private boolean isTraceDeletable(Trace trace, boolean isAssociated) {
-<span class="fc bfc" id="L573" title="All 2 branches covered.">    return !isAssociated</span>
-<span class="fc bfc" id="L574" title="All 2 branches covered.">        || associationCheckService.areAssociationsUnlockedOf(trace.getId(), Trace.class);</span>
-  }
+<span class="fc" id="L560">    var loggedInUser = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L561">    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);</span>
+<span class="fc" id="L562">    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);</span>
+<span class="fc" id="L563">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
