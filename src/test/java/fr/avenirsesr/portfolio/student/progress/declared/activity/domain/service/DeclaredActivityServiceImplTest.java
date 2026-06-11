@@ -1868,4 +1868,128 @@ class DeclaredActivityServiceImplTest {
 
     verify(associationService, never()).createAll(any());
   }
+
+  @Test
+  void areDeclaredActivitiesUnlocked_should_return_true_when_no_declared_activity_ids() {
+    BddLogger.given("an empty declared activity ids list");
+
+    BddLogger.when("checking if declared activities are unlocked");
+    boolean result = service.areDeclaredActivitiesUnlocked(List.of());
+
+    BddLogger.then("it should return true without calling repositories");
+    assertThat(result).isTrue();
+    verify(declaredActivityRepository, never()).findAllById(anyList());
+    verify(feedbackRepository, never()).findDeclaredActivityIdsHavingFeedbacks(anyList());
+  }
+
+  @Test
+  void
+      areDeclaredActivitiesUnlocked_should_return_true_when_declared_activities_have_no_feedback_and_are_not_completed() {
+    BddLogger.given("declared activities without feedback and not completed");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+    when(declaredActivityRepository.findAllById(List.of(declaredActivityId)))
+        .thenReturn(List.of(declaredActivity));
+    when(feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(List.of(declaredActivityId)))
+        .thenReturn(List.of());
+
+    when(declaredActivity.getId()).thenReturn(declaredActivityId);
+    when(declaredActivity.getStatus(false)).thenReturn(EDeclaredActivityStatus.IN_PROGRESS);
+
+    BddLogger.when("checking if declared activities are unlocked");
+    boolean result = service.areDeclaredActivitiesUnlocked(List.of(declaredActivityId));
+
+    BddLogger.then("it should return true");
+    assertThat(result).isTrue();
+  }
+
+  @Test
+  void areDeclaredActivitiesUnlocked_should_return_false_when_declared_activity_has_feedback() {
+    BddLogger.given("a declared activity with feedback");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+    when(declaredActivityRepository.findAllById(List.of(declaredActivityId)))
+        .thenReturn(List.of(declaredActivity));
+    when(feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(List.of(declaredActivityId)))
+        .thenReturn(List.of(declaredActivityId));
+
+    when(declaredActivity.getId()).thenReturn(declaredActivityId);
+    when(declaredActivity.getStatus(true)).thenReturn(EDeclaredActivityStatus.SUBMITTED);
+
+    BddLogger.when("checking if declared activities are unlocked");
+    boolean result = service.areDeclaredActivitiesUnlocked(List.of(declaredActivityId));
+
+    BddLogger.then("it should return false");
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  void areDeclaredActivitiesUnlocked_should_return_false_when_declared_activity_is_completed() {
+    BddLogger.given("a completed declared activity");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+    when(declaredActivityRepository.findAllById(List.of(declaredActivityId)))
+        .thenReturn(List.of(declaredActivity));
+    when(feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(List.of(declaredActivityId)))
+        .thenReturn(List.of());
+
+    when(declaredActivity.getId()).thenReturn(declaredActivityId);
+    when(declaredActivity.getStatus(false)).thenReturn(EDeclaredActivityStatus.COMPLETED);
+
+    BddLogger.when("checking if declared activities are unlocked");
+    boolean result = service.areDeclaredActivitiesUnlocked(List.of(declaredActivityId));
+
+    BddLogger.then("it should return false");
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  void checkDeclaredActivitiesUnlocked_should_throw_when_declared_activity_is_submitted() {
+    BddLogger.given("a submitted declared activity");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+    when(declaredActivityRepository.findAllById(List.of(declaredActivityId)))
+        .thenReturn(List.of(declaredActivity));
+    when(feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(List.of(declaredActivityId)))
+        .thenReturn(List.of(declaredActivityId));
+
+    when(declaredActivity.getId()).thenReturn(declaredActivityId);
+    when(declaredActivity.getStatus(true)).thenReturn(EDeclaredActivityStatus.SUBMITTED);
+
+    BddLogger.when("checking declared activities lock");
+
+    BddLogger.then("it should throw DeclaredActivityLockedException");
+    assertThatThrownBy(() -> service.checkDeclaredActivitiesUnlocked(List.of(declaredActivityId)))
+        .isInstanceOf(DeclaredActivityLockedException.class);
+  }
+
+  @Test
+  void checkDeclaredActivitiesUnlocked_should_not_throw_when_declared_activities_are_unlocked() {
+    BddLogger.given("unlocked declared activities");
+
+    UUID declaredActivityId = UUID.randomUUID();
+    DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
+
+    when(declaredActivityRepository.findAllById(List.of(declaredActivityId)))
+        .thenReturn(List.of(declaredActivity));
+    when(feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(List.of(declaredActivityId)))
+        .thenReturn(List.of());
+
+    when(declaredActivity.getId()).thenReturn(declaredActivityId);
+    when(declaredActivity.getStatus(false)).thenReturn(EDeclaredActivityStatus.IN_PROGRESS);
+
+    BddLogger.when("checking declared activities lock");
+
+    BddLogger.then("it should not throw");
+    assertThatCode(() -> service.checkDeclaredActivitiesUnlocked(List.of(declaredActivityId)))
+        .doesNotThrowAnyException();
+  }
 }

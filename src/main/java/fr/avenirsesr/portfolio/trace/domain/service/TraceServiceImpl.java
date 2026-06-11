@@ -124,10 +124,12 @@ public class TraceServiceImpl implements TraceService {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
+    declaredActivityService.checkDeclaredActivitiesUnlocked(
+        getAssociatedDeclaredActivityIds(trace.getId()));
+
     trace.setDeletedAt(Instant.now());
 
     associationService.deleteAllOf(List.of(trace.getId()), Trace.class);
-
     traceRepository.save(trace);
     log.info("Deleted trace {}", trace);
   }
@@ -171,14 +173,17 @@ public class TraceServiceImpl implements TraceService {
     Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
     var isTraceAssociated = traceRepository.isAssociated(List.of(trace)).get(trace);
-    return buildTraceDetailData(trace, isTraceAssociated);
+    return buildTraceDetailData(
+        trace, isTraceAssociated, isTraceDeletable(trace, isTraceAssociated));
   }
 
-  private TraceDetailData buildTraceDetailData(Trace trace, boolean isAssociated) {
+  private TraceDetailData buildTraceDetailData(
+      Trace trace, boolean isAssociated, boolean isDeletable) {
     return new TraceDetailData(
         trace.getId(),
         trace.getTitle(),
         isAssociated,
+        isDeletable,
         programNameOfTrace(trace),
         trace.getAuthorType(),
         trace.getAiUseJustification().orElse(null),
@@ -330,7 +335,8 @@ public class TraceServiceImpl implements TraceService {
 
     var savedTrace = traceRepository.save(trace);
     var isTraceAssociated = traceRepository.isAssociated(List.of(savedTrace)).get(savedTrace);
-    return buildTraceDetailData(savedTrace, isTraceAssociated);
+    return buildTraceDetailData(
+        savedTrace, isTraceAssociated, isTraceDeletable(trace, isTraceAssociated));
   }
 
   @Override
@@ -560,5 +566,20 @@ public class TraceServiceImpl implements TraceService {
     var loggedInUser = loggedInUserService.getLoggedInUser();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+  }
+
+  private boolean isTraceDeletable(Trace trace, boolean isAssociated) {
+    return !isAssociated
+        || declaredActivityService.areDeclaredActivitiesUnlocked(
+            getAssociatedDeclaredActivityIds(trace.getId()));
+  }
+
+  private List<UUID> getAssociatedDeclaredActivityIds(UUID traceId) {
+    return associationService
+        .getAllOf(traceId, Trace.class, List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))
+        .stream()
+        .map(Association::getId1)
+        .distinct()
+        .toList();
   }
 }

@@ -3,5 +3,6 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.
 public enum EDeclaredActivityStatus {
   SUBSCRIBED,
   IN_PROGRESS,
+  SUBMITTED,
   COMPLETED
 }

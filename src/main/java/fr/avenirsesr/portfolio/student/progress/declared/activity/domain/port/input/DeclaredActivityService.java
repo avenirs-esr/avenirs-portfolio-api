@@ -69,4 +69,8 @@ public interface DeclaredActivityService {
 
   PagedResult<Feedback> getStaffFeedbacks(
       EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria);
+
+  boolean areDeclaredActivitiesUnlocked(List<UUID> declaredActivityIds);
+
+  void checkDeclaredActivitiesUnlocked(List<UUID> declaredActivityIds);
 }

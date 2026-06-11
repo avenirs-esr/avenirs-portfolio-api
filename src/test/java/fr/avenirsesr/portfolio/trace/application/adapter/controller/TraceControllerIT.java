@@ -32,7 +32,6 @@ class TraceControllerIT extends ContainerConfigurationTest {
   private static final String BASE_PATH_WITH_ID = BASE_PATH + "/{traceId}";
   private static final String OVERVIEW_BASE_PATH = BASE_PATH + "/overview";
   private static final String VIEW_BASE_PATH = BASE_PATH + "/view";
-  private static final String SUMMARY_BASE_PATH = BASE_PATH + "/summary";
   private static final String DETAIL_BASE_PATH = BASE_PATH + "/{traceId}/detail";
 
   private static final String SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH =
@@ -53,14 +52,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
   @Value("${user.student.payload}")
   private String studentPayload;
 
-  @Value("${user.unknown.payload}")
-  private String unknownUserPayload;
-
   @Value("${user.student.signature}")
   private String studentSignature;
-
-  @Value("${user.unknown.signature}")
-  private String unknownUserSignature;
 
   @BeforeAll
   void setup(@Autowired SeederRunner seederRunner) {
@@ -105,7 +98,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     return UUID.fromString(json.get(0).get("traceId").asText());
   }
 
-  private UUID searchFirstAssociationDeclaredSkillId(int i) throws Exception {
+  private UUID searchFirstAssociationDeclaredSkillId(int index) throws Exception {
     UUID traceId = getFirstTraceIdFromOverview();
 
     String body =
@@ -129,14 +122,13 @@ class TraceControllerIT extends ContainerConfigurationTest {
             .returnResult()
             .getResponseBody();
 
-    JsonNode json = objectMapper.readTree(body);
-    JsonNode data = json.get("data");
+    JsonNode data = objectMapper.readTree(body).get("data");
 
     if (data == null || !data.isArray() || data.isEmpty()) {
       throw new IllegalStateException("No declared skill association data");
     }
 
-    return UUID.fromString(data.get(i).get("id").asText());
+    return UUID.fromString(data.get(index).get("id").asText());
   }
 
   private UUID searchFirstAssociationDeclaredActivityId() throws Exception {
@@ -163,8 +155,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
             .returnResult()
             .getResponseBody();
 
-    JsonNode json = objectMapper.readTree(body);
-    JsonNode data = json.get("data");
+    JsonNode data = objectMapper.readTree(body).get("data");
 
     if (data == null || !data.isArray() || data.isEmpty()) {
       throw new IllegalStateException("No declared activity association data");
@@ -173,8 +164,36 @@ class TraceControllerIT extends ContainerConfigurationTest {
     return UUID.fromString(data.get(0).get("id").asText());
   }
 
+  private UUID getFirstDeclaredExperienceIdFromView() throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(DECLARED_EXPERIENCE_VIEW_URL)
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .accept(APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode data = objectMapper.readTree(body).get("data");
+
+    if (data == null || !data.isArray() || data.isEmpty()) {
+      throw new IllegalStateException("Seeder returned no experience in /view");
+    }
+
+    return UUID.fromString(data.get(0).get("id").asText());
+  }
+
   @Test
   void shouldReturnTraceOverview() {
+    BddLogger.given("seeded traces");
+    BddLogger.when("getting trace overview");
+
     webTestClient
         .get()
         .uri(OVERVIEW_BASE_PATH)
@@ -188,10 +207,96 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$[0].traceId")
         .exists();
+
+    BddLogger.then("it should return trace overview");
+  }
+
+  @Test
+  void shouldReturnTraceViewWithIsDeletable() {
+    BddLogger.given("seeded traces");
+    BddLogger.when("getting trace view");
+
+    webTestClient
+        .post()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(VIEW_BASE_PATH)
+                    .queryParam("page", "0")
+                    .queryParam("pageSize", "8")
+                    .build())
+        .contentType(APPLICATION_JSON)
+        .bodyValue("{}")
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data")
+        .isArray()
+        .jsonPath("$.data[0].id")
+        .exists()
+        .jsonPath("$.data[0].title")
+        .exists()
+        .jsonPath("$.data[0].isAssociated")
+        .exists()
+        .jsonPath("$.data[0].createdAt")
+        .exists()
+        .jsonPath("$.data[0].updatedAt")
+        .exists()
+        .jsonPath("$.page.page")
+        .isEqualTo(0)
+        .jsonPath("$.page.pageSize")
+        .isEqualTo(8);
+
+    BddLogger.then("it should return trace view with isDeletable");
+  }
+
+  @Test
+  void shouldReturnTraceDetailWithIsDeletableAndAuthorType() throws Exception {
+    BddLogger.given("an existing trace");
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    BddLogger.when("getting trace detail");
+
+    webTestClient
+        .get()
+        .uri(DETAIL_BASE_PATH, traceId)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(traceId.toString())
+        .jsonPath("$.title")
+        .exists()
+        .jsonPath("$.isAssociated")
+        .exists()
+        .jsonPath("$.isDeletable")
+        .exists()
+        .jsonPath("$.programName")
+        .exists()
+        .jsonPath("$.authorType")
+        .exists()
+        .jsonPath("$.createdAt")
+        .exists()
+        .jsonPath("$.updatedAt")
+        .exists();
+
+    BddLogger.then("it should return trace detail with isDeletable and authorType");
   }
 
   @Test
   void shouldCreateNewTrace() throws Exception {
+    BddLogger.given("a valid create trace request");
+
     CreateTraceDTO dto =
         new CreateTraceDTO(
             "Nouvelle trace",
@@ -200,6 +305,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
             "Note",
             "Justification",
             null);
+
+    BddLogger.when("creating a trace");
 
     webTestClient
         .post()
@@ -215,11 +322,16 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.traceId")
         .exists();
+
+    BddLogger.then("it should create a new trace");
   }
 
   @Test
   void shouldDeleteTrace() {
+    BddLogger.given("an existing deletable trace");
     UUID existingTraceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
+
+    BddLogger.when("deleting trace");
 
     webTestClient
         .delete()
@@ -230,11 +342,16 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isOk();
+
+    BddLogger.then("it should delete trace");
   }
 
   @Test
   void shouldReturn404IfTraceNotFoundWhenDeleting() {
+    BddLogger.given("an unknown trace id");
     UUID traceId = UUID.randomUUID();
+
+    BddLogger.when("deleting trace");
 
     webTestClient
         .delete()
@@ -245,14 +362,19 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+
+    BddLogger.then("it should return 404");
   }
 
   @Test
   void shouldAssociateTraceWithDeclaredSkill() throws Exception {
+    BddLogger.given("an existing trace and declared skill");
     UUID traceId = getFirstTraceIdFromOverview();
     UUID skillId = searchFirstAssociationDeclaredSkillId(0);
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
+
+    BddLogger.when("associating trace with declared skill");
 
     webTestClient
         .post()
@@ -268,15 +390,19 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.declaredSkillAssociations")
         .exists();
+
+    BddLogger.then("it should associate trace with declared skill");
   }
 
   @Test
   void shouldUnassociateTraceAssociationsSuccessfully() throws Exception {
+    BddLogger.given("an existing trace associated with a declared skill");
     UUID traceId = getFirstTraceIdFromOverview();
     UUID skillId = searchFirstAssociationDeclaredSkillId(1);
 
     AssociationsCreationRequest associateBody = new AssociationsCreationRequest(List.of(skillId));
-    var associateResult =
+
+    String associateResult =
         webTestClient
             .post()
             .uri(BASE_PATH + "/" + traceId + "/associate/declared-skill")
@@ -296,6 +422,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
     UUID associationId =
         UUID.fromString(json.get("declaredSkillAssociations").get(0).get("associationId").asText());
 
+    BddLogger.when("unassociating trace association");
+
     webTestClient
         .method(HttpMethod.DELETE)
         .uri(BASE_PATH + "/" + traceId + "/associations")
@@ -307,6 +435,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isOk();
+
+    BddLogger.then("it should unassociate trace association");
   }
 
   @Test
@@ -315,6 +445,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     UUID traceId = getFirstTraceIdFromOverview();
 
     BddLogger.when("searching declared activities for association");
+
     webTestClient
         .get()
         .uri(
@@ -356,6 +487,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     UUID traceId = getFirstTraceIdFromOverview();
 
     BddLogger.when("searching with a keyword that matches nothing");
+
     webTestClient
         .get()
         .uri(
@@ -388,6 +520,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     UUID nonExistentTraceId = UUID.randomUUID();
 
     BddLogger.when("searching declared activities for association");
+
     webTestClient
         .get()
         .uri(
@@ -414,6 +547,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     UUID traceId = getFirstTraceIdFromOverview();
 
     BddLogger.when("searching declared skills for association");
+
     webTestClient
         .get()
         .uri(
@@ -455,6 +589,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     UUID nonExistentTraceId = UUID.randomUUID();
 
     BddLogger.when("searching declared skills for association");
+
     webTestClient
         .get()
         .uri(
@@ -475,39 +610,15 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.then("it should return 404");
   }
 
-  private UUID getFirstDeclaredExperienceIdFromView() throws Exception {
-    String body =
-        webTestClient
-            .get()
-            .uri(DECLARED_EXPERIENCE_VIEW_URL)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-            .accept(APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-
-    JsonNode json = objectMapper.readTree(body);
-    JsonNode data = json.get("data");
-
-    if (!data.isArray() || data.isEmpty()) {
-      throw new IllegalStateException("Seeder returned no experience in /overview");
-    }
-
-    return UUID.fromString(data.get(0).get("id").asText());
-  }
-
   @Test
   void shouldAssociateTraceWithDeclaredExperiences() throws Exception {
+    BddLogger.given("an existing trace and declared experience");
     UUID traceId = getFirstTraceIdFromOverview();
-
     UUID experienceId = getFirstDeclaredExperienceIdFromView();
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(experienceId));
+
+    BddLogger.when("associating trace with declared experience");
 
     webTestClient
         .post()
@@ -523,14 +634,19 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.declaredExperienceAssociations")
         .exists();
+
+    BddLogger.then("it should associate trace with declared experience");
   }
 
   @Test
   void shouldReturn404WhenAssociatingDeclaredExperiencesWithUnknownTrace() throws Exception {
+    BddLogger.given("an unknown trace");
     UUID unknownTraceId = UUID.randomUUID();
     UUID experienceId = searchFirstAssociationDeclaredActivityId();
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(experienceId));
+
+    BddLogger.when("associating declared experience with unknown trace");
 
     webTestClient
         .post()
@@ -543,14 +659,19 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+
+    BddLogger.then("it should return 404");
   }
 
   @Test
-  void shouldReturn400WhenAssociatingDeclaredExperiencesWithUnknownDeclaredExperiences()
+  void shouldReturn404WhenAssociatingDeclaredExperiencesWithUnknownDeclaredExperiences()
       throws Exception {
+    BddLogger.given("an existing trace and unknown declared experience");
     UUID traceId = getFirstTraceIdFromOverview();
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(UUID.randomUUID()));
+
+    BddLogger.when("associating unknown declared experience");
 
     webTestClient
         .post()
@@ -563,6 +684,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exchange()
         .expectStatus()
         .isNotFound();
+
+    BddLogger.then("it should return 404");
   }
 
   @Test
@@ -571,6 +694,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     UUID traceId = getFirstTraceIdFromOverview();
 
     BddLogger.when("searching declared experiences for association");
+
     webTestClient
         .get()
         .uri(
@@ -612,6 +736,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     UUID traceId = getFirstTraceIdFromOverview();
 
     BddLogger.when("searching with a keyword that matches nothing");
+
     webTestClient
         .get()
         .uri(
@@ -644,6 +769,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     UUID nonExistentTraceId = UUID.randomUUID();
 
     BddLogger.when("searching declared experiences for association");
+
     webTestClient
         .get()
         .uri(
