@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.notification.infrastructure.adapter.mapper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
@@ -25,6 +26,7 @@ class NotificationMapperTest {
   private UUID elementId;
   private User user;
   private UserEntity userEntity;
+  private EUserCategory userCategory;
   private List<String> parameters;
   private boolean seen;
 
@@ -35,6 +37,7 @@ class NotificationMapperTest {
     updatedAt = Instant.parse("2026-01-02T10:00:00Z");
     type = ENotificationType.ASK_FOR_FEEDBACK;
     elementId = UUID.randomUUID();
+    userCategory = type.getRestrictedTo();
     parameters = List.of("Alice", "Martin", "Activité de test");
     seen = false;
     user = UserFixture.create().toModel();
@@ -45,7 +48,8 @@ class NotificationMapperTest {
   void fromDomain_should_map_all_fields_to_entity() {
     BddLogger.given("A Notification domain object with all fields set");
     Notification domain =
-        Notification.toDomain(id, createdAt, updatedAt, type, elementId, user, parameters, seen);
+        Notification.toDomain(
+            id, createdAt, updatedAt, type, elementId, user, userCategory, parameters, seen);
 
     BddLogger.when("fromDomain is called");
     NotificationEntity entity = NotificationMapper.INSTANCE.fromDomain(domain);
@@ -66,7 +70,7 @@ class NotificationMapperTest {
     BddLogger.given("A NotificationEntity with all fields set");
     NotificationEntity entity =
         NotificationEntity.of(
-            id, createdAt, updatedAt, type, elementId, userEntity, parameters, seen);
+            id, createdAt, updatedAt, type, elementId, userEntity, userCategory, parameters, seen);
 
     BddLogger.when("toDomain is called");
     Notification domain = NotificationMapper.INSTANCE.toDomain(entity);
@@ -86,7 +90,8 @@ class NotificationMapperTest {
   void fromDomain_then_toDomain_should_produce_equivalent_domain_object() {
     BddLogger.given("A Notification domain object");
     Notification original =
-        Notification.toDomain(id, createdAt, updatedAt, type, elementId, user, parameters, seen);
+        Notification.toDomain(
+            id, createdAt, updatedAt, type, elementId, user, userCategory, parameters, seen);
 
     BddLogger.when("mapped to entity and back to domain");
     Notification roundTripped =
@@ -107,7 +112,8 @@ class NotificationMapperTest {
   void fromDomain_should_correctly_map_seen_true() {
     BddLogger.given("A Notification with seen=true");
     Notification domain =
-        Notification.toDomain(id, createdAt, updatedAt, type, elementId, user, parameters, true);
+        Notification.toDomain(
+            id, createdAt, updatedAt, type, elementId, user, userCategory, parameters, true);
 
     BddLogger.when("fromDomain is called");
     NotificationEntity entity = NotificationMapper.INSTANCE.fromDomain(domain);

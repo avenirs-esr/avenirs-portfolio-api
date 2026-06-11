@@ -53,6 +53,7 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
             ENotificationType.ASK_FOR_FEEDBACK,
             UUID.randomUUID(),
             user,
+            ENotificationType.ASK_FOR_FEEDBACK.getRestrictedTo(),
             List.of("Prenom", "Nom", "titre de l'activité"),
             false);
     notificationId = notificationJpaRepository.save(entity).getId().toString();

@@ -18,6 +18,7 @@ public class NotificationMapper implements Mapper<NotificationEntity, Notificati
         domain.getType(),
         domain.getElementId(),
         UserMapper.INSTANCE.fromDomain(domain.getUser()),
+        domain.getUserCategory(),
         domain.getParameters(),
         domain.isSeen());
   }
@@ -31,6 +32,7 @@ public class NotificationMapper implements Mapper<NotificationEntity, Notificati
         entity.getType(),
         entity.getElementId(),
         UserMapper.INSTANCE.toDomain(entity.getUser()),
+        entity.getUserCategory(),
         entity.getParameters(),
         entity.isSeen());
   }

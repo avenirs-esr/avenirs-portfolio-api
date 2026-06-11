@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.notification.infrastructure.adapter.model;
 
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -27,6 +28,10 @@ public class NotificationEntity extends AvenirsBaseEntity {
   @Column(name = "element_id", nullable = false)
   private UUID elementId;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "user_category")
+  private EUserCategory userCategory;
+
   @ManyToOne(optional = false)
   @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
@@ -45,6 +50,7 @@ public class NotificationEntity extends AvenirsBaseEntity {
       ENotificationType type,
       UUID elementId,
       UserEntity user,
+      EUserCategory userCategory,
       List<String> parameters,
       boolean seen) {
     this.setId(id);
@@ -53,6 +59,7 @@ public class NotificationEntity extends AvenirsBaseEntity {
     this.type = type;
     this.elementId = elementId;
     this.user = user;
+    this.userCategory = userCategory;
     this.parameters = parameters;
     this.seen = seen;
   }
@@ -64,9 +71,10 @@ public class NotificationEntity extends AvenirsBaseEntity {
       ENotificationType type,
       UUID elementId,
       UserEntity user,
+      EUserCategory userCategory,
       List<String> parameters,
       boolean seen) {
     return new NotificationEntity(
-        id, createdAt, updatedAt, type, elementId, user, parameters, seen);
+        id, createdAt, updatedAt, type, elementId, user, userCategory, parameters, seen);
   }
 }
