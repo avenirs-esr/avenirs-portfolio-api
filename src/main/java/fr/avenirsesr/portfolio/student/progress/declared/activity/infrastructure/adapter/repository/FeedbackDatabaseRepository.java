@@ -129,6 +129,15 @@ public class FeedbackDatabaseRepository
             page.getTotalElements()));
   }
 
+  @Override
+  public List<UUID> findDeclaredActivityIdsHavingFeedbacks(List<UUID> declaredActivityIds) {
+    if (declaredActivityIds.isEmpty()) {
+      return List.of();
+    }
+
+    return jpaRepository.findDeclaredActivityIdsHavingFeedbacks(declaredActivityIds);
+  }
+
   // ── private helpers ─────────────────────────────────────────────────
 
   private Feedback toDomainWithDependencies(FeedbackEntity entity) {

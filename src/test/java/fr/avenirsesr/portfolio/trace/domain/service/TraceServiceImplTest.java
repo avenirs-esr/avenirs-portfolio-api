@@ -4,35 +4,30 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
 import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfiguration;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
-import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.data.domain.model.*;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
-import fr.avenirsesr.portfolio.program.infrastructure.fixture.*;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityLockedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
-import fr.avenirsesr.portfolio.trace.domain.data.TraceAssociationsData;
-import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
-import fr.avenirsesr.portfolio.trace.domain.data.TraceViewData;
-import fr.avenirsesr.portfolio.trace.domain.data.TracesSummaryData;
+import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -62,18 +57,18 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class TraceServiceImplTest {
-  @Mock private TraceRepository traceRepository;
-  @Mock private AssociationService associationService;
-  @Mock private AssociationSearchHelper associationSearchHelper;
+class TraceServiceImplTest {
 
+  @Mock private TraceRepository traceRepository;
+  @Mock private UserService userService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private DeclaredExperienceService declaredExperienceService;
   @Mock private TraceConfigurationClient traceConfigurationClient;
-
-  @Mock private UserService userService;
   @Mock private LoggedInUserService loggedInUserService;
+  @Mock private AssociationService associationService;
+  @Mock private AssociationSearchHelper associationSearchHelper;
+
   @InjectMocks private TraceServiceImpl traceService;
 
   private Student student;
@@ -86,1271 +81,953 @@ public class TraceServiceImplTest {
   }
 
   @Nested
-  class ConnectedTests {
+  class GivenConnectedStudent {
+
     @BeforeEach
     void setupGiven() {
       BddLogger.given("a connected student");
       when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
     }
 
-    @Test
-    void givenPageAndPageSize_shouldGetTracesView() {
-      BddLogger.given("a TraceServiceImpl service and a pagination configuration");
-      int pageNumber = 1;
-      int pageSize = 8;
-      int totalElement = 13;
+    @Nested
+    class WhenGettingTracesView {
 
-      List<Trace> traces =
-          List.of(
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(83, ChronoUnit.DAYS))
-                  .toModel(),
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
-                  .toModel(),
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(85, ChronoUnit.DAYS))
-                  .toModel(),
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(86, ChronoUnit.DAYS))
-                  .toModel(),
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(87, ChronoUnit.DAYS))
-                  .toModel());
+      @Test
+      void thenItShouldReturnTheTracesView() {
+        BddLogger.when("getting the traces view");
 
-      BddLogger.when("getting the traces view");
-      when(traceRepository.findAll(
-              student.getUser(),
-              null,
-              new TraceFilter(false, null, null, null),
-              null,
-              new PageCriteria(pageNumber, pageSize)))
-          .thenReturn(new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
-      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-      when(traceRepository.isAssociated(traces))
-          .thenReturn(traces.stream().collect(Collectors.toMap(t -> t, t -> false)));
-      PagedResult<TraceViewData> traceView =
-          traceService.getTracesView(
-              null,
-              new TraceFilter(false, null, null, null),
-              null,
-              new PageCriteria(pageNumber, pageSize));
+        int pageNumber = 1;
+        int pageSize = 8;
+        int totalElement = 13;
 
-      BddLogger.then("it should return the traces view");
-      assertEquals(traces.size(), traceView.content().size());
-      assertEquals(pageSize, traceView.pageInfo().pageSize());
-      assertEquals(totalElement, traceView.pageInfo().totalElements());
-      assertEquals(pageNumber, traceView.pageInfo().page());
+        List<Trace> traces =
+            List.of(
+                TraceFixture.create()
+                    .withUser(student.getUser())
+                    .withCreatedAt(Instant.now().minus(83, ChronoUnit.DAYS))
+                    .toModel(),
+                TraceFixture.create()
+                    .withUser(student.getUser())
+                    .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
+                    .toModel());
+
+        var filter = new TraceFilter(false, null, null, null);
+        var pageCriteria = new PageCriteria(pageNumber, pageSize);
+
+        when(traceRepository.findAll(student.getUser(), null, filter, null, pageCriteria))
+            .thenReturn(
+                new PagedResult<>(traces, new PageInfo(pageNumber, pageSize, totalElement)));
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+        when(traceRepository.isAssociated(traces))
+            .thenReturn(traces.stream().collect(Collectors.toMap(t -> t, t -> false)));
+
+        PagedResult<TraceViewData> result =
+            traceService.getTracesView(null, filter, null, pageCriteria);
+
+        BddLogger.then("it should return the traces view");
+
+        assertEquals(traces.size(), result.content().size());
+        assertEquals(pageNumber, result.pageInfo().page());
+        assertEquals(pageSize, result.pageInfo().pageSize());
+        assertEquals(totalElement, result.pageInfo().totalElements());
+      }
+
+      @Test
+      void thenItShouldReturnWillBeDeletedAtWhenTraceIsUnassociated() {
+        BddLogger.when("getting traces view with an unassociated trace");
+
+        Instant createdAt = Instant.now().minus(10, ChronoUnit.DAYS);
+        Trace trace =
+            TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
+
+        var filter = new TraceFilter(false, null, null, null);
+        var pageCriteria = new PageCriteria(0, 8);
+
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+        when(traceRepository.findAll(student.getUser(), null, filter, null, pageCriteria))
+            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+
+        PagedResult<TraceViewData> result =
+            traceService.getTracesView(null, filter, null, pageCriteria);
+
+        BddLogger.then("it should return willBeDeletedAt");
+
+        LocalDate expectedDate =
+            createdAt
+                .plus(Duration.ofDays(DEFAULT_CONFIG.maxRemainingDays()))
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        var returnedTrace = result.content().getFirst();
+
+        assertFalse(returnedTrace.isAssociated());
+        assertEquals(expectedDate, returnedTrace.willBeDeletedAt().get());
+      }
+
+      @Test
+      void thenItShouldReturnEmptyWillBeDeletedAtWhenTraceIsAssociated() {
+        BddLogger.when("getting traces view with an associated trace");
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+
+        var filter = new TraceFilter(false, null, null, null);
+        var pageCriteria = new PageCriteria(0, 8);
+
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+        when(traceRepository.findAll(student.getUser(), null, filter, null, pageCriteria))
+            .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
+
+        PagedResult<TraceViewData> result =
+            traceService.getTracesView(null, filter, null, pageCriteria);
+
+        BddLogger.then("it should return empty willBeDeletedAt");
+
+        var returnedTrace = result.content().getFirst();
+
+        assertTrue(returnedTrace.isAssociated());
+        assertTrue(returnedTrace.willBeDeletedAt().isEmpty());
+      }
     }
 
-    @Test
-    void givenTraces_shouldReturnSummary() {
-      BddLogger.given("a TraceServiceImpl service and unassociated traces");
-      List<Trace> unassociatedTraces =
-          List.of(
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(12, ChronoUnit.DAYS))
-                  .toModel(),
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(72, ChronoUnit.DAYS))
-                  .toModel(),
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
-                  .toModel(),
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(86, ChronoUnit.DAYS))
-                  .toModel());
+    @Nested
+    class WhenGettingTracesSummary {
 
-      List<Trace> associatedTraces =
-          List.of(
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(12, ChronoUnit.DAYS))
-                  .toModel(),
-              TraceFixture.create()
-                  .withUser(student.getUser())
-                  .withCreatedAt(Instant.now().minus(72, ChronoUnit.DAYS))
-                  .toModel());
+      @Test
+      void thenItShouldReturnSummary() {
+        BddLogger.when("getting the traces summary");
 
-      BddLogger.when("getting the traces summary");
-      when(traceRepository.findAll(student.getUser(), false)).thenReturn(unassociatedTraces);
-      when(traceRepository.findAll(student.getUser(), true)).thenReturn(associatedTraces);
-      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-      TracesSummaryData summary = traceService.getTracesSummary();
+        List<Trace> unassociatedTraces =
+            List.of(
+                TraceFixture.create()
+                    .withUser(student.getUser())
+                    .withCreatedAt(Instant.now().minus(12, ChronoUnit.DAYS))
+                    .toModel(),
+                TraceFixture.create()
+                    .withUser(student.getUser())
+                    .withCreatedAt(Instant.now().minus(72, ChronoUnit.DAYS))
+                    .toModel(),
+                TraceFixture.create()
+                    .withUser(student.getUser())
+                    .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
+                    .toModel(),
+                TraceFixture.create()
+                    .withUser(student.getUser())
+                    .withCreatedAt(Instant.now().minus(86, ChronoUnit.DAYS))
+                    .toModel());
 
-      BddLogger.then("it should return the traces summary");
-      assertEquals(4, summary.unassociated());
-      assertEquals(2, summary.associated());
-      assertEquals(3, summary.totalWarnings());
-      assertEquals(1, summary.totalCriticals());
+        List<Trace> associatedTraces =
+            List.of(
+                TraceFixture.create().withUser(student.getUser()).toModel(),
+                TraceFixture.create().withUser(student.getUser()).toModel());
+
+        when(traceRepository.findAll(student.getUser(), false)).thenReturn(unassociatedTraces);
+        when(traceRepository.findAll(student.getUser(), true)).thenReturn(associatedTraces);
+        when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
+
+        TracesSummaryData result = traceService.getTracesSummary();
+
+        BddLogger.then("it should return the traces summary");
+
+        assertEquals(4, result.unassociated());
+        assertEquals(2, result.associated());
+        assertEquals(3, result.totalWarnings());
+        assertEquals(1, result.totalCriticals());
+      }
     }
 
-    @Test
-    void shouldCreateAndSaveNewTrace() {
-      BddLogger.given("a TraceServiceImpl service");
-      User user = student.getUser();
-      String title = "Test Title";
-      ELanguage language = ELanguage.FRENCH;
-      ETraceAuthorType authorType = ETraceAuthorType.PERSONAL;
-      String personalNote = "Some personal note";
-      String iaJustification = "Justified by AI";
-      String link = "https://example.com";
+    @Nested
+    class WhenCreatingTrace {
 
-      BddLogger.when("creating a new trace");
-      traceService.createTrace(title, language, authorType, personalNote, iaJustification, link);
+      @Test
+      void thenItShouldCreateAndSaveNewTrace() {
+        BddLogger.when("creating a new trace");
 
-      BddLogger.then("it should create and save the new trace");
-      ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
-      verify(traceRepository).save(captor.capture());
+        String title = "Test Title";
+        ELanguage language = ELanguage.FRENCH;
+        ETraceAuthorType authorType = ETraceAuthorType.PERSONAL;
+        String personalNote = "Some personal note";
+        String aiJustification = "Justified by AI";
+        String link = "https://example.com";
 
-      Trace trace = captor.getValue();
+        traceService.createTrace(title, language, authorType, personalNote, aiJustification, link);
 
-      assertEquals(user, trace.getUser());
+        BddLogger.then("it should create and save the new trace");
 
-      assertNotNull(trace.getId());
-      assertEquals(title, trace.getTitle());
-      assertEquals(language, trace.getLanguage());
-      assertEquals(authorType, trace.getAuthorType());
+        ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+        verify(traceRepository).save(captor.capture());
 
-      assertTrue(trace.getPersonalNote().isPresent());
-      assertEquals(personalNote, trace.getPersonalNote().get());
+        Trace trace = captor.getValue();
 
-      assertTrue(trace.getLink().isPresent());
-      assertEquals(link, trace.getLink().get());
+        assertEquals(student.getUser(), trace.getUser());
+        assertNotNull(trace.getId());
+        assertEquals(title, trace.getTitle());
+        assertEquals(language, trace.getLanguage());
+        assertEquals(authorType, trace.getAuthorType());
+        assertEquals(personalNote, trace.getPersonalNote().get());
+        assertEquals(link, trace.getLink().get());
+        assertEquals(aiJustification, trace.getAiUseJustification().get());
+      }
 
-      assertTrue(trace.getAiUseJustification().isPresent());
-      assertEquals(iaJustification, trace.getAiUseJustification().get());
+      @Test
+      void thenItShouldCreateTraceWithNullFields() {
+        BddLogger.when("creating a new trace with null fields");
+
+        traceService.createTrace(
+            "Trace with null fields",
+            ELanguage.FRENCH,
+            ETraceAuthorType.PERSONAL,
+            null,
+            null,
+            null);
+
+        BddLogger.then("it should create and save the new trace with null fields");
+
+        ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+        verify(traceRepository).save(captor.capture());
+
+        Trace trace = captor.getValue();
+
+        assertEquals("Trace with null fields", trace.getTitle());
+        assertEquals(ELanguage.FRENCH, trace.getLanguage());
+        assertEquals(ETraceAuthorType.PERSONAL, trace.getAuthorType());
+        assertTrue(trace.getPersonalNote().isEmpty());
+        assertTrue(trace.getLink().isEmpty());
+        assertTrue(trace.getAiUseJustification().isEmpty());
+      }
+
+      @Test
+      void thenItShouldThrowWhenTitleIsBlank() {
+        BddLogger.when("creating a new trace with a blank title");
+
+        assertThrows(
+            Exception.class,
+            () ->
+                traceService.createTrace(
+                    "   ", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null));
+
+        BddLogger.then("it should throw a validation exception");
+
+        verify(traceRepository, never()).save(any());
+      }
     }
 
-    @Test
-    void shouldCreateTraceWithNullFields() {
-      BddLogger.given("a TraceServiceImpl service");
-      String title = "Trace with null fields";
+    @Nested
+    class WhenUpdatingTrace {
 
-      BddLogger.when("creating a new trace with null fields");
-      traceService.createTrace(
-          title, ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null);
+      @Test
+      void thenItShouldUpdateAndSaveTrace() {
+        BddLogger.when("updating a trace");
 
-      BddLogger.then("it should create and save the new trace with null fields");
-      ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
-      verify(traceRepository).save(captor.capture());
+        Trace trace =
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withTitle("Test Title")
+                .withLanguage(ELanguage.ENGLISH)
+                .withAuthorType(ETraceAuthorType.PERSONAL)
+                .withPersonalNote("Some personal note")
+                .withAiUseJustification("Justified by AI")
+                .toModel();
 
-      Trace trace = captor.getValue();
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(traceRepository.save(trace)).thenReturn(trace);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
 
-      assertEquals(title, trace.getTitle());
-      assertEquals(ELanguage.FRENCH, trace.getLanguage());
-      assertTrue(trace.getPersonalNote().isEmpty());
-      assertTrue(trace.getLink().isEmpty());
-      assertTrue(trace.getAiUseJustification().isEmpty());
+        traceService.updateTrace(
+            trace.getId(),
+            "Test Title - Updated",
+            ELanguage.FRENCH,
+            ETraceAuthorType.COLLECTIVE,
+            "Some personal note - Updated",
+            "Justified by AI - Updated");
+
+        BddLogger.then("it should update and save the trace");
+
+        ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+        verify(traceRepository).save(captor.capture());
+
+        Trace updatedTrace = captor.getValue();
+
+        assertEquals(student.getUser(), updatedTrace.getUser());
+        assertEquals("Test Title - Updated", updatedTrace.getTitle());
+        assertEquals(ELanguage.FRENCH, updatedTrace.getLanguage());
+        assertEquals(ETraceAuthorType.COLLECTIVE, updatedTrace.getAuthorType());
+        assertEquals("Some personal note - Updated", updatedTrace.getPersonalNote().get());
+        assertEquals("Justified by AI - Updated", updatedTrace.getAiUseJustification().get());
+      }
+
+      @Test
+      void thenItShouldUpdateTraceWithLink() {
+        BddLogger.when("updating a trace with link");
+
+        Trace trace =
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withLink("https://example.com")
+                .toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(traceRepository.save(trace)).thenReturn(trace);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+
+        traceService.updateTrace(
+            trace.getId(),
+            "Updated title",
+            ELanguage.FRENCH,
+            ETraceAuthorType.THIRD_PARTY,
+            "Updated note",
+            "Updated justification",
+            "https://example.com/updated");
+
+        BddLogger.then("it should update and save the link");
+
+        ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+        verify(traceRepository).save(captor.capture());
+
+        assertEquals("https://example.com/updated", captor.getValue().getLink().get());
+        assertEquals(ETraceAuthorType.THIRD_PARTY, captor.getValue().getAuthorType());
+      }
+
+      @Test
+      void thenItShouldUpdateTraceWithNullFields() {
+        BddLogger.when("updating a trace with null optional fields");
+
+        Trace trace =
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withPersonalNote("Some personal note")
+                .withAiUseJustification("Justified by AI")
+                .toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(traceRepository.save(trace)).thenReturn(trace);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+
+        traceService.updateTrace(
+            trace.getId(),
+            "Updated title",
+            ELanguage.FRENCH,
+            ETraceAuthorType.PERSONAL,
+            null,
+            null);
+
+        BddLogger.then("it should update and clear nullable fields");
+
+        ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+        verify(traceRepository).save(captor.capture());
+
+        Trace updatedTrace = captor.getValue();
+
+        assertEquals("Updated title", updatedTrace.getTitle());
+        assertEquals(ELanguage.FRENCH, updatedTrace.getLanguage());
+        assertEquals(ETraceAuthorType.PERSONAL, updatedTrace.getAuthorType());
+        assertTrue(updatedTrace.getPersonalNote().isEmpty());
+        assertTrue(updatedTrace.getAiUseJustification().isEmpty());
+      }
+
+      @Test
+      void thenItShouldReturnDeletableFalseWhenAssociatedTraceIsLocked() {
+        BddLogger.when("updating an associated locked trace");
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(traceRepository.save(trace)).thenReturn(trace);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
+        when(declaredActivityService.areDeclaredActivitiesUnlocked(anyList())).thenReturn(false);
+
+        TraceDetailData result =
+            traceService.updateTrace(
+                trace.getId(), "Updated", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null);
+
+        BddLogger.then("it should return a non deletable trace detail");
+
+        assertTrue(result.isAssociated());
+        assertFalse(result.isDeletable());
+      }
+
+      @Test
+      void thenItShouldReturnDeletableTrueWhenAssociatedTraceIsUnlocked() {
+        BddLogger.when("updating an associated unlocked trace");
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(traceRepository.save(trace)).thenReturn(trace);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
+        when(declaredActivityService.areDeclaredActivitiesUnlocked(anyList())).thenReturn(true);
+
+        TraceDetailData result =
+            traceService.updateTrace(
+                trace.getId(), "Updated", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null);
+
+        BddLogger.then("it should return a deletable trace detail");
+
+        assertTrue(result.isAssociated());
+        assertTrue(result.isDeletable());
+      }
+
+      @Test
+      void thenItShouldThrowTraceNotFoundWhenTraceDoesNotExist() {
+        BddLogger.when("updating an unknown trace");
+
+        UUID unknownId = UUID.randomUUID();
+        when(traceRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+        TraceNotFoundException exception =
+            assertThrows(
+                TraceNotFoundException.class,
+                () ->
+                    traceService.updateTrace(
+                        unknownId,
+                        "Title",
+                        ELanguage.FRENCH,
+                        ETraceAuthorType.PERSONAL,
+                        null,
+                        null,
+                        null));
+
+        BddLogger.then("it should throw TRACE_NOT_FOUND");
+
+        assertEquals(EErrorCode.TRACE_NOT_FOUND, exception.getErrorCode());
+      }
+
+      @Test
+      void thenItShouldThrowUserNotAuthorizedWhenTraceBelongsToAnotherUser() {
+        BddLogger.when("updating a trace owned by another user");
+
+        Trace trace = TraceFixture.create().withUser(UserFixture.create().toModel()).toModel();
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+        UserNotAuthorizedException exception =
+            assertThrows(
+                UserNotAuthorizedException.class,
+                () ->
+                    traceService.updateTrace(
+                        trace.getId(),
+                        "Title",
+                        ELanguage.FRENCH,
+                        ETraceAuthorType.PERSONAL,
+                        null,
+                        null,
+                        null));
+
+        BddLogger.then("it should throw USER_NOT_AUTHORIZED");
+
+        assertEquals(EErrorCode.USER_NOT_AUTHORIZED, exception.getErrorCode());
+        verify(traceRepository, never()).save(any());
+      }
     }
 
-    @Test
-    void shouldThrowExceptionWhenCreatingTraceWithBlankTitle() {
-      BddLogger.given("a TraceServiceImpl service");
-      BddLogger.when("creating a new trace with a blank title");
-      assertThrows(
-          Exception.class,
-          () ->
-              traceService.createTrace(
-                  "   ", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null));
-      BddLogger.then("it should throw a validation exception");
-      verify(traceRepository, never()).save(any());
+    @Nested
+    class WhenDeletingTrace {
+
+      @Test
+      void thenItShouldSoftDeleteTraceAndDeleteAssociations() {
+        BddLogger.when("deleting an unlocked trace");
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        doNothing().when(declaredActivityService).checkDeclaredActivitiesUnlocked(anyList());
+
+        traceService.deleteById(trace.getId());
+
+        BddLogger.then("it should soft delete the trace and delete its associations");
+
+        assertTrue(trace.getDeletedAt().isPresent());
+        verify(declaredActivityService).checkDeclaredActivitiesUnlocked(anyList());
+        verify(associationService).deleteAllOf(List.of(trace.getId()), Trace.class);
+        verify(traceRepository).save(trace);
+      }
+
+      @Test
+      void thenItShouldThrowDeclaredActivityLockedExceptionWhenTraceIsLocked() {
+        BddLogger.when("deleting a locked trace");
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        doThrow(new DeclaredActivityLockedException())
+            .when(declaredActivityService)
+            .checkDeclaredActivitiesUnlocked(anyList());
+
+        assertThrows(
+            DeclaredActivityLockedException.class, () -> traceService.deleteById(trace.getId()));
+
+        BddLogger.then("it should not delete associations and not save the trace");
+
+        verify(declaredActivityService).checkDeclaredActivitiesUnlocked(anyList());
+        verify(associationService, never()).deleteAllOf(anyList(), any());
+        verify(traceRepository, never()).save(any());
+      }
+
+      @Test
+      void thenItShouldThrowTraceNotFoundWhenTraceDoesNotExist() {
+        BddLogger.when("deleting an unknown trace");
+
+        UUID traceId = UUID.randomUUID();
+        when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+        assertThrows(TraceNotFoundException.class, () -> traceService.deleteById(traceId));
+
+        BddLogger.then("it should throw TraceNotFoundException");
+
+        verify(declaredActivityService, never()).checkDeclaredActivitiesUnlocked(anyList());
+        verify(traceRepository, never()).save(any());
+      }
+
+      @Test
+      void thenItShouldThrowUserNotAuthorizedWhenTraceBelongsToAnotherUser() {
+        BddLogger.when("deleting a trace owned by another user");
+
+        Trace trace = TraceFixture.create().withUser(UserFixture.create().toModel()).toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+        assertThrows(
+            UserNotAuthorizedException.class, () -> traceService.deleteById(trace.getId()));
+
+        BddLogger.then("it should throw UserNotAuthorizedException");
+
+        verify(declaredActivityService, never()).checkDeclaredActivitiesUnlocked(anyList());
+        verify(traceRepository, never()).save(any());
+      }
     }
 
-    @Test
-    void shouldUpdateAndSaveTraceWithFile() {
-      BddLogger.given("a TraceServiceImpl service and a valid trace with file");
-      User user = student.getUser();
-      String title = "Test Title";
-      String titleUpdated = "Test Title - Updated";
-      ELanguage language = ELanguage.ENGLISH;
-      ELanguage languageUpdated = ELanguage.FRENCH;
-      ETraceAuthorType authorType = ETraceAuthorType.PERSONAL;
-      ETraceAuthorType authorTypeUpdated = ETraceAuthorType.COLLECTIVE;
-      String personalNote = "Some personal note";
-      String personalNoteUpdated = "Some personal note - Updated";
-      String aiJustification = "Justified by AI";
-      String aiJustificationUpdated = "Justified by AI - Updated";
+    @Nested
+    class WhenGettingTraceDetail {
 
-      Trace trace =
-          TraceFixture.create()
-              .withUser(user)
-              .withTitle(title)
-              .withLanguage(language)
-              .withAuthorType(authorType)
-              .withPersonalNote(personalNote)
-              .withAiUseJustification(aiJustification)
-              .toModel();
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-      when(traceRepository.save(trace)).thenReturn(trace);
-      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+      @Test
+      void thenItShouldReturnAssociatedAndDeletableTraceDetailWhenAssociationsAreUnlocked() {
+        BddLogger.when("getting trace detail for an associated unlocked trace");
 
-      BddLogger.when("update trace");
-      traceService.updateTrace(
-          trace.getId(),
-          titleUpdated,
-          languageUpdated,
-          authorTypeUpdated,
-          personalNoteUpdated,
-          aiJustificationUpdated);
+        Trace trace =
+            TraceFixture.create()
+                .withUser(student.getUser())
+                .withTitle("Trace title")
+                .withLanguage(ELanguage.FRENCH)
+                .withAuthorType(ETraceAuthorType.PERSONAL)
+                .toModel();
 
-      BddLogger.then("it should update and save the trace");
-      ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
-      verify(traceRepository).save(captor.capture());
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
+        when(declaredActivityService.areDeclaredActivitiesUnlocked(anyList())).thenReturn(true);
 
-      Trace captorTrace = captor.getValue();
+        TraceDetailData result = traceService.getTraceDetail(trace.getId());
 
-      assertEquals(user, captorTrace.getUser());
-      assertEquals(titleUpdated, captorTrace.getTitle());
-      assertEquals(languageUpdated, captorTrace.getLanguage());
-      assertEquals(authorTypeUpdated, captorTrace.getAuthorType());
+        BddLogger.then("it should return a deletable trace detail");
 
-      assertTrue(captorTrace.getPersonalNote().isPresent());
-      assertEquals(personalNoteUpdated, captorTrace.getPersonalNote().get());
+        assertEquals(trace.getId(), result.id());
+        assertEquals("Trace title", result.title());
+        assertTrue(result.isAssociated());
+        assertTrue(result.isDeletable());
+        assertEquals(EPortfolioType.LIFE_PROJECT.name(), result.programName());
+        assertEquals(ETraceAuthorType.PERSONAL, result.authorType());
+      }
 
-      assertTrue(captorTrace.getAiUseJustification().isPresent());
-      assertEquals(aiJustificationUpdated, captorTrace.getAiUseJustification().get());
+      @Test
+      void thenItShouldReturnAssociatedAndNotDeletableTraceDetailWhenAssociationsAreLocked() {
+        BddLogger.when("getting trace detail for an associated locked trace");
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
+        when(declaredActivityService.areDeclaredActivitiesUnlocked(anyList())).thenReturn(false);
+
+        TraceDetailData result = traceService.getTraceDetail(trace.getId());
+
+        BddLogger.then("it should return a non deletable trace detail");
+
+        assertTrue(result.isAssociated());
+        assertFalse(result.isDeletable());
+      }
+
+      @Test
+      void thenItShouldReturnUnassociatedAndDeletableTraceDetailWithoutCheckingAssociations() {
+        BddLogger.when("getting trace detail for an unassociated trace");
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+
+        TraceDetailData result = traceService.getTraceDetail(trace.getId());
+
+        BddLogger.then("it should return a deletable trace detail");
+
+        assertFalse(result.isAssociated());
+        assertTrue(result.isDeletable());
+        verify(declaredActivityService, never()).areDeclaredActivitiesUnlocked(anyList());
+      }
+
+      @Test
+      void thenItShouldThrowUserNotAuthorizedWhenTraceBelongsToAnotherUser() {
+        BddLogger.when("getting trace detail of another user");
+
+        Trace trace = TraceFixture.create().withUser(UserFixture.create().toModel()).toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+
+        UserNotAuthorizedException exception =
+            assertThrows(
+                UserNotAuthorizedException.class, () -> traceService.getTraceDetail(trace.getId()));
+
+        BddLogger.then("it should throw USER_NOT_AUTHORIZED");
+
+        assertEquals(EErrorCode.USER_NOT_AUTHORIZED, exception.getErrorCode());
+      }
     }
 
-    @Test
-    void shouldUpdateAndSaveTraceWithLink() {
-      BddLogger.given("a TraceServiceImpl service and a valid trace with link");
-      User user = student.getUser();
-      String title = "Test Title";
-      String titleUpdated = "Test Title - Updated";
-      ELanguage language = ELanguage.ENGLISH;
-      ELanguage languageUpdated = ELanguage.FRENCH;
-      ETraceAuthorType authorType = ETraceAuthorType.PERSONAL;
-      ETraceAuthorType authorTypeUpdated = ETraceAuthorType.COLLECTIVE;
-      String personalNote = "Some personal note";
-      String personalNoteUpdated = "Some personal note - Updated";
-      String aiJustification = "Justified by AI";
-      String aiJustificationUpdated = "Justified by AI - Updated";
-      String link = "https://example.com";
-      String linkUpdated = "https://example.com/updated";
+    @Nested
+    class WhenGettingTraceAssociations {
 
-      Trace trace =
-          TraceFixture.create()
-              .withUser(user)
-              .withTitle(title)
-              .withLanguage(language)
-              .withAuthorType(authorType)
-              .withPersonalNote(personalNote)
-              .withAiUseJustification(aiJustification)
-              .withLink(link)
-              .toModel();
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-      when(traceRepository.save(trace)).thenReturn(trace);
-      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+      @Test
+      void thenItShouldReturnDeclaredActivityAssociations() {
+        BddLogger.when("getting trace associations");
 
-      BddLogger.when("update trace");
-      traceService.updateTrace(
-          trace.getId(),
-          titleUpdated,
-          languageUpdated,
-          authorTypeUpdated,
-          personalNoteUpdated,
-          aiJustificationUpdated,
-          linkUpdated);
+        UUID traceId = UUID.randomUUID();
+        UUID activityId = UUID.randomUUID();
 
-      BddLogger.then("it should update and save the trace");
-      ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
-      verify(traceRepository).save(captor.capture());
+        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
 
-      Trace captorTrace = captor.getValue();
+        Association association = mock(Association.class);
+        when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
+        when(association.getId1()).thenReturn(activityId);
 
-      assertEquals(user, captorTrace.getUser());
-      assertEquals(titleUpdated, captorTrace.getTitle());
-      assertEquals(languageUpdated, captorTrace.getLanguage());
-      assertEquals(authorTypeUpdated, captorTrace.getAuthorType());
+        DeclaredActivity activity = mock(DeclaredActivity.class);
+        when(activity.getId()).thenReturn(activityId);
 
-      assertTrue(captorTrace.getPersonalNote().isPresent());
-      assertEquals(personalNoteUpdated, captorTrace.getPersonalNote().get());
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(associationService.getAllOf(
+                traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+            .thenReturn(List.of(association));
+        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(activityId)))
+            .thenReturn(List.of(activity));
 
-      assertTrue(captorTrace.getAiUseJustification().isPresent());
-      assertEquals(aiJustificationUpdated, captorTrace.getAiUseJustification().get());
+        TraceAssociationsData result = traceService.getTraceAssociations(traceId, false);
 
-      assertTrue(captorTrace.getLink().isPresent());
-      assertEquals(linkUpdated, captorTrace.getLink().get());
+        BddLogger.then("it should return declared activity associations");
+
+        assertEquals(1, result.declaredActivityAssociations().size());
+      }
+
+      @Test
+      void thenItShouldCallFindAllNotCompletedWhenOnlyNotCompletedIsTrue() {
+        BddLogger.when("getting only not completed trace associations");
+
+        UUID traceId = UUID.randomUUID();
+        UUID activityId = UUID.randomUUID();
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+        Association association = mock(Association.class);
+        when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
+        when(association.getId1()).thenReturn(activityId);
+
+        DeclaredActivity activity = mock(DeclaredActivity.class);
+        when(activity.getId()).thenReturn(activityId);
+
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(associationService.getAllOf(
+                traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+            .thenReturn(List.of(association));
+        when(declaredActivityService.findAllNotCompletedActivitiesByIds(List.of(activityId)))
+            .thenReturn(List.of(activity));
+
+        TraceAssociationsData result = traceService.getTraceAssociations(traceId, true);
+
+        BddLogger.then("it should call the not completed method and return the data");
+
+        verify(declaredActivityService).findAllNotCompletedActivitiesByIds(List.of(activityId));
+        verify(declaredActivityService, never()).findAllDeclaredActivitiesByIds(any());
+        assertEquals(1, result.declaredActivityAssociations().size());
+      }
+
+      @Test
+      void thenItShouldThrowTraceNotFoundWhenTraceDoesNotExist() {
+        BddLogger.when("getting trace associations for unknown trace");
+
+        UUID traceId = UUID.randomUUID();
+
+        when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
+
+        assertThrows(
+            TraceNotFoundException.class, () -> traceService.getTraceAssociations(traceId, false));
+
+        BddLogger.then("it should throw TraceNotFoundException");
+      }
+
+      @Test
+      void thenItShouldThrowUserNotAuthorizedWhenTraceBelongsToAnotherUser() {
+        BddLogger.when("getting trace associations of another user");
+
+        UUID traceId = UUID.randomUUID();
+        Trace trace =
+            TraceFixture.create()
+                .withUser(UserFixture.create().toModel())
+                .withId(traceId)
+                .toModel();
+
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () -> traceService.getTraceAssociations(traceId, false));
+
+        BddLogger.then("it should throw UserNotAuthorizedException");
+      }
     }
 
-    @Test
-    void shouldUpdateTraceWithNullFields() {
-      BddLogger.given("a TraceServiceImpl service and a valid trace");
-      User user = student.getUser();
-      String title = "Test Title";
-      String titleUpdated = "Test Title with null fields";
-      ELanguage language = ELanguage.ENGLISH;
-      ELanguage languageUpdated = ELanguage.FRENCH;
-      ETraceAuthorType authorType = ETraceAuthorType.PERSONAL;
-      ETraceAuthorType authorTypeUpdated = ETraceAuthorType.THIRD_PARTY;
-      String personalNote = "Some personal note";
-      String aiJustification = "Justified by AI";
+    @Nested
+    class WhenAssociatingTraceWithDeclaredSkill {
 
-      Trace trace =
-          TraceFixture.create()
-              .withUser(user)
-              .withTitle(title)
-              .withLanguage(language)
-              .withAuthorType(authorType)
-              .withPersonalNote(personalNote)
-              .withAiUseJustification(aiJustification)
-              .toModel();
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-      when(traceRepository.save(trace)).thenReturn(trace);
-      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+      @Test
+      void thenItShouldCreateAssociation() {
+        BddLogger.when("associating trace with declared skills");
 
-      BddLogger.when("update trace with null fields");
-      traceService.updateTrace(
-          trace.getId(), titleUpdated, languageUpdated, authorTypeUpdated, null, null);
+        UUID traceId = UUID.randomUUID();
+        UUID skillId = UUID.randomUUID();
 
-      BddLogger.then("it should update and save the trace with null fields");
-      ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
-      verify(traceRepository).save(captor.capture());
+        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
 
-      Trace captorTrace = captor.getValue();
+        DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
+        when(skill.getId()).thenReturn(skillId);
+        when(skill.getStudent()).thenReturn(student);
 
-      assertEquals(user, captorTrace.getUser());
-      assertEquals(titleUpdated, captorTrace.getTitle());
-      assertEquals(languageUpdated, captorTrace.getLanguage());
-      assertEquals(authorTypeUpdated, captorTrace.getAuthorType());
-      assertFalse(captorTrace.getPersonalNote().isPresent());
-      assertFalse(captorTrace.getAiUseJustification().isPresent());
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+            .thenReturn(List.of(skill));
+        when(associationService.getAllOf(
+                traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+            .thenReturn(List.of());
+
+        TraceAssociationsData result =
+            traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId));
+
+        BddLogger.then("it should create association");
+
+        verify(associationService).createAll(any());
+        assertNotNull(result);
+      }
+
+      @Test
+      void thenItShouldThrowDeclaredSkillProgressNotFoundWhenSkillIsMissing() {
+        BddLogger.when("associating trace with missing declared skill");
+
+        UUID traceId = UUID.randomUUID();
+        UUID skillId = UUID.randomUUID();
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+            .thenReturn(List.of());
+
+        assertThrows(
+            DeclaredSkillProgressNotFoundException.class,
+            () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
+
+        BddLogger.then("it should throw DeclaredSkillProgressNotFoundException");
+      }
+
+      @Test
+      void thenItShouldThrowUserNotAuthorizedWhenSkillBelongsToAnotherUser() {
+        BddLogger.when("associating trace with skill of another user");
+
+        UUID traceId = UUID.randomUUID();
+        UUID skillId = UUID.randomUUID();
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+        DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
+        when(skill.getId()).thenReturn(skillId);
+        when(skill.getStudent()).thenReturn(StudentFixture.create().toModel());
+
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
+            .thenReturn(List.of(skill));
+
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
+
+        BddLogger.then("it should throw UserNotAuthorizedException");
+      }
     }
 
-    @Test
-    void shouldThrowTraceNotFoundWhenUpdatingUnknownTrace() {
-      BddLogger.given("a TraceServiceImpl service");
-      UUID unknownId = UUID.randomUUID();
-      when(traceRepository.findById(unknownId)).thenReturn(Optional.empty());
+    @Nested
+    class WhenAssociatingTraceWithDeclaredExperience {
 
-      BddLogger.when("updating an unknown trace");
-      TraceNotFoundException ex =
-          assertThrows(
-              TraceNotFoundException.class,
-              () ->
-                  traceService.updateTrace(
-                      unknownId,
-                      "t",
-                      ELanguage.FRENCH,
-                      ETraceAuthorType.PERSONAL,
-                      null,
-                      null,
-                      null));
+      @Test
+      void thenItShouldCreateAssociation() {
+        BddLogger.when("associating trace with declared experiences");
 
-      BddLogger.then("it should throw TRACE_NOT_FOUND");
-      assertEquals(EErrorCode.TRACE_NOT_FOUND, ex.getErrorCode());
+        UUID traceId = UUID.randomUUID();
+        UUID experienceId = UUID.randomUUID();
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+        DeclaredExperience experience = mock(DeclaredExperience.class);
+        when(experience.getId()).thenReturn(experienceId);
+        when(experience.getStudent()).thenReturn(student);
+
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(declaredExperienceService.findAllByIds(List.of(experienceId)))
+            .thenReturn(List.of(experience));
+        when(associationService.getAllOf(
+                traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+            .thenReturn(List.of());
+
+        TraceAssociationsData result =
+            traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId));
+
+        BddLogger.then("it should create association");
+
+        verify(associationService).createAll(any());
+        assertNotNull(result);
+      }
+
+      @Test
+      void thenItShouldThrowDeclaredExperienceNotFoundWhenExperienceIsMissing() {
+        BddLogger.when("associating trace with missing declared experience");
+
+        UUID traceId = UUID.randomUUID();
+        UUID experienceId = UUID.randomUUID();
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(declaredExperienceService.findAllByIds(List.of(experienceId))).thenReturn(List.of());
+
+        assertThrows(
+            DeclaredExperienceNotFoundException.class,
+            () ->
+                traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
+
+        BddLogger.then("it should throw DeclaredExperienceNotFoundException");
+      }
+
+      @Test
+      void thenItShouldThrowUserNotAuthorizedWhenExperienceBelongsToAnotherUser() {
+        BddLogger.when("associating trace with experience of another user");
+
+        UUID traceId = UUID.randomUUID();
+        UUID experienceId = UUID.randomUUID();
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        DeclaredExperience experience = Mockito.mock(DeclaredExperience.class);
+
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(declaredExperienceService.findAllByIds(List.of(experienceId)))
+            .thenReturn(List.of(experience));
+        when(experience.getId()).thenReturn(experienceId);
+        when(experience.getStudent()).thenReturn(StudentFixture.create().toModel());
+
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () ->
+                traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
+
+        BddLogger.then("it should throw UserNotAuthorizedException");
+      }
     }
 
-    @Test
-    void shouldThrowUserNotAuthorizedWhenUpdatingTraceOfAnotherUser() {
-      BddLogger.given("a TraceServiceImpl service and a trace owned by another user");
-      User otherUser = UserFixture.create().toModel();
-      Trace trace = TraceFixture.create().withUser(otherUser).toModel();
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+    @Nested
+    class WhenUnassociatingTrace {
 
-      BddLogger.when("updating the trace");
-      UserNotAuthorizedException ex =
-          assertThrows(
-              UserNotAuthorizedException.class,
-              () ->
-                  traceService.updateTrace(
-                      trace.getId(),
-                      "x",
-                      ELanguage.FRENCH,
-                      ETraceAuthorType.PERSONAL,
-                      null,
-                      null,
-                      null));
+      @Test
+      void thenItShouldDeleteAssociationsWhenTheyBelongToTrace() {
+        BddLogger.when("unassociating valid associations from trace");
 
-      BddLogger.then("it should throw USER_NOT_AUTHORIZED");
-      assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
-      verify(traceRepository, never()).save(any());
-    }
+        UUID traceId = UUID.randomUUID();
+        UUID associationId1 = UUID.randomUUID();
+        UUID associationId2 = UUID.randomUUID();
+        List<UUID> idsToDelete = List.of(associationId1, associationId2);
 
-    @Test
-    void givenLoggedInUser_shouldReturnLastTracesOverview() {
-      BddLogger.given("a TraceServiceImpl service");
-      List<Trace> traces =
-          List.of(
-              TraceFixture.create().withUser(student.getUser()).toModel(),
-              TraceFixture.create().withUser(student.getUser()).toModel());
+        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
 
-      BddLogger.when("getting last traces overview");
-      when(traceRepository.findLastsOf(eq(student.getUser()), anyInt())).thenReturn(traces);
-      List<Trace> result = traceService.lastTracesOf();
+        Association association1 = mock(Association.class);
+        when(association1.getId()).thenReturn(associationId1);
 
-      BddLogger.then("it should return last traces and call repository with logged user");
-      assertEquals(2, result.size());
-      verify(traceRepository).findLastsOf(eq(student.getUser()), anyInt());
-    }
+        Association association2 = mock(Association.class);
+        when(association2.getId()).thenReturn(associationId2);
 
-    @Test
-    void givenExistingTrace_shouldReturnTraceDetailData_withAssociations() {
-      BddLogger.given(
-          "a TraceServiceImpl service and a trace with associations and an active attachment");
-      Trace trace =
-          TraceFixture.create()
-              .withUser(student.getUser())
-              .withTitle("Trace title")
-              .withLanguage(ELanguage.FRENCH)
-              .withAuthorType(ETraceAuthorType.PERSONAL)
-              .toModel();
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(associationService.getAllOf(
+                traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+            .thenReturn(List.of(association1, association2));
 
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-      when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+        traceService.unassociate(traceId, idsToDelete);
 
-      BddLogger.when("getting trace detail");
-      TraceDetailData detail = traceService.getTraceDetail(trace.getId());
+        BddLogger.then("it should delete associations");
 
-      BddLogger.then("it should return detail with associations and attachment");
-      assertEquals(trace.getId(), detail.id());
-      assertEquals("Trace title", detail.title());
-      assertEquals(EPortfolioType.LIFE_PROJECT.name(), detail.programName());
-      assertNotNull(detail.attachment());
-    }
+        verify(associationService).deleteAllByIds(idsToDelete);
+      }
 
-    @Test
-    void givenTraceOfAnotherUser_shouldThrowUserNotAuthorizedException_onGetTraceDetail() {
-      BddLogger.given("a TraceServiceImpl service and a trace owned by another user");
-      User otherUser = UserFixture.create().toModel();
-      Trace trace = TraceFixture.create().withUser(otherUser).toModel();
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+      @Test
+      void thenItShouldThrowAssociationDoesNotExistWhenIdsAreNotLinkedToTrace() {
+        BddLogger.when("unassociating ids not linked to trace");
 
-      BddLogger.when("getting trace detail");
-      UserNotAuthorizedException ex =
-          assertThrows(
-              UserNotAuthorizedException.class, () -> traceService.getTraceDetail(trace.getId()));
+        UUID linkedAssociationId = UUID.randomUUID();
+        UUID unlinkedAssociationId = UUID.randomUUID();
 
-      BddLogger.then("it should throw USER_NOT_AUTHORIZED");
-      assertEquals(EErrorCode.USER_NOT_AUTHORIZED, ex.getErrorCode());
-    }
+        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
-    @Test
-    void givenTraceWithDeclaredActivityAssociation_shouldReturnTraceAssociations() {
-      BddLogger.given("a trace with declared activity associations");
+        Association association = mock(Association.class);
+        when(association.getId()).thenReturn(linkedAssociationId);
 
-      UUID traceId = UUID.randomUUID();
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(associationService.getAllOf(
+                trace.getId(), Trace.class, EAssociationType.getAllBy(Trace.class)))
+            .thenReturn(List.of(association));
 
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
+        assertThrows(
+            AssociationDoesNotExistException.class,
+            () ->
+                traceService.unassociate(
+                    trace.getId(), List.of(linkedAssociationId, unlinkedAssociationId)));
 
-      UUID activityId = UUID.randomUUID();
+        BddLogger.then("it should not delete associations");
 
-      Association association = mock(Association.class);
-      when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
-      when(association.getId1()).thenReturn(activityId);
+        verify(associationService, never()).deleteAllByIds(any());
+      }
 
-      DeclaredActivity activity = mock(DeclaredActivity.class);
-      when(activity.getId()).thenReturn(activityId);
+      @Test
+      void thenItShouldThrowDeclaredActivityAlreadyFinishedWhenActivityAssociationIsFinished() {
+        BddLogger.when("unassociating a finished declared activity association");
 
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        UUID traceId = UUID.randomUUID();
+        UUID associationId = UUID.randomUUID();
+        UUID activityId = UUID.randomUUID();
 
-      when(associationService.getAllOf(
-              traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
-          .thenReturn(List.of(association));
+        Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
 
-      when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(activityId)))
-          .thenReturn(List.of(activity));
+        Association association = mock(Association.class);
+        when(association.getId()).thenReturn(associationId);
+        when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
+        when(association.getId1()).thenReturn(activityId);
 
-      BddLogger.when("getting trace associations");
+        DeclaredActivity activity = mock(DeclaredActivity.class);
+        when(activity.getFinishedAt()).thenReturn(Optional.of(Instant.now()));
 
-      TraceAssociationsData result = traceService.getTraceAssociations(traceId, false);
+        when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
+        when(associationService.getAllOf(
+                traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
+            .thenReturn(List.of(association));
+        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(activityId)))
+            .thenReturn(List.of(activity));
 
-      BddLogger.then("it should return declared activity associations");
+        assertThrows(
+            DeclaredActivityAlreadyFinishedException.class,
+            () -> traceService.unassociate(traceId, List.of(associationId)));
 
-      assertEquals(1, result.declaredActivityAssociations().size());
-    }
+        BddLogger.then("it should not delete associations");
 
-    @Test
-    void givenUnknownTrace_shouldThrowTraceNotFoundException_onGetTraceAssociations() {
-      BddLogger.given("unknown trace id");
-
-      UUID traceId = UUID.randomUUID();
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-      BddLogger.when("getting trace associations");
-
-      assertThrows(
-          TraceNotFoundException.class, () -> traceService.getTraceAssociations(traceId, false));
-
-      BddLogger.then("it should throw TraceNotFoundException");
-    }
-
-    @Test
-    void givenTraceOfAnotherUser_shouldThrowUserNotAuthorized_onGetTraceAssociations() {
-      BddLogger.given("a trace owned by another user");
-
-      UUID traceId = UUID.randomUUID();
-
-      User otherUser = UserFixture.create().toModel();
-
-      Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      BddLogger.when("getting trace associations");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () -> traceService.getTraceAssociations(traceId, false));
-
-      BddLogger.then("it should throw UserNotAuthorizedException");
-    }
-
-    @Test
-    void givenTraceWithDeclaredActivity_whenOnlyNotCompleted_shouldCallFindAllNotCompleted() {
-      BddLogger.given("a trace with a declared activity association");
-      UUID traceId = UUID.randomUUID();
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-      UUID activityId = UUID.randomUUID();
-
-      Association association = mock(Association.class);
-      when(association.getAssociationType()).thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
-      when(association.getId1()).thenReturn(activityId);
-
-      DeclaredActivity activity = mock(DeclaredActivity.class);
-      when(activity.getId()).thenReturn(activityId);
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-      when(associationService.getAllOf(
-              traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
-          .thenReturn(List.of(association));
-
-      when(declaredActivityService.findAllNotCompletedActivitiesByIds(eq(List.of(activityId))))
-          .thenReturn(List.of(activity));
-
-      BddLogger.when("getting ONLY NOT COMPLETED trace associations");
-      TraceAssociationsData result = traceService.getTraceAssociations(traceId, true);
-
-      BddLogger.then("it should call the specific repository method and return the data");
-      verify(declaredActivityService).findAllNotCompletedActivitiesByIds(eq(List.of(activityId)));
-      verify(declaredActivityService, never()).findAllDeclaredActivitiesByIds(any());
-      assertEquals(1, result.declaredActivityAssociations().size());
-    }
-
-    @Test
-    void givenTraceAndDeclaredSkills_shouldAssociateTraceWithDeclaredSkills() {
-      BddLogger.given("a trace and declared skills");
-
-      UUID traceId = UUID.randomUUID();
-      UUID skillId = UUID.randomUUID();
-
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-
-      DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
-      when(skill.getId()).thenReturn(skillId);
-      when(skill.getStudent()).thenReturn(student);
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      when(associationService.getAllOf(
-              traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
-          .thenReturn(List.of());
-
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(any()))
-          .thenReturn(List.of(skill));
-
-      BddLogger.when("associating trace with declared skills");
-
-      TraceAssociationsData result =
-          traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId));
-
-      BddLogger.then("association should be created");
-
-      verify(associationService).createAll(any());
-
-      assertNotNull(result);
-    }
-
-    @Test
-    void givenUnknownTrace_shouldThrowTraceNotFound_whenAssociateTraceWithDeclaredSkill() {
-      BddLogger.given("unknown trace");
-
-      UUID traceId = UUID.randomUUID();
-      UUID skillId = UUID.randomUUID();
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-      BddLogger.when("associating");
-
-      assertThrows(
-          TraceNotFoundException.class,
-          () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
-
-      BddLogger.then("it should throw TraceNotFoundException");
-    }
-
-    @Test
-    void
-        givenTraceOfAnotherUser_shouldThrowUserNotAuthorized_whenAssociateTraceWithDeclaredSkill() {
-      BddLogger.given("trace of another user");
-
-      UUID traceId = UUID.randomUUID();
-      UUID skillId = UUID.randomUUID();
-
-      User otherUser = UserFixture.create().toModel();
-
-      Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      BddLogger.when("associating");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
-
-      BddLogger.then("should throw UserNotAuthorizedException");
-    }
-
-    @Test
-    void givenMissingSkill_shouldThrowDeclaredSkillProgressNotFound() {
-      BddLogger.given("missing skill");
-
-      UUID traceId = UUID.randomUUID();
-      UUID skillId = UUID.randomUUID();
-
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
-          .thenReturn(List.of());
-
-      BddLogger.when("associating");
-
-      assertThrows(
-          fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception
-              .DeclaredSkillProgressNotFoundException.class,
-          () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
-
-      BddLogger.then("should throw DeclaredSkillProgressNotFoundException");
-    }
-
-    @Test
-    void givenSkillOfAnotherUser_shouldThrowUserNotAuthorized() {
-      BddLogger.given("skill of another user");
-
-      UUID traceId = UUID.randomUUID();
-      UUID skillId = UUID.randomUUID();
-
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-
-      Student otherStudent = StudentFixture.create().toModel();
-
-      DeclaredSkillProgress skill = mock(DeclaredSkillProgress.class);
-      when(skill.getId()).thenReturn(skillId);
-      when(skill.getStudent()).thenReturn(otherStudent);
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
-          .thenReturn(List.of(skill));
-
-      BddLogger.when("associating");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () -> traceService.associateTraceWithDeclaredSkill(traceId, List.of(skillId)));
-
-      BddLogger.then("should throw UserNotAuthorizedException");
-    }
-
-    @Test
-    void givenValidTraceAndAssociations_shouldUnassociateSuccessfully() {
-      BddLogger.given("a TraceServiceImpl service, a valid trace and valid association IDs");
-      UUID traceId = UUID.randomUUID();
-      UUID associationId1 = UUID.randomUUID();
-      UUID associationId2 = UUID.randomUUID();
-      List<UUID> idsToDelete = List.of(associationId1, associationId2);
-
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      Association assoc1 = mock(Association.class);
-      when(assoc1.getId()).thenReturn(associationId1);
-      Association assoc2 = mock(Association.class);
-      when(assoc2.getId()).thenReturn(associationId2);
-
-      when(associationService.getAllOf(
-              traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
-          .thenReturn(List.of(assoc1, assoc2));
-
-      BddLogger.when("unassociating traces");
-      traceService.unassociate(traceId, idsToDelete);
-
-      BddLogger.then("it should call the association service to delete the associations");
-      verify(associationService).deleteAllByIds(idsToDelete);
-    }
-
-    @Test
-    void givenUnknownTrace_shouldThrowTraceNotFound_whenUnassociating() {
-      BddLogger.given("an unknown trace id");
-      UUID traceId = UUID.randomUUID();
-      List<UUID> idsToDelete = List.of(UUID.randomUUID());
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-      BddLogger.when("unassociating");
-      assertThrows(
-          TraceNotFoundException.class, () -> traceService.unassociate(traceId, idsToDelete));
-
-      BddLogger.then("it should throw TraceNotFoundException and never delete");
-      verify(associationService, never()).deleteAllByIds(any());
-    }
-
-    @Test
-    void givenTraceOfAnotherUser_shouldThrowUserNotAuthorized_whenUnassociating() {
-      BddLogger.given("a trace owned by another user");
-      UUID traceId = UUID.randomUUID();
-      List<UUID> idsToDelete = List.of(UUID.randomUUID());
-
-      User otherUser = UserFixture.create().toModel();
-      Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      BddLogger.when("unassociating");
-      assertThrows(
-          UserNotAuthorizedException.class, () -> traceService.unassociate(traceId, idsToDelete));
-
-      BddLogger.then("it should throw UserNotAuthorizedException and never delete");
-      verify(associationService, never()).deleteAllByIds(any());
-    }
-
-    @Test
-    void unassociate_should_delete_associations_when_they_belong_to_trace() {
-      BddLogger.given("A logged-in user, an existing trace, and valid association IDs");
-      UUID traceId = UUID.randomUUID();
-      UUID associationId1 = UUID.randomUUID();
-      UUID associationId2 = UUID.randomUUID();
-      List<UUID> idsToDelete = List.of(associationId1, associationId2);
-
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      Association assoc1 = mock(Association.class);
-      when(assoc1.getId()).thenReturn(associationId1);
-      Association assoc2 = mock(Association.class);
-      when(assoc2.getId()).thenReturn(associationId2);
-
-      when(associationService.getAllOf(
-              traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
-          .thenReturn(List.of(assoc1, assoc2));
-
-      BddLogger.when("unassociate is called");
-      traceService.unassociate(traceId, idsToDelete);
-
-      BddLogger.then("associationService.deleteAllByIds should be called");
-      verify(associationService).deleteAllByIds(idsToDelete);
-    }
-
-    @Test
-    void unassociate_should_throw_TraceNotFoundException_when_trace_not_found() {
-      BddLogger.given("An unknown trace id");
-      UUID traceId = UUID.randomUUID();
-      List<UUID> idsToDelete = List.of(UUID.randomUUID());
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-      BddLogger.when("unassociate is called");
-      BddLogger.then("TraceNotFoundException is thrown");
-
-      assertThrows(
-          TraceNotFoundException.class, () -> traceService.unassociate(traceId, idsToDelete));
-
-      verify(associationService, never()).deleteAllByIds(any());
-    }
-
-    @Test
-    void unassociate_should_throw_UserNotAuthorizedException_when_trace_belongs_to_other_user() {
-      BddLogger.given("A trace owned by another user");
-      List<UUID> idsToDelete = List.of(UUID.randomUUID());
-
-      User otherUser = UserFixture.create().toModel();
-      Trace trace = TraceFixture.create().withUser(otherUser).toModel();
-
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-
-      BddLogger.when("unassociate is called");
-      BddLogger.then("UserNotAuthorizedException is thrown");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () -> traceService.unassociate(trace.getId(), idsToDelete));
-
-      verify(associationService, never()).deleteAllByIds(any());
-    }
-
-    @Test
-    void unassociate_should_throw_AssociationDoesNotExistException_when_ids_not_linked_to_trace() {
-      BddLogger.given("A valid trace but association IDs not linked to it");
-      UUID linkedAssocId = UUID.randomUUID();
-      UUID unlinkedAssocId = UUID.randomUUID();
-      List<UUID> idsToDelete = List.of(linkedAssocId, unlinkedAssocId);
-
-      Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
-      when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
-
-      Association assoc1 = mock(Association.class);
-      when(assoc1.getId()).thenReturn(linkedAssocId);
-
-      when(associationService.getAllOf(
-              trace.getId(), Trace.class, EAssociationType.getAllBy(Trace.class)))
-          .thenReturn(List.of(assoc1));
-
-      BddLogger.when("unassociate is called with unlinked id");
-      BddLogger.then("AssociationDoesNotExistException is thrown");
-
-      assertThrows(
-          AssociationDoesNotExistException.class,
-          () -> traceService.unassociate(trace.getId(), idsToDelete));
-
-      verify(associationService, never()).deleteAllByIds(any());
-    }
-
-    @Test
-    void searchDeclaredActivityForAssociation_should_return_mapped_results() {
-      BddLogger.given("A valid trace and a list of declared activities");
-      UUID traceId = UUID.randomUUID();
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      PageCriteria criteria = new PageCriteria(0, 10);
-      PageInfo pageInfo = new PageInfo(0, 10, 3);
-
-      var expectedResults =
-          List.of(
-              new AssociationSearchResultData(UUID.randomUUID(), "Activity 1", "THEMATIC_1", true),
-              new AssociationSearchResultData(UUID.randomUUID(), "Activity 2", "THEMATIC_2", false),
-              new AssociationSearchResultData(UUID.randomUUID(), "Activity 3", "THEMATIC_3", true));
-
-      when(associationSearchHelper.searchForAssociation(
-              eq(traceId),
-              eq(Trace.class),
-              eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
-              any(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any()))
-          .thenReturn(new PagedResult<>(expectedResults, pageInfo));
-
-      BddLogger.when("searching declared activities for association");
-      var result = traceService.searchDeclaredActivityForAssociation(traceId, "kw", criteria);
-
-      BddLogger.then("it should delegate to associationSearchHelper and return results");
-      assertEquals(3, result.content().size());
-      assertTrue(result.content().get(0).disabled());
-      assertFalse(result.content().get(1).disabled());
-      assertTrue(result.content().get(2).disabled());
-      verify(associationSearchHelper)
-          .searchForAssociation(
-              eq(traceId),
-              eq(Trace.class),
-              eq(EAssociationType.DECLARED_ACTIVITY_TRACE),
-              any(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any());
-    }
-
-    @Test
-    void searchDeclaredSkillForAssociation_should_return_mapped_results() {
-      BddLogger.given("A valid trace and a list of declared skills");
-      UUID traceId = UUID.randomUUID();
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      PageCriteria criteria = new PageCriteria(0, 10);
-      PageInfo pageInfo = new PageInfo(0, 10, 2);
-
-      var expectedResults =
-          List.of(
-              new AssociationSearchResultData(UUID.randomUUID(), "Skill 1", "TYPE_1", true),
-              new AssociationSearchResultData(UUID.randomUUID(), "Skill 2", "TYPE_2", false));
-
-      when(associationSearchHelper.searchForAssociation(
-              eq(traceId),
-              eq(Trace.class),
-              eq(EAssociationType.TRACE_DECLARED_SKILL),
-              any(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any()))
-          .thenReturn(new PagedResult<>(expectedResults, pageInfo));
-
-      BddLogger.when("searching declared skills for association");
-      var result = traceService.searchDeclaredSkillForAssociation(traceId, "kw", criteria);
-
-      BddLogger.then("it should delegate to associationSearchHelper and return results");
-      assertEquals(2, result.content().size());
-      assertTrue(result.content().get(0).disabled());
-      assertFalse(result.content().get(1).disabled());
-      verify(associationSearchHelper)
-          .searchForAssociation(
-              eq(traceId),
-              eq(Trace.class),
-              eq(EAssociationType.TRACE_DECLARED_SKILL),
-              any(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any());
-    }
-
-    @Test
-    void searchDeclaredActivityForAssociation_should_throw_TraceNotFoundException() {
-      BddLogger.given("an unknown trace id");
-      UUID traceId = UUID.randomUUID();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-      BddLogger.when("searching declared activities");
-      assertThrows(
-          TraceNotFoundException.class,
-          () ->
-              traceService.searchDeclaredActivityForAssociation(
-                  traceId, "", new PageCriteria(0, 10)));
-
-      BddLogger.then("it should throw TraceNotFoundException");
-    }
-
-    @Test
-    void searchDeclaredSkillForAssociation_should_throw_TraceNotFoundException() {
-      BddLogger.given("an unknown trace id");
-      UUID traceId = UUID.randomUUID();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-      BddLogger.when("searching declared skills");
-      assertThrows(
-          TraceNotFoundException.class,
-          () ->
-              traceService.searchDeclaredSkillForAssociation(traceId, "", new PageCriteria(0, 10)));
-
-      BddLogger.then("it should throw TraceNotFoundException");
-    }
-
-    @Test
-    void searchDeclaredActivityForAssociation_should_throw_UserNotAuthorizedException() {
-      BddLogger.given("a trace owned by another user");
-      UUID traceId = UUID.randomUUID();
-      User otherUser = UserFixture.create().toModel();
-      Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      BddLogger.when("searching declared activities");
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () ->
-              traceService.searchDeclaredActivityForAssociation(
-                  traceId, "", new PageCriteria(0, 10)));
-
-      BddLogger.then("it should throw UserNotAuthorizedException");
-    }
-
-    @Test
-    void searchDeclaredSkillForAssociation_should_throw_UserNotAuthorizedException() {
-      BddLogger.given("a trace owned by another user");
-      UUID traceId = UUID.randomUUID();
-      User otherUser = UserFixture.create().toModel();
-      Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      BddLogger.when("searching declared skills");
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () ->
-              traceService.searchDeclaredSkillForAssociation(traceId, "", new PageCriteria(0, 10)));
-
-      BddLogger.then("it should throw UserNotAuthorizedException");
-    }
-
-    @Test
-    void givenTraceAndDeclaredExperiences_shouldAssociateTraceWithDeclaredExperiences() {
-      BddLogger.given("a trace and declared experiences");
-
-      UUID traceId = UUID.randomUUID();
-      UUID experienceId = UUID.randomUUID();
-
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-
-      DeclaredExperience experience = mock(DeclaredExperience.class);
-      when(experience.getId()).thenReturn(experienceId);
-      when(experience.getStudent()).thenReturn(student);
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      when(associationService.getAllOf(
-              traceId, Trace.class, EAssociationType.getAllBy(Trace.class)))
-          .thenReturn(List.of());
-
-      when(declaredExperienceService.findAllByIds(List.of(experienceId)))
-          .thenReturn(List.of(experience));
-
-      BddLogger.when("associating trace with declared experiences");
-
-      TraceAssociationsData result =
-          traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId));
-
-      BddLogger.then("association should be created");
-
-      verify(associationService).createAll(any());
-      assertNotNull(result);
-    }
-
-    @Test
-    void givenUnknownTrace_shouldThrowTraceNotFound_whenAssociateTraceWithDeclaredExperience() {
-      BddLogger.given("unknown trace");
-
-      UUID traceId = UUID.randomUUID();
-      UUID experienceId = UUID.randomUUID();
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-      BddLogger.when("associating");
-
-      assertThrows(
-          TraceNotFoundException.class,
-          () -> traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
-
-      BddLogger.then("it should throw TraceNotFoundException");
-    }
-
-    @Test
-    void
-        givenTraceOfAnotherUser_shouldThrowUserNotAuthorized_whenAssociateTraceWithDeclaredExperience() {
-      BddLogger.given("trace of another user");
-
-      UUID traceId = UUID.randomUUID();
-      UUID experienceId = UUID.randomUUID();
-
-      User otherUser = UserFixture.create().toModel();
-
-      Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      BddLogger.when("associating");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () -> traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
-
-      BddLogger.then("should throw UserNotAuthorizedException");
-    }
-
-    @Test
-    void givenMissingExperience_shouldThrowDeclaredExperienceNotFound() {
-      BddLogger.given("missing experience");
-
-      UUID traceId = UUID.randomUUID();
-      UUID experienceId = UUID.randomUUID();
-
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      when(declaredExperienceService.findAllByIds(List.of(experienceId))).thenReturn(List.of());
-
-      BddLogger.when("associating");
-
-      assertThrows(
-          DeclaredExperienceNotFoundException.class,
-          () -> traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
-
-      BddLogger.then("should throw DeclaredExperienceNotFoundException");
-    }
-
-    @Test
-    void givenExperienceOfAnotherUser_shouldThrowUserNotAuthorized() {
-      BddLogger.given("experience of another user");
-
-      UUID traceId = UUID.randomUUID();
-      UUID experienceId = UUID.randomUUID();
-      var mockedExperience = Mockito.mock(DeclaredExperience.class);
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-      when(declaredExperienceService.findAllByIds(List.of(experienceId)))
-          .thenReturn(List.of(mockedExperience));
-      when(mockedExperience.getId()).thenReturn(experienceId);
-      when(mockedExperience.getStudent()).thenReturn(StudentFixture.create().toModel());
-
-      BddLogger.when("associating");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () -> traceService.associateTraceWithDeclaredExperience(traceId, List.of(experienceId)));
-
-      BddLogger.then("should throw UserNotAuthorizedException");
-    }
-
-    @Test
-    void searchDeclaredExperienceForAssociation_should_return_mapped_results() {
-      BddLogger.given("A valid trace and a list of declared experiences");
-
-      UUID traceId = UUID.randomUUID();
-      Trace trace = TraceFixture.create().withUser(student.getUser()).withId(traceId).toModel();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      PageCriteria criteria = new PageCriteria(0, 10);
-      PageInfo pageInfo = new PageInfo(0, 10, 2);
-
-      var expectedResults =
-          List.of(
-              new AssociationSearchResultData(UUID.randomUUID(), "Experience 1", "TYPE_1", true),
-              new AssociationSearchResultData(UUID.randomUUID(), "Experience 2", "TYPE_2", false));
-
-      when(associationSearchHelper.searchForAssociation(
-              eq(traceId),
-              eq(Trace.class),
-              eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
-              any(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any()))
-          .thenReturn(new PagedResult<>(expectedResults, pageInfo));
-
-      BddLogger.when("searching declared experiences for association");
-      var result = traceService.searchDeclaredExperienceForAssociation(traceId, "kw", criteria);
-
-      BddLogger.then("it should delegate to associationSearchHelper and return results");
-      assertEquals(2, result.content().size());
-      assertTrue(result.content().get(0).disabled());
-      assertFalse(result.content().get(1).disabled());
-
-      verify(associationSearchHelper)
-          .searchForAssociation(
-              eq(traceId),
-              eq(Trace.class),
-              eq(EAssociationType.TRACE_DECLARED_EXPERIENCE),
-              any(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any());
-    }
-
-    @Test
-    void searchDeclaredExperienceForAssociation_should_throw_TraceNotFoundException() {
-      BddLogger.given("an unknown trace id");
-
-      UUID traceId = UUID.randomUUID();
-      when(traceRepository.findById(traceId)).thenReturn(Optional.empty());
-
-      BddLogger.when("searching declared experiences");
-
-      assertThrows(
-          TraceNotFoundException.class,
-          () ->
-              traceService.searchDeclaredExperienceForAssociation(
-                  traceId, "", new PageCriteria(0, 10)));
-
-      BddLogger.then("it should throw TraceNotFoundException");
-    }
-
-    @Test
-    void searchDeclaredExperienceForAssociation_should_throw_UserNotAuthorizedException() {
-      BddLogger.given("a trace owned by another user");
-
-      UUID traceId = UUID.randomUUID();
-      User otherUser = UserFixture.create().toModel();
-      Trace trace = TraceFixture.create().withUser(otherUser).withId(traceId).toModel();
-
-      when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
-
-      BddLogger.when("searching declared experiences");
-
-      assertThrows(
-          UserNotAuthorizedException.class,
-          () ->
-              traceService.searchDeclaredExperienceForAssociation(
-                  traceId, "", new PageCriteria(0, 10)));
-
-      BddLogger.then("it should throw UserNotAuthorizedException");
-    }
-
-    @Test
-    void givenUnassociatedTrace_shouldReturnWillBeDeletedAt() {
-      BddLogger.given("a TraceServiceImpl service and an unassociated trace");
-
-      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-
-      Instant createdAt = Instant.now().minus(10, ChronoUnit.DAYS);
-      Trace trace =
-          TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
-      when(traceRepository.findAll(
-              student.getUser(),
-              null,
-              new TraceFilter(false, null, null, null),
-              null,
-              new PageCriteria(0, 8)))
-          .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
-      when(traceRepository.isAssociated(anyList())).thenReturn(Map.of(trace, false));
-
-      BddLogger.when("getting willBeDeletedAt");
-      PagedResult<TraceViewData> traceView =
-          traceService.getTracesView(
-              null, new TraceFilter(false, null, null, null), null, new PageCriteria(0, 8));
-
-      BddLogger.then("it should return willBeDeletedAt");
-      var returnedTrace = traceView.content().getFirst();
-      assertFalse(returnedTrace.isAssociated());
-      LocalDate expectedDate =
-          createdAt
-              .plus(Duration.ofDays(DEFAULT_CONFIG.maxRemainingDays()))
-              .atZone(ZoneId.systemDefault())
-              .toLocalDate();
-      assertEquals(expectedDate, returnedTrace.willBeDeletedAt().get());
-    }
-
-    @Test
-    void givenAssociatedTrace_shouldReturnEmpty() {
-      BddLogger.given("a TraceServiceImpl service and an associated trace");
-      when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
-
-      Instant createdAt = Instant.now();
-      Trace trace =
-          TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
-      when(traceRepository.findAll(
-              student.getUser(),
-              null,
-              new TraceFilter(false, null, null, null),
-              null,
-              new PageCriteria(0, 8)))
-          .thenReturn(new PagedResult<>(List.of(trace), new PageInfo(0, 8, 1)));
-      when(traceRepository.isAssociated(anyList())).thenReturn(Map.of(trace, true));
-
-      BddLogger.when("getting willBeDeletedAt");
-
-      PagedResult<TraceViewData> traceView =
-          traceService.getTracesView(
-              null, new TraceFilter(false, null, null, null), null, new PageCriteria(0, 8));
-
-      BddLogger.then("it should return willBeDeletedAt");
-      var returnedTrace = traceView.content().getFirst();
-
-      BddLogger.then("it should return empty");
-      assertTrue(returnedTrace.isAssociated());
-      assertTrue(returnedTrace.willBeDeletedAt().isEmpty());
+        verify(associationService, never()).deleteAllByIds(any());
+      }
     }
   }
 }

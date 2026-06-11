@@ -28,6 +28,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.De
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -548,11 +549,46 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     return feedbackRepository.findByStaff(staff.getId(), statusFilter, activityId, pageCriteria);
   }
 
+  @Override
+  public boolean areDeclaredActivitiesUnlocked(List<UUID> declaredActivityIds) {
+    if (declaredActivityIds.isEmpty()) {
+      return true;
+    }
+
+    var declaredActivities = findAllDeclaredActivitiesByIds(declaredActivityIds);
+    var declaredActivityIdsWithFeedback =
+        findFeedbackPresenceByDeclaredActivityId(declaredActivityIds);
+
+    return declaredActivities.stream()
+        .noneMatch(
+            declaredActivity ->
+                isSubmittedOrFinished(
+                    declaredActivity,
+                    declaredActivityIdsWithFeedback.contains(declaredActivity.getId())));
+  }
+
+  @Override
+  public void checkDeclaredActivitiesUnlocked(List<UUID> declaredActivityIds) {
+    if (!areDeclaredActivitiesUnlocked(declaredActivityIds)) {
+      throw new DeclaredActivityLockedException();
+    }
+  }
+
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
     return switch (contextType) {
       case TRACE -> EAssociationType.DECLARED_ACTIVITY_TRACE;
       case DECLARED_SKILL -> EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;
       case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -> throw new UnsupportedOperationException();
     };
+  }
+
+  private boolean isSubmittedOrFinished(DeclaredActivity declaredActivity, boolean hasFeedback) {
+    EDeclaredActivityStatus status = declaredActivity.getStatus(hasFeedback);
+    return status.equals(EDeclaredActivityStatus.SUBMITTED)
+        || status.equals(EDeclaredActivityStatus.COMPLETED);
+  }
+
+  private List<UUID> findFeedbackPresenceByDeclaredActivityId(List<UUID> declaredActivityIds) {
+    return feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(declaredActivityIds);
   }
 }

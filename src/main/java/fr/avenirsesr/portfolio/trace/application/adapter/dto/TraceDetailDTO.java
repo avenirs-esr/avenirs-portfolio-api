@@ -10,6 +10,7 @@ import java.util.UUID;
     requiredProperties = {
       "id",
       "title",
+      "isDeletable",
       "programName",
       "authorType",
       "aiUseJustification",
@@ -21,6 +22,7 @@ public record TraceDetailDTO(
     UUID id,
     String title,
     boolean isAssociated,
+    boolean isDeletable,
     String programName,
     @Schema(ref = "#/components/schemas/ETraceAuthorType") ETraceAuthorType authorType,
     String aiUseJustification,

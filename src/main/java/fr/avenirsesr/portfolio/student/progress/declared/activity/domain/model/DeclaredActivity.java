@@ -49,14 +49,24 @@ public class DeclaredActivity extends AvenirsBaseModel {
     this.finishedAt = finishedAt;
   }
 
-  public EDeclaredActivityStatus getStatus() {
+  public EDeclaredActivityStatus getStatus(boolean hasFeedback) {
     if (finishedAt != null) {
       return EDeclaredActivityStatus.COMPLETED;
     }
-    if (startedAt != null) {
+
+    if (hasFeedback) {
+      return EDeclaredActivityStatus.SUBMITTED;
+    }
+
+    if (startedAt != null && startedAt.isBefore(Instant.now())) {
       return EDeclaredActivityStatus.IN_PROGRESS;
     }
+
     return EDeclaredActivityStatus.SUBSCRIBED;
+  }
+
+  public EDeclaredActivityStatus getStatus() {
+    return getStatus(false);
   }
 
   public static DeclaredActivity create(
