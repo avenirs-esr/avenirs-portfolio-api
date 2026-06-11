@@ -25,24 +25,24 @@ import org.springframework.data.jpa.domain.Specification;
 
   public static Specification&lt;TraceEntity&gt; associated() {
 <span class="fc" id="L27">    return (root, query, cb) -&gt; {</span>
-<span class="pc bpc" id="L28" title="1 of 2 branches missed.">      if (query == null) return null;</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">      if (query == null) return null;</span>
 
-<span class="nc" id="L30">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
-<span class="nc" id="L31">      Root&lt;AssociationEntity&gt; associationRoot = subquery.from(AssociationEntity.class);</span>
+<span class="fc" id="L30">      Subquery&lt;UUID&gt; subquery = query.subquery(UUID.class);</span>
+<span class="fc" id="L31">      Root&lt;AssociationEntity&gt; associationRoot = subquery.from(AssociationEntity.class);</span>
 
-<span class="nc" id="L33">      var traceId = root.get(&quot;id&quot;);</span>
+<span class="fc" id="L33">      var traceId = root.get(&quot;id&quot;);</span>
 
-<span class="nc" id="L35">      var id1Match = cb.equal(associationRoot.get(&quot;id1&quot;), traceId);</span>
-<span class="nc" id="L36">      var id2Match = cb.equal(associationRoot.get(&quot;id2&quot;), traceId);</span>
+<span class="fc" id="L35">      var id1Match = cb.equal(associationRoot.get(&quot;id1&quot;), traceId);</span>
+<span class="fc" id="L36">      var id2Match = cb.equal(associationRoot.get(&quot;id2&quot;), traceId);</span>
 
-<span class="nc" id="L38">      var typeIn =</span>
-<span class="nc" id="L39">          associationRoot.get(&quot;associationType&quot;).in(EAssociationType.getAllBy(Trace.class));</span>
+<span class="fc" id="L38">      var typeIn =</span>
+<span class="fc" id="L39">          associationRoot.get(&quot;associationType&quot;).in(EAssociationType.getAllBy(Trace.class));</span>
 
-<span class="nc" id="L41">      subquery.select(associationRoot.get(&quot;id&quot;)).where(cb.and(cb.or(id1Match, id2Match), typeIn));</span>
+<span class="fc" id="L41">      subquery.select(associationRoot.get(&quot;id&quot;)).where(cb.and(cb.or(id1Match, id2Match), typeIn));</span>
 
-<span class="nc" id="L43">      query.distinct(true);</span>
+<span class="fc" id="L43">      query.distinct(true);</span>
 
-<span class="nc" id="L45">      return cb.exists(subquery);</span>
+<span class="fc" id="L45">      return cb.exists(subquery);</span>
     };
   }
 
