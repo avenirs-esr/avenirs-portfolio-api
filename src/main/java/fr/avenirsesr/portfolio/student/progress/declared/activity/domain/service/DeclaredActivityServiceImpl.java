@@ -48,6 +48,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -574,6 +575,59 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     }
   }
 
+  @Override
+  public EDeclaredActivityStatus getDeclaredActivityStatus(DeclaredActivity declaredActivity) {
+    boolean hasActiveFeedback =
+        feedbackRepository
+            .findDeclaredActivityIdsHavingActiveFeedbacks(List.of(declaredActivity.getId()))
+            .contains(declaredActivity.getId());
+
+    return getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);
+  }
+
+  @Override
+  public Map<DeclaredActivity, EDeclaredActivityStatus> getDeclaredActivityStatus(
+      List<DeclaredActivity> declaredActivities) {
+    var declaredActivityIds = declaredActivities.stream().map(DeclaredActivity::getId).toList();
+
+    var idsWithFeedback =
+        new HashSet<>(findFeedbackPresenceByDeclaredActivityId(declaredActivityIds));
+
+    return declaredActivities.stream()
+        .collect(
+            Collectors.toMap(
+                Function.identity(),
+                declaredActivity ->
+                    getDeclaredActivityStatus(
+                        declaredActivity, idsWithFeedback.contains(declaredActivity.getId()))));
+  }
+
+  private EDeclaredActivityStatus getDeclaredActivityStatus(
+      DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
+    if (declaredActivity.getFinishedAt().isPresent()) {
+      return EDeclaredActivityStatus.COMPLETED;
+    }
+
+    if (hasActiveFeedback) {
+      return EDeclaredActivityStatus.SUBMITTED;
+    }
+
+    if (declaredActivity.getStartedAt().isPresent()
+        && declaredActivity.getStartedAt().get().isBefore(Instant.now())) {
+      return EDeclaredActivityStatus.IN_PROGRESS;
+    }
+
+    return EDeclaredActivityStatus.SUBSCRIBED;
+  }
+
+  private List<UUID> findFeedbackPresenceByDeclaredActivityId(List<UUID> declaredActivityIds) {
+    if (declaredActivityIds.isEmpty()) {
+      return List.of();
+    }
+
+    return feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(declaredActivityIds);
+  }
+
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
     return switch (contextType) {
       case TRACE -> EAssociationType.DECLARED_ACTIVITY_TRACE;
@@ -582,13 +636,11 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     };
   }
 
-  private boolean isSubmittedOrFinished(DeclaredActivity declaredActivity, boolean hasFeedback) {
-    EDeclaredActivityStatus status = declaredActivity.getStatus(hasFeedback);
-    return status.equals(EDeclaredActivityStatus.SUBMITTED)
-        || status.equals(EDeclaredActivityStatus.COMPLETED);
-  }
+  private boolean isSubmittedOrFinished(
+      DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
+    EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);
 
-  private List<UUID> findFeedbackPresenceByDeclaredActivityId(List<UUID> declaredActivityIds) {
-    return feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(declaredActivityIds);
+    return status == EDeclaredActivityStatus.SUBMITTED
+        || status == EDeclaredActivityStatus.COMPLETED;
   }
 }

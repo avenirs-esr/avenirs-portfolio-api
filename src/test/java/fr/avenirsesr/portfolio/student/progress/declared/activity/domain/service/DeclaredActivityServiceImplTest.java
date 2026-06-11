@@ -39,7 +39,6 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.excepti
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityStartDateBeforeSubscriptionException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
@@ -424,25 +423,24 @@ class DeclaredActivityServiceImplTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getActivity()).thenReturn(activity);
+    when(declaredActivity.getStartedAt()).thenReturn(Optional.empty());
 
     when(declaredActivityRepository.findById(activityId)).thenReturn(Optional.of(declaredActivity));
 
     String reflection = "Nouvelle réflexion";
     BddLogger.and("Un body reflection contenant : " + reflection);
 
-    when(declaredActivity.getStartedAt()).thenReturn(Optional.empty());
     BddLogger.when("Le service updateReflection est appelé");
     declaredActivityService.updateReflection(activityId, reflection);
 
     BddLogger.then("La reflection doit être mise à jour");
     verify(declaredActivity).setReflection(reflection);
 
+    BddLogger.and("La DeclaredActivity doit être démarrée");
+    verify(declaredActivity).setStartedAt(any(Instant.class));
+
     BddLogger.and("La DeclaredActivity doit être persistée via le repository");
     verify(declaredActivityRepository).save(declaredActivity);
-
-    BddLogger.and("Le statut doit être IN_PROGRESS");
-    when(declaredActivity.getStatus()).thenReturn(EDeclaredActivityStatus.IN_PROGRESS);
-    Assertions.assertEquals(EDeclaredActivityStatus.IN_PROGRESS, declaredActivity.getStatus());
   }
 
   @Test
@@ -1879,7 +1877,7 @@ class DeclaredActivityServiceImplTest {
     BddLogger.then("it should return true without calling repositories");
     assertThat(result).isTrue();
     verify(declaredActivityRepository, never()).findAllById(anyList());
-    verify(feedbackRepository, never()).findDeclaredActivityIdsHavingFeedbacks(anyList());
+    verify(feedbackRepository, never()).findDeclaredActivityIdsHavingActiveFeedbacks(anyList());
   }
 
   @Test
@@ -1892,11 +1890,13 @@ class DeclaredActivityServiceImplTest {
 
     when(declaredActivityRepository.findAllById(List.of(declaredActivityId)))
         .thenReturn(List.of(declaredActivity));
-    when(feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(List.of(declaredActivityId)))
+    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(
+            List.of(declaredActivityId)))
         .thenReturn(List.of());
 
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
-    when(declaredActivity.getStatus(false)).thenReturn(EDeclaredActivityStatus.IN_PROGRESS);
+    when(declaredActivity.getFinishedAt()).thenReturn(Optional.empty());
+    when(declaredActivity.getStartedAt()).thenReturn(Optional.of(Instant.now().minusSeconds(60)));
 
     BddLogger.when("checking if declared activities are unlocked");
     boolean result = service.areDeclaredActivitiesUnlocked(List.of(declaredActivityId));
@@ -1914,11 +1914,12 @@ class DeclaredActivityServiceImplTest {
 
     when(declaredActivityRepository.findAllById(List.of(declaredActivityId)))
         .thenReturn(List.of(declaredActivity));
-    when(feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(List.of(declaredActivityId)))
+    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(
+            List.of(declaredActivityId)))
         .thenReturn(List.of(declaredActivityId));
 
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
-    when(declaredActivity.getStatus(true)).thenReturn(EDeclaredActivityStatus.SUBMITTED);
+    when(declaredActivity.getFinishedAt()).thenReturn(Optional.empty());
 
     BddLogger.when("checking if declared activities are unlocked");
     boolean result = service.areDeclaredActivitiesUnlocked(List.of(declaredActivityId));
@@ -1936,11 +1937,12 @@ class DeclaredActivityServiceImplTest {
 
     when(declaredActivityRepository.findAllById(List.of(declaredActivityId)))
         .thenReturn(List.of(declaredActivity));
-    when(feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(List.of(declaredActivityId)))
+    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(
+            List.of(declaredActivityId)))
         .thenReturn(List.of());
 
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
-    when(declaredActivity.getStatus(false)).thenReturn(EDeclaredActivityStatus.COMPLETED);
+    when(declaredActivity.getFinishedAt()).thenReturn(Optional.of(Instant.now()));
 
     BddLogger.when("checking if declared activities are unlocked");
     boolean result = service.areDeclaredActivitiesUnlocked(List.of(declaredActivityId));
@@ -1958,11 +1960,12 @@ class DeclaredActivityServiceImplTest {
 
     when(declaredActivityRepository.findAllById(List.of(declaredActivityId)))
         .thenReturn(List.of(declaredActivity));
-    when(feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(List.of(declaredActivityId)))
+    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(
+            List.of(declaredActivityId)))
         .thenReturn(List.of(declaredActivityId));
 
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
-    when(declaredActivity.getStatus(true)).thenReturn(EDeclaredActivityStatus.SUBMITTED);
+    when(declaredActivity.getFinishedAt()).thenReturn(Optional.empty());
 
     BddLogger.when("checking declared activities lock");
 
@@ -1980,11 +1983,13 @@ class DeclaredActivityServiceImplTest {
 
     when(declaredActivityRepository.findAllById(List.of(declaredActivityId)))
         .thenReturn(List.of(declaredActivity));
-    when(feedbackRepository.findDeclaredActivityIdsHavingFeedbacks(List.of(declaredActivityId)))
+    when(feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(
+            List.of(declaredActivityId)))
         .thenReturn(List.of());
 
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
-    when(declaredActivity.getStatus(false)).thenReturn(EDeclaredActivityStatus.IN_PROGRESS);
+    when(declaredActivity.getFinishedAt()).thenReturn(Optional.empty());
+    when(declaredActivity.getStartedAt()).thenReturn(Optional.of(Instant.now().minusSeconds(60)));
 
     BddLogger.when("checking declared activities lock");
 

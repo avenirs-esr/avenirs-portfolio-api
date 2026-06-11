@@ -9,10 +9,12 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.De
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -73,4 +75,9 @@ public interface DeclaredActivityService {
   boolean areDeclaredActivitiesUnlocked(List<UUID> declaredActivityIds);
 
   void checkDeclaredActivitiesUnlocked(List<UUID> declaredActivityIds);
+
+  Map<DeclaredActivity, EDeclaredActivityStatus> getDeclaredActivityStatus(
+      List<DeclaredActivity> declaredActivities);
+
+  EDeclaredActivityStatus getDeclaredActivityStatus(DeclaredActivity declaredActivity);
 }

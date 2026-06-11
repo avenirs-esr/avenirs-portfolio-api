@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.application.ad
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
@@ -40,6 +41,7 @@ class DeclaredActivityPresentationDTOMapperTest {
   @Test
   void shouldMapDeclaredActivityToDetailsDTO() {
     BddLogger.given("a declared activity");
+
     Student student = StudentFixture.create().toModel();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
@@ -54,21 +56,26 @@ class DeclaredActivityPresentationDTOMapperTest {
             null);
 
     BddLogger.when("mapping to DeclaredActivityDetailsDTO");
+
     DeclaredActivityDetailsDTO dto =
-        mapper.toDTO(new DeclaredActivityDetailsData(declaredActivity, List.of()));
+        mapper.toDTO(
+            new DeclaredActivityDetailsData(declaredActivity, List.of()),
+            EDeclaredActivityStatus.SUBSCRIBED);
 
     BddLogger.then("it should map activity via ActivityDtoMapper and include status");
+
     assertNotNull(dto);
     assertEquals(declaredActivity.getId(), dto.id());
     assertNotNull(dto.activity());
     assertEquals(activity.getId(), dto.activity().id());
     assertEquals(activity.getTitle(), dto.activity().title());
-    assertNotNull(dto.status());
+    assertEquals(EDeclaredActivityStatus.SUBSCRIBED, dto.status());
   }
 
   @Test
   void shouldMapFeedbacksFromDetailsDataToFeedbackOverviewDTOs() {
     BddLogger.given("a declared activity with 2 feedbacks");
+
     Student student = StudentFixture.create().toModel();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
@@ -86,6 +93,7 @@ class DeclaredActivityPresentationDTOMapperTest {
             1,
             List.of(),
             List.of());
+
     Feedback feedback2 =
         Feedback.toDomain(
             UUID.randomUUID(),
@@ -100,13 +108,17 @@ class DeclaredActivityPresentationDTOMapperTest {
             List.of());
 
     BddLogger.when("mapping DeclaredActivityDetailsData with feedbacks");
+
     DeclaredActivityDetailsDTO dto =
         mapper.toDTO(
-            new DeclaredActivityDetailsData(declaredActivity, List.of(feedback1, feedback2)));
+            new DeclaredActivityDetailsData(declaredActivity, List.of(feedback1, feedback2)),
+            EDeclaredActivityStatus.SUBMITTED);
 
     BddLogger.then("the feedbacks list is mapped and contains 2 FeedbackOverviewDTOs");
+
     assertNotNull(dto.feedbacks());
     assertEquals(2, dto.feedbacks().size());
+    assertEquals(EDeclaredActivityStatus.SUBMITTED, dto.status());
     assertEquals(feedback1.getId(), dto.feedbacks().get(0).id());
     assertEquals(EFeedbackStatus.NEW, dto.feedbacks().get(0).status());
     assertEquals(feedback2.getId(), dto.feedbacks().get(1).id());
@@ -116,17 +128,23 @@ class DeclaredActivityPresentationDTOMapperTest {
   @Test
   void shouldMapEmptyFeedbacksListWhenNoFeedbacks() {
     BddLogger.given("a declared activity with no feedbacks");
+
     Student student = StudentFixture.create().toModel();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
         DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
 
     BddLogger.when("mapping DeclaredActivityDetailsData with empty feedbacks");
+
     DeclaredActivityDetailsDTO dto =
-        mapper.toDTO(new DeclaredActivityDetailsData(declaredActivity, List.of()));
+        mapper.toDTO(
+            new DeclaredActivityDetailsData(declaredActivity, List.of()),
+            EDeclaredActivityStatus.SUBSCRIBED);
 
     BddLogger.then("the feedbacks list is empty");
+
     assertNotNull(dto.feedbacks());
     assertTrue(dto.feedbacks().isEmpty());
+    assertEquals(EDeclaredActivityStatus.SUBSCRIBED, dto.status());
   }
 }

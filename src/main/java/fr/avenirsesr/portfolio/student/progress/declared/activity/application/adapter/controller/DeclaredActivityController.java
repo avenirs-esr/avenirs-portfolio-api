@@ -56,17 +56,27 @@ public class DeclaredActivityController {
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
+
     log.debug(
         "Received request to get declared activities view of user [{}] (page= {}, fileSize= {})",
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());
+
     PagedResult<DeclaredActivity> pagedResult =
         declaredActivityService.getDeclaredActivities(pageCriteria);
 
+    var statusByDeclaredActivity =
+        declaredActivityService.getDeclaredActivityStatus(pagedResult.content());
+
     var viewResponse =
         new PagedResponse<>(
-            pagedResult.content().stream().map(declaredActivityViewDTOMapper::toDTO).toList(),
+            pagedResult.content().stream()
+                .map(
+                    declaredActivity ->
+                        declaredActivityViewDTOMapper.toDTO(
+                            declaredActivity, statusByDeclaredActivity.get(declaredActivity)))
+                .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo()));
 
     return ResponseEntity.ok(viewResponse);
@@ -126,9 +136,10 @@ public class DeclaredActivityController {
         "Received request to get declared activity [{}] details for student [{}]",
         declaredActivityId,
         principal.getName());
-    return ResponseEntity.ok(
-        declaredActivityDetailsDTOMapper.toDTO(
-            declaredActivityService.getDeclaredActivityDetails(declaredActivityId)));
+    var details = declaredActivityService.getDeclaredActivityDetails(declaredActivityId);
+    var status = declaredActivityService.getDeclaredActivityStatus(details.declaredActivity());
+
+    return ResponseEntity.ok(declaredActivityDetailsDTOMapper.toDTO(details, status));
   }
 
   @GetMapping("/{declaredActivityId}/associations")
