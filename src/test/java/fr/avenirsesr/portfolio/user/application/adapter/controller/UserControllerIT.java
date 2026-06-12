@@ -152,7 +152,29 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.email")
         .isEqualTo("lucas.tessier@university.com")
         .jsonPath("$.bio")
-        .exists();
+        .exists()
+        .jsonPath("$.hasUnseenNotification")
+        .isEqualTo(false);
+  }
+
+  @Test
+  void shouldGetStaffProfile() {
+    BddLogger.given("the /me/users/STAFF/overview endpoint");
+    BddLogger.when("performing a GET");
+    BddLogger.then("it should return the staff profile");
+
+    webTestClient
+        .get()
+        .uri("/me/users/STAFF/overview")
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.hasUnseenNotification")
+        .isEqualTo(false);
   }
 
   @Test

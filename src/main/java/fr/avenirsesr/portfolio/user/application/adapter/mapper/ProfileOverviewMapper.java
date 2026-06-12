@@ -15,6 +15,7 @@ public interface ProfileOverviewMapper {
         overview.lastName(),
         overview.bio(),
         overview.email(),
+        overview.hasUnseenNotification(),
         new FileDTO(
             overview.profilePhoto().id().orElse(null),
             overview.profilePhoto().name().orElse(null),

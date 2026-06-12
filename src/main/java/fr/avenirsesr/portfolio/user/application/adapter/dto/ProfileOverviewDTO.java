@@ -11,6 +11,7 @@ import java.util.UUID;
       "lastname",
       "bio",
       "email",
+      "hasUnseenNotification",
       "profilePicture",
       "coverPicture"
     })
@@ -20,5 +21,6 @@ public record ProfileOverviewDTO(
     String lastname,
     String bio,
     String email,
+    boolean hasUnseenNotification,
     FileDTO profilePicture,
     FileDTO coverPicture) {}

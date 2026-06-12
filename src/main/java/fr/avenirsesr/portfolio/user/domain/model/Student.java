@@ -20,6 +20,8 @@ public class Student extends AvenirsBaseModel {
 
   private String bio;
 
+  private boolean hasUnseenNotification;
+
   @Getter(AccessLevel.NONE)
   private File coverPicture;
 
@@ -30,6 +32,7 @@ public class Student extends AvenirsBaseModel {
       User user,
       String institutionEmail,
       String bio,
+      boolean hasUnseenNotification,
       File coverPicture,
       File profilePicture,
       Instant createdAt,
@@ -38,24 +41,34 @@ public class Student extends AvenirsBaseModel {
     this.user = user;
     this.institutionEmail = institutionEmail;
     this.bio = bio;
+    this.hasUnseenNotification = hasUnseenNotification;
     this.coverPicture = coverPicture;
     this.profilePicture = profilePicture;
   }
 
   public static Student create(User user, String institutionEmail, String bio) {
-    return new Student(user, institutionEmail, bio, null, null, Instant.now(), Instant.now());
+    return new Student(
+        user, institutionEmail, bio, false, null, null, Instant.now(), Instant.now());
   }
 
   public static Student toDomain(
       User user,
       String institutionEmail,
       String bio,
+      boolean hasUnseenNotification,
       File coverPicture,
       File profilePicture,
       Instant createdAt,
       Instant updatedAt) {
     return new Student(
-        user, institutionEmail, bio, coverPicture, profilePicture, createdAt, updatedAt);
+        user,
+        institutionEmail,
+        bio,
+        hasUnseenNotification,
+        coverPicture,
+        profilePicture,
+        createdAt,
+        updatedAt);
   }
 
   public Optional<File> getCoverPicture() {

@@ -27,6 +27,9 @@ public class StaffEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "institution_email")
   private String institutionEmail;
 
+  @Column(name = "has_unseen_notification", nullable = false)
+  private boolean hasUnseenNotification;
+
   @OneToOne
   @JoinColumn(name = "cover_picture_id")
   private FileEntity coverPicture;
@@ -40,6 +43,7 @@ public class StaffEntity extends AvenirsBaseEntity {
       UserEntity user,
       String institutionEmail,
       String bio,
+      boolean hasUnseenNotification,
       FileEntity coverPicture,
       FileEntity profilePicture,
       Instant createdAt,
@@ -48,6 +52,7 @@ public class StaffEntity extends AvenirsBaseEntity {
     this.user = user;
     this.bio = bio;
     this.institutionEmail = institutionEmail;
+    this.hasUnseenNotification = hasUnseenNotification;
     this.coverPicture = coverPicture;
     this.profilePicture = profilePicture;
     setCreatedAt(createdAt);
@@ -58,6 +63,7 @@ public class StaffEntity extends AvenirsBaseEntity {
       UserEntity user,
       String institutionEmail,
       String bio,
+      boolean hasUnseenNotification,
       FileEntity coverPicture,
       FileEntity profilePicture,
       Instant createdAt,
@@ -67,6 +73,7 @@ public class StaffEntity extends AvenirsBaseEntity {
         user,
         institutionEmail,
         bio,
+        hasUnseenNotification,
         coverPicture,
         profilePicture,
         createdAt,

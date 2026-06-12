@@ -9,5 +9,6 @@ public record UserProfileOverviewData(
     String lastName,
     String email,
     String bio,
+    boolean hasUnseenNotification,
     FileData coverPhoto,
     FileData profilePhoto) {}

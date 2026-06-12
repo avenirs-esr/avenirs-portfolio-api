@@ -30,6 +30,9 @@ public class StudentEntity extends AvenirsBaseEntity {
   @Column(length = BIO_LENGTH)
   private String bio;
 
+  @Column(name = "has_unseen_notification", nullable = false)
+  private boolean hasUnseenNotification;
+
   @ManyToMany
   @JoinTable(
       name = "student_self_knowledge_category",
@@ -50,6 +53,7 @@ public class StudentEntity extends AvenirsBaseEntity {
       UserEntity user,
       String institutionEmail,
       String bio,
+      boolean hasUnseenNotification,
       FileEntity coverPicture,
       FileEntity profilePicture,
       Instant createdAt,
@@ -58,6 +62,7 @@ public class StudentEntity extends AvenirsBaseEntity {
     this.user = user;
     this.bio = bio;
     this.institutionEmail = institutionEmail;
+    this.hasUnseenNotification = hasUnseenNotification;
     this.coverPicture = coverPicture;
     this.profilePicture = profilePicture;
     setCreatedAt(createdAt);
@@ -68,6 +73,7 @@ public class StudentEntity extends AvenirsBaseEntity {
       UserEntity user,
       String institutionEmail,
       String bio,
+      boolean hasUnseenNotification,
       FileEntity coverPicture,
       FileEntity profilePicture,
       Instant createdAt,
@@ -77,6 +83,7 @@ public class StudentEntity extends AvenirsBaseEntity {
         user,
         institutionEmail,
         bio,
+        hasUnseenNotification,
         coverPicture,
         profilePicture,
         createdAt,

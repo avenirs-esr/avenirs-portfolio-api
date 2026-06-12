@@ -12,6 +12,7 @@ public class StudentFixture {
   private User user;
   private File profilePicture;
   private File coverPicture;
+  private boolean hasUnseenNotification;
   private Instant createdAt;
   private Instant updatedAt;
 
@@ -19,6 +20,7 @@ public class StudentFixture {
     this.user = UserFixture.create().toModel();
     this.id = user.getId();
     this.bio = "this is my student bio";
+    this.hasUnseenNotification = false;
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }
@@ -53,8 +55,20 @@ public class StudentFixture {
     return this;
   }
 
+  public StudentFixture withHasUnseenNotification(boolean hasUnseenNotification) {
+    this.hasUnseenNotification = hasUnseenNotification;
+    return this;
+  }
+
   public Student toModel() {
     return Student.toDomain(
-        user, bio, user.getEmail(), coverPicture, profilePicture, createdAt, updatedAt);
+        user,
+        user.getEmail(),
+        bio,
+        hasUnseenNotification,
+        coverPicture,
+        profilePicture,
+        createdAt,
+        updatedAt);
   }
 }

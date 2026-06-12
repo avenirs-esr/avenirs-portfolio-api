@@ -15,7 +15,7 @@ public class FakeStaff {
   public static FakeStaff create(UserEntity user) {
     return new FakeStaff(
         StaffEntity.of(
-            user, user.getEmail(), "fake bio", null, null, Instant.now(), Instant.now()));
+            user, user.getEmail(), "fake bio", false, null, null, Instant.now(), Instant.now()));
   }
 
   public FakeStaff withBio(String bio) {

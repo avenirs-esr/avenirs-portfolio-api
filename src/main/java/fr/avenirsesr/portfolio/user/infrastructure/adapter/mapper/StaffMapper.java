@@ -14,6 +14,7 @@ public class StaffMapper implements Mapper<StaffEntity, Staff> {
         UserMapper.INSTANCE.fromDomain(staff.getUser()),
         staff.getInstitutionEmail(),
         staff.getBio(),
+        staff.isHasUnseenNotification(),
         staff.getCoverPicture().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         staff.getProfilePicture().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         staff.getCreatedAt(),
@@ -26,6 +27,7 @@ public class StaffMapper implements Mapper<StaffEntity, Staff> {
         UserMapper.INSTANCE.toDomain(staffEntity.getUser()),
         staffEntity.getInstitutionEmail(),
         staffEntity.getBio(),
+        staffEntity.isHasUnseenNotification(),
         staffEntity.getCoverPicture() == null
             ? null
             : FileMapper.INSTANCE.toDomain(staffEntity.getCoverPicture()),

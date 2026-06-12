@@ -43,6 +43,7 @@ public class StaffServiceImpl implements StaffService {
         staff.getUser().getLastName(),
         staff.getInstitutionEmail(),
         staff.getBio(),
+        staff.isHasUnseenNotification(),
         FileDataMapper.mapFileData(
             staff.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),
         FileDataMapper.mapFileData(
