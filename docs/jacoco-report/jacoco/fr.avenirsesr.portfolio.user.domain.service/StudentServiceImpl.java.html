@@ -47,45 +47,46 @@ public class StudentServiceImpl implements StudentService {
 <span class="fc" id="L47">        student.getUser().getLastName(),</span>
 <span class="fc" id="L48">        student.getUser().getEmail(),</span>
 <span class="fc" id="L49">        student.getBio(),</span>
-<span class="fc" id="L50">        FileDataMapper.mapFileData(</span>
-<span class="fc" id="L51">            student.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
-<span class="fc" id="L52">        FileDataMapper.mapFileData(</span>
-<span class="fc" id="L53">            student.getProfilePicture().orElse(null),</span>
+<span class="fc" id="L50">        student.isHasUnseenNotification(),</span>
+<span class="fc" id="L51">        FileDataMapper.mapFileData(</span>
+<span class="fc" id="L52">            student.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
+<span class="fc" id="L53">        FileDataMapper.mapFileData(</span>
+<span class="fc" id="L54">            student.getProfilePicture().orElse(null),</span>
             FileStorageConstants.DEFAULT_PROFILE_FILE_URL));
   }
 
   @Override
   public void updateProfile(User user, String bio) {
-<span class="fc" id="L59">    var student =</span>
-<span class="fc" id="L60">        studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);</span>
+<span class="fc" id="L60">    var student =</span>
+<span class="fc" id="L61">        studentRepository.findById(user.getId()).orElseThrow(UserIsNotStudentException::new);</span>
 
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">    if (bio != null) student.setBio(bio);</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">    if (bio != null) student.setBio(bio);</span>
 
-<span class="fc" id="L64">    studentRepository.save(student);</span>
-<span class="fc" id="L65">  }</span>
+<span class="fc" id="L65">    studentRepository.save(student);</span>
+<span class="fc" id="L66">  }</span>
 
   @Override
   public Student createStudent(UUID userId, String institutionEmail, String bio) {
-<span class="fc" id="L69">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L70">    var student = Student.create(user, institutionEmail, bio);</span>
-<span class="fc bfc" id="L71" title="All 2 branches covered.">    if (user.getEmail() == null) {</span>
-<span class="fc" id="L72">      user.setEmail(institutionEmail);</span>
-<span class="fc" id="L73">      userRepository.save(user);</span>
+<span class="fc" id="L70">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L71">    var student = Student.create(user, institutionEmail, bio);</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">    if (user.getEmail() == null) {</span>
+<span class="fc" id="L73">      user.setEmail(institutionEmail);</span>
+<span class="fc" id="L74">      userRepository.save(user);</span>
     }
-<span class="fc" id="L75">    studentRepository.save(student);</span>
-<span class="fc" id="L76">    selfKnowledgeService.initSelfKnowledgeCategoriesMandatory(student);</span>
-<span class="fc" id="L77">    return student;</span>
+<span class="fc" id="L76">    studentRepository.save(student);</span>
+<span class="fc" id="L77">    selfKnowledgeService.initSelfKnowledgeCategoriesMandatory(student);</span>
+<span class="fc" id="L78">    return student;</span>
   }
 
   @Override
   public void addSelfKnowledgeCategories(Student student, List&lt;SelfKnowledgeCategory&gt; categories) {
-<span class="fc" id="L82">    studentRepository.addSelfKnowledgeCategories(student, categories);</span>
-<span class="fc" id="L83">  }</span>
+<span class="fc" id="L83">    studentRepository.addSelfKnowledgeCategories(student, categories);</span>
+<span class="fc" id="L84">  }</span>
 
   @Override
   public void removeSelfKnowledgeCategory(
       Student student, SelfKnowledgeCategory selfKnowledgeCategory) {
-<span class="nc" id="L88">    studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);</span>
-<span class="nc" id="L89">  }</span>
+<span class="nc" id="L89">    studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);</span>
+<span class="nc" id="L90">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

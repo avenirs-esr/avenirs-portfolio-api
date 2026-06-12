@@ -48,9 +48,9 @@ public class UserController {
           @PathVariable
           EUserCategory userCategory) {
 <span class="fc" id="L50">    UserProfileOverviewData overview =</span>
-<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        switch (userCategory) {</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        switch (userCategory) {</span>
 <span class="fc" id="L52">          case STUDENT -&gt; studentService.getStudentProfile();</span>
-<span class="pc" id="L53">          case STAFF -&gt; staffService.getStaffProfile();</span>
+<span class="fc" id="L53">          case STAFF -&gt; staffService.getStaffProfile();</span>
         };
 
 <span class="fc" id="L56">    String baseUrl = extractOrigin(request);</span>
