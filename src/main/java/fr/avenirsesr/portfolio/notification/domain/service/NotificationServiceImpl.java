@@ -26,8 +26,16 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public void notify(BaseNotification notification) {
-    // Todo: check if user has enabled notifications
-    var savedNotification = notificationRepository.save(notification.build());
+    var builtNotification = notification.build();
+
+    if (!builtNotification.getUser().isNotificationEnabled()) {
+      log.debug(
+          "Notifications disabled for user [{}], skipping notification",
+          builtNotification.getUser().getId());
+      return;
+    }
+
+    var savedNotification = notificationRepository.save(builtNotification);
 
     var userId = savedNotification.getUser().getId();
     switch (savedNotification.getUserCategory()) {

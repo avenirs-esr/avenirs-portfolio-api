@@ -25,17 +25,22 @@ public class UserEntity extends AvenirsBaseEntity {
 
   @Email @Column private String email;
 
+  @Column(name = "notification_enabled", nullable = false)
+  private boolean notificationEnabled;
+
   private UserEntity(
       UUID id,
       String firstName,
       String lastName,
       String email,
+      boolean notificationEnabled,
       Instant createdAt,
       Instant updatedAt) {
     this.setId(id);
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
+    this.notificationEnabled = notificationEnabled;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
   }
@@ -45,8 +50,10 @@ public class UserEntity extends AvenirsBaseEntity {
       String firstName,
       String lastName,
       String email,
+      boolean notificationEnabled,
       Instant createdAt,
       Instant updatedAt) {
-    return new UserEntity(id, firstName, lastName, email, createdAt, updatedAt);
+    return new UserEntity(
+        id, firstName, lastName, email, notificationEnabled, createdAt, updatedAt);
   }
 }

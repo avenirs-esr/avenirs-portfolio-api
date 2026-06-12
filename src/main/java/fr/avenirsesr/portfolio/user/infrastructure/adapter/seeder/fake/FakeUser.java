@@ -26,6 +26,7 @@ public class FakeUser {
             userDataGenerator.with("firstName").firstName(),
             userDataGenerator.with("lastName").lastName(),
             userDataGenerator.with("email").email(),
+            false,
             Instant.now(),
             Instant.now()));
   }

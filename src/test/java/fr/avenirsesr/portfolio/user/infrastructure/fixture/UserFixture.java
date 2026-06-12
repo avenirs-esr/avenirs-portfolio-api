@@ -10,6 +10,7 @@ public class UserFixture {
   private String firstName;
   private String lastName;
   private String email;
+  private boolean notificationEnabled;
   private Instant createdAt;
   private Instant updatedAt;
 
@@ -18,6 +19,7 @@ public class UserFixture {
     this.firstName = "firstName";
     this.lastName = "lastName";
     this.email = "user@email.com";
+    this.notificationEnabled = false;
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }
@@ -56,7 +58,12 @@ public class UserFixture {
     return this;
   }
 
+  public UserFixture withNotificationEnabled(boolean notificationEnabled) {
+    this.notificationEnabled = notificationEnabled;
+    return this;
+  }
+
   public User toModel() {
-    return User.toDomain(id, firstName, lastName, email, createdAt, updatedAt);
+    return User.toDomain(id, firstName, lastName, email, notificationEnabled, createdAt, updatedAt);
   }
 }

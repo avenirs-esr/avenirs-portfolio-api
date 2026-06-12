@@ -168,6 +168,7 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             "firstname",
             "lastname",
             "test@gmail.com",
+            false,
             Instant.now(),
             Instant.now());
     entityManager.persist(u);

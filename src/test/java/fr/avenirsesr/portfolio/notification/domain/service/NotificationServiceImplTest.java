@@ -20,6 +20,7 @@ import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
@@ -70,7 +71,7 @@ class NotificationServiceImplTest {
     @Test
     void should_save_the_notification_built_from_the_base_notification() {
       BddLogger.given("A BaseNotification that builds a specific Notification");
-      User user = UserFixture.create().toModel();
+      User user = UserFixture.create().withNotificationEnabled(true).toModel();
       Notification expectedNotification = buildNotification(user, EUserCategory.STUDENT);
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(expectedNotification);
@@ -88,7 +89,7 @@ class NotificationServiceImplTest {
     @Test
     void should_call_build_exactly_once() {
       BddLogger.given("A BaseNotification mock");
-      User user = UserFixture.create().toModel();
+      User user = UserFixture.create().withNotificationEnabled(true).toModel();
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(buildNotification(user, EUserCategory.STUDENT));
       when(notificationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -167,8 +168,8 @@ class NotificationServiceImplTest {
 
     @Test
     void should_set_hasUnseenNotification_true_on_student_when_userCategory_is_STUDENT() {
-      BddLogger.given("A notification targeting a STUDENT");
-      User user = UserFixture.create().toModel();
+      BddLogger.given("A notification targeting a STUDENT whose user has notifications enabled");
+      User user = UserFixture.create().withNotificationEnabled(true).toModel();
       Student student =
           StudentFixture.create().withUser(user).withHasUnseenNotification(false).toModel();
       Notification notification = buildNotification(user, EUserCategory.STUDENT);
@@ -188,10 +189,12 @@ class NotificationServiceImplTest {
 
     @Test
     void should_not_update_staff_when_userCategory_is_STUDENT() {
-      BddLogger.given("A notification targeting a STUDENT");
-      User user = UserFixture.create().toModel();
+      BddLogger.given("A notification targeting a STUDENT whose user has notifications enabled");
+      User user = UserFixture.create().withNotificationEnabled(true).toModel();
+      Student student = StudentFixture.create().withUser(user).toModel();
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(buildNotification(user, EUserCategory.STUDENT));
+      when(studentRepository.findById(user.getId())).thenReturn(Optional.of(student));
       when(notificationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
       BddLogger.when("notify is called");
@@ -203,11 +206,9 @@ class NotificationServiceImplTest {
 
     @Test
     void should_set_hasUnseenNotification_true_on_staff_when_userCategory_is_STAFF() {
-      BddLogger.given("A notification targeting a STAFF");
-      User user = UserFixture.create().toModel();
-      Staff staff =
-          Staff.toDomain(
-              user, user.getEmail(), "bio", false, null, null, Instant.now(), Instant.now());
+      BddLogger.given("A notification targeting a STAFF whose user has notifications enabled");
+      User user = UserFixture.create().withNotificationEnabled(true).toModel();
+      Staff staff = StaffFixture.create().withUser(user).withHasUnseenNotification(false).toModel();
       Notification notification = buildNotification(user, EUserCategory.STAFF);
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(notification);
@@ -225,10 +226,12 @@ class NotificationServiceImplTest {
 
     @Test
     void should_not_update_student_when_userCategory_is_STAFF() {
-      BddLogger.given("A notification targeting a STAFF");
-      User user = UserFixture.create().toModel();
+      BddLogger.given("A notification targeting a STAFF whose user has notifications enabled");
+      User user = UserFixture.create().withNotificationEnabled(true).toModel();
+      Staff staff = StaffFixture.create().withUser(user).toModel();
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(buildNotification(user, EUserCategory.STAFF));
+      when(staffRepository.findById(user.getId())).thenReturn(Optional.of(staff));
       when(notificationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
       BddLogger.when("notify is called");
@@ -240,13 +243,11 @@ class NotificationServiceImplTest {
 
     @Test
     void should_set_hasUnseenNotification_true_on_both_when_userCategory_is_null() {
-      BddLogger.given("A notification with no specific user category (null)");
-      User user = UserFixture.create().toModel();
+      BddLogger.given("A notification with null category whose user has notifications enabled");
+      User user = UserFixture.create().withNotificationEnabled(true).toModel();
       Student student =
           StudentFixture.create().withUser(user).withHasUnseenNotification(false).toModel();
-      Staff staff =
-          Staff.toDomain(
-              user, user.getEmail(), "bio", false, null, null, Instant.now(), Instant.now());
+      Staff staff = StaffFixture.create().withUser(user).withHasUnseenNotification(false).toModel();
       Notification notification = buildNotification(user, null);
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(notification);
@@ -265,6 +266,55 @@ class NotificationServiceImplTest {
       ArgumentCaptor<Staff> staffCaptor = ArgumentCaptor.forClass(Staff.class);
       verify(staffRepository).save(staffCaptor.capture());
       assertTrue(staffCaptor.getValue().isHasUnseenNotification());
+    }
+  }
+
+  @Nested
+  class NotificationEnabledCheck {
+
+    @Test
+    void should_not_save_notification_when_user_has_notifications_disabled() {
+      BddLogger.given("A notification whose user has notifications disabled");
+      User user = UserFixture.create().withNotificationEnabled(false).toModel();
+      BaseNotification baseNotification = mock(BaseNotification.class);
+      when(baseNotification.build()).thenReturn(buildNotification(user, EUserCategory.STUDENT));
+
+      BddLogger.when("notify is called");
+      service.notify(baseNotification);
+
+      BddLogger.then("the notification is not saved and no unseen flag is updated");
+      verify(notificationRepository, never()).save(any());
+      verify(studentRepository, never()).findById(any());
+      verify(staffRepository, never()).findById(any());
+    }
+
+    @Test
+    void should_not_save_notification_for_staff_when_user_has_notifications_disabled() {
+      BddLogger.given("A STAFF notification whose user has notifications disabled");
+      User user = UserFixture.create().withNotificationEnabled(false).toModel();
+      BaseNotification baseNotification = mock(BaseNotification.class);
+      when(baseNotification.build()).thenReturn(buildNotification(user, EUserCategory.STAFF));
+
+      BddLogger.when("notify is called");
+      service.notify(baseNotification);
+
+      BddLogger.then("the notification is not saved");
+      verify(notificationRepository, never()).save(any());
+      verify(staffRepository, never()).findById(any());
+    }
+
+    @Test
+    void should_not_save_notification_for_null_category_when_user_has_notifications_disabled() {
+      BddLogger.given("A null-category notification whose user has notifications disabled");
+      User user = UserFixture.create().withNotificationEnabled(false).toModel();
+      BaseNotification baseNotification = mock(BaseNotification.class);
+      when(baseNotification.build()).thenReturn(buildNotification(user, null));
+
+      BddLogger.when("notify is called");
+      service.notify(baseNotification);
+
+      BddLogger.then("the notification is not saved");
+      verify(notificationRepository, never()).save(any());
     }
   }
 }

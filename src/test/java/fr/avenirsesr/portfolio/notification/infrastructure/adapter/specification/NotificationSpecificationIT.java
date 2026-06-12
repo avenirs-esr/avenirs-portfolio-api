@@ -147,7 +147,7 @@ class NotificationSpecificationIT extends ContainerConfigurationTest {
   private UserEntity persistUser(String email) {
     UserEntity u =
         UserEntity.of(
-            UUID.randomUUID(), "Firstname", "Lastname", email, Instant.now(), Instant.now());
+            UUID.randomUUID(), "Firstname", "Lastname", email, false, Instant.now(), Instant.now());
     entityManager.persist(u);
     return u;
   }
