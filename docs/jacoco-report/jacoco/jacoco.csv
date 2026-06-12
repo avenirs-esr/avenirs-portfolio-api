@@ -107,7 +107,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.service,LoggedInUser
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.infrastructure.adapter.specification,AssociationSpecification,15,135,3,7,3,24,6,13,3,11
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository,TraceDatabaseRepository,50,140,11,7,13,34,10,7,1,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.infrastructure.adapter.repository,NotificationDatabaseRepository,0,32,0,0,0,8,0,2,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.domain.service,NotificationServiceImpl,5,136,1,5,1,36,1,11,0,8
+avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.domain.service,NotificationServiceImpl,5,149,1,7,1,41,1,12,0,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.specification,DeclaredExperienceSpecification,6,76,2,4,2,15,3,5,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio,AvenirsPortfolioApiApplication,5,3,0,0,2,1,1,1,1,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.domain.utils,AssociationUtils,0,19,0,2,0,4,0,3,0,2
