@@ -40,22 +40,32 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
-  public void deleteAllByIds(List&lt;UUID&gt; ids) {
-<span class="fc" id="L44">    var activities = associationRepository.findAllById(ids);</span>
-
-<span class="fc bfc" id="L46" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(activities.stream().map(Association::getId).toList()).containsAll(ids)) {</span>
-<span class="fc" id="L47">      throw new AssociationDoesNotExistException();</span>
+  public List&lt;Association&gt; getAllOf(
+      List&lt;UUID&gt; ids, Class&lt;?&gt; clazz, List&lt;EAssociationType&gt; associationTypes) {
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">    if (ids.isEmpty()) {</span>
+<span class="nc" id="L46">      return List.of();</span>
     }
 
-<span class="fc" id="L50">    associationRepository.removeAllFromDatabase(activities);</span>
-<span class="fc" id="L51">  }</span>
+<span class="fc" id="L49">    return associationRepository.findAllOf(ids, clazz, associationTypes);</span>
+  }
+
+  @Override
+  public void deleteAllByIds(List&lt;UUID&gt; ids) {
+<span class="fc" id="L54">    var activities = associationRepository.findAllById(ids);</span>
+
+<span class="fc bfc" id="L56" title="All 2 branches covered.">    if (!new HashSet&lt;&gt;(activities.stream().map(Association::getId).toList()).containsAll(ids)) {</span>
+<span class="fc" id="L57">      throw new AssociationDoesNotExistException();</span>
+    }
+
+<span class="fc" id="L60">    associationRepository.removeAllFromDatabase(activities);</span>
+<span class="fc" id="L61">  }</span>
 
   @Override
   public void deleteAllOf(List&lt;UUID&gt; ids, Class&lt;?&gt; clazz) {
-<span class="fc" id="L55">    var associationTypes = EAssociationType.getAllBy(clazz);</span>
-<span class="fc" id="L56">    var associations =</span>
-<span class="fc" id="L57">        ids.stream().flatMap(id -&gt; getAllOf(id, clazz, associationTypes).stream()).toList();</span>
-<span class="fc" id="L58">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
-<span class="fc" id="L59">  }</span>
+<span class="fc" id="L65">    var associationTypes = EAssociationType.getAllBy(clazz);</span>
+<span class="fc" id="L66">    var associations =</span>
+<span class="fc" id="L67">        ids.stream().flatMap(id -&gt; getAllOf(id, clazz, associationTypes).stream()).toList();</span>
+<span class="fc" id="L68">    deleteAllByIds(associations.stream().map(Association::getId).toList());</span>
+<span class="fc" id="L69">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
