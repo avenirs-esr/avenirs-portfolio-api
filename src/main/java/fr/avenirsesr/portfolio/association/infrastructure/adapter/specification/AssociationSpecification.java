@@ -57,4 +57,12 @@ public class AssociationSpecification {
       return criteriaBuilder.equal(root.get("id2"), id2);
     };
   }
+
+  public static Specification<AssociationEntity> key1In(List<UUID> ids) {
+    return (root, query, criteriaBuilder) -> root.get("id1").in(ids);
+  }
+
+  public static Specification<AssociationEntity> key2In(List<UUID> ids) {
+    return (root, query, criteriaBuilder) -> root.get("id2").in(ids);
+  }
 }

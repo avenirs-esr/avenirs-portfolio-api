@@ -45,6 +45,36 @@ public class AssociationDatabaseRepository
 
   @Override
   public List<Association> findAllOf(
+      List<UUID> ids, Class<?> clazz, List<EAssociationType> associationTypes) {
+    if (ids.isEmpty()) {
+      return List.of();
+    }
+
+    Specification<AssociationEntity> specification = null;
+
+    for (EAssociationType type : associationTypes) {
+      Specification<AssociationEntity> typeSpec =
+          AssociationSpecification.withTypeIn(List.of(type));
+
+      if (type.getKey1().equals(clazz)) {
+        typeSpec = typeSpec.and(AssociationSpecification.key1In(ids));
+      } else if (type.getKey2().equals(clazz)) {
+        typeSpec = typeSpec.and(AssociationSpecification.key2In(ids));
+      } else {
+        throw new IllegalArgumentException(
+            "Class " + clazz + " not compatible with association type " + type);
+      }
+
+      specification = specification == null ? typeSpec : specification.or(typeSpec);
+    }
+
+    return jpaRepository.findAll(specification, DEFAULT_SORT).stream()
+        .map(AssociationMapper.INSTANCE::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<Association> findAllOf(
       UUID id, Class<?> clazz, List<EAssociationType> associationTypes) {
     Specification<AssociationEntity> specification = null;
 

@@ -243,6 +243,8 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exists()
         .jsonPath("$.data[0].isAssociated")
         .exists()
+        .jsonPath("$.data[0].isDeletable")
+        .exists()
         .jsonPath("$.data[0].createdAt")
         .exists()
         .jsonPath("$.data[0].updatedAt")
@@ -327,15 +329,17 @@ class TraceControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldDeleteTrace() {
+  void shouldDeleteTrace() throws Exception {
     BddLogger.given("an existing deletable trace");
     UUID existingTraceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
 
     BddLogger.when("deleting trace");
 
     webTestClient
-        .delete()
-        .uri(BASE_PATH_WITH_ID, existingTraceId)
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(List.of(existingTraceId)))
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
@@ -347,15 +351,17 @@ class TraceControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturn404IfTraceNotFoundWhenDeleting() {
+  void shouldReturn404IfTraceNotFoundWhenDeleting() throws Exception {
     BddLogger.given("an unknown trace id");
     UUID traceId = UUID.randomUUID();
 
     BddLogger.when("deleting trace");
 
     webTestClient
-        .delete()
-        .uri(BASE_PATH_WITH_ID, traceId)
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(List.of(traceId)))
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
