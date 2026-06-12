@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.application.a
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import java.time.Instant;
 import java.util.Optional;
@@ -25,6 +26,11 @@ public interface DeclaredActivityDetailsDTOMapper {
   @Mapping(source = "data.declaredActivity.updatedAt", target = "updatedAt")
   DeclaredActivityDetailsDTO toDTO(
       DeclaredActivityDetailsData data, EDeclaredActivityStatus status);
+
+  @Mapping(source = "activity", target = "activity")
+  @Mapping(target = "status", ignore = true)
+  @Mapping(target = "feedbacks", ignore = true)
+  DeclaredActivityDetailsDTO toDTO(DeclaredActivity declaredActivity);
 
   default Instant unwrap(Optional<Instant> value) {
     return value == null ? null : value.orElse(null);

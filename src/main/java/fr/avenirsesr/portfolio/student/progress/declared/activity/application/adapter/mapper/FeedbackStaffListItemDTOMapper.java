@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(
     componentModel = "spring",
-    uses = {DeclaredActivityViewDTOMapper.class})
+    uses = {DeclaredActivityDetailsDTOMapper.class})
 public interface FeedbackStaffListItemDTOMapper {
 
   @Mapping(source = "declaredActivity.student.user", target = "student")
