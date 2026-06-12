@@ -129,61 +129,70 @@ public class FeedbackDatabaseRepository
 <span class="fc" id="L129">            page.getTotalElements()));</span>
   }
 
+  @Override
+  public List&lt;UUID&gt; findDeclaredActivityIdsHavingActiveFeedbacks(List&lt;UUID&gt; declaredActivityIds) {
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">    if (declaredActivityIds.isEmpty()) {</span>
+<span class="nc" id="L135">      return List.of();</span>
+    }
+
+<span class="fc" id="L138">    return jpaRepository.findDeclaredActivityIdsWithActiveFeedbacks(declaredActivityIds);</span>
+  }
+
   // ── private helpers ─────────────────────────────────────────────────
 
   private Feedback toDomainWithDependencies(FeedbackEntity entity) {
-<span class="fc" id="L135">    AssociationsJson associations = entity.getAssociations();</span>
+<span class="fc" id="L144">    AssociationsJson associations = entity.getAssociations();</span>
 
-<span class="fc" id="L137">    Map&lt;UUID, User&gt; users = resolveUsers(associations);</span>
-<span class="fc" id="L138">    Map&lt;UUID, File&gt; files = resolveFiles(associations);</span>
-<span class="fc" id="L139">    Map&lt;UUID, Student&gt; students = resolveStudents(associations);</span>
-<span class="fc" id="L140">    Map&lt;UUID, DeclaredSkill&gt; skills = resolveSkills(associations);</span>
+<span class="fc" id="L146">    Map&lt;UUID, User&gt; users = resolveUsers(associations);</span>
+<span class="fc" id="L147">    Map&lt;UUID, File&gt; files = resolveFiles(associations);</span>
+<span class="fc" id="L148">    Map&lt;UUID, Student&gt; students = resolveStudents(associations);</span>
+<span class="fc" id="L149">    Map&lt;UUID, DeclaredSkill&gt; skills = resolveSkills(associations);</span>
 
-<span class="fc" id="L142">    return FeedbackMapper.INSTANCE.toDomain(entity, users, files, students, skills);</span>
+<span class="fc" id="L151">    return FeedbackMapper.INSTANCE.toDomain(entity, users, files, students, skills);</span>
   }
 
   private Map&lt;UUID, User&gt; resolveUsers(AssociationsJson associations) {
-<span class="fc" id="L146">    Set&lt;UUID&gt; ids =</span>
-<span class="fc" id="L147">        associations.traces().stream()</span>
-<span class="fc" id="L148">            .map(AssociationsJson.TraceSnapshot::userId)</span>
-<span class="fc" id="L149">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L155">    Set&lt;UUID&gt; ids =</span>
+<span class="fc" id="L156">        associations.traces().stream()</span>
+<span class="fc" id="L157">            .map(AssociationsJson.TraceSnapshot::userId)</span>
+<span class="fc" id="L158">            .collect(Collectors.toSet());</span>
 
-<span class="fc" id="L151">    return userJpaRepository.findAllById(ids).stream()</span>
-<span class="fc" id="L152">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, UserMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L160">    return userJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L161">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, UserMapper.INSTANCE::toDomain));</span>
   }
 
   private Map&lt;UUID, File&gt; resolveFiles(AssociationsJson associations) {
-<span class="fc" id="L156">    Set&lt;UUID&gt; ids =</span>
-<span class="fc" id="L157">        associations.traces().stream()</span>
-<span class="fc" id="L158">            .map(AssociationsJson.TraceSnapshot::attachmentId)</span>
-<span class="fc" id="L159">            .filter(Objects::nonNull)</span>
-<span class="fc" id="L160">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L165">    Set&lt;UUID&gt; ids =</span>
+<span class="fc" id="L166">        associations.traces().stream()</span>
+<span class="fc" id="L167">            .map(AssociationsJson.TraceSnapshot::attachmentId)</span>
+<span class="fc" id="L168">            .filter(Objects::nonNull)</span>
+<span class="fc" id="L169">            .collect(Collectors.toSet());</span>
 
-<span class="fc bfc" id="L162" title="All 2 branches covered.">    if (ids.isEmpty()) return Map.of();</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">    if (ids.isEmpty()) return Map.of();</span>
 
-<span class="fc" id="L164">    return fileJpaRepository.findAllById(ids).stream()</span>
-<span class="fc" id="L165">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, FileMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L173">    return fileJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L174">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, FileMapper.INSTANCE::toDomain));</span>
   }
 
   private Map&lt;UUID, Student&gt; resolveStudents(AssociationsJson associations) {
-<span class="fc" id="L169">    Set&lt;UUID&gt; ids =</span>
-<span class="fc" id="L170">        associations.declaredSkillProgresses().stream()</span>
-<span class="fc" id="L171">            .map(AssociationsJson.DeclaredSkillProgressSnapshot::studentId)</span>
-<span class="fc" id="L172">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L178">    Set&lt;UUID&gt; ids =</span>
+<span class="fc" id="L179">        associations.declaredSkillProgresses().stream()</span>
+<span class="fc" id="L180">            .map(AssociationsJson.DeclaredSkillProgressSnapshot::studentId)</span>
+<span class="fc" id="L181">            .collect(Collectors.toSet());</span>
 
-<span class="fc" id="L174">    return studentJpaRepository.findAllById(ids).stream()</span>
-<span class="fc" id="L175">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, StudentMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L183">    return studentJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L184">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, StudentMapper.INSTANCE::toDomain));</span>
   }
 
   private Map&lt;UUID, DeclaredSkill&gt; resolveSkills(AssociationsJson associations) {
-<span class="fc" id="L179">    Set&lt;UUID&gt; ids =</span>
-<span class="fc" id="L180">        associations.declaredSkillProgresses().stream()</span>
-<span class="fc" id="L181">            .map(AssociationsJson.DeclaredSkillProgressSnapshot::skillId)</span>
-<span class="fc" id="L182">            .collect(Collectors.toSet());</span>
+<span class="fc" id="L188">    Set&lt;UUID&gt; ids =</span>
+<span class="fc" id="L189">        associations.declaredSkillProgresses().stream()</span>
+<span class="fc" id="L190">            .map(AssociationsJson.DeclaredSkillProgressSnapshot::skillId)</span>
+<span class="fc" id="L191">            .collect(Collectors.toSet());</span>
 
-<span class="fc" id="L184">    return declaredSkillJpaRepository.findAllById(ids).stream()</span>
-<span class="fc" id="L185">        .collect(</span>
-<span class="fc" id="L186">            Collectors.toMap(AvenirsBaseEntity::getId, DeclaredSkillMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L193">    return declaredSkillJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L194">        .collect(</span>
+<span class="fc" id="L195">            Collectors.toMap(AvenirsBaseEntity::getId, DeclaredSkillMapper.INSTANCE::toDomain));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
