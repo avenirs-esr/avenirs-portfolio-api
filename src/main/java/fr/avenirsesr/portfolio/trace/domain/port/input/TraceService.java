@@ -24,7 +24,7 @@ public interface TraceService {
   PagedResult<TraceViewData> getTracesView(
       String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria);
 
-  void deleteById(UUID id);
+  void deleteAllByIds(List<UUID> tracesIds);
 
   TracesSummaryData getTracesSummary();
 

@@ -61,10 +61,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -1055,7 +1052,9 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
-    when(associationService.getAllOf(any(), any(), any())).thenReturn(List.of());
+    when(associationService.getAllOf(
+            any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
+        .thenReturn(List.of());
 
     when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
     when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
@@ -1085,7 +1084,9 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
-    when(associationService.getAllOf(any(), any(), any())).thenReturn(List.of(traceAssociation));
+    when(associationService.getAllOf(
+            any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
+        .thenReturn(List.of(traceAssociation));
 
     when(traceAssociation.getAssociationType())
         .thenReturn(EAssociationType.DECLARED_ACTIVITY_TRACE);
@@ -1121,7 +1122,9 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity.getStudent()).thenReturn(student);
     when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
-    when(associationService.getAllOf(any(), any(), any())).thenReturn(List.of(skillAssociation));
+    when(associationService.getAllOf(
+            any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
+        .thenReturn(List.of(skillAssociation));
 
     when(skillAssociation.getAssociationType())
         .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
@@ -1207,7 +1210,16 @@ class DeclaredActivityServiceImplTest {
     when(skill1.getStudent()).thenReturn(student);
     when(skill2.getStudent()).thenReturn(student);
 
-    when(associationService.getAllOf(any(), any(), any())).thenReturn(List.of());
+    when(declaredActivity.getId()).thenReturn(declaredActivityId);
+
+    when(associationService.getAllOf(
+            eq(declaredActivityId),
+            eq(DeclaredActivity.class),
+            eq(
+                List.of(
+                    EAssociationType.DECLARED_ACTIVITY_TRACE,
+                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))))
+        .thenReturn(List.of());
 
     BddLogger.when("associateActivityWithDeclaredSkills is called");
     service.associateActivityWithDeclaredSkills(declaredActivityId, List.of(skillId1, skillId2));
@@ -1493,7 +1505,9 @@ class DeclaredActivityServiceImplTest {
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.of(declaredActivity));
-    when(associationService.getAllOf(any(), any(), any())).thenReturn(List.of());
+    when(associationService.getAllOf(
+            any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
+        .thenReturn(List.of());
     when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
     when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
         .thenReturn(List.of());
@@ -1542,7 +1556,8 @@ class DeclaredActivityServiceImplTest {
         .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
     when(skillAssociation.getId2()).thenReturn(skillId);
 
-    when(associationService.getAllOf(any(), any(), any()))
+    when(associationService.getAllOf(
+            any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
         .thenReturn(List.of(traceAssociation, skillAssociation));
     when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
     when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
@@ -1711,7 +1726,8 @@ class DeclaredActivityServiceImplTest {
     when(skillAssociation.getAssociationType())
         .thenReturn(EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
     when(skillAssociation.getId2()).thenReturn(skillId);
-    when(associationService.getAllOf(any(), any(), any()))
+    when(associationService.getAllOf(
+            any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
         .thenReturn(List.of(traceAssociation, skillAssociation));
     when(traceService.findAllTracesById(List.of(traceId))).thenReturn(List.of(trace));
     when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of(skillId)))
@@ -1761,7 +1777,9 @@ class DeclaredActivityServiceImplTest {
         .thenReturn(Optional.of(declaredActivity));
     when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
         .thenReturn(List.of(submittedFeedback));
-    when(associationService.getAllOf(any(), any(), any())).thenReturn(List.of());
+    when(associationService.getAllOf(
+            any(UUID.class), any(Class.class), ArgumentMatchers.<List<EAssociationType>>any()))
+        .thenReturn(List.of());
     when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
     when(declaredSkillProgressService.findAllDeclaredSkillProgressesByIds(List.of()))
         .thenReturn(List.of());

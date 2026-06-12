@@ -24,6 +24,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.De
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data.DeclaredExperienceAssociationData;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
@@ -47,6 +48,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -89,22 +91,48 @@ public class TraceServiceImpl implements TraceService {
       String keyword, TraceFilter filter, DateFilter dateFilter, PageCriteria pageCriteria) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
     var config = traceConfigurationClient.getTraceConfiguration();
+
     PagedResult<Trace> pagedResult =
         traceRepository.findAll(loggedInUser, keyword, filter, dateFilter, pageCriteria);
-    Map<Trace, Boolean> traceAssociated = traceRepository.isAssociated(pagedResult.content());
+
+    List<Trace> traces = pagedResult.content();
+
+    Map<Trace, Boolean> traceAssociated = traceRepository.isAssociated(traces);
+
+    Map<UUID, List<UUID>> associatedDeclaredActivityIdsByTraceId =
+        getAssociatedDeclaredActivityIdsByTraceId(traces.stream().map(Trace::getId).toList());
+
+    Set<UUID> lockedDeclaredActivityIds =
+        getLockedDeclaredActivityIds(
+            associatedDeclaredActivityIdsByTraceId.values().stream()
+                .flatMap(Collection::stream)
+                .distinct()
+                .toList());
+
     return new PagedResult<>(
-        pagedResult.content().stream()
+        traces.stream()
             .map(
-                trace ->
-                    new TraceViewData(
-                        trace.getId(),
-                        trace.getTitle(),
-                        traceAssociated.get(trace),
-                        trace.getCreatedAt(),
-                        trace.getUpdatedAt(),
-                        traceAssociated.get(trace)
-                            ? Optional.empty()
-                            : Optional.of(computeDeletionDateForUnassociatedTrace(trace, config))))
+                trace -> {
+                  boolean isAssociated = traceAssociated.get(trace);
+
+                  boolean isDeletable =
+                      !isAssociated
+                          || associatedDeclaredActivityIdsByTraceId
+                              .getOrDefault(trace.getId(), List.of())
+                              .stream()
+                              .noneMatch(lockedDeclaredActivityIds::contains);
+
+                  return new TraceViewData(
+                      trace.getId(),
+                      trace.getTitle(),
+                      isAssociated,
+                      isDeletable,
+                      trace.getCreatedAt(),
+                      trace.getUpdatedAt(),
+                      isAssociated
+                          ? Optional.empty()
+                          : Optional.of(computeDeletionDateForUnassociatedTrace(trace, config)));
+                })
             .toList(),
         pagedResult.pageInfo());
   }
@@ -119,19 +147,36 @@ public class TraceServiceImpl implements TraceService {
   }
 
   @Override
-  public void deleteById(UUID id) {
+  public void deleteAllByIds(List<UUID> traceIds) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
-    Trace trace = traceRepository.findById(id).orElseThrow(TraceNotFoundException::new);
-    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
 
-    declaredActivityService.checkDeclaredActivitiesUnlocked(
-        getAssociatedDeclaredActivityIds(trace.getId()));
+    var traces = traceRepository.findAllById(traceIds);
 
-    trace.setDeletedAt(Instant.now());
+    if (traces.size() != traceIds.stream().distinct().count()) {
+      throw new TraceNotFoundException();
+    }
 
-    associationService.deleteAllOf(List.of(trace.getId()), Trace.class);
-    traceRepository.save(trace);
-    log.info("Deleted trace {}", trace);
+    traces.forEach(trace -> checkIfUserIsAuthorizedOnTrace(loggedInUser, trace));
+
+    var declaredActivityIds =
+        getAssociatedDeclaredActivityIdsByTraceId(traces.stream().map(Trace::getId).toList())
+            .values()
+            .stream()
+            .flatMap(Collection::stream)
+            .distinct()
+            .toList();
+
+    declaredActivityService.checkDeclaredActivitiesUnlocked(declaredActivityIds);
+
+    var now = Instant.now();
+
+    traces.forEach(trace -> trace.setDeletedAt(now));
+
+    associationService.deleteAllOf(traces.stream().map(Trace::getId).toList(), Trace.class);
+
+    traceRepository.saveAll(traces);
+
+    log.info("Deleted traces {}", traceIds);
   }
 
   @Override
@@ -568,18 +613,51 @@ public class TraceServiceImpl implements TraceService {
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
   }
 
-  private boolean isTraceDeletable(Trace trace, boolean isAssociated) {
-    return !isAssociated
-        || declaredActivityService.areDeclaredActivitiesUnlocked(
-            getAssociatedDeclaredActivityIds(trace.getId()));
+  private Map<UUID, List<UUID>> getAssociatedDeclaredActivityIdsByTraceId(List<UUID> traceIds) {
+    if (traceIds.isEmpty()) {
+      return Map.of();
+    }
+
+    return associationService
+        .getAllOf(traceIds, Trace.class, List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))
+        .stream()
+        .collect(
+            Collectors.groupingBy(
+                Association::getId2, Collectors.mapping(Association::getId1, Collectors.toList())));
+  }
+
+  private Set<UUID> getLockedDeclaredActivityIds(List<UUID> declaredActivityIds) {
+    if (declaredActivityIds.isEmpty()) {
+      return Set.of();
+    }
+
+    List<DeclaredActivity> declaredActivities =
+        declaredActivityService.findAllDeclaredActivitiesByIds(declaredActivityIds);
+
+    return declaredActivityService.getDeclaredActivityStatus(declaredActivities).entrySet().stream()
+        .filter(
+            entry ->
+                entry.getValue() == EDeclaredActivityStatus.SUBMITTED
+                    || entry.getValue() == EDeclaredActivityStatus.COMPLETED)
+        .map(entry -> entry.getKey().getId())
+        .collect(Collectors.toSet());
   }
 
   private List<UUID> getAssociatedDeclaredActivityIds(UUID traceId) {
-    return associationService
-        .getAllOf(traceId, Trace.class, List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))
+    return getAssociatedDeclaredActivityIdsByTraceId(List.of(traceId))
+        .getOrDefault(traceId, List.of())
         .stream()
-        .map(Association::getId1)
         .distinct()
         .toList();
+  }
+
+  private boolean isTraceDeletable(Trace trace, boolean isAssociated) {
+    if (!isAssociated) {
+      return true;
+    }
+
+    var declaredActivityIds = getAssociatedDeclaredActivityIds(trace.getId());
+
+    return getLockedDeclaredActivityIds(declaredActivityIds).isEmpty();
   }
 }

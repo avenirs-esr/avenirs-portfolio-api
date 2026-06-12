@@ -40,6 +40,16 @@ public class AssociationServiceImpl implements AssociationService {
   }
 
   @Override
+  public List<Association> getAllOf(
+      List<UUID> ids, Class<?> clazz, List<EAssociationType> associationTypes) {
+    if (ids.isEmpty()) {
+      return List.of();
+    }
+
+    return associationRepository.findAllOf(ids, clazz, associationTypes);
+  }
+
+  @Override
   public void deleteAllByIds(List<UUID> ids) {
     var activities = associationRepository.findAllById(ids);
 

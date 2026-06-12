@@ -20,31 +20,37 @@ class TraceViewMapperTest {
   @Test
   void shouldMapTraceViewDataToDTO() {
     BddLogger.given("a trace view data with an optional deletion date");
+
     UUID id = UUID.randomUUID();
     LocalDate deletionDate = LocalDate.now().plusDays(30);
+
     TraceViewData data =
         new TraceViewData(
-            id, "My Trace", true, Instant.now(), Instant.now(), Optional.of(deletionDate));
+            id, "My Trace", true, false, Instant.now(), Instant.now(), Optional.of(deletionDate));
 
     BddLogger.when("mapping to TraceViewDTO");
     TraceViewDTO dto = mapper.toDTO(data);
 
     BddLogger.then("it should map all fields and unwrap Optional deletion date");
+
     assertNotNull(dto);
     assertEquals(id, dto.id());
     assertEquals("My Trace", dto.title());
     assertTrue(dto.isAssociated());
+    assertFalse(dto.isDeletable());
     assertEquals(deletionDate, dto.willBeDeletedAt());
   }
 
   @Test
   void shouldMapEmptyOptionalDeletionDateToNull() {
     BddLogger.given("a trace view data without a deletion date");
+
     TraceViewData data =
         new TraceViewData(
             UUID.randomUUID(),
             "Other Trace",
             false,
+            true,
             Instant.now(),
             Instant.now(),
             Optional.empty());
@@ -53,21 +59,32 @@ class TraceViewMapperTest {
     TraceViewDTO dto = mapper.toDTO(data);
 
     BddLogger.then("it should return null for willBeDeletedAt");
+
     assertNotNull(dto);
+    assertFalse(dto.isAssociated());
+    assertTrue(dto.isDeletable());
     assertNull(dto.willBeDeletedAt());
   }
 
   @Test
   void shouldMapListOfTraceViewDataToDTOs() {
     BddLogger.given("a list of trace view data");
+
     List<TraceViewData> dataList =
         List.of(
             new TraceViewData(
-                UUID.randomUUID(), "Trace A", true, Instant.now(), Instant.now(), Optional.empty()),
+                UUID.randomUUID(),
+                "Trace A",
+                true,
+                false,
+                Instant.now(),
+                Instant.now(),
+                Optional.empty()),
             new TraceViewData(
                 UUID.randomUUID(),
                 "Trace B",
                 false,
+                true,
                 Instant.now(),
                 Instant.now(),
                 Optional.empty()));
@@ -75,8 +92,11 @@ class TraceViewMapperTest {
     BddLogger.when("mapping list to DTOs");
     List<TraceViewDTO> dtos = mapper.toDTOs(dataList);
 
-    BddLogger.then("it should return a list of the same size");
+    BddLogger.then("it should return a list of the same size and map isDeletable");
+
     assertNotNull(dtos);
     assertEquals(2, dtos.size());
+    assertFalse(dtos.get(0).isDeletable());
+    assertTrue(dtos.get(1).isDeletable());
   }
 }

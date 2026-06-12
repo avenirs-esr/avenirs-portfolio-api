@@ -471,9 +471,15 @@ public class DeclaredSkillProgressServiceImplTest {
                 List.of(activityId1, activityId2)))
             .thenReturn(List.of(declaredActivity1, declaredActivity2));
 
-        // Mock pour getAssociationsOf
-        when(associationService.getAllOf(any(), any(), any())).thenReturn(List.of());
-        when(traceService.findAllTracesById(any())).thenReturn(List.of());
+        when(associationService.getAllOf(
+                eq(declaredSkillProgress.getId()),
+                eq(DeclaredSkillProgress.class),
+                eq(
+                    List.of(
+                        EAssociationType.TRACE_DECLARED_SKILL,
+                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))))
+            .thenReturn(List.of());
+        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
         when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
             .thenReturn(List.of());
 
@@ -637,9 +643,17 @@ public class DeclaredSkillProgressServiceImplTest {
         when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
             .thenReturn(List.of());
 
-        // Mock pour getAssociationsOf
-        when(associationService.getAllOf(any(), any(), any())).thenReturn(List.of());
-        when(traceService.findAllTracesById(any())).thenReturn(List.of());
+        when(associationService.getAllOf(
+                eq(declaredSkillProgress.getId()),
+                eq(DeclaredSkillProgress.class),
+                eq(
+                    List.of(
+                        EAssociationType.TRACE_DECLARED_SKILL,
+                        EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))))
+            .thenReturn(List.of());
+        when(traceService.findAllTracesById(List.of())).thenReturn(List.of());
+        when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
+            .thenReturn(List.of());
 
         DeclaredSkillAssociationsData result =
             declaredSkillProgressService.associateDeclaredSkillWithActivities(

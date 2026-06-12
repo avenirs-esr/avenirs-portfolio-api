@@ -82,11 +82,12 @@ public class TraceController {
     return ResponseEntity.ok(tracesViewResponse);
   }
 
-  @DeleteMapping("/{traceId}")
-  public ResponseEntity<String> deleteTrace(Principal principal, @PathVariable UUID traceId) {
-    log.debug("Received request to delete trace [{}] of user [{}]", traceId, principal.getName());
+  @DeleteMapping()
+  public ResponseEntity<String> deleteTraces(
+      Principal principal, @RequestBody List<UUID> tracesIds) {
+    log.debug("Received request to delete trace [{}] of user [{}]", tracesIds, principal.getName());
 
-    traceService.deleteById(traceId);
+    traceService.deleteAllByIds(tracesIds);
 
     return ResponseEntity.ok("Resource successfully deleted.");
   }
