@@ -106,7 +106,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.service,ClockService
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.domain.service,LoggedInUserServiceImpl,4,28,1,1,1,6,1,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.infrastructure.adapter.specification,AssociationSpecification,6,126,3,7,2,23,4,11,1,9
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.repository,TraceDatabaseRepository,157,33,18,0,39,8,14,3,5,3
-avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.infrastructure.adapter.repository,NotificationDatabaseRepository,0,43,0,0,0,8,0,2,0,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.infrastructure.adapter.repository,NotificationDatabaseRepository,0,32,0,0,0,8,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.notification.domain.service,NotificationServiceImpl,0,53,0,0,0,13,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.specification,DeclaredExperienceSpecification,6,76,2,4,2,15,3,5,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio,AvenirsPortfolioApiApplication,5,3,0,0,2,1,1,1,1,1
