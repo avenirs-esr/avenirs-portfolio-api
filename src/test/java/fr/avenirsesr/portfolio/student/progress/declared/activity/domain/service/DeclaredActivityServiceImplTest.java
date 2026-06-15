@@ -1,9 +1,10 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_DESCRIPTION_LENGTH;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -32,12 +33,6 @@ import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationServic
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyExistException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityDatesException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityHasNotStartedException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityStartDateBeforeSubscriptionException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
@@ -1624,9 +1619,9 @@ class DeclaredActivityServiceImplTest {
   void createFeedback_should_throw_FieldValidationException_when_reflexion_exceeds_max_length() {
     BddLogger.given(
         "A logged-in student and his declared activity with a reflexion exceeding"
-            + " RICH_TEXT_LENGTH");
+            + " RICH_DESCRIPTION_LENGTH");
     UUID declaredActivityId = UUID.randomUUID();
-    String tooLongReflexion = "a".repeat(RICH_TEXT_LENGTH + 1);
+    String tooLongReflexion = "a".repeat(RICH_DESCRIPTION_LENGTH + 1);
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
         DeclaredActivity.create(
@@ -2107,7 +2102,7 @@ class DeclaredActivityServiceImplTest {
   @Test
   void
       updateFeedback_should_throw_FieldValidationException_when_feedback_text_exceeds_max_length() {
-    BddLogger.given("A valid feedback and a feedback text exceeding RICH_TEXT_LENGTH");
+    BddLogger.given("A valid feedback and a feedback text exceeding RICH_DESCRIPTION_LENGTH");
     UUID feedbackId = UUID.randomUUID();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
@@ -2124,7 +2119,7 @@ class DeclaredActivityServiceImplTest {
             1,
             List.of(),
             List.of());
-    String tooLongFeedback = "a".repeat(RICH_TEXT_LENGTH + 1);
+    String tooLongFeedback = "a".repeat(RICH_DESCRIPTION_LENGTH + 1);
     User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
 
     when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));

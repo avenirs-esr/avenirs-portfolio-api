@@ -1,8 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service;
 
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_DESCRIPTION_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateDateOrder;
-import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalEnrichedTextMaxLength;
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
@@ -173,7 +174,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     if (!declaredActivity.getActivity().isEnableReflection()) {
       throw new UserNotAuthorizedException();
     }
-    validateOptionalTextMaxLength("reflection", reflection, RICH_TEXT_LENGTH);
+    validateOptionalEnrichedTextMaxLength("reflection", reflection, RICH_TEXT_LENGTH);
 
     declaredActivity.setReflection(reflection);
 
@@ -471,7 +472,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
-    validateOptionalTextMaxLength("reflexion", declaredActivity.getReflection(), RICH_TEXT_LENGTH);
+    validateOptionalEnrichedTextMaxLength(
+        "reflexion", declaredActivity.getReflection(), RICH_DESCRIPTION_LENGTH);
 
     var allAssociations =
         associationService.getAllOf(
@@ -564,7 +566,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new UserNotAuthorizedException();
     }
 
-    validateOptionalTextMaxLength("feedback", feedback, RICH_TEXT_LENGTH);
+    validateOptionalEnrichedTextMaxLength("feedback", feedback, RICH_DESCRIPTION_LENGTH);
 
     feedbackToUpdate.setFeedback(feedback);
     feedbackRepository.save(feedbackToUpdate);

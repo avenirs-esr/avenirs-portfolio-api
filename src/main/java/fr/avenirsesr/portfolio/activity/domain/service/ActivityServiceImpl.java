@@ -63,7 +63,7 @@ public class ActivityServiceImpl implements ActivityService {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     requireNotNull("thematic", thematic);
     requireNotBlankAndMaxLength("summary", summary, SUMMARY_LENGTH);
-    requireNotBlankAndMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
+    requireNotBlankAndEnrichedMaxLength("description", description, RICH_DESCRIPTION_LENGTH);
     requireNotBlankAndMaxLength(
         "executionPeriodInfo", executionPeriodInfo, ACTIVITY_EXECUTION_PERIOD_INFO);
     validateOptionalTextMaxLength(

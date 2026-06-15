@@ -1,8 +1,8 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service;
 
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_TEXT_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_DESCRIPTION_LENGTH;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
-import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalEnrichedTextMaxLength;
 
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
@@ -73,7 +73,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     requireNotNull("type", type);
     requireNotNull("level", level);
     try {
-      validateOptionalTextMaxLength("reflection", reflection, RICH_TEXT_LENGTH);
+      validateOptionalEnrichedTextMaxLength("reflection", reflection, RICH_DESCRIPTION_LENGTH);
       DeclaredSkill declaredSkill =
           declaredSkillSyncService
               .getOrCreateFromExternalSkill(declaredSkillId)
@@ -99,7 +99,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   public DeclaredSkillProgress updateDeclaredSkillProgress(
       UUID declaredSkillProgressId, EDeclaredSkillLevel level, String reflection) {
     Student student = loggedInUserService.getLoggedInStudent();
-    validateOptionalTextMaxLength("reflection", reflection, RICH_TEXT_LENGTH);
+    validateOptionalEnrichedTextMaxLength("reflection", reflection, RICH_DESCRIPTION_LENGTH);
 
     DeclaredSkillProgress declaredSkillProgress =
         declaredSkillProgressRepository
