@@ -287,6 +287,17 @@ public class DeclaredActivityController {
         feedbackDetailsDTOMapper.toDTO(declaredActivityService.getFeedbackDetails(feedbackId)));
   }
 
+  @PutMapping("/feedbacks/{feedbackId}")
+  public ResponseEntity<Void> updateFeedback(
+      Principal principal,
+      @Valid @PathVariable UUID feedbackId,
+      @Valid @RequestBody UpdateFeedbackRequest request) {
+    log.debug(
+        "Received request to update feedback [{}] by user [{}]", feedbackId, principal.getName());
+    declaredActivityService.updateFeedback(feedbackId, request.feedback());
+    return ResponseEntity.noContent().build();
+  }
+
   @PostMapping("/{declaredActivityId}/ask-for-feedback")
   public ResponseEntity<FeedbackDetailsDTO> askForFeedback(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
