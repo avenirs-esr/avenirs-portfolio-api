@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface TraceOverviewMapper {
 
-  @Mapping(source = "trace.id", target = "traceId")
+  @Mapping(source = "trace.id", target = "id")
   TraceOverviewDTO toDTO(Trace trace, String programName);
 
   default TraceOverviewDTO toDTO(Trace trace) {

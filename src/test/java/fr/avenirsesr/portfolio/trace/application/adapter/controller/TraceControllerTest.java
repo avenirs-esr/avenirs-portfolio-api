@@ -74,7 +74,7 @@ class TraceControllerTest {
     assertEquals(1, body.size());
 
     TraceOverviewDTO dto = body.getFirst();
-    assertEquals(trace.getId(), dto.traceId());
+    assertEquals(trace.getId(), dto.id());
     assertEquals(trace.getTitle(), dto.title());
     assertEquals("Program Name", dto.programName());
 
