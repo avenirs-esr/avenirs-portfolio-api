@@ -8,9 +8,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.LocalDate;
 import java.util.List;
@@ -64,15 +62,6 @@ public interface DeclaredActivityService {
   List<DeclaredActivity> findAllDeclaredActivitiesByIds(List<UUID> ids);
 
   List<DeclaredActivity> findAllNotCompletedActivitiesByIds(List<UUID> ids);
-
-  Feedback createFeedback(UUID declaredActivityId);
-
-  Feedback getFeedbackDetails(UUID feedbackId);
-
-  void updateFeedback(UUID feedbackId, String feedback);
-
-  PagedResult<Feedback> getStaffFeedbacks(
-      EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria);
 
   boolean areDeclaredActivitiesUnlocked(List<UUID> declaredActivityIds);
 

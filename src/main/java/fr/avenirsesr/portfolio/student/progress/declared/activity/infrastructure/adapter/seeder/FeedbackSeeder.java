@@ -8,7 +8,7 @@ import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.Va
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.mapper.FeedbackMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.FeedbackEntity;
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FeedbackSeeder {
   private static final String PATH_FILE = "seeder/feedbacks.json";
   private final FileReader fileReader;
-  private final DeclaredActivityService declaredActivityService;
+  private final FeedbackService feedbackService;
 
   @Value("${seeder.source}")
   private ESeederSource seederSource;
@@ -70,7 +70,7 @@ public class FeedbackSeeder {
                   Optional.ofNullable(UserMapper.INSTANCE.toDomain(student.getUser())),
                   ELanguage.FRENCH));
 
-          feedbacks.add(declaredActivityService.createFeedback(data.declaredActivityId()));
+          feedbacks.add(feedbackService.createFeedback(data.declaredActivityId()));
         });
 
     log.info("✔ {} feedbacks created", feedbacks.size());

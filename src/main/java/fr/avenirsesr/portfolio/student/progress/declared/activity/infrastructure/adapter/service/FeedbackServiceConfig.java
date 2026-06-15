@@ -1,13 +1,12 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.service;
 
-import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
-import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service.DeclaredActivityServiceImpl;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service.FeedbackServiceImpl;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import lombok.RequiredArgsConstructor;
@@ -19,25 +18,23 @@ import org.springframework.context.annotation.Lazy;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class DeclaredActivityServiceConfig {
+public class FeedbackServiceConfig {
+  private final FeedbackRepository feedbackRepository;
   private final DeclaredActivityRepository declaredActivityRepository;
+  private final AssociationService associationService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final LoggedInUserService loggedInUserService;
-  private final AssociationService associationService;
-  private final AssociationSearchHelper associationSearchHelper;
-  private final FeedbackRepository feedbackRepository;
+  private final NotificationService notificationService;
 
   @Bean
-  public DeclaredActivityService declaredActivityService(
-      @Lazy ActivityService activityService, @Lazy TraceService traceService) {
-    return new DeclaredActivityServiceImpl(
+  public FeedbackService feedbackService(@Lazy TraceService traceService) {
+    return new FeedbackServiceImpl(
+        feedbackRepository,
         declaredActivityRepository,
-        activityService,
+        associationService,
         traceService,
         declaredSkillProgressService,
-        associationService,
-        associationSearchHelper,
         loggedInUserService,
-        feedbackRepository);
+        notificationService);
   }
 }

@@ -12,10 +12,16 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.*;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.*;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityAssociationsDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityPeriodRequest;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.SubscribeDeclaredActivityRequest;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateReflectionRequest;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityAssociationsDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,11 +34,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,8 +54,6 @@ public class DeclaredActivityController {
   private final DeclaredActivityDetailsDTOMapper declaredActivityDetailsDTOMapper;
   private final DeclaredActivityAssociationsDTOMapper declaredActivityAssociationsDTOMapper;
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
-  private final FeedbackDetailsDTOMapper feedbackDetailsDTOMapper;
-  private final FeedbackStaffListItemDTOMapper feedbackStaffListItemDTOMapper;
 
   @GetMapping
   public ResponseEntity<PagedResponse<DeclaredActivityViewDTO>> getDeclaredActivitiesView(
@@ -249,66 +254,6 @@ public class DeclaredActivityController {
                 .map(associationSearchResultDTOMapper::toDeclaredActivityDTO)
                 .toList(),
             PageInfoDTO.fromDomain(pagedResult.pageInfo())));
-  }
-
-  @GetMapping("/feedbacks")
-  public ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> getStaffFeedbacks(
-      Principal principal,
-      @Parameter(schema = @Schema(ref = "#/components/schemas/EFeedbackStatus"))
-          @RequestParam(required = false)
-          EFeedbackStatus status,
-      @RequestParam(required = false) UUID activityId,
-      @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
-    var pageCriteria = new PageCriteria(page, pageSize);
-    log.debug(
-        "Received request to get staff feedbacks for user [{}] (status={}, activityId={}, page={},"
-            + " pageSize={})",
-        principal.getName(),
-        status,
-        activityId,
-        pageCriteria.page(),
-        pageCriteria.pageSize());
-    var result = declaredActivityService.getStaffFeedbacks(status, activityId, pageCriteria);
-    return ResponseEntity.ok(
-        new PagedResponse<>(
-            result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),
-            PageInfoDTO.fromDomain(result.pageInfo())));
-  }
-
-  @GetMapping("/feedback/{feedbackId}")
-  public ResponseEntity<FeedbackDetailsDTO> getFeedbackDetails(
-      Principal principal, @Valid @PathVariable UUID feedbackId) {
-    log.debug(
-        "Received request to get feedback details [{}] by user [{}]",
-        feedbackId,
-        principal.getName());
-    return ResponseEntity.ok(
-        feedbackDetailsDTOMapper.toDTO(declaredActivityService.getFeedbackDetails(feedbackId)));
-  }
-
-  @PutMapping("/feedbacks/{feedbackId}")
-  public ResponseEntity<Void> updateFeedback(
-      Principal principal,
-      @Valid @PathVariable UUID feedbackId,
-      @Valid @RequestBody UpdateFeedbackRequest request) {
-    log.debug(
-        "Received request to update feedback [{}] by user [{}]", feedbackId, principal.getName());
-    declaredActivityService.updateFeedback(feedbackId, request.feedback());
-    return ResponseEntity.noContent().build();
-  }
-
-  @PostMapping("/{declaredActivityId}/ask-for-feedback")
-  public ResponseEntity<FeedbackDetailsDTO> askForFeedback(
-      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
-    log.debug(
-        "Received request to ask for feedback on declared activity [{}] by student [{}]",
-        declaredActivityId,
-        principal.getName());
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(
-            feedbackDetailsDTOMapper.toDTO(
-                declaredActivityService.createFeedback(declaredActivityId)));
   }
 
   @GetMapping("/{declaredActivityId}/search-for-association/traces")
