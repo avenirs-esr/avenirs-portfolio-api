@@ -17,7 +17,6 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.application.ad
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.SubscribeDeclaredActivityRequest;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateFeedbackRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityAssociationsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
@@ -379,40 +378,5 @@ class DeclaredActivityControllerTest {
     assertThat(response.getBody().page().totalElements()).isZero();
 
     verifyNoInteractions(feedbackStaffListItemDTOMapper);
-  }
-
-  @Test
-  void updateFeedback_should_return_204_no_content() {
-    BddLogger.given("A valid feedback ID and a staff writing their feedback text");
-
-    UUID feedbackId = UUID.randomUUID();
-    UpdateFeedbackRequest request = new UpdateFeedbackRequest("Excellent travail, bravo !");
-
-    doNothing().when(declaredActivityService).updateFeedback(feedbackId, request.feedback());
-
-    BddLogger.when("updateFeedback is called");
-    ResponseEntity<Void> response = controller.updateFeedback(principal, feedbackId, request);
-
-    BddLogger.then("204 No Content is returned with no body");
-    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-    assertThat(response.getBody()).isNull();
-
-    verify(declaredActivityService).updateFeedback(feedbackId, request.feedback());
-  }
-
-  @Test
-  void updateFeedback_should_delegate_to_service_with_correct_feedback_id_and_text() {
-    BddLogger.given("A feedback ID and a request with a specific feedback text");
-
-    UUID feedbackId = UUID.randomUUID();
-    String feedbackText = "Très bon travail sur cette activité.";
-    UpdateFeedbackRequest request = new UpdateFeedbackRequest(feedbackText);
-
-    BddLogger.when("updateFeedback is called");
-    controller.updateFeedback(principal, feedbackId, request);
-
-    BddLogger.then("The service is called exactly once with the correct feedback ID and text");
-    verify(declaredActivityService, times(1)).updateFeedback(feedbackId, feedbackText);
-    verifyNoMoreInteractions(declaredActivityService);
   }
 }

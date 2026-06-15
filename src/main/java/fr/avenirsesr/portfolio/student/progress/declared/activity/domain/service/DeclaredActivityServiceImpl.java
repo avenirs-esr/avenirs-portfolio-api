@@ -19,7 +19,6 @@ import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AskForFeedbackNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
@@ -44,7 +43,6 @@ import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -550,24 +548,6 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria) {
     var staff = loggedInUserService.getLoggedInStaff();
     return feedbackRepository.findByStaff(staff.getId(), statusFilter, activityId, pageCriteria);
-  }
-
-  @Override
-  public void updateFeedback(UUID feedbackId, String feedback) {
-    Feedback feedbackToUpdate =
-        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);
-
-    User loggedInUser = loggedInUserService.getLoggedInUser();
-    Staff author = feedbackToUpdate.getDeclaredActivity().getActivity().getAuthor();
-
-    if (!loggedInUser.equals(author.getUser())) {
-      throw new UserNotAuthorizedException();
-    }
-
-    validateOptionalTextMaxLength("feedback", feedback, RICH_TEXT_LENGTH);
-
-    feedbackToUpdate.setFeedback(feedback);
-    feedbackRepository.save(feedbackToUpdate);
   }
 
   @Override
