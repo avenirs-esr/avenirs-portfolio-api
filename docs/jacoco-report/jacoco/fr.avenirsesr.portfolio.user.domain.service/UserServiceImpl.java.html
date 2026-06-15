@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
 import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
-import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -26,87 +26,79 @@ public class UserServiceImpl implements UserService {
   private final StaffService staffService;
   private final StudentService studentService;
   private final ExternalUserClient externalUserClient;
-  private final LoggedInUserService loggedInUserService;
 
   @Override
   public User getUser(UUID id) {
-<span class="fc" id="L33">    return userRepository</span>
-<span class="fc" id="L34">        .findById(id)</span>
-<span class="fc" id="L35">        .orElseThrow(</span>
+<span class="fc" id="L32">    return userRepository</span>
+<span class="fc" id="L33">        .findById(id)</span>
+<span class="fc" id="L34">        .orElseThrow(</span>
             () -&gt; {
-<span class="fc" id="L37">              log.error(&quot;User {} not found&quot;, id);</span>
-<span class="fc" id="L38">              return new UserNotFoundException();</span>
+<span class="fc" id="L36">              log.error(&quot;User {} not found&quot;, id);</span>
+<span class="fc" id="L37">              return new UserNotFoundException();</span>
             });
   }
 
   @Override
   public User getUserByEppn(String eppn) {
-<span class="fc" id="L44">    return userPrincipalRepository</span>
-<span class="fc" id="L45">        .findByEppn(eppn)</span>
-<span class="fc" id="L46">        .orElseGet(() -&gt; createUserFromExternalUser(eppn));</span>
+<span class="fc" id="L43">    return userPrincipalRepository</span>
+<span class="fc" id="L44">        .findByEppn(eppn)</span>
+<span class="fc" id="L45">        .orElseGet(() -&gt; createUserFromExternalUser(eppn));</span>
   }
 
   @Override
   public void updateProfile(EUserCategory userCategory, String email, String bio) {
-<span class="fc" id="L51">    var user = loggedInUserService.getLoggedInUser();</span>
-<span class="fc bfc" id="L52" title="All 2 branches covered.">    if (email != null) {</span>
-<span class="pc bpc" id="L53" title="1 of 3 branches missed.">      switch (userCategory) {</span>
-<span class="fc" id="L54">        case STUDENT -&gt; user.setEmail(email);</span>
-<span class="fc" id="L55">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L50">    var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    if (email != null) {</span>
+<span class="pc bpc" id="L52" title="1 of 3 branches missed.">      switch (userCategory) {</span>
+<span class="fc" id="L53">        case STUDENT -&gt; user.setEmail(email);</span>
+<span class="fc" id="L54">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
       }
     }
-<span class="fc" id="L58">    userRepository.save(user);</span>
+<span class="fc" id="L57">    userRepository.save(user);</span>
 
-<span class="pc bpc" id="L60" title="1 of 3 branches missed.">    switch (userCategory) {</span>
-<span class="fc" id="L61">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
-<span class="fc" id="L62">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
-<span class="nc" id="L63">      default -&gt; throw new UserNotAuthorizedException();</span>
+<span class="pc bpc" id="L59" title="1 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="fc" id="L60">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
+<span class="fc" id="L61">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
+<span class="nc" id="L62">      default -&gt; throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L65">  }</span>
-
-  @Override
-  public void updateNotificationPreferences(boolean notificationEnabled) {
-<span class="fc" id="L69">    var user = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L70">    user.setNotificationEnabled(notificationEnabled);</span>
-<span class="fc" id="L71">    userRepository.save(user);</span>
-<span class="fc" id="L72">  }</span>
+<span class="fc" id="L64">  }</span>
 
   @Override
   public User createUser(UUID id, String firstname, String lastname, String email, String eppn) {
-<span class="fc" id="L76">    var user = User.create(id, firstname, lastname, email);</span>
-<span class="fc" id="L77">    userRepository.save(user);</span>
-<span class="fc" id="L78">    userPrincipalRepository.saveOrUpdate(user, eppn);</span>
-<span class="fc" id="L79">    return user;</span>
+<span class="fc" id="L68">    var user = User.create(id, firstname, lastname, email);</span>
+<span class="fc" id="L69">    userRepository.save(user);</span>
+<span class="fc" id="L70">    userPrincipalRepository.saveOrUpdate(user, eppn);</span>
+<span class="fc" id="L71">    return user;</span>
   }
 
   private User createUserFromExternalUser(String eppn) {
-<span class="fc" id="L83">    var externalUser =</span>
-<span class="fc" id="L84">        externalUserClient.getByEppn(eppn).orElseThrow(ExternalUserNotFoundException::new);</span>
+<span class="fc" id="L75">    var externalUser =</span>
+<span class="fc" id="L76">        externalUserClient.getByEppn(eppn).orElseThrow(ExternalUserNotFoundException::new);</span>
 
-<span class="fc bfc" id="L86" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.BLOCKED) {</span>
-<span class="fc" id="L87">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_BLOCKED);</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.BLOCKED) {</span>
+<span class="fc" id="L79">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_BLOCKED);</span>
     }
 
-<span class="fc bfc" id="L90" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.REMOVED) {</span>
-<span class="fc" id="L91">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_REMOVED);</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.REMOVED) {</span>
+<span class="fc" id="L83">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_REMOVED);</span>
     }
 
-<span class="fc" id="L94">    var user =</span>
-<span class="fc" id="L95">        createUser(</span>
-<span class="fc" id="L96">            UUID.randomUUID(),</span>
-<span class="fc" id="L97">            externalUser.firstName(),</span>
-<span class="fc" id="L98">            externalUser.lastName(),</span>
-<span class="fc" id="L99">            externalUser.email(),</span>
-<span class="fc" id="L100">            externalUser.eppn());</span>
+<span class="fc" id="L86">    var user =</span>
+<span class="fc" id="L87">        createUser(</span>
+<span class="fc" id="L88">            UUID.randomUUID(),</span>
+<span class="fc" id="L89">            externalUser.firstName(),</span>
+<span class="fc" id="L90">            externalUser.lastName(),</span>
+<span class="fc" id="L91">            externalUser.email(),</span>
+<span class="fc" id="L92">            externalUser.eppn());</span>
 
-<span class="pc bpc" id="L102" title="1 of 3 branches missed.">    switch (externalUser.category()) {</span>
-<span class="fc" id="L103">      case STUDENT -&gt; studentService.createStudent(user.getId(), externalUser.email(), null);</span>
-<span class="fc" id="L104">      case STAFF -&gt; staffService.createStaff(user.getId(), externalUser.email(), null);</span>
+<span class="pc bpc" id="L94" title="1 of 3 branches missed.">    switch (externalUser.category()) {</span>
+<span class="fc" id="L95">      case STUDENT -&gt; studentService.createStudent(user.getId(), externalUser.email(), null);</span>
+<span class="fc" id="L96">      case STAFF -&gt; staffService.createStaff(user.getId(), externalUser.email(), null);</span>
     }
 
-<span class="fc" id="L107">    externalUserClient.activateByEppn(externalUser.eppn());</span>
+<span class="fc" id="L99">    externalUserClient.activateByEppn(externalUser.eppn());</span>
 
-<span class="fc" id="L109">    return user;</span>
+<span class="fc" id="L101">    return user;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
