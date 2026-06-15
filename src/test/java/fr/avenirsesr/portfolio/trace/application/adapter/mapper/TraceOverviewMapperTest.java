@@ -22,9 +22,9 @@ class TraceOverviewMapperTest {
     BddLogger.when("mapping with programName to TraceOverviewDTO");
     TraceOverviewDTO dto = mapper.toDTO(trace, "My Program");
 
-    BddLogger.then("it should map traceId, title, and programName");
+    BddLogger.then("it should map id, title, and programName");
     assertNotNull(dto);
-    assertEquals(trace.getId(), dto.traceId());
+    assertEquals(trace.getId(), dto.id());
     assertEquals(trace.getTitle(), dto.title());
     assertEquals("My Program", dto.programName());
   }
@@ -37,9 +37,9 @@ class TraceOverviewMapperTest {
     BddLogger.when("mapping trace only to TraceOverviewDTO");
     TraceOverviewDTO dto = mapper.toDTO(trace);
 
-    BddLogger.then("it should map traceId with null programName");
+    BddLogger.then("it should map id with null programName");
     assertNotNull(dto);
-    assertEquals(trace.getId(), dto.traceId());
+    assertEquals(trace.getId(), dto.id());
     assertNull(dto.programName());
   }
 
@@ -65,7 +65,7 @@ class TraceOverviewMapperTest {
 
     BddLogger.then("it should map trace and program name");
     assertNotNull(dto);
-    assertEquals(trace.getId(), dto.traceId());
+    assertEquals(trace.getId(), dto.id());
     assertEquals("Project X", dto.programName());
   }
 }

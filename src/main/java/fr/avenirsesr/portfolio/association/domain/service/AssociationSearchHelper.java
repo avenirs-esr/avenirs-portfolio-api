@@ -20,7 +20,7 @@ public class AssociationSearchHelper {
   /**
    * Shared model for searching for entities that are candidates for association
    *
-   * @param sourceEntityId ID of the source entity (e.g., traceId, declaredActivityId)
+   * @param sourceEntityId ID of the source entity (e.g., id, declaredActivityId)
    * @param sourceEntityClass class of the source entity (e.g., Trace.class)
    * @param associationType type of association being searched for
    * @param associationIdExtractor extractor for the relevant ID from the association (getId1 or

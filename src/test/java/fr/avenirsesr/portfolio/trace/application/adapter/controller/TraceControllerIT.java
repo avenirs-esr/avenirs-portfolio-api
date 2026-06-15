@@ -95,7 +95,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
       throw new IllegalStateException("Seeder returned no traces in /overview");
     }
 
-    return UUID.fromString(json.get(0).get("traceId").asText());
+    return UUID.fromString(json.get(0).get("id").asText());
   }
 
   private UUID searchFirstAssociationDeclaredSkillId(int index) throws Exception {
@@ -205,7 +205,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .expectStatus()
         .isOk()
         .expectBody()
-        .jsonPath("$[0].traceId")
+        .jsonPath("$[0].id")
         .exists();
 
     BddLogger.then("it should return trace overview");
