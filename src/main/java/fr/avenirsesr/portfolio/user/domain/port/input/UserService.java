@@ -11,5 +11,7 @@ public interface UserService extends BaseUserService {
 
   void updateProfile(EUserCategory userCategory, String email, String bio);
 
+  void updateNotificationPreferences(boolean notificationEnabled);
+
   User createUser(UUID id, String firstname, String lastname, String email, String eppn);
 }

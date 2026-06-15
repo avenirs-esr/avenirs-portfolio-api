@@ -7,20 +7,19 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.common.user.application.adapter.dto.ExternalUserDTO;
 import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
 import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.*;
@@ -36,10 +35,10 @@ class UserServiceImplTest {
   @Mock private StaffService staffService;
   @Mock private StudentService studentService;
   @Mock private ExternalUserClient externalUserClient;
+  @Mock private LoggedInUserService loggedInUserService;
 
   private UserServiceImpl userService;
   private User loggedUser;
-  private MockedStatic<RequestContext> mockedRequestContext;
 
   @BeforeEach
   void setUp() {
@@ -51,17 +50,8 @@ class UserServiceImplTest {
             userPrincipalRepository,
             staffService,
             studentService,
-            externalUserClient);
-
-    mockedRequestContext = mockStatic(RequestContext.class);
-    mockedRequestContext
-        .when(RequestContext::get)
-        .thenReturn(new RequestData(Optional.of(loggedUser), ELanguage.FRENCH));
-  }
-
-  @AfterEach
-  void tearDown() {
-    mockedRequestContext.close();
+            externalUserClient,
+            loggedInUserService);
   }
 
   @Nested
@@ -280,6 +270,11 @@ class UserServiceImplTest {
   @Nested
   class UpdateProfile {
 
+    @BeforeEach
+    void setUp() {
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+    }
+
     @Test
     void shouldUpdateStudentEmailAndBio() {
       BddLogger.given("a logged student user");
@@ -332,6 +327,49 @@ class UserServiceImplTest {
 
       verify(userRepository, never()).save(any());
       verifyNoInteractions(staffService, studentService);
+    }
+  }
+
+  @Nested
+  class UpdateNotificationPreferences {
+
+    @BeforeEach
+    void setUp() {
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+    }
+
+    @Test
+    void shouldEnableNotificationsForLoggedInUser() {
+      loggedUser = UserFixture.create().withNotificationEnabled(false).toModel();
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+
+      BddLogger.given("a logged user with notifications disabled");
+
+      BddLogger.when("enabling notifications");
+      userService.updateNotificationPreferences(true);
+
+      BddLogger.then("it should save the user with notifications enabled");
+      ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+      verify(userRepository).save(userCaptor.capture());
+
+      assertTrue(userCaptor.getValue().isNotificationEnabled());
+    }
+
+    @Test
+    void shouldDisableNotificationsForLoggedInUser() {
+      loggedUser = UserFixture.create().withNotificationEnabled(true).toModel();
+      when(loggedInUserService.getLoggedInUser()).thenReturn(loggedUser);
+
+      BddLogger.given("a logged user with notifications enabled");
+
+      BddLogger.when("disabling notifications");
+      userService.updateNotificationPreferences(false);
+
+      BddLogger.then("it should save the user with notifications disabled");
+      ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+      verify(userRepository).save(userCaptor.capture());
+
+      assertFalse(userCaptor.getValue().isNotificationEnabled());
     }
   }
 

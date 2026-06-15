@@ -30,6 +30,11 @@ public class TransactionalUserService implements UserService {
   }
 
   @Override
+  public void updateNotificationPreferences(boolean notificationEnabled) {
+    delegate.updateNotificationPreferences(notificationEnabled);
+  }
+
+  @Override
   @Transactional
   public User createUser(UUID id, String firstname, String lastname, String email, String eppn) {
     return delegate.createUser(id, firstname, lastname, email, eppn);

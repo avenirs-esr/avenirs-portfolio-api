@@ -5,6 +5,7 @@ import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOr
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
+import fr.avenirsesr.portfolio.user.application.adapter.request.NotificationPreferencesRequest;
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
@@ -20,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,6 +73,15 @@ public class UserController {
       @RequestBody ProfileUpdateRequest request) {
     log.debug("Received request to update profile of user [{}]", principal.getName());
     userService.updateProfile(userCategory, request.getEmail(), request.getBio());
-    return ResponseEntity.ok("Mise à jour faite.");
+    return ResponseEntity.noContent().build();
+  }
+
+  @PatchMapping("/preferences/notification")
+  public ResponseEntity<String> updateNotificationPreferences(
+      Principal principal, @RequestBody NotificationPreferencesRequest request) {
+    log.debug(
+        "Received request to update notification preferences of user [{}]", principal.getName());
+    userService.updateNotificationPreferences(request.notificationEnabled());
+    return ResponseEntity.noContent().build();
   }
 }

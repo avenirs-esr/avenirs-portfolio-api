@@ -7,7 +7,7 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
 import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
-import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
+import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -26,6 +26,7 @@ public class UserServiceImpl implements UserService {
   private final StaffService staffService;
   private final StudentService studentService;
   private final ExternalUserClient externalUserClient;
+  private final LoggedInUserService loggedInUserService;
 
   @Override
   public User getUser(UUID id) {
@@ -47,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void updateProfile(EUserCategory userCategory, String email, String bio) {
-    var user = RequestContext.get().userLoggedIn().orElseThrow(IllegalStateException::new);
+    var user = loggedInUserService.getLoggedInUser();
     if (email != null) {
       switch (userCategory) {
         case STUDENT -> user.setEmail(email);
@@ -61,6 +62,13 @@ public class UserServiceImpl implements UserService {
       case STAFF -> staffService.updateProfile(user, bio);
       default -> throw new UserNotAuthorizedException();
     }
+  }
+
+  @Override
+  public void updateNotificationPreferences(boolean notificationEnabled) {
+    var user = loggedInUserService.getLoggedInUser();
+    user.setNotificationEnabled(notificationEnabled);
+    userRepository.save(user);
   }
 
   @Override

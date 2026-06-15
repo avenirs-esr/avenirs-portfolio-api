@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.Utils;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,9 +65,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .bodyValue(payloadJson)
         .exchange()
         .expectStatus()
-        .isOk()
-        .expectBody(String.class)
-        .isEqualTo("Mise à jour faite.");
+        .isNoContent();
   }
 
   @Test
@@ -87,9 +86,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .bodyValue(payloadJson)
         .exchange()
         .expectStatus()
-        .isOk()
-        .expectBody(String.class)
-        .isEqualTo("Mise à jour faite.");
+        .isNoContent();
   }
 
   @Test
@@ -230,6 +227,76 @@ public class UserControllerIT extends ContainerConfigurationTest {
     String origin = ReflectionTestUtils.invokeMethod(Utils.class, "extractOrigin", request);
 
     assertThat(origin).isNull();
+  }
+
+  @Nested
+  class UpdateNotificationPreferences {
+
+    @Test
+    void shouldUpdateNotificationPreferencesForStudent() throws Exception {
+      BddLogger.given("the /me/users/preferences/notification endpoint");
+      String payloadJson = loadJson("user/mock-update-notification-preferences.json");
+
+      BddLogger.when("performing a PATCH as a student");
+      BddLogger.then("it should update the notification preferences successfully");
+
+      webTestClient
+          .patch()
+          .uri("/me/users/preferences/notification")
+          .header("X-Signed-Context", studentPayload)
+          .header("X-Context-Kid", secretKey)
+          .header("X-Context-Signature", studentSignature)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(payloadJson)
+          .exchange()
+          .expectStatus()
+          .isNoContent();
+    }
+
+    @Test
+    void shouldUpdateNotificationPreferencesForStaff() throws Exception {
+      BddLogger.given("the /me/users/preferences/notification endpoint");
+      String payloadJson = loadJson("user/mock-update-notification-preferences.json");
+
+      BddLogger.when("performing a PATCH as a staff member");
+      BddLogger.then("it should update the notification preferences successfully");
+
+      webTestClient
+          .patch()
+          .uri("/me/users/preferences/notification")
+          .header("X-Signed-Context", staffPayload)
+          .header("X-Context-Kid", secretKey)
+          .header("X-Context-Signature", staffSignature)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(payloadJson)
+          .exchange()
+          .expectStatus()
+          .isNoContent();
+    }
+
+    @Test
+    void shouldReturnUnauthorizedForUnknownUser() throws Exception {
+      BddLogger.given("the /me/users/preferences/notification endpoint");
+      String payloadJson = loadJson("user/mock-update-notification-preferences.json");
+
+      BddLogger.when("performing a PATCH with an unknown user");
+      BddLogger.then("it should return 401");
+
+      webTestClient
+          .patch()
+          .uri("/me/users/preferences/notification")
+          .header("X-Signed-Context", unknownPayload)
+          .header("X-Context-Kid", secretKey)
+          .header("X-Context-Signature", unknownSignature)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(payloadJson)
+          .exchange()
+          .expectStatus()
+          .isUnauthorized()
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo("USER_NOT_AUTHORIZED");
+    }
   }
 
   @Test
