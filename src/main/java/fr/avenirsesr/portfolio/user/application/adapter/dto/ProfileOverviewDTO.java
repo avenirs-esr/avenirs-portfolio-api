@@ -12,6 +12,7 @@ import java.util.UUID;
       "bio",
       "email",
       "hasUnseenNotification",
+      "notificationEnabled",
       "profilePicture",
       "coverPicture"
     })
@@ -22,5 +23,6 @@ public record ProfileOverviewDTO(
     String bio,
     String email,
     boolean hasUnseenNotification,
+    boolean notificationEnabled,
     FileDTO profilePicture,
     FileDTO coverPicture) {}

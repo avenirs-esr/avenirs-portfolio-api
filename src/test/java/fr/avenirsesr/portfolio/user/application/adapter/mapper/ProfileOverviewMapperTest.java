@@ -26,7 +26,15 @@ class ProfileOverviewMapperTest {
     var cover = new FileData(Optional.of(coverFileId), Optional.of("cover.jpg"), "cover.jpg");
     UserProfileOverviewData overview =
         new UserProfileOverviewData(
-            UUID.randomUUID(), "Jane", "Doe", "jane@example.com", "My bio", false, cover, profile);
+            UUID.randomUUID(),
+            "Jane",
+            "Doe",
+            "jane@example.com",
+            "My bio",
+            false,
+            true,
+            cover,
+            profile);
 
     BddLogger.when("mapping to ProfileOverviewDTO");
     ProfileOverviewDTO dto = mapper.userDomainToDto(overview, "https://cdn.example.com/");
@@ -38,6 +46,7 @@ class ProfileOverviewMapperTest {
     assertEquals("jane@example.com", dto.email());
     assertEquals("My bio", dto.bio());
     assertFalse(dto.hasUnseenNotification());
+    assertTrue(dto.notificationEnabled());
     assertNotNull(dto.profilePicture());
     assertEquals(profileFileId, dto.profilePicture().id());
     assertEquals("profile.jpg", dto.profilePicture().fileName());
@@ -52,7 +61,15 @@ class ProfileOverviewMapperTest {
     var cover = new FileData(Optional.empty(), Optional.empty(), "default-cover.jpg");
     UserProfileOverviewData overview =
         new UserProfileOverviewData(
-            UUID.randomUUID(), "Jane", "Doe", "jane@example.com", "My bio", true, cover, profile);
+            UUID.randomUUID(),
+            "Jane",
+            "Doe",
+            "jane@example.com",
+            "My bio",
+            true,
+            false,
+            cover,
+            profile);
 
     BddLogger.when("mapping to ProfileOverviewDTO");
     ProfileOverviewDTO dto = mapper.userDomainToDto(overview, "https://cdn.example.com/");
@@ -60,6 +77,7 @@ class ProfileOverviewMapperTest {
     BddLogger.then("it should map hasUnseenNotification as true");
     assertNotNull(dto);
     assertTrue(dto.hasUnseenNotification());
+    assertFalse(dto.notificationEnabled());
   }
 
   @Test
@@ -70,7 +88,15 @@ class ProfileOverviewMapperTest {
     var cover = new FileData(Optional.empty(), Optional.empty(), "default-cover.jpg");
     UserProfileOverviewData overview =
         new UserProfileOverviewData(
-            UUID.randomUUID(), "John", "Smith", "john@example.com", null, false, cover, profile);
+            UUID.randomUUID(),
+            "John",
+            "Smith",
+            "john@example.com",
+            null,
+            false,
+            false,
+            cover,
+            profile);
 
     BddLogger.when("mapping to ProfileOverviewDTO");
     ProfileOverviewDTO dto = mapper.userDomainToDto(overview, "https://cdn.example.com/");
