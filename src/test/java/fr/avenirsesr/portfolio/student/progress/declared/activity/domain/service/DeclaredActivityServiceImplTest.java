@@ -22,6 +22,7 @@ import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.BusinessException;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
@@ -52,6 +53,7 @@ import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -2014,5 +2016,126 @@ class DeclaredActivityServiceImplTest {
     BddLogger.then("it should not throw");
     assertThatCode(() -> service.checkDeclaredActivitiesUnlocked(List.of(declaredActivityId)))
         .doesNotThrowAnyException();
+  }
+
+  // ── updateFeedback ────────────────────────────────────────────────────────
+
+  @Test
+  void updateFeedback_should_save_feedback_with_updated_text_when_user_is_author() {
+    BddLogger.given("A logged-in staff who is the author of the activity and a valid feedback");
+    UUID feedbackId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+    Feedback feedback =
+        Feedback.toDomain(
+            feedbackId,
+            Instant.now(),
+            Instant.now(),
+            declaredActivity,
+            null,
+            null,
+            EFeedbackStatus.IN_PROCESS,
+            1,
+            List.of(),
+            List.of());
+    String feedbackText = "Excellent travail, bravo !";
+    User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+
+    when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+    when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+    when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+
+    BddLogger.when("updateFeedback is called with the new feedback text");
+    service.updateFeedback(feedbackId, feedbackText);
+
+    BddLogger.then("The feedback is saved with the updated text");
+    verify(feedbackRepository).save(feedbackCaptor.capture());
+    Feedback saved = feedbackCaptor.getValue();
+    assertThat(saved.getFeedback()).contains(feedbackText);
+  }
+
+  @Test
+  void updateFeedback_should_throw_FeedbackNotFoundException_when_feedback_does_not_exist() {
+    BddLogger.given("A non-existent feedback ID");
+    UUID feedbackId = UUID.randomUUID();
+
+    when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.empty());
+
+    BddLogger.when("updateFeedback is called");
+
+    BddLogger.then("A FeedbackNotFoundException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.updateFeedback(feedbackId, "some text"))
+        .isInstanceOf(FeedbackNotFoundException.class);
+
+    verify(feedbackRepository, never()).save(any());
+  }
+
+  @Test
+  void updateFeedback_should_throw_UserNotAuthorizedException_when_user_is_not_the_author() {
+    BddLogger.given("A logged-in user who is NOT the author of the activity");
+    UUID feedbackId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+    Feedback feedback =
+        Feedback.toDomain(
+            feedbackId,
+            Instant.now(),
+            Instant.now(),
+            declaredActivity,
+            null,
+            null,
+            EFeedbackStatus.IN_PROCESS,
+            1,
+            List.of(),
+            List.of());
+    User differentUser = UserFixture.create().toModel();
+
+    when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+    when(loggedInUserService.getLoggedInUser()).thenReturn(differentUser);
+
+    BddLogger.when("updateFeedback is called");
+
+    BddLogger.then("A UserNotAuthorizedException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.updateFeedback(feedbackId, "some text"))
+        .isInstanceOf(UserNotAuthorizedException.class);
+
+    verify(feedbackRepository, never()).save(any());
+  }
+
+  @Test
+  void
+      updateFeedback_should_throw_FieldValidationException_when_feedback_text_exceeds_max_length() {
+    BddLogger.given("A valid feedback and a feedback text exceeding RICH_TEXT_LENGTH");
+    UUID feedbackId = UUID.randomUUID();
+    Activity activity = ActivityFixture.create().toModel();
+    DeclaredActivity declaredActivity =
+        DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+    Feedback feedback =
+        Feedback.toDomain(
+            feedbackId,
+            Instant.now(),
+            Instant.now(),
+            declaredActivity,
+            null,
+            null,
+            EFeedbackStatus.IN_PROCESS,
+            1,
+            List.of(),
+            List.of());
+    String tooLongFeedback = "a".repeat(RICH_TEXT_LENGTH + 1);
+    User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+
+    when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+    when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+
+    BddLogger.when("updateFeedback is called with a text that is too long");
+
+    BddLogger.then("A FieldValidationException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.updateFeedback(feedbackId, tooLongFeedback))
+        .isInstanceOf(FieldValidationException.class);
+
+    verify(feedbackRepository, never()).save(any());
   }
 }
