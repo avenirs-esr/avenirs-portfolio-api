@@ -112,7 +112,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     List<DeclaredActivity> declaredActivities =
         declaredActivityRepository.findAllByActivityIdAndStudent(
-            activityIds, student, FetchGraph.init().fetch("activity").add("student").fetch("user"));
+            activityIds,
+            student,
+            FetchGraph.init().add("activity").fetch("author").root().add("student").fetch("user"));
 
     if (!declaredActivities.stream()
         .map(declaredActivity -> declaredActivity.getActivity().getId())
