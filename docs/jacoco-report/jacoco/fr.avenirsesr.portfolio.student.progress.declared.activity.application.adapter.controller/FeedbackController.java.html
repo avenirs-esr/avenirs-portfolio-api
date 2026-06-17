@@ -3,7 +3,6 @@
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateFeedbackRequest;
@@ -30,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-<span class="fc" id="L33">@Slf4j</span>
+<span class="fc" id="L32">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/activity-progress/feedbacks&quot;)
 public class FeedbackController {
@@ -47,35 +46,31 @@ public class FeedbackController {
       @RequestParam(required = false) UUID activityId,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L50">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L51">    log.debug(</span>
+<span class="fc" id="L49">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L50">    log.debug(</span>
         &quot;Received request to get staff feedbacks for user [{}] (status={}, activityId={}, page={},&quot;
             + &quot; pageSize={})&quot;,
-<span class="fc" id="L54">        principal.getName(),</span>
+<span class="fc" id="L53">        principal.getName(),</span>
         status,
         activityId,
-<span class="fc" id="L57">        pageCriteria.page(),</span>
-<span class="fc" id="L58">        pageCriteria.pageSize());</span>
-<span class="fc" id="L59">    var result = feedbackService.getStaffFeedbacks(status, activityId, pageCriteria);</span>
-<span class="fc" id="L60">    return ResponseEntity.ok(</span>
+<span class="fc" id="L56">        pageCriteria.page(),</span>
+<span class="fc" id="L57">        pageCriteria.pageSize());</span>
+<span class="fc" id="L58">    var result = feedbackService.getStaffFeedbacks(status, activityId, pageCriteria);</span>
+<span class="fc" id="L59">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L62">            result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),</span>
-<span class="fc" id="L63">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
+<span class="fc" id="L61">            result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),</span>
+<span class="fc" id="L62">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
   }
 
-  @GetMapping(&quot;/{userCategory}/{feedbackId}&quot;)
+  @GetMapping(&quot;/{feedbackId}&quot;)
   public ResponseEntity&lt;FeedbackDetailsDTO&gt; getFeedbackDetails(
-      Principal principal,
-      @Valid @PathVariable UUID feedbackId,
-      @PathVariable EUserCategory userCategory) {
-<span class="fc" id="L71">    log.debug(</span>
-        &quot;Received request to get feedback details [{}] by user [{}] (userCategory={})&quot;,
+      Principal principal, @Valid @PathVariable UUID feedbackId) {
+<span class="fc" id="L68">    log.debug(</span>
+        &quot;Received request to get feedback details [{}] by user [{}]&quot;,
         feedbackId,
-<span class="fc" id="L74">        principal.getName(),</span>
-        userCategory);
-<span class="fc" id="L76">    return ResponseEntity.ok(</span>
-<span class="fc" id="L77">        feedbackDetailsDTOMapper.toDTO(</span>
-<span class="fc" id="L78">            feedbackService.getFeedbackDetails(feedbackId, userCategory)));</span>
+<span class="fc" id="L71">        principal.getName());</span>
+<span class="fc" id="L72">    return ResponseEntity.ok(</span>
+<span class="fc" id="L73">        feedbackDetailsDTOMapper.toDTO(feedbackService.getFeedbackDetails(feedbackId)));</span>
   }
 
   @PutMapping(&quot;/{feedbackId}&quot;)
@@ -83,21 +78,21 @@ public class FeedbackController {
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @Valid @RequestBody UpdateFeedbackRequest request) {
-<span class="fc" id="L86">    log.debug(</span>
-<span class="fc" id="L87">        &quot;Received request to update feedback [{}] by user [{}]&quot;, feedbackId, principal.getName());</span>
-<span class="fc" id="L88">    feedbackService.updateFeedback(feedbackId, request.feedback());</span>
-<span class="fc" id="L89">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L81">    log.debug(</span>
+<span class="fc" id="L82">        &quot;Received request to update feedback [{}] by user [{}]&quot;, feedbackId, principal.getName());</span>
+<span class="fc" id="L83">    feedbackService.updateFeedback(feedbackId, request.feedback());</span>
+<span class="fc" id="L84">    return ResponseEntity.noContent().build();</span>
   }
 
   @PostMapping(&quot;/{declaredActivityId}/ask-for-feedback&quot;)
   public ResponseEntity&lt;FeedbackDetailsDTO&gt; askForFeedback(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L95">    log.debug(</span>
+<span class="fc" id="L90">    log.debug(</span>
         &quot;Received request to ask for feedback on declared activity [{}] by student [{}]&quot;,
         declaredActivityId,
-<span class="fc" id="L98">        principal.getName());</span>
-<span class="fc" id="L99">    return ResponseEntity.status(HttpStatus.CREATED)</span>
-<span class="fc" id="L100">        .body(feedbackDetailsDTOMapper.toDTO(feedbackService.createFeedback(declaredActivityId)));</span>
+<span class="fc" id="L93">        principal.getName());</span>
+<span class="fc" id="L94">    return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="fc" id="L95">        .body(feedbackDetailsDTOMapper.toDTO(feedbackService.createFeedback(declaredActivityId)));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
