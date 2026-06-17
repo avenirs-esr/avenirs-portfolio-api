@@ -3,21 +3,20 @@
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-<span class="fc" id="L10">public record TraceDetailData(</span>
+<span class="fc" id="L9">public record TraceDetailData(</span>
     UUID id,
     String title,
     boolean isAssociated,
+    boolean isDeletable,
     String programName,
     ETraceAuthorType authorType,
     String aiUseJustification,
     String personalNote,
     Optional&lt;String&gt; link,
     Optional&lt;File&gt; attachment,
-    List&lt;TraceDeclaredActivityData&gt; lockedDeclaredActivities,
     Instant createdAt,
     Instant updatedAt) {}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

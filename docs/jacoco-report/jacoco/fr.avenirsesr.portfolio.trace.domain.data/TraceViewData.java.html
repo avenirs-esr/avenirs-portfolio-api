@@ -2,15 +2,14 @@
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-<span class="fc" id="L9">public record TraceViewData(</span>
+<span class="fc" id="L8">public record TraceViewData(</span>
     UUID id,
     String title,
     boolean isAssociated,
-    List&lt;TraceDeclaredActivityData&gt; lockedDeclaredActivities,
+    boolean isDeletable,
     Instant createdAt,
     Instant updatedAt,
     Optional&lt;LocalDate&gt; willBeDeletedAt) {}
