@@ -87,9 +87,9 @@ public class TraceController {
       Principal principal, @RequestBody List&lt;UUID&gt; tracesIds) {
 <span class="fc" id="L88">    log.debug(&quot;Received request to delete trace [{}] of user [{}]&quot;, tracesIds, principal.getName());</span>
 
-<span class="fc" id="L90">    traceService.deleteAllByIds(tracesIds);</span>
+<span class="nc" id="L90">    traceService.deleteAllByIds(tracesIds);</span>
 
-<span class="fc" id="L92">    return ResponseEntity.ok(&quot;Resource successfully deleted.&quot;);</span>
+<span class="nc" id="L92">    return ResponseEntity.ok(&quot;Resource successfully deleted.&quot;);</span>
   }
 
   @GetMapping(&quot;/summary&quot;)
