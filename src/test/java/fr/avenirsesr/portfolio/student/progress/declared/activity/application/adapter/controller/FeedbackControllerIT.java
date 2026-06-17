@@ -96,6 +96,20 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     return BASE_PATH + "/" + userCategory + "/" + feedbackId;
   }
 
+  private void updateFeedbackWithText(String feedbackId, String feedbackText) {
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + feedbackId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue("{\"feedback\": \"" + feedbackText + "\"}")
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+  }
+
   // ── POST /{declaredActivityId}/ask-for-feedback ─────────────────────
 
   @Test
@@ -430,6 +444,121 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     for (JsonNode item : data) {
       assertThat(item.get("status").asText()).isEqualTo("NEW");
     }
+  }
+
+  // ── POST /{feedbackId}/submit ────────────────────────────────────────
+
+  @Test
+  @Transactional
+  void shouldSubmitFeedbackSuccessfully() throws Exception {
+    BddLogger.given("a staff/student who asked for feedback and set a feedback text on it");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+    updateFeedbackWithText(feedbackId, "Excellent travail !");
+
+    BddLogger.when("the staff author submits the feedback");
+    BddLogger.then("204 No Content is returned and the feedback status becomes SUBMITTED");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + feedbackId + "/submit")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn400WhenFeedbackTextIsNullOnSubmit() throws Exception {
+    BddLogger.given("a feedback that was never updated — its feedback text is null");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("the staff author tries to submit the feedback without setting a text");
+    BddLogger.then("400 Bad Request is returned");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + feedbackId + "/submit")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isBadRequest();
+  }
+
+  @Test
+  void shouldReturn404WhenFeedbackNotFoundOnSubmit() {
+    BddLogger.given("a non-existent feedback ID");
+    BddLogger.when("the staff tries to submit it");
+    BddLogger.then("404 Not Found is returned");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + notFoundId + "/submit")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnSubmit() {
+    BddLogger.given("the POST /me/activity-progress/feedbacks/{feedbackId}/submit endpoint");
+    BddLogger.when("performing a POST without authentication headers");
+    BddLogger.then("401 Unauthorized is returned");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + notFoundId + "/submit")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn403WhenNonStaffUserTriesToSubmit() throws Exception {
+    BddLogger.given("a feedback and a user who is not registered as staff");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("the non-staff user tries to submit the feedback");
+    BddLogger.then("403 Forbidden is returned");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + feedbackId + "/submit")
+        .header("X-Signed-Context", otherStudentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn403WhenStaffIsNotAuthorOnSubmit() throws Exception {
+    BddLogger.given("a feedback on an activity whose author is not the currently logged-in staff");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+    updateFeedbackWithText(feedbackId, "Quelques remarques.");
+
+    BddLogger.when("a different staff (not the activity author) tries to submit");
+    BddLogger.then("403 Forbidden is returned");
+
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + feedbackId + "/submit")
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
   }
 
   @Test

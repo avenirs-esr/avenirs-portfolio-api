@@ -34,7 +34,7 @@
     },
     "authorStaffId": "5fcd76c5-017c-4d61-99d2-62a6f199c94e",
     "traceAllowedAssociations": -1,
-    "feedbackAllowedIterations": 7,
+    "feedbackAllowedIterations": 70,
     "enableReflection": false,
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"

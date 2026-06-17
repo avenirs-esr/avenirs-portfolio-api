@@ -99,4 +99,13 @@ public class FeedbackController {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(feedbackDetailsDTOMapper.toDTO(feedbackService.createFeedback(declaredActivityId)));
   }
+
+  @PostMapping("/{feedbackId}/submit")
+  public ResponseEntity<Void> submitFeedback(
+      Principal principal, @Valid @PathVariable UUID feedbackId) {
+    log.debug(
+        "Received request to submit feedback [{}] by user [{}]", feedbackId, principal.getName());
+    feedbackService.submitFeedback(feedbackId);
+    return ResponseEntity.noContent().build();
+  }
 }

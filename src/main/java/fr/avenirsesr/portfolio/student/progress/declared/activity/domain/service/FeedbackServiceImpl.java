@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.RICH_DESCRIPTION_LENGTH;
+import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.requireNotNull;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalEnrichedTextMaxLength;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
@@ -187,5 +188,23 @@ public class FeedbackServiceImpl implements FeedbackService {
       EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria) {
     var staff = loggedInUserService.getLoggedInStaff();
     return feedbackRepository.findByStaff(staff.getId(), statusFilter, activityId, pageCriteria);
+  }
+
+  @Override
+  public void submitFeedback(UUID feedbackId) {
+    Feedback feedback =
+        feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);
+
+    Staff loggedInStaff = loggedInUserService.getLoggedInStaff();
+    Staff author = feedback.getDeclaredActivity().getActivity().getAuthor();
+
+    if (!loggedInStaff.equals(author)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    requireNotNull("feedback", feedback.getFeedback().orElse(null));
+
+    feedback.setStatus(EFeedbackStatus.SUBMITTED);
+    feedbackRepository.save(feedback);
   }
 }

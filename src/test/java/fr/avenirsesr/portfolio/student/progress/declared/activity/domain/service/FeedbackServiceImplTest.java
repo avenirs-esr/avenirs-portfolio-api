@@ -31,7 +31,10 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.Decl
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.user.domain.exception.UserIsNotStaffException;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
@@ -807,6 +810,164 @@ class FeedbackServiceImplTest {
 
       BddLogger.then("A FieldValidationException is thrown and nothing is saved");
       assertThatThrownBy(() -> service.updateFeedback(feedbackId, tooLongFeedback))
+          .isInstanceOf(FieldValidationException.class);
+
+      verify(feedbackRepository, never()).save(any());
+    }
+  }
+
+  @Nested
+  class SubmitFeedback {
+
+    @Test
+    void should_set_status_to_SUBMITTED_and_save_when_staff_is_author_and_feedback_is_not_null() {
+      BddLogger.given(
+          "A logged-in staff who is the author of the activity and a feedback with non-null text");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, "Ma réflexion", null, null, null);
+      Feedback feedback =
+          Feedback.toDomain(
+              feedbackId,
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              "Ma réflexion",
+              "Bon travail !",
+              EFeedbackStatus.IN_PROCESS,
+              1,
+              List.of(),
+              List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(feedbackRepository.save(any(Feedback.class))).thenAnswer(i -> i.getArguments()[0]);
+
+      BddLogger.when("submitFeedback is called");
+      service.submitFeedback(feedbackId);
+
+      BddLogger.then("The feedback status is set to SUBMITTED and the feedback is saved");
+      verify(feedbackRepository).save(feedbackCaptor.capture());
+      Feedback saved = feedbackCaptor.getValue();
+      assertThat(saved.getStatus()).isEqualTo(EFeedbackStatus.SUBMITTED);
+      assertThat(saved.getId()).isEqualTo(feedbackId);
+    }
+
+    @Test
+    void should_throw_FeedbackNotFoundException_when_feedback_does_not_exist() {
+      BddLogger.given("A non-existent feedback ID");
+      UUID feedbackId = UUID.randomUUID();
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.empty());
+
+      BddLogger.when("submitFeedback is called");
+
+      BddLogger.then("A FeedbackNotFoundException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.submitFeedback(feedbackId))
+          .isInstanceOf(FeedbackNotFoundException.class);
+
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void should_throw_UserIsNotStaffException_when_logged_in_user_is_not_staff() {
+      BddLogger.given("A logged-in user who is not registered as staff");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+      Feedback feedback =
+          Feedback.toDomain(
+              feedbackId,
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              "Bon travail !",
+              EFeedbackStatus.IN_PROCESS,
+              1,
+              List.of(),
+              List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+
+      BddLogger.when("submitFeedback is called");
+
+      BddLogger.then("A UserIsNotStaffException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.submitFeedback(feedbackId))
+          .isInstanceOf(UserIsNotStaffException.class);
+
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void should_throw_UserNotAuthorizedException_when_staff_is_not_the_author() {
+      BddLogger.given("A logged-in staff who is NOT the author of the activity");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff differentStaff = StaffFixture.create().toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+      Feedback feedback =
+          Feedback.toDomain(
+              feedbackId,
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              "Bon travail !",
+              EFeedbackStatus.IN_PROCESS,
+              1,
+              List.of(),
+              List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(differentStaff);
+
+      BddLogger.when("submitFeedback is called");
+
+      BddLogger.then("A UserNotAuthorizedException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.submitFeedback(feedbackId))
+          .isInstanceOf(UserNotAuthorizedException.class);
+
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void should_throw_FieldValidationException_when_feedback_text_is_null() {
+      BddLogger.given("A logged-in staff who is the author but the feedback text field is null");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+      Feedback feedback =
+          Feedback.toDomain(
+              feedbackId,
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              null,
+              EFeedbackStatus.NEW,
+              1,
+              List.of(),
+              List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+
+      BddLogger.when("submitFeedback is called");
+
+      BddLogger.then("A FieldValidationException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.submitFeedback(feedbackId))
           .isInstanceOf(FieldValidationException.class);
 
       verify(feedbackRepository, never()).save(any());

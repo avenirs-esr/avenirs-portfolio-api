@@ -20,4 +20,6 @@ public interface FeedbackService {
 
   PagedResult<Feedback> getStaffFeedbacks(
       EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria);
+
+  void submitFeedback(UUID feedbackId);
 }

@@ -291,4 +291,35 @@ class FeedbackControllerTest {
     verify(feedbackService, times(1)).updateFeedback(feedbackId, feedbackText);
     verifyNoMoreInteractions(feedbackService);
   }
+
+  @Test
+  void submitFeedback_should_return_204_no_content() {
+    BddLogger.given("A valid feedback ID and a staff ready to submit");
+
+    UUID feedbackId = UUID.randomUUID();
+    doNothing().when(feedbackService).submitFeedback(feedbackId);
+
+    BddLogger.when("submitFeedback is called");
+    ResponseEntity<Void> response = controller.submitFeedback(principal, feedbackId);
+
+    BddLogger.then("204 No Content is returned with no body");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    assertThat(response.getBody()).isNull();
+
+    verify(feedbackService).submitFeedback(feedbackId);
+  }
+
+  @Test
+  void submitFeedback_should_delegate_to_service_with_correct_feedback_id() {
+    BddLogger.given("A feedback ID");
+
+    UUID feedbackId = UUID.randomUUID();
+
+    BddLogger.when("submitFeedback is called");
+    controller.submitFeedback(principal, feedbackId);
+
+    BddLogger.then("The service is called exactly once with the correct feedback ID");
+    verify(feedbackService, times(1)).submitFeedback(feedbackId);
+    verifyNoMoreInteractions(feedbackService);
+  }
 }
