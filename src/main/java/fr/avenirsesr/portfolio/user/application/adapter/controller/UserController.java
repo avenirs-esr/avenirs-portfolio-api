@@ -4,6 +4,7 @@ import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOr
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
+import fr.avenirsesr.portfolio.user.application.adapter.dto.QuickLinksDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
 import fr.avenirsesr.portfolio.user.application.adapter.request.NotificationPreferencesRequest;
 import fr.avenirsesr.portfolio.user.application.adapter.request.ProfileUpdateRequest;
@@ -57,6 +58,27 @@ public class UserController {
 
     String baseUrl = extractOrigin(request);
     return ResponseEntity.ok(profileOverviewMapper.userDomainToDto(overview, baseUrl));
+  }
+
+  @GetMapping("/{userCategory}/quick-links")
+  public ResponseEntity<QuickLinksDTO> getQuickLinks(
+      @Valid
+          @Parameter(
+              name = "userCategory",
+              in = ParameterIn.PATH,
+              required = true,
+              schema = @Schema(ref = "#/components/schemas/EUserCategory"))
+          @PathVariable
+          EUserCategory userCategory) {
+    var data = userService.getQuickLinks(userCategory);
+    return ResponseEntity.ok(
+        new QuickLinksDTO(
+            data.userId(),
+            data.firstname(),
+            data.lastname(),
+            data.hasUnseenNotification(),
+            data.unreadNotifications(),
+            data.notificationEnabled()));
   }
 
   @PutMapping("/{userCategory}/update")

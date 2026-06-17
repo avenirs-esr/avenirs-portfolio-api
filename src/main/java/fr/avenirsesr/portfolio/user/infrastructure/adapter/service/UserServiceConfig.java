@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.service;
 
+import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
@@ -22,6 +23,7 @@ public class UserServiceConfig {
   private final StudentService studentService;
   private final ExternalUserClient externalUserClient;
   private final LoggedInUserService loggedInUserService;
+  private final NotificationRepository notificationRepository;
 
   @Bean
   public UserService userService() {
@@ -32,6 +34,7 @@ public class UserServiceConfig {
             staffService,
             studentService,
             externalUserClient,
-            loggedInUserService));
+            loggedInUserService,
+            notificationRepository));
   }
 }

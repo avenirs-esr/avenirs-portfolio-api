@@ -34,4 +34,13 @@ public class NotificationDatabaseRepository
         PageRequest.of(
             pageCriteria.page(), pageCriteria.pageSize(), Sort.by("createdAt").descending()));
   }
+
+  @Override
+  public long countUnreadByUserAndCategory(UUID userId, EUserCategory userCategory) {
+    var specification =
+        NotificationSpecification.hasUser(userId)
+            .and(NotificationSpecification.hasUserCategoryNullOrEquals(userCategory))
+            .and(NotificationSpecification.isNotSeen());
+    return jpaSpecificationExecutor.count(specification);
+  }
 }

@@ -7,7 +7,9 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
 import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
+import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -27,6 +29,7 @@ public class UserServiceImpl implements UserService {
   private final StudentService studentService;
   private final ExternalUserClient externalUserClient;
   private final LoggedInUserService loggedInUserService;
+  private final NotificationRepository notificationRepository;
 
   @Override
   public User getUser(UUID id) {
@@ -77,6 +80,33 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
     userPrincipalRepository.saveOrUpdate(user, eppn);
     return user;
+  }
+
+  @Override
+  public UserQuickLinksData getQuickLinks(EUserCategory userCategory) {
+    User user;
+    boolean hasUnseenNotification =
+        switch (userCategory) {
+          case STUDENT -> {
+            var student = loggedInUserService.getLoggedInStudent();
+            user = student.getUser();
+            yield student.isHasUnseenNotification();
+          }
+          case STAFF -> {
+            var staff = loggedInUserService.getLoggedInStaff();
+            user = staff.getUser();
+            yield staff.isHasUnseenNotification();
+          }
+        };
+    int unreadNotifications =
+        (int) notificationRepository.countUnreadByUserAndCategory(user.getId(), userCategory);
+    return new UserQuickLinksData(
+        user.getId(),
+        user.getFirstName(),
+        user.getLastName(),
+        hasUnseenNotification,
+        unreadNotifications,
+        user.isNotificationEnabled());
   }
 
   private User createUserFromExternalUser(String eppn) {

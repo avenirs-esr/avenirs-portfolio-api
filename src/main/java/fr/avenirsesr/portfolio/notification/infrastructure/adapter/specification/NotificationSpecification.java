@@ -18,4 +18,8 @@ public final class NotificationSpecification {
     return (root, query, cb) ->
         cb.or(root.get("userCategory").isNull(), cb.equal(root.get("userCategory"), userCategory));
   }
+
+  public static Specification<NotificationEntity> isNotSeen() {
+    return (root, query, cb) -> cb.isFalse(root.get("seen"));
+  }
 }

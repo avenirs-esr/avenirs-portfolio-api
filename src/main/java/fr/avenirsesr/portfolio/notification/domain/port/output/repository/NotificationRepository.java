@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface NotificationRepository extends GenericRepositoryPort<Notification> {
   PagedResult<Notification> findByUserAndCategory(
       UUID userId, EUserCategory userCategory, PageCriteria pageCriteria);
+
+  long countUnreadByUserAndCategory(UUID userId, EUserCategory userCategory);
 }

@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.user.domain.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -12,12 +13,15 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.common.user.application.adapter.dto.ExternalUserDTO;
 import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
 import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
+import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.output.client.ExternalUserClient;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserPrincipalRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.util.Optional;
@@ -36,6 +40,7 @@ class UserServiceImplTest {
   @Mock private StudentService studentService;
   @Mock private ExternalUserClient externalUserClient;
   @Mock private LoggedInUserService loggedInUserService;
+  @Mock private NotificationRepository notificationRepository;
 
   private UserServiceImpl userService;
   private User loggedUser;
@@ -51,7 +56,8 @@ class UserServiceImplTest {
             staffService,
             studentService,
             externalUserClient,
-            loggedInUserService);
+            loggedInUserService,
+            notificationRepository);
   }
 
   @Nested
@@ -370,6 +376,103 @@ class UserServiceImplTest {
       verify(userRepository).save(userCaptor.capture());
 
       assertFalse(userCaptor.getValue().isNotificationEnabled());
+    }
+  }
+
+  @Nested
+  class GetQuickLinks {
+
+    @Test
+    void shouldReturnQuickLinksDataForStudent() {
+      var user =
+          UserFixture.create()
+              .withFirstName("Lucas")
+              .withLastName("Tessier")
+              .withNotificationEnabled(true)
+              .toModel();
+      var student =
+          StudentFixture.create()
+              .withId(user.getId())
+              .withUser(user)
+              .withHasUnseenNotification(true)
+              .toModel();
+
+      BddLogger.given("a logged student with unseen notifications and 3 unread messages");
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(notificationRepository.countUnreadByUserAndCategory(user.getId(), EUserCategory.STUDENT))
+          .thenReturn(3L);
+
+      BddLogger.when("getting quick links for STUDENT category");
+      UserQuickLinksData result = userService.getQuickLinks(EUserCategory.STUDENT);
+
+      BddLogger.then("it should return the correct quick links data");
+      assertThat(result.userId()).isEqualTo(user.getId());
+      assertThat(result.firstname()).isEqualTo("Lucas");
+      assertThat(result.lastname()).isEqualTo("Tessier");
+      assertThat(result.hasUnseenNotification()).isTrue();
+      assertThat(result.unreadNotifications()).isEqualTo(3);
+      assertThat(result.notificationEnabled()).isTrue();
+
+      verify(loggedInUserService).getLoggedInStudent();
+      verify(notificationRepository)
+          .countUnreadByUserAndCategory(user.getId(), EUserCategory.STUDENT);
+      verifyNoInteractions(staffService);
+    }
+
+    @Test
+    void shouldReturnQuickLinksDataForStaff() {
+      var user =
+          UserFixture.create()
+              .withFirstName("Marie")
+              .withLastName("Dupont")
+              .withNotificationEnabled(false)
+              .toModel();
+      var staff =
+          StaffFixture.create()
+              .withId(user.getId())
+              .withUser(user)
+              .withHasUnseenNotification(false)
+              .toModel();
+
+      BddLogger.given("a logged staff member with no unseen notifications and 0 unread messages");
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(notificationRepository.countUnreadByUserAndCategory(user.getId(), EUserCategory.STAFF))
+          .thenReturn(0L);
+
+      BddLogger.when("getting quick links for STAFF category");
+      UserQuickLinksData result = userService.getQuickLinks(EUserCategory.STAFF);
+
+      BddLogger.then("it should return the correct quick links data");
+      assertThat(result.userId()).isEqualTo(user.getId());
+      assertThat(result.firstname()).isEqualTo("Marie");
+      assertThat(result.lastname()).isEqualTo("Dupont");
+      assertThat(result.hasUnseenNotification()).isFalse();
+      assertThat(result.unreadNotifications()).isZero();
+      assertThat(result.notificationEnabled()).isFalse();
+
+      verify(loggedInUserService).getLoggedInStaff();
+      verify(notificationRepository)
+          .countUnreadByUserAndCategory(user.getId(), EUserCategory.STAFF);
+      verifyNoInteractions(studentService);
+    }
+
+    @Test
+    void shouldReturnZeroUnreadNotificationsWhenRepositoryReturnsZero() {
+      var student = StudentFixture.create().withHasUnseenNotification(false).toModel();
+      var user = UserFixture.create().withId(student.getId()).toModel();
+
+      BddLogger.given("a student with no unread notifications");
+      when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+      when(notificationRepository.countUnreadByUserAndCategory(user.getId(), EUserCategory.STUDENT))
+          .thenReturn(0L);
+
+      BddLogger.when("getting quick links for STUDENT");
+      UserQuickLinksData result = userService.getQuickLinks(EUserCategory.STUDENT);
+
+      BddLogger.then(
+          "unreadNotifications should be zero and hasUnseenNotification should be false");
+      assertThat(result.unreadNotifications()).isZero();
+      assertThat(result.hasUnseenNotification()).isFalse();
     }
   }
 

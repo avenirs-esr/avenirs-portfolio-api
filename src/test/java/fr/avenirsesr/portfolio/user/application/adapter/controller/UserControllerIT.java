@@ -230,6 +230,86 @@ public class UserControllerIT extends ContainerConfigurationTest {
   }
 
   @Nested
+  class GetQuickLinks {
+
+    @Test
+    void shouldGetStudentQuickLinks() {
+      BddLogger.given("the /me/users/STUDENT/quick-links endpoint");
+      BddLogger.when("performing a GET as a student");
+      BddLogger.then("it should return the student quick links data");
+
+      webTestClient
+          .get()
+          .uri("/me/users/STUDENT/quick-links")
+          .header("X-Signed-Context", studentPayload)
+          .header("X-Context-Kid", secretKey)
+          .header("X-Context-Signature", studentSignature)
+          .exchange()
+          .expectStatus()
+          .isOk()
+          .expectBody()
+          .jsonPath("$.userId")
+          .exists()
+          .jsonPath("$.firstname")
+          .exists()
+          .jsonPath("$.lastname")
+          .exists()
+          .jsonPath("$.hasUnseenNotification")
+          .isEqualTo(false)
+          .jsonPath("$.unreadNotifications")
+          .isNumber()
+          .jsonPath("$.notificationEnabled")
+          .isBoolean();
+    }
+
+    @Test
+    void shouldGetStaffQuickLinks() {
+      BddLogger.given("the /me/users/STAFF/quick-links endpoint");
+      BddLogger.when("performing a GET as a staff member");
+      BddLogger.then("it should return the staff quick links data");
+
+      webTestClient
+          .get()
+          .uri("/me/users/STAFF/quick-links")
+          .header("X-Signed-Context", staffPayload)
+          .header("X-Context-Kid", secretKey)
+          .header("X-Context-Signature", staffSignature)
+          .exchange()
+          .expectStatus()
+          .isOk()
+          .expectBody()
+          .jsonPath("$.userId")
+          .exists()
+          .jsonPath("$.hasUnseenNotification")
+          .isEqualTo(false)
+          .jsonPath("$.unreadNotifications")
+          .isNumber()
+          .jsonPath("$.notificationEnabled")
+          .isBoolean();
+    }
+
+    @Test
+    void shouldReturnUnauthorizedForUnknownUserOnQuickLinks() {
+      BddLogger.given("the /me/users/STUDENT/quick-links endpoint");
+      BddLogger.when("performing a GET with an unknown user");
+      BddLogger.then("it should return 401");
+
+      webTestClient
+          .get()
+          .uri("/me/users/STUDENT/quick-links")
+          .header("X-Signed-Context", unknownPayload)
+          .header("X-Context-Kid", secretKey)
+          .header("X-Context-Signature", unknownSignature)
+          .exchange()
+          .expectStatus()
+          .isUnauthorized()
+          .expectBody()
+          .jsonPath("$.code")
+          .isEqualTo("USER_NOT_AUTHORIZED");
+    }
+  }
+
+  @Nested
   class UpdateNotificationPreferences {
 
     @Test
