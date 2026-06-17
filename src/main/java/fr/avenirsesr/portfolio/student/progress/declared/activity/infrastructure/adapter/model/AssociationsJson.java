@@ -20,8 +20,7 @@ public record AssociationsJson(
       String personalNote,
       String link,
       Instant createdAt,
-      Instant updatedAt,
-      Instant deletedAt) {}
+      Instant updatedAt) {}
 
   public record DeclaredSkillProgressSnapshot(
       UUID id,

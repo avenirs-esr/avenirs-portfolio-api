@@ -23,8 +23,7 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
         trace.getLink().orElse(null),
         trace.getAttachment().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         trace.getCreatedAt(),
-        trace.getUpdatedAt(),
-        trace.getDeletedAt().orElse(null));
+        trace.getUpdatedAt());
   }
 
   @Override
@@ -42,7 +41,6 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
             : FileMapper.INSTANCE.toDomain(traceEntity.getAttachment()),
         traceEntity.getCreatedAt(),
         traceEntity.getUpdatedAt(),
-        traceEntity.getDeletedAt(),
         traceEntity.getLanguage());
   }
 
@@ -62,7 +60,6 @@ public class TraceMapper implements Mapper<TraceEntity, Trace> {
             : null,
         traceEntity.getCreatedAt(),
         traceEntity.getUpdatedAt(),
-        traceEntity.getDeletedAt(),
         traceEntity.getLanguage());
   }
 }

@@ -19,38 +19,39 @@ class TraceViewMapperTest {
 
   @Test
   void shouldMapTraceViewDataToDTO() {
-    BddLogger.given("a trace view data with an optional deletion date");
+    BddLogger.given("a trace view data with locked declared activities");
 
     UUID id = UUID.randomUUID();
     LocalDate deletionDate = LocalDate.now().plusDays(30);
+    UUID activityId = UUID.randomUUID();
+    Instant createdAt = Instant.now();
+    Instant updatedAt = Instant.now();
 
     TraceViewData data =
-        new TraceViewData(
-            id, "My Trace", true, false, Instant.now(), Instant.now(), Optional.of(deletionDate));
+        new TraceViewData(id, "My Trace", true, createdAt, updatedAt, Optional.of(deletionDate));
 
     BddLogger.when("mapping to TraceViewDTO");
     TraceViewDTO dto = mapper.toDTO(data);
 
-    BddLogger.then("it should map all fields and unwrap Optional deletion date");
+    BddLogger.then("it should map all fields");
 
     assertNotNull(dto);
     assertEquals(id, dto.id());
     assertEquals("My Trace", dto.title());
     assertTrue(dto.isAssociated());
-    assertFalse(dto.isDeletable());
-    assertEquals(deletionDate, dto.willBeDeletedAt());
+    assertEquals(createdAt, dto.createdAt());
+    assertEquals(updatedAt, dto.updatedAt());
   }
 
   @Test
-  void shouldMapEmptyOptionalDeletionDateToNull() {
-    BddLogger.given("a trace view data without a deletion date");
+  void shouldMapTraceViewDataWithEmptyLockedDeclaredActivities() {
+    BddLogger.given("a trace view data without locked declared activities");
 
     TraceViewData data =
         new TraceViewData(
             UUID.randomUUID(),
             "Other Trace",
             false,
-            true,
             Instant.now(),
             Instant.now(),
             Optional.empty());
@@ -58,33 +59,26 @@ class TraceViewMapperTest {
     BddLogger.when("mapping to TraceViewDTO");
     TraceViewDTO dto = mapper.toDTO(data);
 
-    BddLogger.then("it should return null for willBeDeletedAt");
+    BddLogger.then("it should map an empty locked declared activities list");
 
     assertNotNull(dto);
     assertFalse(dto.isAssociated());
-    assertTrue(dto.isDeletable());
-    assertNull(dto.willBeDeletedAt());
   }
 
   @Test
   void shouldMapListOfTraceViewDataToDTOs() {
     BddLogger.given("a list of trace view data");
 
+    UUID firstActivityId = UUID.randomUUID();
+
     List<TraceViewData> dataList =
         List.of(
             new TraceViewData(
-                UUID.randomUUID(),
-                "Trace A",
-                true,
-                false,
-                Instant.now(),
-                Instant.now(),
-                Optional.empty()),
+                UUID.randomUUID(), "Trace A", true, Instant.now(), Instant.now(), Optional.empty()),
             new TraceViewData(
                 UUID.randomUUID(),
                 "Trace B",
                 false,
-                true,
                 Instant.now(),
                 Instant.now(),
                 Optional.empty()));
@@ -92,11 +86,13 @@ class TraceViewMapperTest {
     BddLogger.when("mapping list to DTOs");
     List<TraceViewDTO> dtos = mapper.toDTOs(dataList);
 
-    BddLogger.then("it should return a list of the same size and map isDeletable");
+    BddLogger.then("it should return a list of the same size and map locked declared activities");
 
     assertNotNull(dtos);
     assertEquals(2, dtos.size());
-    assertFalse(dtos.get(0).isDeletable());
-    assertTrue(dtos.get(1).isDeletable());
+
+    assertTrue(dtos.getFirst().isAssociated());
+
+    assertFalse(dtos.get(1).isAssociated());
   }
 }

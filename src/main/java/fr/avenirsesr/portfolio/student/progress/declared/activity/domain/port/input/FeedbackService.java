@@ -7,6 +7,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface FeedbackService {
@@ -22,4 +24,7 @@ public interface FeedbackService {
       EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria);
 
   void submitFeedback(UUID feedbackId);
+
+  Set<UUID> findAttachmentIdsUsedByTraceSnapshots(
+      List<UUID> declaredActivityIds, List<UUID> traceIds);
 }

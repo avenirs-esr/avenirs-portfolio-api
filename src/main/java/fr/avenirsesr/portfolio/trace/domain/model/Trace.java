@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.trace.domain.model;
 
-import fr.avenirsesr.portfolio.common.data.domain.model.DeletableAvenirsBaseModel;
+import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.File;
@@ -14,7 +14,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Trace extends DeletableAvenirsBaseModel {
+public class Trace extends AvenirsBaseModel {
   private final User user;
   private String title;
   private ETraceAuthorType authorType;
@@ -43,9 +43,8 @@ public class Trace extends DeletableAvenirsBaseModel {
       String link,
       File attachment,
       Instant createdAt,
-      Instant updatedAt,
-      Instant deletedAt) {
-    super(id, deletedAt, createdAt, updatedAt);
+      Instant updatedAt) {
+    super(id, createdAt, updatedAt);
     this.user = user;
     this.title = title;
     this.language = language;
@@ -78,8 +77,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         link,
         attachment,
         Instant.now(),
-        Instant.now(),
-        null);
+        Instant.now());
   }
 
   public static Trace toDomain(
@@ -93,7 +91,6 @@ public class Trace extends DeletableAvenirsBaseModel {
       File attachment,
       Instant createdAt,
       Instant updatedAt,
-      Instant deletedAt,
       ELanguage language) {
     return new Trace(
         id,
@@ -106,8 +103,7 @@ public class Trace extends DeletableAvenirsBaseModel {
         link,
         attachment,
         createdAt,
-        updatedAt,
-        deletedAt);
+        updatedAt);
   }
 
   public Optional<String> getAiUseJustification() {

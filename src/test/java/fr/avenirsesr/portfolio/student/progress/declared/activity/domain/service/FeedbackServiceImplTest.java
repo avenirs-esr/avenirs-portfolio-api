@@ -40,6 +40,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -971,6 +972,71 @@ class FeedbackServiceImplTest {
           .isInstanceOf(FieldValidationException.class);
 
       verify(feedbackRepository, never()).save(any());
+    }
+  }
+
+  @Nested
+  class FindAttachmentIdsUsedByTraceSnapshots {
+
+    @Test
+    void should_return_empty_set_when_declared_activity_ids_are_empty() {
+      BddLogger.given("empty declared activity ids and some trace ids");
+
+      List<UUID> declaredActivityIds = List.of();
+      List<UUID> traceIds = List.of(UUID.randomUUID());
+
+      BddLogger.when("findAttachmentIdsUsedByTraceSnapshots is called");
+
+      Set<UUID> result =
+          service.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);
+
+      BddLogger.then("it should return an empty set without calling the repository");
+
+      assertThat(result).isEmpty();
+      verify(feedbackRepository, never())
+          .findAttachmentIdsUsedByTraceSnapshots(anyList(), anyList());
+    }
+
+    @Test
+    void should_return_empty_set_when_trace_ids_are_empty() {
+      BddLogger.given("some declared activity ids and empty trace ids");
+
+      List<UUID> declaredActivityIds = List.of(UUID.randomUUID());
+      List<UUID> traceIds = List.of();
+
+      BddLogger.when("findAttachmentIdsUsedByTraceSnapshots is called");
+
+      Set<UUID> result =
+          service.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);
+
+      BddLogger.then("it should return an empty set without calling the repository");
+
+      assertThat(result).isEmpty();
+      verify(feedbackRepository, never())
+          .findAttachmentIdsUsedByTraceSnapshots(anyList(), anyList());
+    }
+
+    @Test
+    void should_return_repository_result_when_inputs_are_not_empty() {
+      BddLogger.given("declared activity ids and trace ids with matching snapshot attachments");
+
+      List<UUID> declaredActivityIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+      List<UUID> traceIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+      Set<UUID> expectedAttachmentIds = Set.of(UUID.randomUUID(), UUID.randomUUID());
+
+      when(feedbackRepository.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds))
+          .thenReturn(expectedAttachmentIds);
+
+      BddLogger.when("findAttachmentIdsUsedByTraceSnapshots is called");
+
+      Set<UUID> result =
+          service.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);
+
+      BddLogger.then("it should return the repository result");
+
+      assertThat(result).isEqualTo(expectedAttachmentIds);
+      verify(feedbackRepository)
+          .findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);
     }
   }
 }

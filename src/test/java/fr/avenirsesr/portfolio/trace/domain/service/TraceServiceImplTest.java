@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotExistException;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
@@ -15,13 +16,16 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityLockedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.exception.DeclaredExperienceNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.DeclaredExperience;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
@@ -70,6 +74,8 @@ class TraceServiceImplTest {
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private AssociationService associationService;
   @Mock private AssociationSearchHelper associationSearchHelper;
+  @Mock private FeedbackService feedbackService;
+  @Mock private FileRepository fileRepository;
 
   @InjectMocks private TraceServiceImpl traceService;
 
@@ -88,6 +94,14 @@ class TraceServiceImplTest {
                 eq(Trace.class),
                 eq(List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))))
         .thenReturn(List.of());
+
+    lenient()
+        .when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of()))
+        .thenReturn(List.of());
+
+    lenient()
+        .when(declaredActivityService.getDeclaredActivityStatus(List.of()))
+        .thenReturn(Map.of());
   }
 
   @Nested
@@ -96,7 +110,7 @@ class TraceServiceImplTest {
     @BeforeEach
     void setupGiven() {
       BddLogger.given("a connected student");
-      when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
+      lenient().when(loggedInUserService.getLoggedInUser()).thenReturn(student.getUser());
     }
 
     @Nested
@@ -197,7 +211,6 @@ class TraceServiceImplTest {
         var returnedTrace = result.content().getFirst();
 
         assertTrue(returnedTrace.isAssociated());
-        assertTrue(returnedTrace.willBeDeletedAt().isEmpty());
       }
     }
 
@@ -275,8 +288,11 @@ class TraceServiceImplTest {
         assertEquals(title, trace.getTitle());
         assertEquals(language, trace.getLanguage());
         assertEquals(authorType, trace.getAuthorType());
+        assertTrue(trace.getPersonalNote().isPresent());
         assertEquals(personalNote, trace.getPersonalNote().get());
+        assertTrue(trace.getLink().isPresent());
         assertEquals(link, trace.getLink().get());
+        assertTrue(trace.getAiUseJustification().isPresent());
         assertEquals(aiJustification, trace.getAiUseJustification().get());
       }
 
@@ -363,6 +379,8 @@ class TraceServiceImplTest {
         assertEquals("Test Title - Updated", updatedTrace.getTitle());
         assertEquals(ELanguage.FRENCH, updatedTrace.getLanguage());
         assertEquals(ETraceAuthorType.COLLECTIVE, updatedTrace.getAuthorType());
+        assertTrue(updatedTrace.getPersonalNote().isPresent());
+        assertTrue(updatedTrace.getAiUseJustification().isPresent());
         assertEquals("Some personal note - Updated", updatedTrace.getPersonalNote().get());
         assertEquals("Justified by AI - Updated", updatedTrace.getAiUseJustification().get());
       }
@@ -395,6 +413,7 @@ class TraceServiceImplTest {
         ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
         verify(traceRepository).save(captor.capture());
 
+        assertTrue(captor.getValue().getLink().isPresent());
         assertEquals("https://example.com/updated", captor.getValue().getLink().get());
         assertEquals(ETraceAuthorType.THIRD_PARTY, captor.getValue().getAuthorType());
       }
@@ -445,7 +464,6 @@ class TraceServiceImplTest {
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.save(trace)).thenReturn(trace);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
-        mockDeclaredActivityAssociationStatus(trace, EDeclaredActivityStatus.COMPLETED);
 
         TraceDetailData result =
             traceService.updateTrace(
@@ -454,7 +472,6 @@ class TraceServiceImplTest {
         BddLogger.then("it should return a non deletable trace detail");
 
         assertTrue(result.isAssociated());
-        assertFalse(result.isDeletable());
       }
 
       @Test
@@ -466,7 +483,6 @@ class TraceServiceImplTest {
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.save(trace)).thenReturn(trace);
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
-        mockDeclaredActivityAssociationStatus(trace, EDeclaredActivityStatus.IN_PROGRESS);
 
         TraceDetailData result =
             traceService.updateTrace(
@@ -475,7 +491,6 @@ class TraceServiceImplTest {
         BddLogger.then("it should return a deletable trace detail");
 
         assertTrue(result.isAssociated());
-        assertTrue(result.isDeletable());
       }
 
       @Test
@@ -534,52 +549,92 @@ class TraceServiceImplTest {
     class WhenDeletingTrace {
 
       @Test
-      void thenItShouldSoftDeleteTracesAndDeleteAssociations() {
-        BddLogger.when("deleting unlocked traces");
+      void thenItShouldDeleteTracesAssociationsAndFiles() {
+        BddLogger.when("deleting traces with removable attachments");
 
-        Trace trace1 = TraceFixture.create().withUser(student.getUser()).toModel();
-        Trace trace2 = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = mock(Trace.class);
+        File file = mock(File.class);
 
-        List<UUID> traceIds = List.of(trace1.getId(), trace2.getId());
+        UUID traceId = UUID.randomUUID();
+        UUID fileId = UUID.randomUUID();
+        List<UUID> traceIds = List.of(traceId);
 
-        when(traceRepository.findAllById(traceIds)).thenReturn(List.of(trace1, trace2));
-        doNothing().when(declaredActivityService).checkDeclaredActivitiesUnlocked(anyList());
+        when(trace.getId()).thenReturn(traceId);
+        when(trace.getUser()).thenReturn(student.getUser());
+        when(trace.getAttachment()).thenReturn(Optional.of(file));
+        when(file.getId()).thenReturn(fileId);
+
+        when(traceRepository.findAllById(traceIds)).thenReturn(List.of(trace));
+        when(feedbackService.findAttachmentIdsUsedByTraceSnapshots(List.of(), traceIds))
+            .thenReturn(Set.of());
+        when(fileRepository.findAllById(List.of(fileId))).thenReturn(List.of(file));
 
         traceService.deleteAllByIds(traceIds);
 
-        BddLogger.then("it should soft delete traces and delete their associations");
+        BddLogger.then("it should delete files, associations and traces from database");
 
-        assertTrue(trace1.getDeletedAt().isPresent());
-        assertTrue(trace2.getDeletedAt().isPresent());
-
-        verify(declaredActivityService).checkDeclaredActivitiesUnlocked(anyList());
+        verify(fileRepository).removeAllFromDatabase(List.of(file));
         verify(associationService).deleteAllOf(traceIds, Trace.class);
-        verify(traceRepository).saveAll(List.of(trace1, trace2));
+        verify(traceRepository).removeAllFromDatabase(List.of(trace));
       }
 
       @Test
-      void thenItShouldThrowDeclaredActivityLockedExceptionWhenOneTraceIsLocked() {
-        BddLogger.when("deleting traces with locked declared activity association");
+      void thenItShouldNotDeleteProtectedFiles() {
+        BddLogger.when("deleting a trace with an attachment used by a snapshot");
 
-        Trace trace1 = TraceFixture.create().withUser(student.getUser()).toModel();
-        Trace trace2 = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace trace = mock(Trace.class);
+        File file = mock(File.class);
 
-        List<UUID> traceIds = List.of(trace1.getId(), trace2.getId());
+        UUID traceId = UUID.randomUUID();
+        UUID fileId = UUID.randomUUID();
+        List<UUID> traceIds = List.of(traceId);
 
-        when(traceRepository.findAllById(traceIds)).thenReturn(List.of(trace1, trace2));
-        doThrow(new DeclaredActivityLockedException())
-            .when(declaredActivityService)
-            .checkDeclaredActivitiesUnlocked(anyList());
+        when(trace.getId()).thenReturn(traceId);
+        when(trace.getUser()).thenReturn(student.getUser());
+        when(trace.getAttachment()).thenReturn(Optional.of(file));
+        when(file.getId()).thenReturn(fileId);
 
-        assertThrows(
-            DeclaredActivityLockedException.class, () -> traceService.deleteAllByIds(traceIds));
+        when(traceRepository.findAllById(traceIds)).thenReturn(List.of(trace));
+        when(feedbackService.findAttachmentIdsUsedByTraceSnapshots(List.of(), traceIds))
+            .thenReturn(Set.of(fileId));
 
-        BddLogger.then("it should not delete associations and not save traces");
+        traceService.deleteAllByIds(traceIds);
 
-        verify(declaredActivityService).checkDeclaredActivitiesUnlocked(anyList());
+        BddLogger.then("it should keep the protected file but delete associations and traces");
+
+        verify(fileRepository, never()).findAllById(anyList());
+        verify(fileRepository, never()).removeAllFromDatabase(anyList());
+        verify(associationService).deleteAllOf(traceIds, Trace.class);
+        verify(traceRepository).removeAllFromDatabase(List.of(trace));
+      }
+
+      @Test
+      void thenItShouldThrowFileNotFoundWhenAttachmentDoesNotExist() {
+        BddLogger.when("deleting a trace with a missing attachment");
+
+        Trace trace = mock(Trace.class);
+        File file = mock(File.class);
+
+        UUID traceId = UUID.randomUUID();
+        UUID fileId = UUID.randomUUID();
+        List<UUID> traceIds = List.of(traceId);
+
+        when(trace.getId()).thenReturn(traceId);
+        when(trace.getUser()).thenReturn(student.getUser());
+        when(trace.getAttachment()).thenReturn(Optional.of(file));
+        when(file.getId()).thenReturn(fileId);
+
+        when(traceRepository.findAllById(traceIds)).thenReturn(List.of(trace));
+        when(feedbackService.findAttachmentIdsUsedByTraceSnapshots(List.of(), traceIds))
+            .thenReturn(Set.of());
+        when(fileRepository.findAllById(List.of(fileId))).thenReturn(List.of());
+
+        assertThrows(FileNotFoundException.class, () -> traceService.deleteAllByIds(traceIds));
+
+        BddLogger.then("it should not delete associations and traces");
+
         verify(associationService, never()).deleteAllOf(anyList(), any());
-        verify(traceRepository, never()).saveAll(anyList());
-        verify(traceRepository, never()).save(any());
+        verify(traceRepository, never()).removeAllFromDatabase(anyList());
       }
 
       @Test
@@ -597,9 +652,11 @@ class TraceServiceImplTest {
 
         BddLogger.then("it should throw TraceNotFoundException");
 
-        verify(declaredActivityService, never()).checkDeclaredActivitiesUnlocked(anyList());
+        verify(feedbackService, never())
+            .findAttachmentIdsUsedByTraceSnapshots(anyList(), anyList());
+        verify(fileRepository, never()).findAllById(anyList());
         verify(associationService, never()).deleteAllOf(anyList(), any());
-        verify(traceRepository, never()).saveAll(anyList());
+        verify(traceRepository, never()).removeAllFromDatabase(anyList());
       }
 
       @Test
@@ -618,9 +675,11 @@ class TraceServiceImplTest {
 
         BddLogger.then("it should throw UserNotAuthorizedException");
 
-        verify(declaredActivityService, never()).checkDeclaredActivitiesUnlocked(anyList());
+        verify(feedbackService, never())
+            .findAttachmentIdsUsedByTraceSnapshots(anyList(), anyList());
+        verify(fileRepository, never()).findAllById(anyList());
         verify(associationService, never()).deleteAllOf(anyList(), any());
-        verify(traceRepository, never()).saveAll(anyList());
+        verify(traceRepository, never()).removeAllFromDatabase(anyList());
       }
     }
 
@@ -641,7 +700,6 @@ class TraceServiceImplTest {
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
-        mockDeclaredActivityAssociationStatus(trace, EDeclaredActivityStatus.IN_PROGRESS);
 
         TraceDetailData result = traceService.getTraceDetail(trace.getId());
 
@@ -650,7 +708,6 @@ class TraceServiceImplTest {
         assertEquals(trace.getId(), result.id());
         assertEquals("Trace title", result.title());
         assertTrue(result.isAssociated());
-        assertTrue(result.isDeletable());
         assertEquals(EPortfolioType.LIFE_PROJECT.name(), result.programName());
         assertEquals(ETraceAuthorType.PERSONAL, result.authorType());
       }
@@ -663,14 +720,12 @@ class TraceServiceImplTest {
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
         when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, true));
-        mockDeclaredActivityAssociationStatus(trace, EDeclaredActivityStatus.COMPLETED);
 
         TraceDetailData result = traceService.getTraceDetail(trace.getId());
 
         BddLogger.then("it should return a non deletable trace detail");
 
         assertTrue(result.isAssociated());
-        assertFalse(result.isDeletable());
       }
 
       @Test
@@ -687,7 +742,6 @@ class TraceServiceImplTest {
         BddLogger.then("it should return a deletable trace detail");
 
         assertFalse(result.isAssociated());
-        assertTrue(result.isDeletable());
         verify(declaredActivityService, never()).findAllDeclaredActivitiesByIds(anyList());
         verify(declaredActivityService, never()).getDeclaredActivityStatus(anyList());
       }
@@ -1058,25 +1112,184 @@ class TraceServiceImplTest {
         verify(associationService, never()).deleteAllByIds(any());
       }
     }
+
+    @Nested
+    class WhenGettingLockedDeclaredActivities {
+
+      @Test
+      void thenItShouldReturnLockedDeclaredActivitiesGroupedByTrace() {
+        BddLogger.when("getting locked declared activities for traces");
+
+        Trace firstTrace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace secondTrace = TraceFixture.create().withUser(student.getUser()).toModel();
+
+        UUID firstDeclaredActivityId = UUID.randomUUID();
+        UUID secondDeclaredActivityId = UUID.randomUUID();
+
+        DeclaredActivity firstDeclaredActivity =
+            mockDeclaredActivityWithTitle(firstDeclaredActivityId, "Submitted activity");
+        DeclaredActivity secondDeclaredActivity = mock(DeclaredActivity.class);
+
+        List<UUID> traceIds = List.of(firstTrace.getId(), secondTrace.getId());
+
+        when(traceRepository.findAllById(traceIds)).thenReturn(List.of(firstTrace, secondTrace));
+
+        when(associationService.getAllOf(
+                eq(traceIds),
+                eq(Trace.class),
+                eq(List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))))
+            .thenReturn(
+                List.of(
+                    Association.create(
+                        firstDeclaredActivityId,
+                        firstTrace.getId(),
+                        EAssociationType.DECLARED_ACTIVITY_TRACE),
+                    Association.create(
+                        secondDeclaredActivityId,
+                        secondTrace.getId(),
+                        EAssociationType.DECLARED_ACTIVITY_TRACE)));
+
+        when(declaredActivityService.findAllDeclaredActivitiesByIds(anyList()))
+            .thenReturn(List.of(firstDeclaredActivity, secondDeclaredActivity));
+
+        when(declaredActivityService.getDeclaredActivityStatus(
+                List.of(firstDeclaredActivity, secondDeclaredActivity)))
+            .thenReturn(
+                Map.of(
+                    firstDeclaredActivity, EDeclaredActivityStatus.SUBMITTED,
+                    secondDeclaredActivity, EDeclaredActivityStatus.IN_PROGRESS));
+
+        List<TraceLockedDeclaredActivitiesData> result =
+            traceService.getLockedDeclaredActivities(traceIds);
+
+        BddLogger.then("it should return only locked activities with trace title");
+
+        assertEquals(2, result.size());
+
+        TraceLockedDeclaredActivitiesData firstResult = result.getFirst();
+        TraceLockedDeclaredActivitiesData secondResult = result.get(1);
+
+        assertEquals(firstTrace.getId(), firstResult.traceId());
+        assertEquals(firstTrace.getTitle(), firstResult.traceTitle());
+        assertEquals(1, firstResult.lockedDeclaredActivities().size());
+        assertEquals(
+            firstDeclaredActivityId,
+            firstResult.lockedDeclaredActivities().getFirst().activityId());
+        assertEquals(
+            "Submitted activity",
+            firstResult.lockedDeclaredActivities().getFirst().activityTitle());
+        assertEquals(
+            EDeclaredActivityStatus.SUBMITTED,
+            firstResult.lockedDeclaredActivities().getFirst().activityStatus());
+
+        assertEquals(secondTrace.getId(), secondResult.traceId());
+        assertEquals(secondTrace.getTitle(), secondResult.traceTitle());
+        assertTrue(secondResult.lockedDeclaredActivities().isEmpty());
+      }
+
+      @Test
+      void thenItShouldReturnEmptyResultWhenTraceIdsAreEmpty() {
+        BddLogger.when("getting locked declared activities with empty trace ids");
+
+        List<TraceLockedDeclaredActivitiesData> result =
+            traceService.getLockedDeclaredActivities(List.of());
+
+        BddLogger.then("it should return an empty list");
+
+        assertTrue(result.isEmpty());
+        verify(traceRepository, never()).findAllById(anyList());
+        verify(associationService, never()).getAllOf(anyList(), any(), anyList());
+      }
+
+      @Test
+      void thenItShouldReturnEmptyLockedActivitiesWhenNoDeclaredActivityIsAssociated() {
+        BddLogger.when(
+            "getting locked declared activities for traces without declared activity association");
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        List<UUID> traceIds = List.of(trace.getId());
+
+        when(traceRepository.findAllById(traceIds)).thenReturn(List.of(trace));
+
+        when(associationService.getAllOf(
+                eq(traceIds),
+                eq(Trace.class),
+                eq(List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))))
+            .thenReturn(List.of());
+
+        List<TraceLockedDeclaredActivitiesData> result =
+            traceService.getLockedDeclaredActivities(traceIds);
+
+        BddLogger.then("it should return trace data with empty locked activities");
+
+        assertEquals(1, result.size());
+        assertEquals(trace.getId(), result.getFirst().traceId());
+        assertEquals(trace.getTitle(), result.getFirst().traceTitle());
+        assertTrue(result.getFirst().lockedDeclaredActivities().isEmpty());
+
+        verify(declaredActivityService, never()).findAllDeclaredActivitiesByIds(anyList());
+        verify(declaredActivityService, never()).getDeclaredActivityStatus(anyList());
+      }
+
+      @Test
+      void thenItShouldThrowTraceNotFoundWhenOneTraceDoesNotExist() {
+        BddLogger.when("getting locked declared activities with one unknown trace");
+
+        Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
+        UUID missingTraceId = UUID.randomUUID();
+        List<UUID> traceIds = List.of(trace.getId(), missingTraceId);
+
+        when(traceRepository.findAllById(traceIds)).thenReturn(List.of(trace));
+
+        assertThrows(
+            TraceNotFoundException.class, () -> traceService.getLockedDeclaredActivities(traceIds));
+
+        BddLogger.then("it should throw TraceNotFoundException");
+
+        verify(associationService, never()).getAllOf(anyList(), any(), anyList());
+      }
+
+      @Test
+      void thenItShouldThrowUserNotAuthorizedWhenOneTraceBelongsToAnotherUser() {
+        BddLogger.when("getting locked declared activities with one trace owned by another user");
+
+        Trace ownedTrace = TraceFixture.create().withUser(student.getUser()).toModel();
+        Trace otherUserTrace =
+            TraceFixture.create().withUser(UserFixture.create().toModel()).toModel();
+
+        List<UUID> traceIds = List.of(ownedTrace.getId(), otherUserTrace.getId());
+
+        when(traceRepository.findAllById(traceIds)).thenReturn(List.of(ownedTrace, otherUserTrace));
+
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () -> traceService.getLockedDeclaredActivities(traceIds));
+
+        BddLogger.then("it should throw UserNotAuthorizedException");
+
+        verify(associationService, never()).getAllOf(anyList(), any(), anyList());
+      }
+    }
   }
 
-  private void mockDeclaredActivityAssociationStatus(Trace trace, EDeclaredActivityStatus status) {
-    UUID declaredActivityId = UUID.randomUUID();
+  private DeclaredActivity mockDeclaredActivityWithTitle(
+      UUID declaredActivityId, String activityTitle) {
+    Activity activity = mock(Activity.class);
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
 
-    when(associationService.getAllOf(
-            eq(List.of(trace.getId())),
-            eq(Trace.class),
-            eq(List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))))
-        .thenReturn(
-            List.of(
-                Association.create(
-                    declaredActivityId, trace.getId(), EAssociationType.DECLARED_ACTIVITY_TRACE)));
+    when(declaredActivity.getId()).thenReturn(declaredActivityId);
+    when(declaredActivity.getActivity()).thenReturn(activity);
+    when(activity.getTitle()).thenReturn(activityTitle);
 
-    when(declaredActivityService.findAllDeclaredActivitiesByIds(List.of(declaredActivityId)))
-        .thenReturn(List.of(declaredActivity));
+    return declaredActivity;
+  }
 
-    when(declaredActivityService.getDeclaredActivityStatus(List.of(declaredActivity)))
-        .thenReturn(Map.of(declaredActivity, status));
+  private DeclaredActivity mockDeclaredActivity() {
+    return mock(DeclaredActivity.class);
+  }
+
+  private boolean isLocked(EDeclaredActivityStatus status) {
+    return status == EDeclaredActivityStatus.SUBMITTED
+        || status == EDeclaredActivityStatus.COMPLETED;
   }
 }

@@ -2,7 +2,7 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.model;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.DeletableAvenirsBaseEntity;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
@@ -19,17 +19,13 @@ import lombok.Setter;
 @Table(
     name = "trace",
     indexes = {
-      @Index(
-          name = "idx_trace_user_deleted_created",
-          columnList = "user_id, deleted_at, created_at"),
-      @Index(
-          name = "idx_trace_user_deleted_updated",
-          columnList = "user_id, deleted_at, updated_at, created_at")
+      @Index(name = "idx_trace_user_created", columnList = "user_id, created_at"),
+      @Index(name = "idx_trace_user_updated", columnList = "user_id, updated_at, created_at")
     })
 @NoArgsConstructor
 @Getter
 @Setter
-public class TraceEntity extends DeletableAvenirsBaseEntity {
+public class TraceEntity extends AvenirsBaseEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "user_id", nullable = false)
   private UserEntity user;
@@ -72,10 +68,8 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       String link,
       FileEntity attachment,
       Instant createdAt,
-      Instant updatedAt,
-      Instant deletedAt) {
+      Instant updatedAt) {
     this.setId(id);
-    this.setDeletedAt(deletedAt);
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
     this.user = user;
@@ -99,8 +93,7 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
       String link,
       FileEntity attachment,
       Instant createdAt,
-      Instant updatedAt,
-      Instant deletedAt) {
+      Instant updatedAt) {
     return new TraceEntity(
         id,
         user,
@@ -112,7 +105,6 @@ public class TraceEntity extends DeletableAvenirsBaseEntity {
         link,
         attachment,
         createdAt,
-        updatedAt,
-        deletedAt);
+        updatedAt);
   }
 }

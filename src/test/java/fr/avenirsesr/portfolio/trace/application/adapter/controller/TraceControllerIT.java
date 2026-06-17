@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.common.testutils.BddLogger.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,10 +30,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 class TraceControllerIT extends ContainerConfigurationTest {
 
   private static final String BASE_PATH = "/me/traces";
-  private static final String BASE_PATH_WITH_ID = BASE_PATH + "/{traceId}";
   private static final String OVERVIEW_BASE_PATH = BASE_PATH + "/overview";
   private static final String VIEW_BASE_PATH = BASE_PATH + "/view";
   private static final String DETAIL_BASE_PATH = BASE_PATH + "/{traceId}/detail";
+  private static final String LOCKED_DECLARED_ACTIVITIES_BASE_PATH =
+      BASE_PATH + "/locked-declared-activities";
 
   private static final String SEARCH_ASSOCIATION_DECLARED_SKILL_BASE_PATH =
       BASE_PATH + "/{traceId}/search-for-association/declared-skills";
@@ -192,7 +194,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
   @Test
   void shouldReturnTraceOverview() {
     BddLogger.given("seeded traces");
-    BddLogger.when("getting trace overview");
+    when("getting trace overview");
 
     webTestClient
         .get()
@@ -212,57 +214,11 @@ class TraceControllerIT extends ContainerConfigurationTest {
   }
 
   @Test
-  void shouldReturnTraceViewWithIsDeletable() {
-    BddLogger.given("seeded traces");
-    BddLogger.when("getting trace view");
-
-    webTestClient
-        .post()
-        .uri(
-            uriBuilder ->
-                uriBuilder
-                    .path(VIEW_BASE_PATH)
-                    .queryParam("page", "0")
-                    .queryParam("pageSize", "8")
-                    .build())
-        .contentType(APPLICATION_JSON)
-        .bodyValue("{}")
-        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-        .accept(APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$.data")
-        .isArray()
-        .jsonPath("$.data[0].id")
-        .exists()
-        .jsonPath("$.data[0].title")
-        .exists()
-        .jsonPath("$.data[0].isAssociated")
-        .exists()
-        .jsonPath("$.data[0].isDeletable")
-        .exists()
-        .jsonPath("$.data[0].createdAt")
-        .exists()
-        .jsonPath("$.data[0].updatedAt")
-        .exists()
-        .jsonPath("$.page.page")
-        .isEqualTo(0)
-        .jsonPath("$.page.pageSize")
-        .isEqualTo(8);
-
-    BddLogger.then("it should return trace view with isDeletable");
-  }
-
-  @Test
-  void shouldReturnTraceDetailWithIsDeletableAndAuthorType() throws Exception {
+  void shouldReturnTraceDetailWithAuthorType() throws Exception {
     BddLogger.given("an existing trace");
     UUID traceId = getFirstTraceIdFromOverview();
 
-    BddLogger.when("getting trace detail");
+    when("getting trace detail");
 
     webTestClient
         .get()
@@ -281,8 +237,6 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exists()
         .jsonPath("$.isAssociated")
         .exists()
-        .jsonPath("$.isDeletable")
-        .exists()
         .jsonPath("$.programName")
         .exists()
         .jsonPath("$.authorType")
@@ -292,7 +246,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.updatedAt")
         .exists();
 
-    BddLogger.then("it should return trace detail with isDeletable and authorType");
+    BddLogger.then("it should return trace detail with authorType");
   }
 
   @Test
@@ -308,7 +262,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
             "Justification",
             null);
 
-    BddLogger.when("creating a trace");
+    when("creating a trace");
 
     webTestClient
         .post()
@@ -328,34 +282,85 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.then("it should create a new trace");
   }
 
-  @Test
-  void shouldDeleteTrace() throws Exception {
-    BddLogger.given("an existing deletable trace");
-    UUID existingTraceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
-
-    BddLogger.when("deleting trace");
-
-    webTestClient
-        .method(HttpMethod.DELETE)
-        .uri(BASE_PATH)
-        .contentType(APPLICATION_JSON)
-        .bodyValue(objectMapper.writeValueAsString(List.of(existingTraceId)))
-        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-        .exchange()
-        .expectStatus()
-        .isOk();
-
-    BddLogger.then("it should delete trace");
-  }
+  //  TODO: Refacto in #1887 beacause the JSON request is incompatible with H2
+  //  @Test
+  //  void shouldDeleteTraceAndItsAssociationsAndAttachment() throws Exception {
+  //    BddLogger.given("an existing deletable trace with associations and removable attachment");
+  //
+  //    UUID existingTraceId = UUID.fromString("efb1f0ce-e531-49af-8031-949f3d68b354");
+  //
+  //    var traceBeforeDelete = traceRepository.findById(existingTraceId).orElseThrow();
+  //    var attachmentId =
+  // traceBeforeDelete.getAttachment().map(AvenirsBaseModel::getId).orElse(null);
+  //
+  //    when("deleting trace");
+  //
+  //    webTestClient
+  //            .method(HttpMethod.DELETE)
+  //            .uri(BASE_PATH)
+  //            .contentType(APPLICATION_JSON)
+  //            .bodyValue(objectMapper.writeValueAsString(List.of(existingTraceId)))
+  //            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+  //            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+  //            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+  //            .exchange()
+  //            .expectStatus()
+  //            .isOk();
+  //
+  //    BddLogger.then("it should delete the trace from database");
+  //
+  //    assertThat(traceRepository.findById(existingTraceId)).isEmpty();
+  //
+  //    BddLogger.then("it should delete associations linked to the trace");
+  //
+  //    assertThat(
+  //            associationRepository.findAllOf(
+  //                    existingTraceId,
+  //                    Trace.class,
+  //                    EAssociationType.getAllBy(Trace.class)))
+  //            .isEmpty();
+  //
+  //    if (attachmentId != null) {
+  //      BddLogger.then("it should delete the removable attachment");
+  //      assertThat(fileRepository.findById(attachmentId)).isEmpty();
+  //    }
+  //  }
+  //
+  //  @Test
+  //  void shouldDeleteTraceButKeepAttachmentWhenUsedByFeedbackSnapshot() throws Exception {
+  //    BddLogger.given("an existing trace whose attachment is used by a feedback snapshot");
+  //
+  //    UUID existingTraceId = UUID.fromString("ID_TRACE_AVEC_ATTACHMENT_PROTEGE");
+  //    UUID attachmentId =
+  //
+  // traceRepository.findById(existingTraceId).orElseThrow().getAttachment().orElseThrow().getId();
+  //
+  //    when("deleting trace");
+  //
+  //    webTestClient
+  //            .method(HttpMethod.DELETE)
+  //            .uri(BASE_PATH)
+  //            .contentType(APPLICATION_JSON)
+  //            .bodyValue(objectMapper.writeValueAsString(List.of(existingTraceId)))
+  //            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+  //            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+  //            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+  //            .exchange()
+  //            .expectStatus()
+  //            .isOk();
+  //
+  //    BddLogger.then("it should delete the trace but keep the protected attachment");
+  //
+  //    assertThat(traceRepository.findById(existingTraceId)).isEmpty();
+  //    assertThat(fileRepository.findById(attachmentId)).isPresent();
+  //  }
 
   @Test
   void shouldReturn404IfTraceNotFoundWhenDeleting() throws Exception {
     BddLogger.given("an unknown trace id");
     UUID traceId = UUID.randomUUID();
 
-    BddLogger.when("deleting trace");
+    when("deleting trace");
 
     webTestClient
         .method(HttpMethod.DELETE)
@@ -380,7 +385,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(skillId));
 
-    BddLogger.when("associating trace with declared skill");
+    when("associating trace with declared skill");
 
     webTestClient
         .post()
@@ -428,7 +433,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     UUID associationId =
         UUID.fromString(json.get("declaredSkillAssociations").get(0).get("associationId").asText());
 
-    BddLogger.when("unassociating trace association");
+    when("unassociating trace association");
 
     webTestClient
         .method(HttpMethod.DELETE)
@@ -450,7 +455,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("an existing trace");
     UUID traceId = getFirstTraceIdFromOverview();
 
-    BddLogger.when("searching declared activities for association");
+    when("searching declared activities for association");
 
     webTestClient
         .get()
@@ -492,7 +497,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("an existing trace and a keyword");
     UUID traceId = getFirstTraceIdFromOverview();
 
-    BddLogger.when("searching with a keyword that matches nothing");
+    when("searching with a keyword that matches nothing");
 
     webTestClient
         .get()
@@ -525,7 +530,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("a non-existent trace ID");
     UUID nonExistentTraceId = UUID.randomUUID();
 
-    BddLogger.when("searching declared activities for association");
+    when("searching declared activities for association");
 
     webTestClient
         .get()
@@ -552,7 +557,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("an existing trace");
     UUID traceId = getFirstTraceIdFromOverview();
 
-    BddLogger.when("searching declared skills for association");
+    when("searching declared skills for association");
 
     webTestClient
         .get()
@@ -594,7 +599,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("a non-existent trace ID");
     UUID nonExistentTraceId = UUID.randomUUID();
 
-    BddLogger.when("searching declared skills for association");
+    when("searching declared skills for association");
 
     webTestClient
         .get()
@@ -624,7 +629,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(experienceId));
 
-    BddLogger.when("associating trace with declared experience");
+    when("associating trace with declared experience");
 
     webTestClient
         .post()
@@ -652,7 +657,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(experienceId));
 
-    BddLogger.when("associating declared experience with unknown trace");
+    when("associating declared experience with unknown trace");
 
     webTestClient
         .post()
@@ -677,7 +682,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
 
     AssociationsCreationRequest body = new AssociationsCreationRequest(List.of(UUID.randomUUID()));
 
-    BddLogger.when("associating unknown declared experience");
+    when("associating unknown declared experience");
 
     webTestClient
         .post()
@@ -699,7 +704,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("an existing trace");
     UUID traceId = getFirstTraceIdFromOverview();
 
-    BddLogger.when("searching declared experiences for association");
+    when("searching declared experiences for association");
 
     webTestClient
         .get()
@@ -741,7 +746,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("an existing trace and a keyword");
     UUID traceId = getFirstTraceIdFromOverview();
 
-    BddLogger.when("searching with a keyword that matches nothing");
+    when("searching with a keyword that matches nothing");
 
     webTestClient
         .get()
@@ -774,7 +779,7 @@ class TraceControllerIT extends ContainerConfigurationTest {
     BddLogger.given("a non-existent trace ID");
     UUID nonExistentTraceId = UUID.randomUUID();
 
-    BddLogger.when("searching declared experiences for association");
+    when("searching declared experiences for association");
 
     webTestClient
         .get()
@@ -785,6 +790,61 @@ class TraceControllerIT extends ContainerConfigurationTest {
                     .queryParam("page", "0")
                     .queryParam("pageSize", "8")
                     .build(nonExistentTraceId))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+
+    BddLogger.then("it should return 404");
+  }
+
+  @Test
+  void shouldReturnLockedDeclaredActivities() throws Exception {
+    BddLogger.given("an existing trace");
+    UUID traceId = getFirstTraceIdFromOverview();
+
+    when("getting locked declared activities");
+
+    webTestClient
+        .method(HttpMethod.POST)
+        .uri(LOCKED_DECLARED_ACTIVITIES_BASE_PATH)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(List.of(traceId)))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .accept(APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$")
+        .isArray()
+        .jsonPath("$[0].traceId")
+        .isEqualTo(traceId.toString())
+        .jsonPath("$[0].traceTitle")
+        .exists()
+        .jsonPath("$[0].lockedDeclaredActivities")
+        .isArray();
+
+    BddLogger.then("it should return locked declared activities grouped by trace");
+  }
+
+  @Test
+  void shouldReturn404WhenGettingLockedDeclaredActivitiesForUnknownTrace() throws Exception {
+    BddLogger.given("an unknown trace");
+    UUID unknownTraceId = UUID.randomUUID();
+
+    when("getting locked declared activities");
+
+    webTestClient
+        .method(HttpMethod.POST)
+        .uri(LOCKED_DECLARED_ACTIVITIES_BASE_PATH)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(List.of(unknownTraceId)))
         .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
         .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
         .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)

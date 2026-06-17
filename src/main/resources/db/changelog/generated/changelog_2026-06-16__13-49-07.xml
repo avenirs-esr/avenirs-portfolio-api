@@ -1,0 +1,19 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="nathp (generated)" id="1781617755455-1">
+        <createIndex indexName="idx_trace_user_created" tableName="trace">
+            <column name="user_id"/>
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1781617755455-2">
+        <createIndex indexName="idx_trace_user_updated" tableName="trace">
+            <column name="user_id"/>
+            <column name="updated_at"/>
+            <column name="created_at"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1781617755455-3">
+        <dropColumn columnName="deleted_at" tableName="trace"/>
+    </changeSet>
+</databaseChangeLog>
