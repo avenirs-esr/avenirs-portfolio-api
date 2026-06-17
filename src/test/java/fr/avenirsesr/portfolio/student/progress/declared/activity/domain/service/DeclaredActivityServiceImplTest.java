@@ -29,10 +29,12 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
@@ -68,6 +70,7 @@ class DeclaredActivityServiceImplTest {
   @Mock private DeclaredSkillProgressService declaredSkillProgressService;
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private FeedbackRepository feedbackRepository;
+  @Mock private FeedbackService feedbackService;
 
   @InjectMocks private DeclaredActivityServiceImpl service;
 
@@ -89,7 +92,8 @@ class DeclaredActivityServiceImplTest {
             associationService,
             associationSearchHelper,
             loggedInUserService,
-            feedbackRepository);
+            feedbackRepository,
+            feedbackService);
   }
 
   @Test
@@ -445,14 +449,15 @@ class DeclaredActivityServiceImplTest {
     BddLogger.when("He requests declared activity details");
     DeclaredActivityDetailsData result = service.getDeclaredActivityDetails(declaredActivityId);
 
-    BddLogger.then("The declared activity is returned and no save is performed");
+    BddLogger.then("The declared activity is returned with an empty feedbacks list");
     assertThat(result.declaredActivity()).isSameAs(declaredActivity);
+    assertThat(result.feedbacks()).isEmpty();
     verify(declaredActivityRepository).findById(eq(declaredActivityId), any(FetchGraph.class));
     verify(declaredActivityRepository, never()).save(any());
   }
 
   @Test
-  void getDeclaredActivityDetails_should_include_feedbacks_fetched_from_repository() {
+  void getDeclaredActivityDetails_should_include_feedbacks_mapped_as_FeedbackData() {
     BddLogger.given(
         "A logged-in student, his declared activity, and 2 feedbacks in the repository");
     UUID declaredActivityId = UUID.randomUUID();
@@ -462,20 +467,30 @@ class DeclaredActivityServiceImplTest {
 
     Feedback feedback1 = mock(Feedback.class);
     Feedback feedback2 = mock(Feedback.class);
+    FeedbackData feedbackData1 = mock(FeedbackData.class);
+    FeedbackData feedbackData2 = mock(FeedbackData.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
     when(declaredActivityRepository.findById(eq(declaredActivityId), any(FetchGraph.class)))
         .thenReturn(Optional.of(declaredActivity));
     when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
         .thenReturn(List.of(feedback1, feedback2));
+    when(feedbackService.getStudentFeedbackDetails(student.getUser(), feedback1))
+        .thenReturn(feedbackData1);
+    when(feedbackService.getStudentFeedbackDetails(student.getUser(), feedback2))
+        .thenReturn(feedbackData2);
 
     BddLogger.when("getDeclaredActivityDetails is called");
     DeclaredActivityDetailsData result = service.getDeclaredActivityDetails(declaredActivityId);
 
-    BddLogger.then("The result contains the declared activity and its 2 feedbacks");
+    BddLogger.then(
+        "The result contains the declared activity and 2 FeedbackData mapped via"
+            + " getStudentFeedbackDetails");
     assertThat(result.declaredActivity()).isSameAs(declaredActivity);
-    assertThat(result.feedbacks()).containsExactly(feedback1, feedback2);
+    assertThat(result.feedbacks()).containsExactly(feedbackData1, feedbackData2);
     verify(feedbackRepository).findAllByDeclaredActivityId(declaredActivityId);
+    verify(feedbackService).getStudentFeedbackDetails(student.getUser(), feedback1);
+    verify(feedbackService).getStudentFeedbackDetails(student.getUser(), feedback2);
   }
 
   @Test
@@ -498,6 +513,7 @@ class DeclaredActivityServiceImplTest {
     assertThat(result.declaredActivity()).isSameAs(declaredActivity);
     assertThat(result.feedbacks()).isEmpty();
     verify(feedbackRepository).findAllByDeclaredActivityId(declaredActivityId);
+    verifyNoInteractions(feedbackService);
   }
 
   @Test

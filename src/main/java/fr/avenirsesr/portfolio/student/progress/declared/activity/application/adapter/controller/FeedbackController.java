@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.application.a
 import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateFeedbackRequest;
@@ -62,15 +63,19 @@ public class FeedbackController {
             PageInfoDTO.fromDomain(result.pageInfo())));
   }
 
-  @GetMapping("/{feedbackId}")
+  @GetMapping("/{userCategory}/{feedbackId}")
   public ResponseEntity<FeedbackDetailsDTO> getFeedbackDetails(
-      Principal principal, @Valid @PathVariable UUID feedbackId) {
+      Principal principal,
+      @Valid @PathVariable UUID feedbackId,
+      @PathVariable EUserCategory userCategory) {
     log.debug(
-        "Received request to get feedback details [{}] by user [{}]",
+        "Received request to get feedback details [{}] by user [{}] (userCategory={})",
         feedbackId,
-        principal.getName());
+        principal.getName(),
+        userCategory);
     return ResponseEntity.ok(
-        feedbackDetailsDTOMapper.toDTO(feedbackService.getFeedbackDetails(feedbackId)));
+        feedbackDetailsDTOMapper.toDTO(
+            feedbackService.getFeedbackDetails(feedbackId, userCategory)));
   }
 
   @PutMapping("/{feedbackId}")

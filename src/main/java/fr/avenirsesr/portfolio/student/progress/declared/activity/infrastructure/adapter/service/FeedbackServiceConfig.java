@@ -3,8 +3,8 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructur
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service.FeedbackServiceImpl;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
@@ -20,17 +20,17 @@ import org.springframework.context.annotation.Lazy;
 @RequiredArgsConstructor
 public class FeedbackServiceConfig {
   private final FeedbackRepository feedbackRepository;
-  private final DeclaredActivityRepository declaredActivityRepository;
   private final AssociationService associationService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final LoggedInUserService loggedInUserService;
   private final NotificationService notificationService;
 
   @Bean
-  public FeedbackService feedbackService(@Lazy TraceService traceService) {
+  public FeedbackService feedbackService(
+      @Lazy TraceService traceService, @Lazy DeclaredActivityService declaredActivityService) {
     return new FeedbackServiceImpl(
         feedbackRepository,
-        declaredActivityRepository,
+        declaredActivityService,
         associationService,
         traceService,
         declaredSkillProgressService,

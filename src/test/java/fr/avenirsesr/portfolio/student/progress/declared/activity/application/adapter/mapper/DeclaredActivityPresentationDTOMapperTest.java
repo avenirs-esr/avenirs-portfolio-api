@@ -8,8 +8,8 @@ import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -74,16 +74,19 @@ class DeclaredActivityPresentationDTOMapperTest {
 
   @Test
   void shouldMapFeedbacksFromDetailsDataToFeedbackOverviewDTOs() {
-    BddLogger.given("a declared activity with 2 feedbacks");
+    BddLogger.given("a declared activity with 2 FeedbackData");
 
     Student student = StudentFixture.create().toModel();
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
         DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
 
-    Feedback feedback1 =
-        Feedback.toDomain(
-            UUID.randomUUID(),
+    UUID feedbackId1 = UUID.randomUUID();
+    UUID feedbackId2 = UUID.randomUUID();
+
+    FeedbackData feedbackData1 =
+        new FeedbackData(
+            feedbackId1,
             Instant.now(),
             Instant.now(),
             declaredActivity,
@@ -94,9 +97,9 @@ class DeclaredActivityPresentationDTOMapperTest {
             List.of(),
             List.of());
 
-    Feedback feedback2 =
-        Feedback.toDomain(
-            UUID.randomUUID(),
+    FeedbackData feedbackData2 =
+        new FeedbackData(
+            feedbackId2,
             Instant.now(),
             Instant.now(),
             declaredActivity,
@@ -111,7 +114,8 @@ class DeclaredActivityPresentationDTOMapperTest {
 
     DeclaredActivityDetailsDTO dto =
         mapper.toDTO(
-            new DeclaredActivityDetailsData(declaredActivity, List.of(feedback1, feedback2)),
+            new DeclaredActivityDetailsData(
+                declaredActivity, List.of(feedbackData1, feedbackData2)),
             EDeclaredActivityStatus.SUBMITTED);
 
     BddLogger.then("the feedbacks list is mapped and contains 2 FeedbackOverviewDTOs");
@@ -119,9 +123,9 @@ class DeclaredActivityPresentationDTOMapperTest {
     assertNotNull(dto.feedbacks());
     assertEquals(2, dto.feedbacks().size());
     assertEquals(EDeclaredActivityStatus.SUBMITTED, dto.status());
-    assertEquals(feedback1.getId(), dto.feedbacks().get(0).id());
+    assertEquals(feedbackId1, dto.feedbacks().get(0).id());
     assertEquals(EFeedbackStatus.NEW, dto.feedbacks().get(0).status());
-    assertEquals(feedback2.getId(), dto.feedbacks().get(1).id());
+    assertEquals(feedbackId2, dto.feedbacks().get(1).id());
     assertEquals(EFeedbackStatus.SUBMITTED, dto.feedbacks().get(1).status());
   }
 

@@ -7,30 +7,29 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.utils.AssociationUtils;
-import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AskForFeedbackNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackInProcessException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackMaximumIterationReachedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -40,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
   private final FeedbackRepository feedbackRepository;
-  private final DeclaredActivityRepository declaredActivityRepository;
+  private final DeclaredActivityService declaredActivityService;
   private final AssociationService associationService;
   private final TraceService traceService;
   private final DeclaredSkillProgressService declaredSkillProgressService;
@@ -49,7 +48,9 @@ public class FeedbackServiceImpl implements FeedbackService {
 
   @Override
   public Feedback createFeedback(UUID declaredActivityId) {
-    DeclaredActivity declaredActivity = fetchAndAuthorizeDeclaredActivity(declaredActivityId);
+    DeclaredActivity declaredActivity =
+        declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
+            declaredActivityId);
 
     validateOptionalEnrichedTextMaxLength(
         "reflexion", declaredActivity.getReflection(), RICH_DESCRIPTION_LENGTH);
@@ -111,19 +112,56 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
-  public Feedback getFeedbackDetails(UUID feedbackId) {
+  public FeedbackData getFeedbackDetails(UUID feedbackId, EUserCategory userCategory) {
+    var user = loggedInUserService.getLoggedInUser();
     Feedback feedback =
         feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);
 
-    UUID loggedInUserId = loggedInUserService.getLoggedInUser().getId();
-    UUID studentId = feedback.getDeclaredActivity().getStudent().getId();
-    UUID authorId = feedback.getDeclaredActivity().getActivity().getAuthor().getId();
+    return switch (userCategory) {
+      case STUDENT -> getStudentFeedbackDetails(user, feedback);
+      case STAFF -> getStaffFeedbackDetails(user, feedback);
+    };
+  }
 
-    if (!loggedInUserId.equals(studentId) || !loggedInUserId.equals(authorId)) {
+  private FeedbackData getStaffFeedbackDetails(User loggedInUser, Feedback feedback) {
+    if (!loggedInUser.equals(feedback.getDeclaredActivity().getActivity().getAuthor().getUser())) {
       throw new UserNotAuthorizedException();
     }
 
-    return feedback;
+    return new FeedbackData(
+        feedback.getId(),
+        feedback.getCreatedAt(),
+        feedback.getUpdatedAt(),
+        feedback.getDeclaredActivity(),
+        feedback.getReflexion().orElse(null),
+        feedback.getFeedback().orElse(null),
+        feedback.getStatus(),
+        feedback.getIteration(),
+        feedback.getAssociatedTraces(),
+        feedback.getAssociatedDeclaredSkills());
+  }
+
+  @Override
+  public FeedbackData getStudentFeedbackDetails(User loggedInUser, Feedback feedback) {
+    if (!loggedInUser.equals(feedback.getDeclaredActivity().getStudent().getUser())) {
+      throw new UserNotAuthorizedException();
+    }
+
+    String feedbackText =
+        feedback.getStatus() == EFeedbackStatus.SUBMITTED
+            ? feedback.getFeedback().orElse(null)
+            : null;
+    return new FeedbackData(
+        feedback.getId(),
+        feedback.getCreatedAt(),
+        feedback.getUpdatedAt(),
+        feedback.getDeclaredActivity(),
+        feedback.getReflexion().orElse(null),
+        feedbackText,
+        feedback.getStatus(),
+        feedback.getIteration(),
+        feedback.getAssociatedTraces(),
+        feedback.getAssociatedDeclaredSkills());
   }
 
   @Override
@@ -149,21 +187,5 @@ public class FeedbackServiceImpl implements FeedbackService {
       EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria) {
     var staff = loggedInUserService.getLoggedInStaff();
     return feedbackRepository.findByStaff(staff.getId(), statusFilter, activityId, pageCriteria);
-  }
-
-  private DeclaredActivity fetchAndAuthorizeDeclaredActivity(UUID declaredActivityId) {
-    Student student = loggedInUserService.getLoggedInStudent();
-    var graph =
-        FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");
-
-    DeclaredActivity declaredActivity =
-        declaredActivityRepository
-            .findById(declaredActivityId, graph)
-            .orElseThrow(DeclaredActivityNotFoundException::new);
-
-    if (!declaredActivity.getStudent().equals(student)) {
-      throw new UserNotAuthorizedException();
-    }
-    return declaredActivity;
   }
 }

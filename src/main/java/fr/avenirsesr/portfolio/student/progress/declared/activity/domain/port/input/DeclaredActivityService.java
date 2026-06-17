@@ -71,4 +71,6 @@ public interface DeclaredActivityService {
       List<DeclaredActivity> declaredActivities);
 
   EDeclaredActivityStatus getDeclaredActivityStatus(DeclaredActivity declaredActivity);
+
+  DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(UUID declaredActivityId);
 }

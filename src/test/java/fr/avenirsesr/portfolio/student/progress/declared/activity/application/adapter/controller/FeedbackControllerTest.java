@@ -9,12 +9,14 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateFeedbackRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackStaffListItemDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
@@ -103,10 +105,11 @@ class FeedbackControllerTest {
 
   @Test
   void getFeedbackDetails_should_return_200_with_mapped_dto() {
-    BddLogger.given("A feedback ID and a service returning the feedback");
+    BddLogger.given("A feedback ID, a user category STUDENT and a service returning FeedbackData");
 
     UUID feedbackId = UUID.randomUUID();
-    Feedback feedback = mock(Feedback.class);
+    EUserCategory userCategory = EUserCategory.STUDENT;
+    FeedbackData feedbackData = mock(FeedbackData.class);
     FeedbackDetailsDTO expectedDto =
         new FeedbackDetailsDTO(
             feedbackId,
@@ -120,36 +123,37 @@ class FeedbackControllerTest {
             Instant.now(),
             Instant.now());
 
-    when(feedbackService.getFeedbackDetails(feedbackId)).thenReturn(feedback);
-    when(feedbackDetailsDTOMapper.toDTO(feedback)).thenReturn(expectedDto);
+    when(feedbackService.getFeedbackDetails(feedbackId, userCategory)).thenReturn(feedbackData);
+    when(feedbackDetailsDTOMapper.toDTO(feedbackData)).thenReturn(expectedDto);
 
-    BddLogger.when("getFeedbackDetails is called");
+    BddLogger.when("getFeedbackDetails is called with STUDENT category");
     ResponseEntity<FeedbackDetailsDTO> response =
-        controller.getFeedbackDetails(principal, feedbackId);
+        controller.getFeedbackDetails(principal, feedbackId, userCategory);
 
     BddLogger.then("200 OK is returned with the mapped FeedbackDetailsDTO");
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody()).isSameAs(expectedDto);
 
-    verify(feedbackService).getFeedbackDetails(feedbackId);
-    verify(feedbackDetailsDTOMapper).toDTO(feedback);
+    verify(feedbackService).getFeedbackDetails(feedbackId, userCategory);
+    verify(feedbackDetailsDTOMapper).toDTO(feedbackData);
   }
 
   @Test
-  void getFeedbackDetails_should_delegate_to_service_with_correct_id() {
-    BddLogger.given("A feedback ID");
+  void getFeedbackDetails_should_delegate_to_service_with_correct_id_and_category() {
+    BddLogger.given("A feedback ID and a STAFF user category");
 
     UUID feedbackId = UUID.randomUUID();
-    Feedback feedback = mock(Feedback.class);
+    EUserCategory userCategory = EUserCategory.STAFF;
+    FeedbackData feedbackData = mock(FeedbackData.class);
 
-    when(feedbackService.getFeedbackDetails(feedbackId)).thenReturn(feedback);
-    when(feedbackDetailsDTOMapper.toDTO(feedback)).thenReturn(mock(FeedbackDetailsDTO.class));
+    when(feedbackService.getFeedbackDetails(feedbackId, userCategory)).thenReturn(feedbackData);
+    when(feedbackDetailsDTOMapper.toDTO(feedbackData)).thenReturn(mock(FeedbackDetailsDTO.class));
 
-    BddLogger.when("getFeedbackDetails is called");
-    controller.getFeedbackDetails(principal, feedbackId);
+    BddLogger.when("getFeedbackDetails is called with STAFF category");
+    controller.getFeedbackDetails(principal, feedbackId, userCategory);
 
-    BddLogger.then("The service is called exactly once with the right feedback ID");
-    verify(feedbackService, times(1)).getFeedbackDetails(feedbackId);
+    BddLogger.then("The service is called exactly once with the correct feedback ID and category");
+    verify(feedbackService, times(1)).getFeedbackDetails(feedbackId, userCategory);
     verifyNoMoreInteractions(feedbackService);
   }
 

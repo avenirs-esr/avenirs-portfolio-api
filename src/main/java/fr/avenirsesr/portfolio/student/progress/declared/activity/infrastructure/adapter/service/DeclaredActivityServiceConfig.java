@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.service.DeclaredActivityServiceImpl;
@@ -29,7 +30,9 @@ public class DeclaredActivityServiceConfig {
 
   @Bean
   public DeclaredActivityService declaredActivityService(
-      @Lazy ActivityService activityService, @Lazy TraceService traceService) {
+      @Lazy ActivityService activityService,
+      @Lazy TraceService traceService,
+      @Lazy FeedbackService feedbackService) {
     return new DeclaredActivityServiceImpl(
         declaredActivityRepository,
         activityService,
@@ -38,6 +41,7 @@ public class DeclaredActivityServiceConfig {
         associationService,
         associationSearchHelper,
         loggedInUserService,
-        feedbackRepository);
+        feedbackRepository,
+        feedbackService);
   }
 }

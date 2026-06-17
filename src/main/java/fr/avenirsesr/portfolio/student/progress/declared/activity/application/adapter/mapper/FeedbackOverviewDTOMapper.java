@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.application.a
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackOverviewDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.UserInfoDTO;
 import java.util.Optional;
@@ -14,6 +15,10 @@ public interface FeedbackOverviewDTOMapper {
   @Mapping(source = "declaredActivity.student.user", target = "student")
   @Mapping(source = "declaredActivity.activity.author.user", target = "staff")
   FeedbackOverviewDTO toDTO(Feedback feedback);
+
+  @Mapping(source = "declaredActivity.student.user", target = "student")
+  @Mapping(source = "declaredActivity.activity.author.user", target = "staff")
+  FeedbackOverviewDTO toDTO(FeedbackData feedbackData);
 
   UserInfoDTO toUserInfoDTO(User user);
 

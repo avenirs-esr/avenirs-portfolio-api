@@ -92,6 +92,10 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     return objectMapper.readTree(body).get("id").asText();
   }
 
+  private String feedbackPath(String userCategory, String feedbackId) {
+    return BASE_PATH + "/" + userCategory + "/" + feedbackId;
+  }
+
   // ── POST /{declaredActivityId}/ask-for-feedback ─────────────────────
 
   @Test
@@ -167,7 +171,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .isForbidden();
   }
 
-  // ── GET /me/activity-progress/feedbacks/{feedbackId} ────────────────
+  // ── GET /me/activity-progress/feedbacks/{userCategory}/{feedbackId} ──
 
   @Test
   @Transactional
@@ -180,7 +184,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(BASE_PATH + "/" + feedbackId)
+        .uri(feedbackPath("STUDENT", feedbackId))
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
@@ -214,7 +218,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(BASE_PATH + "/" + feedbackId)
+        .uri(feedbackPath("STAFF", feedbackId))
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
@@ -232,12 +236,12 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     BddLogger.given("a feedback belonging to another student on activity authored by another user");
     String feedbackId = askForFeedbackAndGetId(declaredActivityId);
 
-    BddLogger.when("a third user (otherStudent) tries to fetch the feedback details");
+    BddLogger.when("a third user (otherStudent) tries to fetch the feedback details as STUDENT");
     BddLogger.then("403 Forbidden is returned");
 
     webTestClient
         .get()
-        .uri(BASE_PATH + "/" + feedbackId)
+        .uri(feedbackPath("STUDENT", feedbackId))
         .header("X-Signed-Context", otherStudentPayload)
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", otherStudentSignature)
@@ -254,7 +258,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
 
     webTestClient
         .get()
-        .uri(BASE_PATH + "/" + notFoundId)
+        .uri(feedbackPath("STUDENT", notFoundId))
         .header("X-Signed-Context", studentPayload)
         .header("X-Context-Kid", secretKey)
         .header("X-Context-Signature", studentSignature)
@@ -268,13 +272,13 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
 
   @Test
   void shouldReturn401WhenNotAuthenticatedOnFeedbackDetailsEndpoint() {
-    BddLogger.given("the GET /me/activity-progress/feedbacks/{feedbackId} endpoint");
+    BddLogger.given("the GET /me/activity-progress/feedbacks/{userCategory}/{feedbackId} endpoint");
     BddLogger.when("performing a GET without authentication headers");
     BddLogger.then("401 Unauthorized is returned");
 
     webTestClient
         .get()
-        .uri(BASE_PATH + "/" + notFoundId)
+        .uri(feedbackPath("STUDENT", notFoundId))
         .exchange()
         .expectStatus()
         .isUnauthorized();

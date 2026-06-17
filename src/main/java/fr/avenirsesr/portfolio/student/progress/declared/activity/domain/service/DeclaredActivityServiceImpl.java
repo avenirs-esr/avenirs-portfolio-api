@@ -23,11 +23,12 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationData;
@@ -61,6 +62,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   private final AssociationSearchHelper associationSearchHelper;
   private final LoggedInUserService loggedInUserService;
   private final FeedbackRepository feedbackRepository;
+  private final FeedbackService feedbackService;
 
   @Override
   public PagedResult<DeclaredActivity> getDeclaredActivities(PageCriteria pageCriteria) {
@@ -183,7 +185,13 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   public DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId) {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
-    List<Feedback> feedbacks = feedbackRepository.findAllByDeclaredActivityId(declaredActivityId);
+    List<FeedbackData> feedbacks =
+        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()
+            .map(
+                feedback ->
+                    feedbackService.getStudentFeedbackDetails(
+                        declaredActivity.getStudent().getUser(), feedback))
+            .toList();
     return new DeclaredActivityDetailsData(declaredActivity, feedbacks);
   }
 
@@ -447,7 +455,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     associationService.deleteAllByIds(idsToDelete);
   }
 
-  private DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(
+  @Override
+  public DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(
       UUID declaredActivityId) {
     Student student = loggedInUserService.getLoggedInStudent();
     var graph =
