@@ -634,13 +634,19 @@ class DeclaredActivityServiceImplTest {
     UUID declaredActivityId = UUID.randomUUID();
     UUID associationId1 = UUID.randomUUID();
     UUID associationId2 = UUID.randomUUID();
+    UUID associationId3 = UUID.randomUUID();
+    UUID associationId4 = UUID.randomUUID();
 
     DeclaredActivity declaredActivity = mock(DeclaredActivity.class);
     Trace trace1 = mock(Trace.class);
     Trace trace2 = mock(Trace.class);
+    DeclaredSkillProgress declaredSkill1 = mock(DeclaredSkillProgress.class);
+    DeclaredSkillProgress declaredSkill2 = mock(DeclaredSkillProgress.class);
 
     Association association1 = mock(Association.class);
     Association association2 = mock(Association.class);
+    Association association3 = mock(Association.class);
+    Association association4 = mock(Association.class);
 
     when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
 
@@ -648,15 +654,20 @@ class DeclaredActivityServiceImplTest {
         .thenReturn(Optional.of(declaredActivity));
 
     when(declaredActivity.getStudent()).thenReturn(student);
+    when(declaredActivity.getId()).thenReturn(declaredActivityId);
 
     when(associationService.getAllOf(
-            declaredActivity.getId(),
+            declaredActivityId,
             DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
-        .thenReturn(List.of(association1, association2));
+            List.of(
+                EAssociationType.DECLARED_ACTIVITY_TRACE,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)))
+        .thenReturn(List.of(association1, association2, association3, association4));
 
     when(association1.getId()).thenReturn(associationId1);
     when(association2.getId()).thenReturn(associationId2);
+    when(association3.getId()).thenReturn(associationId3);
+    when(association4.getId()).thenReturn(associationId4);
 
     BddLogger.when("deleteAssociations is called");
 
@@ -925,7 +936,9 @@ class DeclaredActivityServiceImplTest {
     when(associationService.getAllOf(
             declaredActivity.getId(),
             DeclaredActivity.class,
-            List.of(EAssociationType.DECLARED_ACTIVITY_TRACE)))
+            List.of(
+                EAssociationType.DECLARED_ACTIVITY_TRACE,
+                EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)))
         .thenReturn(List.of(association1));
 
     BddLogger.when("deleteAssociations is called with non associated id");
