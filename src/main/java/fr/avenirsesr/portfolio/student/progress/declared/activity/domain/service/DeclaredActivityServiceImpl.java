@@ -428,17 +428,19 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     DeclaredActivity declaredActivity =
         fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
 
-    var associatedTracesIds =
+    var associatedElementsIds =
         associationService
             .getAllOf(
                 declaredActivity.getId(),
                 DeclaredActivity.class,
-                List.of(EAssociationType.DECLARED_ACTIVITY_TRACE))
+                List.of(
+                    EAssociationType.DECLARED_ACTIVITY_TRACE,
+                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
             .stream()
             .map(Association::getId)
             .toList();
 
-    if (!new HashSet<>(associatedTracesIds).containsAll(idsToDelete)) {
+    if (!new HashSet<>(associatedElementsIds).containsAll(idsToDelete)) {
       throw new UserNotAuthorizedException();
     }
 
