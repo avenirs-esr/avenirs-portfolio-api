@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericDeletableJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.DateFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
@@ -28,8 +28,8 @@ import org.springframework.stereotype.Repository;
 <span class="fc" id="L28">@Slf4j</span>
 @Repository
 @SQLRestriction(&quot;deleted_at IS NULL&quot;)
-public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Trace, TraceEntity&gt;
-    implements TraceRepository {
+public class TraceDatabaseRepository
+    extends GenericDeletableJpaRepositoryAdapter&lt;Trace, TraceEntity&gt; implements TraceRepository {
   private final TraceJpaRepository jpaRepository;
 
   public TraceDatabaseRepository(TraceJpaRepository jpaRepository) {
@@ -40,7 +40,7 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Trac
   @Override
   public List&lt;Trace&gt; findLastsOf(User user, int limit) {
 <span class="fc" id="L42">    return findAll(</span>
-<span class="fc" id="L43">            TraceSpecification.ofUser(user),</span>
+<span class="fc" id="L43">            TraceSpecification.ofUser(user).and(TraceSpecification.notDeleted()),</span>
 <span class="fc" id="L44">            PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;)))</span>
 <span class="fc" id="L45">        .content();</span>
   }
@@ -75,45 +75,47 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Trac
       DateFilter dateFilter,
       PageCriteria pageCriteria) {
 
-<span class="fc" id="L78">    Specification&lt;TraceEntity&gt; specification = TraceSpecification.ofUser(user);</span>
+<span class="fc" id="L78">    Specification&lt;TraceEntity&gt; specification =</span>
+<span class="fc" id="L79">        TraceSpecification.ofUser(user).and(TraceSpecification.notDeleted());</span>
 
-<span class="fc" id="L80">    var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());</span>
-<span class="pc bpc" id="L81" title="1 of 2 branches missed.">    if (filterSpecification.isPresent()) {</span>
-<span class="nc" id="L82">      specification = specification.and(filterSpecification.get());</span>
+<span class="fc" id="L81">    var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">    if (filterSpecification.isPresent()) {</span>
+<span class="nc" id="L83">      specification = specification.and(filterSpecification.get());</span>
     }
 
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">    if (dateFilter != null) {</span>
-<span class="fc" id="L86">      var dateFilterSpecification =</span>
-<span class="fc" id="L87">          new DateFilterSpecificationBuilder&lt;TraceEntity&gt;().build(dateFilter.toMap());</span>
-<span class="pc bpc" id="L88" title="1 of 2 branches missed.">      if (dateFilterSpecification.isPresent())</span>
-<span class="nc" id="L89">        specification = specification.and(dateFilterSpecification.get());</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">    if (dateFilter != null) {</span>
+<span class="fc" id="L87">      var dateFilterSpecification =</span>
+<span class="fc" id="L88">          new DateFilterSpecificationBuilder&lt;TraceEntity&gt;().build(dateFilter.toMap());</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">      if (dateFilterSpecification.isPresent())</span>
+<span class="nc" id="L90">        specification = specification.and(dateFilterSpecification.get());</span>
     }
 
-<span class="pc bpc" id="L92" title="1 of 2 branches missed.">    if (keyword != null) {</span>
-<span class="nc" id="L93">      specification =</span>
-<span class="nc" id="L94">          specification.and(</span>
-<span class="nc" id="L95">              TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">    if (keyword != null) {</span>
+<span class="nc" id="L94">      specification =</span>
+<span class="nc" id="L95">          specification.and(</span>
+<span class="nc" id="L96">              TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));</span>
     }
 
     Sort sort =
-<span class="pc bpc" id="L99" title="3 of 4 branches missed.">        filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
-<span class="nc" id="L100">            ? Sort.by(Sort.Direction.ASC, &quot;createdAt&quot;)</span>
-<span class="fc" id="L101">            : Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
-<span class="fc" id="L102">                .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
+<span class="pc bpc" id="L100" title="3 of 4 branches missed.">        filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
+<span class="nc" id="L101">            ? Sort.by(Sort.Direction.ASC, &quot;createdAt&quot;)</span>
+<span class="fc" id="L102">            : Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
+<span class="fc" id="L103">                .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
 
-<span class="fc" id="L104">    return findAll(</span>
-<span class="fc" id="L105">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+<span class="fc" id="L105">    return findAll(</span>
+<span class="fc" id="L106">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
   }
 
   @Override
   public List&lt;Trace&gt; findAll(User user, boolean isAssociated) {
-<span class="nc" id="L110">    Specification&lt;TraceEntity&gt; specification = TraceSpecification.ofUser(user);</span>
+<span class="nc" id="L111">    Specification&lt;TraceEntity&gt; specification =</span>
+<span class="nc" id="L112">        TraceSpecification.ofUser(user).and(TraceSpecification.notDeleted());</span>
 
-<span class="nc" id="L112">    specification =</span>
-<span class="nc" id="L113">        specification.and(</span>
-<span class="nc bnc" id="L114" title="All 2 branches missed.">            isAssociated ? TraceSpecification.associated() : TraceSpecification.unassociated());</span>
+<span class="nc" id="L114">    specification =</span>
+<span class="nc" id="L115">        specification.and(</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">            isAssociated ? TraceSpecification.associated() : TraceSpecification.unassociated());</span>
 
-<span class="nc" id="L116">    return findAll(specification);</span>
+<span class="nc" id="L118">    return findAll(specification);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
