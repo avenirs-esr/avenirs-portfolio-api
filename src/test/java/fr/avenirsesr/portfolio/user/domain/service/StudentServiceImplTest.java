@@ -38,34 +38,6 @@ class StudentServiceImplTest {
   @Nested
   class GetStudentProfile {
 
-    private Student createStudent(boolean hasUnseenNotification) {
-      return StudentFixture.create().withHasUnseenNotification(hasUnseenNotification).toModel();
-    }
-
-    @Test
-    void shouldReturnHasUnseenNotificationFalse() {
-      BddLogger.given("a logged-in student with no unseen notifications");
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(createStudent(false));
-
-      BddLogger.when("getting the student profile");
-      var result = studentService.getStudentProfile();
-
-      BddLogger.then("hasUnseenNotification should be false");
-      assertFalse(result.hasUnseenNotification());
-    }
-
-    @Test
-    void shouldReturnHasUnseenNotificationTrue() {
-      BddLogger.given("a logged-in student with unseen notifications");
-      when(loggedInUserService.getLoggedInStudent()).thenReturn(createStudent(true));
-
-      BddLogger.when("getting the student profile");
-      var result = studentService.getStudentProfile();
-
-      BddLogger.then("hasUnseenNotification should be true");
-      assertTrue(result.hasUnseenNotification());
-    }
-
     @Test
     void shouldMapStudentFieldsToProfileOverviewData() {
       BddLogger.given("a logged-in student with known field values");
@@ -75,12 +47,7 @@ class StudentServiceImplTest {
               .withLastName("Tessier")
               .withEmail("lucas@university.com")
               .toModel();
-      Student student =
-          StudentFixture.create()
-              .withUser(user)
-              .withBio("My student bio")
-              .withHasUnseenNotification(false)
-              .toModel();
+      Student student = StudentFixture.create().withUser(user).withBio("My student bio").toModel();
       when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
 
       BddLogger.when("getting the student profile");
@@ -92,7 +59,6 @@ class StudentServiceImplTest {
       assertEquals("Tessier", result.lastName());
       assertEquals("lucas@university.com", result.email());
       assertEquals("My student bio", result.bio());
-      assertFalse(result.hasUnseenNotification());
     }
   }
 }

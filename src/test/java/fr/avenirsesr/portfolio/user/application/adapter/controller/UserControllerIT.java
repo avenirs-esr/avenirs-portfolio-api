@@ -149,9 +149,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.email")
         .isEqualTo("lucas.tessier@university.com")
         .jsonPath("$.bio")
-        .exists()
-        .jsonPath("$.hasUnseenNotification")
-        .isEqualTo(false);
+        .exists();
   }
 
   @Test
@@ -168,10 +166,7 @@ public class UserControllerIT extends ContainerConfigurationTest {
         .header("X-Context-Signature", staffSignature)
         .exchange()
         .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$.hasUnseenNotification")
-        .isEqualTo(false);
+        .isOk();
   }
 
   @Test

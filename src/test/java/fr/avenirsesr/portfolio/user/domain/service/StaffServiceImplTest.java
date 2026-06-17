@@ -34,43 +34,6 @@ class StaffServiceImplTest {
   @Nested
   class GetStaffProfile {
 
-    private Staff createStaff(boolean hasUnseenNotification) {
-      var user = UserFixture.create().toModel();
-      return Staff.toDomain(
-          user,
-          user.getEmail(),
-          "My bio",
-          hasUnseenNotification,
-          null,
-          null,
-          Instant.now(),
-          Instant.now());
-    }
-
-    @Test
-    void shouldReturnHasUnseenNotificationFalse() {
-      BddLogger.given("a logged-in staff with no unseen notifications");
-      when(loggedInUserService.getLoggedInStaff()).thenReturn(createStaff(false));
-
-      BddLogger.when("getting the staff profile");
-      var result = staffService.getStaffProfile();
-
-      BddLogger.then("hasUnseenNotification should be false");
-      assertFalse(result.hasUnseenNotification());
-    }
-
-    @Test
-    void shouldReturnHasUnseenNotificationTrue() {
-      BddLogger.given("a logged-in staff with unseen notifications");
-      when(loggedInUserService.getLoggedInStaff()).thenReturn(createStaff(true));
-
-      BddLogger.when("getting the staff profile");
-      var result = staffService.getStaffProfile();
-
-      BddLogger.then("hasUnseenNotification should be true");
-      assertTrue(result.hasUnseenNotification());
-    }
-
     @Test
     void shouldMapStaffFieldsToProfileOverviewData() {
       BddLogger.given("a logged-in staff with known field values");
@@ -101,7 +64,6 @@ class StaffServiceImplTest {
       assertEquals("Dupont", result.lastName());
       assertEquals("marie@university.com", result.email());
       assertEquals("My staff bio", result.bio());
-      assertFalse(result.hasUnseenNotification());
     }
   }
 }

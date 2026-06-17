@@ -9,7 +9,5 @@ public record UserProfileOverviewData(
     String lastName,
     String email,
     String bio,
-    boolean hasUnseenNotification,
-    boolean notificationEnabled,
     FileData coverPhoto,
     FileData profilePhoto) {}

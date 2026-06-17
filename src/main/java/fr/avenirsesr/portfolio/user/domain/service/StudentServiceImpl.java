@@ -47,8 +47,6 @@ public class StudentServiceImpl implements StudentService {
         student.getUser().getLastName(),
         student.getUser().getEmail(),
         student.getBio(),
-        student.isHasUnseenNotification(),
-        student.getUser().isNotificationEnabled(),
         FileDataMapper.mapFileData(
             student.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),
         FileDataMapper.mapFileData(

@@ -195,7 +195,8 @@ class NotificationSpecificationIT extends ContainerConfigurationTest {
   @Test
   void countUnreadByUserAndCategory_should_return_correct_count_for_student() {
     BddLogger.given(
-        "3 unseen STUDENT notifications, 1 seen STUDENT notification, and 1 unseen STAFF notification for user");
+        "3 unseen STUDENT notifications, 1 seen STUDENT notification, and 1 unseen STAFF"
+            + " notification for user");
     persistNotificationWithSeen(user, EUserCategory.STUDENT, false);
     persistNotificationWithSeen(user, EUserCategory.STUDENT, false);
     persistNotificationWithSeen(user, EUserCategory.STUDENT, false);
