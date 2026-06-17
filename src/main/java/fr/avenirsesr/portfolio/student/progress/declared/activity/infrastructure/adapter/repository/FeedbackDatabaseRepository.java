@@ -138,6 +138,12 @@ public class FeedbackDatabaseRepository
     return jpaRepository.findDeclaredActivityIdsWithActiveFeedbacks(declaredActivityIds);
   }
 
+  @Override
+  public Set<UUID> findAttachmentIdsUsedByTraceSnapshots(
+      List<UUID> declaredActivityIds, List<UUID> traceIds) {
+    return jpaRepository.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);
+  }
+
   // ── private helpers ─────────────────────────────────────────────────
 
   private Feedback toDomainWithDependencies(FeedbackEntity entity) {

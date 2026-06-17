@@ -10,7 +10,6 @@ import java.util.UUID;
       "id",
       "title",
       "isAssociated",
-      "isDeletable",
       "createdAt",
       "updatedAt",
     })
@@ -18,7 +17,6 @@ public record TraceViewDTO(
     UUID id,
     String title,
     boolean isAssociated,
-    boolean isDeletable,
     Instant createdAt,
     Instant updatedAt,
     LocalDate willBeDeletedAt) {}

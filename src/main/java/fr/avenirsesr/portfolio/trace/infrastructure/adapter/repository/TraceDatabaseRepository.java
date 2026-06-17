@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericDeletableJpaRepositoryAdapter;
+import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.specification.DateFilterSpecificationBuilder;
 import fr.avenirsesr.portfolio.common.language.infrastructure.adapter.utils.TranslationUtil;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
@@ -28,8 +28,8 @@ import org.springframework.stereotype.Repository;
 @Slf4j
 @Repository
 @SQLRestriction("deleted_at IS NULL")
-public class TraceDatabaseRepository
-    extends GenericDeletableJpaRepositoryAdapter<Trace, TraceEntity> implements TraceRepository {
+public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter<Trace, TraceEntity>
+    implements TraceRepository {
   private final TraceJpaRepository jpaRepository;
 
   public TraceDatabaseRepository(TraceJpaRepository jpaRepository) {
@@ -40,7 +40,7 @@ public class TraceDatabaseRepository
   @Override
   public List<Trace> findLastsOf(User user, int limit) {
     return findAll(
-            TraceSpecification.ofUser(user).and(TraceSpecification.notDeleted()),
+            TraceSpecification.ofUser(user),
             PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt")))
         .content();
   }
@@ -75,8 +75,7 @@ public class TraceDatabaseRepository
       DateFilter dateFilter,
       PageCriteria pageCriteria) {
 
-    Specification<TraceEntity> specification =
-        TraceSpecification.ofUser(user).and(TraceSpecification.notDeleted());
+    Specification<TraceEntity> specification = TraceSpecification.ofUser(user);
 
     var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());
     if (filterSpecification.isPresent()) {
@@ -108,8 +107,7 @@ public class TraceDatabaseRepository
 
   @Override
   public List<Trace> findAll(User user, boolean isAssociated) {
-    Specification<TraceEntity> specification =
-        TraceSpecification.ofUser(user).and(TraceSpecification.notDeleted());
+    Specification<TraceEntity> specification = TraceSpecification.ofUser(user);
 
     specification =
         specification.and(

@@ -38,6 +38,8 @@ public class TraceController {
   private final TraceViewMapper traceViewMapper;
   private final TraceOverviewMapper traceOverviewMapper;
   private final TraceDetailMapper traceDetailMapper;
+  private final TraceDeclaredActivityMapper traceDeclaredActivityMapper;
+  private final TraceLockedDeclaredActivitiesMapper traceLockedDeclaredActivitiesMapper;
   private final TracesSummaryMapper tracesSummaryMapper;
   private final TraceAssociationsMapper traceAssociationsMapper;
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
@@ -317,5 +319,18 @@ public class TraceController {
     traceService.unassociate(traceId, associationIds);
 
     return ResponseEntity.ok("Associations successfully deleted.");
+  }
+
+  @PostMapping("/locked-declared-activities")
+  public ResponseEntity<List<TraceLockedDeclaredActivitiesDTO>> getLockedDeclaredActivities(
+      Principal principal, @RequestBody List<UUID> traceIds) {
+    log.debug(
+        "Received request to get locked declared activities for traces [{}] of user [{}]",
+        traceIds,
+        principal.getName());
+
+    return ResponseEntity.ok(
+        traceLockedDeclaredActivitiesMapper.toDTOs(
+            traceService.getLockedDeclaredActivities(traceIds)));
   }
 }

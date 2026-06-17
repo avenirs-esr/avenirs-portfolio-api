@@ -84,4 +84,6 @@ public interface TraceService {
 
   PagedResult<AssociationSearchResultData> searchDeclaredExperienceForAssociation(
       UUID traceId, String keyword, PageCriteria pageCriteria);
+
+  List<TraceLockedDeclaredActivitiesData> getLockedDeclaredActivities(List<UUID> traceIds);
 }

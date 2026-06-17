@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.Generic
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface FeedbackRepository extends GenericRepositoryPort<Feedback> {
@@ -15,4 +16,7 @@ public interface FeedbackRepository extends GenericRepositoryPort<Feedback> {
       UUID staffId, EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria);
 
   List<UUID> findDeclaredActivityIdsHavingActiveFeedbacks(List<UUID> declaredActivityIds);
+
+  Set<UUID> findAttachmentIdsUsedByTraceSnapshots(
+      List<UUID> declaredActivityIds, List<UUID> traceIds);
 }

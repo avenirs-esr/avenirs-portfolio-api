@@ -34,8 +34,7 @@ public class FakeTrace {
                 null,
                 null,
                 Instant.now(),
-                Instant.now(),
-                null));
+                Instant.now()));
 
     ETraceAuthorType[] types = ETraceAuthorType.values();
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.withAiUseJustification();
@@ -49,11 +48,6 @@ public class FakeTrace {
 
   public FakeTrace withELanguage(ELanguage language) {
     trace.setLanguage(language);
-    return this;
-  }
-
-  public FakeTrace withDeletedAt(Instant deletedAt) {
-    trace.setDeletedAt(deletedAt);
     return this;
   }
 

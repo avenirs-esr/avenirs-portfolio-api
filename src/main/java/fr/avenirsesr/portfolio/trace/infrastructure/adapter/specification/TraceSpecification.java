@@ -46,10 +46,6 @@ public class TraceSpecification {
     };
   }
 
-  public static Specification<TraceEntity> notDeleted() {
-    return (root, query, cb) -> cb.isNull(root.get("deletedAt"));
-  }
-
   public static Specification<TraceEntity> search(String keyword, ELanguage language) {
     return (root, query, criteriaBuilder) -> {
       if (keyword == null || keyword.trim().isEmpty() || query == null) {

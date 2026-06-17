@@ -2,8 +2,10 @@ package fr.avenirsesr.portfolio.trace.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.service.AssociationSearchHelper;
+import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.port.input.DeclaredExperienceService;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
@@ -27,6 +29,8 @@ public class TraceServiceConfig {
   private final LoggedInUserService loggedInUserService;
   private final AssociationService associationService;
   private final AssociationSearchHelper associationSearchHelper;
+  private final FeedbackService feedbackService;
+  private final FileRepository fileRepository;
 
   @Bean
   public TraceService traceService() {
@@ -39,6 +43,8 @@ public class TraceServiceConfig {
         traceConfigurationClient,
         loggedInUserService,
         associationService,
-        associationSearchHelper);
+        associationSearchHelper,
+        feedbackService,
+        fileRepository);
   }
 }

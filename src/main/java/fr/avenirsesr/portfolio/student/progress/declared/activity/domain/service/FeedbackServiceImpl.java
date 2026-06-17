@@ -32,6 +32,7 @@ import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -206,5 +207,15 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     feedback.setStatus(EFeedbackStatus.SUBMITTED);
     feedbackRepository.save(feedback);
+  }
+
+  @Override
+  public Set<UUID> findAttachmentIdsUsedByTraceSnapshots(
+      List<UUID> declaredActivityIds, List<UUID> traceIds) {
+    if (declaredActivityIds.isEmpty() || traceIds.isEmpty()) {
+      return Set.of();
+    }
+
+    return feedbackRepository.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);
   }
 }

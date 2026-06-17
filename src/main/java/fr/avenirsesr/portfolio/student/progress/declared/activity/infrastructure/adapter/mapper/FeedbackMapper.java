@@ -49,8 +49,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
                         t.getPersonalNote().orElse(null),
                         t.getLink().orElse(null),
                         t.getCreatedAt(),
-                        t.getUpdatedAt(),
-                        t.getDeletedAt().orElse(null)))
+                        t.getUpdatedAt()))
             .toList();
 
     List<AssociationsJson.DeclaredSkillProgressSnapshot> progresses =
@@ -107,7 +106,6 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
                         snap.attachmentId() != null ? files.get(snap.attachmentId()) : null,
                         snap.createdAt(),
                         snap.updatedAt(),
-                        snap.deletedAt(),
                         snap.language()))
             .toList();
 

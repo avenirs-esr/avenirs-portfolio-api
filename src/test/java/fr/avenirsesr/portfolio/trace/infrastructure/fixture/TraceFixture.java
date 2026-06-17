@@ -20,7 +20,6 @@ public class TraceFixture {
   private String title;
   private Instant createdAt;
   private Instant updatedAt;
-  private Instant deletedAt;
   private ETraceAuthorType authorType;
   private String aiUseJustification;
   private String personalNote;
@@ -36,7 +35,6 @@ public class TraceFixture {
     this.title = base.getTitle();
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
-    this.deletedAt = base.getDeletedAt();
     this.authorType = base.getAuthorType();
     this.attachment =
         File.create(
@@ -77,11 +75,6 @@ public class TraceFixture {
 
   public TraceFixture withUpdatedAt(Instant updatedAt) {
     this.updatedAt = updatedAt;
-    return this;
-  }
-
-  public TraceFixture withDeletedAt(Instant deletedAt) {
-    this.deletedAt = deletedAt;
     return this;
   }
 
@@ -127,7 +120,6 @@ public class TraceFixture {
         attachment,
         createdAt,
         updatedAt,
-        deletedAt,
         language);
   }
 }
