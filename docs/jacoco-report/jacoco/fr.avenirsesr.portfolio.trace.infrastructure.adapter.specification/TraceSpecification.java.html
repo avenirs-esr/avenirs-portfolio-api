@@ -46,38 +46,34 @@ import org.springframework.data.jpa.domain.Specification;
     };
   }
 
-  public static Specification&lt;TraceEntity&gt; notDeleted() {
-<span class="fc" id="L50">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;deletedAt&quot;));</span>
-  }
-
   public static Specification&lt;TraceEntity&gt; search(String keyword, ELanguage language) {
-<span class="fc" id="L54">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc bfc" id="L55" title="All 6 branches covered.">      if (keyword == null || keyword.trim().isEmpty() || query == null) {</span>
-<span class="fc" id="L56">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L50">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L51" title="All 6 branches covered.">      if (keyword == null || keyword.trim().isEmpty() || query == null) {</span>
+<span class="fc" id="L52">        return criteriaBuilder.conjunction();</span>
       }
 
-<span class="fc" id="L59">      query.distinct(true);</span>
+<span class="fc" id="L55">      query.distinct(true);</span>
 
-<span class="fc" id="L61">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
+<span class="fc" id="L57">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
 
       // Trace
-<span class="fc" id="L64">      var titlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;title&quot;)), pattern);</span>
-<span class="fc" id="L65">      var aiUsePredicate =</span>
-<span class="fc" id="L66">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;aiUseJustification&quot;)), pattern);</span>
-<span class="fc" id="L67">      var personalNotePredicate =</span>
-<span class="fc" id="L68">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;personalNote&quot;)), pattern);</span>
+<span class="fc" id="L60">      var titlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;title&quot;)), pattern);</span>
+<span class="fc" id="L61">      var aiUsePredicate =</span>
+<span class="fc" id="L62">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;aiUseJustification&quot;)), pattern);</span>
+<span class="fc" id="L63">      var personalNotePredicate =</span>
+<span class="fc" id="L64">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;personalNote&quot;)), pattern);</span>
 
       // Attachment
-<span class="fc" id="L71">      Subquery&lt;FileEntity&gt; attachSub = query.subquery(FileEntity.class);</span>
-<span class="fc" id="L72">      Root&lt;FileEntity&gt; attachRoot = attachSub.from(FileEntity.class);</span>
-<span class="fc" id="L73">      attachSub</span>
-<span class="fc" id="L74">          .select(attachRoot)</span>
-<span class="fc" id="L75">          .where(</span>
-<span class="fc" id="L76">              criteriaBuilder.equal(attachRoot.get(&quot;elementId&quot;), root.get(&quot;id&quot;)),</span>
-<span class="fc" id="L77">              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get(&quot;fileName&quot;)), pattern));</span>
-<span class="fc" id="L78">      Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);</span>
+<span class="fc" id="L67">      Subquery&lt;FileEntity&gt; attachSub = query.subquery(FileEntity.class);</span>
+<span class="fc" id="L68">      Root&lt;FileEntity&gt; attachRoot = attachSub.from(FileEntity.class);</span>
+<span class="fc" id="L69">      attachSub</span>
+<span class="fc" id="L70">          .select(attachRoot)</span>
+<span class="fc" id="L71">          .where(</span>
+<span class="fc" id="L72">              criteriaBuilder.equal(attachRoot.get(&quot;elementId&quot;), root.get(&quot;id&quot;)),</span>
+<span class="fc" id="L73">              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get(&quot;fileName&quot;)), pattern));</span>
+<span class="fc" id="L74">      Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);</span>
 
-<span class="fc" id="L80">      return criteriaBuilder.or(</span>
+<span class="fc" id="L76">      return criteriaBuilder.or(</span>
           titlePredicate, aiUsePredicate, personalNotePredicate, attachmentPredicate);
     };
   }
