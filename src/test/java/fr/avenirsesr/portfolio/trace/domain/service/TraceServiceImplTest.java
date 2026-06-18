@@ -609,7 +609,7 @@ class TraceServiceImplTest {
       }
 
       @Test
-      void thenItShouldThrowFileNotFoundWhenAttachmentDoesNotExist() {
+      void thenItShouldThrowFileNotFoundAfterDeletingTraceWhenAttachmentDoesNotExist() {
         BddLogger.when("deleting a trace with a missing attachment");
 
         Trace trace = mock(Trace.class);
@@ -631,10 +631,12 @@ class TraceServiceImplTest {
 
         assertThrows(FileNotFoundException.class, () -> traceService.deleteAllByIds(traceIds));
 
-        BddLogger.then("it should not delete associations and traces");
+        BddLogger.then("it should delete associations and traces before failing on missing file");
 
-        verify(associationService, never()).deleteAllOf(anyList(), any());
-        verify(traceRepository, never()).removeAllFromDatabase(anyList());
+        verify(associationService).deleteAllOf(traceIds, Trace.class);
+        verify(traceRepository).removeAllFromDatabase(List.of(trace));
+        verify(fileRepository).findAllById(List.of(fileId));
+        verify(fileRepository, never()).removeAllFromDatabase(anyList());
       }
 
       @Test
