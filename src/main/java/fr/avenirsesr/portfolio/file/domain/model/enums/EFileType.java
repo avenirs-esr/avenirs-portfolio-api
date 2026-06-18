@@ -57,7 +57,7 @@ public enum EFileType {
   X_MSEXCEL(FileSize.of(10, FileSize.Unit.Mo), "application/x-msexcel"),
   XLS_VND(FileSize.of(10, FileSize.Unit.Mo), "application/vnd.ms-excel"),
   PPT_VND(FileSize.of(10, FileSize.Unit.Mo), "application/vnd.ms-powerpoint"),
-  ODT(FileSize.of(510, FileSize.Unit.Mo), "application/vnd.oasis.opendocument.text"),
+  ODT(FileSize.of(10, FileSize.Unit.Mo), "application/vnd.oasis.opendocument.text"),
   VSD(FileSize.of(10, FileSize.Unit.Mo), "application/vnd.visio"),
   RTF(FileSize.of(10, FileSize.Unit.Mo), "application/rtf"),
   X_RTF(FileSize.of(10, FileSize.Unit.Mo), "application/x-rtf"),
