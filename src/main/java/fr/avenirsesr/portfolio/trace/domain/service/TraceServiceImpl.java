@@ -168,11 +168,11 @@ public class TraceServiceImpl implements TraceService {
     List<UUID> fileIdsToDelete =
         fileIdsUsedByTraces.stream().filter(fileId -> !protectedFileIds.contains(fileId)).toList();
 
-    deleteAllFilesByIds(fileIdsToDelete);
-
     associationService.deleteAllOf(traceIdsToDelete, Trace.class);
 
     traceRepository.removeAllFromDatabase(traces);
+
+    deleteAllFilesByIds(fileIdsToDelete);
 
     log.info("Deleted traces {}", traceIds);
   }
