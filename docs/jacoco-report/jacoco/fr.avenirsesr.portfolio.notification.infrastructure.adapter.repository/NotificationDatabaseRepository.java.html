@@ -34,14 +34,5 @@ public class NotificationDatabaseRepository
 <span class="fc" id="L34">        PageRequest.of(</span>
 <span class="fc" id="L35">            pageCriteria.page(), pageCriteria.pageSize(), Sort.by(&quot;createdAt&quot;).descending()));</span>
   }
-
-  @Override
-  public long countUnreadByUserAndCategory(UUID userId, EUserCategory userCategory) {
-<span class="fc" id="L40">    var specification =</span>
-<span class="fc" id="L41">        NotificationSpecification.hasUser(userId)</span>
-<span class="fc" id="L42">            .and(NotificationSpecification.hasUserCategoryNullOrEquals(userCategory))</span>
-<span class="fc" id="L43">            .and(NotificationSpecification.isNotSeen());</span>
-<span class="fc" id="L44">    return jpaSpecificationExecutor.count(specification);</span>
-  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

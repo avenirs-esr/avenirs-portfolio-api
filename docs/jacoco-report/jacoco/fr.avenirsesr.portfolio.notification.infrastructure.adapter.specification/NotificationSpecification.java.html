@@ -18,9 +18,5 @@ public final class NotificationSpecification {
 <span class="fc" id="L18">    return (root, query, cb) -&gt;</span>
 <span class="fc" id="L19">        cb.or(root.get(&quot;userCategory&quot;).isNull(), cb.equal(root.get(&quot;userCategory&quot;), userCategory));</span>
   }
-
-  public static Specification&lt;NotificationEntity&gt; isNotSeen() {
-<span class="fc" id="L23">    return (root, query, cb) -&gt; cb.isFalse(root.get(&quot;seen&quot;));</span>
-  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

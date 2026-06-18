@@ -7,9 +7,7 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
 import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
-import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
@@ -20,7 +18,7 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L23">@Slf4j</span>
+<span class="fc" id="L21">@Slf4j</span>
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
   private final UserRepository userRepository;
@@ -29,114 +27,86 @@ public class UserServiceImpl implements UserService {
   private final StudentService studentService;
   private final ExternalUserClient externalUserClient;
   private final LoggedInUserService loggedInUserService;
-  private final NotificationRepository notificationRepository;
 
   @Override
   public User getUser(UUID id) {
-<span class="fc" id="L36">    return userRepository</span>
-<span class="fc" id="L37">        .findById(id)</span>
-<span class="fc" id="L38">        .orElseThrow(</span>
+<span class="fc" id="L33">    return userRepository</span>
+<span class="fc" id="L34">        .findById(id)</span>
+<span class="fc" id="L35">        .orElseThrow(</span>
             () -&gt; {
-<span class="fc" id="L40">              log.error(&quot;User {} not found&quot;, id);</span>
-<span class="fc" id="L41">              return new UserNotFoundException();</span>
+<span class="fc" id="L37">              log.error(&quot;User {} not found&quot;, id);</span>
+<span class="fc" id="L38">              return new UserNotFoundException();</span>
             });
   }
 
   @Override
   public User getUserByEppn(String eppn) {
-<span class="fc" id="L47">    return userPrincipalRepository</span>
-<span class="fc" id="L48">        .findByEppn(eppn)</span>
-<span class="fc" id="L49">        .orElseGet(() -&gt; createUserFromExternalUser(eppn));</span>
+<span class="fc" id="L44">    return userPrincipalRepository</span>
+<span class="fc" id="L45">        .findByEppn(eppn)</span>
+<span class="fc" id="L46">        .orElseGet(() -&gt; createUserFromExternalUser(eppn));</span>
   }
 
   @Override
   public void updateProfile(EUserCategory userCategory, String email, String bio) {
-<span class="fc" id="L54">    var user = loggedInUserService.getLoggedInUser();</span>
-<span class="fc bfc" id="L55" title="All 2 branches covered.">    if (email != null) {</span>
-<span class="pc bpc" id="L56" title="1 of 3 branches missed.">      switch (userCategory) {</span>
-<span class="fc" id="L57">        case STUDENT -&gt; user.setEmail(email);</span>
-<span class="fc" id="L58">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
+<span class="fc" id="L51">    var user = loggedInUserService.getLoggedInUser();</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">    if (email != null) {</span>
+<span class="pc bpc" id="L53" title="1 of 3 branches missed.">      switch (userCategory) {</span>
+<span class="fc" id="L54">        case STUDENT -&gt; user.setEmail(email);</span>
+<span class="fc" id="L55">        case STAFF -&gt; throw new UserNotAuthorizedException();</span>
       }
     }
-<span class="fc" id="L61">    userRepository.save(user);</span>
+<span class="fc" id="L58">    userRepository.save(user);</span>
 
-<span class="pc bpc" id="L63" title="1 of 3 branches missed.">    switch (userCategory) {</span>
-<span class="fc" id="L64">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
-<span class="fc" id="L65">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
-<span class="nc" id="L66">      default -&gt; throw new UserNotAuthorizedException();</span>
+<span class="pc bpc" id="L60" title="1 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="fc" id="L61">      case STUDENT -&gt; studentService.updateProfile(user, bio);</span>
+<span class="fc" id="L62">      case STAFF -&gt; staffService.updateProfile(user, bio);</span>
+<span class="nc" id="L63">      default -&gt; throw new UserNotAuthorizedException();</span>
     }
-<span class="fc" id="L68">  }</span>
+<span class="fc" id="L65">  }</span>
 
   @Override
   public void updateNotificationPreferences(boolean notificationEnabled) {
-<span class="fc" id="L72">    var user = loggedInUserService.getLoggedInUser();</span>
-<span class="fc" id="L73">    user.setNotificationEnabled(notificationEnabled);</span>
-<span class="fc" id="L74">    userRepository.save(user);</span>
-<span class="fc" id="L75">  }</span>
+<span class="fc" id="L69">    var user = loggedInUserService.getLoggedInUser();</span>
+<span class="fc" id="L70">    user.setNotificationEnabled(notificationEnabled);</span>
+<span class="fc" id="L71">    userRepository.save(user);</span>
+<span class="fc" id="L72">  }</span>
 
   @Override
   public User createUser(UUID id, String firstname, String lastname, String email, String eppn) {
-<span class="fc" id="L79">    var user = User.create(id, firstname, lastname, email);</span>
-<span class="fc" id="L80">    userRepository.save(user);</span>
-<span class="fc" id="L81">    userPrincipalRepository.saveOrUpdate(user, eppn);</span>
-<span class="fc" id="L82">    return user;</span>
-  }
-
-  @Override
-  public UserQuickLinksData getQuickLinks(EUserCategory userCategory) {
-    User user;
-<span class="fc" id="L88">    boolean hasUnseenNotification =</span>
-<span class="fc bfc" id="L89" title="All 2 branches covered.">        switch (userCategory) {</span>
-          case STUDENT -&gt; {
-<span class="fc" id="L91">            var student = loggedInUserService.getLoggedInStudent();</span>
-<span class="fc" id="L92">            user = student.getUser();</span>
-<span class="fc" id="L93">            yield student.isHasUnseenNotification();</span>
-          }
-          case STAFF -&gt; {
-<span class="fc" id="L96">            var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="fc" id="L97">            user = staff.getUser();</span>
-<span class="fc" id="L98">            yield staff.isHasUnseenNotification();</span>
-          }
-        };
-<span class="fc" id="L101">    int unreadNotifications =</span>
-<span class="fc" id="L102">        (int) notificationRepository.countUnreadByUserAndCategory(user.getId(), userCategory);</span>
-<span class="fc" id="L103">    return new UserQuickLinksData(</span>
-<span class="fc" id="L104">        user.getId(),</span>
-<span class="fc" id="L105">        user.getFirstName(),</span>
-<span class="fc" id="L106">        user.getLastName(),</span>
-        hasUnseenNotification,
-        unreadNotifications,
-<span class="fc" id="L109">        user.isNotificationEnabled());</span>
+<span class="fc" id="L76">    var user = User.create(id, firstname, lastname, email);</span>
+<span class="fc" id="L77">    userRepository.save(user);</span>
+<span class="fc" id="L78">    userPrincipalRepository.saveOrUpdate(user, eppn);</span>
+<span class="fc" id="L79">    return user;</span>
   }
 
   private User createUserFromExternalUser(String eppn) {
-<span class="fc" id="L113">    var externalUser =</span>
-<span class="fc" id="L114">        externalUserClient.getByEppn(eppn).orElseThrow(ExternalUserNotFoundException::new);</span>
+<span class="fc" id="L83">    var externalUser =</span>
+<span class="fc" id="L84">        externalUserClient.getByEppn(eppn).orElseThrow(ExternalUserNotFoundException::new);</span>
 
-<span class="fc bfc" id="L116" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.BLOCKED) {</span>
-<span class="fc" id="L117">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_BLOCKED);</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.BLOCKED) {</span>
+<span class="fc" id="L87">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_BLOCKED);</span>
     }
 
-<span class="fc bfc" id="L120" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.REMOVED) {</span>
-<span class="fc" id="L121">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_REMOVED);</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">    if (externalUser.status() == EUserStatus.REMOVED) {</span>
+<span class="fc" id="L91">      throw new ExternalUserNotFoundException(EErrorCode.EXTERNAL_USER_REMOVED);</span>
     }
 
-<span class="fc" id="L124">    var user =</span>
-<span class="fc" id="L125">        createUser(</span>
-<span class="fc" id="L126">            UUID.randomUUID(),</span>
-<span class="fc" id="L127">            externalUser.firstName(),</span>
-<span class="fc" id="L128">            externalUser.lastName(),</span>
-<span class="fc" id="L129">            externalUser.email(),</span>
-<span class="fc" id="L130">            externalUser.eppn());</span>
+<span class="fc" id="L94">    var user =</span>
+<span class="fc" id="L95">        createUser(</span>
+<span class="fc" id="L96">            UUID.randomUUID(),</span>
+<span class="fc" id="L97">            externalUser.firstName(),</span>
+<span class="fc" id="L98">            externalUser.lastName(),</span>
+<span class="fc" id="L99">            externalUser.email(),</span>
+<span class="fc" id="L100">            externalUser.eppn());</span>
 
-<span class="pc bpc" id="L132" title="1 of 3 branches missed.">    switch (externalUser.category()) {</span>
-<span class="fc" id="L133">      case STUDENT -&gt; studentService.createStudent(user.getId(), externalUser.email(), null);</span>
-<span class="fc" id="L134">      case STAFF -&gt; staffService.createStaff(user.getId(), externalUser.email(), null);</span>
+<span class="pc bpc" id="L102" title="1 of 3 branches missed.">    switch (externalUser.category()) {</span>
+<span class="fc" id="L103">      case STUDENT -&gt; studentService.createStudent(user.getId(), externalUser.email(), null);</span>
+<span class="fc" id="L104">      case STAFF -&gt; staffService.createStaff(user.getId(), externalUser.email(), null);</span>
     }
 
-<span class="fc" id="L137">    externalUserClient.activateByEppn(externalUser.eppn());</span>
+<span class="fc" id="L107">    externalUserClient.activateByEppn(externalUser.eppn());</span>
 
-<span class="fc" id="L139">    return user;</span>
+<span class="fc" id="L109">    return user;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
