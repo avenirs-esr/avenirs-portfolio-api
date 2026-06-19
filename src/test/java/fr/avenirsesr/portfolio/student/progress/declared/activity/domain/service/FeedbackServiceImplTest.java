@@ -563,6 +563,68 @@ class FeedbackServiceImplTest {
     }
 
     @Test
+    void should_set_status_to_IN_PROCESS_when_staff_fetches_NEW_feedback() {
+      BddLogger.given(
+          "A logged-in staff who is the author of the activity fetching a NEW feedback");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+      Feedback feedback =
+          Feedback.toDomain(
+              feedbackId,
+              Instant.now(),
+              Instant.now(),
+              DeclaredActivity.create(
+                  UUID.randomUUID(), student, activity, null, null, null, null, null),
+              "Réflexion",
+              null,
+              EFeedbackStatus.NEW,
+              1,
+              List.of(),
+              List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+
+      BddLogger.when("getFeedbackDetails is called with STAFF category");
+      FeedbackData result = service.getFeedbackDetails(feedbackId, EUserCategory.STAFF);
+
+      BddLogger.then("The returned FeedbackData has status IN_PROCESS");
+      assertThat(result.status()).isEqualTo(EFeedbackStatus.IN_PROCESS);
+    }
+
+    @Test
+    void should_not_change_status_when_staff_fetches_feedback_already_IN_PROCESS() {
+      BddLogger.given(
+          "A logged-in staff who is the author of the activity fetching an IN_PROCESS feedback");
+      UUID feedbackId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      User authorUser = UserFixture.create().withId(activity.getAuthor().getId()).toModel();
+      Feedback feedback =
+          Feedback.toDomain(
+              feedbackId,
+              Instant.now(),
+              Instant.now(),
+              DeclaredActivity.create(
+                  UUID.randomUUID(), student, activity, null, null, null, null, null),
+              "Réflexion",
+              null,
+              EFeedbackStatus.IN_PROCESS,
+              1,
+              List.of(),
+              List.of());
+
+      when(feedbackRepository.findById(feedbackId)).thenReturn(Optional.of(feedback));
+      when(loggedInUserService.getLoggedInUser()).thenReturn(authorUser);
+
+      BddLogger.when("getFeedbackDetails is called with STAFF category");
+      FeedbackData result = service.getFeedbackDetails(feedbackId, EUserCategory.STAFF);
+
+      BddLogger.then("The returned FeedbackData still has status IN_PROCESS");
+      assertThat(result.status()).isEqualTo(EFeedbackStatus.IN_PROCESS);
+    }
+
+    @Test
     void should_throw_UserNotAuthorizedException_when_staff_is_not_author() {
       BddLogger.given("A logged-in user who is NOT the author of the activity");
       UUID feedbackId = UUID.randomUUID();
