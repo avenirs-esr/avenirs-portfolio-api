@@ -110,12 +110,18 @@ public class DeclaredActivitySeeder {
                   data.activityId(),
                   data.startDate().orElse(null),
                   data.endDate().orElse(null));
+          log.info("Created declared activity started At: {}", declaredActivity.getStartDate());
           if (data.reflection().isPresent())
             declaredActivityService.updateReflection(
                 declaredActivity.getId(), data.reflection().get());
 
           if (data.finishedAt().isPresent()) {
             clockService.fixed(data.finishedAt().get());
+            log.info(
+                "Finished at: {} , started At : {} - {}  ",
+                data.finishedAt(),
+                data.startDate(),
+                declaredActivity.getStartDate());
             declaredActivityService.finish(declaredActivity.getId());
             clockService.clear();
           }

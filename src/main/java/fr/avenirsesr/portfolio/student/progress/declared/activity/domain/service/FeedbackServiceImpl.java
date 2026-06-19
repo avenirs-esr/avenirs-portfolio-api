@@ -130,7 +130,10 @@ public class FeedbackServiceImpl implements FeedbackService {
       throw new UserNotAuthorizedException();
     }
 
-    if (feedback.getStatus() == EFeedbackStatus.NEW) feedback.setStatus(EFeedbackStatus.IN_PROCESS);
+    if (feedback.getStatus() == EFeedbackStatus.NEW) {
+      feedback.setStatus(EFeedbackStatus.IN_PROCESS);
+      feedbackRepository.save(feedback);
+    }
 
     return new FeedbackData(
         feedback.getId(),

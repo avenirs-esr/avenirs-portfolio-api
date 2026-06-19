@@ -1,14 +1,65 @@
 [
   {
     "declaredActivityId": "c1c9f6d2-6c2b-4a5e-9c4f-8e2a6b1d3f01",
-    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d"
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "targetStatus": "NEW"
   },
   {
     "declaredActivityId": "9a1d7c55-2f6b-4e88-9c2a-1e7b3d4f6c44",
-    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d"
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "targetStatus": "IN_PROCESS"
   },
   {
     "declaredActivityId": "8d4c1a77-5e2b-4b33-9f6c-3a7e1d2c6f66",
-    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d"
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "targetStatus": "IN_PROCESS",
+    "feedbackText": "Votre réflexion sur la lettre de motivation est bien structurée. Vous avez clairement identifié le lien entre votre parcours et l'offre ciblée. Je vous encourage à approfondir la mise en valeur de vos compétences transversales dans votre argumentation."
+  },
+  {
+    "declaredActivityId": "a1f6c2d2-6c2b-4a5e-9c4f-8e2a6b1d3f01",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "targetStatus": "SUBMITTED",
+    "feedbackText": "Excellente analyse de votre parcours de formation. Vous avez su identifier avec précision les compétences développées et leur articulation. Votre réflexion démontre une bonne capacité de recul sur votre propre progression académique."
+  },
+  {
+    "declaredActivityId": "b2e7d3e3-6c2b-4a5e-9c4f-8e2a6b1d3f02",
+    "studentId": "7c508ac3-d7a8-4f00-9989-0f677f4f9dea",
+    "targetStatus": "SUBMITTED",
+    "feedbackText": "Vous avez bien cerné les compétences acquises en formation et leur transférabilité. Ce travail d'identification est pertinent et servira de base solide pour valoriser votre parcours auprès des recruteurs."
+  },
+  {
+    "declaredActivityId": "c3d8e4f4-6c2b-4a5e-9c4f-8e2a6b1d3f03",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "targetStatus": "SUBMITTED",
+    "feedbackText": "Votre première itération révèle une réflexion approfondie sur vos motivations. J'apprécie la clarté avec laquelle vous avez articulé ce qui vous engage vraiment. Je vous invite à explorer davantage les actions concrètes qui en découlent."
+  },
+  {
+    "declaredActivityId": "c3d8e4f4-6c2b-4a5e-9c4f-8e2a6b1d3f03",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "targetStatus": "NEW"
+  },
+  {
+    "declaredActivityId": "d4c9f5a5-6c2b-4a5e-9c4f-8e2a6b1d3f04",
+    "studentId": "7c508ac3-d7a8-4f00-9989-0f677f4f9dea",
+    "targetStatus": "SUBMITTED",
+    "feedbackText": "Votre exploration des pistes d'orientation est prometteuse. Vous avez bien analysé les différentes options et leur adéquation avec votre profil. Continuez à affiner votre projet en tenant compte des réalités du marché."
+  },
+  {
+    "declaredActivityId": "d4c9f5a5-6c2b-4a5e-9c4f-8e2a6b1d3f04",
+    "studentId": "7c508ac3-d7a8-4f00-9989-0f677f4f9dea",
+    "targetStatus": "IN_PROCESS",
+    "feedbackText": "Dans cette deuxième itération, votre réflexion gagne en profondeur. La comparaison des scénarios est pertinente et montre une bonne maturité dans votre démarche d'orientation."
+  },
+  {
+    "declaredActivityId": "e5baf6b6-6c2b-4a5e-9c4f-8e2a6b1d3f05",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "targetStatus": "SUBMITTED",
+    "feedbackText": "Très bonne identification de vos réussites marquantes. Vous avez su analyser avec précision les compétences mobilisées et les facteurs de succès. Ce travail renforce votre capacité à vous valoriser efficacement."
+  },
+  {
+    "declaredActivityId": "e5baf6b6-6c2b-4a5e-9c4f-8e2a6b1d3f05",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "targetStatus": "SUBMITTED",
+    "feedbackText": "Excellente progression dans votre réflexion sur les réussites. Vous avez approfondi l'analyse en identifiant des compétences transversales supplémentaires. Votre capacité d'auto-analyse s'est nettement améliorée par rapport à la première itération."
   }
 ]

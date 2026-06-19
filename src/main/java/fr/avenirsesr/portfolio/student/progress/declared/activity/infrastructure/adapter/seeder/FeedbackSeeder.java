@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.common.utils.FileReader;
@@ -8,6 +9,7 @@ import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.Va
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.mapper.FeedbackMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.DeclaredActivityEntity;
@@ -51,7 +53,7 @@ public class FeedbackSeeder {
           case FAKER ->
               savedDeclaredActivities.stream()
                   .filter(a -> a.getFinishedAt() != null)
-                  .map(a -> new FeedbackCreationData(a.getId(), a.getStudent().getId()))
+                  .map(a -> new FeedbackCreationData(a.getId(), a.getStudent().getId(), null, null))
                   .toList();
         };
 
@@ -70,7 +72,26 @@ public class FeedbackSeeder {
                   Optional.ofNullable(UserMapper.INSTANCE.toDomain(student.getUser())),
                   ELanguage.FRENCH));
 
-          feedbacks.add(feedbackService.createFeedback(data.declaredActivityId()));
+          Feedback feedback = feedbackService.createFeedback(data.declaredActivityId());
+          feedbacks.add(feedback);
+
+          EFeedbackStatus targetStatus =
+              data.targetStatus() != null ? data.targetStatus() : EFeedbackStatus.NEW;
+
+          if (targetStatus != EFeedbackStatus.NEW) {
+            var staffUser = feedback.getDeclaredActivity().getActivity().getAuthor().getUser();
+            RequestContext.set(new RequestData(Optional.of(staffUser), ELanguage.FRENCH));
+
+            feedbackService.getFeedbackDetails(feedback.getId(), EUserCategory.STAFF);
+
+            if (data.feedbackText() != null) {
+              feedbackService.updateFeedback(feedback.getId(), data.feedbackText());
+            }
+
+            if (targetStatus == EFeedbackStatus.SUBMITTED) {
+              feedbackService.submitFeedback(feedback.getId());
+            }
+          }
         });
 
     log.info("✔ {} feedbacks created", feedbacks.size());

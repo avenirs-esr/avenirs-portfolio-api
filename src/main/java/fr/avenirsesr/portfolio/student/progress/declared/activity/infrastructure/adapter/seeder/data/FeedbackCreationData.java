@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.seeder.data;
 
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import java.util.UUID;
 
-public record FeedbackCreationData(UUID declaredActivityId, UUID studentId) {}
+public record FeedbackCreationData(
+    UUID declaredActivityId, UUID studentId, EFeedbackStatus targetStatus, String feedbackText) {}
