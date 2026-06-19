@@ -278,9 +278,11 @@ public class TraceServiceImpl implements TraceService {
         declaredExperienceService.findAllByIds(
             declaredExperienceAssociations.stream().map(Association::getId2).toList());
 
+    var activityStatuses = declaredActivityService.getDeclaredActivityStatus(activities);
+
     return new TraceAssociationsData(
         declaredActivityAssociations.stream()
-            .map(a -> declaredActivityMapper(a, activities))
+            .map(a -> declaredActivityMapper(a, activities, activityStatuses))
             .toList(),
         declaredSkillAssociations.stream().map(a -> declaredSkillMapper(a, skills)).toList(),
         declaredExperienceAssociations.stream()
@@ -418,13 +420,18 @@ public class TraceServiceImpl implements TraceService {
   }
 
   private DeclaredActivityAssociationData declaredActivityMapper(
-      Association association, List<DeclaredActivity> activities) {
-    return new DeclaredActivityAssociationData(
-        association.getId(),
+      Association association,
+      List<DeclaredActivity> activities,
+      Map<DeclaredActivity, EDeclaredActivityStatus> activityStatuses) {
+
+    DeclaredActivity activity =
         activities.stream()
-            .filter(activity -> activity.getId().equals(association.getId1()))
+            .filter(a -> a.getId().equals(association.getId1()))
             .findAny()
-            .orElseThrow(DeclaredActivityNotFoundException::new));
+            .orElseThrow(DeclaredActivityNotFoundException::new);
+
+    return new DeclaredActivityAssociationData(
+        association.getId(), activity, activityStatuses.get(activity));
   }
 
   private DeclaredSkillAssociationData declaredSkillMapper(

@@ -237,6 +237,8 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     var declaredActivities =
         declaredActivityService.findAllDeclaredActivitiesByIds(activityAssociationIds);
 
+    var activityStatuses = declaredActivityService.getDeclaredActivityStatus(declaredActivities);
+
     return new DeclaredSkillAssociationsData(
         associations.stream()
             .filter(a -> a.getAssociationType() == EAssociationType.TRACE_DECLARED_SKILL)
@@ -253,13 +255,16 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
             .filter(
                 a -> a.getAssociationType() == EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)
             .map(
-                a ->
-                    new DeclaredActivityAssociationData(
-                        a.getId(),
-                        declaredActivities.stream()
-                            .filter(activity -> activity.getId().equals(a.getId1()))
-                            .findAny()
-                            .orElseThrow(DeclaredActivityNotFoundException::new)))
+                a -> {
+                  DeclaredActivity activity =
+                      declaredActivities.stream()
+                          .filter(declaredActivity -> declaredActivity.getId().equals(a.getId1()))
+                          .findAny()
+                          .orElseThrow(DeclaredActivityNotFoundException::new);
+
+                  return new DeclaredActivityAssociationData(
+                      a.getId(), activity, activityStatuses.get(activity));
+                })
             .toList());
   }
 
