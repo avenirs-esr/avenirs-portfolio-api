@@ -1,6 +1,6 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.mapper;
 
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityAssociationMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.experience.application.adapter.mapper.DeclaredExperienceMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.mapper.DeclaredSkillProgressMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceAssociationsDTO;
@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 @Mapper(
     componentModel = "spring",
     uses = {
-      DeclaredActivityViewDTOMapper.class,
+      DeclaredActivityAssociationMapper.class,
       DeclaredSkillProgressMapper.class,
       DeclaredExperienceMapper.class
     })
