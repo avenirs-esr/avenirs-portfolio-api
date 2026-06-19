@@ -544,8 +544,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   private List&lt;UUID&gt; findFeedbackPresenceByDeclaredActivityId(List&lt;UUID&gt; declaredActivityIds) {
-<span class="pc bpc" id="L547" title="1 of 2 branches missed.">    if (declaredActivityIds.isEmpty()) {</span>
-<span class="nc" id="L548">      return List.of();</span>
+<span class="fc bfc" id="L547" title="All 2 branches covered.">    if (declaredActivityIds.isEmpty()) {</span>
+<span class="fc" id="L548">      return List.of();</span>
     }
 
 <span class="fc" id="L551">    return feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(declaredActivityIds);</span>
