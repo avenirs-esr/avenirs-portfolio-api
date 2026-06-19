@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
 
+@Schema(requiredProperties = {"id", "staff", "student", "status", "createdAt", "updatedAt"})
 public record FeedbackOverviewDTO(
     UUID id,
     UserInfoDTO staff,
