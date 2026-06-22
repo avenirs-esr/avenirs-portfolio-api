@@ -13,6 +13,7 @@ import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.repository.D
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.FileJpaRepository;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboard;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
@@ -153,6 +154,29 @@ public class FeedbackDatabaseRepository
   public Set<UUID> findAttachmentIdsUsedByTraceSnapshots(
       List<UUID> declaredActivityIds, List<UUID> traceIds) {
     return jpaRepository.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);
+  }
+
+  @Override
+  public FeedbackDashboard countDashboard(UUID staffId, UUID activityId) {
+    var baseSpec =
+        FeedbackSpecification.hasStaffAuthor(staffId)
+            .and(FeedbackSpecification.hasActivityId(activityId));
+
+    long newCount =
+        jpaRepository.count(baseSpec.and(FeedbackSpecification.hasStatus(EFeedbackStatus.NEW)));
+    long inProcessCount =
+        jpaRepository.count(
+            baseSpec.and(FeedbackSpecification.hasStatus(EFeedbackStatus.IN_PROCESS)));
+    long processedCount =
+        jpaRepository.count(
+            baseSpec.and(FeedbackSpecification.hasStatus(EFeedbackStatus.SUBMITTED)));
+
+    long pendingCount = newCount + inProcessCount;
+    return new FeedbackDashboard(
+        (int) newCount,
+        (int) pendingCount,
+        (int) processedCount,
+        (int) (pendingCount + processedCount));
   }
 
   // ── private helpers ─────────────────────────────────────────────────

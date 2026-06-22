@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.o
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.port.output.repository.GenericRepositoryPort;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboard;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import java.util.List;
@@ -21,4 +22,6 @@ public interface FeedbackRepository extends GenericRepositoryPort<Feedback> {
 
   Set<UUID> findAttachmentIdsUsedByTraceSnapshots(
       List<UUID> declaredActivityIds, List<UUID> traceIds);
+
+  FeedbackDashboard countDashboard(UUID staffId, UUID activityId);
 }

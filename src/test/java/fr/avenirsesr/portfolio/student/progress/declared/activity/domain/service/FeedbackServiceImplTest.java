@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboard;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackInProcessException;
@@ -1108,6 +1109,76 @@ class FeedbackServiceImplTest {
           .isInstanceOf(UserIsNotStaffException.class);
 
       verify(feedbackRepository, never()).findAllByStaffAndActivity(any(), any());
+    }
+  }
+
+  @Nested
+  class GetFeedbackDashboard {
+
+    @Test
+    void should_return_dashboard_from_repository_for_logged_in_staff() {
+      BddLogger.given("A logged-in staff and the repository returning a FeedbackDashboard");
+      Staff staff = StaffFixture.create().toModel();
+      FeedbackDashboard expected = new FeedbackDashboard(2, 5, 3, 8);
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(feedbackRepository.countDashboard(staff.getId(), null)).thenReturn(expected);
+
+      BddLogger.when("getFeedbackDashboard is called without activityId");
+      FeedbackDashboard result = service.getFeedbackDashboard(null);
+
+      BddLogger.then("The dashboard from the repository is returned as-is");
+      assertThat(result).isEqualTo(expected);
+      verify(feedbackRepository).countDashboard(staff.getId(), null);
+    }
+
+    @Test
+    void should_forward_activityId_to_repository() {
+      BddLogger.given("A logged-in staff and a specific activityId");
+      UUID activityId = UUID.randomUUID();
+      Staff staff = StaffFixture.create().toModel();
+      FeedbackDashboard expected = new FeedbackDashboard(1, 1, 0, 1);
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(feedbackRepository.countDashboard(staff.getId(), activityId)).thenReturn(expected);
+
+      BddLogger.when("getFeedbackDashboard is called with activityId");
+      FeedbackDashboard result = service.getFeedbackDashboard(activityId);
+
+      BddLogger.then("The repository is called with the activityId and the result is returned");
+      assertThat(result).isEqualTo(expected);
+      verify(feedbackRepository).countDashboard(staff.getId(), activityId);
+    }
+
+    @Test
+    void should_pass_staff_id_to_repository_to_scope_counts_to_logged_in_staff() {
+      BddLogger.given("A logged-in staff");
+      Staff staff = StaffFixture.create().toModel();
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(feedbackRepository.countDashboard(staff.getId(), null))
+          .thenReturn(new FeedbackDashboard(0, 0, 0, 0));
+
+      BddLogger.when("getFeedbackDashboard is called");
+      service.getFeedbackDashboard(null);
+
+      BddLogger.then("The repository is called with the logged-in staff's ID — not any other ID");
+      verify(feedbackRepository).countDashboard(staff.getId(), null);
+    }
+
+    @Test
+    void should_throw_UserIsNotStaffException_when_logged_in_user_is_not_staff() {
+      BddLogger.given("A logged-in user who is not registered as staff");
+
+      when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+
+      BddLogger.when("getFeedbackDashboard is called");
+
+      BddLogger.then("A UserIsNotStaffException is thrown and the repository is never called");
+      assertThatThrownBy(() -> service.getFeedbackDashboard(null))
+          .isInstanceOf(UserIsNotStaffException.class);
+
+      verify(feedbackRepository, never()).countDashboard(any(), any());
     }
   }
 

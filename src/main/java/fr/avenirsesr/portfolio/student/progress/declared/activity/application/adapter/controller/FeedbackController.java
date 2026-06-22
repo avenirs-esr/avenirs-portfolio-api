@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDashboardDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.StudentFeedbackItemListDTO;
@@ -115,6 +116,22 @@ public class FeedbackController {
         principal.getName());
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(feedbackDetailsDTOMapper.toDTO(feedbackService.createFeedback(declaredActivityId)));
+  }
+
+  @GetMapping("/dashboard")
+  public ResponseEntity<FeedbackDashboardDTO> getFeedbackDashboard(
+      Principal principal, @RequestParam(required = false) UUID activityId) {
+    log.debug(
+        "Received request to get feedback dashboard for user [{}] (activityId={})",
+        principal.getName(),
+        activityId);
+    var dashboard = feedbackService.getFeedbackDashboard(activityId);
+    return ResponseEntity.ok(
+        new FeedbackDashboardDTO(
+            dashboard.newFeedbacks(),
+            dashboard.pendingFeedbacks(),
+            dashboard.processedFeedbacks(),
+            dashboard.totalFeedbacks()));
   }
 
   @PostMapping("/{feedbackId}/submit")

@@ -11,6 +11,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDashboardDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.StudentFeedbackItemListDTO;
@@ -18,6 +19,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.application.ad
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackStaffListItemDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.StudentFeedbackItemListDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboard;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
@@ -390,5 +392,76 @@ class FeedbackControllerTest {
     assertThat(response.getBody()).isEmpty();
 
     verifyNoInteractions(studentFeedbackItemListDTOMapper);
+  }
+
+  @Test
+  void getFeedbackDashboard_should_return_200_with_correct_counts() {
+    BddLogger.given("A logged-in staff and the service returning a dashboard with counts 2/5/3/8");
+
+    FeedbackDashboard dashboard = new FeedbackDashboard(2, 5, 3, 8);
+    when(feedbackService.getFeedbackDashboard(null)).thenReturn(dashboard);
+
+    BddLogger.when("getFeedbackDashboard is called without activityId");
+    ResponseEntity<FeedbackDashboardDTO> response =
+        controller.getFeedbackDashboard(principal, null);
+
+    BddLogger.then(
+        "200 OK is returned with newFeedbacks=2, pendingFeedbacks=5, processedFeedbacks=3,"
+            + " totalFeedbacks=8");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().newFeedbacks()).isEqualTo(2);
+    assertThat(response.getBody().pendingFeedbacks()).isEqualTo(5);
+    assertThat(response.getBody().processedFeedbacks()).isEqualTo(3);
+    assertThat(response.getBody().totalFeedbacks()).isEqualTo(8);
+
+    verify(feedbackService).getFeedbackDashboard(null);
+  }
+
+  @Test
+  void getFeedbackDashboard_should_forward_activityId_to_service() {
+    BddLogger.given("A logged-in staff and a specific activityId");
+
+    UUID activityId = UUID.randomUUID();
+    when(feedbackService.getFeedbackDashboard(activityId))
+        .thenReturn(new FeedbackDashboard(1, 1, 0, 1));
+
+    BddLogger.when("getFeedbackDashboard is called with activityId");
+    controller.getFeedbackDashboard(principal, activityId);
+
+    BddLogger.then("The service is called exactly once with the provided activityId");
+    verify(feedbackService, times(1)).getFeedbackDashboard(activityId);
+    verifyNoMoreInteractions(feedbackService);
+  }
+
+  @Test
+  void getFeedbackDashboard_should_return_all_zeros_when_staff_has_no_feedbacks() {
+    BddLogger.given("A logged-in staff with no feedbacks");
+
+    when(feedbackService.getFeedbackDashboard(null)).thenReturn(new FeedbackDashboard(0, 0, 0, 0));
+
+    BddLogger.when("getFeedbackDashboard is called");
+    ResponseEntity<FeedbackDashboardDTO> response =
+        controller.getFeedbackDashboard(principal, null);
+
+    BddLogger.then("200 OK is returned with all counts at zero");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody().newFeedbacks()).isZero();
+    assertThat(response.getBody().pendingFeedbacks()).isZero();
+    assertThat(response.getBody().processedFeedbacks()).isZero();
+    assertThat(response.getBody().totalFeedbacks()).isZero();
+  }
+
+  @Test
+  void getFeedbackDashboard_should_forward_null_activityId_when_not_provided() {
+    BddLogger.given("A logged-in staff calling the dashboard endpoint without activityId");
+
+    when(feedbackService.getFeedbackDashboard(null)).thenReturn(new FeedbackDashboard(0, 0, 0, 0));
+
+    BddLogger.when("getFeedbackDashboard is called with activityId=null");
+    controller.getFeedbackDashboard(principal, null);
+
+    BddLogger.then("The service is called with null activityId");
+    verify(feedbackService).getFeedbackDashboard(null);
   }
 }

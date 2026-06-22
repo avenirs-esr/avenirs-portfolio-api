@@ -16,6 +16,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AskForFeedbackNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboard;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackInProcessException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackMaximumIterationReachedException;
@@ -228,5 +229,11 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     return feedbackRepository.findAttachmentIdsUsedByTraceSnapshots(declaredActivityIds, traceIds);
+  }
+
+  @Override
+  public FeedbackDashboard getFeedbackDashboard(UUID activityId) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    return feedbackRepository.countDashboard(staff.getId(), activityId);
   }
 }

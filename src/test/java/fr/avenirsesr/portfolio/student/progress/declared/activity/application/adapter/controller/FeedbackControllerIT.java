@@ -668,6 +668,149 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .isEqualTo(0);
   }
 
+  // ── GET /me/activity-progress/feedbacks/dashboard ───────────────────
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnDashboardEndpoint() {
+    BddLogger.given("the GET /me/activity-progress/feedbacks/dashboard endpoint");
+    BddLogger.when("performing a GET without authentication headers");
+    BddLogger.then("401 Unauthorized is returned");
+
+    webTestClient.get().uri(BASE_PATH + "/dashboard").exchange().expectStatus().isUnauthorized();
+  }
+
+  @Test
+  void shouldReturn403WhenStudentTriesToAccessDashboardEndpoint() {
+    BddLogger.given("a user who is not registered as staff");
+    BddLogger.when("performing a GET on the dashboard endpoint");
+    BddLogger.then("403 Forbidden is returned");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/dashboard")
+        .header("X-Signed-Context", otherStudentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturnDashboardWithCorrectShapeForAuthenticatedStaff() {
+    BddLogger.given("a staff user who has authored activities with seeded feedbacks");
+    BddLogger.when("performing a GET on the dashboard endpoint");
+    BddLogger.then("200 OK is returned with the four expected numeric fields");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/dashboard")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.newFeedbacks")
+        .isNumber()
+        .jsonPath("$.pendingFeedbacks")
+        .isNumber()
+        .jsonPath("$.processedFeedbacks")
+        .isNumber()
+        .jsonPath("$.totalFeedbacks")
+        .isNumber();
+  }
+
+  @Test
+  void shouldReturnZeroCountsWhenStaffHasNoFeedbacks() {
+    BddLogger.given("a staff user who is not the author of any activity with feedbacks");
+    BddLogger.when("performing a GET on the dashboard endpoint");
+    BddLogger.then("200 OK is returned with all counts at zero");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/dashboard")
+        .header("X-Signed-Context", staffPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", staffSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.newFeedbacks")
+        .isEqualTo(0)
+        .jsonPath("$.pendingFeedbacks")
+        .isEqualTo(0)
+        .jsonPath("$.processedFeedbacks")
+        .isEqualTo(0)
+        .jsonPath("$.totalFeedbacks")
+        .isEqualTo(0);
+  }
+
+  @Test
+  void shouldReturnConsistentCountsOnDashboard() throws Exception {
+    BddLogger.given("a staff user with seeded feedbacks in various states");
+    BddLogger.when("performing a GET on the dashboard endpoint");
+    BddLogger.then(
+        "totalFeedbacks equals pendingFeedbacks + processedFeedbacks, and newFeedbacks <="
+            + " pendingFeedbacks");
+
+    String body =
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/dashboard")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode node = objectMapper.readTree(body);
+    int newFeedbacks = node.get("newFeedbacks").asInt();
+    int pendingFeedbacks = node.get("pendingFeedbacks").asInt();
+    int processedFeedbacks = node.get("processedFeedbacks").asInt();
+    int totalFeedbacks = node.get("totalFeedbacks").asInt();
+
+    assertThat(totalFeedbacks).isEqualTo(pendingFeedbacks + processedFeedbacks);
+    assertThat(newFeedbacks).isLessThanOrEqualTo(pendingFeedbacks);
+  }
+
+  @Test
+  void shouldReturnDashboardFilteredByActivityId() {
+    BddLogger.given("a staff user and a request filtered by the seeded activityId");
+    BddLogger.when("performing a GET on the dashboard endpoint with activityId=" + ACTIVITY_ID);
+    BddLogger.then("200 OK is returned with a valid dashboard structure");
+
+    webTestClient
+        .get()
+        .uri(
+            uriBuilder ->
+                uriBuilder
+                    .path(BASE_PATH + "/dashboard")
+                    .queryParam("activityId", ACTIVITY_ID)
+                    .build())
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.newFeedbacks")
+        .isNumber()
+        .jsonPath("$.pendingFeedbacks")
+        .isNumber()
+        .jsonPath("$.processedFeedbacks")
+        .isNumber()
+        .jsonPath("$.totalFeedbacks")
+        .isNumber();
+  }
+
   @Test
   @Transactional
   void shouldReturnOnlyFeedbacksMatchingActivityIdFilter() throws Exception {
