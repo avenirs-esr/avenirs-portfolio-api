@@ -197,6 +197,12 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
+  public List<Feedback> getFeedbacksByActivity(UUID activityId) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    return feedbackRepository.findAllByStaffAndActivity(staff.getId(), activityId);
+  }
+
+  @Override
   public void submitFeedback(UUID feedbackId) {
     Feedback feedback =
         feedbackRepository.findById(feedbackId).orElseThrow(FeedbackNotFoundException::new);

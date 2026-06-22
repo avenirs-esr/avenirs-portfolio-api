@@ -561,6 +561,113 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .isForbidden();
   }
 
+  // ── GET /me/activity-progress/feedbacks/exhaustive-list/{activityId} ──
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnExhaustiveListEndpoint() {
+    BddLogger.given(
+        "the GET /me/activity-progress/feedbacks/exhaustive-list/{activityId} endpoint");
+    BddLogger.when("performing a GET without authentication headers");
+    BddLogger.then("401 Unauthorized is returned");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/exhaustive-list/" + ACTIVITY_ID)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
+
+  @Test
+  void shouldReturn403WhenStudentTriesToAccessExhaustiveListEndpoint() {
+    BddLogger.given("a user who is not registered as staff");
+    BddLogger.when("performing a GET on the exhaustive list endpoint");
+    BddLogger.then("403 Forbidden is returned");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/exhaustive-list/" + ACTIVITY_ID)
+        .header("X-Signed-Context", otherStudentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturnArrayStructureOnExhaustiveListEndpoint() {
+    BddLogger.given("a staff who has authored activities with seeded feedbacks");
+    BddLogger.when("performing a GET on the exhaustive list endpoint for the seeded activity");
+    BddLogger.then("200 OK is returned with a JSON array");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/exhaustive-list/" + ACTIVITY_ID)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$")
+        .isArray();
+  }
+
+  @Test
+  void shouldReturnFeedbacksWithCorrectShapeOnExhaustiveListEndpoint() {
+    BddLogger.given("a staff who has authored activities with seeded feedbacks");
+    BddLogger.when("performing a GET on the exhaustive list endpoint for the seeded activity");
+    BddLogger.then(
+        "each item in the response has an id and a student with id, firstName, lastName, email");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/exhaustive-list/" + ACTIVITY_ID)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$[0].feedbackId")
+        .isNotEmpty()
+        .jsonPath("$[0].student")
+        .isNotEmpty()
+        .jsonPath("$[0].student.id")
+        .isNotEmpty()
+        .jsonPath("$[0].student.firstName")
+        .isNotEmpty()
+        .jsonPath("$[0].student.lastName")
+        .isNotEmpty()
+        .jsonPath("$[0].student.email")
+        .isNotEmpty();
+  }
+
+  @Test
+  void shouldReturnEmptyArrayForUnknownActivityIdOnExhaustiveListEndpoint() {
+    BddLogger.given("a staff user and an activityId that has no associated feedbacks");
+    BddLogger.when("performing a GET on the exhaustive list endpoint for the unknown activity");
+    BddLogger.then("200 OK is returned with an empty array");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/exhaustive-list/" + notFoundId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$")
+        .isArray()
+        .jsonPath("$.length()")
+        .isEqualTo(0);
+  }
+
   @Test
   @Transactional
   void shouldReturnOnlyFeedbacksMatchingActivityIdFilter() throws Exception {

@@ -6,15 +6,18 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.StudentFeedbackItemListDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateFeedbackRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackStaffListItemDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.StudentFeedbackItemListDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +40,7 @@ public class FeedbackController {
   private final FeedbackService feedbackService;
   private final FeedbackDetailsDTOMapper feedbackDetailsDTOMapper;
   private final FeedbackStaffListItemDTOMapper feedbackStaffListItemDTOMapper;
+  private final StudentFeedbackItemListDTOMapper studentFeedbackItemListDTOMapper;
 
   @GetMapping
   public ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> getStaffFeedbacks(
@@ -61,6 +65,19 @@ public class FeedbackController {
         new PagedResponse<>(
             result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),
             PageInfoDTO.fromDomain(result.pageInfo())));
+  }
+
+  @GetMapping("/exhaustive-list/{activityId}")
+  public ResponseEntity<List<StudentFeedbackItemListDTO>> getFeedbacksByActivity(
+      Principal principal, @PathVariable UUID activityId) {
+    log.debug(
+        "Received request to get all feedbacks for activity [{}] by user [{}]",
+        activityId,
+        principal.getName());
+    return ResponseEntity.ok(
+        feedbackService.getFeedbacksByActivity(activityId).stream()
+            .map(studentFeedbackItemListDTOMapper::toDTO)
+            .toList());
   }
 
   @GetMapping("/{userCategory}/{feedbackId}")

@@ -1038,6 +1038,80 @@ class FeedbackServiceImplTest {
   }
 
   @Nested
+  class GetFeedbacksByActivity {
+
+    @Test
+    void should_return_feedbacks_from_repository_for_logged_in_staff_and_activity() {
+      BddLogger.given("A logged-in staff and an activityId with two existing feedbacks");
+      UUID activityId = UUID.randomUUID();
+      Staff staff = StaffFixture.create().toModel();
+      Feedback feedback1 = mock(Feedback.class);
+      Feedback feedback2 = mock(Feedback.class);
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(feedbackRepository.findAllByStaffAndActivity(staff.getId(), activityId))
+          .thenReturn(List.of(feedback1, feedback2));
+
+      BddLogger.when("getFeedbacksByActivity is called");
+      List<Feedback> result = service.getFeedbacksByActivity(activityId);
+
+      BddLogger.then("The full list from the repository is returned");
+      assertThat(result).containsExactly(feedback1, feedback2);
+      verify(feedbackRepository).findAllByStaffAndActivity(staff.getId(), activityId);
+    }
+
+    @Test
+    void should_return_empty_list_when_activity_has_no_feedbacks() {
+      BddLogger.given("A logged-in staff and an activityId with no feedbacks");
+      UUID activityId = UUID.randomUUID();
+      Staff staff = StaffFixture.create().toModel();
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(feedbackRepository.findAllByStaffAndActivity(staff.getId(), activityId))
+          .thenReturn(List.of());
+
+      BddLogger.when("getFeedbacksByActivity is called");
+      List<Feedback> result = service.getFeedbacksByActivity(activityId);
+
+      BddLogger.then("An empty list is returned");
+      assertThat(result).isEmpty();
+    }
+
+    @Test
+    void should_pass_staff_id_to_repository_to_scope_results_to_logged_in_staff() {
+      BddLogger.given("Two distinct staff users and the same activityId");
+      UUID activityId = UUID.randomUUID();
+      Staff staff = StaffFixture.create().toModel();
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(feedbackRepository.findAllByStaffAndActivity(staff.getId(), activityId))
+          .thenReturn(List.of());
+
+      BddLogger.when("getFeedbacksByActivity is called");
+      service.getFeedbacksByActivity(activityId);
+
+      BddLogger.then("The repository is called with the logged-in staff's ID — not any other ID");
+      verify(feedbackRepository).findAllByStaffAndActivity(staff.getId(), activityId);
+    }
+
+    @Test
+    void should_throw_UserIsNotStaffException_when_logged_in_user_is_not_staff() {
+      BddLogger.given("A logged-in user who is not registered as staff");
+      UUID activityId = UUID.randomUUID();
+
+      when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+
+      BddLogger.when("getFeedbacksByActivity is called");
+
+      BddLogger.then("A UserIsNotStaffException is thrown and the repository is never called");
+      assertThatThrownBy(() -> service.getFeedbacksByActivity(activityId))
+          .isInstanceOf(UserIsNotStaffException.class);
+
+      verify(feedbackRepository, never()).findAllByStaffAndActivity(any(), any());
+    }
+  }
+
+  @Nested
   class FindAttachmentIdsUsedByTraceSnapshots {
 
     @Test

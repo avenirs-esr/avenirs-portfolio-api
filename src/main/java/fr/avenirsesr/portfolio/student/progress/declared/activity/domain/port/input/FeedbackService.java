@@ -23,6 +23,8 @@ public interface FeedbackService {
   PagedResult<Feedback> getStaffFeedbacks(
       EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria);
 
+  List<Feedback> getFeedbacksByActivity(UUID activityId);
+
   void submitFeedback(UUID feedbackId);
 
   Set<UUID> findAttachmentIdsUsedByTraceSnapshots(

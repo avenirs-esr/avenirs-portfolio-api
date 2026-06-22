@@ -130,6 +130,17 @@ public class FeedbackDatabaseRepository
   }
 
   @Override
+  public List<Feedback> findAllByStaffAndActivity(UUID staffId, UUID activityId) {
+    var specification =
+        FeedbackSpecification.hasStaffAuthor(staffId)
+            .and(FeedbackSpecification.hasActivityId(activityId));
+    var sort = Sort.by("status").ascending().and(Sort.by("createdAt").ascending());
+    return jpaRepository.findAll(specification, sort).stream()
+        .map(this::toDomainWithDependencies)
+        .toList();
+  }
+
+  @Override
   public List<UUID> findDeclaredActivityIdsHavingActiveFeedbacks(List<UUID> declaredActivityIds) {
     if (declaredActivityIds.isEmpty()) {
       return List.of();

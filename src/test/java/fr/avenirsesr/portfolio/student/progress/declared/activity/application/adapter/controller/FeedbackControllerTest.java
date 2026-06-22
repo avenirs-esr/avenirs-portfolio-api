@@ -13,9 +13,11 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.StudentFeedbackItemListDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateFeedbackRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackStaffListItemDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.StudentFeedbackItemListDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
@@ -39,6 +41,7 @@ class FeedbackControllerTest {
   @Mock private FeedbackService feedbackService;
   @Mock private FeedbackDetailsDTOMapper feedbackDetailsDTOMapper;
   @Mock private FeedbackStaffListItemDTOMapper feedbackStaffListItemDTOMapper;
+  @Mock private StudentFeedbackItemListDTOMapper studentFeedbackItemListDTOMapper;
 
   @InjectMocks private FeedbackController controller;
 
@@ -321,5 +324,71 @@ class FeedbackControllerTest {
     BddLogger.then("The service is called exactly once with the correct feedback ID");
     verify(feedbackService, times(1)).submitFeedback(feedbackId);
     verifyNoMoreInteractions(feedbackService);
+  }
+
+  @Test
+  void getFeedbacksByActivity_should_return_200_with_mapped_list() {
+    BddLogger.given("A logged-in staff and an activity with two feedbacks");
+
+    UUID activityId = UUID.randomUUID();
+    Feedback feedback1 = mock(Feedback.class);
+    Feedback feedback2 = mock(Feedback.class);
+    StudentFeedbackItemListDTO dto1 = mock(StudentFeedbackItemListDTO.class);
+    StudentFeedbackItemListDTO dto2 = mock(StudentFeedbackItemListDTO.class);
+
+    when(feedbackService.getFeedbacksByActivity(activityId))
+        .thenReturn(List.of(feedback1, feedback2));
+    when(studentFeedbackItemListDTOMapper.toDTO(feedback1)).thenReturn(dto1);
+    when(studentFeedbackItemListDTOMapper.toDTO(feedback2)).thenReturn(dto2);
+
+    BddLogger.when("getFeedbacksByActivity is called");
+    ResponseEntity<List<StudentFeedbackItemListDTO>> response =
+        controller.getFeedbacksByActivity(principal, activityId);
+
+    BddLogger.then("200 OK is returned with 2 mapped items");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).containsExactly(dto1, dto2);
+
+    verify(feedbackService).getFeedbacksByActivity(activityId);
+    verify(studentFeedbackItemListDTOMapper).toDTO(feedback1);
+    verify(studentFeedbackItemListDTOMapper).toDTO(feedback2);
+  }
+
+  @Test
+  void getFeedbacksByActivity_should_forward_activityId_to_service() {
+    BddLogger.given("A specific activity ID");
+
+    UUID activityId = UUID.randomUUID();
+    Feedback feedback = mock(Feedback.class);
+
+    when(feedbackService.getFeedbacksByActivity(activityId)).thenReturn(List.of(feedback));
+    when(studentFeedbackItemListDTOMapper.toDTO(feedback))
+        .thenReturn(mock(StudentFeedbackItemListDTO.class));
+
+    BddLogger.when("getFeedbacksByActivity is called");
+    controller.getFeedbacksByActivity(principal, activityId);
+
+    BddLogger.then("The service is called exactly once with the correct activityId");
+    verify(feedbackService, times(1)).getFeedbacksByActivity(activityId);
+    verifyNoMoreInteractions(feedbackService);
+  }
+
+  @Test
+  void getFeedbacksByActivity_should_return_empty_list_when_activity_has_no_feedbacks() {
+    BddLogger.given("An activity ID for which no feedbacks exist");
+
+    UUID activityId = UUID.randomUUID();
+
+    when(feedbackService.getFeedbacksByActivity(activityId)).thenReturn(List.of());
+
+    BddLogger.when("getFeedbacksByActivity is called");
+    ResponseEntity<List<StudentFeedbackItemListDTO>> response =
+        controller.getFeedbacksByActivity(principal, activityId);
+
+    BddLogger.then("200 OK is returned with an empty list");
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(response.getBody()).isEmpty();
+
+    verifyNoInteractions(studentFeedbackItemListDTOMapper);
   }
 }
