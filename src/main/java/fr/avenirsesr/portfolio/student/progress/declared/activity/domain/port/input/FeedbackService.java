@@ -4,7 +4,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboard;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
@@ -31,5 +31,5 @@ public interface FeedbackService {
   Set<UUID> findAttachmentIdsUsedByTraceSnapshots(
       List<UUID> declaredActivityIds, List<UUID> traceIds);
 
-  FeedbackDashboard getFeedbackDashboard(UUID activityId);
+  FeedbackDashboardData getFeedbackDashboard(UUID activityId);
 }

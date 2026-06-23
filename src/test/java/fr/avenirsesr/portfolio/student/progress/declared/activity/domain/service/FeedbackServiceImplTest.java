@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
@@ -17,7 +18,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboard;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackInProcessException;
@@ -58,6 +59,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class FeedbackServiceImplTest {
 
   @Mock private FeedbackRepository feedbackRepository;
+  @Mock private ActivityService activityService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private AssociationService associationService;
   @Mock private TraceService traceService;
@@ -1113,57 +1115,69 @@ class FeedbackServiceImplTest {
   }
 
   @Nested
-  class GetFeedbackDashboard {
+  class GetFeedbackDashboardData {
 
     @Test
-    void should_return_dashboard_from_repository_for_logged_in_staff() {
-      BddLogger.given("A logged-in staff and the repository returning a FeedbackDashboard");
+    void should_aggregate_counts_per_status_when_no_activityId() {
+      BddLogger.given("A logged-in staff and countByStatus returning counts per status");
       Staff staff = StaffFixture.create().toModel();
-      FeedbackDashboard expected = new FeedbackDashboard(2, 5, 3, 8);
 
       when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
-      when(feedbackRepository.countDashboard(staff.getId(), null)).thenReturn(expected);
+      when(feedbackRepository.countByStatus(staff, null, EFeedbackStatus.NEW)).thenReturn(2);
+      when(feedbackRepository.countByStatus(staff, null, EFeedbackStatus.IN_PROCESS)).thenReturn(3);
+      when(feedbackRepository.countByStatus(staff, null, EFeedbackStatus.SUBMITTED)).thenReturn(3);
 
       BddLogger.when("getFeedbackDashboard is called without activityId");
-      FeedbackDashboard result = service.getFeedbackDashboard(null);
+      FeedbackDashboardData result = service.getFeedbackDashboard(null);
 
-      BddLogger.then("The dashboard from the repository is returned as-is");
-      assertThat(result).isEqualTo(expected);
-      verify(feedbackRepository).countDashboard(staff.getId(), null);
+      BddLogger.then(
+          "FeedbackDashboardData is assembled: new=2, pending=5(2+3), processed=3, total=8");
+      assertThat(result).isEqualTo(new FeedbackDashboardData(2, 5, 3, 8));
     }
 
     @Test
-    void should_forward_activityId_to_repository() {
-      BddLogger.given("A logged-in staff and a specific activityId");
+    void should_check_authorship_and_scope_counts_to_activity_when_activityId_provided() {
+      BddLogger.given(
+          "A logged-in staff who is the author of the activity and a specific activityId");
       UUID activityId = UUID.randomUUID();
-      Staff staff = StaffFixture.create().toModel();
-      FeedbackDashboard expected = new FeedbackDashboard(1, 1, 0, 1);
+      Activity activity = ActivityFixture.create().toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
 
       when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
-      when(feedbackRepository.countDashboard(staff.getId(), activityId)).thenReturn(expected);
+      when(activityService.getActivityById(activityId)).thenReturn(activity);
+      when(feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.NEW)).thenReturn(1);
+      when(feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.IN_PROCESS))
+          .thenReturn(0);
+      when(feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.SUBMITTED))
+          .thenReturn(0);
 
       BddLogger.when("getFeedbackDashboard is called with activityId");
-      FeedbackDashboard result = service.getFeedbackDashboard(activityId);
+      FeedbackDashboardData result = service.getFeedbackDashboard(activityId);
 
-      BddLogger.then("The repository is called with the activityId and the result is returned");
-      assertThat(result).isEqualTo(expected);
-      verify(feedbackRepository).countDashboard(staff.getId(), activityId);
+      BddLogger.then("countByStatus is called with the resolved activity and the result assembled");
+      assertThat(result).isEqualTo(new FeedbackDashboardData(1, 1, 0, 1));
+      verify(feedbackRepository).countByStatus(staff, activity, EFeedbackStatus.NEW);
+      verify(feedbackRepository).countByStatus(staff, activity, EFeedbackStatus.IN_PROCESS);
+      verify(feedbackRepository).countByStatus(staff, activity, EFeedbackStatus.SUBMITTED);
     }
 
     @Test
-    void should_pass_staff_id_to_repository_to_scope_counts_to_logged_in_staff() {
-      BddLogger.given("A logged-in staff");
-      Staff staff = StaffFixture.create().toModel();
+    void should_throw_UserNotAuthorizedException_when_staff_is_not_the_activity_author() {
+      BddLogger.given("A logged-in staff who is NOT the author of the requested activity");
+      UUID activityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff differentStaff = StaffFixture.create().toModel();
 
-      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
-      when(feedbackRepository.countDashboard(staff.getId(), null))
-          .thenReturn(new FeedbackDashboard(0, 0, 0, 0));
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(differentStaff);
+      when(activityService.getActivityById(activityId)).thenReturn(activity);
 
-      BddLogger.when("getFeedbackDashboard is called");
-      service.getFeedbackDashboard(null);
+      BddLogger.when("getFeedbackDashboard is called with the activityId");
 
-      BddLogger.then("The repository is called with the logged-in staff's ID — not any other ID");
-      verify(feedbackRepository).countDashboard(staff.getId(), null);
+      BddLogger.then("A UserNotAuthorizedException is thrown and no counts are fetched");
+      assertThatThrownBy(() -> service.getFeedbackDashboard(activityId))
+          .isInstanceOf(UserNotAuthorizedException.class);
+
+      verify(feedbackRepository, never()).countByStatus(any(), any(), any());
     }
 
     @Test
@@ -1178,7 +1192,7 @@ class FeedbackServiceImplTest {
       assertThatThrownBy(() -> service.getFeedbackDashboard(null))
           .isInstanceOf(UserIsNotStaffException.class);
 
-      verify(feedbackRepository, never()).countDashboard(any(), any());
+      verify(feedbackRepository, never()).countByStatus(any(), any(), any());
     }
   }
 

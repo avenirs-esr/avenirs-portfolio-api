@@ -5,6 +5,7 @@ import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValida
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalEnrichedTextMaxLength;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalTextMaxLength;
 
+import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.utils.AssociationUtils;
@@ -16,7 +17,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.notification.domain.model.notification.AskForFeedbackNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboard;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackInProcessException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackMaximumIterationReachedException;
@@ -48,6 +49,7 @@ public class FeedbackServiceImpl implements FeedbackService {
   private final DeclaredSkillProgressService declaredSkillProgressService;
   private final LoggedInUserService loggedInUserService;
   private final NotificationService notificationService;
+  private final ActivityService activityService;
 
   @Override
   public Feedback createFeedback(UUID declaredActivityId) {
@@ -232,8 +234,24 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
-  public FeedbackDashboard getFeedbackDashboard(UUID activityId) {
-    var staff = loggedInUserService.getLoggedInStaff();
-    return feedbackRepository.countDashboard(staff.getId(), activityId);
+  public FeedbackDashboardData getFeedbackDashboard(UUID activityId) {
+    Staff staff = loggedInUserService.getLoggedInStaff();
+
+    var activity = activityId != null ? activityService.getActivityById(activityId) : null;
+    if (activity != null) {
+      if (!staff.equals(activity.getAuthor())) {
+        throw new UserNotAuthorizedException();
+      }
+    }
+
+    int newCount = feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.NEW);
+    int inProcessCount =
+        feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.IN_PROCESS);
+    int submittedCount =
+        feedbackRepository.countByStatus(staff, activity, EFeedbackStatus.SUBMITTED);
+
+    int pendingCount = newCount + inProcessCount;
+    return new FeedbackDashboardData(
+        newCount, pendingCount, submittedCount, pendingCount + submittedCount);
   }
 }

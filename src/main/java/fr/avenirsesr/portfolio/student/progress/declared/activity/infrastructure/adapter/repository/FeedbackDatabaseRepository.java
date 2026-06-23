@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.repository;
 
+import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
@@ -13,7 +14,6 @@ import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.repository.D
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.repository.FileJpaRepository;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboard;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
@@ -21,6 +21,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.AssociationsJson;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.model.FeedbackEntity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.infrastructure.adapter.specification.FeedbackSpecification;
+import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StudentMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -157,26 +158,12 @@ public class FeedbackDatabaseRepository
   }
 
   @Override
-  public FeedbackDashboard countDashboard(UUID staffId, UUID activityId) {
-    var baseSpec =
-        FeedbackSpecification.hasStaffAuthor(staffId)
-            .and(FeedbackSpecification.hasActivityId(activityId));
-
-    long newCount =
-        jpaRepository.count(baseSpec.and(FeedbackSpecification.hasStatus(EFeedbackStatus.NEW)));
-    long inProcessCount =
-        jpaRepository.count(
-            baseSpec.and(FeedbackSpecification.hasStatus(EFeedbackStatus.IN_PROCESS)));
-    long processedCount =
-        jpaRepository.count(
-            baseSpec.and(FeedbackSpecification.hasStatus(EFeedbackStatus.SUBMITTED)));
-
-    long pendingCount = newCount + inProcessCount;
-    return new FeedbackDashboard(
-        (int) newCount,
-        (int) pendingCount,
-        (int) processedCount,
-        (int) (pendingCount + processedCount));
+  public int countByStatus(Staff staff, Activity activity, EFeedbackStatus status) {
+    var spec =
+        FeedbackSpecification.hasStaffAuthor(staff.getId())
+            .and(FeedbackSpecification.hasActivityId(activity != null ? activity.getId() : null))
+            .and(FeedbackSpecification.hasStatus(status));
+    return (int) jpaRepository.count(spec);
   }
 
   // ── private helpers ─────────────────────────────────────────────────

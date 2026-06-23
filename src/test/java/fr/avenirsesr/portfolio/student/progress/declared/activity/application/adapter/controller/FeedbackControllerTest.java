@@ -19,7 +19,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.application.ad
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackStaffListItemDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.StudentFeedbackItemListDTOMapper;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboard;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
@@ -398,7 +398,7 @@ class FeedbackControllerTest {
   void getFeedbackDashboard_should_return_200_with_correct_counts() {
     BddLogger.given("A logged-in staff and the service returning a dashboard with counts 2/5/3/8");
 
-    FeedbackDashboard dashboard = new FeedbackDashboard(2, 5, 3, 8);
+    FeedbackDashboardData dashboard = new FeedbackDashboardData(2, 5, 3, 8);
     when(feedbackService.getFeedbackDashboard(null)).thenReturn(dashboard);
 
     BddLogger.when("getFeedbackDashboard is called without activityId");
@@ -424,7 +424,7 @@ class FeedbackControllerTest {
 
     UUID activityId = UUID.randomUUID();
     when(feedbackService.getFeedbackDashboard(activityId))
-        .thenReturn(new FeedbackDashboard(1, 1, 0, 1));
+        .thenReturn(new FeedbackDashboardData(1, 1, 0, 1));
 
     BddLogger.when("getFeedbackDashboard is called with activityId");
     controller.getFeedbackDashboard(principal, activityId);
@@ -438,7 +438,8 @@ class FeedbackControllerTest {
   void getFeedbackDashboard_should_return_all_zeros_when_staff_has_no_feedbacks() {
     BddLogger.given("A logged-in staff with no feedbacks");
 
-    when(feedbackService.getFeedbackDashboard(null)).thenReturn(new FeedbackDashboard(0, 0, 0, 0));
+    when(feedbackService.getFeedbackDashboard(null))
+        .thenReturn(new FeedbackDashboardData(0, 0, 0, 0));
 
     BddLogger.when("getFeedbackDashboard is called");
     ResponseEntity<FeedbackDashboardDTO> response =
@@ -456,7 +457,8 @@ class FeedbackControllerTest {
   void getFeedbackDashboard_should_forward_null_activityId_when_not_provided() {
     BddLogger.given("A logged-in staff calling the dashboard endpoint without activityId");
 
-    when(feedbackService.getFeedbackDashboard(null)).thenReturn(new FeedbackDashboard(0, 0, 0, 0));
+    when(feedbackService.getFeedbackDashboard(null))
+        .thenReturn(new FeedbackDashboardData(0, 0, 0, 0));
 
     BddLogger.when("getFeedbackDashboard is called with activityId=null");
     controller.getFeedbackDashboard(principal, null);
