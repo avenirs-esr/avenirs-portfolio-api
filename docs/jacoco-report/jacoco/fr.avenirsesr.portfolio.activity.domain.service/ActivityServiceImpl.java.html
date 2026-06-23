@@ -140,7 +140,7 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public Activity getActivityById(UUID id) {
-<span class="fc" id="L143">    return activityRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="fc" id="L143">    return activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);</span>
   }
 
   @Override
