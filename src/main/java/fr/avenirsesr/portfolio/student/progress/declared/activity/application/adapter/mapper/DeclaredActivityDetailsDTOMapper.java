@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityContentDtoMapper;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityDetailsData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -12,7 +13,11 @@ import org.mapstruct.Mapping;
 
 @Mapper(
     componentModel = "spring",
-    uses = {ActivityContentDtoMapper.class, FeedbackOverviewDTOMapper.class})
+    uses = {
+      ActivityContentDtoMapper.class,
+      FeedbackOverviewDTOMapper.class,
+      OptionalMapper.class,
+    })
 public interface DeclaredActivityDetailsDTOMapper {
 
   @Mapping(source = "data.declaredActivity.id", target = "id")

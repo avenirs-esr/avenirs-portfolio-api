@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
@@ -63,7 +64,7 @@ class FeedbackControllerTest {
     FeedbackDetailsDTO expectedDto =
         new FeedbackDetailsDTO(
             UUID.randomUUID(),
-            declaredActivityId,
+            mock(ActivityContentDTO.class),
             null,
             "Ma réflexion",
             null,
@@ -84,7 +85,7 @@ class FeedbackControllerTest {
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     assertThat(response.getBody()).isEqualTo(expectedDto);
     assertThat(response.getBody().status()).isEqualTo(EFeedbackStatus.NEW);
-    assertThat(response.getBody().declaredActivityId()).isEqualTo(declaredActivityId);
+    assertThat(response.getBody().activity()).isNotNull();
 
     verify(feedbackService).createFeedback(declaredActivityId);
     verify(feedbackDetailsDTOMapper).toDTO(feedback);
@@ -118,7 +119,7 @@ class FeedbackControllerTest {
     FeedbackDetailsDTO expectedDto =
         new FeedbackDetailsDTO(
             feedbackId,
-            UUID.randomUUID(),
+            mock(ActivityContentDTO.class),
             null,
             null,
             null,
