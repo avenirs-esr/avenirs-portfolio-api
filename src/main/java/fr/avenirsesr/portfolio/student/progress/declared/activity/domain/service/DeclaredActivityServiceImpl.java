@@ -19,6 +19,7 @@ import fr.avenirsesr.portfolio.common.data.domain.FetchGraph;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationsData;
@@ -184,7 +185,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   @Override
   public DeclaredActivityDetailsData getDeclaredActivityDetails(UUID declaredActivityId) {
     DeclaredActivity declaredActivity =
-        fetchActivityAndCheckLoggedInStudentAuthorization(declaredActivityId);
+        fetchActivityAndCheckLoggedInUserAuthorization(declaredActivityId);
+
     List<FeedbackData> feedbacks =
         feedbackRepository.findAllByDeclaredActivityId(declaredActivityId).stream()
             .map(
@@ -192,6 +194,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
                     feedbackService.getStudentFeedbackDetails(
                         declaredActivity.getStudent().getUser(), feedback))
             .toList();
+
     return new DeclaredActivityDetailsData(declaredActivity, feedbacks);
   }
 
@@ -565,5 +568,28 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
     return status == EDeclaredActivityStatus.SUBMITTED
         || status == EDeclaredActivityStatus.COMPLETED;
+  }
+
+  private DeclaredActivity fetchActivityAndCheckLoggedInUserAuthorization(UUID declaredActivityId) {
+    User loggedInUser = loggedInUserService.getLoggedInUser();
+
+    var graph =
+        FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");
+
+    DeclaredActivity declaredActivity =
+        declaredActivityRepository
+            .findById(declaredActivityId, graph)
+            .orElseThrow(DeclaredActivityNotFoundException::new);
+
+    boolean isStudentOwner = declaredActivity.getStudent().getUser().equals(loggedInUser);
+
+    boolean isActivityAuthor =
+        declaredActivity.getActivity().getAuthor().getUser().equals(loggedInUser);
+
+    if (!isStudentOwner && !isActivityAuthor) {
+      throw new UserNotAuthorizedException();
+    }
+
+    return declaredActivity;
   }
 }
