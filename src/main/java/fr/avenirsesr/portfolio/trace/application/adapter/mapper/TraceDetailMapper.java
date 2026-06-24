@@ -1,14 +1,16 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.mapper;
 
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceDetailDTO;
 import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
-import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = FileDtoMapper.class)
+@Mapper(
+    componentModel = "spring",
+    uses = {FileDtoMapper.class, OptionalMapper.class})
 public interface TraceDetailMapper {
 
   TraceDetailDTO toDTO(TraceDetailData traceDetail);
@@ -17,8 +19,4 @@ public interface TraceDetailMapper {
   @Mapping(target = "personalNote", source = "personalNote")
   @Mapping(target = "link", source = "link")
   TraceDetailDTO toTraceDetailsDTO(Trace trace);
-
-  default String unwrap(Optional<String> value) {
-    return value == null ? null : value.orElse(null);
-  }
 }

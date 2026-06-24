@@ -119,7 +119,8 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     String id = declaredActivityId;
 
     BddLogger.when("the student asks for feedback on this activity");
-    BddLogger.then("it should return 201 CREATED with a FeedbackDetailsDTO");
+    BddLogger.then(
+        "it should return 201 CREATED with a FeedbackDetailsDTO containing the activity");
 
     webTestClient
         .post()
@@ -133,8 +134,10 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.id")
         .isNotEmpty()
-        .jsonPath("$.declaredActivityId")
-        .isEqualTo(id)
+        .jsonPath("$.activity")
+        .exists()
+        .jsonPath("$.activity.id")
+        .isEqualTo(ACTIVITY_ID)
         .jsonPath("$.status")
         .isEqualTo("NEW")
         .jsonPath("$.student")
@@ -208,8 +211,10 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.id")
         .isEqualTo(feedbackId)
-        .jsonPath("$.declaredActivityId")
-        .isEqualTo(declaredActivityId)
+        .jsonPath("$.activity")
+        .exists()
+        .jsonPath("$.activity.id")
+        .isEqualTo(ACTIVITY_ID)
         .jsonPath("$.status")
         .isEqualTo("NEW")
         .jsonPath("$.student")
@@ -620,7 +625,8 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
     BddLogger.given("a staff who has authored activities with seeded feedbacks");
     BddLogger.when("performing a GET on the exhaustive list endpoint for the seeded activity");
     BddLogger.then(
-        "each item in the response has an id and a student with id, firstName, lastName, email");
+        "each item in the response has an id, an activity and a student with id, firstName,"
+            + " lastName, email");
 
     webTestClient
         .get()

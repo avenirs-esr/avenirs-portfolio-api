@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto;
 
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceDetailDTO;
@@ -20,7 +21,7 @@ import java.util.UUID;
     })
 public record FeedbackDetailsDTO(
     UUID id,
-    UUID declaredActivityId,
+    ActivityContentDTO activity,
     UserInfoDTO student,
     String reflexion,
     String feedback,

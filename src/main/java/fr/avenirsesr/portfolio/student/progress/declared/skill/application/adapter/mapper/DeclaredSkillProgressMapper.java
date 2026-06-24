@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.skill.application.adap
 
 import fr.avenirsesr.portfolio.common.externalskill.application.adapter.dto.ExternalSkillCategoryDTO;
 import fr.avenirsesr.portfolio.declaredskill.application.adapter.dto.DeclaredSkillCategoryDTO;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillProgressDetails;
@@ -10,7 +11,9 @@ import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMap
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = TraceOverviewMapper.class)
+@Mapper(
+    componentModel = "spring",
+    uses = {TraceOverviewMapper.class, OptionalMapper.class})
 public interface DeclaredSkillProgressMapper {
 
   @Mapping(source = "skill.libelle", target = "title")

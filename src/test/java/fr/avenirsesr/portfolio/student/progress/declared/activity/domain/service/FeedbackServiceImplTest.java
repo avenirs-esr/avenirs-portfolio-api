@@ -1044,23 +1044,26 @@ class FeedbackServiceImplTest {
   class GetFeedbacksByActivity {
 
     @Test
-    void should_return_feedbacks_from_repository_for_logged_in_staff_and_activity() {
-      BddLogger.given("A logged-in staff and an activityId with two existing feedbacks");
+    void should_return_latest_feedbacks_per_student_from_repository() {
+      BddLogger.given("A logged-in staff and latest feedbacks per student returned by repository");
       UUID activityId = UUID.randomUUID();
       Staff staff = StaffFixture.create().toModel();
-      Feedback feedback1 = mock(Feedback.class);
-      Feedback feedback2 = mock(Feedback.class);
+
+      Feedback latestStudent1Feedback = mock(Feedback.class);
+      Feedback latestStudent2Feedback = mock(Feedback.class);
 
       when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
-      when(feedbackRepository.findAllByStaffAndActivity(staff.getId(), activityId))
-          .thenReturn(List.of(feedback1, feedback2));
+      when(feedbackRepository.findLatestFeedbacksByStaffAndActivityForEachStudent(
+              staff.getId(), activityId))
+          .thenReturn(List.of(latestStudent1Feedback, latestStudent2Feedback));
 
       BddLogger.when("getFeedbacksByActivity is called");
       List<Feedback> result = service.getFeedbacksByActivity(activityId);
 
-      BddLogger.then("The full list from the repository is returned");
-      assertThat(result).containsExactly(feedback1, feedback2);
-      verify(feedbackRepository).findAllByStaffAndActivity(staff.getId(), activityId);
+      BddLogger.then("The repository result is returned as-is");
+      assertThat(result).containsExactly(latestStudent1Feedback, latestStudent2Feedback);
+      verify(feedbackRepository)
+          .findLatestFeedbacksByStaffAndActivityForEachStudent(staff.getId(), activityId);
     }
 
     @Test
@@ -1070,7 +1073,8 @@ class FeedbackServiceImplTest {
       Staff staff = StaffFixture.create().toModel();
 
       when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
-      when(feedbackRepository.findAllByStaffAndActivity(staff.getId(), activityId))
+      when(feedbackRepository.findLatestFeedbacksByStaffAndActivityForEachStudent(
+              staff.getId(), activityId))
           .thenReturn(List.of());
 
       BddLogger.when("getFeedbacksByActivity is called");
@@ -1082,19 +1086,21 @@ class FeedbackServiceImplTest {
 
     @Test
     void should_pass_staff_id_to_repository_to_scope_results_to_logged_in_staff() {
-      BddLogger.given("Two distinct staff users and the same activityId");
+      BddLogger.given("A logged-in staff and an activityId");
       UUID activityId = UUID.randomUUID();
       Staff staff = StaffFixture.create().toModel();
 
       when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
-      when(feedbackRepository.findAllByStaffAndActivity(staff.getId(), activityId))
+      when(feedbackRepository.findLatestFeedbacksByStaffAndActivityForEachStudent(
+              staff.getId(), activityId))
           .thenReturn(List.of());
 
       BddLogger.when("getFeedbacksByActivity is called");
       service.getFeedbacksByActivity(activityId);
 
-      BddLogger.then("The repository is called with the logged-in staff's ID — not any other ID");
-      verify(feedbackRepository).findAllByStaffAndActivity(staff.getId(), activityId);
+      BddLogger.then("The repository is called with the logged-in staff's ID");
+      verify(feedbackRepository)
+          .findLatestFeedbacksByStaffAndActivityForEachStudent(staff.getId(), activityId);
     }
 
     @Test
@@ -1110,7 +1116,8 @@ class FeedbackServiceImplTest {
       assertThatThrownBy(() -> service.getFeedbacksByActivity(activityId))
           .isInstanceOf(UserIsNotStaffException.class);
 
-      verify(feedbackRepository, never()).findAllByStaffAndActivity(any(), any());
+      verify(feedbackRepository, never())
+          .findLatestFeedbacksByStaffAndActivityForEachStudent(any(), any());
     }
   }
 

@@ -1,7 +1,9 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
@@ -22,15 +24,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class DeclaredActivityPresentationDTOMapperTest {
 
-  @Spy
-  private ActivityContentDtoMapper activityContentDtoMapper =
-      Mappers.getMapper(ActivityContentDtoMapper.class);
+  @Mock private ActivityContentDtoMapper activityContentDtoMapper;
 
   @Spy
   private FeedbackOverviewDTOMapper feedbackOverviewDTOMapper =
@@ -54,6 +55,8 @@ class DeclaredActivityPresentationDTOMapperTest {
             LocalDate.now(),
             LocalDate.now().plusMonths(3),
             null);
+
+    when(activityContentDtoMapper.toDTO(activity)).thenReturn(toActivityContentDTO(activity));
 
     BddLogger.when("mapping to DeclaredActivityDetailsDTO");
 
@@ -80,6 +83,8 @@ class DeclaredActivityPresentationDTOMapperTest {
     Activity activity = ActivityFixture.create().toModel();
     DeclaredActivity declaredActivity =
         DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+    when(activityContentDtoMapper.toDTO(activity)).thenReturn(toActivityContentDTO(activity));
 
     UUID feedbackId1 = UUID.randomUUID();
     UUID feedbackId2 = UUID.randomUUID();
@@ -138,6 +143,8 @@ class DeclaredActivityPresentationDTOMapperTest {
     DeclaredActivity declaredActivity =
         DeclaredActivity.create(UUID.randomUUID(), student, activity, null, null, null, null, null);
 
+    when(activityContentDtoMapper.toDTO(activity)).thenReturn(toActivityContentDTO(activity));
+
     BddLogger.when("mapping DeclaredActivityDetailsData with empty feedbacks");
 
     DeclaredActivityDetailsDTO dto =
@@ -150,5 +157,20 @@ class DeclaredActivityPresentationDTOMapperTest {
     assertNotNull(dto.feedbacks());
     assertTrue(dto.feedbacks().isEmpty());
     assertEquals(EDeclaredActivityStatus.SUBSCRIBED, dto.status());
+  }
+
+  private ActivityContentDTO toActivityContentDTO(Activity activity) {
+    return new ActivityContentDTO(
+        activity.getId(),
+        activity.getTitle(),
+        activity.getThematic(),
+        activity.getSummary(),
+        activity.getDescription().orElse(null),
+        activity.getExecutionPeriodInfo().orElse(null),
+        activity.isEnableReflection(),
+        activity.getTraceAllowedAssociations(),
+        activity.getFeedbackAllowedIterations(),
+        activity.getCreatedAt(),
+        activity.getUpdatedAt());
   }
 }

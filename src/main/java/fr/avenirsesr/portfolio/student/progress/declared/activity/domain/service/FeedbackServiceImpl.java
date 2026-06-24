@@ -33,9 +33,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -202,7 +200,9 @@ public class FeedbackServiceImpl implements FeedbackService {
   @Override
   public List<Feedback> getFeedbacksByActivity(UUID activityId) {
     var staff = loggedInUserService.getLoggedInStaff();
-    return feedbackRepository.findAllByStaffAndActivity(staff.getId(), activityId);
+
+    return feedbackRepository.findLatestFeedbacksByStaffAndActivityForEachStudent(
+        staff.getId(), activityId);
   }
 
   @Override
