@@ -28,6 +28,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.D
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
@@ -59,6 +60,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class FeedbackServiceImplTest {
 
   @Mock private FeedbackRepository feedbackRepository;
+  @Mock private DeclaredActivityRepository declaredActivityRepository;
   @Mock private ActivityService activityService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private AssociationService associationService;
@@ -1200,6 +1202,118 @@ class FeedbackServiceImplTest {
           .isInstanceOf(UserIsNotStaffException.class);
 
       verify(feedbackRepository, never()).countByStatus(any(), any(), any());
+    }
+  }
+
+  @Nested
+  class GetFeedbackHistory {
+
+    @Test
+    void should_return_feedbacks_ordered_by_repository_when_staff_is_author() {
+      BddLogger.given("A logged-in staff who is the author of the declared activity's activity");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+      Feedback feedback1 = mock(Feedback.class);
+      Feedback feedback2 = mock(Feedback.class);
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(declaredActivityRepository.findById(declaredActivityId))
+          .thenReturn(Optional.of(declaredActivity));
+      when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+          .thenReturn(List.of(feedback1, feedback2));
+
+      BddLogger.when("getFeedbackHistory is called");
+      List<Feedback> result = service.getFeedbackHistory(declaredActivityId);
+
+      BddLogger.then("The repository result is returned as-is");
+      assertThat(result).containsExactly(feedback1, feedback2);
+      verify(feedbackRepository).findAllByDeclaredActivityId(declaredActivityId);
+    }
+
+    @Test
+    void should_return_empty_list_when_declared_activity_has_no_feedbacks() {
+      BddLogger.given(
+          "A logged-in staff who is the author and a declared activity with no feedbacks");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(declaredActivityRepository.findById(declaredActivityId))
+          .thenReturn(Optional.of(declaredActivity));
+      when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+          .thenReturn(List.of());
+
+      BddLogger.when("getFeedbackHistory is called");
+      List<Feedback> result = service.getFeedbackHistory(declaredActivityId);
+
+      BddLogger.then("An empty list is returned");
+      assertThat(result).isEmpty();
+    }
+
+    @Test
+    void should_throw_DeclaredActivityNotFoundException_when_activity_not_found() {
+      BddLogger.given("A non-existent declared activity ID");
+      UUID declaredActivityId = UUID.randomUUID();
+      Staff staff = StaffFixture.create().toModel();
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(declaredActivityRepository.findById(declaredActivityId)).thenReturn(Optional.empty());
+
+      BddLogger.when("getFeedbackHistory is called");
+
+      BddLogger.then("A DeclaredActivityNotFoundException is thrown");
+      assertThatThrownBy(() -> service.getFeedbackHistory(declaredActivityId))
+          .isInstanceOf(DeclaredActivityNotFoundException.class);
+
+      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any());
+    }
+
+    @Test
+    void should_throw_UserNotAuthorizedException_when_staff_is_not_the_author() {
+      BddLogger.given("A logged-in staff who is NOT the author of the activity");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff differentStaff = StaffFixture.create().toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(differentStaff);
+      when(declaredActivityRepository.findById(declaredActivityId))
+          .thenReturn(Optional.of(declaredActivity));
+
+      BddLogger.when("getFeedbackHistory is called");
+
+      BddLogger.then("A UserNotAuthorizedException is thrown");
+      assertThatThrownBy(() -> service.getFeedbackHistory(declaredActivityId))
+          .isInstanceOf(UserNotAuthorizedException.class);
+
+      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any());
+    }
+
+    @Test
+    void should_throw_UserIsNotStaffException_when_logged_in_user_is_not_staff() {
+      BddLogger.given("A logged-in user who is not registered as staff");
+      UUID declaredActivityId = UUID.randomUUID();
+
+      when(loggedInUserService.getLoggedInStaff()).thenThrow(new UserIsNotStaffException());
+
+      BddLogger.when("getFeedbackHistory is called");
+
+      BddLogger.then("A UserIsNotStaffException is thrown");
+      assertThatThrownBy(() -> service.getFeedbackHistory(declaredActivityId))
+          .isInstanceOf(UserIsNotStaffException.class);
+
+      verify(declaredActivityRepository, never()).findById(any());
+      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any());
     }
   }
 

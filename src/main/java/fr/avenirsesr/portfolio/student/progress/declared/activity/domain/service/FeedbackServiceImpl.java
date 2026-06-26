@@ -19,6 +19,7 @@ import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationServic
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackDashboardData;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.FeedbackData;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackInProcessException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackMaximumIterationReachedException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.FeedbackNotFoundException;
@@ -27,6 +28,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.F
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.FeedbackService;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.DeclaredActivityRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.output.repository.FeedbackRepository;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
@@ -41,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
   private final FeedbackRepository feedbackRepository;
+  private final DeclaredActivityRepository declaredActivityRepository;
   private final DeclaredActivityService declaredActivityService;
   private final AssociationService associationService;
   private final TraceService traceService;
@@ -203,6 +206,20 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     return feedbackRepository.findLatestFeedbacksByStaffAndActivityForEachStudent(
         staff.getId(), activityId);
+  }
+
+  @Override
+  public List<Feedback> getFeedbackHistory(UUID declaredActivityId) {
+    Staff loggedInStaff = loggedInUserService.getLoggedInStaff();
+    DeclaredActivity declaredActivity =
+        declaredActivityRepository
+            .findById(declaredActivityId)
+            .orElseThrow(DeclaredActivityNotFoundException::new);
+
+    if (!loggedInStaff.equals(declaredActivity.getActivity().getAuthor())) {
+      throw new UserNotAuthorizedException();
+    }
+    return feedbackRepository.findAllByDeclaredActivityId(declaredActivityId);
   }
 
   @Override

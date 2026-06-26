@@ -26,6 +26,8 @@ public interface FeedbackService {
 
   List<Feedback> getFeedbacksByActivity(UUID activityId);
 
+  List<Feedback> getFeedbackHistory(UUID declaredActivityId);
+
   void submitFeedback(UUID feedbackId);
 
   Set<UUID> findAttachmentIdsUsedByTraceSnapshots(

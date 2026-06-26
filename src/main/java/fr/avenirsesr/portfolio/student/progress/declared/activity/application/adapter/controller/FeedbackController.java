@@ -6,10 +6,12 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDashboardDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackOverviewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.StudentFeedbackItemListDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateFeedbackRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackDetailsDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackOverviewDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackStaffListItemDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.StudentFeedbackItemListDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
@@ -42,6 +44,7 @@ public class FeedbackController {
   private final FeedbackDetailsDTOMapper feedbackDetailsDTOMapper;
   private final FeedbackStaffListItemDTOMapper feedbackStaffListItemDTOMapper;
   private final StudentFeedbackItemListDTOMapper studentFeedbackItemListDTOMapper;
+  private final FeedbackOverviewDTOMapper feedbackOverviewDTOMapper;
 
   @GetMapping
   public ResponseEntity<PagedResponse<FeedbackStaffListItemDTO>> getStaffFeedbacks(
@@ -132,6 +135,19 @@ public class FeedbackController {
             dashboard.pendingFeedbacks(),
             dashboard.processedFeedbacks(),
             dashboard.totalFeedbacks()));
+  }
+
+  @GetMapping("/{declaredActivityId}/history")
+  public ResponseEntity<List<FeedbackOverviewDTO>> getFeedbackHistory(
+      Principal principal, @PathVariable UUID declaredActivityId) {
+    log.debug(
+        "Received request to get feedback history for declared activity [{}] by user [{}]",
+        declaredActivityId,
+        principal.getName());
+    return ResponseEntity.ok(
+        feedbackService.getFeedbackHistory(declaredActivityId).stream()
+            .map(feedbackOverviewDTOMapper::toDTO)
+            .toList());
   }
 
   @PostMapping("/{feedbackId}/submit")

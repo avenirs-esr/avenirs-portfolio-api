@@ -865,4 +865,91 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
       assertThat(item.get("activity").get("id").asText()).isNotBlank();
     }
   }
+
+  // ── GET /{declaredActivityId}/history ───────────────────────────────
+
+  @Test
+  @Transactional
+  void shouldReturnFeedbackHistoryWhenStaffIsAuthorAndFeedbacksExist() throws Exception {
+    BddLogger.given(
+        "a staff who is the author of the activity and a student who asked for feedback");
+    String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+
+    BddLogger.when("the staff author requests the feedback history for the declared activity");
+    BddLogger.then(
+        "200 OK is returned with a list containing the feedback, with required fields present");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + declaredActivityId + "/history")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$")
+        .isArray()
+        .jsonPath("$[0].id")
+        .isEqualTo(feedbackId)
+        .jsonPath("$[0].status")
+        .isEqualTo("NEW")
+        .jsonPath("$[0].staff")
+        .exists()
+        .jsonPath("$[0].student")
+        .exists();
+  }
+
+  @Test
+  void shouldReturn404WhenDeclaredActivityDoesNotExistOnHistory() {
+    BddLogger.given("a non-existent declared activity ID");
+
+    BddLogger.when("the staff requests the feedback history");
+    BddLogger.then("404 Not Found is returned");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + notFoundId + "/history")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNotFound();
+  }
+
+  @Test
+  @Transactional
+  void shouldReturn403WhenUserIsNotTheStaffAuthorOnHistory() {
+    BddLogger.given("a declared activity whose activity is not authored by the requesting user");
+
+    BddLogger.when("a non-author staff requests the feedback history");
+    BddLogger.then("403 Forbidden is returned");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + declaredActivityId + "/history")
+        .header("X-Signed-Context", otherStudentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", otherStudentSignature)
+        .exchange()
+        .expectStatus()
+        .isForbidden();
+  }
+
+  @Test
+  void shouldReturn401WhenNotAuthenticatedOnHistoryEndpoint() {
+    BddLogger.given(
+        "the GET /me/activity-progress/feedbacks/{declaredActivityId}/history endpoint");
+    BddLogger.when("performing a GET without authentication headers");
+    BddLogger.then("401 Unauthorized is returned");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + notFoundId + "/history")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized();
+  }
 }
