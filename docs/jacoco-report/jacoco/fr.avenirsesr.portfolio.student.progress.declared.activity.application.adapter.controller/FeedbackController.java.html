@@ -6,10 +6,12 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDashboardDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackDetailsDTO;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackOverviewDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.FeedbackStaffListItemDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.StudentFeedbackItemListDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateFeedbackRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackDetailsDTOMapper;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackOverviewDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.FeedbackStaffListItemDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.StudentFeedbackItemListDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EFeedbackStatus;
@@ -34,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-<span class="fc" id="L37">@Slf4j</span>
+<span class="fc" id="L39">@Slf4j</span>
 @AllArgsConstructor
 @RequestMapping(&quot;/me/activity-progress/feedbacks&quot;)
 public class FeedbackController {
@@ -42,6 +44,7 @@ public class FeedbackController {
   private final FeedbackDetailsDTOMapper feedbackDetailsDTOMapper;
   private final FeedbackStaffListItemDTOMapper feedbackStaffListItemDTOMapper;
   private final StudentFeedbackItemListDTOMapper studentFeedbackItemListDTOMapper;
+  private final FeedbackOverviewDTOMapper feedbackOverviewDTOMapper;
 
   @GetMapping
   public ResponseEntity&lt;PagedResponse&lt;FeedbackStaffListItemDTO&gt;&gt; getStaffFeedbacks(
@@ -52,33 +55,33 @@ public class FeedbackController {
       @RequestParam(required = false) UUID activityId,
       @RequestParam(required = false) Integer page,
       @RequestParam(required = false) Integer pageSize) {
-<span class="fc" id="L55">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L56">    log.debug(</span>
+<span class="fc" id="L58">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L59">    log.debug(</span>
         &quot;Received request to get staff feedbacks for user [{}] (status={}, activityId={}, page={},&quot;
             + &quot; pageSize={})&quot;,
-<span class="fc" id="L59">        principal.getName(),</span>
+<span class="fc" id="L62">        principal.getName(),</span>
         status,
         activityId,
-<span class="fc" id="L62">        pageCriteria.page(),</span>
-<span class="fc" id="L63">        pageCriteria.pageSize());</span>
-<span class="fc" id="L64">    var result = feedbackService.getStaffFeedbacks(status, activityId, pageCriteria);</span>
-<span class="fc" id="L65">    return ResponseEntity.ok(</span>
+<span class="fc" id="L65">        pageCriteria.page(),</span>
+<span class="fc" id="L66">        pageCriteria.pageSize());</span>
+<span class="fc" id="L67">    var result = feedbackService.getStaffFeedbacks(status, activityId, pageCriteria);</span>
+<span class="fc" id="L68">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L67">            result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),</span>
-<span class="fc" id="L68">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
+<span class="fc" id="L70">            result.content().stream().map(feedbackStaffListItemDTOMapper::toDTO).toList(),</span>
+<span class="fc" id="L71">            PageInfoDTO.fromDomain(result.pageInfo())));</span>
   }
 
   @GetMapping(&quot;/exhaustive-list/{activityId}&quot;)
   public ResponseEntity&lt;List&lt;StudentFeedbackItemListDTO&gt;&gt; getFeedbacksByActivity(
       Principal principal, @PathVariable UUID activityId) {
-<span class="fc" id="L74">    log.debug(</span>
+<span class="fc" id="L77">    log.debug(</span>
         &quot;Received request to get all feedbacks for activity [{}] by user [{}]&quot;,
         activityId,
-<span class="fc" id="L77">        principal.getName());</span>
-<span class="fc" id="L78">    return ResponseEntity.ok(</span>
-<span class="fc" id="L79">        feedbackService.getFeedbacksByActivity(activityId).stream()</span>
-<span class="fc" id="L80">            .map(studentFeedbackItemListDTOMapper::toDTO)</span>
-<span class="fc" id="L81">            .toList());</span>
+<span class="fc" id="L80">        principal.getName());</span>
+<span class="fc" id="L81">    return ResponseEntity.ok(</span>
+<span class="fc" id="L82">        feedbackService.getFeedbacksByActivity(activityId).stream()</span>
+<span class="fc" id="L83">            .map(studentFeedbackItemListDTOMapper::toDTO)</span>
+<span class="fc" id="L84">            .toList());</span>
   }
 
   @GetMapping(&quot;/{userCategory}/{feedbackId}&quot;)
@@ -86,14 +89,14 @@ public class FeedbackController {
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @PathVariable EUserCategory userCategory) {
-<span class="fc" id="L89">    log.debug(</span>
+<span class="fc" id="L92">    log.debug(</span>
         &quot;Received request to get feedback details [{}] by user [{}] (userCategory={})&quot;,
         feedbackId,
-<span class="fc" id="L92">        principal.getName(),</span>
+<span class="fc" id="L95">        principal.getName(),</span>
         userCategory);
-<span class="fc" id="L94">    return ResponseEntity.ok(</span>
-<span class="fc" id="L95">        feedbackDetailsDTOMapper.toDTO(</span>
-<span class="fc" id="L96">            feedbackService.getFeedbackDetails(feedbackId, userCategory)));</span>
+<span class="fc" id="L97">    return ResponseEntity.ok(</span>
+<span class="fc" id="L98">        feedbackDetailsDTOMapper.toDTO(</span>
+<span class="fc" id="L99">            feedbackService.getFeedbackDetails(feedbackId, userCategory)));</span>
   }
 
   @PutMapping(&quot;/{feedbackId}&quot;)
@@ -101,46 +104,59 @@ public class FeedbackController {
       Principal principal,
       @Valid @PathVariable UUID feedbackId,
       @Valid @RequestBody UpdateFeedbackRequest request) {
-<span class="fc" id="L104">    log.debug(</span>
-<span class="fc" id="L105">        &quot;Received request to update feedback [{}] by user [{}]&quot;, feedbackId, principal.getName());</span>
-<span class="fc" id="L106">    feedbackService.updateFeedback(feedbackId, request.feedback());</span>
-<span class="fc" id="L107">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L107">    log.debug(</span>
+<span class="fc" id="L108">        &quot;Received request to update feedback [{}] by user [{}]&quot;, feedbackId, principal.getName());</span>
+<span class="fc" id="L109">    feedbackService.updateFeedback(feedbackId, request.feedback());</span>
+<span class="fc" id="L110">    return ResponseEntity.noContent().build();</span>
   }
 
   @PostMapping(&quot;/{declaredActivityId}/ask-for-feedback&quot;)
   public ResponseEntity&lt;FeedbackDetailsDTO&gt; askForFeedback(
       Principal principal, @Valid @PathVariable UUID declaredActivityId) {
-<span class="fc" id="L113">    log.debug(</span>
+<span class="fc" id="L116">    log.debug(</span>
         &quot;Received request to ask for feedback on declared activity [{}] by student [{}]&quot;,
         declaredActivityId,
-<span class="fc" id="L116">        principal.getName());</span>
-<span class="fc" id="L117">    return ResponseEntity.status(HttpStatus.CREATED)</span>
-<span class="fc" id="L118">        .body(feedbackDetailsDTOMapper.toDTO(feedbackService.createFeedback(declaredActivityId)));</span>
+<span class="fc" id="L119">        principal.getName());</span>
+<span class="fc" id="L120">    return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="fc" id="L121">        .body(feedbackDetailsDTOMapper.toDTO(feedbackService.createFeedback(declaredActivityId)));</span>
   }
 
   @GetMapping(&quot;/dashboard&quot;)
   public ResponseEntity&lt;FeedbackDashboardDTO&gt; getFeedbackDashboard(
       Principal principal, @RequestParam(required = false) UUID activityId) {
-<span class="fc" id="L124">    log.debug(</span>
+<span class="fc" id="L127">    log.debug(</span>
         &quot;Received request to get feedback dashboard for user [{}] (activityId={})&quot;,
-<span class="fc" id="L126">        principal.getName(),</span>
+<span class="fc" id="L129">        principal.getName(),</span>
         activityId);
-<span class="fc" id="L128">    var dashboard = feedbackService.getFeedbackDashboard(activityId);</span>
-<span class="fc" id="L129">    return ResponseEntity.ok(</span>
+<span class="fc" id="L131">    var dashboard = feedbackService.getFeedbackDashboard(activityId);</span>
+<span class="fc" id="L132">    return ResponseEntity.ok(</span>
         new FeedbackDashboardDTO(
-<span class="fc" id="L131">            dashboard.newFeedbacks(),</span>
-<span class="fc" id="L132">            dashboard.pendingFeedbacks(),</span>
-<span class="fc" id="L133">            dashboard.processedFeedbacks(),</span>
-<span class="fc" id="L134">            dashboard.totalFeedbacks()));</span>
+<span class="fc" id="L134">            dashboard.newFeedbacks(),</span>
+<span class="fc" id="L135">            dashboard.pendingFeedbacks(),</span>
+<span class="fc" id="L136">            dashboard.processedFeedbacks(),</span>
+<span class="fc" id="L137">            dashboard.totalFeedbacks()));</span>
+  }
+
+  @GetMapping(&quot;/{declaredActivityId}/history&quot;)
+  public ResponseEntity&lt;List&lt;FeedbackOverviewDTO&gt;&gt; getFeedbackHistory(
+      Principal principal, @PathVariable UUID declaredActivityId) {
+<span class="fc" id="L143">    log.debug(</span>
+        &quot;Received request to get feedback history for declared activity [{}] by user [{}]&quot;,
+        declaredActivityId,
+<span class="fc" id="L146">        principal.getName());</span>
+<span class="fc" id="L147">    return ResponseEntity.ok(</span>
+<span class="fc" id="L148">        feedbackService.getFeedbackHistory(declaredActivityId).stream()</span>
+<span class="fc" id="L149">            .map(feedbackOverviewDTOMapper::toDTO)</span>
+<span class="fc" id="L150">            .toList());</span>
   }
 
   @PostMapping(&quot;/{feedbackId}/submit&quot;)
   public ResponseEntity&lt;Void&gt; submitFeedback(
       Principal principal, @Valid @PathVariable UUID feedbackId) {
-<span class="fc" id="L140">    log.debug(</span>
-<span class="fc" id="L141">        &quot;Received request to submit feedback [{}] by user [{}]&quot;, feedbackId, principal.getName());</span>
-<span class="fc" id="L142">    feedbackService.submitFeedback(feedbackId);</span>
-<span class="fc" id="L143">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L156">    log.debug(</span>
+<span class="fc" id="L157">        &quot;Received request to submit feedback [{}] by user [{}]&quot;, feedbackId, principal.getName());</span>
+<span class="fc" id="L158">    feedbackService.submitFeedback(feedbackId);</span>
+<span class="fc" id="L159">    return ResponseEntity.noContent().build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
