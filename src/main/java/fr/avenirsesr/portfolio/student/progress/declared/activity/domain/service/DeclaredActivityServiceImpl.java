@@ -271,7 +271,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
             List.of(EAssociationType.DECLARED_ACTIVITY_TRACE));
     var activity = declaredActivity.getActivity();
     if (activity.getTraceAllowedAssociations() != -1
-        && activity.getTraceAllowedAssociations() >= traceAssociations.size()) {
+        && traceAssociations.size() >= activity.getTraceAllowedAssociations()) {
       throw new MaximumAssociationReachedException();
     }
 
