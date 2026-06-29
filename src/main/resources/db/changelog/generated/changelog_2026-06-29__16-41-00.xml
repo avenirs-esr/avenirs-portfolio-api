@@ -1,0 +1,43 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="nathp" id="remove-deleted-at-from-feedback-associations-traces">
+        <comment>
+            Remove legacy deletedAt field from trace snapshots stored in feedback.associations JSON.
+        </comment>
+
+        <sql dbms="postgresql"><![CDATA[
+            UPDATE feedback
+            SET associations = jsonb_set(
+                    associations::jsonb,
+                    '{traces}',
+                    (
+                        SELECT jsonb_agg(trace_element - 'deletedAt')
+                        FROM jsonb_array_elements(associations::jsonb -> 'traces') AS trace_element
+                    )
+                               )
+            WHERE associations IS NOT NULL
+              AND jsonb_exists(associations::jsonb, 'traces')
+              AND EXISTS (
+                SELECT 1
+                FROM jsonb_array_elements(associations::jsonb -> 'traces') AS trace_element
+                WHERE jsonb_exists(trace_element, 'deletedAt')
+            );
+            ]]></sql>
+
+        <rollback>
+            <comment>
+                No rollback possible: deletedAt values are intentionally removed from historical JSON snapshots.
+            </comment>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
