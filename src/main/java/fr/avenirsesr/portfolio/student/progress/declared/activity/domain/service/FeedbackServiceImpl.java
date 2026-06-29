@@ -219,7 +219,8 @@ public class FeedbackServiceImpl implements FeedbackService {
     if (!loggedInStaff.equals(declaredActivity.getActivity().getAuthor())) {
       throw new UserNotAuthorizedException();
     }
-    return feedbackRepository.findAllByDeclaredActivityId(declaredActivityId);
+    return feedbackRepository.findAllByDeclaredActivityId(
+        declaredActivityId, EFeedbackStatus.SUBMITTED);
   }
 
   @Override

@@ -12,7 +12,11 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface FeedbackRepository extends GenericRepositoryPort<Feedback> {
-  List<Feedback> findAllByDeclaredActivityId(UUID declaredActivityId);
+  List<Feedback> findAllByDeclaredActivityId(UUID declaredActivityId, EFeedbackStatus status);
+
+  default List<Feedback> findAllByDeclaredActivityId(UUID declaredActivityId) {
+    return findAllByDeclaredActivityId(declaredActivityId, null);
+  }
 
   PagedResult<Feedback> findByStaff(
       UUID staffId, EFeedbackStatus statusFilter, UUID activityId, PageCriteria pageCriteria);

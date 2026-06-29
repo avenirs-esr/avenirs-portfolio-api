@@ -110,6 +110,18 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .isNoContent();
   }
 
+  private void submitFeedback(String feedbackId) {
+    webTestClient
+        .post()
+        .uri(BASE_PATH + "/" + feedbackId + "/submit")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+  }
+
   // ── POST /{declaredActivityId}/ask-for-feedback ─────────────────────
 
   @Test
@@ -872,12 +884,16 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
   @Transactional
   void shouldReturnFeedbackHistoryWhenStaffIsAuthorAndFeedbacksExist() throws Exception {
     BddLogger.given(
-        "a staff who is the author of the activity and a student who asked for feedback");
+        "a staff who is the author of the activity and a student who asked for feedback, updated"
+            + " it, and submitted it");
     String feedbackId = askForFeedbackAndGetId(declaredActivityId);
+    updateFeedbackWithText(feedbackId, "Bon travail !");
+    submitFeedback(feedbackId);
 
     BddLogger.when("the staff author requests the feedback history for the declared activity");
     BddLogger.then(
-        "200 OK is returned with a list containing the feedback, with required fields present");
+        "200 OK is returned with a list containing only the SUBMITTED feedback, with required"
+            + " fields present");
 
     webTestClient
         .get()
@@ -894,7 +910,7 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .jsonPath("$[0].id")
         .isEqualTo(feedbackId)
         .jsonPath("$[0].status")
-        .isEqualTo("NEW")
+        .isEqualTo("SUBMITTED")
         .jsonPath("$[0].staff")
         .exists()
         .jsonPath("$[0].student")

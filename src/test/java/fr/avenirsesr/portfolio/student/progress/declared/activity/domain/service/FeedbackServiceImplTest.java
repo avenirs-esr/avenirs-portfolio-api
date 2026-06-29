@@ -1223,15 +1223,83 @@ class FeedbackServiceImplTest {
       when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
       when(declaredActivityRepository.findById(declaredActivityId))
           .thenReturn(Optional.of(declaredActivity));
-      when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+      when(feedbackRepository.findAllByDeclaredActivityId(
+              declaredActivityId, EFeedbackStatus.SUBMITTED))
           .thenReturn(List.of(feedback1, feedback2));
 
       BddLogger.when("getFeedbackHistory is called");
       List<Feedback> result = service.getFeedbackHistory(declaredActivityId);
 
-      BddLogger.then("The repository result is returned as-is");
+      BddLogger.then("The repository result is returned");
       assertThat(result).containsExactly(feedback1, feedback2);
-      verify(feedbackRepository).findAllByDeclaredActivityId(declaredActivityId);
+      verify(feedbackRepository)
+          .findAllByDeclaredActivityId(declaredActivityId, EFeedbackStatus.SUBMITTED);
+    }
+
+    @Test
+    void should_return_only_SUBMITTED_feedbacks_when_repository_is_called_with_SUBMITTED_status() {
+      BddLogger.given(
+          "A logged-in staff who is the author and the repository is queried with SUBMITTED"
+              + " status");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+      Feedback submittedFeedback =
+          Feedback.toDomain(
+              UUID.randomUUID(),
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              "Retour du formateur",
+              EFeedbackStatus.SUBMITTED,
+              1,
+              List.of(),
+              List.of());
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(declaredActivityRepository.findById(declaredActivityId))
+          .thenReturn(Optional.of(declaredActivity));
+      when(feedbackRepository.findAllByDeclaredActivityId(
+              declaredActivityId, EFeedbackStatus.SUBMITTED))
+          .thenReturn(List.of(submittedFeedback));
+
+      BddLogger.when("getFeedbackHistory is called");
+      List<Feedback> result = service.getFeedbackHistory(declaredActivityId);
+
+      BddLogger.then("The repository is called with SUBMITTED status and its result is returned");
+      assertThat(result).containsExactly(submittedFeedback);
+      verify(feedbackRepository)
+          .findAllByDeclaredActivityId(declaredActivityId, EFeedbackStatus.SUBMITTED);
+    }
+
+    @Test
+    void should_return_empty_list_when_repository_returns_no_SUBMITTED_feedbacks() {
+      BddLogger.given(
+          "A logged-in staff who is the author and the repository finds no SUBMITTED feedbacks");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      Staff staff = StaffFixture.create().withId(activity.getAuthor().getId()).toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+      when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+      when(declaredActivityRepository.findById(declaredActivityId))
+          .thenReturn(Optional.of(declaredActivity));
+      when(feedbackRepository.findAllByDeclaredActivityId(
+              declaredActivityId, EFeedbackStatus.SUBMITTED))
+          .thenReturn(List.of());
+
+      BddLogger.when("getFeedbackHistory is called");
+      List<Feedback> result = service.getFeedbackHistory(declaredActivityId);
+
+      BddLogger.then("An empty list is returned");
+      assertThat(result).isEmpty();
     }
 
     @Test
@@ -1248,7 +1316,8 @@ class FeedbackServiceImplTest {
       when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
       when(declaredActivityRepository.findById(declaredActivityId))
           .thenReturn(Optional.of(declaredActivity));
-      when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+      when(feedbackRepository.findAllByDeclaredActivityId(
+              declaredActivityId, EFeedbackStatus.SUBMITTED))
           .thenReturn(List.of());
 
       BddLogger.when("getFeedbackHistory is called");
@@ -1273,7 +1342,7 @@ class FeedbackServiceImplTest {
       assertThatThrownBy(() -> service.getFeedbackHistory(declaredActivityId))
           .isInstanceOf(DeclaredActivityNotFoundException.class);
 
-      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any());
+      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any(), any());
     }
 
     @Test
@@ -1296,7 +1365,7 @@ class FeedbackServiceImplTest {
       assertThatThrownBy(() -> service.getFeedbackHistory(declaredActivityId))
           .isInstanceOf(UserNotAuthorizedException.class);
 
-      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any());
+      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any(), any());
     }
 
     @Test
@@ -1313,7 +1382,7 @@ class FeedbackServiceImplTest {
           .isInstanceOf(UserIsNotStaffException.class);
 
       verify(declaredActivityRepository, never()).findById(any());
-      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any());
+      verify(feedbackRepository, never()).findAllByDeclaredActivityId(any(), any());
     }
   }
 

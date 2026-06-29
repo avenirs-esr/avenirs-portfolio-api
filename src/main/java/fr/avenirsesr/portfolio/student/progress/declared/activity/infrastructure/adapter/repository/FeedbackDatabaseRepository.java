@@ -97,12 +97,13 @@ public class FeedbackDatabaseRepository
   }
 
   @Override
-  public List<Feedback> findAllByDeclaredActivityId(UUID declaredActivityId) {
-    return jpaRepository
-        .findAllByDeclaredActivity_IdOrderByCreatedAtDesc(declaredActivityId)
-        .stream()
-        .map(this::toDomainWithDependencies)
-        .toList();
+  public List<Feedback> findAllByDeclaredActivityId(
+      UUID declaredActivityId, EFeedbackStatus status) {
+    var spec =
+        FeedbackSpecification.hasDeclaredActivityId(declaredActivityId)
+            .and(FeedbackSpecification.hasStatus(status));
+    var sort = Sort.by("createdAt").descending();
+    return jpaRepository.findAll(spec, sort).stream().map(this::toDomainWithDependencies).toList();
   }
 
   @Override

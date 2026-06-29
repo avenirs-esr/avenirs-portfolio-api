@@ -27,4 +27,9 @@ public final class FeedbackSpecification {
       return cb.equal(root.get("declaredActivity").get("activity").get("id"), activityId);
     };
   }
+
+  public static Specification<FeedbackEntity> hasDeclaredActivityId(UUID declaredActivityId) {
+    return (root, query, cb) ->
+        cb.equal(root.get("declaredActivity").get("id"), declaredActivityId);
+  }
 }
