@@ -22,10 +22,12 @@ import org.mapstruct.Mapping;
     })
 public interface FeedbackDetailsDTOMapper {
 
+  @Mapping(source = "declaredActivity.id", target = "declaredActivityId")
   @Mapping(source = "declaredActivity.activity", target = "activity")
   @Mapping(source = "declaredActivity.student.user", target = "student")
   FeedbackDetailsDTO toDTO(Feedback feedback);
 
+  @Mapping(source = "declaredActivity.id", target = "declaredActivityId")
   @Mapping(source = "declaredActivity.activity", target = "activity")
   @Mapping(source = "declaredActivity.student.user", target = "student")
   FeedbackDetailsDTO toDTO(FeedbackData feedbackData);

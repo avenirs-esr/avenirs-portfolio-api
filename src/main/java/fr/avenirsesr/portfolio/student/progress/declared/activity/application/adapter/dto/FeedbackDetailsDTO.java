@@ -10,9 +10,19 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"id", "activity", "student", "status", "createdAt", "updatedAt"})
+@Schema(
+    requiredProperties = {
+      "id",
+      "declaredActivityId",
+      "activity",
+      "student",
+      "status",
+      "createdAt",
+      "updatedAt"
+    })
 public record FeedbackDetailsDTO(
     UUID id,
+    UUID declaredActivityId,
     ActivityContentDTO activity,
     UserInfoDTO student,
     String reflexion,

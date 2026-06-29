@@ -71,6 +71,7 @@ class FeedbackControllerTest {
       FeedbackDetailsDTO expectedDto =
           new FeedbackDetailsDTO(
               UUID.randomUUID(),
+              UUID.randomUUID(),
               mock(ActivityContentDTO.class),
               null,
               "Ma réflexion",
@@ -131,6 +132,7 @@ class FeedbackControllerTest {
       FeedbackDetailsDTO expectedDto =
           new FeedbackDetailsDTO(
               feedbackId,
+              UUID.randomUUID(),
               mock(ActivityContentDTO.class),
               null,
               null,
