@@ -309,7 +309,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
           experiences,
           AvenirsBaseModel::getId,
           DeclaredExperience::getTitle,
-          de -> de.getExperienceType().name(),
+          de -> de.getExperienceType() != null ? de.getExperienceType().name() : null,
           de -> false);
     }
 
@@ -323,7 +323,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         experiences,
         AvenirsBaseModel::getId,
         DeclaredExperience::getTitle,
-        de -> de.getExperienceType().name(),
+        de -> de.getExperienceType() != null ? de.getExperienceType().name() : null,
         de -> false);
   }
 
