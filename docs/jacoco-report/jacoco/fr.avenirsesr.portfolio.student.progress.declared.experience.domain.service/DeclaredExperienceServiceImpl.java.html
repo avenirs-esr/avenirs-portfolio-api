@@ -309,7 +309,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
           experiences,
           AvenirsBaseModel::getId,
           DeclaredExperience::getTitle,
-<span class="nc" id="L312">          de -&gt; de.getExperienceType().name(),</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">          de -&gt; de.getExperienceType() != null ? de.getExperienceType().name() : null,</span>
 <span class="nc" id="L313">          de -&gt; false);</span>
     }
 
@@ -323,7 +323,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
         experiences,
         AvenirsBaseModel::getId,
         DeclaredExperience::getTitle,
-<span class="nc" id="L326">        de -&gt; de.getExperienceType().name(),</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        de -&gt; de.getExperienceType() != null ? de.getExperienceType().name() : null,</span>
 <span class="nc" id="L327">        de -&gt; false);</span>
   }
 

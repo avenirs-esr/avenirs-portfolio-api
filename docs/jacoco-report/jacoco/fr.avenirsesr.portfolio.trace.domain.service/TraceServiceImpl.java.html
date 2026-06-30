@@ -598,7 +598,7 @@ public class TraceServiceImpl implements TraceService {
 <span class="fc" id="L598">        declaredExperienceService.search(keyword, pageCriteria),</span>
         AvenirsBaseModel::getId,
         DeclaredExperience::getTitle,
-<span class="fc" id="L601">        de -&gt; de.getExperienceType().name(),</span>
+<span class="pc bpc" id="L601" title="1 of 2 branches missed.">        de -&gt; de.getExperienceType() != null ? de.getExperienceType().name() : null,</span>
 <span class="fc" id="L602">        de -&gt; false);</span>
   }
 
