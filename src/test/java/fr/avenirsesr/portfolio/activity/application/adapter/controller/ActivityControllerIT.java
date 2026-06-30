@@ -986,7 +986,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isOk()
         .expectBody()
         .jsonPath("$.page.pageSize")
-        .isEqualTo(12); // MAX_PAGE_SIZE du PageCriteria
+        .isEqualTo(100); // MAX_PAGE_SIZE du PageCriteria
   }
 
   @Test

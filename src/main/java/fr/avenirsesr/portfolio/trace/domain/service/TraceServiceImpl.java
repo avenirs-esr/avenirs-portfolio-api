@@ -598,7 +598,7 @@ public class TraceServiceImpl implements TraceService {
         declaredExperienceService.search(keyword, pageCriteria),
         AvenirsBaseModel::getId,
         DeclaredExperience::getTitle,
-        de -> de.getExperienceType().name(),
+        de -> de.getExperienceType() != null ? de.getExperienceType().name() : null,
         de -> false);
   }
 
