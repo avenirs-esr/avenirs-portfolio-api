@@ -209,10 +209,10 @@ public class FeedbackDatabaseRepository
 <span class="fc" id="L209">            .filter(Objects::nonNull)</span>
 <span class="fc" id="L210">            .collect(Collectors.toSet());</span>
 
-<span class="pc bpc" id="L212" title="1 of 2 branches missed.">    if (ids.isEmpty()) return Map.of();</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">    if (ids.isEmpty()) return Map.of();</span>
 
-<span class="nc" id="L214">    return fileJpaRepository.findAllById(ids).stream()</span>
-<span class="nc" id="L215">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, FileMapper.INSTANCE::toDomain));</span>
+<span class="fc" id="L214">    return fileJpaRepository.findAllById(ids).stream()</span>
+<span class="fc" id="L215">        .collect(Collectors.toMap(AvenirsBaseEntity::getId, FileMapper.INSTANCE::toDomain));</span>
   }
 
   private Map&lt;UUID, Student&gt; resolveStudents(AssociationsJson associations) {
