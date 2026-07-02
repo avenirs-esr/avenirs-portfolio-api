@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.activity.domain.model;
 
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.file.domain.model.File;
@@ -18,6 +19,7 @@ public class Activity extends AvenirsBaseModel {
   private String title;
   private EActivityThematic thematic;
   private String summary;
+  private EActivityStatus status;
   private boolean enableReflection;
   private int traceAllowedAssociations;
   private int feedbackAllowedIterations;
@@ -40,6 +42,7 @@ public class Activity extends AvenirsBaseModel {
       String title,
       EActivityThematic thematic,
       String summary,
+      EActivityStatus status,
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
@@ -54,6 +57,7 @@ public class Activity extends AvenirsBaseModel {
     this.title = title;
     this.thematic = thematic;
     this.summary = summary;
+    this.status = status;
     this.description = description;
     this.executionPeriodInfo = executionPeriodInfo;
     this.executionPeriodInfoSummary = executionPeriodInfoSummary;
@@ -83,6 +87,7 @@ public class Activity extends AvenirsBaseModel {
         title,
         thematic,
         summary,
+        EActivityStatus.PUBLISHED,
         description,
         executionPeriodInfo,
         executionPeriodInfoSummary,
@@ -100,6 +105,7 @@ public class Activity extends AvenirsBaseModel {
       String title,
       EActivityThematic thematic,
       String summary,
+      EActivityStatus status,
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
@@ -115,6 +121,7 @@ public class Activity extends AvenirsBaseModel {
         title,
         thematic,
         summary,
+        status,
         description,
         executionPeriodInfo,
         executionPeriodInfoSummary,

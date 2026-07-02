@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -60,6 +61,7 @@ class ActivityMapperTest {
             title,
             thematic,
             summary,
+            EActivityStatus.PUBLISHED,
             description,
             executionPeriodInfo,
             executionPeriodInfoSummary,

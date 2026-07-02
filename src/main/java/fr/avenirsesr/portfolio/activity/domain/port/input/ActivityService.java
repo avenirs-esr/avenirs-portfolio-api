@@ -30,6 +30,8 @@ public interface ActivityService {
 
   Activity publish(UUID activityDraftId);
 
+  Activity unpublish(UUID activityId);
+
   void deleteDraft(UUID activityDraftId);
 
   Activity getActivityById(UUID id);

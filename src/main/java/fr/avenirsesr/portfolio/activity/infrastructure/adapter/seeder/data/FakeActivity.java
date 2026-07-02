@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder.data;
 
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
@@ -23,6 +24,7 @@ public class FakeActivity {
             faker.job().position(),
             faker.options().option(EActivityThematic.values()),
             faker.lorem().paragraph(2),
+            EActivityStatus.PUBLISHED,
             faker.lorem().paragraph(2),
             faker.lorem().sentence(15),
             faker.lorem().sentence(4),

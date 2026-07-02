@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.activity.domain.mapper.ActivityPresentationDataMapper;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
@@ -124,6 +125,21 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
+  public Activity unpublish(UUID activityId) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var activity =
+        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+    if (!activity.getAuthor().equals(staff)) {
+      throw new UserNotAuthorizedException();
+    }
+    if (activity.getStatus() == EActivityStatus.UNPUBLISHED) {
+      throw new ActivityUnpublishedException();
+    }
+    activity.setStatus(EActivityStatus.UNPUBLISHED);
+    return activityRepository.save(activity);
+  }
+
+  @Override
   public void deleteDraft(UUID activityDraftId) {
     var staff = loggedInUserService.getLoggedInStaff();
     var draft =
@@ -157,7 +173,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public ActivityPresentationData getActivityPresentation(EActivityStatus activityStatus, UUID id) {
     return switch (activityStatus) {
-      case PUBLISHED -> {
+      case PUBLISHED, UNPUBLISHED -> {
         Activity activity =
             activityRepository.findById(id).orElseThrow(ActivityNotFoundException::new);
         yield ActivityPresentationDataMapper.toData(
@@ -199,6 +215,7 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public Map<EActivityThematic, List<Activity>> getActivityNavigation() {
     return activityRepository.findAll().stream()
+        .filter(a -> a.getStatus() != EActivityStatus.UNPUBLISHED)
         .collect(
             Collectors.groupingBy(
                 Activity::getThematic,
@@ -312,7 +329,7 @@ public class ActivityServiceImpl implements ActivityService {
               traceAllowedAssociations,
               feedbackAllowedIterations,
               enableReflection);
-      case PUBLISHED -> throw new UnsupportedOperationException();
+      case PUBLISHED, UNPUBLISHED -> throw new UnsupportedOperationException();
     };
   }
 

@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.fixture;
 
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
@@ -27,6 +28,7 @@ public class ActivityFixture {
   private int traceAllowedAssociations = 10;
   private int feedbackAllowedIterations = 10;
   private boolean enableRefection = true;
+  private EActivityStatus status = EActivityStatus.PUBLISHED;
   private final File banner = ActivityBannerFixture.create().toModel();
   private Instant createdAt = Instant.now();
   private Instant updatedAt = Instant.now();
@@ -90,6 +92,11 @@ public class ActivityFixture {
     return this;
   }
 
+  public ActivityFixture withStatus(EActivityStatus status) {
+    this.status = status;
+    return this;
+  }
+
   public ActivityFixture withCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
     return this;
@@ -107,6 +114,7 @@ public class ActivityFixture {
         title,
         thematic,
         summary,
+        status,
         description,
         executionPeriodInfo,
         executionPeriodInfoSummary,

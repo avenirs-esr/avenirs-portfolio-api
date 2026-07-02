@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.infrastructure.adapter.model;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
@@ -32,6 +33,10 @@ public class ActivityEntity extends AvenirsBaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private EActivityThematic thematic;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private EActivityStatus status;
 
   @Column(nullable = false, length = SUMMARY_LENGTH)
   private String summary;
@@ -64,6 +69,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
       String title,
       EActivityThematic thematic,
       String summary,
+      EActivityStatus status,
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
@@ -78,6 +84,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
     this.author = author;
     this.thematic = thematic;
     this.summary = summary;
+    this.status = status;
     this.description = description;
     this.executionPeriodInfo = executionPeriodInfo;
     this.executionPeriodInfoSummary = executionPeriodInfoSummary;
@@ -95,6 +102,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
       String title,
       EActivityThematic thematic,
       String summary,
+      EActivityStatus status,
       String description,
       String executionPeriodInfo,
       String executionPeriodInfoSummary,
@@ -111,6 +119,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
         title,
         thematic,
         summary,
+        status,
         description,
         executionPeriodInfo,
         executionPeriodInfoSummary,

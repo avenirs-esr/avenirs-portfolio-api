@@ -12,6 +12,7 @@ import fr.avenirsesr.portfolio.activity.domain.data.ActivityPresentationData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
@@ -96,6 +97,53 @@ class ActivityServiceImplTest {
     verify(activityRepository).save(captor.capture());
     Activity savedActivity = captor.getValue();
     assertEquals(createdActivity, savedActivity);
+  }
+
+  @Test
+  void getActivityNavigation_shouldExcludeUnpublishedActivities() {
+    var author = Mockito.mock(Staff.class);
+    // Given
+    Activity published =
+        Activity.create(
+            UUID.randomUUID(),
+            author,
+            "Published",
+            EActivityThematic.EXPERIENCES,
+            "S",
+            "D",
+            "2026",
+            null,
+            true,
+            -1,
+            -1,
+            null);
+    Activity unpublished =
+        Activity.toDomain(
+            UUID.randomUUID(),
+            author,
+            "Unpublished",
+            EActivityThematic.EXPERIENCES,
+            "S",
+            EActivityStatus.UNPUBLISHED,
+            "D",
+            "2025",
+            null,
+            true,
+            -1,
+            -1,
+            null,
+            java.time.Instant.now(),
+            java.time.Instant.now());
+
+    when(activityRepository.findAll()).thenReturn(List.of(published, unpublished));
+
+    // When
+    Map<EActivityThematic, List<Activity>> result = activityService.getActivityNavigation();
+
+    // Then
+    assertEquals(1, result.get(EActivityThematic.EXPERIENCES).size());
+    assertTrue(result.get(EActivityThematic.EXPERIENCES).contains(published));
+    assertFalse(result.get(EActivityThematic.EXPERIENCES).contains(unpublished));
   }
 
   @Test
@@ -1229,6 +1277,125 @@ class ActivityServiceImplTest {
     @BeforeEach
     void setupGiven() {
       BddLogger.given("an activity service");
+    }
+
+    @Nested
+    class WhenUnpublishingAnActivity {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("unpublishing an activity");
+      }
+
+      @Nested
+      class AndActivityExistsAndStaffIsAuthor {
+
+        UUID activityId = UUID.randomUUID();
+        Staff staff = mock(Staff.class);
+        Activity activity = mock(Activity.class);
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity exists and the logged-in staff is the author");
+          when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+          when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+          when(activity.getAuthor()).thenReturn(staff);
+          when(activityRepository.save(activity)).thenReturn(activity);
+        }
+
+        @Test
+        void thenStatusIsSetToUnpublished() {
+          BddLogger.then("the activity status is set to UNPUBLISHED");
+          activityService.unpublish(activityId);
+          verify(activity).setStatus(EActivityStatus.UNPUBLISHED);
+        }
+
+        @Test
+        void thenActivityIsSaved() {
+          BddLogger.then("the activity is persisted");
+          activityService.unpublish(activityId);
+          verify(activityRepository).save(activity);
+        }
+
+        @Test
+        void thenItReturnsTheSavedActivity() {
+          BddLogger.then("the saved activity is returned");
+          Activity result = activityService.unpublish(activityId);
+          assertEquals(activity, result);
+        }
+      }
+
+      @Nested
+      class AndActivityDoesNotExist {
+
+        UUID unknownId = UUID.randomUUID();
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity does not exist");
+          when(loggedInUserService.getLoggedInStaff()).thenReturn(mock(Staff.class));
+          when(activityRepository.findById(unknownId)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void thenThrowsActivityNotFoundException() {
+          BddLogger.then("the service should throw ActivityNotFoundException");
+          assertThrows(ActivityNotFoundException.class, () -> activityService.unpublish(unknownId));
+          verify(activityRepository, never()).save(any());
+        }
+      }
+
+      @Nested
+      class AndStaffIsNotTheAuthor {
+
+        UUID activityId = UUID.randomUUID();
+        Staff loggedInStaff = mock(Staff.class);
+        Staff author = mock(Staff.class);
+        Activity activity = mock(Activity.class);
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the logged-in staff is not the author of the activity");
+          when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
+          when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+          when(activity.getAuthor()).thenReturn(author);
+        }
+
+        @Test
+        void thenThrowsUserNotAuthorizedException() {
+          BddLogger.then("the service should throw UserNotAuthorizedException");
+          assertThrows(
+              UserNotAuthorizedException.class, () -> activityService.unpublish(activityId));
+          verify(activity, never()).setStatus(any());
+          verify(activityRepository, never()).save(any());
+        }
+      }
+
+      @Nested
+      class AndActivityIsAlreadyUnpublished {
+
+        UUID activityId = UUID.randomUUID();
+        Staff staff = mock(Staff.class);
+        Activity activity = mock(Activity.class);
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity is already unpublished");
+          when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+          when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+          when(activity.getAuthor()).thenReturn(staff);
+          when(activity.getStatus()).thenReturn(EActivityStatus.UNPUBLISHED);
+        }
+
+        @Test
+        void thenThrowsActivityUnpublishedException() {
+          BddLogger.then("the service should throw ActivityUnpublishedException");
+          assertThrows(
+              ActivityUnpublishedException.class, () -> activityService.unpublish(activityId));
+          verify(activity, never()).setStatus(any());
+          verify(activityRepository, never()).save(any());
+        }
+      }
     }
 
     @Nested

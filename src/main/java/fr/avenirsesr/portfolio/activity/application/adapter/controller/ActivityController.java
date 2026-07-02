@@ -76,7 +76,7 @@ public class ActivityController {
     log.debug("Received request to get activity [{}] content", activityId);
     ActivityContentDTO dto =
         switch (activityStatus) {
-          case PUBLISHED ->
+          case PUBLISHED, UNPUBLISHED ->
               activityContentDtoMapper.toDTO(activityService.getActivityById(activityId));
           case DRAFT ->
               activityContentDtoMapper.toDTO(activityService.getActivityDraftById(activityId));
@@ -210,6 +210,16 @@ public class ActivityController {
 
     var activity = activityService.publish(activityDraftId);
     return ResponseEntity.ok(new CreationResponse(activity.getId()));
+  }
+
+  @PostMapping("/unpublish/{activityId}")
+  public ResponseEntity<Void> unpublishActivity(
+      Principal principal, @PathVariable UUID activityId) {
+    log.debug(
+        "Received request to unpublish activity {} by user [{}]", activityId, principal.getName());
+
+    activityService.unpublish(activityId);
+    return ResponseEntity.noContent().build();
   }
 
   @DeleteMapping("/draft/{activityDraftId}")

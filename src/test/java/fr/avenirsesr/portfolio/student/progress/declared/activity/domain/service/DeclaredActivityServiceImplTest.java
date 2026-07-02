@@ -8,7 +8,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
@@ -135,6 +137,25 @@ class DeclaredActivityServiceImplTest {
         .isInstanceOf(ActivityNotFoundException.class);
 
     verify(declaredActivityRepository, never()).findByActivity(any(), any());
+    verify(declaredActivityRepository, never()).save(any());
+  }
+
+  @Test
+  void subscribe_should_throw_ActivityUnpublishedException_when_activity_is_unpublished() {
+    BddLogger.given("A logged-in student and an unpublished activity");
+    Activity activity = mock(Activity.class);
+    UUID activityId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(activityService.getActivityById(activityId)).thenReturn(activity);
+    when(activity.getStatus()).thenReturn(EActivityStatus.UNPUBLISHED);
+
+    BddLogger.when("He tries to subscribe to the unpublished activity");
+
+    BddLogger.then("An ActivityUnpublishedException is thrown and nothing is saved");
+    assertThatThrownBy(() -> service.subscribe(activityId, null, null))
+        .isInstanceOf(ActivityUnpublishedException.class);
+
     verify(declaredActivityRepository, never()).save(any());
   }
 

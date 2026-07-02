@@ -4,7 +4,9 @@ import static fr.avenirsesr.portfolio.common.validation.domain.constraints.Field
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateDateOrder;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.validateOptionalEnrichedTextMaxLength;
 
+import fr.avenirsesr.portfolio.activity.domain.exception.ActivityUnpublishedException;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
@@ -95,6 +97,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       UUID declaredActivityId, UUID activityId, LocalDate startDate, LocalDate endDate) {
     Student student = loggedInUserService.getLoggedInStudent();
     Activity activity = activityService.getActivityById(activityId);
+
+    if (activity.getStatus() == EActivityStatus.UNPUBLISHED) {
+      throw new ActivityUnpublishedException();
+    }
 
     if (declaredActivityRepository.findByActivity(student, activity).isPresent()) {
       throw new DeclaredActivityAlreadyExistException();
