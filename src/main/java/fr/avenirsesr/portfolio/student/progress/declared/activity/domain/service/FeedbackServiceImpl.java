@@ -97,8 +97,8 @@ public class FeedbackServiceImpl implements FeedbackService {
           return feedbackRepository.save(lastFeedback);
         }
         case SUBMITTED -> {
-          if (existingFeedbacks.size()
-              >= declaredActivity.getActivity().getFeedbackAllowedIterations()) {
+          int maxIterations = declaredActivity.getActivity().getFeedbackAllowedIterations();
+          if (maxIterations != -1 && existingFeedbacks.size() >= maxIterations) {
             throw new FeedbackMaximumIterationReachedException();
           }
         }
