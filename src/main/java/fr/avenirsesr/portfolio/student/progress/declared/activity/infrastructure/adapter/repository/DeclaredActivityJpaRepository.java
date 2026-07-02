@@ -10,4 +10,6 @@ public interface DeclaredActivityJpaRepository
     extends JpaRepository<DeclaredActivityEntity, UUID>,
         JpaSpecificationExecutor<DeclaredActivityEntity> {
   Optional<DeclaredActivityEntity> findByStudentIdAndActivityId(UUID studentId, UUID activityId);
+
+  int countByActivityId(UUID activityId);
 }

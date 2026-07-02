@@ -379,4 +379,46 @@ public class ActivityServiceImpl implements ActivityService {
     log.info("Updated activity draft with id: {}", id);
     return updatedDraft;
   }
+
+  @Override
+  public ActivityDraft createDraftFromActivity(UUID activityId) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var activity =
+        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+
+    if (!activity.getAuthor().equals(staff)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    var draft =
+        ActivityDraft.toDomain(
+            activityId,
+            activity.getCreatedAt(),
+            activity.getUpdatedAt(),
+            activity.getTitle(),
+            activity.getAuthor(),
+            activity.getThematic(),
+            activity.getSummary(),
+            activity.getDescription().orElse(null),
+            activity.getExecutionPeriodInfo().orElse(null),
+            activity.getExecutionPeriodInfoSummary().orElse(null),
+            activity.getTraceAllowedAssociations(),
+            activity.getFeedbackAllowedIterations(),
+            activity.isEnableReflection(),
+            activity.getBanner().orElse(null));
+
+    var savedDraft = activityDraftRepository.save(draft);
+
+    if (!hasEnrolledStudents(activity)) {
+      activity.setStatus(EActivityStatus.UNPUBLISHED);
+      activityRepository.save(activity);
+      log.info("Unpublished activity {} after creating edition draft", activityId);
+    }
+
+    return savedDraft;
+  }
+
+  private boolean hasEnrolledStudents(Activity activity) {
+    return declaredActivityService.countEnrolledStudents(activity) > 0;
+  }
 }

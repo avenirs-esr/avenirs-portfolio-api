@@ -188,6 +188,18 @@ public class ActivityController {
         activityNavigationMapper.toDTO(activityService.getActivityNavigation()));
   }
 
+  @PostMapping("/create-draft/{activityId}")
+  public ResponseEntity<ActivityDraftCreationResponse> createDraftFromActivity(
+      Principal principal, @PathVariable UUID activityId) {
+    log.debug(
+        "Received request to create draft from activity [{}] by user [{}]",
+        activityId,
+        principal.getName());
+
+    var draft = activityService.createDraftFromActivity(activityId);
+    return ResponseEntity.ok(new ActivityDraftCreationResponse(draft.getId()));
+  }
+
   @PostMapping("/draft")
   public ResponseEntity<ActivityDraftCreationResponse> createActivityDraft(
       Principal principal, @RequestBody ActivityDraftCreationRequest body) {

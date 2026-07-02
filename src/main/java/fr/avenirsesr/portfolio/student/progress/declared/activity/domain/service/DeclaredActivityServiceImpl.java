@@ -557,6 +557,11 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     return feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(declaredActivityIds);
   }
 
+  @Override
+  public int countEnrolledStudents(Activity activity) {
+    return declaredActivityRepository.countByActivity(activity);
+  }
+
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
     return switch (contextType) {
       case TRACE -> EAssociationType.DECLARED_ACTIVITY_TRACE;

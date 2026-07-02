@@ -1399,6 +1399,135 @@ class ActivityServiceImplTest {
     }
 
     @Nested
+    class WhenCreatingDraftFromActivity {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("creating a draft from an existing activity");
+      }
+
+      @Nested
+      class AndActivityExistsAndStaffIsAuthor {
+
+        UUID activityId = UUID.randomUUID();
+        Staff staff = mock(Staff.class);
+        Activity activity = mock(Activity.class);
+        ActivityDraft savedDraft = mock(ActivityDraft.class);
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity exists and the logged-in staff is the author");
+          when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+          when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+          when(activity.getId()).thenReturn(activityId);
+          when(activity.getAuthor()).thenReturn(staff);
+          when(activity.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+          when(activityDraftRepository.save(any(ActivityDraft.class))).thenReturn(savedDraft);
+        }
+
+        @Nested
+        class AndActivityHasNoEnrolledStudents {
+
+          @BeforeEach
+          void setupAnd() {
+            BddLogger.and("the activity has no enrolled students");
+            when(declaredActivityService.countEnrolledStudents(activity)).thenReturn(0);
+          }
+
+          @Test
+          void thenActivityStatusIsSetToUnpublished() {
+            BddLogger.then("the activity status is set to UNPUBLISHED instead of being deleted");
+            activityService.createDraftFromActivity(activityId);
+            verify(activity).setStatus(EActivityStatus.UNPUBLISHED);
+            verify(activityRepository).save(activity);
+            verify(activityRepository, never()).removeFromDatabase(any());
+          }
+
+          @Test
+          void thenItReturnsTheSavedDraft() {
+            BddLogger.then("the saved draft is returned");
+            ActivityDraft result = activityService.createDraftFromActivity(activityId);
+            assertEquals(savedDraft, result);
+          }
+        }
+
+        @Nested
+        class AndActivityHasEnrolledStudents {
+
+          @BeforeEach
+          void setupAnd() {
+            BddLogger.and("the activity has enrolled students");
+            when(declaredActivityService.countEnrolledStudents(activity)).thenReturn(1);
+          }
+
+          @Test
+          void thenActivityIsNeitherUnpublishedNorDeleted() {
+            BddLogger.then("the activity is left untouched");
+            activityService.createDraftFromActivity(activityId);
+            verify(activity, never()).setStatus(any());
+            verify(activityRepository, never()).save(any());
+            verify(activityRepository, never()).removeFromDatabase(any());
+          }
+
+          @Test
+          void thenItReturnsTheSavedDraft() {
+            BddLogger.then("the saved draft is returned");
+            ActivityDraft result = activityService.createDraftFromActivity(activityId);
+            assertEquals(savedDraft, result);
+          }
+        }
+      }
+
+      @Nested
+      class AndActivityDoesNotExist {
+
+        UUID unknownId = UUID.randomUUID();
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the activity does not exist");
+          when(loggedInUserService.getLoggedInStaff()).thenReturn(mock(Staff.class));
+          when(activityRepository.findById(unknownId)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void thenThrowsActivityNotFoundException() {
+          BddLogger.then("the service should throw ActivityNotFoundException");
+          assertThrows(
+              ActivityNotFoundException.class,
+              () -> activityService.createDraftFromActivity(unknownId));
+          verify(activityDraftRepository, never()).save(any());
+        }
+      }
+
+      @Nested
+      class AndStaffIsNotTheAuthor {
+
+        UUID activityId = UUID.randomUUID();
+        Staff loggedInStaff = mock(Staff.class);
+        Staff author = mock(Staff.class);
+        Activity activity = mock(Activity.class);
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the logged-in staff is not the author of the activity");
+          when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
+          when(activityRepository.findById(activityId)).thenReturn(Optional.of(activity));
+          when(activity.getAuthor()).thenReturn(author);
+        }
+
+        @Test
+        void thenThrowsUserNotAuthorizedException() {
+          BddLogger.then("the service should throw UserNotAuthorizedException");
+          assertThrows(
+              UserNotAuthorizedException.class,
+              () -> activityService.createDraftFromActivity(activityId));
+          verify(activityDraftRepository, never()).save(any());
+        }
+      }
+    }
+
+    @Nested
     class WhenDeletingAnActivityDraft {
 
       @BeforeEach

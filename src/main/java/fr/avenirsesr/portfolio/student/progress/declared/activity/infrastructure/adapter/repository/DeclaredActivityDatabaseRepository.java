@@ -83,4 +83,9 @@ public class DeclaredActivityDatabaseRepository
         .findByStudentIdAndActivityId(student.getId(), activity.getId())
         .map(DeclaredActivityMapper.INSTANCE::toDomain);
   }
+
+  @Override
+  public int countByActivity(Activity activity) {
+    return jpaRepository.countByActivityId(activity.getId());
+  }
 }
