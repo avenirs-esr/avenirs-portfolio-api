@@ -5,11 +5,13 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = OptionalMapper.class)
 public interface ActivityContentDtoMapper {
 
+  @Mapping(target = "hasEnrolledStudent", expression = "java(null)")
   ActivityContentDTO toDTO(Activity activity);
 
-  ActivityContentDTO toDTO(ActivityDraft activity);
+  ActivityContentDTO toDTO(ActivityDraft activity, Boolean hasEnrolledStudent);
 }

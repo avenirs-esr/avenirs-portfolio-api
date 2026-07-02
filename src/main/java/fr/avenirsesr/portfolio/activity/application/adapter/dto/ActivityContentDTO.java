@@ -27,5 +27,6 @@ public record ActivityContentDTO(
     boolean enableReflection,
     int traceAllowedAssociations,
     int feedbackAllowedIterations,
+    Boolean hasEnrolledStudent,
     Instant createdAt,
     Instant updatedAt) {}

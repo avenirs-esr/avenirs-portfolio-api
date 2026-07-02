@@ -5,14 +5,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityOverviewDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityStaffOverviewDTO;
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.AuthorDTO;
+import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityContentDtoMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityOverviewDtoMapper;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.ActivityStaffOverviewDtoMapper;
+import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftCreationResponse;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityStaffOverviewData;
 import fr.avenirsesr.portfolio.activity.domain.data.ActivityWithStudentStatusData;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
@@ -44,6 +48,7 @@ class ActivityControllerTest {
   @Mock private ActivityService activityService;
   @Mock private ActivityOverviewDtoMapper activityOverviewDtoMapper;
   @Mock private ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
+  @Mock private ActivityContentDtoMapper activityContentDtoMapper;
 
   @InjectMocks private ActivityController controller;
 
@@ -624,5 +629,125 @@ class ActivityControllerTest {
     verify(activityStaffOverviewDtoMapper).toDTO(data1);
     verify(activityStaffOverviewDtoMapper).toDTO(data2);
     verify(activityStaffOverviewDtoMapper).toDTO(data3);
+  }
+
+  @Test
+  void shouldReturnContentForPublishedActivityWithoutComputingHasEnrolledStudent() {
+    BddLogger.given("a published activity");
+    UUID activityId = activity.getId();
+
+    ActivityContentDTO dto =
+        new ActivityContentDTO(
+            activityId,
+            activity.getTitle(),
+            activity.getThematic(),
+            activity.getSummary(),
+            null,
+            null,
+            true,
+            0,
+            0,
+            null,
+            Instant.now(),
+            Instant.now());
+
+    when(activityService.getActivityById(activityId)).thenReturn(activity);
+    when(activityContentDtoMapper.toDTO(activity)).thenReturn(dto);
+
+    BddLogger.when("getting the activity content for status PUBLISHED");
+    var response = controller.getActivityContent(EActivityStatus.PUBLISHED, activityId);
+
+    BddLogger.then("it should return the DTO without calling hasEnrolledStudents");
+    assertEquals(200, response.getStatusCode().value());
+    assertEquals(dto, response.getBody());
+    verify(activityContentDtoMapper).toDTO(activity);
+    verify(activityService, never()).hasEnrolledStudents(any(ActivityDraft.class));
+  }
+
+  @Test
+  void shouldReturnContentForUnpublishedActivityWithoutComputingHasEnrolledStudent() {
+    BddLogger.given("an unpublished activity");
+    UUID activityId = activity.getId();
+
+    ActivityContentDTO dto =
+        new ActivityContentDTO(
+            activityId,
+            activity.getTitle(),
+            activity.getThematic(),
+            activity.getSummary(),
+            null,
+            null,
+            true,
+            0,
+            0,
+            null,
+            Instant.now(),
+            Instant.now());
+
+    when(activityService.getActivityById(activityId)).thenReturn(activity);
+    when(activityContentDtoMapper.toDTO(activity)).thenReturn(dto);
+
+    BddLogger.when("getting the activity content for status UNPUBLISHED");
+    var response = controller.getActivityContent(EActivityStatus.UNPUBLISHED, activityId);
+
+    BddLogger.then("it should return the DTO without calling hasEnrolledStudents");
+    assertEquals(200, response.getStatusCode().value());
+    assertEquals(dto, response.getBody());
+    verify(activityContentDtoMapper).toDTO(activity);
+    verify(activityService, never()).hasEnrolledStudents(any(ActivityDraft.class));
+  }
+
+  @Test
+  void shouldReturnContentForDraftUsingComputedHasEnrolledStudent() {
+    BddLogger.given("an activity draft");
+    UUID draftId = UUID.randomUUID();
+    ActivityDraft draft = mock(ActivityDraft.class);
+
+    ActivityContentDTO dto =
+        new ActivityContentDTO(
+            draftId,
+            "title",
+            EActivityThematic.EXPERIENCES,
+            "summary",
+            null,
+            null,
+            true,
+            0,
+            0,
+            true,
+            Instant.now(),
+            Instant.now());
+
+    when(activityService.getActivityDraftById(draftId)).thenReturn(draft);
+    when(activityService.hasEnrolledStudents(draft)).thenReturn(true);
+    when(activityContentDtoMapper.toDTO(draft, true)).thenReturn(dto);
+
+    BddLogger.when("getting the activity content for status DRAFT");
+    var response = controller.getActivityContent(EActivityStatus.DRAFT, draftId);
+
+    BddLogger.then("it should return the DTO built from the computed hasEnrolledStudents value");
+    assertEquals(200, response.getStatusCode().value());
+    assertEquals(dto, response.getBody());
+    verify(activityService).hasEnrolledStudents(draft);
+    verify(activityContentDtoMapper).toDTO(draft, true);
+  }
+
+  @Test
+  void shouldCreateDraftFromActivityAndReturnItsId() {
+    BddLogger.given("an existing activity and its author");
+    UUID activityId = UUID.randomUUID();
+    UUID draftId = UUID.randomUUID();
+    ActivityDraft draft = mock(ActivityDraft.class);
+    when(draft.getId()).thenReturn(draftId);
+    when(activityService.createDraftFromActivity(activityId)).thenReturn(draft);
+
+    BddLogger.when("creating a draft from that activity");
+    ResponseEntity<ActivityDraftCreationResponse> response =
+        controller.createDraftFromActivity(principal, activityId);
+
+    BddLogger.then("it should return the created draft id");
+    assertEquals(200, response.getStatusCode().value());
+    assertNotNull(response.getBody());
+    assertEquals(draftId, response.getBody().draftId());
   }
 }

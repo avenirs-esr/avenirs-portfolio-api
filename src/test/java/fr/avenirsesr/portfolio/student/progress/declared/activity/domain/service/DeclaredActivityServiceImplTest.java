@@ -1699,4 +1699,30 @@ class DeclaredActivityServiceImplTest {
     assertThatCode(() -> service.checkDeclaredActivitiesUnlocked(List.of(declaredActivityId)))
         .doesNotThrowAnyException();
   }
+
+  @Test
+  void countEnrolledStudents_should_delegate_to_repository() {
+    BddLogger.given("an activity with enrolled students");
+    Activity activity = ActivityFixture.create().toModel();
+    when(declaredActivityRepository.countByActivity(activity)).thenReturn(3);
+
+    BddLogger.when("counting enrolled students");
+    int count = service.countEnrolledStudents(activity);
+
+    BddLogger.then("it should return the repository count");
+    assertThat(count).isEqualTo(3);
+  }
+
+  @Test
+  void countEnrolledStudents_should_return_zero_when_no_students_enrolled() {
+    BddLogger.given("an activity with no enrolled students");
+    Activity activity = ActivityFixture.create().toModel();
+    when(declaredActivityRepository.countByActivity(activity)).thenReturn(0);
+
+    BddLogger.when("counting enrolled students");
+    int count = service.countEnrolledStudents(activity);
+
+    BddLogger.then("it should return zero");
+    assertThat(count).isZero();
+  }
 }

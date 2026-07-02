@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.ActivityContentDTO;
 import fr.avenirsesr.portfolio.activity.domain.model.Activity;
+import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
+import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -37,6 +39,7 @@ class ActivityContentDtoMapperTest {
     assertEquals(activity.getSummary(), dto.summary());
     assertEquals(activity.getDescription().orElse(null), dto.description());
     assertEquals(activity.getExecutionPeriodInfo().orElse(null), dto.executionPeriodInfo());
+    assertNull(dto.hasEnrolledStudent());
   }
 
   @Test
@@ -52,5 +55,29 @@ class ActivityContentDtoMapperTest {
     assertNotNull(dto);
     assertNull(dto.description());
     assertNull(dto.executionPeriodInfo());
+  }
+
+  @Test
+  void shouldMapDraftHasEnrolledStudentWhenProvided() {
+    BddLogger.given("an activity draft and a computed hasEnrolledStudent value");
+    ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
+
+    BddLogger.when("mapping to ActivityContentDTO with hasEnrolledStudent = true");
+    ActivityContentDTO dto = mapper.toDTO(draft, true);
+
+    BddLogger.then("hasEnrolledStudent should be true");
+    assertEquals(Boolean.TRUE, dto.hasEnrolledStudent());
+  }
+
+  @Test
+  void shouldMapDraftHasEnrolledStudentToNullWhenNotProvided() {
+    BddLogger.given("an activity draft with no known enrolled student value");
+    ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
+
+    BddLogger.when("mapping to ActivityContentDTO with hasEnrolledStudent = null");
+    ActivityContentDTO dto = mapper.toDTO(draft, null);
+
+    BddLogger.then("hasEnrolledStudent should be null");
+    assertNull(dto.hasEnrolledStudent());
   }
 }

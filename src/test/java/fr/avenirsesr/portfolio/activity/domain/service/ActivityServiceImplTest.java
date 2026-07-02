@@ -1528,6 +1528,60 @@ class ActivityServiceImplTest {
     }
 
     @Nested
+    class WhenCheckingIfDraftHasEnrolledStudents {
+
+      UUID draftId = UUID.randomUUID();
+      ActivityDraft draft = mock(ActivityDraft.class);
+      Activity activity = mock(Activity.class);
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("checking if a draft's underlying activity has enrolled students");
+        when(draft.getId()).thenReturn(draftId);
+      }
+
+      @Nested
+      class AndTheUnderlyingActivityExists {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the underlying activity exists");
+          when(activityRepository.findById(draftId)).thenReturn(Optional.of(activity));
+        }
+
+        @Test
+        void thenReturnsTrueWhenActivityHasEnrolledStudents() {
+          BddLogger.then("it should return true when the activity has enrolled students");
+          when(declaredActivityService.countEnrolledStudents(activity)).thenReturn(2);
+          assertTrue(activityService.hasEnrolledStudents(draft));
+        }
+
+        @Test
+        void thenReturnsFalseWhenActivityHasNoEnrolledStudents() {
+          BddLogger.then("it should return false when the activity has no enrolled students");
+          when(declaredActivityService.countEnrolledStudents(activity)).thenReturn(0);
+          assertFalse(activityService.hasEnrolledStudents(draft));
+        }
+      }
+
+      @Nested
+      class AndTheUnderlyingActivityDoesNotExist {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the underlying activity does not exist (brand new draft)");
+          when(activityRepository.findById(draftId)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void thenReturnsFalse() {
+          BddLogger.then("it should return false");
+          assertFalse(activityService.hasEnrolledStudents(draft));
+        }
+      }
+    }
+
+    @Nested
     class WhenDeletingAnActivityDraft {
 
       @BeforeEach

@@ -68,4 +68,6 @@ public interface ActivityService {
       Boolean enableReflection);
 
   ActivityDraft createDraftFromActivity(UUID activityId);
+
+  Boolean hasEnrolledStudents(ActivityDraft draft);
 }

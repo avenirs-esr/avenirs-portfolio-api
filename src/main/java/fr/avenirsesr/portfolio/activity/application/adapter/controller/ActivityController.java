@@ -78,8 +78,10 @@ public class ActivityController {
         switch (activityStatus) {
           case PUBLISHED, UNPUBLISHED ->
               activityContentDtoMapper.toDTO(activityService.getActivityById(activityId));
-          case DRAFT ->
-              activityContentDtoMapper.toDTO(activityService.getActivityDraftById(activityId));
+          case DRAFT -> {
+            var draft = activityService.getActivityDraftById(activityId);
+            yield activityContentDtoMapper.toDTO(draft, activityService.hasEnrolledStudents(draft));
+          }
         };
     return ResponseEntity.ok(dto);
   }

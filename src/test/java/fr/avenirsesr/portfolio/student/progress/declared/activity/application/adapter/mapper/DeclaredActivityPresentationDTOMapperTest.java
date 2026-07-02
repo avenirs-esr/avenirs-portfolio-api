@@ -170,6 +170,7 @@ class DeclaredActivityPresentationDTOMapperTest {
         activity.isEnableReflection(),
         activity.getTraceAllowedAssociations(),
         activity.getFeedbackAllowedIterations(),
+        true,
         activity.getCreatedAt(),
         activity.getUpdatedAt());
   }

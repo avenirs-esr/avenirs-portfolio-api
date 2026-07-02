@@ -421,4 +421,9 @@ public class ActivityServiceImpl implements ActivityService {
   private boolean hasEnrolledStudents(Activity activity) {
     return declaredActivityService.countEnrolledStudents(activity) > 0;
   }
+
+  @Override
+  public Boolean hasEnrolledStudents(ActivityDraft draft) {
+    return activityRepository.findById(draft.getId()).map(this::hasEnrolledStudents).orElse(false);
+  }
 }
