@@ -107,24 +107,37 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     var activity =
-        activityRepository.save(
-            Activity.create(
-                draft.getId(),
-                draft.getAuthor(),
-                draft.getTitle(),
-                draft.getThematic(),
-                draft.getSummary().get(),
-                draft.getDescription().orElse(null),
-                draft.getExecutionPeriodInfo().orElse(null),
-                draft.getExecutionPeriodInfoSummary().orElse(null),
-                draft.isEnableReflection(),
-                draft.getTraceAllowedAssociations(),
-                draft.getFeedbackAllowedIterations(),
-                draft.getBanner().orElse(null),
-                draft.getLinks()));
+        activityRepository
+            .findById(activityDraftId)
+            .orElse(
+                Activity.create(
+                    draft.getId(),
+                    draft.getAuthor(),
+                    draft.getTitle(),
+                    draft.getThematic(),
+                    draft.getSummary().get(),
+                    draft.getDescription().orElse(null),
+                    draft.getExecutionPeriodInfo().orElse(null),
+                    draft.getExecutionPeriodInfoSummary().orElse(null),
+                    draft.isEnableReflection(),
+                    draft.getTraceAllowedAssociations(),
+                    draft.getFeedbackAllowedIterations(),
+                    draft.getBanner().orElse(null),
+                    draft.getLinks()));
+
+    activity.setTitle(draft.getTitle());
+    activity.setThematic(draft.getThematic());
+    activity.setDescription(draft.getDescription().orElse(null));
+    activity.setSummary(draft.getSummary().orElse(null));
+    activity.setExecutionPeriodInfo(draft.getExecutionPeriodInfo().orElse(null));
+    activity.setExecutionPeriodInfoSummary(draft.getExecutionPeriodInfoSummary().orElse(null));
+    activity.setBanner(draft.getBanner().orElse(null));
+    activity.setStatus(EActivityStatus.PUBLISHED);
+
+    var savedActivity = activityRepository.save(activity);
 
     activityDraftRepository.removeFromDatabase(draft);
-    return activity;
+    return savedActivity;
   }
 
   @Override

@@ -559,6 +559,116 @@ class ActivityServiceImplTest {
     }
 
     @Nested
+    class WhenPublishingADraftThatSharesIdWithAnExistingActivity {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("publishing a draft that shares its id with an existing activity");
+      }
+
+      @Test
+      void thenItShouldUpdateExistingActivityInsteadOfCreatingANewOne() {
+        BddLogger.then("the existing activity should be reused and updated, not recreated");
+
+        UUID activityId = UUID.randomUUID();
+        Staff staff = mock(Staff.class);
+        ActivityDraft draft = mock(ActivityDraft.class);
+        Activity existingActivity = mock(Activity.class);
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityDraftRepository.findById(activityId)).thenReturn(Optional.of(draft));
+        when(draft.getAuthor()).thenReturn(staff);
+        when(draft.getSummary()).thenReturn(Optional.of("Nouveau résumé"));
+        when(draft.getTitle()).thenReturn("Nouveau titre");
+        when(draft.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+        when(draft.getDescription()).thenReturn(Optional.of("Nouvelle description"));
+        when(draft.getExecutionPeriodInfo()).thenReturn(Optional.of("Nouvelle période"));
+        when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.of("Nouveau label"));
+        when(draft.getBanner()).thenReturn(Optional.empty());
+
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(existingActivity));
+        when(activityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Activity result = activityService.publish(activityId);
+
+        assertSame(existingActivity, result);
+        verify(existingActivity).setTitle("Nouveau titre");
+        verify(existingActivity).setThematic(EActivityThematic.EXPERIENCES);
+        verify(existingActivity).setDescription("Nouvelle description");
+        verify(existingActivity).setSummary("Nouveau résumé");
+        verify(existingActivity).setExecutionPeriodInfo("Nouvelle période");
+        verify(existingActivity).setExecutionPeriodInfoSummary("Nouveau label");
+        verify(existingActivity).setBanner(null);
+        verify(existingActivity).setStatus(EActivityStatus.PUBLISHED);
+        verify(activityRepository).save(existingActivity);
+        verify(activityDraftRepository).removeFromDatabase(draft);
+      }
+
+      @Test
+      void thenItShouldNotOverwriteNotEditableFieldsOfExistingActivity() {
+        BddLogger.then(
+            "enableReflection, traceAllowedAssociations and feedbackAllowedIterations should not"
+                + " be touched on an already existing activity");
+
+        UUID activityId = UUID.randomUUID();
+        Staff staff = mock(Staff.class);
+        ActivityDraft draft = mock(ActivityDraft.class);
+        Activity existingActivity = mock(Activity.class);
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityDraftRepository.findById(activityId)).thenReturn(Optional.of(draft));
+        when(draft.getAuthor()).thenReturn(staff);
+        when(draft.getSummary()).thenReturn(Optional.of("Résumé"));
+        when(draft.getTitle()).thenReturn("Titre");
+        when(draft.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+        when(draft.getDescription()).thenReturn(Optional.empty());
+        when(draft.getExecutionPeriodInfo()).thenReturn(Optional.empty());
+        when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.empty());
+        when(draft.getBanner()).thenReturn(Optional.empty());
+        when(draft.isEnableReflection()).thenReturn(false);
+        when(draft.getTraceAllowedAssociations()).thenReturn(99);
+        when(draft.getFeedbackAllowedIterations()).thenReturn(99);
+
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(existingActivity));
+        when(activityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        activityService.publish(activityId);
+
+        verify(existingActivity, never()).setEnableReflection(anyBoolean());
+        verify(existingActivity, never()).setTraceAllowedAssociations(anyInt());
+        verify(existingActivity, never()).setFeedbackAllowedIterations(anyInt());
+      }
+
+      @Test
+      void thenItShouldRepublishAnUnpublishedActivity() {
+        BddLogger.then("the existing activity should be republished through its draft");
+
+        UUID activityId = UUID.randomUUID();
+        Staff staff = mock(Staff.class);
+        ActivityDraft draft = mock(ActivityDraft.class);
+        Activity existingActivity = mock(Activity.class);
+
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(staff);
+        when(activityDraftRepository.findById(activityId)).thenReturn(Optional.of(draft));
+        when(draft.getAuthor()).thenReturn(staff);
+        when(draft.getSummary()).thenReturn(Optional.of("Résumé"));
+        when(draft.getTitle()).thenReturn("Titre");
+        when(draft.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+        when(draft.getDescription()).thenReturn(Optional.empty());
+        when(draft.getExecutionPeriodInfo()).thenReturn(Optional.empty());
+        when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.empty());
+        when(draft.getBanner()).thenReturn(Optional.empty());
+
+        when(activityRepository.findById(activityId)).thenReturn(Optional.of(existingActivity));
+        when(activityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        activityService.publish(activityId);
+
+        verify(existingActivity).setStatus(EActivityStatus.PUBLISHED);
+      }
+    }
+
+    @Nested
     class WhenUnpublishingAnActivity {
 
       UUID activityId;
