@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.trace.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
@@ -25,6 +26,7 @@ public class TraceSeederConfig {
       StaffRepository staffRepository,
       StudentRepository studentRepository,
       ActivityDraftRepository activityDraftRepository,
+      ActivityRepository activityRepository,
       LoggedInUserService loggedInUserService,
       TraceService traceService) {
     return new FileResourceServiceImpl(
@@ -34,6 +36,7 @@ public class TraceSeederConfig {
         staffRepository,
         studentRepository,
         activityDraftRepository,
+        activityRepository,
         loggedInUserService,
         traceService);
   }

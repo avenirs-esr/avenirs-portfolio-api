@@ -46,7 +46,7 @@ public class FakeTraceAttachment {
         FileEntity.of(
             id,
             fileType,
-            EFileCategory.TRACE_ATTACHEMENT,
+            EFileCategory.TRACE_ATTACHMENT,
             fileDataGenerator.with("file-name").fileName(fileType),
             dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,

@@ -1,8 +1,6 @@
 package fr.avenirsesr.portfolio.activity.infrastructure.adapter.model;
 
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.ACTIVITY_EXECUTION_PERIOD_INFO;
-import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.TITLE_LENGTH;
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsBaseEntity;

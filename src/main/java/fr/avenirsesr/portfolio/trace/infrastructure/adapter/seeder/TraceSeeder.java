@@ -90,7 +90,7 @@ public class TraceSeeder {
                   attachment -> {
                     fileResourceService.upload(
                         trace.getId(),
-                        EFileCategory.TRACE_ATTACHEMENT,
+                        EFileCategory.TRACE_ATTACHMENT,
                         attachment.title(),
                         attachment.fileType().getMimeType(),
                         attachment.size(),

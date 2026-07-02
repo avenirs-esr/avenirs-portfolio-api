@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.dependency.domain.port.input.DependencyChe
 import fr.avenirsesr.portfolio.common.seeder.domain.model.enums.ESeedMode;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.configuration.SeedingState;
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.ActivityFileSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
@@ -80,6 +81,7 @@ public class SeederOrchestrator {
   private final ActivityDraftSeeder activityDraftSeeder;
   private final ActivitySeeder activitySeeder;
   private final DeclaredActivitySeeder declaredActivitySeeder;
+  private final ActivityFileSeeder activityFileSeeder;
   private final FeedbackSeeder feedbackSeeder;
   private final AssociationSeeder associationSeeder;
 
@@ -125,11 +127,13 @@ public class SeederOrchestrator {
 
       declaredProgramSeeder.seed(savedStudents);
 
-      activityDraftSeeder.seed(savedStaffs);
+      var savedActivityDrafts = activityDraftSeeder.seed(savedStaffs);
       var savedActivities = activitySeeder.seed(savedStaffs.getFirst());
       var declaredActivities = declaredActivitySeeder.seed(savedStudents, savedActivities);
       associationSeeder.seed(
           declaredActivities, savedTraces, savedDeclaredSkillProgresses, savedDeclaredExperiences);
+
+      activityFileSeeder.seed(savedActivityDrafts, savedActivities);
 
       feedbackSeeder.seed(savedStudents, declaredActivities);
 
