@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ENotificationType {
+  ACTIVITY_MODIFIED(EUserCategory.STUDENT),
   ASK_FOR_FEEDBACK(EUserCategory.STAFF);
 
   private final EUserCategory restrictedTo;
