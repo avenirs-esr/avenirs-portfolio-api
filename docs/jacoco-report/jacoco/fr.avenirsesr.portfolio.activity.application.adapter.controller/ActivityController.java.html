@@ -188,7 +188,7 @@ public class ActivityController {
 <span class="fc" id="L188">        activityNavigationMapper.toDTO(activityService.getActivityNavigation()));</span>
   }
 
-  @PostMapping(&quot;/{activityId}/create-draft&quot;)
+  @PostMapping(&quot;/create-draft/{activityId}&quot;)
   public ResponseEntity&lt;ActivityDraftCreationResponse&gt; createDraftFromActivity(
       Principal principal, @PathVariable UUID activityId) {
 <span class="nc" id="L194">    log.debug(</span>
