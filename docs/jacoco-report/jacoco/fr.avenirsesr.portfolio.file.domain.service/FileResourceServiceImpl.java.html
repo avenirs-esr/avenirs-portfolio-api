@@ -174,7 +174,7 @@ public class FileResourceServiceImpl implements FileResourceService {
 <span class="nc" id="L174">  }</span>
 
   private void saveFileOnElement(UUID elementId, EFileCategory fileCategory, File file) {
-<span class="pc bpc" id="L177" title="3 of 7 branches missed.">    switch (fileCategory) {</span>
+<span class="pc bpc" id="L177" title="4 of 7 branches missed.">    switch (fileCategory) {</span>
       case TRACE_ATTACHEMENT -&gt; {
 <span class="fc" id="L179">        var trace = traceService.getTraceById(elementId);</span>
 <span class="fc" id="L180">        trace.setAttachment(file);</span>
@@ -212,7 +212,7 @@ public class FileResourceServiceImpl implements FileResourceService {
 <span class="fc" id="L212">  }</span>
 
   private void chekUploadRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
-<span class="pc bpc" id="L215" title="2 of 5 branches missed.">    switch (fileCategory) {</span>
+<span class="pc bpc" id="L215" title="3 of 5 branches missed.">    switch (fileCategory) {</span>
       case TRACE_ATTACHEMENT -&gt; {
 <span class="fc" id="L217">        var trace = traceService.getTraceById(elementId);</span>
 <span class="pc bpc" id="L218" title="1 of 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
