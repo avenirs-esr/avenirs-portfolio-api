@@ -207,7 +207,7 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
         FileEntity.of(
             UUID.randomUUID(),
             type,
-            EFileCategory.TRACE_ATTACHEMENT,
+            EFileCategory.TRACE_ATTACHMENT,
             name,
             1L,
             1,

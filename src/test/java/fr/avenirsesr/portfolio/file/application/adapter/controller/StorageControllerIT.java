@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
@@ -42,6 +43,7 @@ class StorageControllerIT extends ContainerConfigurationTest {
   @Autowired private StudentRepository studentRepository;
   @Autowired private StaffRepository staffRepository;
   @Autowired private ActivityDraftRepository activityDraftRepository;
+  @Autowired private ActivityRepository activityRepository;
   @Autowired private TraceService traceService;
   @Autowired private LoggedInUserService loggedInUserService;
 
@@ -72,6 +74,7 @@ class StorageControllerIT extends ContainerConfigurationTest {
                 staffRepository,
                 studentRepository,
                 activityDraftRepository,
+                activityRepository,
                 loggedInUserService,
                 traceService),
             fileStorageService);

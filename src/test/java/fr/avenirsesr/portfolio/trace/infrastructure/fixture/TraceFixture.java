@@ -40,7 +40,7 @@ public class TraceFixture {
         File.create(
             UUID.randomUUID(),
             id,
-            EFileCategory.TRACE_ATTACHEMENT,
+            EFileCategory.TRACE_ATTACHMENT,
             EFileType.PDF,
             "my fake pdf",
             1000L,

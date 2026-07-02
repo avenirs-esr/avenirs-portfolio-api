@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.file.infrastructure.service;
 
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
@@ -24,6 +25,7 @@ public class FileResourceServiceConfig {
   private final StaffRepository staffRepository;
   private final StudentRepository studentRepository;
   private final ActivityDraftRepository activityDraftRepository;
+  private final ActivityRepository activityRepository;
   private final LoggedInUserService loggedInUserService;
   private final TraceService traceService;
 
@@ -37,6 +39,7 @@ public class FileResourceServiceConfig {
         staffRepository,
         studentRepository,
         activityDraftRepository,
+        activityRepository,
         loggedInUserService,
         traceService);
   }
