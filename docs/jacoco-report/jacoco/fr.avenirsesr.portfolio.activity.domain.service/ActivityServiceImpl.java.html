@@ -161,13 +161,13 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public ActivityDraft getActivityDraftById(UUID id) {
-<span class="nc" id="L164">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L165">    var draft =</span>
-<span class="nc" id="L166">        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
-<span class="nc bnc" id="L167" title="All 2 branches missed.">    if (!draft.getAuthor().equals(staff)) {</span>
+<span class="fc" id="L164">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L165">    var draft =</span>
+<span class="fc" id="L166">        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">    if (!draft.getAuthor().equals(staff)) {</span>
 <span class="nc" id="L168">      throw new UserNotAuthorizedException();</span>
     }
-<span class="nc" id="L170">    return draft;</span>
+<span class="fc" id="L170">    return draft;</span>
   }
 
   @Override
@@ -420,6 +420,11 @@ public class ActivityServiceImpl implements ActivityService {
 
   private boolean hasEnrolledStudents(Activity activity) {
 <span class="fc bfc" id="L422" title="All 2 branches covered.">    return declaredActivityService.countEnrolledStudents(activity) &gt; 0;</span>
+  }
+
+  @Override
+  public Boolean hasEnrolledStudents(ActivityDraft draft) {
+<span class="fc" id="L427">    return activityRepository.findById(draft.getId()).map(this::hasEnrolledStudents).orElse(false);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
