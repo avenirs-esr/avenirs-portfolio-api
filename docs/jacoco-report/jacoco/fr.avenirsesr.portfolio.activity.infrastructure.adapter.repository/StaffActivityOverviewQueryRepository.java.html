@@ -37,7 +37,7 @@ import org.springframework.stereotype.Repository;
                   a.title         AS title,
                   a.thematic      AS thematic,
                   a.author_id     AS author_id,
-                  'PUBLISHED'     AS status,
+                  a.status        AS status,
                   a.updated_at    AS updated_at
               FROM activity a
               WHERE a.author_id = :authorId
