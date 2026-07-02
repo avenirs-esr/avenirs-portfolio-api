@@ -557,19 +557,24 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 <span class="fc" id="L557">    return feedbackRepository.findDeclaredActivityIdsHavingActiveFeedbacks(declaredActivityIds);</span>
   }
 
+  @Override
+  public int countEnrolledStudents(Activity activity) {
+<span class="nc" id="L562">    return declaredActivityRepository.countByActivity(activity);</span>
+  }
+
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
-<span class="pc bpc" id="L561" title="1 of 3 branches missed.">    return switch (contextType) {</span>
-<span class="fc" id="L562">      case TRACE -&gt; EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
-<span class="fc" id="L563">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
-<span class="nc" id="L564">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
+<span class="pc bpc" id="L566" title="1 of 3 branches missed.">    return switch (contextType) {</span>
+<span class="fc" id="L567">      case TRACE -&gt; EAssociationType.DECLARED_ACTIVITY_TRACE;</span>
+<span class="fc" id="L568">      case DECLARED_SKILL -&gt; EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL;</span>
+<span class="nc" id="L569">      case DECLARED_ACTIVITY, DECLARED_EXPERIENCE -&gt; throw new UnsupportedOperationException();</span>
     };
   }
 
   private boolean isSubmittedOrFinished(
       DeclaredActivity declaredActivity, boolean hasActiveFeedback) {
-<span class="fc" id="L570">    EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);</span>
+<span class="fc" id="L575">    EDeclaredActivityStatus status = getDeclaredActivityStatus(declaredActivity, hasActiveFeedback);</span>
 
-<span class="fc bfc" id="L572" title="All 4 branches covered.">    return status == EDeclaredActivityStatus.SUBMITTED</span>
+<span class="fc bfc" id="L577" title="All 4 branches covered.">    return status == EDeclaredActivityStatus.SUBMITTED</span>
         || status == EDeclaredActivityStatus.COMPLETED;
   }
 }

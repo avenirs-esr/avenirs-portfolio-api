@@ -97,8 +97,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 <span class="fc" id="L97">          return feedbackRepository.save(lastFeedback);</span>
         }
         case SUBMITTED -&gt; {
-<span class="fc" id="L100">          int maxIterations = declaredActivity.getActivity().getFeedbackAllowedIterations();</span>
-<span class="pc bpc" id="L101" title="1 of 4 branches missed.">          if (maxIterations != -1 &amp;&amp; existingFeedbacks.size() &gt;= maxIterations) {</span>
+<span class="fc" id="L100">          if (existingFeedbacks.size()</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">              &gt;= declaredActivity.getActivity().getFeedbackAllowedIterations()) {</span>
 <span class="fc" id="L102">            throw new FeedbackMaximumIterationReachedException();</span>
           }
         }

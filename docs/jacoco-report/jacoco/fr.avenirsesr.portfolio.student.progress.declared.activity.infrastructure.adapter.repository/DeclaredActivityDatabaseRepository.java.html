@@ -83,5 +83,10 @@ public class DeclaredActivityDatabaseRepository
 <span class="fc" id="L83">        .findByStudentIdAndActivityId(student.getId(), activity.getId())</span>
 <span class="fc" id="L84">        .map(DeclaredActivityMapper.INSTANCE::toDomain);</span>
   }
+
+  @Override
+  public int countByActivity(Activity activity) {
+<span class="nc" id="L89">    return jpaRepository.countByActivityId(activity.getId());</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
