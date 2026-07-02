@@ -206,8 +206,7 @@ class ActivityServiceImplTest {
 
             List<String> links = List.of("https://example.com", "https://avenirs-esr.fr");
             ActivityDraft result =
-                activityService.updateActivity(
-                    EActivityStatus.DRAFT,
+                activityService.updateActivityDraft(
                     draftId,
                     "Nouveau titre",
                     EActivityThematic.EXPERIENCES,
@@ -238,19 +237,8 @@ class ActivityServiceImplTest {
           void thenItShouldNotUpdateFieldsWhenNullIsPassed() {
             BddLogger.then("no field should be updated when null values are passed");
 
-            activityService.updateActivity(
-                EActivityStatus.DRAFT,
-                draftId,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+            activityService.updateActivityDraft(
+                draftId, null, null, null, null, null, null, null, null, null, null);
 
             verify(draft, never()).setTitle(any());
             verify(draft, never()).setThematic(any());
@@ -269,19 +257,8 @@ class ActivityServiceImplTest {
           void thenItShouldOnlyUpdateProvidedFields() {
             BddLogger.then("only provided fields should be updated");
 
-            activityService.updateActivity(
-                EActivityStatus.DRAFT,
-                draftId,
-                "Titre seul",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+            activityService.updateActivityDraft(
+                draftId, "Titre seul", null, null, null, null, null, null, null, null, null);
 
             verify(draft).setTitle("Titre seul");
             verify(draft, never()).setThematic(any());
@@ -303,19 +280,8 @@ class ActivityServiceImplTest {
             when(activityDraftRepository.save(draft)).thenReturn(savedDraft);
 
             ActivityDraft result =
-                activityService.updateActivity(
-                    EActivityStatus.DRAFT,
-                    draftId,
-                    "Titre",
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null);
+                activityService.updateActivityDraft(
+                    draftId, "Titre", null, null, null, null, null, null, null, null, null);
 
             assertEquals(savedDraft, result);
           }
@@ -337,19 +303,8 @@ class ActivityServiceImplTest {
             assertThrows(
                 UserNotAuthorizedException.class,
                 () ->
-                    activityService.updateActivity(
-                        EActivityStatus.DRAFT,
-                        draftId,
-                        "Titre",
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null));
+                    activityService.updateActivityDraft(
+                        draftId, "Titre", null, null, null, null, null, null, null, null, null));
 
             verify(activityDraftRepository, never()).save(any());
           }
@@ -372,19 +327,8 @@ class ActivityServiceImplTest {
           assertThrows(
               ActivityDraftNotFoundException.class,
               () ->
-                  activityService.updateActivity(
-                      EActivityStatus.DRAFT,
-                      draftId,
-                      "Titre",
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null,
-                      null));
+                  activityService.updateActivityDraft(
+                      draftId, "Titre", null, null, null, null, null, null, null, null, null));
 
           verify(activityDraftRepository, never()).save(any());
         }

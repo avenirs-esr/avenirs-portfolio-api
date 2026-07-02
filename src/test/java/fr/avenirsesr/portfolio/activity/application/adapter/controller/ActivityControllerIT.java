@@ -31,7 +31,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String PRESENTATION_PATH =
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
   private static final String DRAFT_PATH = BASE_PATH + "/draft";
-  private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/DRAFT/{draftId}";
+  private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/{draftId}";
   private static final String WORKING_SPACE_PATH = BASE_PATH + "/staff/working-space";
   private static final String LIBRARY_PATH = BASE_PATH + "/staff/library";
   private static final String PUBLISH_PATH = BASE_PATH + "/publish/{draftId}";

@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.activity.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
-import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.mapper.ActivityDraftMapper;
@@ -124,8 +123,7 @@ public class ActivityDraftSeeder {
             }
 
             var updatedDraft =
-                activityService.updateActivity(
-                    EActivityStatus.DRAFT,
+                activityService.updateActivityDraft(
                     draft.getId(),
                     data.title(),
                     data.thematic(),

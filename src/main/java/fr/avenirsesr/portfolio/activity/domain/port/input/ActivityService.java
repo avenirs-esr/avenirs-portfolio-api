@@ -55,8 +55,7 @@ public interface ActivityService {
 
   ActivityDraft createActivityDraft(String title);
 
-  ActivityDraft updateActivity(
-      EActivityStatus status,
+  ActivityDraft updateActivityDraft(
       UUID id,
       String title,
       EActivityThematic thematic,

@@ -339,38 +339,7 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   @Override
-  public ActivityDraft updateActivity(
-      EActivityStatus status,
-      UUID id,
-      String title,
-      EActivityThematic thematic,
-      String summary,
-      String description,
-      String executionPeriodInfo,
-      String executionPeriodInfoSummary,
-      Integer traceAllowedAssociations,
-      Integer feedbackAllowedIterations,
-      Boolean enableReflection,
-      List<String> links) {
-    return switch (status) {
-      case DRAFT ->
-          updateActivityDraft(
-              id,
-              title,
-              thematic,
-              summary,
-              description,
-              executionPeriodInfo,
-              executionPeriodInfoSummary,
-              traceAllowedAssociations,
-              feedbackAllowedIterations,
-              enableReflection,
-              links);
-      case PUBLISHED, UNPUBLISHED -> throw new UnsupportedOperationException();
-    };
-  }
-
-  private ActivityDraft updateActivityDraft(
+  public ActivityDraft updateActivityDraft(
       UUID id,
       String title,
       EActivityThematic thematic,
@@ -407,11 +376,14 @@ public class ActivityServiceImpl implements ActivityService {
     if (executionPeriodInfo != null) draft.setExecutionPeriodInfo(executionPeriodInfo);
     if (executionPeriodInfoSummary != null)
       draft.setExecutionPeriodInfoSummary(executionPeriodInfoSummary);
-    if (traceAllowedAssociations != null)
-      draft.setTraceAllowedAssociations(traceAllowedAssociations);
-    if (feedbackAllowedIterations != null)
-      draft.setFeedbackAllowedIterations(feedbackAllowedIterations);
-    if (enableReflection != null) draft.setEnableReflection(enableReflection);
+
+    if (!hasEnrolledStudents(draft)) {
+      if (traceAllowedAssociations != null)
+        draft.setTraceAllowedAssociations(traceAllowedAssociations);
+      if (feedbackAllowedIterations != null)
+        draft.setFeedbackAllowedIterations(feedbackAllowedIterations);
+      if (enableReflection != null) draft.setEnableReflection(enableReflection);
+    }
 
     if (links != null && !links.isEmpty()) {
       links.forEach(

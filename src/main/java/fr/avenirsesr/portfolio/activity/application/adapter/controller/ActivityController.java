@@ -249,28 +249,20 @@ public class ActivityController {
     return ResponseEntity.ok("Activity draft successfully deleted");
   }
 
-  @PatchMapping("/{activityStatus}/{activityId}")
-  public ResponseEntity<ActivityDraftUpdateResponse> updateActivity(
+  @PatchMapping("/{activityDraftId}")
+  public ResponseEntity<ActivityDraftUpdateResponse> updateActivityDraft(
       Principal principal,
-      @PathVariable
-          @Parameter(
-              name = "activityStatus",
-              in = ParameterIn.PATH,
-              required = true,
-              schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
-          EActivityStatus activityStatus,
-      @PathVariable UUID activityId,
+      @PathVariable UUID activityDraftId,
       @RequestBody ActivityDraftUpdateRequest body) {
     log.debug(
-        "Received request to update activity by user [{}] for activity {} body : {}",
+        "Received request to update activity draft by user [{}] for draft {} body : {}",
         principal.getName(),
-        activityId,
+        activityDraftId,
         body);
 
     var draft =
-        activityService.updateActivity(
-            activityStatus,
-            activityId,
+        activityService.updateActivityDraft(
+            activityDraftId,
             body.title(),
             body.thematic(),
             body.summary(),
