@@ -135,9 +135,8 @@ public class ActivityDraftSeeder {
                     data.executionPeriodInfoSummary().orElse(null),
                     data.traceAllowedAssociations().orElse(null),
                     data.feedbackAllowedIterations().orElse(null),
-                    data.enableReflection());
-
-            activityService.addLinks(draft.getId(), data.links());
+                    data.enableReflection(),
+                    data.links());
 
             entityManager.flush();
 

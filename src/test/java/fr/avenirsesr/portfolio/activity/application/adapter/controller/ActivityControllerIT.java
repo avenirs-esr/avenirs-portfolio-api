@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftAddLinksRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
@@ -31,12 +30,10 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String NAVIGATION_PATH = BASE_PATH + "/navigation";
   private static final String PRESENTATION_PATH =
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
-  private static final String DRAFT_PRESENTATION_PATH = BASE_PATH + "/DRAFT/{draftId}/presentation";
   private static final String DRAFT_PATH = BASE_PATH + "/draft";
   private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/DRAFT/{draftId}";
   private static final String WORKING_SPACE_PATH = BASE_PATH + "/staff/working-space";
   private static final String LIBRARY_PATH = BASE_PATH + "/staff/library";
-  private static final String DRAFT_ADD_LINKS_PATH = BASE_PATH + "/{draftId}/links";
   private static final String PUBLISH_PATH = BASE_PATH + "/publish/{draftId}";
   private static final String UNPUBLISH_PATH = BASE_PATH + "/unpublish/{activityId}";
   private static final String CONTENT_PATH = BASE_PATH + "/{activityStatus}/{activityId}/content";
@@ -382,7 +379,8 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                     "Label court",
                     5,
                     3,
-                    false));
+                    false,
+                    List.of("https://example.com", "https://avenirs-esr.fr")));
 
         webTestClient
             .patch()
@@ -409,7 +407,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre seul mis à jour", null, null, null, null, null, null, null, null));
+                    "Titre seul mis à jour", null, null, null, null, null, null, null, null, null));
 
         webTestClient
             .patch()
@@ -436,7 +434,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null));
+                    "Titre", null, null, null, null, null, null, null, null, null));
 
         webTestClient
             .patch()
@@ -463,7 +461,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre étudiant", null, null, null, null, null, null, null, null));
+                    "Titre étudiant", null, null, null, null, null, null, null, null, null));
 
         webTestClient
             .patch()
@@ -487,118 +485,11 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         String requestBody =
             objectMapper.writeValueAsString(
                 new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null));
+                    "Titre", null, null, null, null, null, null, null, null, null));
 
         webTestClient
             .patch()
             .uri(DRAFT_UPDATE_PATH, UUID.randomUUID())
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized();
-      }
-    }
-
-    @Nested
-    class WhenAddingLinksToActivityDraft {
-
-      @BeforeEach
-      void setupWhen() {
-        BddLogger.when("performing a POST on " + DRAFT_ADD_LINKS_PATH);
-      }
-
-      @Test
-      void thenItShouldAddLinksAndReturnDraftId() throws Exception {
-        BddLogger.given("an existing activity draft");
-        UUID draftId = createDraftAndGetId("Brouillon avec liens");
-
-        BddLogger.then("it should return 200 with the updated draft id");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftAddLinksRequest(
-                    List.of("https://example.com", "https://avenirs-esr.fr")));
-
-        webTestClient
-            .post()
-            .uri(DRAFT_ADD_LINKS_PATH, draftId)
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.draftId")
-            .isEqualTo(draftId.toString());
-      }
-
-      @Test
-      void thenItShouldReturn404WhenDraftNotFound() throws Exception {
-        BddLogger.given("a non-existent draft id");
-        UUID unknownId = UUID.randomUUID();
-
-        BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftAddLinksRequest(List.of("https://example.com")));
-
-        webTestClient
-            .post()
-            .uri(DRAFT_ADD_LINKS_PATH, unknownId)
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNotFound()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
-      }
-
-      @Test
-      void thenItShouldReturn403WhenStudentTriesToAddLinks() throws Exception {
-        BddLogger.given("an existing activity draft and a student account");
-        UUID draftId = createDraftAndGetId("Brouillon liens accès refusé");
-
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftAddLinksRequest(List.of("https://example.com")));
-
-        webTestClient
-            .post()
-            .uri(DRAFT_ADD_LINKS_PATH, draftId)
-            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isForbidden()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
-      }
-
-      @Test
-      void thenItShouldReturn401WhenNotAuthenticated() throws Exception {
-        BddLogger.then("it should return 401");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftAddLinksRequest(List.of("https://example.com")));
-
-        webTestClient
-            .post()
-            .uri(DRAFT_ADD_LINKS_PATH, UUID.randomUUID())
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(requestBody)
             .accept(MediaType.APPLICATION_JSON)
@@ -1648,26 +1539,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
                 null,
                 null,
                 null,
+                null,
                 null));
 
     webTestClient
         .patch()
         .uri(DRAFT_UPDATE_PATH, draftId)
-        .headers(this::addStaffHeaders)
-        .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(requestBody)
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isOk();
-  }
-
-  private void addLinksToDraft(UUID draftId, List<String> links) throws Exception {
-    String requestBody = objectMapper.writeValueAsString(new ActivityDraftAddLinksRequest(links));
-
-    webTestClient
-        .post()
-        .uri(DRAFT_ADD_LINKS_PATH, draftId)
         .headers(this::addStaffHeaders)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(requestBody)

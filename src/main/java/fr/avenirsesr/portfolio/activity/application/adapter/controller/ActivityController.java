@@ -4,7 +4,6 @@ import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOr
 
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.*;
-import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftAddLinksRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftUpdateRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.response.ActivityDraftCreationResponse;
@@ -280,21 +279,8 @@ public class ActivityController {
             body.executionPeriodInfoSummary(),
             body.traceAllowedAssociations(),
             body.feedbackAllowedIterations(),
-            body.enableReflection());
-    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));
-  }
-
-  @PostMapping("/{activityDraftId}/links")
-  public ResponseEntity<ActivityDraftUpdateResponse> addLinks(
-      Principal principal,
-      @PathVariable UUID activityDraftId,
-      @RequestBody ActivityDraftAddLinksRequest body) {
-    log.debug(
-        "Received request to add links to activity draft {} by user [{}]",
-        activityDraftId,
-        principal.getName());
-
-    var draft = activityService.addLinks(activityDraftId, body.links());
+            body.enableReflection(),
+            body.links());
     return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));
   }
 }

@@ -66,11 +66,10 @@ public interface ActivityService {
       String executionPeriodInfoSummary,
       Integer traceAllowedAssociations,
       Integer feedbackAllowedIterations,
-      Boolean enableReflection);
+      Boolean enableReflection,
+      List<String> links);
 
   ActivityDraft createDraftFromActivity(UUID activityId);
 
   Boolean hasEnrolledStudents(ActivityDraft draft);
-
-  ActivityDraft addLinks(UUID id, List<String> links);
 }
