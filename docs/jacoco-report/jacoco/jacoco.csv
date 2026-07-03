@@ -14,7 +14,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.ap
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,169,376,0,0,38,84,5,13,5,13
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller,SelfKnowledgeController,75,88,0,0,17,26,3,7,3,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.specification,DeclaredProgramSpecification,5,34,1,5,2,5,2,3,1,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.service,ActivityServiceImpl,33,727,3,45,10,191,3,48,0,27
+avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.service,ActivityServiceImpl,33,781,3,45,10,201,3,48,0,27
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.infrastructure.adapter.repository,AssociationDatabaseRepository,44,152,5,13,9,35,6,9,1,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,FileResourceServiceConfig,0,22,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,FileDataGeneratorConfig,0,7,0,0,0,2,0,2,0,2
