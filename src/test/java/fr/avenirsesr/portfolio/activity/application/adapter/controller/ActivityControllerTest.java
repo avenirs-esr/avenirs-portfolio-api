@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -27,9 +28,12 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
@@ -49,6 +53,7 @@ class ActivityControllerTest {
   @Mock private ActivityOverviewDtoMapper activityOverviewDtoMapper;
   @Mock private ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
   @Mock private ActivityContentDtoMapper activityContentDtoMapper;
+  @Mock private FileResourceService fileResourceService;
 
   @InjectMocks private ActivityController controller;
 
@@ -648,19 +653,26 @@ class ActivityControllerTest {
             0,
             0,
             null,
+            List.of(),
+            List.of(),
             Instant.now(),
             Instant.now());
 
     when(activityService.getActivityById(activityId)).thenReturn(activity);
-    when(activityContentDtoMapper.toDTO(activity)).thenReturn(dto);
+    when(fileResourceService.findAllByElementIdAndCategory(
+            any(UUID.class), any(EFileCategory.class)))
+        .thenReturn(List.of());
+    when(activityContentDtoMapper.toDTO(activity, List.of())).thenReturn(dto);
 
     BddLogger.when("getting the activity content for status PUBLISHED");
-    var response = controller.getActivityContent(EActivityStatus.PUBLISHED, activityId);
+
+    var request = createMockRequest();
+    var response = controller.getActivityContent(request, EActivityStatus.PUBLISHED, activityId);
 
     BddLogger.then("it should return the DTO without calling hasEnrolledStudents");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
-    verify(activityContentDtoMapper).toDTO(activity);
+    verify(activityContentDtoMapper).toDTO(activity, List.of());
     verify(activityService, never()).hasEnrolledStudents(any(ActivityDraft.class));
   }
 
@@ -681,19 +693,26 @@ class ActivityControllerTest {
             0,
             0,
             null,
+            List.of(),
+            List.of(),
             Instant.now(),
             Instant.now());
 
     when(activityService.getActivityById(activityId)).thenReturn(activity);
-    when(activityContentDtoMapper.toDTO(activity)).thenReturn(dto);
+    when(activityContentDtoMapper.toDTO(activity, List.of())).thenReturn(dto);
 
     BddLogger.when("getting the activity content for status UNPUBLISHED");
-    var response = controller.getActivityContent(EActivityStatus.UNPUBLISHED, activityId);
+
+    when(fileResourceService.findAllByElementIdAndCategory(
+            any(UUID.class), any(EFileCategory.class)))
+        .thenReturn(List.of());
+    var request = createMockRequest();
+    var response = controller.getActivityContent(request, EActivityStatus.UNPUBLISHED, activityId);
 
     BddLogger.then("it should return the DTO without calling hasEnrolledStudents");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
-    verify(activityContentDtoMapper).toDTO(activity);
+    verify(activityContentDtoMapper).toDTO(activity, List.of());
     verify(activityService, never()).hasEnrolledStudents(any(ActivityDraft.class));
   }
 
@@ -715,21 +734,29 @@ class ActivityControllerTest {
             0,
             0,
             true,
+            List.of(),
+            List.of(),
             Instant.now(),
             Instant.now());
 
     when(activityService.getActivityDraftById(draftId)).thenReturn(draft);
     when(activityService.hasEnrolledStudents(draft)).thenReturn(true);
-    when(activityContentDtoMapper.toDTO(draft, true)).thenReturn(dto);
+    when(fileResourceService.findAllByElementIdAndCategory(
+            any(UUID.class), any(EFileCategory.class)))
+        .thenReturn(List.of());
+    when(activityContentDtoMapper.toDTO(draft, true, List.of())).thenReturn(dto);
 
     BddLogger.when("getting the activity content for status DRAFT");
-    var response = controller.getActivityContent(EActivityStatus.DRAFT, draftId);
+
+    var request = createMockRequest();
+
+    var response = controller.getActivityContent(request, EActivityStatus.DRAFT, draftId);
 
     BddLogger.then("it should return the DTO built from the computed hasEnrolledStudents value");
     assertEquals(200, response.getStatusCode().value());
     assertEquals(dto, response.getBody());
     verify(activityService).hasEnrolledStudents(draft);
-    verify(activityContentDtoMapper).toDTO(draft, true);
+    verify(activityContentDtoMapper).toDTO(draft, true, List.of());
   }
 
   @Test
@@ -749,5 +776,13 @@ class ActivityControllerTest {
     assertEquals(200, response.getStatusCode().value());
     assertNotNull(response.getBody());
     assertEquals(draftId, response.getBody().draftId());
+  }
+
+  private HttpServletRequest createMockRequest() {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    lenient().when(request.getScheme()).thenReturn("https");
+    lenient().when(request.getServerName()).thenReturn("localhost");
+    lenient().when(request.getServerPort()).thenReturn(8080);
+    return request;
   }
 }
