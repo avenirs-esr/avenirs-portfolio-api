@@ -235,10 +235,6 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .exists()
             .jsonPath("$.summary")
             .exists()
-            .jsonPath("$.files")
-            .isArray()
-            .jsonPath("$.links")
-            .isArray()
             .jsonPath("$.createdAt")
             .exists()
             .jsonPath("$.updatedAt")
@@ -1250,7 +1246,11 @@ class ActivityControllerIT extends ContainerConfigurationTest {
             .jsonPath("$.id")
             .isEqualTo(activityId.toString())
             .jsonPath("$.hasEnrolledStudent")
-            .doesNotExist();
+            .doesNotExist()
+            .jsonPath("$.files")
+            .isArray()
+            .jsonPath("$.links")
+            .isArray();
       }
 
       @Test

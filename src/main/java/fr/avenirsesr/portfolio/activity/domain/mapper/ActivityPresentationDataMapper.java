@@ -19,7 +19,6 @@ public interface ActivityPresentationDataMapper {
         activity.getDescription().orElse(null),
         activity.getExecutionPeriodInfo().orElse(null),
         banner,
-        activity.getLinks(),
         activity.getCreatedAt(),
         activity.getUpdatedAt());
   }
@@ -34,7 +33,6 @@ public interface ActivityPresentationDataMapper {
         draft.getDescription().orElse(null),
         draft.getExecutionPeriodInfo().orElse(null),
         banner,
-        draft.getLinks(),
         draft.getCreatedAt(),
         draft.getUpdatedAt());
   }

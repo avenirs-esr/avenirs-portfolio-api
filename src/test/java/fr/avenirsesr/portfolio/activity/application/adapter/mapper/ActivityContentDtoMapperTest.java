@@ -7,8 +7,11 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.infrastructure.fixture.ActivityFixture;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.OptionalMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StaffFixture;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -63,7 +66,7 @@ class ActivityContentDtoMapperTest {
     ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
 
     BddLogger.when("mapping to ActivityContentDTO with hasEnrolledStudent = true");
-    ActivityContentDTO dto = mapper.toDTO(draft, true);
+    ActivityContentDTO dto = mapper.toDTO(draft, true, List.of());
 
     BddLogger.then("hasEnrolledStudent should be true");
     assertEquals(Boolean.TRUE, dto.hasEnrolledStudent());
@@ -75,9 +78,38 @@ class ActivityContentDtoMapperTest {
     ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
 
     BddLogger.when("mapping to ActivityContentDTO with hasEnrolledStudent = null");
-    ActivityContentDTO dto = mapper.toDTO(draft, null);
+    ActivityContentDTO dto = mapper.toDTO(draft, null, List.of());
 
     BddLogger.then("hasEnrolledStudent should be null");
     assertNull(dto.hasEnrolledStudent());
+  }
+
+  @Test
+  void shouldMapDraftFilesWhenProvided() {
+    BddLogger.given("an activity draft and a list of files");
+    ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
+    List<FileDTO> files =
+        List.of(
+            new FileDTO(UUID.randomUUID(), "file1.txt", "/files/file1.txt"),
+            new FileDTO(UUID.randomUUID(), "file2.txt", "/files/file2.txt"));
+
+    BddLogger.when("mapping to ActivityContentDTO with files");
+    ActivityContentDTO dto = mapper.toDTO(draft, null, files);
+
+    BddLogger.then("files should be correctly mapped");
+    assertEquals(files, dto.files());
+  }
+
+  @Test
+  void shouldMapDraftFilesToEmptyListWhenNotProvided() {
+    BddLogger.given("an activity draft with no files");
+    ActivityDraft draft = ActivityDraft.create("draft title", StaffFixture.create().toModel());
+
+    BddLogger.when("mapping to ActivityContentDTO with no files");
+    ActivityContentDTO dto = mapper.toDTO(draft, null, List.of());
+
+    BddLogger.then("files should be an empty list");
+    assertNotNull(dto);
+    assertTrue(dto.files().isEmpty());
   }
 }

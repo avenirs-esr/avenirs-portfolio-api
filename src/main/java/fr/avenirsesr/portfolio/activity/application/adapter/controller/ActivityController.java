@@ -63,18 +63,13 @@ public class ActivityController {
     String baseUrl = extractOrigin(request);
     ActivityPresentationData activityPresentation =
         activityService.getActivityPresentation(activityStatus, activityId);
-    List<FileDTO> files =
-        fileResourceService
-            .findAllByElementIdAndCategory(activityId, EFileCategory.ACTIVITY_FILE)
-            .stream()
-            .map(file -> new FileDTO(file.getId(), file.getFileName(), baseUrl + file.getUri()))
-            .toList();
-    var dto = activityPresentationDtoMapper.toDTO(activityPresentation, baseUrl, files);
+    var dto = activityPresentationDtoMapper.toDTO(activityPresentation, baseUrl);
     return ResponseEntity.ok(dto);
   }
 
   @GetMapping("/{activityStatus}/{activityId}/content")
   public ResponseEntity<ActivityContentDTO> getActivityContent(
+      HttpServletRequest request,
       @PathVariable
           @Parameter(
               name = "activityStatus",
@@ -84,13 +79,22 @@ public class ActivityController {
           EActivityStatus activityStatus,
       @PathVariable UUID activityId) {
     log.debug("Received request to get activity [{}] content", activityId);
+
+    String baseUrl = extractOrigin(request);
+    List<FileDTO> files =
+        fileResourceService
+            .findAllByElementIdAndCategory(activityId, EFileCategory.ACTIVITY_FILE)
+            .stream()
+            .map(file -> new FileDTO(file.getId(), file.getFileName(), baseUrl + file.getUri()))
+            .toList();
     ActivityContentDTO dto =
         switch (activityStatus) {
           case PUBLISHED, UNPUBLISHED ->
-              activityContentDtoMapper.toDTO(activityService.getActivityById(activityId));
+              activityContentDtoMapper.toDTO(activityService.getActivityById(activityId), files);
           case DRAFT -> {
             var draft = activityService.getActivityDraftById(activityId);
-            yield activityContentDtoMapper.toDTO(draft, activityService.hasEnrolledStudents(draft));
+            yield activityContentDtoMapper.toDTO(
+                draft, activityService.hasEnrolledStudents(draft), files);
           }
         };
     return ResponseEntity.ok(dto);
