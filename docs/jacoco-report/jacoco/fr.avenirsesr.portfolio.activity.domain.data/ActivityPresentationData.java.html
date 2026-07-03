@@ -3,10 +3,11 @@
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-<span class="fc" id="L9">public record ActivityPresentationData(</span>
+<span class="fc" id="L10">public record ActivityPresentationData(</span>
     UUID id,
     String title,
     EActivityThematic thematic,
@@ -15,6 +16,7 @@ import java.util.UUID;
     String description,
     String executionPeriodInfo,
     FileData banner,
+    List&lt;String&gt; links,
     Instant createdAt,
     Instant updatedAt) {}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
