@@ -249,39 +249,31 @@ public class ActivityController {
 <span class="nc" id="L249">    return ResponseEntity.ok(&quot;Activity draft successfully deleted&quot;);</span>
   }
 
-  @PatchMapping(&quot;/{activityStatus}/{activityId}&quot;)
-  public ResponseEntity&lt;ActivityDraftUpdateResponse&gt; updateActivity(
+  @PatchMapping(&quot;/{activityDraftId}&quot;)
+  public ResponseEntity&lt;ActivityDraftUpdateResponse&gt; updateActivityDraft(
       Principal principal,
-      @PathVariable
-          @Parameter(
-              name = &quot;activityStatus&quot;,
-              in = ParameterIn.PATH,
-              required = true,
-              schema = @Schema(ref = &quot;#/components/schemas/EActivityStatus&quot;))
-          EActivityStatus activityStatus,
-      @PathVariable UUID activityId,
+      @PathVariable UUID activityDraftId,
       @RequestBody ActivityDraftUpdateRequest body) {
-<span class="fc" id="L264">    log.debug(</span>
-        &quot;Received request to update activity by user [{}] for activity {} body : {}&quot;,
-<span class="fc" id="L266">        principal.getName(),</span>
-        activityId,
+<span class="fc" id="L257">    log.debug(</span>
+        &quot;Received request to update activity draft by user [{}] for draft {} body : {}&quot;,
+<span class="fc" id="L259">        principal.getName(),</span>
+        activityDraftId,
         body);
 
-<span class="fc" id="L270">    var draft =</span>
-<span class="fc" id="L271">        activityService.updateActivity(</span>
-            activityStatus,
-            activityId,
-<span class="fc" id="L274">            body.title(),</span>
-<span class="fc" id="L275">            body.thematic(),</span>
-<span class="fc" id="L276">            body.summary(),</span>
-<span class="fc" id="L277">            body.description(),</span>
-<span class="fc" id="L278">            body.executionPeriodInfo(),</span>
-<span class="fc" id="L279">            body.executionPeriodInfoSummary(),</span>
-<span class="fc" id="L280">            body.traceAllowedAssociations(),</span>
-<span class="fc" id="L281">            body.feedbackAllowedIterations(),</span>
-<span class="fc" id="L282">            body.enableReflection(),</span>
-<span class="fc" id="L283">            body.links());</span>
-<span class="fc" id="L284">    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));</span>
+<span class="fc" id="L263">    var draft =</span>
+<span class="fc" id="L264">        activityService.updateActivityDraft(</span>
+            activityDraftId,
+<span class="fc" id="L266">            body.title(),</span>
+<span class="fc" id="L267">            body.thematic(),</span>
+<span class="fc" id="L268">            body.summary(),</span>
+<span class="fc" id="L269">            body.description(),</span>
+<span class="fc" id="L270">            body.executionPeriodInfo(),</span>
+<span class="fc" id="L271">            body.executionPeriodInfoSummary(),</span>
+<span class="fc" id="L272">            body.traceAllowedAssociations(),</span>
+<span class="fc" id="L273">            body.feedbackAllowedIterations(),</span>
+<span class="fc" id="L274">            body.enableReflection(),</span>
+<span class="fc" id="L275">            body.links());</span>
+<span class="fc" id="L276">    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
