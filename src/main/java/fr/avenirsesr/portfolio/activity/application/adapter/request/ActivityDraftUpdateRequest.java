@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.activity.application.adapter.request;
 
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 
 @Schema()
 public record ActivityDraftUpdateRequest(
@@ -13,4 +14,5 @@ public record ActivityDraftUpdateRequest(
     String executionPeriodInfoSummary,
     Integer traceAllowedAssociations,
     Integer feedbackAllowedIterations,
-    Boolean enableReflection) {}
+    Boolean enableReflection,
+    List<String> links) {}

@@ -166,134 +166,6 @@ class ActivityServiceImplTest {
     }
 
     @Nested
-    class WhenAddingLinksToAnActivityDraft {
-
-      UUID draftId;
-      Staff loggedInStaff;
-      ActivityDraft draft;
-
-      @BeforeEach
-      void setupWhen() {
-        BddLogger.when("adding links to an activity draft");
-        draftId = UUID.randomUUID();
-        loggedInStaff = mock(Staff.class);
-        draft = mock(ActivityDraft.class);
-        when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
-      }
-
-      @Nested
-      class AndTheDraftExists {
-
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("the draft exists");
-          when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
-        }
-
-        @Nested
-        class AndTheLoggedInStaffIsTheAuthor {
-
-          @BeforeEach
-          void setupAnd() {
-            BddLogger.and("the logged-in staff is the author");
-            when(draft.getAuthor()).thenReturn(loggedInStaff);
-          }
-
-          @Test
-          void thenItShouldAddLinksAndSaveDraft() {
-            BddLogger.then("the links should be added and the draft should be saved");
-
-            List<String> links = List.of("https://example.com", "https://avenirs-esr.fr");
-            when(activityDraftRepository.save(draft)).thenReturn(draft);
-
-            ActivityDraft result = activityService.addLinks(draftId, links);
-
-            verify(draft).addLinks(links);
-            verify(activityDraftRepository).save(draft);
-            assertEquals(draft, result);
-          }
-
-          @Test
-          void thenItShouldReturnDraftWithoutSavingWhenLinksIsNull() {
-            BddLogger.then("the draft should be returned without save when links is null");
-
-            ActivityDraft result = activityService.addLinks(draftId, null);
-
-            verify(draft, never()).addLinks(anyList());
-            verify(activityDraftRepository, never()).save(any());
-            assertEquals(draft, result);
-          }
-
-          @Test
-          void thenItShouldReturnDraftWithoutSavingWhenLinksIsEmpty() {
-            BddLogger.then("the draft should be returned without save when links is empty");
-
-            ActivityDraft result = activityService.addLinks(draftId, List.of());
-
-            verify(draft, never()).addLinks(anyList());
-            verify(activityDraftRepository, never()).save(any());
-            assertEquals(draft, result);
-          }
-
-          @Test
-          void thenItShouldThrowFieldValidationExceptionWhenLinkIsBlank() {
-            BddLogger.then("the service should throw FieldValidationException");
-
-            assertThrows(
-                FieldValidationException.class,
-                () -> activityService.addLinks(draftId, List.of(" ")));
-
-            verify(draft, never()).addLinks(anyList());
-            verify(activityDraftRepository, never()).save(any());
-          }
-        }
-
-        @Nested
-        class AndTheLoggedInStaffIsNotTheAuthor {
-
-          @BeforeEach
-          void setupAnd() {
-            BddLogger.and("the logged-in staff is not the author");
-            when(draft.getAuthor()).thenReturn(mock(Staff.class));
-          }
-
-          @Test
-          void thenItShouldThrowUserNotAuthorizedException() {
-            BddLogger.then("the service should throw UserNotAuthorizedException");
-
-            assertThrows(
-                UserNotAuthorizedException.class,
-                () -> activityService.addLinks(draftId, List.of("https://example.com")));
-
-            verify(draft, never()).addLinks(anyList());
-            verify(activityDraftRepository, never()).save(any());
-          }
-        }
-      }
-
-      @Nested
-      class AndTheDraftDoesNotExist {
-
-        @BeforeEach
-        void setupAnd() {
-          BddLogger.and("the draft does not exist");
-          when(activityDraftRepository.findById(draftId)).thenReturn(Optional.empty());
-        }
-
-        @Test
-        void thenItShouldThrowActivityDraftNotFoundException() {
-          BddLogger.then("the service should throw ActivityDraftNotFoundException");
-
-          assertThrows(
-              ActivityDraftNotFoundException.class,
-              () -> activityService.addLinks(draftId, List.of("https://example.com")));
-
-          verify(activityDraftRepository, never()).save(any());
-        }
-      }
-    }
-
-    @Nested
     class WhenUpdatingAnActivityDraft {
 
       UUID draftId;
@@ -332,6 +204,7 @@ class ActivityServiceImplTest {
           void thenItShouldUpdateAllFieldsAndSave() {
             BddLogger.then("all provided fields should be updated and saved");
 
+            List<String> links = List.of("https://example.com", "https://avenirs-esr.fr");
             ActivityDraft result =
                 activityService.updateActivity(
                     EActivityStatus.DRAFT,
@@ -344,7 +217,8 @@ class ActivityServiceImplTest {
                     "Label court",
                     5,
                     3,
-                    false);
+                    false,
+                    links);
 
             verify(draft).setTitle("Nouveau titre");
             verify(draft).setThematic(EActivityThematic.EXPERIENCES);
@@ -355,6 +229,7 @@ class ActivityServiceImplTest {
             verify(draft).setTraceAllowedAssociations(5);
             verify(draft).setFeedbackAllowedIterations(3);
             verify(draft).setEnableReflection(false);
+            verify(draft).addLinks(links);
             verify(activityDraftRepository).save(draft);
             assertEquals(draft, result);
           }
@@ -374,6 +249,7 @@ class ActivityServiceImplTest {
                 null,
                 null,
                 null,
+                null,
                 null);
 
             verify(draft, never()).setTitle(any());
@@ -385,6 +261,7 @@ class ActivityServiceImplTest {
             verify(draft, never()).setTraceAllowedAssociations(anyInt());
             verify(draft, never()).setFeedbackAllowedIterations(anyInt());
             verify(draft, never()).setEnableReflection(anyBoolean());
+            verify(draft, never()).addLinks(anyList());
             verify(activityDraftRepository).save(draft);
           }
 
@@ -403,6 +280,7 @@ class ActivityServiceImplTest {
                 null,
                 null,
                 null,
+                null,
                 null);
 
             verify(draft).setTitle("Titre seul");
@@ -414,6 +292,7 @@ class ActivityServiceImplTest {
             verify(draft, never()).setTraceAllowedAssociations(anyInt());
             verify(draft, never()).setFeedbackAllowedIterations(anyInt());
             verify(draft, never()).setEnableReflection(anyBoolean());
+            verify(draft, never()).addLinks(anyList());
           }
 
           @Test
@@ -428,6 +307,7 @@ class ActivityServiceImplTest {
                     EActivityStatus.DRAFT,
                     draftId,
                     "Titre",
+                    null,
                     null,
                     null,
                     null,
@@ -468,6 +348,7 @@ class ActivityServiceImplTest {
                         null,
                         null,
                         null,
+                        null,
                         null));
 
             verify(activityDraftRepository, never()).save(any());
@@ -495,6 +376,7 @@ class ActivityServiceImplTest {
                       EActivityStatus.DRAFT,
                       draftId,
                       "Titre",
+                      null,
                       null,
                       null,
                       null,

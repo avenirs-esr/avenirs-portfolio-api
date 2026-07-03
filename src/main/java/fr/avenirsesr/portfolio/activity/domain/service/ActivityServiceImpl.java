@@ -318,7 +318,8 @@ public class ActivityServiceImpl implements ActivityService {
       String executionPeriodInfoSummary,
       Integer traceAllowedAssociations,
       Integer feedbackAllowedIterations,
-      Boolean enableReflection) {
+      Boolean enableReflection,
+      List<String> links) {
     return switch (status) {
       case DRAFT ->
           updateActivityDraft(
@@ -331,32 +332,10 @@ public class ActivityServiceImpl implements ActivityService {
               executionPeriodInfoSummary,
               traceAllowedAssociations,
               feedbackAllowedIterations,
-              enableReflection);
+              enableReflection,
+              links);
       case PUBLISHED, UNPUBLISHED -> throw new UnsupportedOperationException();
     };
-  }
-
-  @Override
-  public ActivityDraft addLinks(UUID id, List<String> links) {
-    var loggedInStaff = loggedInUserService.getLoggedInStaff();
-    var draft =
-        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
-
-    if (!draft.getAuthor().equals(loggedInStaff)) {
-      throw new UserNotAuthorizedException();
-    }
-
-    if (links == null || links.isEmpty()) {
-      return draft;
-    }
-
-    links.forEach(link -> requireNotBlankAndMaxLength("link", link, LINK_LENGTH));
-
-    draft.addLinks(links);
-
-    var updatedDraft = activityDraftRepository.save(draft);
-    log.info("Added {} link(s) to activity draft with id: {}", links.size(), id);
-    return updatedDraft;
   }
 
   private ActivityDraft updateActivityDraft(
@@ -369,7 +348,8 @@ public class ActivityServiceImpl implements ActivityService {
       String executionPeriodInfoSummary,
       Integer traceAllowedAssociations,
       Integer feedbackAllowedIterations,
-      Boolean enableReflection) {
+      Boolean enableReflection,
+      List<String> links) {
     var loggedInStaff = loggedInUserService.getLoggedInStaff();
     var draft =
         activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
@@ -400,6 +380,15 @@ public class ActivityServiceImpl implements ActivityService {
     if (feedbackAllowedIterations != null)
       draft.setFeedbackAllowedIterations(feedbackAllowedIterations);
     if (enableReflection != null) draft.setEnableReflection(enableReflection);
+
+    if (links != null && !links.isEmpty()) {
+      links.forEach(
+          link -> {
+            requireNotBlankAndMaxLength("link", link, LINK_LENGTH);
+            validateUrl(link);
+          });
+      draft.addLinks(links);
+    }
 
     var updatedDraft = activityDraftRepository.save(draft);
     log.info("Updated activity draft with id: {}", id);
