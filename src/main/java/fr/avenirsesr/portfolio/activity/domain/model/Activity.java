@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -36,6 +37,8 @@ public class Activity extends AvenirsBaseModel {
   @Getter(AccessLevel.NONE)
   private File banner;
 
+  private List<String> links;
+
   private Activity(
       UUID id,
       Staff author,
@@ -50,6 +53,7 @@ public class Activity extends AvenirsBaseModel {
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       File banner,
+      List<String> links,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -65,6 +69,7 @@ public class Activity extends AvenirsBaseModel {
     this.traceAllowedAssociations = traceAllowedAssociations;
     this.feedbackAllowedIterations = feedbackAllowedIterations;
     this.banner = banner;
+    this.links = links;
   }
 
   public static Activity create(
@@ -79,7 +84,8 @@ public class Activity extends AvenirsBaseModel {
       boolean enableReflection,
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
-      File banner) {
+      File banner,
+      List<String> links) {
     Instant now = Instant.now();
     return new Activity(
         id,
@@ -95,6 +101,7 @@ public class Activity extends AvenirsBaseModel {
         traceAllowedAssociations,
         feedbackAllowedIterations,
         banner,
+        links,
         now,
         now);
   }
@@ -113,6 +120,7 @@ public class Activity extends AvenirsBaseModel {
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       File banner,
+      List<String> links,
       Instant createdAt,
       Instant updatedAt) {
     return new Activity(
@@ -129,6 +137,7 @@ public class Activity extends AvenirsBaseModel {
         traceAllowedAssociations,
         feedbackAllowedIterations,
         banner,
+        links,
         createdAt,
         updatedAt);
   }

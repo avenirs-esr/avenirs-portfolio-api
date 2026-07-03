@@ -16,6 +16,7 @@
     "traceAllowedAssociations": 4,
     "feedbackAllowedIterations": -1,
     "enableReflection": true,
+    "links": ["https://github.com/avenirs-esr/avenirs-portfolio-api/pull/376"],
     "createdAt": "2024-06-01T09:00:00Z",
     "updatedAt": "2024-06-01T09:00:00Z"
   },
@@ -36,6 +37,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 70,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -56,6 +58,7 @@
     "traceAllowedAssociations": 2,
     "feedbackAllowedIterations": 5,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -76,6 +79,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": -1,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -96,6 +100,7 @@
     "traceAllowedAssociations": 8,
     "feedbackAllowedIterations": 3,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -116,6 +121,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 1,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -136,6 +142,7 @@
     "traceAllowedAssociations": 6,
     "feedbackAllowedIterations": -1,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -156,6 +163,7 @@
     "traceAllowedAssociations": 0,
     "feedbackAllowedIterations": 9,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -176,6 +184,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 4,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -196,6 +205,7 @@
     "traceAllowedAssociations": 3,
     "feedbackAllowedIterations": -1,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -216,6 +226,7 @@
     "traceAllowedAssociations": 10,
     "feedbackAllowedIterations": 2,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -236,6 +247,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 6,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -256,6 +268,7 @@
     "traceAllowedAssociations": 5,
     "feedbackAllowedIterations": -1,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -276,6 +289,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 8,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -296,6 +310,7 @@
     "traceAllowedAssociations": 7,
     "feedbackAllowedIterations": -1,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -316,6 +331,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 3,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -336,6 +352,7 @@
     "traceAllowedAssociations": 1,
     "feedbackAllowedIterations": 10,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -356,6 +373,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": -1,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -376,6 +394,7 @@
     "traceAllowedAssociations": 9,
     "feedbackAllowedIterations": -1,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -396,6 +415,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 5,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -416,6 +436,7 @@
     "traceAllowedAssociations": 3,
     "feedbackAllowedIterations": -1,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -436,6 +457,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 2,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -456,6 +478,7 @@
     "traceAllowedAssociations": 6,
     "feedbackAllowedIterations": -1,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -476,6 +499,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 7,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -496,6 +520,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 4,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -516,6 +541,7 @@
     "traceAllowedAssociations": 5,
     "feedbackAllowedIterations": -1,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -536,6 +562,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 6,
     "enableReflection": false,
+    "links": [],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
@@ -556,6 +583,7 @@
     "traceAllowedAssociations": 2,
     "feedbackAllowedIterations": -1,
     "enableReflection": true,
+    "links": [],
     "createdAt": "2024-06-01T14:00:00Z",
     "updatedAt": "2024-06-01T14:00:00Z"
   }

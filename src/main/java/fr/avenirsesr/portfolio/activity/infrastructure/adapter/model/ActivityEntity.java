@@ -8,7 +8,10 @@ import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.model.AvenirsB
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -63,6 +66,12 @@ public class ActivityEntity extends AvenirsBaseEntity {
   @JoinColumn(name = "banner_id")
   private FileEntity banner;
 
+  @ElementCollection
+  @CollectionTable(name = "activity_links", joinColumns = @JoinColumn(name = "activity_id"))
+  @Column(name = "link", nullable = false)
+  private List<@Size(max = LINK_LENGTH, message = "link can not exceed {max} characters") String>
+      links = new ArrayList<>();
+
   private ActivityEntity(
       UUID id,
       StaffEntity author,
@@ -77,6 +86,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
       int feedbackAllowedIterations,
       boolean enableReflection,
       FileEntity banner,
+      List<String> links,
       Instant createdAt,
       Instant updatedAt) {
     this.setId(id);
@@ -92,6 +102,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
     this.feedbackAllowedIterations = feedbackAllowedIterations;
     this.enableReflection = enableReflection;
     this.banner = banner;
+    this.links = links;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
   }
@@ -110,6 +121,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
       int feedbackAllowedIterations,
       boolean enableReflection,
       FileEntity banner,
+      List<String> links,
       Instant createdAt,
       Instant updatedAt) {
 
@@ -127,6 +139,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
         feedbackAllowedIterations,
         enableReflection,
         banner,
+        links,
         createdAt,
         updatedAt);
   }

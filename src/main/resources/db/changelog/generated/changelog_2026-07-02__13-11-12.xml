@@ -1,0 +1,29 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="nathp (generated)" id="1782997878919-1">
+        <createTable tableName="activity_draft_links">
+            <column name="activity_draft_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="link" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1782997878919-2">
+        <createTable tableName="activity_links">
+            <column name="activity_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="link" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1782997878919-3">
+        <addForeignKeyConstraint baseColumnNames="activity_id" baseTableName="activity_links" constraintName="FKguqnfkucoundpta0nma36h560" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity" validate="true"/>
+    </changeSet>
+    <changeSet author="nathp (generated)" id="1782997878919-4">
+        <addForeignKeyConstraint baseColumnNames="activity_draft_id" baseTableName="activity_draft_links" constraintName="FKs50iq2cou8grpx8c5lbntyou2" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_draft" validate="true"/>
+    </changeSet>
+</databaseChangeLog>

@@ -26,7 +26,8 @@ public interface ActivityService {
       String executionPeriodInfoSummary,
       boolean enableReflection,
       int traceAllowedAssociations,
-      int feedbackAllowedIterations);
+      int feedbackAllowedIterations,
+      List<String> links);
 
   Activity publish(UUID activityDraftId);
 
@@ -70,4 +71,6 @@ public interface ActivityService {
   ActivityDraft createDraftFromActivity(UUID activityId);
 
   Boolean hasEnrolledStudents(ActivityDraft draft);
+
+  ActivityDraft addLinks(UUID id, List<String> links);
 }

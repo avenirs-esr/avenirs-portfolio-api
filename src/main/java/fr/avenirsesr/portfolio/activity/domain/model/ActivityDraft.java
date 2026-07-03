@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class ActivityDraft extends AvenirsBaseModel {
   private String executionPeriodInfo;
   private String executionPeriodInfoSummary;
   private File banner;
+  @Getter private List<String> links;
   @Getter private int traceAllowedAssociations;
   @Getter private int feedbackAllowedIterations;
   @Getter private boolean enableReflection;
@@ -42,7 +44,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       boolean enableReflection,
-      File banner) {
+      File banner,
+      List<String> links) {
     super(id, createdAt, updatedAt);
     this.title = title;
     this.author = author;
@@ -55,6 +58,7 @@ public class ActivityDraft extends AvenirsBaseModel {
     this.enableReflection = enableReflection;
     this.feedbackAllowedIterations = feedbackAllowedIterations;
     this.banner = banner;
+    this.links = links;
   }
 
   public static ActivityDraft create(String title, Staff createdBy) {
@@ -72,7 +76,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         DEFAULT_TRACE_ALLOWED_ASSOCIATION,
         DEFAULT_FEEDBACK_ALLOWED_ITERATIONS,
         true,
-        null);
+        null,
+        List.of());
   }
 
   public static ActivityDraft toDomain(
@@ -89,7 +94,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       boolean enableReflection,
-      File banner) {
+      File banner,
+      List<String> links) {
     return new ActivityDraft(
         id,
         createdAt,
@@ -104,7 +110,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         traceAllowedAssociations,
         feedbackAllowedIterations,
         enableReflection,
-        banner);
+        banner,
+        links);
   }
 
   public Optional<String> getSummary() {
@@ -125,5 +132,9 @@ public class ActivityDraft extends AvenirsBaseModel {
 
   public Optional<File> getBanner() {
     return Optional.ofNullable(banner);
+  }
+
+  public void addLinks(List<String> links) {
+    this.links.addAll(links);
   }
 }

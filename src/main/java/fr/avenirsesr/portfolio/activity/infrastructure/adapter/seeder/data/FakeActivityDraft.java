@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityDraftEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import net.datafaker.Faker;
 
@@ -30,6 +31,7 @@ public class FakeActivityDraft {
             faker.number().numberBetween(0, 10),
             faker.bool().bool(),
             null,
+            List.of(),
             Instant.now(),
             Instant.now()));
   }

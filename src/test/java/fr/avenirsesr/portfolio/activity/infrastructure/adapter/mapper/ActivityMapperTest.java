@@ -17,6 +17,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeStaff;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,8 @@ class ActivityMapperTest {
           author.getUser());
   private final Instant createdAt = Instant.parse("2023-01-01T00:00:00Z");
   private final Instant updatedAt = Instant.parse("2023-12-31T23:59:59Z");
+  private final List<String> links =
+      List.of("https://example.com/link1", "https://example.com/link2");
 
   @BeforeEach
   void setUp() {
@@ -69,6 +72,7 @@ class ActivityMapperTest {
             traceAllowedAssociations,
             feedbackAllowedIterations,
             banner,
+            links,
             createdAt,
             updatedAt);
   }
