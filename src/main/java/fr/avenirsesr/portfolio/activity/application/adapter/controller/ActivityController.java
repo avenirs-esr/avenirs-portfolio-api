@@ -18,7 +18,10 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/activities")
 public class ActivityController {
   private final ActivityService activityService;
+  private final FileResourceService fileResourceService;
   private final ActivityPresentationDtoMapper activityPresentationDtoMapper;
   private final ActivityContentDtoMapper activityContentDtoMapper;
   private final ActivityNavigationMapper activityNavigationMapper;
@@ -59,7 +63,13 @@ public class ActivityController {
     String baseUrl = extractOrigin(request);
     ActivityPresentationData activityPresentation =
         activityService.getActivityPresentation(activityStatus, activityId);
-    var dto = activityPresentationDtoMapper.toDTO(activityPresentation, baseUrl);
+    List<FileDTO> files =
+        fileResourceService
+            .findAllByElementIdAndCategory(activityId, EFileCategory.ACTIVITY_FILE)
+            .stream()
+            .map(file -> new FileDTO(file.getId(), file.getFileName(), baseUrl + file.getUri()))
+            .toList();
+    var dto = activityPresentationDtoMapper.toDTO(activityPresentation, baseUrl, files);
     return ResponseEntity.ok(dto);
   }
 

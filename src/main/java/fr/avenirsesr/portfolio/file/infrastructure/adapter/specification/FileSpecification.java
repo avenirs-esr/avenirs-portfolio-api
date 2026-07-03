@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.specification;
 
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import java.util.UUID;
 import org.springframework.data.jpa.domain.Specification;
@@ -8,5 +9,13 @@ public interface FileSpecification {
   static Specification<FileEntity> ofElement(UUID elementId) {
     return (root, query, criteriaBuilder) ->
         criteriaBuilder.and(criteriaBuilder.equal(root.get("elementId"), elementId));
+  }
+
+  static Specification<FileEntity> ofElementAndCategory(
+      UUID elementId, EFileCategory fileCategory) {
+    return (root, query, criteriaBuilder) ->
+        criteriaBuilder.and(
+            criteriaBuilder.equal(root.get("elementId"), elementId),
+            criteriaBuilder.equal(root.get("fileCategory"), fileCategory));
   }
 }
