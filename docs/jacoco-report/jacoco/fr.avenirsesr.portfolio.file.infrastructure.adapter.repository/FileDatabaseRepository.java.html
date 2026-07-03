@@ -2,6 +2,7 @@
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
@@ -14,14 +15,23 @@ import org.springframework.stereotype.Repository;
 public class FileDatabaseRepository extends GenericJpaRepositoryAdapter&lt;File, FileEntity&gt;
     implements FileRepository {
   public FileDatabaseRepository(FileJpaRepository jpaRepository) {
-<span class="fc" id="L17">    super(jpaRepository, jpaRepository, FileEntity.class, FileMapper.INSTANCE);</span>
-<span class="fc" id="L18">  }</span>
+<span class="fc" id="L18">    super(jpaRepository, jpaRepository, FileEntity.class, FileMapper.INSTANCE);</span>
+<span class="fc" id="L19">  }</span>
 
   @Override
   public List&lt;File&gt; findAllByElement(UUID elementId) {
-<span class="fc" id="L22">    return jpaSpecificationExecutor.findAll(FileSpecification.ofElement(elementId)).stream()</span>
-<span class="fc" id="L23">        .map(FileMapper.INSTANCE::toDomain)</span>
-<span class="fc" id="L24">        .toList();</span>
+<span class="fc" id="L23">    return jpaSpecificationExecutor.findAll(FileSpecification.ofElement(elementId)).stream()</span>
+<span class="fc" id="L24">        .map(FileMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L25">        .toList();</span>
+  }
+
+  @Override
+  public List&lt;File&gt; findAllByElementIdAndCategory(UUID elementId, EFileCategory fileCategory) {
+<span class="fc" id="L30">    return jpaSpecificationExecutor</span>
+<span class="fc" id="L31">        .findAll(FileSpecification.ofElementAndCategory(elementId, fileCategory))</span>
+<span class="fc" id="L32">        .stream()</span>
+<span class="fc" id="L33">        .map(FileMapper.INSTANCE::toDomain)</span>
+<span class="fc" id="L34">        .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

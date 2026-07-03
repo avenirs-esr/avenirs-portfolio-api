@@ -14,14 +14,14 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.ap
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,169,376,0,0,38,84,5,13,5,13
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller,SelfKnowledgeController,75,88,0,0,17,26,3,7,3,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.specification,DeclaredProgramSpecification,5,34,1,5,2,5,2,3,1,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.service,ActivityServiceImpl,29,806,3,49,9,212,3,51,0,28
+avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.service,ActivityServiceImpl,33,727,3,45,10,191,3,48,0,27
 avenirs-portfolio-api,fr.avenirsesr.portfolio.association.infrastructure.adapter.repository,AssociationDatabaseRepository,44,152,5,13,9,35,6,9,1,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,FileResourceServiceConfig,0,22,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,FileDataGeneratorConfig,0,7,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.service,UserPhotoSeederConfig,0,7,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.repository,StudentProgressDatabaseRepository,0,72,0,0,0,30,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.imported.infrastructure.adapter.repository,SkillLevelProgressDatabaseRepository,38,31,1,1,8,6,3,4,2,4
-avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.data,ActivityPresentationData,0,33,0,0,0,1,0,1,0,1
+avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.data,ActivityPresentationData,0,36,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.data,ActivityStaffOverviewData,0,21,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.domain.data,ActivityWithStudentStatusData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.domain.service,DeclaredSkillSyncServiceImpl,0,64,0,4,0,20,0,4,0,2
@@ -33,7 +33,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TracesSummaryDat
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceLockedDeclaredActivitiesData,0,12,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceViewData,0,21,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.data,TraceAssociationData,0,9,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.application.adapter.controller,ActivityController,13,398,0,2,4,91,1,14,1,13
+avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.application.adapter.controller,ActivityController,13,423,0,2,4,96,1,15,1,14
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.specification,StudentSpecification,0,12,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,UserPrincipalDatabaseRepository,0,63,0,2,0,20,0,5,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,StudentDatabaseRepository,33,38,2,0,9,10,3,2,2,2
@@ -92,18 +92,18 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.association.domain.data,Associatio
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data,DeclaredExperienceAssociationData,0,9,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.domain.data,DeclaredExperienceAssociationsData,0,6,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.experience.infrastructure.adapter.repository,DeclaredExperienceDatabaseRepository,0,42,0,0,0,10,0,3,0,3
-avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.specification,FileSpecification,0,17,0,0,0,2,0,2,0,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.specification,FileSpecification,0,36,0,0,0,6,0,4,0,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client,ExternalSkillClient.new ParameterizedTypeReference() {...},0,3,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client,ExternalSkillClient,0,247,0,8,0,63,0,10,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.data,UserProfileOverviewData,0,24,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.data,UserQuickLinksData,0,21,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.service,FileResourceServiceImpl,459,200,53,15,103,48,46,9,6,4
+avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.service,FileResourceServiceImpl,459,206,53,15,103,49,46,10,6,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository,ActivityDatabaseRepository,37,93,0,4,8,24,1,6,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository,ActivityDraftDatabaseRepository,0,7,0,0,0,2,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository,StaffActivityOverviewQueryRepository,66,166,9,3,9,29,9,7,0,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification,TraceSpecification,13,184,0,8,3,33,3,10,3,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.infrastructure.adapter.specification,TraceFilterSpecificationBuilder,117,57,17,13,26,11,12,12,0,8
-avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.repository,FileDatabaseRepository,0,21,0,0,0,5,0,2,0,2
+avenirs-portfolio-api,fr.avenirsesr.portfolio.file.infrastructure.adapter.repository,FileDatabaseRepository,0,36,0,0,0,10,0,3,0,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.service,ClockServiceConfig,0,7,0,0,0,2,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.application.adapter.controller,StorageController,23,44,0,0,5,15,1,3,1,3
 avenirs-portfolio-api,fr.avenirsesr.portfolio.file.application.adapter.controller,FileController,89,4,0,0,22,1,3,1,3,1
