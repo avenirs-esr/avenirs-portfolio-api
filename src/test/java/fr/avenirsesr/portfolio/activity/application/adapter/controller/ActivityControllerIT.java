@@ -1,25 +1,27 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftAddLinksRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftCreationRequest;
 import fr.avenirsesr.portfolio.activity.application.adapter.request.ActivityDraftUpdateRequest;
-import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -29,10 +31,12 @@ class ActivityControllerIT extends ContainerConfigurationTest {
   private static final String NAVIGATION_PATH = BASE_PATH + "/navigation";
   private static final String PRESENTATION_PATH =
       BASE_PATH + "/PUBLISHED/{activityId}/presentation";
+  private static final String DRAFT_PRESENTATION_PATH = BASE_PATH + "/DRAFT/{draftId}/presentation";
   private static final String DRAFT_PATH = BASE_PATH + "/draft";
   private static final String DRAFT_UPDATE_PATH = BASE_PATH + "/DRAFT/{draftId}";
   private static final String WORKING_SPACE_PATH = BASE_PATH + "/staff/working-space";
   private static final String LIBRARY_PATH = BASE_PATH + "/staff/library";
+  private static final String DRAFT_ADD_LINKS_PATH = BASE_PATH + "/{draftId}/links";
   private static final String PUBLISH_PATH = BASE_PATH + "/publish/{draftId}";
   private static final String UNPUBLISH_PATH = BASE_PATH + "/unpublish/{activityId}";
   private static final String CONTENT_PATH = BASE_PATH + "/{activityStatus}/{activityId}/content";
@@ -68,6 +72,1549 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     seederRunner.run();
   }
 
+  @Nested
+  class GivenActivityEndpoint {
+
+    @BeforeEach
+    void setupGiven() {
+      BddLogger.given("activity endpoints");
+    }
+
+    @Nested
+    class WhenGettingNavigation {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + NAVIGATION_PATH);
+      }
+
+      @Test
+      void thenItShouldReturnActivitiesNavigationAsArrayAndValidateItemShapeWhenPresent()
+          throws Exception {
+        BddLogger.then("it should return a JSON array with valid item shape when present");
+
+        String body =
+            webTestClient
+                .get()
+                .uri(NAVIGATION_PATH)
+                .headers(ActivityControllerIT.this::addStudentHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        JsonNode root = objectMapper.readTree(body);
+
+        if (root == null || !root.isArray()) {
+          throw new AssertionError("root should be a JSON array");
+        }
+
+        if (root.isEmpty()) {
+          return;
+        }
+
+        JsonNode firstMenuWithItems = null;
+        for (JsonNode menu : root) {
+          JsonNode items = menu.get("items");
+          if (items != null && items.isArray() && !items.isEmpty()) {
+            firstMenuWithItems = menu;
+            break;
+          }
+        }
+
+        if (firstMenuWithItems == null) {
+          return;
+        }
+
+        if (!firstMenuWithItems.hasNonNull("title")
+            || !firstMenuWithItems.get("title").isTextual()) {
+          throw new AssertionError("menu should have textual title");
+        }
+
+        JsonNode firstItem = firstMenuWithItems.get("items").get(0);
+
+        if (!firstItem.hasNonNull("id")
+            || !firstItem.hasNonNull("title")
+            || !firstItem.get("id").isTextual()
+            || !firstItem.get("title").isTextual()) {
+          throw new AssertionError("invalid item shape");
+        }
+      }
+    }
+
+    @Nested
+    class WhenGettingActivitiesView {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + BASE_PATH);
+      }
+
+      @Test
+      void thenItShouldReturnActivitiesView() {
+        BddLogger.then("it should return paged activities");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "10")
+                        .build())
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldReturnActivitiesViewFilteredByThematic() {
+        BddLogger.then("it should return filtered paged activities");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(BASE_PATH)
+                        .queryParam("thematic", EActivityThematic.SELF_KNOWLEDGE.name())
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "8")
+                        .build())
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data")
+            .isArray()
+            .jsonPath("$.page.page")
+            .isEqualTo(0)
+            .jsonPath("$.page.pageSize")
+            .isEqualTo(8)
+            .jsonPath("$.page.totalElements")
+            .exists();
+      }
+    }
+
+    @Nested
+    class WhenGettingActivityPresentation {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + PRESENTATION_PATH);
+      }
+
+      @Test
+      void thenItShouldGetActivityPresentation() throws Exception {
+        BddLogger.and("given an existing activity");
+        UUID activityId = getFirstActivityIdFromOverview();
+
+        BddLogger.then("it should return 200 with the activity presentation");
+
+        webTestClient
+            .get()
+            .uri(PRESENTATION_PATH, activityId)
+            .header("Accept-Language", ELanguage.FRENCH.getCode())
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.id")
+            .isEqualTo(activityId.toString())
+            .jsonPath("$.title")
+            .exists()
+            .jsonPath("$.summary")
+            .exists()
+            .jsonPath("$.createdAt")
+            .exists()
+            .jsonPath("$.updatedAt")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldReturn404WhenActivityNotFound() {
+        BddLogger.and("given a non-existent activity id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
+
+        webTestClient
+            .get()
+            .uri(PRESENTATION_PATH, unknownId)
+            .header("Accept-Language", ELanguage.FRENCH.getCode())
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_NOT_FOUND");
+      }
+    }
+
+    @Nested
+    class WhenCreatingActivityDraft {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a POST on " + DRAFT_PATH);
+      }
+
+      @Test
+      void thenItShouldCreateActivityDraftAndReturnItsId() throws Exception {
+        BddLogger.then("it should return 200 with the created draft id");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftCreationRequest("Mon brouillon de test"));
+
+        webTestClient
+            .post()
+            .uri(DRAFT_PATH)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.draftId")
+            .exists()
+            .jsonPath("$.draftId")
+            .isNotEmpty();
+      }
+
+      @Test
+      void thenItShouldReturn4xxWhenBodyIsMissing() {
+        BddLogger.then("it should return a 4xx error");
+
+        webTestClient
+            .post()
+            .uri(DRAFT_PATH)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .is4xxClientError();
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() throws Exception {
+        BddLogger.then("it should return 401");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftCreationRequest("Brouillon non authentifié"));
+
+        webTestClient
+            .post()
+            .uri(DRAFT_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+
+      @Test
+      void thenItShouldReturn403WhenUserIsNotStaff() throws Exception {
+        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+        String requestBody =
+            objectMapper.writeValueAsString(new ActivityDraftCreationRequest("Brouillon étudiant"));
+
+        webTestClient
+            .post()
+            .uri(DRAFT_PATH)
+            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+      }
+    }
+
+    @Nested
+    class WhenUpdatingActivityDraft {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a PATCH on " + DRAFT_UPDATE_PATH);
+      }
+
+      @Test
+      void thenItShouldUpdateActivityAndReturnItsId() throws Exception {
+        BddLogger.and("given an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon à mettre à jour");
+
+        BddLogger.then("it should return 200 with the updated draft id");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    "Titre mis à jour",
+                    EActivityThematic.EXPERIENCES,
+                    "Nouveau summary",
+                    "<p>Nouvelle description</p>",
+                    "Avant entretien",
+                    "Label court",
+                    5,
+                    3,
+                    false));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.draftId")
+            .isEqualTo(draftId.toString());
+      }
+
+      @Test
+      void thenItShouldUpdateActivityWithPartialFields() throws Exception {
+        BddLogger.and("given an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon mise à jour partielle");
+
+        BddLogger.then("it should return 200 with the draft id");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    "Titre seul mis à jour", null, null, null, null, null, null, null, null));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.draftId")
+            .isEqualTo(draftId.toString());
+      }
+
+      @Test
+      void thenItShouldReturn404WhenDraftNotFound() throws Exception {
+        BddLogger.and("given a non-existent draft id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND error code");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    "Titre", null, null, null, null, null, null, null, null));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, unknownId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
+      }
+
+      @Test
+      void thenItShouldReturn403WhenStudentTriesToUpdateDraft() throws Exception {
+        BddLogger.and("given an existing activity draft and a student account");
+        UUID draftId = createDraftAndGetId("Brouillon accès refusé");
+
+        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    "Titre étudiant", null, null, null, null, null, null, null, null));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, draftId)
+            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() throws Exception {
+        BddLogger.then("it should return 401");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftUpdateRequest(
+                    "Titre", null, null, null, null, null, null, null, null));
+
+        webTestClient
+            .patch()
+            .uri(DRAFT_UPDATE_PATH, UUID.randomUUID())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+    }
+
+    @Nested
+    class WhenAddingLinksToActivityDraft {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a POST on " + DRAFT_ADD_LINKS_PATH);
+      }
+
+      @Test
+      void thenItShouldAddLinksAndReturnDraftId() throws Exception {
+        BddLogger.given("an existing activity draft");
+        UUID draftId = createDraftAndGetId("Brouillon avec liens");
+
+        BddLogger.then("it should return 200 with the updated draft id");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftAddLinksRequest(
+                    List.of("https://example.com", "https://avenirs-esr.fr")));
+
+        webTestClient
+            .post()
+            .uri(DRAFT_ADD_LINKS_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.draftId")
+            .isEqualTo(draftId.toString());
+      }
+
+      @Test
+      void thenItShouldReturn404WhenDraftNotFound() throws Exception {
+        BddLogger.given("a non-existent draft id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftAddLinksRequest(List.of("https://example.com")));
+
+        webTestClient
+            .post()
+            .uri(DRAFT_ADD_LINKS_PATH, unknownId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
+      }
+
+      @Test
+      void thenItShouldReturn403WhenStudentTriesToAddLinks() throws Exception {
+        BddLogger.given("an existing activity draft and a student account");
+        UUID draftId = createDraftAndGetId("Brouillon liens accès refusé");
+
+        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftAddLinksRequest(List.of("https://example.com")));
+
+        webTestClient
+            .post()
+            .uri(DRAFT_ADD_LINKS_PATH, draftId)
+            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() throws Exception {
+        BddLogger.then("it should return 401");
+
+        String requestBody =
+            objectMapper.writeValueAsString(
+                new ActivityDraftAddLinksRequest(List.of("https://example.com")));
+
+        webTestClient
+            .post()
+            .uri(DRAFT_ADD_LINKS_PATH, UUID.randomUUID())
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+    }
+
+    @Nested
+    class WhenPublishingActivityDraft {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a POST on " + PUBLISH_PATH);
+      }
+
+      @Test
+      void thenItShouldPublishActivityDraftAndReturnActivityId() throws Exception {
+        BddLogger.and("given an existing activity draft with a summary");
+        UUID draftId = createDraftAndGetId("Brouillon à publier");
+        fillDraftWithSummary(draftId);
+
+        BddLogger.then("it should return 200 with the published activity id");
+
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.createdItemId")
+            .exists()
+            .jsonPath("$.createdItemId")
+            .isNotEmpty();
+      }
+
+      @Test
+      void thenItShouldPublishActivityDraftAndReturnSameIdAsDraft() throws Exception {
+        BddLogger.and("given an existing activity draft with a summary");
+        UUID draftId = createDraftAndGetId("Brouillon id conservé");
+        fillDraftWithSummary(draftId);
+
+        BddLogger.then("it should return the same id as the draft");
+
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.createdItemId")
+            .isEqualTo(draftId.toString());
+      }
+
+      @Test
+      void thenItShouldDeleteDraftAfterPublishing() throws Exception {
+        BddLogger.and("given an existing activity draft with a summary");
+        UUID draftId = createDraftAndGetId("Brouillon supprimé après publication");
+        fillDraftWithSummary(draftId);
+
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("the draft should no longer exist");
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/DRAFT/{draftId}/presentation", draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound();
+      }
+
+      @Test
+      void thenItShouldMakeActivityAccessibleAfterPublishing() throws Exception {
+        BddLogger.and("given an existing draft with a summary");
+        UUID draftId = createDraftAndGetId("Brouillon accessible après publication");
+        fillDraftWithSummary(draftId);
+
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("the published activity should be accessible via the presentation endpoint");
+
+        webTestClient
+            .get()
+            .uri(PRESENTATION_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.id")
+            .isEqualTo(draftId.toString());
+      }
+
+      @Test
+      void thenItShouldReturn404WhenDraftNotFound() {
+        BddLogger.and("given a non-existent draft id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND error code");
+
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, unknownId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
+      }
+
+      @Test
+      void thenItShouldReturn400WhenDraftHasNoSummary() throws Exception {
+        BddLogger.and("given an existing draft without a summary");
+        UUID draftId = createDraftAndGetId("Brouillon sans résumé");
+
+        BddLogger.then("it should return 400 because summary is required to publish");
+
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(400)
+            .expectBody()
+            .jsonPath("$.code")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldReturn403WhenStudentTriesToPublish() throws Exception {
+        BddLogger.and("given an existing draft and a student account");
+        UUID draftId = createDraftAndGetId("Brouillon publication refusée");
+        fillDraftWithSummary(draftId);
+
+        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() {
+        BddLogger.and("given a non-authenticated request");
+        BddLogger.then("it should return 401");
+
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, UUID.randomUUID())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+    }
+
+    @Nested
+    class WhenUnpublishingActivity {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a POST on " + UNPUBLISH_PATH);
+      }
+
+      @Test
+      void thenItShouldUnpublishActivityAndReturn204() throws Exception {
+        BddLogger.and("given an existing published activity created by the staff");
+        UUID activityId = publishNewActivity("Activité à dépublier");
+
+        BddLogger.then("it should return 204 No Content");
+
+        webTestClient
+            .post()
+            .uri(UNPUBLISH_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNoContent();
+      }
+
+      @Test
+      void thenItShouldHideUnpublishedActivityFromActivitiesView() throws Exception {
+        BddLogger.and("given a newly published activity");
+        UUID activityId = publishNewActivity("Activité masquée après dépublication");
+
+        webTestClient
+            .post()
+            .uri(UNPUBLISH_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNoContent();
+
+        BddLogger.then("the activity should no longer appear in the student activities view");
+
+        String body =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder ->
+                        uriBuilder
+                            .path(BASE_PATH)
+                            .queryParam("page", "0")
+                            .queryParam("pageSize", "100")
+                            .build())
+                .headers(ActivityControllerIT.this::addStudentHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        JsonNode data = objectMapper.readTree(body).get("data");
+        for (JsonNode item : data) {
+          if (activityId.toString().equals(item.get("id").asText())) {
+            throw new AssertionError("Unpublished activity should not appear in activitiesView");
+          }
+        }
+      }
+
+      @Test
+      void thenItShouldHideUnpublishedActivityFromNavigation() throws Exception {
+        BddLogger.and("given a newly published activity");
+        UUID activityId = publishNewActivity("Activité navigation dépubliée");
+
+        webTestClient
+            .post()
+            .uri(UNPUBLISH_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNoContent();
+
+        BddLogger.then("the activity should not appear in the navigation");
+
+        String body =
+            webTestClient
+                .get()
+                .uri(NAVIGATION_PATH)
+                .headers(ActivityControllerIT.this::addStudentHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        String activityIdAsString = activityId.toString();
+        JsonNode root = objectMapper.readTree(body);
+        for (JsonNode menu : root) {
+          JsonNode items = menu.get("items");
+          if (items == null) {
+            continue;
+          }
+          for (JsonNode item : items) {
+            if (activityIdAsString.equals(item.get("id").asText())) {
+              throw new AssertionError("Unpublished activity should not appear in navigation");
+            }
+          }
+        }
+      }
+
+      @Test
+      void thenItShouldShowUnpublishedActivityInStaffWorkingSpace() throws Exception {
+        BddLogger.and("given a published activity that gets unpublished");
+        UUID activityId = publishNewActivity("Activité visible dans working space");
+
+        webTestClient
+            .post()
+            .uri(UNPUBLISH_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isNoContent();
+
+        BddLogger.then("the unpublished activity should appear with UNPUBLISHED status");
+
+        String body =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder ->
+                        uriBuilder
+                            .path(WORKING_SPACE_PATH)
+                            .queryParam("page", "0")
+                            .queryParam("pageSize", "100")
+                            .build())
+                .headers(ActivityControllerIT.this::addStaffHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        JsonNode data = objectMapper.readTree(body).get("data");
+        boolean found = false;
+
+        for (JsonNode item : data) {
+          if (activityId.toString().equals(item.get("activityId").asText())) {
+            assertTrue(
+                "UNPUBLISHED".equals(item.get("activityStatus").asText()),
+                "Expected UNPUBLISHED status but got: " + item.get("activityStatus").asText());
+            found = true;
+            break;
+          }
+        }
+
+        assertTrue(found, "Unpublished activity should still appear in staff working space");
+      }
+
+      @Test
+      void thenItShouldReturn404WhenActivityNotFound() {
+        BddLogger.and("given a non-existent activity id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
+
+        webTestClient
+            .post()
+            .uri(UNPUBLISH_PATH, unknownId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_NOT_FOUND");
+      }
+
+      @Test
+      void thenItShouldReturn403WhenStudentTriesToUnpublish() throws Exception {
+        BddLogger.and("given an existing published activity and a student (non-staff) account");
+        UUID activityId = publishNewActivity("Activité dépublication refusée");
+
+        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+        webTestClient
+            .post()
+            .uri(UNPUBLISH_PATH, activityId)
+            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() {
+        BddLogger.then("it should return 401");
+
+        webTestClient
+            .post()
+            .uri(UNPUBLISH_PATH, UUID.randomUUID())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+    }
+
+    @Nested
+    class WhenGettingStaffWorkingSpace {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + WORKING_SPACE_PATH);
+      }
+
+      @Test
+      void thenItShouldReturnStaffActivityWorkingSpace() {
+        BddLogger.then("it should return paged activities with data and page info");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(WORKING_SPACE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "8")
+                        .build())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data")
+            .isArray()
+            .jsonPath("$.page.page")
+            .isEqualTo(0)
+            .jsonPath("$.page.pageSize")
+            .isEqualTo(8)
+            .jsonPath("$.page.totalElements")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldReturnDefaultPaginationWhenNoParamsProvided() {
+        BddLogger.then("it should return 200 with default pagination applied");
+
+        webTestClient
+            .get()
+            .uri(WORKING_SPACE_PATH)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data")
+            .isArray()
+            .jsonPath("$.page.page")
+            .isEqualTo(0)
+            .jsonPath("$.page.pageSize")
+            .isEqualTo(8)
+            .jsonPath("$.page.totalElements")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldReturnOnlyStaffOwnActivities() throws Exception {
+        BddLogger.and("given a staff user with created drafts");
+        createDraftAndGetId("Mon brouillon working space");
+
+        BddLogger.then("it should return at least one activity belonging to the staff");
+
+        String body =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder ->
+                        uriBuilder
+                            .path(WORKING_SPACE_PATH)
+                            .queryParam("page", "0")
+                            .queryParam("pageSize", "12")
+                            .build())
+                .headers(ActivityControllerIT.this::addStaffHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        JsonNode data = objectMapper.readTree(body).get("data");
+
+        assertTrue(data.isArray());
+        assertTrue(data.size() > 0);
+
+        JsonNode first = data.get(0);
+        assertTrue(first.hasNonNull("activityId"));
+        assertTrue(first.hasNonNull("title"));
+        assertTrue(first.hasNonNull("activityStatus"));
+      }
+
+      @Test
+      void thenItShouldReturnItemsWithExpectedShape() throws Exception {
+        BddLogger.and("given a staff user with at least one activity or draft");
+        createDraftAndGetId("Brouillon pour vérifier la shape");
+
+        BddLogger.then(
+            "each item should have activityId, title, thematic and activityStatus fields");
+
+        String body =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder ->
+                        uriBuilder
+                            .path(WORKING_SPACE_PATH)
+                            .queryParam("page", "0")
+                            .queryParam("pageSize", "12")
+                            .build())
+                .headers(ActivityControllerIT.this::addStaffHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        JsonNode data = objectMapper.readTree(body).get("data");
+
+        if (data.isEmpty()) {
+          return;
+        }
+
+        for (JsonNode item : data) {
+          assertTrue(item.hasNonNull("activityId"), "missing activityId");
+          assertTrue(item.hasNonNull("title"), "missing title");
+          assertTrue(item.hasNonNull("activityStatus"), "missing activityStatus");
+
+          String status = item.get("activityStatus").asText();
+          assertTrue(
+              status.equals("DRAFT") || status.equals("PUBLISHED") || status.equals("UNPUBLISHED"),
+              "unexpected status: " + status);
+        }
+      }
+
+      @Test
+      void thenItShouldRespectPageSizeLimit() {
+        BddLogger.then("it should cap the pageSize to the maximum allowed value");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(WORKING_SPACE_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "999")
+                        .build())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.page.pageSize")
+            .isEqualTo(100);
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() {
+        BddLogger.then("it should return 401");
+
+        webTestClient
+            .get()
+            .uri(WORKING_SPACE_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+
+      @Test
+      void shouldReturn403WhenUserIsNotStaff() {
+        BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
+        BddLogger.when("performing a GET with a student account");
+        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+        webTestClient
+            .get()
+            .uri(WORKING_SPACE_PATH)
+            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+      }
+    }
+
+    @Nested
+    class WhenGettingStaffLibrary {
+
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + LIBRARY_PATH);
+      }
+
+      @Test
+      void thenItShouldReturnStaffActivityLibrary() {
+        BddLogger.then("it should return paged activities with data and page info");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(LIBRARY_PATH)
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "8")
+                        .build())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data")
+            .isArray()
+            .jsonPath("$.page.page")
+            .isEqualTo(0)
+            .jsonPath("$.page.pageSize")
+            .isEqualTo(8)
+            .jsonPath("$.page.totalElements")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldReturnStaffActivityLibraryFilteredByThematic() {
+        BddLogger.then("it should return filtered paged activities");
+
+        webTestClient
+            .get()
+            .uri(
+                uriBuilder ->
+                    uriBuilder
+                        .path(LIBRARY_PATH)
+                        .queryParam("thematic", EActivityThematic.SELF_KNOWLEDGE.name())
+                        .queryParam("page", "0")
+                        .queryParam("pageSize", "8")
+                        .build())
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data")
+            .isArray()
+            .jsonPath("$.page.page")
+            .isEqualTo(0)
+            .jsonPath("$.page.pageSize")
+            .isEqualTo(8)
+            .jsonPath("$.page.totalElements")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldReturnDefaultPaginationWhenNoParamsProvided() {
+        BddLogger.then("it should return 200 with default pagination applied");
+
+        webTestClient
+            .get()
+            .uri(LIBRARY_PATH)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.data")
+            .isArray()
+            .jsonPath("$.page.page")
+            .isEqualTo(0)
+            .jsonPath("$.page.pageSize")
+            .isEqualTo(8)
+            .jsonPath("$.page.totalElements")
+            .exists();
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() {
+        BddLogger.and("given a non-authenticated request");
+        BddLogger.then("it should return 401");
+
+        webTestClient
+            .get()
+            .uri(LIBRARY_PATH)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+
+      @Test
+      void thenItShouldReturn403WhenUserIsNotStaff() {
+        BddLogger.and("given a student account");
+        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+        webTestClient
+            .get()
+            .uri(LIBRARY_PATH)
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+      }
+    }
+
+    @Nested
+    class WhenGettingActivityContent {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a GET on " + CONTENT_PATH);
+      }
+
+      @Test
+      void thenItShouldReturnNullHasEnrolledStudentForPublishedActivity() throws Exception {
+        BddLogger.and("given a published activity");
+        UUID activityId = publishNewActivity("Activité contenu publiée");
+
+        BddLogger.then("it should return 200 with hasEnrolledStudent equal to null");
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "PUBLISHED", activityId)
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.id")
+            .isEqualTo(activityId.toString())
+            .jsonPath("$.hasEnrolledStudent")
+            .doesNotExist();
+      }
+
+      @Test
+      void thenItShouldReturn404WhenActivityNotFound() {
+        BddLogger.and("given a non-existent activity id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "PUBLISHED", unknownId)
+            .headers(ActivityControllerIT.this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_NOT_FOUND");
+      }
+
+      @Test
+      void thenItShouldReturnTrueHasEnrolledStudentForDraftWhenStudentIsEnrolled()
+          throws Exception {
+        BddLogger.and("given a published activity with an enrolled student");
+        UUID activityId = publishNewActivity("Activité brouillon avec étudiant inscrit");
+        subscribeStudentToActivity(activityId);
+
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("the draft content should have hasEnrolledStudent equal to true");
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.hasEnrolledStudent")
+            .isEqualTo(true);
+      }
+
+      @Test
+      void thenItShouldReturnFalseHasEnrolledStudentForDraftWhenNoStudentIsEnrolled()
+          throws Exception {
+        BddLogger.and("given a published activity with no enrolled student");
+        UUID activityId = publishNewActivity("Activité brouillon sans étudiant inscrit");
+
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("the draft content should have hasEnrolledStudent equal to false");
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.hasEnrolledStudent")
+            .isEqualTo(false);
+      }
+
+      @Test
+      void thenItShouldReturn404WhenDraftNotFound() {
+        BddLogger.and("given a non-existent draft id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND error code");
+
+        webTestClient
+            .get()
+            .uri(CONTENT_PATH, "DRAFT", unknownId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
+      }
+    }
+
+    @Nested
+    class WhenCreatingDraftFromActivity {
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("performing a POST on " + CREATE_DRAFT_PATH);
+      }
+
+      @Test
+      void thenItShouldCreateDraftWithSameIdAsActivity() throws Exception {
+        BddLogger.and("given an existing published activity created by the staff");
+        UUID activityId = publishNewActivity("Activité pour édition de brouillon");
+
+        BddLogger.then("it should return 200 with the same id as the activity");
+
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.draftId")
+            .isEqualTo(activityId.toString());
+      }
+
+      @Test
+      void thenItShouldUnpublishActivityWhenNoStudentIsEnrolled() throws Exception {
+        BddLogger.and("given a published activity with no enrolled student");
+        UUID activityId = publishNewActivity("Activité dépubliée après édition");
+
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, activityId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        BddLogger.then("the underlying activity should now be UNPUBLISHED");
+
+        String body =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder ->
+                        uriBuilder
+                            .path(WORKING_SPACE_PATH)
+                            .queryParam("page", "0")
+                            .queryParam("pageSize", "100")
+                            .build())
+                .headers(ActivityControllerIT.this::addStaffHeaders)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        JsonNode data = objectMapper.readTree(body).get("data");
+        boolean found = false;
+
+        for (JsonNode item : data) {
+          if (activityId.toString().equals(item.get("activityId").asText())) {
+            assertTrue(
+                "UNPUBLISHED".equals(item.get("activityStatus").asText()),
+                "Expected UNPUBLISHED status but got: " + item.get("activityStatus").asText());
+            found = true;
+            break;
+          }
+        }
+
+        assertTrue(found, "Activity should still appear in staff working space as UNPUBLISHED");
+      }
+
+      @Test
+      void thenItShouldReturn404WhenActivityNotFound() {
+        BddLogger.and("given a non-existent activity id");
+        UUID unknownId = UUID.randomUUID();
+
+        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
+
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, unknownId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("ACTIVITY_NOT_FOUND");
+      }
+
+      @Test
+      void thenItShouldReturn403WhenStudentTriesToCreateDraft() throws Exception {
+        BddLogger.and("given an existing published activity and a student (non-staff) account");
+        UUID activityId = publishNewActivity("Activité édition refusée");
+
+        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, activityId)
+            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isForbidden()
+            .expectBody()
+            .jsonPath("$.code")
+            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+      }
+
+      @Test
+      void thenItShouldReturn401WhenNotAuthenticated() {
+        BddLogger.and("given a non-authenticated request");
+        BddLogger.then("it should return 401");
+
+        webTestClient
+            .post()
+            .uri(CREATE_DRAFT_PATH, UUID.randomUUID())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+      }
+    }
+  }
+
+  private UUID getFirstActivityIdFromOverview() throws Exception {
+    String body =
+        webTestClient
+            .get()
+            .uri(BASE_PATH)
+            .headers(this::addStudentHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    JsonNode activities = objectMapper.readTree(body).get("data");
+
+    if (activities == null || !activities.isArray() || activities.isEmpty()) {
+      throw new IllegalStateException("Seeder returned no activity");
+    }
+
+    return UUID.fromString(activities.get(0).get("id").asText());
+  }
+
   private UUID createDraftAndGetId(String title) throws Exception {
     String requestBody = objectMapper.writeValueAsString(new ActivityDraftCreationRequest(title));
 
@@ -75,9 +1622,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         webTestClient
             .post()
             .uri(DRAFT_PATH)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+            .headers(this::addStaffHeaders)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(requestBody)
             .accept(MediaType.APPLICATION_JSON)
@@ -108,9 +1653,22 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     webTestClient
         .patch()
         .uri(DRAFT_UPDATE_PATH, draftId)
-        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+        .headers(this::addStaffHeaders)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
+  private void addLinksToDraft(UUID draftId, List<String> links) throws Exception {
+    String requestBody = objectMapper.writeValueAsString(new ActivityDraftAddLinksRequest(links));
+
+    webTestClient
+        .post()
+        .uri(DRAFT_ADD_LINKS_PATH, draftId)
+        .headers(this::addStaffHeaders)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(requestBody)
         .accept(MediaType.APPLICATION_JSON)
@@ -127,9 +1685,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         webTestClient
             .post()
             .uri(PUBLISH_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
+            .headers(this::addStaffHeaders)
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -145,9 +1701,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
     webTestClient
         .post()
         .uri(SUBSCRIBE_PATH, activityId)
-        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .headers(this::addStudentHeaders)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue("{}")
         .exchange()
@@ -155,1529 +1709,21 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isCreated();
   }
 
-  private UUID getFirstActivityIdFromOverview() throws Exception {
-    String body =
-        webTestClient
-            .get()
-            .uri(BASE_PATH)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody(String.class)
-            .returnResult()
-            .getResponseBody();
-
-    JsonNode activities = objectMapper.readTree(body).get("data");
-
-    if (activities == null || !activities.isArray() || activities.isEmpty()) {
-      throw new IllegalStateException("Seeder returned no activity");
-    }
-
-    return UUID.fromString(activities.get(0).get("id").asText());
+  private void addStudentHeaders(HttpHeaders headers) {
+    headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload);
+    headers.add(AvenirsSecurityHeaders.CONTEXT_KID, secretKey);
+    headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature);
   }
 
-  @Nested
-  class GivenActivityEndpoint {
-
-    @Nested
-    class WhenGettingNavigation {
-
-      @Test
-      void shouldReturnActivitiesNavigationAsArrayAndValidateItemShapeWhenPresent()
-          throws Exception {
-        BddLogger.given("the " + NAVIGATION_PATH + " endpoint");
-        BddLogger.when("performing a GET");
-        BddLogger.then("it should return a JSON array");
-
-        String body =
-            webTestClient
-                .get()
-                .uri(NAVIGATION_PATH)
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        JsonNode root = objectMapper.readTree(body);
-
-        if (root == null || !root.isArray()) {
-          throw new AssertionError("root should be a JSON array");
-        }
-
-        if (root.isEmpty()) return;
-
-        JsonNode firstMenuWithItems = null;
-        for (JsonNode menu : root) {
-          JsonNode items = menu.get("items");
-          if (items != null && items.isArray() && !items.isEmpty()) {
-            firstMenuWithItems = menu;
-            break;
-          }
-        }
-
-        if (firstMenuWithItems == null) return;
-
-        if (!firstMenuWithItems.hasNonNull("title")
-            || !firstMenuWithItems.get("title").isTextual()) {
-          throw new AssertionError("menu should have textual title");
-        }
-
-        JsonNode firstItem = firstMenuWithItems.get("items").get(0);
-
-        if (!firstItem.hasNonNull("id")
-            || !firstItem.hasNonNull("title")
-            || !firstItem.get("id").isTextual()
-            || !firstItem.get("title").isTextual()) {
-          throw new AssertionError("invalid item shape");
-        }
-      }
-    }
-
-    @Nested
-    class WhenGettingActivitiesView {
-
-      @Test
-      void shouldReturnActivitiesView() {
-        BddLogger.given("the " + BASE_PATH + " endpoint");
-        BddLogger.when("performing a GET");
-        BddLogger.then("it should return paged activities");
-
-        webTestClient
-            .get()
-            .uri(
-                uriBuilder ->
-                    uriBuilder
-                        .path(BASE_PATH)
-                        .queryParam("page", "0")
-                        .queryParam("pageSize", "10")
-                        .build())
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.data")
-            .exists();
-      }
-
-      @Test
-      void shouldReturnActivitiesViewFilteredByThematic() {
-        BddLogger.given("the " + BASE_PATH + " endpoint with thematic filter");
-        BddLogger.when("performing a GET with thematic filter");
-        BddLogger.then("it should return filtered paged activities");
-
-        webTestClient
-            .get()
-            .uri(
-                uriBuilder ->
-                    uriBuilder
-                        .path(BASE_PATH)
-                        .queryParam("thematic", EActivityThematic.SELF_KNOWLEDGE.name())
-                        .queryParam("page", "0")
-                        .queryParam("pageSize", "8")
-                        .build())
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.data")
-            .isArray()
-            .jsonPath("$.page.page")
-            .isEqualTo(0)
-            .jsonPath("$.page.pageSize")
-            .isEqualTo(8)
-            .jsonPath("$.page.totalElements")
-            .exists();
-      }
-    }
-
-    @Nested
-    class WhenGettingActivityPresentation {
-
-      @Test
-      void shouldGetActivityPresentation() throws Exception {
-        BddLogger.given("an existing activity");
-        UUID activityId = getFirstActivityIdFromOverview();
-
-        BddLogger.when("performing a GET on the presentation endpoint");
-        BddLogger.then("it should return 200 with the activity presentation");
-
-        webTestClient
-            .get()
-            .uri(PRESENTATION_PATH, activityId)
-            .header("Accept-Language", ELanguage.FRENCH.getCode())
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.id")
-            .isEqualTo(activityId.toString())
-            .jsonPath("$.title")
-            .exists()
-            .jsonPath("$.summary")
-            .exists()
-            .jsonPath("$.createdAt")
-            .exists()
-            .jsonPath("$.updatedAt")
-            .exists();
-      }
-
-      @Test
-      void shouldReturn404WhenActivityNotFound() {
-        BddLogger.given("a non-existent activity id");
-        UUID unknownId = UUID.randomUUID();
-
-        BddLogger.when("performing a GET on the presentation endpoint with unknown id");
-        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
-
-        webTestClient
-            .get()
-            .uri(PRESENTATION_PATH, unknownId)
-            .header("Accept-Language", ELanguage.FRENCH.getCode())
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNotFound()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("ACTIVITY_NOT_FOUND");
-      }
-    }
-
-    @Nested
-    class WhenCreatingActivityDraft {
-
-      @Test
-      void shouldCreateActivityDraftAndReturnItsId() throws Exception {
-        BddLogger.given("the " + DRAFT_PATH + " endpoint");
-        BddLogger.when("performing a POST with a valid title");
-        BddLogger.then("it should return 200 with the created draft id");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftCreationRequest("Mon brouillon de test"));
-
-        webTestClient
-            .post()
-            .uri(DRAFT_PATH)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.draftId")
-            .exists()
-            .jsonPath("$.draftId")
-            .isNotEmpty();
-      }
-
-      @Test
-      void shouldReturn4xxWhenBodyIsMissing() {
-        BddLogger.given("the " + DRAFT_PATH + " endpoint");
-        BddLogger.when("performing a POST without a body");
-        BddLogger.then("it should return a 4xx error");
-
-        webTestClient
-            .post()
-            .uri(DRAFT_PATH)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .is4xxClientError();
-      }
-
-      @Test
-      void shouldReturn401WhenNotAuthenticated() throws Exception {
-        BddLogger.given("the " + DRAFT_PATH + " endpoint");
-        BddLogger.when("performing a POST without authentication headers");
-        BddLogger.then("it should return 401");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftCreationRequest("Brouillon non authentifié"));
-
-        webTestClient
-            .post()
-            .uri(DRAFT_PATH)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized();
-      }
-
-      @Test
-      void shouldReturn403WhenUserIsNotStaff() throws Exception {
-        BddLogger.given("the " + DRAFT_PATH + " endpoint");
-        BddLogger.when("performing a POST with a student (non-staff) account");
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
-
-        String requestBody =
-            objectMapper.writeValueAsString(new ActivityDraftCreationRequest("Brouillon étudiant"));
-
-        webTestClient
-            .post()
-            .uri(DRAFT_PATH)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isForbidden()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
-      }
-    }
-
-    @Nested
-    class WhenUpdatingActivityDraft {
-
-      @Test
-      void shouldUpdateActivityAndReturnItsId() throws Exception {
-        BddLogger.given("an existing activity draft");
-        UUID draftId = createDraftAndGetId("Brouillon à mettre à jour");
-
-        BddLogger.when("performing a PATCH with valid fields");
-        BddLogger.then("it should return 200 with the updated draft id");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftUpdateRequest(
-                    "Titre mis à jour",
-                    EActivityThematic.EXPERIENCES,
-                    "Nouveau summary",
-                    "<p>Nouvelle description</p>",
-                    "Avant entretien",
-                    "Label court",
-                    5,
-                    3,
-                    false));
-
-        webTestClient
-            .patch()
-            .uri(DRAFT_UPDATE_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.draftId")
-            .isEqualTo(draftId.toString());
-      }
-
-      @Test
-      void shouldUpdateActivityWithPartialFields() throws Exception {
-        BddLogger.given("an existing activity draft");
-        UUID draftId = createDraftAndGetId("Brouillon mise à jour partielle");
-
-        BddLogger.when("performing a PATCH with only the title");
-        BddLogger.then("it should return 200 with the draft id");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftUpdateRequest(
-                    "Titre seul mis à jour", null, null, null, null, null, null, null, null));
-
-        webTestClient
-            .patch()
-            .uri(DRAFT_UPDATE_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.draftId")
-            .isEqualTo(draftId.toString());
-      }
-
-      @Test
-      void shouldReturn404WhenDraftNotFound() throws Exception {
-        BddLogger.given("a non-existent draft id");
-        UUID unknownId = UUID.randomUUID();
-
-        BddLogger.when("performing a PATCH on an unknown draft");
-        BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND error code");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null));
-
-        webTestClient
-            .patch()
-            .uri(DRAFT_UPDATE_PATH, unknownId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNotFound()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
-      }
-
-      @Test
-      void shouldReturn403WhenStudentTriesToUpdateDraft() throws Exception {
-        BddLogger.given("an existing activity draft and a student (non-staff) account");
-        UUID draftId = createDraftAndGetId("Brouillon accès refusé");
-
-        BddLogger.when("performing a PATCH with a student account");
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftUpdateRequest(
-                    "Titre étudiant", null, null, null, null, null, null, null, null));
-
-        webTestClient
-            .patch()
-            .uri(DRAFT_UPDATE_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isForbidden()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
-      }
-
-      @Test
-      void shouldReturn401WhenNotAuthenticated() throws Exception {
-        BddLogger.given("the " + DRAFT_UPDATE_PATH + " endpoint");
-        BddLogger.when("performing a PATCH without authentication headers");
-        BddLogger.then("it should return 401");
-
-        String requestBody =
-            objectMapper.writeValueAsString(
-                new ActivityDraftUpdateRequest(
-                    "Titre", null, null, null, null, null, null, null, null));
-
-        webTestClient
-            .patch()
-            .uri(DRAFT_UPDATE_PATH, UUID.randomUUID())
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestBody)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized();
-      }
-    }
-
-    @Nested
-    class WhenPublishingActivityDraft {
-
-      @Test
-      void shouldPublishActivityDraftAndReturnActivityId() throws Exception {
-        BddLogger.given("an existing activity draft with a summary");
-        UUID draftId = createDraftAndGetId("Brouillon à publier");
-        fillDraftWithSummary(draftId);
-
-        BddLogger.when("performing a POST on publish endpoint");
-        BddLogger.then("it should return 200 with the published activity id");
-
-        webTestClient
-            .post()
-            .uri(PUBLISH_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.createdItemId")
-            .exists()
-            .jsonPath("$.createdItemId")
-            .isNotEmpty();
-      }
-
-      @Test
-      void shouldPublishActivityDraftAndReturnSameIdAsDraft() throws Exception {
-        BddLogger.given("an existing activity draft with a summary");
-        UUID draftId = createDraftAndGetId("Brouillon id conservé");
-        fillDraftWithSummary(draftId);
-
-        BddLogger.when("performing a POST on publish endpoint");
-        BddLogger.then("it should return the same id as the draft");
-
-        webTestClient
-            .post()
-            .uri(PUBLISH_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.createdItemId")
-            .isEqualTo(draftId.toString());
-      }
-
-      @Test
-      void shouldDeleteDraftAfterPublishing() throws Exception {
-        BddLogger.given("an existing activity draft with a summary");
-        UUID draftId = createDraftAndGetId("Brouillon supprimé après publication");
-        fillDraftWithSummary(draftId);
-
-        BddLogger.when("performing a POST on publish endpoint");
-        webTestClient
-            .post()
-            .uri(PUBLISH_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk();
-
-        BddLogger.then("the draft should no longer exist");
-        webTestClient
-            .get()
-            .uri(BASE_PATH + "/DRAFT/{draftId}/presentation", draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNotFound();
-      }
-
-      @Test
-      void shouldMakeActivityAccessibleAfterPublishing() throws Exception {
-        BddLogger.given("an existing draft with a summary");
-        UUID draftId = createDraftAndGetId("Brouillon accessible après publication");
-        fillDraftWithSummary(draftId);
-
-        BddLogger.when("performing a POST on publish endpoint");
-        webTestClient
-            .post()
-            .uri(PUBLISH_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk();
-
-        BddLogger.then("the published activity should be accessible via the presentation endpoint");
-        webTestClient
-            .get()
-            .uri(PRESENTATION_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.id")
-            .isEqualTo(draftId.toString());
-      }
-
-      @Test
-      void shouldReturn404WhenDraftNotFound() {
-        BddLogger.given("a non-existent draft id");
-        UUID unknownId = UUID.randomUUID();
-
-        BddLogger.when("performing a POST on publish endpoint with unknown id");
-        BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND error code");
-
-        webTestClient
-            .post()
-            .uri(PUBLISH_PATH, unknownId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNotFound()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
-      }
-
-      @Test
-      void shouldReturn400WhenDraftHasNoSummary() throws Exception {
-        BddLogger.given("an existing draft without a summary");
-        UUID draftId = createDraftAndGetId("Brouillon sans résumé");
-
-        BddLogger.when("performing a POST on publish endpoint");
-        BddLogger.then("it should return 400 because summary is required to publish");
-
-        webTestClient
-            .post()
-            .uri(PUBLISH_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isEqualTo(400)
-            .expectBody()
-            .jsonPath("$.code")
-            .exists();
-      }
-
-      @Test
-      void shouldReturn403WhenStudentTriesToPublish() throws Exception {
-        BddLogger.given("an existing draft and a student (non-staff) account");
-        UUID draftId = createDraftAndGetId("Brouillon publication refusée");
-        fillDraftWithSummary(draftId);
-
-        BddLogger.when("performing a POST on publish endpoint with a student account");
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
-
-        webTestClient
-            .post()
-            .uri(PUBLISH_PATH, draftId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isForbidden()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
-      }
-
-      @Test
-      void shouldReturn401WhenNotAuthenticated() {
-        BddLogger.given("the " + PUBLISH_PATH + " endpoint");
-        BddLogger.when("performing a POST without authentication headers");
-        BddLogger.then("it should return 401");
-
-        webTestClient
-            .post()
-            .uri(PUBLISH_PATH, UUID.randomUUID())
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized();
-      }
-    }
-
-    @Nested
-    class WhenUnpublishingActivity {
-
-      @Test
-      void shouldUnpublishActivityAndReturn204() throws Exception {
-        BddLogger.given("an existing published activity created by the staff");
-        UUID activityId = publishNewActivity("Activité à dépublier");
-
-        BddLogger.when("performing a POST on unpublish endpoint");
-        BddLogger.then("it should return 204 No Content");
-
-        webTestClient
-            .post()
-            .uri(UNPUBLISH_PATH, activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNoContent();
-      }
-
-      @Test
-      void shouldHideUnpublishedActivityFromActivitiesView() throws Exception {
-        BddLogger.given("a newly published activity");
-        UUID activityId = publishNewActivity("Activité masquée après dépublication");
-
-        BddLogger.when("the activity is unpublished");
-        webTestClient
-            .post()
-            .uri(UNPUBLISH_PATH, activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .exchange()
-            .expectStatus()
-            .isNoContent();
-
-        BddLogger.then("the activity should no longer appear in the student activities view");
-        String body =
-            webTestClient
-                .get()
-                .uri(
-                    uriBuilder ->
-                        uriBuilder
-                            .path(BASE_PATH)
-                            .queryParam("page", "0")
-                            .queryParam("pageSize", "100")
-                            .build())
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        JsonNode data = objectMapper.readTree(body).get("data");
-        for (JsonNode item : data) {
-          if (activityId.toString().equals(item.get("id").asText())) {
-            throw new AssertionError("Unpublished activity should not appear in activitiesView");
-          }
-        }
-      }
-
-      @Test
-      void shouldHideUnpublishedActivityFromNavigation() throws Exception {
-        BddLogger.given("a newly published activity");
-        UUID activityId = publishNewActivity("Activité navigation dépubliée");
-
-        BddLogger.when("the activity is unpublished");
-        webTestClient
-            .post()
-            .uri(UNPUBLISH_PATH, activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .exchange()
-            .expectStatus()
-            .isNoContent();
-
-        BddLogger.then("the activity should not appear in the navigation");
-        String body =
-            webTestClient
-                .get()
-                .uri(NAVIGATION_PATH)
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        String activityIdStr = activityId.toString();
-        JsonNode root = objectMapper.readTree(body);
-        for (JsonNode menu : root) {
-          JsonNode items = menu.get("items");
-          if (items != null) {
-            for (JsonNode item : items) {
-              if (activityIdStr.equals(item.get("id").asText())) {
-                throw new AssertionError("Unpublished activity should not appear in navigation");
-              }
-            }
-          }
-        }
-      }
-
-      @Test
-      void shouldShowUnpublishedActivityInStaffWorkingSpace() throws Exception {
-        BddLogger.given("a published activity that gets unpublished");
-        UUID activityId = publishNewActivity("Activité visible dans working space");
-
-        webTestClient
-            .post()
-            .uri(UNPUBLISH_PATH, activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .exchange()
-            .expectStatus()
-            .isNoContent();
-
-        BddLogger.when("the staff checks their working space");
-        BddLogger.then("the unpublished activity should appear with UNPUBLISHED status");
-
-        String body =
-            webTestClient
-                .get()
-                .uri(
-                    uriBuilder ->
-                        uriBuilder
-                            .path(WORKING_SPACE_PATH)
-                            .queryParam("page", "0")
-                            .queryParam("pageSize", "100")
-                            .build())
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        JsonNode data = objectMapper.readTree(body).get("data");
-        boolean found = false;
-        for (JsonNode item : data) {
-          if (activityId.toString().equals(item.get("activityId").asText())) {
-            assertTrue(
-                "UNPUBLISHED".equals(item.get("activityStatus").asText()),
-                "Expected UNPUBLISHED status but got: " + item.get("activityStatus").asText());
-            found = true;
-            break;
-          }
-        }
-        assertTrue(found, "Unpublished activity should still appear in staff working space");
-      }
-
-      @Test
-      void shouldReturn404WhenActivityNotFound() {
-        BddLogger.given("a non-existent activity id");
-        UUID unknownId = UUID.randomUUID();
-
-        BddLogger.when("performing a POST on unpublish endpoint with unknown id");
-        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
-
-        webTestClient
-            .post()
-            .uri(UNPUBLISH_PATH, unknownId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNotFound()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("ACTIVITY_NOT_FOUND");
-      }
-
-      @Test
-      void shouldReturn403WhenStudentTriesToUnpublish() throws Exception {
-        BddLogger.given("an existing published activity and a student (non-staff) account");
-        UUID activityId = publishNewActivity("Activité dépublication refusée");
-
-        BddLogger.when("performing a POST on unpublish endpoint with a student account");
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
-
-        webTestClient
-            .post()
-            .uri(UNPUBLISH_PATH, activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isForbidden()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
-      }
-
-      @Test
-      void shouldReturn401WhenNotAuthenticated() {
-        BddLogger.given("the " + UNPUBLISH_PATH + " endpoint");
-        BddLogger.when("performing a POST without authentication headers");
-        BddLogger.then("it should return 401");
-
-        webTestClient
-            .post()
-            .uri(UNPUBLISH_PATH, UUID.randomUUID())
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized();
-      }
-    }
-
-    @Nested
-    class WhenGettingStaffWorkingSpace {
-
-      @Test
-      void shouldReturnStaffActivityWorkingSpace() {
-        BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
-        BddLogger.when("performing a GET as a staff user");
-        BddLogger.then("it should return paged activities with data and page info");
-
-        webTestClient
-            .get()
-            .uri(
-                uriBuilder ->
-                    uriBuilder
-                        .path(WORKING_SPACE_PATH)
-                        .queryParam("page", "0")
-                        .queryParam("pageSize", "8")
-                        .build())
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.data")
-            .isArray()
-            .jsonPath("$.page.page")
-            .isEqualTo(0)
-            .jsonPath("$.page.pageSize")
-            .isEqualTo(8)
-            .jsonPath("$.page.totalElements")
-            .exists();
-      }
-
-      @Test
-      void shouldReturnDefaultPaginationWhenNoParamsProvided() {
-        BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
-        BddLogger.when("performing a GET without pagination params");
-        BddLogger.then("it should return 200 with default pagination applied");
-
-        webTestClient
-            .get()
-            .uri(WORKING_SPACE_PATH)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.data")
-            .isArray()
-            .jsonPath("$.page.page")
-            .isEqualTo(0)
-            .jsonPath("$.page.pageSize")
-            .isEqualTo(8)
-            .jsonPath("$.page.totalElements")
-            .exists();
-      }
-
-      @Test
-      void shouldReturnOnlyStaffOwnActivities() throws Exception {
-        BddLogger.given("a staff user with created drafts");
-        createDraftAndGetId("Mon brouillon working space");
-
-        BddLogger.when("performing a GET on working space");
-        BddLogger.then("it should return at least one activity belonging to the staff");
-
-        String body =
-            webTestClient
-                .get()
-                .uri(
-                    uriBuilder ->
-                        uriBuilder
-                            .path(WORKING_SPACE_PATH)
-                            .queryParam("page", "0")
-                            .queryParam("pageSize", "12")
-                            .build())
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        JsonNode data = objectMapper.readTree(body).get("data");
-
-        assertTrue(data.isArray());
-        assertTrue(data.size() > 0);
-
-        JsonNode first = data.get(0);
-        assertTrue(first.hasNonNull("activityId"));
-        assertTrue(first.hasNonNull("title"));
-        assertTrue(first.hasNonNull("activityStatus"));
-      }
-
-      @Test
-      void shouldReturnItemsWithExpectedShape() throws Exception {
-        BddLogger.given("a staff user with at least one activity or draft");
-        createDraftAndGetId("Brouillon pour vérifier la shape");
-
-        BddLogger.when("performing a GET on working space");
-        BddLogger.then(
-            "each item should have activityId, title, thematic and activityStatus fields");
-
-        String body =
-            webTestClient
-                .get()
-                .uri(
-                    uriBuilder ->
-                        uriBuilder
-                            .path(WORKING_SPACE_PATH)
-                            .queryParam("page", "0")
-                            .queryParam("pageSize", "12")
-                            .build())
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        JsonNode data = objectMapper.readTree(body).get("data");
-
-        if (data.isEmpty()) return;
-
-        for (JsonNode item : data) {
-          assertTrue(item.hasNonNull("activityId"), "missing activityId");
-          assertTrue(item.hasNonNull("title"), "missing title");
-          assertTrue(item.hasNonNull("activityStatus"), "missing activityStatus");
-
-          String status = item.get("activityStatus").asText();
-          assertDoesNotThrow(() -> EActivityStatus.valueOf(status), "unexpected status: " + status);
-        }
-      }
-
-      @Test
-      void shouldRespectPageSizeLimit() {
-        BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
-        BddLogger.when("performing a GET with pageSize exceeding the max allowed (12)");
-        BddLogger.then("it should cap the pageSize to the maximum allowed value");
-
-        webTestClient
-            .get()
-            .uri(
-                uriBuilder ->
-                    uriBuilder
-                        .path(WORKING_SPACE_PATH)
-                        .queryParam("page", "0")
-                        .queryParam("pageSize", "999")
-                        .build())
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.page.pageSize")
-            .isEqualTo(100);
-      }
-
-      @Test
-      void shouldReturn401WhenNotAuthenticated() {
-        BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
-        BddLogger.when("performing a GET without authentication headers");
-        BddLogger.then("it should return 401");
-
-        webTestClient
-            .get()
-            .uri(WORKING_SPACE_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized();
-      }
-
-      @Test
-      void shouldReturn403WhenUserIsNotStaff() {
-        BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
-        BddLogger.when("performing a GET with a student account");
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
-
-        webTestClient
-            .get()
-            .uri(WORKING_SPACE_PATH)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isForbidden()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
-      }
-    }
-
-    @Nested
-    class WhenGettingStaffLibrary {
-
-      @Test
-      void shouldReturnStaffActivityLibrary() {
-        BddLogger.given("the " + LIBRARY_PATH + " endpoint");
-        BddLogger.when("performing a GET as a staff user");
-        BddLogger.then("it should return paged activities with data and page info");
-
-        webTestClient
-            .get()
-            .uri(
-                uriBuilder ->
-                    uriBuilder
-                        .path(LIBRARY_PATH)
-                        .queryParam("page", "0")
-                        .queryParam("pageSize", "8")
-                        .build())
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.data")
-            .isArray()
-            .jsonPath("$.page.page")
-            .isEqualTo(0)
-            .jsonPath("$.page.pageSize")
-            .isEqualTo(8)
-            .jsonPath("$.page.totalElements")
-            .exists();
-      }
-
-      @Test
-      void shouldReturnLibraryFilteredByThematic() {
-        BddLogger.given("the " + LIBRARY_PATH + " endpoint with thematic filter");
-        BddLogger.when("performing a GET with thematic filter");
-        BddLogger.then("it should return filtered paged activities");
-
-        webTestClient
-            .get()
-            .uri(
-                uriBuilder ->
-                    uriBuilder
-                        .path(LIBRARY_PATH)
-                        .queryParam("thematic", EActivityThematic.SELF_KNOWLEDGE.name())
-                        .queryParam("page", "0")
-                        .queryParam("pageSize", "8")
-                        .build())
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.data")
-            .isArray()
-            .jsonPath("$.page.page")
-            .isEqualTo(0)
-            .jsonPath("$.page.pageSize")
-            .isEqualTo(8)
-            .jsonPath("$.page.totalElements")
-            .exists();
-      }
-
-      @Test
-      void shouldReturnDefaultPaginationWhenNoParamsProvided() {
-        BddLogger.given("the " + LIBRARY_PATH + " endpoint");
-        BddLogger.when("performing a GET without pagination params");
-        BddLogger.then("it should return 200 with default pagination applied");
-
-        webTestClient
-            .get()
-            .uri(LIBRARY_PATH)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.data")
-            .isArray()
-            .jsonPath("$.page.page")
-            .isEqualTo(0)
-            .jsonPath("$.page.pageSize")
-            .isEqualTo(8)
-            .jsonPath("$.page.totalElements")
-            .exists();
-      }
-
-      @Test
-      void shouldReturn401WhenNotAuthenticated() {
-        BddLogger.given("the " + LIBRARY_PATH + " endpoint");
-        BddLogger.when("performing a GET without authentication headers");
-        BddLogger.then("it should return 401");
-
-        webTestClient
-            .get()
-            .uri(LIBRARY_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized();
-      }
-
-      @Test
-      void shouldReturn403WhenUserIsNotStaff() {
-        BddLogger.given("the " + LIBRARY_PATH + " endpoint");
-        BddLogger.when("performing a GET with a student account");
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
-
-        webTestClient
-            .get()
-            .uri(LIBRARY_PATH)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isForbidden()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
-      }
-    }
-
-    @Nested
-    class WhenGettingActivityContent {
-
-      @Test
-      void shouldReturnNullHasEnrolledStudentForPublishedActivity() throws Exception {
-        BddLogger.given("a published activity");
-        UUID activityId = publishNewActivity("Activité contenu publiée");
-
-        BddLogger.when("performing a GET on the content endpoint with status PUBLISHED");
-        BddLogger.then("it should return 200 with hasEnrolledStudent equal to null");
-
-        webTestClient
-            .get()
-            .uri(CONTENT_PATH, "PUBLISHED", activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.id")
-            .isEqualTo(activityId.toString())
-            .jsonPath("$.hasEnrolledStudent")
-            .doesNotExist();
-      }
-
-      @Test
-      void shouldReturn404WhenActivityNotFound() {
-        BddLogger.given("a non-existent activity id");
-        UUID unknownId = UUID.randomUUID();
-
-        BddLogger.when("performing a GET on the content endpoint with status PUBLISHED");
-        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
-
-        webTestClient
-            .get()
-            .uri(CONTENT_PATH, "PUBLISHED", unknownId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNotFound()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("ACTIVITY_NOT_FOUND");
-      }
-
-      @Test
-      void shouldReturnTrueHasEnrolledStudentForDraftWhenStudentIsEnrolled() throws Exception {
-        BddLogger.given("a published activity with an enrolled student");
-        UUID activityId = publishNewActivity("Activité brouillon avec étudiant inscrit");
-        subscribeStudentToActivity(activityId);
-
-        BddLogger.when("creating a draft from that activity and getting its content");
-        webTestClient
-            .post()
-            .uri(CREATE_DRAFT_PATH, activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .exchange()
-            .expectStatus()
-            .isOk();
-
-        BddLogger.then("the draft content should have hasEnrolledStudent equal to true");
-        webTestClient
-            .get()
-            .uri(CONTENT_PATH, "DRAFT", activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.hasEnrolledStudent")
-            .isEqualTo(true);
-      }
-
-      @Test
-      void shouldReturnFalseHasEnrolledStudentForDraftWhenNoStudentIsEnrolled() throws Exception {
-        BddLogger.given("a published activity with no enrolled student");
-        UUID activityId = publishNewActivity("Activité brouillon sans étudiant inscrit");
-
-        BddLogger.when("creating a draft from that activity and getting its content");
-        webTestClient
-            .post()
-            .uri(CREATE_DRAFT_PATH, activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .exchange()
-            .expectStatus()
-            .isOk();
-
-        BddLogger.then("the draft content should have hasEnrolledStudent equal to false");
-        webTestClient
-            .get()
-            .uri(CONTENT_PATH, "DRAFT", activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.hasEnrolledStudent")
-            .isEqualTo(false);
-      }
-
-      @Test
-      void shouldReturn404WhenDraftNotFound() {
-        BddLogger.given("a non-existent draft id");
-        UUID unknownId = UUID.randomUUID();
-
-        BddLogger.when("performing a GET on the content endpoint with status DRAFT");
-        BddLogger.then("it should return 404 with ACTIVITY_DRAFT_NOT_FOUND error code");
-
-        webTestClient
-            .get()
-            .uri(CONTENT_PATH, "DRAFT", unknownId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNotFound()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("ACTIVITY_DRAFT_NOT_FOUND");
-      }
-    }
-
-    @Nested
-    class WhenCreatingDraftFromActivity {
-
-      @Test
-      void shouldCreateDraftWithSameIdAsActivity() throws Exception {
-        BddLogger.given("an existing published activity created by the staff");
-        UUID activityId = publishNewActivity("Activité pour édition de brouillon");
-
-        BddLogger.when("performing a POST on the create-draft endpoint");
-        BddLogger.then("it should return 200 with the same id as the activity");
-
-        webTestClient
-            .post()
-            .uri(CREATE_DRAFT_PATH, activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.draftId")
-            .isEqualTo(activityId.toString());
-      }
-
-      @Test
-      void shouldUnpublishActivityWhenNoStudentIsEnrolled() throws Exception {
-        BddLogger.given("a published activity with no enrolled student");
-        UUID activityId = publishNewActivity("Activité dépubliée après édition");
-
-        BddLogger.when("creating a draft from that activity");
-        webTestClient
-            .post()
-            .uri(CREATE_DRAFT_PATH, activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .exchange()
-            .expectStatus()
-            .isOk();
-
-        BddLogger.then("the underlying activity should now be UNPUBLISHED");
-        String body =
-            webTestClient
-                .get()
-                .uri(
-                    uriBuilder ->
-                        uriBuilder
-                            .path(WORKING_SPACE_PATH)
-                            .queryParam("page", "0")
-                            .queryParam("pageSize", "100")
-                            .build())
-                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        JsonNode data = objectMapper.readTree(body).get("data");
-        boolean found = false;
-        for (JsonNode item : data) {
-          if (activityId.toString().equals(item.get("activityId").asText())) {
-            assertTrue(
-                "UNPUBLISHED".equals(item.get("activityStatus").asText()),
-                "Expected UNPUBLISHED status but got: " + item.get("activityStatus").asText());
-            found = true;
-            break;
-          }
-        }
-        assertTrue(found, "Activity should still appear in staff working space as UNPUBLISHED");
-      }
-
-      @Test
-      void shouldReturn404WhenActivityNotFound() {
-        BddLogger.given("a non-existent activity id");
-        UUID unknownId = UUID.randomUUID();
-
-        BddLogger.when("performing a POST on the create-draft endpoint with unknown id");
-        BddLogger.then("it should return 404 with ACTIVITY_NOT_FOUND error code");
-
-        webTestClient
-            .post()
-            .uri(CREATE_DRAFT_PATH, unknownId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isNotFound()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("ACTIVITY_NOT_FOUND");
-      }
-
-      @Test
-      void shouldReturn403WhenStudentTriesToCreateDraft() throws Exception {
-        BddLogger.given("an existing published activity and a student (non-staff) account");
-        UUID activityId = publishNewActivity("Activité édition refusée");
-
-        BddLogger.when("performing a POST on the create-draft endpoint with a student account");
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
-
-        webTestClient
-            .post()
-            .uri(CREATE_DRAFT_PATH, activityId)
-            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload)
-            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
-            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isForbidden()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
-      }
-
-      @Test
-      void shouldReturn401WhenNotAuthenticated() {
-        BddLogger.given("the " + CREATE_DRAFT_PATH + " endpoint");
-        BddLogger.when("performing a POST without authentication headers");
-        BddLogger.then("it should return 401");
-
-        webTestClient
-            .post()
-            .uri(CREATE_DRAFT_PATH, UUID.randomUUID())
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized();
-      }
-    }
+  private void addSecondStudentHeaders(HttpHeaders headers) {
+    headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, secondStudentPayload);
+    headers.add(AvenirsSecurityHeaders.CONTEXT_KID, secretKey);
+    headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, secondStudentSignature);
+  }
+
+  private void addStaffHeaders(HttpHeaders headers) {
+    headers.add(AvenirsSecurityHeaders.SIGNED_CONTEXT, staffPayload);
+    headers.add(AvenirsSecurityHeaders.CONTEXT_KID, secretKey);
+    headers.add(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, staffSignature);
   }
 }

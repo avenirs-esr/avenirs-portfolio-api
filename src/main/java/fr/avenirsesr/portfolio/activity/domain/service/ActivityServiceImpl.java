@@ -60,7 +60,8 @@ public class ActivityServiceImpl implements ActivityService {
       String executionPeriodInfoSummary,
       boolean enableReflection,
       int traceAllowedAssociations,
-      int feedbackAllowedIterations) {
+      int feedbackAllowedIterations,
+      List<String> links) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     requireNotNull("thematic", thematic);
     requireNotBlankAndMaxLength("summary", summary, SUMMARY_LENGTH);
@@ -83,7 +84,8 @@ public class ActivityServiceImpl implements ActivityService {
             enableReflection,
             traceAllowedAssociations,
             feedbackAllowedIterations,
-            null);
+            null,
+            links);
     activityRepository.save(activity);
     return activity;
   }
@@ -118,7 +120,8 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.isEnableReflection(),
                 draft.getTraceAllowedAssociations(),
                 draft.getFeedbackAllowedIterations(),
-                draft.getBanner().orElse(null)));
+                draft.getBanner().orElse(null),
+                draft.getLinks()));
 
     activityDraftRepository.removeFromDatabase(draft);
     return activity;
@@ -333,6 +336,29 @@ public class ActivityServiceImpl implements ActivityService {
     };
   }
 
+  @Override
+  public ActivityDraft addLinks(UUID id, List<String> links) {
+    var loggedInStaff = loggedInUserService.getLoggedInStaff();
+    var draft =
+        activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
+
+    if (!draft.getAuthor().equals(loggedInStaff)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    if (links == null || links.isEmpty()) {
+      return draft;
+    }
+
+    links.forEach(link -> requireNotBlankAndMaxLength("link", link, LINK_LENGTH));
+
+    draft.addLinks(links);
+
+    var updatedDraft = activityDraftRepository.save(draft);
+    log.info("Added {} link(s) to activity draft with id: {}", links.size(), id);
+    return updatedDraft;
+  }
+
   private ActivityDraft updateActivityDraft(
       UUID id,
       String title,
@@ -405,7 +431,8 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getTraceAllowedAssociations(),
             activity.getFeedbackAllowedIterations(),
             activity.isEnableReflection(),
-            activity.getBanner().orElse(null));
+            activity.getBanner().orElse(null),
+            activity.getLinks());
 
     var savedDraft = activityDraftRepository.save(draft);
 

@@ -90,6 +90,7 @@ public class ActivityDraftSeeder {
                             Optional.ofNullable(fakeActivity.getTraceAllowedAssociations()),
                             Optional.ofNullable(fakeActivity.getFeedbackAllowedIterations()),
                             fakeActivity.isEnableReflection(),
+                            new ArrayList<>(),
                             now,
                             now);
                       })
@@ -135,6 +136,8 @@ public class ActivityDraftSeeder {
                     data.traceAllowedAssociations().orElse(null),
                     data.feedbackAllowedIterations().orElse(null),
                     data.enableReflection());
+
+            activityService.addLinks(draft.getId(), data.links());
 
             entityManager.flush();
 

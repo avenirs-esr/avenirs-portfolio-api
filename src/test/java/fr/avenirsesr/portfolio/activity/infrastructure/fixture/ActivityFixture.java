@@ -10,6 +10,7 @@ import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.seeder.fake.FakeStaff;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public class ActivityFixture {
@@ -30,6 +31,7 @@ public class ActivityFixture {
   private boolean enableRefection = true;
   private EActivityStatus status = EActivityStatus.PUBLISHED;
   private final File banner = ActivityBannerFixture.create().toModel();
+  private List<String> links = List.of("https://example.com/link1", "https://example.com/link2");
   private Instant createdAt = Instant.now();
   private Instant updatedAt = Instant.now();
 
@@ -107,6 +109,11 @@ public class ActivityFixture {
     return this;
   }
 
+  public ActivityFixture withLinks(List<String> links) {
+    this.links = links;
+    return this;
+  }
+
   public Activity toModel() {
     return Activity.toDomain(
         id,
@@ -122,6 +129,7 @@ public class ActivityFixture {
         traceAllowedAssociations,
         feedbackAllowedIterations,
         banner,
+        links,
         createdAt,
         updatedAt);
   }

@@ -83,6 +83,7 @@ public class ActivitySeeder {
                             new ActivityBannerCreationData(
                                 banner.getFileName(), banner.getFileType(), banner.getSize()),
                             fakeActivity.isEnableReflection(),
+                            new ArrayList<>(),
                             fakeActivity.getTraceAllowedAssociations(),
                             fakeActivity.getFeedbackAllowedIterations(),
                             now,
@@ -116,7 +117,8 @@ public class ActivitySeeder {
                     data.executionPeriodInfoSummary().orElse(null),
                     data.enableReflection(),
                     data.traceAllowedAssociations(),
-                    data.feedbackAllowedIterations());
+                    data.feedbackAllowedIterations(),
+                    data.links());
 
             activities.add(activity);
           } finally {

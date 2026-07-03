@@ -26,6 +26,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         domain.getFeedbackAllowedIterations(),
         domain.isEnableReflection(),
         domain.getBanner().map(FileMapper.INSTANCE::fromDomain).orElse(null),
+        domain.getLinks(),
         domain.getCreatedAt(),
         domain.getUpdatedAt());
   }
@@ -46,6 +47,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         entity.getTraceAllowedAssociations(),
         entity.getFeedbackAllowedIterations(),
         entity.getBanner() == null ? null : FileMapper.INSTANCE.toDomain(entity.getBanner()),
+        entity.getLinks(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -69,6 +71,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         attributes.contains("banner") && entity.getBanner() != null
             ? FileMapper.INSTANCE.toDomain(entity.getBanner(), graph)
             : null,
+        entity.getLinks(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
