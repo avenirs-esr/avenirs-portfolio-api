@@ -106,38 +106,57 @@ public class ActivityServiceImpl implements ActivityService {
           EErrorCode.NOT_BLANK, "summary must be defined to publish an activity");
     }
 
-    var activity =
-        activityRepository
-            .findById(activityDraftId)
-            .orElse(
-                Activity.create(
-                    draft.getId(),
-                    draft.getAuthor(),
-                    draft.getTitle(),
-                    draft.getThematic(),
-                    draft.getSummary().get(),
-                    draft.getDescription().orElse(null),
-                    draft.getExecutionPeriodInfo().orElse(null),
-                    draft.getExecutionPeriodInfoSummary().orElse(null),
-                    draft.isEnableReflection(),
-                    draft.getTraceAllowedAssociations(),
-                    draft.getFeedbackAllowedIterations(),
-                    draft.getBanner().orElse(null),
-                    draft.getLinks()));
+    var publishedActivity = activityRepository.findById(activityDraftId);
 
-    activity.setTitle(draft.getTitle());
-    activity.setThematic(draft.getThematic());
-    activity.setDescription(draft.getDescription().orElse(null));
-    activity.setSummary(draft.getSummary().orElse(null));
-    activity.setExecutionPeriodInfo(draft.getExecutionPeriodInfo().orElse(null));
-    activity.setExecutionPeriodInfoSummary(draft.getExecutionPeriodInfoSummary().orElse(null));
-    activity.setBanner(draft.getBanner().orElse(null));
-    activity.setStatus(EActivityStatus.PUBLISHED);
+    Activity activity =
+        publishedActivity.orElse(
+            Activity.create(
+                draft.getId(),
+                draft.getAuthor(),
+                draft.getTitle(),
+                draft.getThematic(),
+                draft.getSummary().orElseThrow(),
+                draft.getDescription().orElse(null),
+                draft.getExecutionPeriodInfo().orElse(null),
+                draft.getExecutionPeriodInfoSummary().orElse(null),
+                draft.isEnableReflection(),
+                draft.getTraceAllowedAssociations(),
+                draft.getFeedbackAllowedIterations(),
+                draft.getBanner().orElse(null),
+                draft.getLinks()));
+
+    if (publishedActivity.isPresent()) {
+      if (hasEnrolledStudents(activity)) {
+        updateEngagedActivity(activity, draft);
+      } else {
+        updateUnEngagedActivity(activity, draft);
+      }
+      activity.setStatus(EActivityStatus.PUBLISHED);
+    }
 
     var savedActivity = activityRepository.save(activity);
 
     activityDraftRepository.removeFromDatabase(draft);
     return savedActivity;
+  }
+
+  private void updateUnEngagedActivity(Activity publishedActivity, ActivityDraft draft) {
+    updateEngagedActivity(publishedActivity, draft);
+    publishedActivity.setTraceAllowedAssociations(draft.getTraceAllowedAssociations());
+    publishedActivity.setFeedbackAllowedIterations(draft.getFeedbackAllowedIterations());
+    publishedActivity.setEnableReflection(draft.isEnableReflection());
+  }
+
+  private void updateEngagedActivity(Activity publishedActivity, ActivityDraft draft) {
+    publishedActivity.setTitle(draft.getTitle());
+    publishedActivity.setThematic(draft.getThematic());
+    publishedActivity.setDescription(draft.getDescription().orElse(null));
+    publishedActivity.setSummary(draft.getSummary().orElse(null));
+    publishedActivity.setExecutionPeriodInfo(draft.getExecutionPeriodInfo().orElse(null));
+    publishedActivity.setExecutionPeriodInfoSummary(
+        draft.getExecutionPeriodInfoSummary().orElse(null));
+    publishedActivity.setBanner(draft.getBanner().orElse(null));
+    publishedActivity.setLinks(draft.getLinks());
   }
 
   @Override
