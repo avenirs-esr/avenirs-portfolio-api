@@ -22,6 +22,7 @@ import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -115,6 +116,11 @@ public class FileResourceServiceImpl implements FileResourceService {
     }
 
     log.info("File deleted: {}", file);
+  }
+
+  @Override
+  public List<File> findAllByElementIdAndCategory(UUID elementId, EFileCategory fileCategory) {
+    return fileRepository.findAllByElementIdAndCategory(elementId, fileCategory);
   }
 
   private void unlinkFileFromElement(File file) {

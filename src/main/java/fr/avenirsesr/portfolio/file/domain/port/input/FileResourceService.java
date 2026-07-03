@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
+import java.util.List;
 import java.util.UUID;
 
 public interface FileResourceService {
@@ -20,4 +21,6 @@ public interface FileResourceService {
   FileDownload download(UUID fileId);
 
   void delete(UUID fileId);
+
+  List<File> findAllByElementIdAndCategory(UUID elementId, EFileCategory fileCategory);
 }

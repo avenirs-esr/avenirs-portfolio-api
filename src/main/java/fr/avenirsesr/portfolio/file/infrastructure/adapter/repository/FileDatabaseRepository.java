@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.repository;
 
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
@@ -20,6 +21,15 @@ public class FileDatabaseRepository extends GenericJpaRepositoryAdapter<File, Fi
   @Override
   public List<File> findAllByElement(UUID elementId) {
     return jpaSpecificationExecutor.findAll(FileSpecification.ofElement(elementId)).stream()
+        .map(FileMapper.INSTANCE::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<File> findAllByElementIdAndCategory(UUID elementId, EFileCategory fileCategory) {
+    return jpaSpecificationExecutor
+        .findAll(FileSpecification.ofElementAndCategory(elementId, fileCategory))
+        .stream()
         .map(FileMapper.INSTANCE::toDomain)
         .toList();
   }
