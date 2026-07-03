@@ -87,7 +87,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedbackRepository.findAllByDeclaredActivityId(declaredActivityId);
 
     if (!existingFeedbacks.isEmpty()) {
-      Feedback lastFeedback = existingFeedbacks.getLast();
+      Feedback lastFeedback = existingFeedbacks.getFirst();
       switch (lastFeedback.getStatus()) {
         case IN_PROCESS -> throw new FeedbackInProcessException();
         case NEW -> {

@@ -272,6 +272,58 @@ class FeedbackServiceImplTest {
     }
 
     @Test
+    void should_throw_FeedbackInProcessException_when_recent_feedback_is_IN_PROCESS() {
+      BddLogger.given(
+          "A logged-in student with 2 feedbacks: the most recent is IN_PROCESS, the older is"
+              + " SUBMITTED");
+      UUID declaredActivityId = UUID.randomUUID();
+      Activity activity = ActivityFixture.create().toModel();
+      DeclaredActivity declaredActivity =
+          DeclaredActivity.create(
+              UUID.randomUUID(), student, activity, null, null, null, null, null);
+
+      Feedback submittedFeedback =
+          Feedback.toDomain(
+              UUID.randomUUID(),
+              Instant.now().minusSeconds(120),
+              Instant.now().minusSeconds(120),
+              declaredActivity,
+              null,
+              "Retour du formateur",
+              EFeedbackStatus.SUBMITTED,
+              1,
+              List.of(),
+              List.of());
+
+      Feedback inProcessFeedback =
+          Feedback.toDomain(
+              UUID.randomUUID(),
+              Instant.now(),
+              Instant.now(),
+              declaredActivity,
+              null,
+              null,
+              EFeedbackStatus.IN_PROCESS,
+              2,
+              List.of(),
+              List.of());
+
+      when(declaredActivityService.fetchActivityAndCheckLoggedInStudentAuthorization(
+              declaredActivityId))
+          .thenReturn(declaredActivity);
+      when(feedbackRepository.findAllByDeclaredActivityId(declaredActivityId))
+          .thenReturn(List.of(inProcessFeedback, submittedFeedback));
+
+      BddLogger.when("createFeedback is called");
+
+      BddLogger.then("A FeedbackInProcessException is thrown and nothing is saved");
+      assertThatThrownBy(() -> service.createFeedback(declaredActivityId))
+          .isInstanceOf(FeedbackInProcessException.class);
+
+      verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
     void should_update_existing_feedback_when_last_feedback_is_NEW() {
       BddLogger.given(
           "A logged-in student whose last feedback is NEW, and the declared activity has a"

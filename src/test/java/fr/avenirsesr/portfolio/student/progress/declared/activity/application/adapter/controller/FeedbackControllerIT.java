@@ -259,6 +259,8 @@ public class FeedbackControllerIT extends ContainerConfigurationTest {
         .expectBody()
         .jsonPath("$.id")
         .isEqualTo(feedbackId);
+    updateFeedbackWithText(feedbackId, "Retour.");
+    submitFeedback(feedbackId);
   }
 
   @Test
