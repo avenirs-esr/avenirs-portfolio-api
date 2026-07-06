@@ -87,7 +87,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 <span class="fc" id="L87">        feedbackRepository.findAllByDeclaredActivityId(declaredActivityId);</span>
 
 <span class="fc bfc" id="L89" title="All 2 branches covered.">    if (!existingFeedbacks.isEmpty()) {</span>
-<span class="fc" id="L90">      Feedback lastFeedback = existingFeedbacks.getLast();</span>
+<span class="fc" id="L90">      Feedback lastFeedback = existingFeedbacks.getFirst();</span>
 <span class="pc bpc" id="L91" title="1 of 4 branches missed.">      switch (lastFeedback.getStatus()) {</span>
 <span class="fc" id="L92">        case IN_PROCESS -&gt; throw new FeedbackInProcessException();</span>
         case NEW -&gt; {
