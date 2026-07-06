@@ -133,8 +133,9 @@ public class FileResourceServiceImpl implements FileResourceService {
         draft.setBanner(null);
         activityDraftRepository.save(draft);
       }
-      case ACTIVITY_FILE ->
-          throw new UnsupportedOperationException("Operation not supported for ACTIVITY_FILE");
+      case ACTIVITY_FILE -> {
+        break; // No action needed for ACTIVITY_FILE, as it is not linked to a specific entity
+      }
       case STAFF_COVER_PICTURE -> {
         var staff =
             staffRepository.findById(file.getElementId()).orElseThrow(UserNotFoundException::new);
@@ -248,7 +249,7 @@ public class FileResourceServiceImpl implements FileResourceService {
 
   private void chekDeleteRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
     switch (fileCategory) {
-      case ACTIVITY_BANNER -> {
+      case ACTIVITY_BANNER, ACTIVITY_FILE -> {
         var draft =
             activityDraftRepository
                 .findById(elementId)
@@ -256,8 +257,6 @@ public class FileResourceServiceImpl implements FileResourceService {
         if (!draft.getAuthor().getUser().equals(loggedInUser))
           throw new UserNotAuthorizedException();
       }
-      case ACTIVITY_FILE ->
-          throw new UnsupportedOperationException("Operation not supported for ACTIVITY_FILE");
       case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -> {
         var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
         if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
