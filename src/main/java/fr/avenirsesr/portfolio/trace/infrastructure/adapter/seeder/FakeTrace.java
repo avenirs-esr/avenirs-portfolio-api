@@ -33,6 +33,7 @@ public class FakeTrace {
                 null,
                 null,
                 null,
+                false,
                 Instant.now(),
                 Instant.now()));
 
@@ -42,6 +43,7 @@ public class FakeTrace {
     if (new Random().nextBoolean()) fakeTrace = fakeTrace.withLink();
     if (new Random().nextBoolean())
       fakeTrace = fakeTrace.withAuthorType(types[new Random().nextInt(types.length)]);
+    if (new Random().nextBoolean()) fakeTrace = fakeTrace.withValorized(true);
 
     return fakeTrace;
   }
@@ -68,6 +70,11 @@ public class FakeTrace {
 
   public FakeTrace withLink() {
     trace.setLink(faker().internet().url());
+    return this;
+  }
+
+  public FakeTrace withValorized(boolean valorized) {
+    trace.setValorized(valorized);
     return this;
   }
 

@@ -46,7 +46,8 @@ public interface TraceService {
       ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
-      String link);
+      String link,
+      boolean valorized);
 
   TraceDetailData updateTrace(
       UUID traceId,

@@ -106,7 +106,8 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
                         snap.attachmentId() != null ? files.get(snap.attachmentId()) : null,
                         snap.createdAt(),
                         snap.updatedAt(),
-                        snap.language()))
+                        snap.language(),
+                        false))
             .toList();
 
     List<DeclaredSkillProgress> progresses =

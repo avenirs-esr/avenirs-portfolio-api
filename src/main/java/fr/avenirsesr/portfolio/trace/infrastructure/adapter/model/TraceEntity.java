@@ -57,6 +57,9 @@ public class TraceEntity extends AvenirsBaseEntity {
 
   @OneToOne private FileEntity attachment;
 
+  @Column(nullable = false)
+  private boolean valorized;
+
   private TraceEntity(
       UUID id,
       UserEntity user,
@@ -67,6 +70,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       String personalNote,
       String link,
       FileEntity attachment,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     this.setId(id);
@@ -80,6 +84,7 @@ public class TraceEntity extends AvenirsBaseEntity {
     this.personalNote = personalNote;
     this.link = link;
     this.attachment = attachment;
+    this.valorized = valorized;
   }
 
   public static TraceEntity of(
@@ -92,6 +97,7 @@ public class TraceEntity extends AvenirsBaseEntity {
       String personalNote,
       String link,
       FileEntity attachment,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     return new TraceEntity(
@@ -104,6 +110,7 @@ public class TraceEntity extends AvenirsBaseEntity {
         personalNote,
         link,
         attachment,
+        valorized,
         createdAt,
         updatedAt);
   }

@@ -299,7 +299,8 @@ public class TraceServiceImpl implements TraceService {
       ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
-      String link) {
+      String link,
+      boolean valorized) {
     return createTrace(
         traceId,
         userService.getUser(userId),
@@ -308,7 +309,8 @@ public class TraceServiceImpl implements TraceService {
         authorType,
         personalNote,
         aiJustification,
-        link);
+        link,
+        valorized);
   }
 
   @Override
@@ -328,7 +330,8 @@ public class TraceServiceImpl implements TraceService {
         authorType,
         personalNote,
         aiJustification,
-        link);
+        link,
+        false);
   }
 
   private Trace createTrace(
@@ -339,13 +342,15 @@ public class TraceServiceImpl implements TraceService {
       ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
-      String link) {
+      String link,
+      boolean valorized) {
     requireNotBlankAndMaxLength("title", title, TITLE_LENGTH);
     validateOptionalTextMaxLength("link", link, LINK_LENGTH);
     validateUrl(link);
     var trace =
         Trace.create(
             traceId, user, title, language, authorType, aiJustification, personalNote, link, null);
+    trace.setValorized(valorized);
 
     return traceRepository.save(trace);
   }

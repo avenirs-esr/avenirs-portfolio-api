@@ -195,6 +195,7 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             null,
             null,
             null,
+            false,
             Instant.now(),
             Instant.now());
     entityManager.persist(trace);

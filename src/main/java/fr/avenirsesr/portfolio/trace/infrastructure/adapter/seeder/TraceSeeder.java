@@ -80,7 +80,8 @@ public class TraceSeeder {
                   data.authorType(),
                   data.personalNote(),
                   data.aiJustification(),
-                  data.link());
+                  data.link(),
+                  data.valorized());
           traces.add(trace);
 
           RequestContext.set(
@@ -117,6 +118,7 @@ public class TraceSeeder {
                     entity.getAiUseJustification(),
                     entity.getPersonalNote(),
                     entity.getLink(),
+                    entity.isValorized(),
                     entity.getLink() == null
                         ? IntStream.range(
                                 1,

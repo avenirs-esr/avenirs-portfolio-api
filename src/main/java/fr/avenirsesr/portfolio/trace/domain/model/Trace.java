@@ -19,6 +19,7 @@ public class Trace extends AvenirsBaseModel {
   private String title;
   private ETraceAuthorType authorType;
   private ELanguage language;
+  private boolean valorized;
 
   @Getter(AccessLevel.NONE)
   private String aiUseJustification;
@@ -42,6 +43,7 @@ public class Trace extends AvenirsBaseModel {
       String personalNote,
       String link,
       File attachment,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -53,6 +55,7 @@ public class Trace extends AvenirsBaseModel {
     this.personalNote = personalNote;
     this.link = link;
     this.attachment = attachment;
+    this.valorized = valorized;
   }
 
   public static Trace create(
@@ -76,6 +79,7 @@ public class Trace extends AvenirsBaseModel {
         personalNote,
         link,
         attachment,
+        false,
         Instant.now(),
         Instant.now());
   }
@@ -91,7 +95,8 @@ public class Trace extends AvenirsBaseModel {
       File attachment,
       Instant createdAt,
       Instant updatedAt,
-      ELanguage language) {
+      ELanguage language,
+      boolean valorized) {
     return new Trace(
         id,
         user,
@@ -102,6 +107,7 @@ public class Trace extends AvenirsBaseModel {
         personalNote,
         link,
         attachment,
+        valorized,
         createdAt,
         updatedAt);
   }

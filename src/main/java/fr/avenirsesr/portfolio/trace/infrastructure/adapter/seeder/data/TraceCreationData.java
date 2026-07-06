@@ -14,6 +14,7 @@ public record TraceCreationData(
     String aiJustification,
     String personalNote,
     String link,
+    boolean valorized,
     List<TraceAttachementCreationData> attachements) {
   public TraceCreationData {
     if (attachements == null) attachements = List.of();

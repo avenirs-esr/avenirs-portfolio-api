@@ -26,6 +26,7 @@ public class TraceFixture {
   private String link;
   private File attachment;
   private ELanguage language = ELanguage.FRENCH;
+  private boolean valorized;
 
   private TraceFixture() {
     var fakeUser = UserFixture.create().toModel();
@@ -36,6 +37,7 @@ public class TraceFixture {
     this.createdAt = base.getCreatedAt();
     this.updatedAt = base.getUpdatedAt();
     this.authorType = base.getAuthorType();
+    this.valorized = base.isValorized();
     this.attachment =
         File.create(
             UUID.randomUUID(),
@@ -108,6 +110,11 @@ public class TraceFixture {
     return this;
   }
 
+  public TraceFixture withValorized(boolean valorized) {
+    this.valorized = valorized;
+    return this;
+  }
+
   public Trace toModel() {
     return Trace.toDomain(
         id,
@@ -120,6 +127,7 @@ public class TraceFixture {
         attachment,
         createdAt,
         updatedAt,
-        language);
+        language,
+        valorized);
   }
 }
