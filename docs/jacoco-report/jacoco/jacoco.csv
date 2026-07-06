@@ -97,7 +97,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapt
 avenirs-portfolio-api,fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.client,ExternalSkillClient,0,247,0,8,0,63,0,10,0,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.data,UserProfileOverviewData,0,24,0,0,0,1,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.domain.data,UserQuickLinksData,0,21,0,0,0,1,0,1,0,1
-avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.service,FileResourceServiceImpl,459,206,53,15,103,49,46,10,6,5
+avenirs-portfolio-api,fr.avenirsesr.portfolio.file.domain.service,FileResourceServiceImpl,450,206,52,15,102,49,45,10,6,5
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository,ActivityDatabaseRepository,37,93,0,4,8,24,1,6,1,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository,ActivityDraftDatabaseRepository,0,7,0,0,0,2,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.infrastructure.adapter.repository,StaffActivityOverviewQueryRepository,66,166,9,3,9,29,9,7,0,7
