@@ -238,7 +238,8 @@ public class TraceController {
             updateTraceDTO.authorType(),
             updateTraceDTO.personalNote(),
             updateTraceDTO.iaJustification(),
-            updateTraceDTO.link());
+            updateTraceDTO.link(),
+            updateTraceDTO.valorized());
 
     return ResponseEntity.ok(traceDetailMapper.toDTO(trace));
   }

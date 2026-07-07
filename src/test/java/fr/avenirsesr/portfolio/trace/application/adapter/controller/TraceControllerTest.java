@@ -4,15 +4,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceDetailDTO;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.TraceOverviewDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.UpdateTraceDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceDetailMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.TraceOverviewMapper;
 import fr.avenirsesr.portfolio.trace.application.adapter.response.TracesCreationResponse;
+import fr.avenirsesr.portfolio.trace.domain.data.TraceDetailData;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
@@ -32,6 +37,7 @@ class TraceControllerTest {
 
   @Mock private TraceService traceService;
   @Mock private TraceOverviewMapper traceOverviewMapper;
+  @Mock private TraceDetailMapper traceDetailMapper;
 
   @InjectMocks private TraceController controller;
 
@@ -141,5 +147,102 @@ class TraceControllerTest {
     verify(traceService)
         .createTrace(
             "Trace sans IA", ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null);
+  }
+
+  @Test
+  void shouldUpdateTraceWithValorisedTrue() {
+    BddLogger.given("a TraceController");
+    UUID traceId = UUID.randomUUID();
+    TraceDetailData traceDetailData = mock(TraceDetailData.class);
+    TraceDetailDTO traceDetailDTO = mock(TraceDetailDTO.class);
+
+    when(traceService.updateTrace(
+            eq(traceId),
+            eq("Updated title"),
+            eq(ELanguage.FRENCH),
+            eq(ETraceAuthorType.PERSONAL),
+            eq("Updated note"),
+            eq("Updated justification"),
+            isNull(),
+            eq(true)))
+        .thenReturn(traceDetailData);
+    when(traceDetailMapper.toDTO(traceDetailData)).thenReturn(traceDetailDTO);
+
+    UpdateTraceDTO dto =
+        new UpdateTraceDTO(
+            "Updated title",
+            ELanguage.FRENCH,
+            ETraceAuthorType.PERSONAL,
+            "Updated note",
+            "Updated justification",
+            null,
+            true);
+
+    BddLogger.when("updating a trace with valorized to true");
+    ResponseEntity<TraceDetailDTO> response = controller.updateTrace(principal, traceId, dto);
+
+    BddLogger.then("it should update the trace with valorized to true");
+    assertEquals(200, response.getStatusCode().value());
+    assertEquals(traceDetailDTO, response.getBody());
+
+    verify(traceService)
+        .updateTrace(
+            eq(traceId),
+            eq("Updated title"),
+            eq(ELanguage.FRENCH),
+            eq(ETraceAuthorType.PERSONAL),
+            eq("Updated note"),
+            eq("Updated justification"),
+            isNull(),
+            eq(true));
+    verify(traceDetailMapper).toDTO(traceDetailData);
+  }
+
+  @Test
+  void shouldUpdateTraceWithValorisedFalse() {
+    BddLogger.given("a TraceController");
+    UUID traceId = UUID.randomUUID();
+    TraceDetailData traceDetailData = mock(TraceDetailData.class);
+    TraceDetailDTO traceDetailDTO = mock(TraceDetailDTO.class);
+
+    when(traceService.updateTrace(
+            eq(traceId),
+            eq("Updated title"),
+            eq(ELanguage.FRENCH),
+            eq(ETraceAuthorType.PERSONAL),
+            eq("Updated note"),
+            eq("Updated justification"),
+            isNull(),
+            eq(false)))
+        .thenReturn(traceDetailData);
+    when(traceDetailMapper.toDTO(traceDetailData)).thenReturn(traceDetailDTO);
+
+    UpdateTraceDTO dto =
+        new UpdateTraceDTO(
+            "Updated title",
+            ELanguage.FRENCH,
+            ETraceAuthorType.PERSONAL,
+            "Updated note",
+            "Updated justification",
+            null,
+            false);
+
+    BddLogger.when("updating a trace with valorized to false");
+    ResponseEntity<TraceDetailDTO> response = controller.updateTrace(principal, traceId, dto);
+
+    BddLogger.then("it should update the trace with valorized to false");
+    assertEquals(200, response.getStatusCode().value());
+    assertEquals(traceDetailDTO, response.getBody());
+
+    verify(traceService)
+        .updateTrace(
+            eq(traceId),
+            eq("Updated title"),
+            eq(ELanguage.FRENCH),
+            eq(ETraceAuthorType.PERSONAL),
+            eq("Updated note"),
+            eq("Updated justification"),
+            isNull(),
+            eq(false));
   }
 }

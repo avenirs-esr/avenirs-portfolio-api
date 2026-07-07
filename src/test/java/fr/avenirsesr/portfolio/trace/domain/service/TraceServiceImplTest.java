@@ -406,7 +406,8 @@ class TraceServiceImplTest {
             ETraceAuthorType.THIRD_PARTY,
             "Updated note",
             "Updated justification",
-            "https://example.com/updated");
+            "https://example.com/updated",
+            false);
 
         BddLogger.then("it should update and save the link");
 
@@ -494,6 +495,64 @@ class TraceServiceImplTest {
       }
 
       @Test
+      void thenItShouldUpdateValorizedFieldToTrue() {
+        BddLogger.when("updating a trace and setting valorized to true");
+
+        Trace trace =
+            TraceFixture.create().withUser(student.getUser()).withValorized(false).toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(traceRepository.save(trace)).thenReturn(trace);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+
+        traceService.updateTrace(
+            trace.getId(),
+            "Updated title",
+            ELanguage.FRENCH,
+            ETraceAuthorType.PERSONAL,
+            "Updated note",
+            "Updated justification",
+            null,
+            true);
+
+        BddLogger.then("it should update valorized to true");
+
+        ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+        verify(traceRepository).save(captor.capture());
+
+        assertTrue(captor.getValue().isValorized());
+      }
+
+      @Test
+      void thenItShouldUpdateValorizedFieldToFalse() {
+        BddLogger.when("updating a trace and setting valorized to false");
+
+        Trace trace =
+            TraceFixture.create().withUser(student.getUser()).withValorized(true).toModel();
+
+        when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
+        when(traceRepository.save(trace)).thenReturn(trace);
+        when(traceRepository.isAssociated(List.of(trace))).thenReturn(Map.of(trace, false));
+
+        traceService.updateTrace(
+            trace.getId(),
+            "Updated title",
+            ELanguage.FRENCH,
+            ETraceAuthorType.PERSONAL,
+            "Updated note",
+            "Updated justification",
+            null,
+            false);
+
+        BddLogger.then("it should update valorized to false");
+
+        ArgumentCaptor<Trace> captor = ArgumentCaptor.forClass(Trace.class);
+        verify(traceRepository).save(captor.capture());
+
+        assertFalse(captor.getValue().isValorized());
+      }
+
+      @Test
       void thenItShouldThrowTraceNotFoundWhenTraceDoesNotExist() {
         BddLogger.when("updating an unknown trace");
 
@@ -511,7 +570,8 @@ class TraceServiceImplTest {
                         ETraceAuthorType.PERSONAL,
                         null,
                         null,
-                        null));
+                        null,
+                        false));
 
         BddLogger.then("it should throw TRACE_NOT_FOUND");
 
@@ -536,7 +596,8 @@ class TraceServiceImplTest {
                         ETraceAuthorType.PERSONAL,
                         null,
                         null,
-                        null));
+                        null,
+                        false));
 
         BddLogger.then("it should throw USER_NOT_AUTHORIZED");
 

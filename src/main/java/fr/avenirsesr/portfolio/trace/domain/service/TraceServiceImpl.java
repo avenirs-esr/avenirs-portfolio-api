@@ -363,7 +363,8 @@ public class TraceServiceImpl implements TraceService {
       ETraceAuthorType authorType,
       String personalNote,
       String aiJustification,
-      String link) {
+      String link,
+      boolean valorized) {
     User loggedInUser = loggedInUserService.getLoggedInUser();
     var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
     checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
@@ -373,6 +374,7 @@ public class TraceServiceImpl implements TraceService {
     trace.setAuthorType(authorType);
     trace.setPersonalNote(personalNote);
     trace.setAiUseJustification(aiJustification);
+    trace.setValorized(valorized);
 
     if (link != null) {
       validateOptionalTextMaxLength("link", link, LINK_LENGTH);
@@ -393,7 +395,20 @@ public class TraceServiceImpl implements TraceService {
       ETraceAuthorType authorType,
       String personalNote,
       String aiJustification) {
-    return updateTrace(traceId, title, language, authorType, personalNote, aiJustification, null);
+    boolean currentValorized =
+        traceRepository
+            .findById(traceId)
+            .map(Trace::isValorized)
+            .orElseThrow(TraceNotFoundException::new);
+    return updateTrace(
+        traceId,
+        title,
+        language,
+        authorType,
+        personalNote,
+        aiJustification,
+        null,
+        currentValorized);
   }
 
   @Override
