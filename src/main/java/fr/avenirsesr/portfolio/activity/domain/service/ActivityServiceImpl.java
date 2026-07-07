@@ -391,7 +391,7 @@ public class ActivityServiceImpl implements ActivityService {
             requireNotBlankAndMaxLength("link", link, LINK_LENGTH);
             validateUrl(link);
           });
-      draft.addLinks(links);
+      draft.setLinks(links);
     }
 
     var updatedDraft = activityDraftRepository.save(draft);
