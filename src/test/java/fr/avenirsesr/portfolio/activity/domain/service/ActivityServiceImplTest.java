@@ -228,7 +228,7 @@ class ActivityServiceImplTest {
             verify(draft).setTraceAllowedAssociations(5);
             verify(draft).setFeedbackAllowedIterations(3);
             verify(draft).setEnableReflection(false);
-            verify(draft).addLinks(links);
+            verify(draft).setLinks(links);
             verify(activityDraftRepository).save(draft);
             assertEquals(draft, result);
           }
