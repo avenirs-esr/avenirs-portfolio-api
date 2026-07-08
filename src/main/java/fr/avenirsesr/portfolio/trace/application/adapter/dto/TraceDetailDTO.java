@@ -15,6 +15,7 @@ import java.util.UUID;
       "aiUseJustification",
       "personalNote",
       "lockedDeclaredActivities",
+      "valorized",
       "createdAt",
       "updatedAt"
     })
@@ -28,5 +29,6 @@ public record TraceDetailDTO(
     String personalNote,
     String link,
     FileDTO attachment,
+    boolean valorized,
     Instant createdAt,
     Instant updatedAt) {}
