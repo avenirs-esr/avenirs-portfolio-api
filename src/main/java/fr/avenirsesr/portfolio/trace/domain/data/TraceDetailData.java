@@ -16,5 +16,6 @@ public record TraceDetailData(
     String personalNote,
     Optional<String> link,
     Optional<File> attachment,
+    boolean valorized,
     Instant createdAt,
     Instant updatedAt) {}

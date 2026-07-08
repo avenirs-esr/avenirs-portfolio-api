@@ -230,6 +230,7 @@ public class TraceServiceImpl implements TraceService {
         trace.getPersonalNote().orElse(null),
         trace.getLink(),
         trace.getAttachment(),
+        trace.isValorized(),
         trace.getCreatedAt(),
         trace.getUpdatedAt());
   }
