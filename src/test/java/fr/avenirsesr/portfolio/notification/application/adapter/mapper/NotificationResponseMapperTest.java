@@ -8,6 +8,9 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.application.adapter.dto.NotificationDTO;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.AskForFeedbackParameters;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.NotificationParameters;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.util.List;
@@ -23,7 +26,7 @@ class NotificationResponseMapperTest {
   private ENotificationType type;
   private UUID elementId;
   private EUserCategory userCategory;
-  private List<String> parameters;
+  private NotificationParameters parameters;
   private User user;
 
   @BeforeEach
@@ -34,7 +37,7 @@ class NotificationResponseMapperTest {
     type = ENotificationType.ASK_FOR_FEEDBACK;
     elementId = UUID.randomUUID();
     userCategory = EUserCategory.STAFF;
-    parameters = List.of("Alice", "Martin", "Activité de test");
+    parameters = new AskForFeedbackParameters("Alice", "Martin", "Activité de test");
     user = UserFixture.create().toModel();
   }
 
@@ -72,17 +75,27 @@ class NotificationResponseMapperTest {
   }
 
   @Test
-  void toDTO_should_map_empty_parameters_list() {
-    BddLogger.given("A Notification with an empty parameters list");
+  void toDTO_should_map_activity_modified_parameters_with_empty_updated_fields() {
+    BddLogger.given("A Notification whose parameters have an empty updated fields list");
+    NotificationParameters activityModifiedParameters =
+        new ActivityModifiedParameters("Activité de test", List.of());
     Notification notification =
         Notification.toDomain(
-            id, createdAt, updatedAt, type, elementId, user, userCategory, List.of(), false);
+            id,
+            createdAt,
+            updatedAt,
+            ENotificationType.ACTIVITY_MODIFIED,
+            elementId,
+            user,
+            userCategory,
+            activityModifiedParameters,
+            false);
 
     BddLogger.when("toDTO is called");
     NotificationDTO dto = NotificationResponseMapper.INSTANCE.toDTO(notification);
 
-    BddLogger.then("The DTO has an empty parameters list");
-    assertThat(dto.parameters()).isEmpty();
+    BddLogger.then("The DTO carries the typed parameters with an empty updated fields list");
+    assertThat(dto.parameters()).isEqualTo(activityModifiedParameters);
   }
 
   @Test

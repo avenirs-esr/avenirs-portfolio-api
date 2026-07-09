@@ -7,6 +7,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.AskForFeedbackParameters;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.NotificationParameters;
 import fr.avenirsesr.portfolio.notification.infrastructure.adapter.model.NotificationEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
@@ -27,7 +29,8 @@ class NotificationMapperTest {
   private User user;
   private UserEntity userEntity;
   private EUserCategory userCategory;
-  private List<String> parameters;
+  private List<String> rawParameters;
+  private NotificationParameters parameters;
   private boolean seen;
 
   @BeforeEach
@@ -38,7 +41,8 @@ class NotificationMapperTest {
     type = ENotificationType.ASK_FOR_FEEDBACK;
     elementId = UUID.randomUUID();
     userCategory = type.getRestrictedTo();
-    parameters = List.of("Alice", "Martin", "Activité de test");
+    rawParameters = List.of("Alice", "Martin", "Activité de test");
+    parameters = new AskForFeedbackParameters("Alice", "Martin", "Activité de test");
     seen = false;
     user = UserFixture.create().toModel();
     userEntity = UserMapper.INSTANCE.fromDomain(user);
@@ -61,7 +65,7 @@ class NotificationMapperTest {
     assertThat(entity.getType()).isEqualTo(type);
     assertThat(entity.getElementId()).isEqualTo(elementId);
     assertThat(entity.getUser().getId()).isEqualTo(user.getId());
-    assertThat(entity.getParameters()).isEqualTo(parameters);
+    assertThat(entity.getParameters()).isEqualTo(rawParameters);
     assertThat(entity.isSeen()).isEqualTo(seen);
   }
 
@@ -70,7 +74,15 @@ class NotificationMapperTest {
     BddLogger.given("A NotificationEntity with all fields set");
     NotificationEntity entity =
         NotificationEntity.of(
-            id, createdAt, updatedAt, type, elementId, userEntity, userCategory, parameters, seen);
+            id,
+            createdAt,
+            updatedAt,
+            type,
+            elementId,
+            userEntity,
+            userCategory,
+            rawParameters,
+            seen);
 
     BddLogger.when("toDomain is called");
     Notification domain = NotificationMapper.INSTANCE.toDomain(entity);

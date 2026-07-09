@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.BaseNotification;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.AskForFeedbackParameters;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
@@ -60,7 +61,7 @@ class NotificationServiceImplTest {
         UUID.randomUUID(),
         user,
         category,
-        List.of(),
+        new AskForFeedbackParameters("Alice", "Martin", "Activité de test"),
         false);
   }
 

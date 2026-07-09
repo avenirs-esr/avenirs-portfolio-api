@@ -8,6 +8,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.AskForFeedbackParameters;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.Feedback;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -101,7 +102,8 @@ class AskForFeedbackNotificationTest {
     BddLogger.when("build() is called");
     Notification result = notif.build();
 
-    BddLogger.then("The parameters list contains the student full name and the activity title");
-    assertThat(result.getParameters()).containsExactly("Alice", "Martin", "Activité de test");
+    BddLogger.then("The parameters contain the student full name and the activity title");
+    assertThat(result.getParameters())
+        .isEqualTo(new AskForFeedbackParameters("Alice", "Martin", "Activité de test"));
   }
 }

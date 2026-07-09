@@ -3,7 +3,7 @@ package fr.avenirsesr.portfolio.notification.domain.model.notification;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
-import java.util.List;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.NotificationParameters;
 import java.util.UUID;
 
 public abstract class BaseNotification {
@@ -18,7 +18,7 @@ public abstract class BaseNotification {
     this.elementId = elementId;
   }
 
-  protected abstract List<String> buildParameters();
+  protected abstract NotificationParameters buildParameters();
 
   public Notification build() {
     return Notification.create(type, elementId, user, buildParameters());
