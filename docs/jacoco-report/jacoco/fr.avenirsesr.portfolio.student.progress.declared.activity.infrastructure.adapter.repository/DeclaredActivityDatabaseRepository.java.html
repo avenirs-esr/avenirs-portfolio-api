@@ -88,5 +88,10 @@ public class DeclaredActivityDatabaseRepository
   public int countByActivity(Activity activity) {
 <span class="fc" id="L89">    return jpaRepository.countByActivityId(activity.getId());</span>
   }
+
+  @Override
+  public List&lt;DeclaredActivity&gt; findAllByActivity(Activity activity, FetchGraph fetchGraph) {
+<span class="nc" id="L94">    return findAll(DeclaredActivitySpecification.hasActivityId(activity.getId()), fetchGraph);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

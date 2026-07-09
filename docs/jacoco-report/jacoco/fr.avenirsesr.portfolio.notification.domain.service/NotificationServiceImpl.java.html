@@ -11,7 +11,7 @@ import fr.avenirsesr.portfolio.notification.domain.port.output.repository.Notifi
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
-import java.util.UUID;
+import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,72 +26,83 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public void notify(BaseNotification notification) {
-<span class="fc" id="L29">    var builtNotification = notification.build();</span>
+<span class="fc" id="L29">    notifyAll(List.of(notification));</span>
+<span class="fc" id="L30">  }</span>
 
-<span class="fc bfc" id="L31" title="All 2 branches covered.">    if (!builtNotification.getUser().isNotificationEnabled()) {</span>
-<span class="fc" id="L32">      log.debug(</span>
-          &quot;Notifications disabled for user [{}], skipping notification&quot;,
-<span class="fc" id="L34">          builtNotification.getUser().getId());</span>
-<span class="fc" id="L35">      return;</span>
+  @Override
+  public void notifyAll(List&lt;? extends BaseNotification&gt; notifications) {
+<span class="fc" id="L34">    var builtNotifications =</span>
+<span class="fc" id="L35">        notifications.stream()</span>
+<span class="fc" id="L36">            .map(BaseNotification::build)</span>
+<span class="fc" id="L37">            .filter(n -&gt; n.getUser().isNotificationEnabled())</span>
+<span class="fc" id="L38">            .toList();</span>
+
+<span class="fc bfc" id="L40" title="All 2 branches covered.">    if (builtNotifications.isEmpty()) {</span>
+<span class="fc" id="L41">      return;</span>
     }
 
-<span class="fc" id="L38">    var savedNotification = notificationRepository.save(builtNotification);</span>
+<span class="fc" id="L44">    var savedNotifications = notificationRepository.saveAll(builtNotifications);</span>
 
-<span class="fc" id="L40">    var userId = savedNotification.getUser().getId();</span>
-<span class="fc bfc" id="L41" title="All 3 branches covered.">    switch (savedNotification.getUserCategory()) {</span>
-<span class="fc" id="L42">      case STAFF -&gt; setStaffUnseenNotification(userId, true);</span>
-<span class="fc" id="L43">      case STUDENT -&gt; setStudentUnseenNotification(userId, true);</span>
-      case null -&gt; {
-<span class="fc" id="L45">        setStaffUnseenNotification(userId, true);</span>
-<span class="fc" id="L46">        setStudentUnseenNotification(userId, true);</span>
+<span class="fc" id="L46">    List&lt;UUID&gt; staffIds = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L47">    List&lt;UUID&gt; studentIds = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">    for (var savedNotification : savedNotifications) {</span>
+<span class="fc" id="L49">      var userId = savedNotification.getUser().getId();</span>
+<span class="fc bfc" id="L50" title="All 3 branches covered.">      switch (savedNotification.getUserCategory()) {</span>
+<span class="fc" id="L51">        case STAFF -&gt; staffIds.add(userId);</span>
+<span class="fc" id="L52">        case STUDENT -&gt; studentIds.add(userId);</span>
+        case null -&gt; {
+<span class="fc" id="L54">          staffIds.add(userId);</span>
+<span class="fc" id="L55">          studentIds.add(userId);</span>
+        }
       }
-    }
+<span class="fc" id="L58">    }</span>
 
-<span class="fc" id="L50">    log.debug(&quot;[{}] created&quot;, savedNotification);</span>
-<span class="fc" id="L51">  }</span>
+<span class="fc" id="L60">    setStaffUnseenNotification(staffIds, true);</span>
+<span class="fc" id="L61">    setStudentUnseenNotification(studentIds, true);</span>
+
+<span class="fc" id="L63">    log.debug(&quot;[{}] notification(s) created&quot;, savedNotifications.size());</span>
+<span class="fc" id="L64">  }</span>
 
   @Override
   public void markAsSeen(UUID id) {
-<span class="fc" id="L55">    log.debug(&quot;Marking notification [{}] as seen&quot;, id);</span>
-<span class="fc" id="L56">    Notification notification =</span>
-<span class="fc" id="L57">        notificationRepository.findById(id).orElseThrow(NotificationNotFoundException::new);</span>
-<span class="fc" id="L58">    notification.setSeen(true);</span>
-<span class="fc" id="L59">    notificationRepository.save(notification);</span>
-<span class="fc" id="L60">  }</span>
+<span class="fc" id="L68">    log.debug(&quot;Marking notification [{}] as seen&quot;, id);</span>
+<span class="fc" id="L69">    Notification notification =</span>
+<span class="fc" id="L70">        notificationRepository.findById(id).orElseThrow(NotificationNotFoundException::new);</span>
+<span class="fc" id="L71">    notification.setSeen(true);</span>
+<span class="fc" id="L72">    notificationRepository.save(notification);</span>
+<span class="fc" id="L73">  }</span>
 
   @Override
   public PagedResult&lt;Notification&gt; getNotifications(
       EUserCategory userCategory, PageCriteria pageCriteria) {
-<span class="fc" id="L65">    UUID userId = loggedInUserService.getLoggedInUser().getId();</span>
-<span class="fc" id="L66">    log.debug(&quot;Fetching notifications for user [{}] with category [{}]&quot;, userId, userCategory);</span>
+<span class="fc" id="L78">    UUID userId = loggedInUserService.getLoggedInUser().getId();</span>
+<span class="fc" id="L79">    log.debug(&quot;Fetching notifications for user [{}] with category [{}]&quot;, userId, userCategory);</span>
 
-<span class="pc bpc" id="L68" title="1 of 3 branches missed.">    switch (userCategory) {</span>
-<span class="fc" id="L69">      case STAFF -&gt; setStaffUnseenNotification(userId, false);</span>
-<span class="fc" id="L70">      case STUDENT -&gt; setStudentUnseenNotification(userId, false);</span>
-<span class="nc" id="L71">      default -&gt; throw new IllegalArgumentException(&quot;Invalid user category&quot;);</span>
+<span class="pc bpc" id="L81" title="1 of 3 branches missed.">    switch (userCategory) {</span>
+<span class="fc" id="L82">      case STAFF -&gt; setStaffUnseenNotification(List.of(userId), false);</span>
+<span class="fc" id="L83">      case STUDENT -&gt; setStudentUnseenNotification(List.of(userId), false);</span>
+<span class="nc" id="L84">      default -&gt; throw new IllegalArgumentException(&quot;Invalid user category&quot;);</span>
     }
 
-<span class="fc" id="L74">    return notificationRepository.findByUserAndCategory(userId, userCategory, pageCriteria);</span>
+<span class="fc" id="L87">    return notificationRepository.findByUserAndCategory(userId, userCategory, pageCriteria);</span>
   }
 
-  private void setStaffUnseenNotification(UUID staffId, boolean seen) {
-<span class="fc" id="L78">    staffRepository</span>
-<span class="fc" id="L79">        .findById(staffId)</span>
-<span class="fc" id="L80">        .ifPresent(</span>
-            staff -&gt; {
-<span class="fc" id="L82">              staff.setHasUnseenNotification(seen);</span>
-<span class="fc" id="L83">              staffRepository.save(staff);</span>
-<span class="fc" id="L84">            });</span>
-<span class="fc" id="L85">  }</span>
+  private void setStaffUnseenNotification(List&lt;UUID&gt; staffIds, boolean seen) {
+<span class="fc bfc" id="L91" title="All 2 branches covered.">    if (staffIds.isEmpty()) {</span>
+<span class="fc" id="L92">      return;</span>
+    }
+<span class="fc" id="L94">    var staff = staffRepository.findAllById(List.copyOf(staffIds));</span>
+<span class="fc" id="L95">    staff.forEach(s -&gt; s.setHasUnseenNotification(seen));</span>
+<span class="fc" id="L96">    staffRepository.saveAll(staff);</span>
+<span class="fc" id="L97">  }</span>
 
-  private void setStudentUnseenNotification(UUID studentId, boolean seen) {
-<span class="fc" id="L88">    studentRepository</span>
-<span class="fc" id="L89">        .findById(studentId)</span>
-<span class="fc" id="L90">        .ifPresent(</span>
-            student -&gt; {
-<span class="fc" id="L92">              student.setHasUnseenNotification(seen);</span>
-<span class="fc" id="L93">              studentRepository.save(student);</span>
-<span class="fc" id="L94">            });</span>
-<span class="fc" id="L95">  }</span>
+  private void setStudentUnseenNotification(List&lt;UUID&gt; studentIds, boolean seen) {
+<span class="fc bfc" id="L100" title="All 2 branches covered.">    if (studentIds.isEmpty()) {</span>
+<span class="fc" id="L101">      return;</span>
+    }
+<span class="fc" id="L103">    var students = studentRepository.findAllById(List.copyOf(studentIds));</span>
+<span class="fc" id="L104">    students.forEach(s -&gt; s.setHasUnseenNotification(seen));</span>
+<span class="fc" id="L105">    studentRepository.saveAll(students);</span>
+<span class="fc" id="L106">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

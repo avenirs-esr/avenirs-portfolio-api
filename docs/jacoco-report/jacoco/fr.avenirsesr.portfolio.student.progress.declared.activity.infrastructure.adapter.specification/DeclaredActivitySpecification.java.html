@@ -21,23 +21,27 @@ public final class DeclaredActivitySpecification {
 <span class="nc" id="L21">        .and(hasActivityIdIn(activityIds));</span>
   }
 
+  public static Specification&lt;DeclaredActivityEntity&gt; hasActivityId(UUID activityId) {
+<span class="nc" id="L25">    return (root, query, cb) -&gt; cb.equal(root.get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
+  }
+
   public static Specification&lt;DeclaredActivityEntity&gt; search(String keyword) {
-<span class="fc" id="L25">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="pc bpc" id="L26" title="1 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
-<span class="fc" id="L27">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L29">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L30" title="1 of 4 branches missed.">      if (keyword == null || keyword.trim().isEmpty()) {</span>
+<span class="fc" id="L31">        return criteriaBuilder.conjunction();</span>
       }
-<span class="fc" id="L29">      return criteriaBuilder.like(</span>
-<span class="fc" id="L30">          criteriaBuilder.lower(root.get(&quot;activity&quot;).get(&quot;title&quot;)),</span>
-<span class="fc" id="L31">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
+<span class="fc" id="L33">      return criteriaBuilder.like(</span>
+<span class="fc" id="L34">          criteriaBuilder.lower(root.get(&quot;activity&quot;).get(&quot;title&quot;)),</span>
+<span class="fc" id="L35">          &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
     };
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isNotCompleted() {
-<span class="nc" id="L36">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;finishedAt&quot;));</span>
+<span class="nc" id="L40">    return (root, query, cb) -&gt; cb.isNull(root.get(&quot;finishedAt&quot;));</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; isCompleted() {
-<span class="nc" id="L40">    return (root, query, cb) -&gt; cb.isNotNull(root.get(&quot;finishedAt&quot;));</span>
+<span class="nc" id="L44">    return (root, query, cb) -&gt; cb.isNotNull(root.get(&quot;finishedAt&quot;));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
