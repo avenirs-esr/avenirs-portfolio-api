@@ -13,16 +13,20 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityUpdatableField;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.StaffActivityOverviewRepository;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
@@ -44,6 +48,7 @@ class ActivityServiceImplTest {
   @Mock private LoggedInUserService loggedInUserService;
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private StaffActivityOverviewRepository staffActivityOverviewRepository;
+  @Mock private NotificationService notificationService;
 
   @InjectMocks private ActivityServiceImpl activityService;
 
@@ -536,6 +541,7 @@ class ActivityServiceImplTest {
 
         when(activityRepository.findById(activityId)).thenReturn(Optional.of(existingActivity));
         when(activityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(existingActivity.getId()).thenReturn(activityId);
       }
 
       @Nested
@@ -544,7 +550,16 @@ class ActivityServiceImplTest {
         @BeforeEach
         void setupAnd() {
           BddLogger.and("the activity has no enrolled students");
-          when(declaredActivityService.countEnrolledStudents(existingActivity)).thenReturn(0);
+          when(declaredActivityService.getEnrolledStudents(existingActivity)).thenReturn(List.of());
+        }
+
+        @Test
+        void thenItShouldNotSendAnyNotification() {
+          BddLogger.then("no notification should be sent since there is no student to notify");
+
+          activityService.publish(activityId);
+
+          verifyNoInteractions(notificationService);
         }
 
         @Test
@@ -560,7 +575,7 @@ class ActivityServiceImplTest {
           verify(existingActivity).setSummary("Nouveau résumé");
           verify(existingActivity).setExecutionPeriodInfo("Nouvelle période");
           verify(existingActivity).setExecutionPeriodInfoSummary("Nouveau label");
-          verify(existingActivity).setBanner(null);
+          verify(existingActivity, never()).setBanner(any());
           verify(existingActivity).setLinks(List.of("https://example.com"));
           verify(existingActivity).setStatus(EActivityStatus.PUBLISHED);
           verify(activityRepository).save(existingActivity);
@@ -593,10 +608,22 @@ class ActivityServiceImplTest {
       @Nested
       class AndTheActivityHasEnrolledStudents {
 
+        Student student1;
+        Student student2;
+        User user1;
+        User user2;
+
         @BeforeEach
         void setupAnd() {
           BddLogger.and("the activity has enrolled students");
-          when(declaredActivityService.countEnrolledStudents(existingActivity)).thenReturn(2);
+          student1 = mock(Student.class);
+          student2 = mock(Student.class);
+          user1 = mock(User.class);
+          user2 = mock(User.class);
+          lenient().when(student1.getUser()).thenReturn(user1);
+          lenient().when(student2.getUser()).thenReturn(user2);
+          when(declaredActivityService.getEnrolledStudents(existingActivity))
+              .thenReturn(List.of(student1, student2));
         }
 
         @Test
@@ -612,7 +639,7 @@ class ActivityServiceImplTest {
           verify(existingActivity).setSummary("Nouveau résumé");
           verify(existingActivity).setExecutionPeriodInfo("Nouvelle période");
           verify(existingActivity).setExecutionPeriodInfoSummary("Nouveau label");
-          verify(existingActivity).setBanner(null);
+          verify(existingActivity, never()).setBanner(any());
           verify(existingActivity).setLinks(List.of("https://example.com"));
           verify(existingActivity).setStatus(EActivityStatus.PUBLISHED);
           verify(activityRepository).save(existingActivity);
@@ -630,6 +657,60 @@ class ActivityServiceImplTest {
           verify(existingActivity, never()).setEnableReflection(anyBoolean());
           verify(existingActivity, never()).setTraceAllowedAssociations(anyInt());
           verify(existingActivity, never()).setFeedbackAllowedIterations(anyInt());
+        }
+
+        @Test
+        @SuppressWarnings("unchecked")
+        void thenItShouldNotifyEachEnrolledStudentAboutTheUpdatedFields() {
+          BddLogger.then("each enrolled student should be notified about the updated fields");
+
+          activityService.publish(activityId);
+
+          ArgumentCaptor<List<ActivityUpdatedNotification>> captor =
+              ArgumentCaptor.forClass(List.class);
+          verify(notificationService).notifyAll(captor.capture());
+          List<ActivityUpdatedNotification> notifications = captor.getValue();
+
+          assertEquals(2, notifications.size());
+          assertEquals(user1, notifications.get(0).build().getUser());
+          assertEquals(user2, notifications.get(1).build().getUser());
+
+          List<String> expectedUpdatedFields =
+              List.of(
+                  EActivityUpdatableField.ACTIVITY_TITLE.name(),
+                  EActivityUpdatableField.SUMMARY.name(),
+                  EActivityUpdatableField.DESCRIPTION.name(),
+                  EActivityUpdatableField.EXECUTION_PERIOD.name(),
+                  EActivityUpdatableField.THEMATIC.name(),
+                  EActivityUpdatableField.FILES_AND_LINKS.name());
+          List<String> parameters = notifications.getFirst().build().getParameters();
+          assertEquals(expectedUpdatedFields, parameters.subList(1, parameters.size()));
+        }
+
+        @Nested
+        class AndNoTrackedFieldActuallyChanged {
+
+          @BeforeEach
+          void setupAnd() {
+            BddLogger.and("none of the notifiable fields differ from the draft");
+            when(existingActivity.getTitle()).thenReturn("Nouveau titre");
+            when(existingActivity.getSummary()).thenReturn("Nouveau résumé");
+            when(existingActivity.getDescription()).thenReturn(Optional.of("Nouvelle description"));
+            when(existingActivity.getExecutionPeriodInfo())
+                .thenReturn(Optional.of("Nouvelle période"));
+            when(existingActivity.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
+            when(existingActivity.getBanner()).thenReturn(Optional.empty());
+            when(existingActivity.getLinks()).thenReturn(List.of("https://example.com"));
+          }
+
+          @Test
+          void thenItShouldNotSendAnyNotification() {
+            BddLogger.then("no notification should be sent since nothing actually changed");
+
+            activityService.publish(activityId);
+
+            verifyNoInteractions(notificationService);
+          }
         }
       }
     }

@@ -562,6 +562,14 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     return declaredActivityRepository.countByActivity(activity);
   }
 
+  @Override
+  public List<Student> getEnrolledStudents(Activity activity) {
+    var graph = FetchGraph.init().add("student").fetch("user");
+    return declaredActivityRepository.findAllByActivity(activity, graph).stream()
+        .map(DeclaredActivity::getStudent)
+        .toList();
+  }
+
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
     return switch (contextType) {
       case TRACE -> EAssociationType.DECLARED_ACTIVITY_TRACE;

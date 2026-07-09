@@ -21,6 +21,10 @@ public final class DeclaredActivitySpecification {
         .and(hasActivityIdIn(activityIds));
   }
 
+  public static Specification<DeclaredActivityEntity> hasActivityId(UUID activityId) {
+    return (root, query, cb) -> cb.equal(root.get("activity").get("id"), activityId);
+  }
+
   public static Specification<DeclaredActivityEntity> search(String keyword) {
     return (root, query, criteriaBuilder) -> {
       if (keyword == null || keyword.trim().isEmpty()) {

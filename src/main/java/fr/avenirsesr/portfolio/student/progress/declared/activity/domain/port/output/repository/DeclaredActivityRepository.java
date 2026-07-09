@@ -29,4 +29,6 @@ public interface DeclaredActivityRepository extends GenericRepositoryPort<Declar
   Optional<DeclaredActivity> findByActivity(Student student, Activity activity);
 
   int countByActivity(Activity activity);
+
+  List<DeclaredActivity> findAllByActivity(Activity activity, FetchGraph fetchGraph);
 }

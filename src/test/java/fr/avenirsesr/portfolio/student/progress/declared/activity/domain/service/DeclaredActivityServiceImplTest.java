@@ -1725,4 +1725,40 @@ class DeclaredActivityServiceImplTest {
     BddLogger.then("it should return zero");
     assertThat(count).isZero();
   }
+
+  @Test
+  void getEnrolledStudents_should_return_students_of_the_activity_declared_activities() {
+    BddLogger.given("an activity with two enrolled students");
+    Activity activity = ActivityFixture.create().toModel();
+    Student student1 = StudentFixture.create().toModel();
+    Student student2 = StudentFixture.create().toModel();
+    DeclaredActivity declaredActivity1 =
+        DeclaredActivity.create(
+            UUID.randomUUID(), student1, activity, null, null, null, null, null);
+    DeclaredActivity declaredActivity2 =
+        DeclaredActivity.create(
+            UUID.randomUUID(), student2, activity, null, null, null, null, null);
+    when(declaredActivityRepository.findAllByActivity(eq(activity), any(FetchGraph.class)))
+        .thenReturn(List.of(declaredActivity1, declaredActivity2));
+
+    BddLogger.when("getting the enrolled students");
+    List<Student> result = service.getEnrolledStudents(activity);
+
+    BddLogger.then("it should return the students of each declared activity");
+    assertThat(result).containsExactly(student1, student2);
+  }
+
+  @Test
+  void getEnrolledStudents_should_return_empty_list_when_no_students_enrolled() {
+    BddLogger.given("an activity with no enrolled students");
+    Activity activity = ActivityFixture.create().toModel();
+    when(declaredActivityRepository.findAllByActivity(eq(activity), any(FetchGraph.class)))
+        .thenReturn(List.of());
+
+    BddLogger.when("getting the enrolled students");
+    List<Student> result = service.getEnrolledStudents(activity);
+
+    BddLogger.then("it should return an empty list");
+    assertThat(result).isEmpty();
+  }
 }

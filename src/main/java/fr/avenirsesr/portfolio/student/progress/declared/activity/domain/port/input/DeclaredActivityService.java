@@ -75,4 +75,6 @@ public interface DeclaredActivityService {
   DeclaredActivity fetchActivityAndCheckLoggedInStudentAuthorization(UUID declaredActivityId);
 
   int countEnrolledStudents(Activity activity);
+
+  List<Student> getEnrolledStudents(Activity activity);
 }

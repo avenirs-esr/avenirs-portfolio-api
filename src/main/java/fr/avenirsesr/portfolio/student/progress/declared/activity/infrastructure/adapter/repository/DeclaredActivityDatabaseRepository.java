@@ -88,4 +88,9 @@ public class DeclaredActivityDatabaseRepository
   public int countByActivity(Activity activity) {
     return jpaRepository.countByActivityId(activity.getId());
   }
+
+  @Override
+  public List<DeclaredActivity> findAllByActivity(Activity activity, FetchGraph fetchGraph) {
+    return findAll(DeclaredActivitySpecification.hasActivityId(activity.getId()), fetchGraph);
+  }
 }

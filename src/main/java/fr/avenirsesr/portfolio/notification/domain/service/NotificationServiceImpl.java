@@ -11,7 +11,7 @@ import fr.avenirsesr.portfolio.notification.domain.port.output.repository.Notifi
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
-import java.util.UUID;
+import java.util.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,28 +26,41 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public void notify(BaseNotification notification) {
-    var builtNotification = notification.build();
+    notifyAll(List.of(notification));
+  }
 
-    if (!builtNotification.getUser().isNotificationEnabled()) {
-      log.debug(
-          "Notifications disabled for user [{}], skipping notification",
-          builtNotification.getUser().getId());
+  @Override
+  public void notifyAll(List<? extends BaseNotification> notifications) {
+    var builtNotifications =
+        notifications.stream()
+            .map(BaseNotification::build)
+            .filter(n -> n.getUser().isNotificationEnabled())
+            .toList();
+
+    if (builtNotifications.isEmpty()) {
       return;
     }
 
-    var savedNotification = notificationRepository.save(builtNotification);
+    var savedNotifications = notificationRepository.saveAll(builtNotifications);
 
-    var userId = savedNotification.getUser().getId();
-    switch (savedNotification.getUserCategory()) {
-      case STAFF -> setStaffUnseenNotification(userId, true);
-      case STUDENT -> setStudentUnseenNotification(userId, true);
-      case null -> {
-        setStaffUnseenNotification(userId, true);
-        setStudentUnseenNotification(userId, true);
+    List<UUID> staffIds = new ArrayList<>();
+    List<UUID> studentIds = new ArrayList<>();
+    for (var savedNotification : savedNotifications) {
+      var userId = savedNotification.getUser().getId();
+      switch (savedNotification.getUserCategory()) {
+        case STAFF -> staffIds.add(userId);
+        case STUDENT -> studentIds.add(userId);
+        case null -> {
+          staffIds.add(userId);
+          studentIds.add(userId);
+        }
       }
     }
 
-    log.debug("[{}] created", savedNotification);
+    setStaffUnseenNotification(staffIds, true);
+    setStudentUnseenNotification(studentIds, true);
+
+    log.debug("[{}] notification(s) created", savedNotifications.size());
   }
 
   @Override
@@ -66,31 +79,29 @@ public class NotificationServiceImpl implements NotificationService {
     log.debug("Fetching notifications for user [{}] with category [{}]", userId, userCategory);
 
     switch (userCategory) {
-      case STAFF -> setStaffUnseenNotification(userId, false);
-      case STUDENT -> setStudentUnseenNotification(userId, false);
+      case STAFF -> setStaffUnseenNotification(List.of(userId), false);
+      case STUDENT -> setStudentUnseenNotification(List.of(userId), false);
       default -> throw new IllegalArgumentException("Invalid user category");
     }
 
     return notificationRepository.findByUserAndCategory(userId, userCategory, pageCriteria);
   }
 
-  private void setStaffUnseenNotification(UUID staffId, boolean seen) {
-    staffRepository
-        .findById(staffId)
-        .ifPresent(
-            staff -> {
-              staff.setHasUnseenNotification(seen);
-              staffRepository.save(staff);
-            });
+  private void setStaffUnseenNotification(List<UUID> staffIds, boolean seen) {
+    if (staffIds.isEmpty()) {
+      return;
+    }
+    var staff = staffRepository.findAllById(List.copyOf(staffIds));
+    staff.forEach(s -> s.setHasUnseenNotification(seen));
+    staffRepository.saveAll(staff);
   }
 
-  private void setStudentUnseenNotification(UUID studentId, boolean seen) {
-    studentRepository
-        .findById(studentId)
-        .ifPresent(
-            student -> {
-              student.setHasUnseenNotification(seen);
-              studentRepository.save(student);
-            });
+  private void setStudentUnseenNotification(List<UUID> studentIds, boolean seen) {
+    if (studentIds.isEmpty()) {
+      return;
+    }
+    var students = studentRepository.findAllById(List.copyOf(studentIds));
+    students.forEach(s -> s.setHasUnseenNotification(seen));
+    studentRepository.saveAll(students);
   }
 }

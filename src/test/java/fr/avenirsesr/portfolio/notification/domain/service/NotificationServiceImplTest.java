@@ -25,7 +25,6 @@ import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -75,15 +74,15 @@ class NotificationServiceImplTest {
       Notification expectedNotification = buildNotification(user, EUserCategory.STUDENT);
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(expectedNotification);
-      when(notificationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+      when(notificationRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
 
       BddLogger.when("notify is called");
       service.notify(baseNotification);
 
       BddLogger.then("The repository saves exactly the notification produced by build()");
-      ArgumentCaptor<Notification> captor = forClass(Notification.class);
-      verify(notificationRepository).save(captor.capture());
-      assertThat(captor.getValue()).isSameAs(expectedNotification);
+      ArgumentCaptor<List<Notification>> captor = forClass(List.class);
+      verify(notificationRepository).saveAll(captor.capture());
+      assertThat(captor.getValue()).containsExactly(expectedNotification);
     }
 
     @Test
@@ -92,7 +91,7 @@ class NotificationServiceImplTest {
       User user = UserFixture.create().withNotificationEnabled(true).toModel();
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(buildNotification(user, EUserCategory.STUDENT));
-      when(notificationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+      when(notificationRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
 
       BddLogger.when("notify is called");
       service.notify(baseNotification);
@@ -175,16 +174,16 @@ class NotificationServiceImplTest {
       Notification notification = buildNotification(user, EUserCategory.STUDENT);
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(notification);
-      when(studentRepository.findById(user.getId())).thenReturn(Optional.of(student));
-      when(notificationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+      when(studentRepository.findAllById(List.of(user.getId()))).thenReturn(List.of(student));
+      when(notificationRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
 
       BddLogger.when("notify is called");
       service.notify(baseNotification);
 
       BddLogger.then("hasUnseenNotification is set to true on the student and saved");
-      ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
-      verify(studentRepository).save(captor.capture());
-      assertTrue(captor.getValue().isHasUnseenNotification());
+      ArgumentCaptor<List<Student>> captor = forClass(List.class);
+      verify(studentRepository).saveAll(captor.capture());
+      assertTrue(captor.getValue().get(0).isHasUnseenNotification());
     }
 
     @Test
@@ -194,14 +193,14 @@ class NotificationServiceImplTest {
       Student student = StudentFixture.create().withUser(user).toModel();
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(buildNotification(user, EUserCategory.STUDENT));
-      when(studentRepository.findById(user.getId())).thenReturn(Optional.of(student));
-      when(notificationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+      when(studentRepository.findAllById(List.of(user.getId()))).thenReturn(List.of(student));
+      when(notificationRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
 
       BddLogger.when("notify is called");
       service.notify(baseNotification);
 
       BddLogger.then("staffRepository is never queried");
-      verify(staffRepository, never()).findById(any());
+      verify(staffRepository, never()).findAllById(any());
     }
 
     @Test
@@ -212,16 +211,16 @@ class NotificationServiceImplTest {
       Notification notification = buildNotification(user, EUserCategory.STAFF);
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(notification);
-      when(staffRepository.findById(user.getId())).thenReturn(Optional.of(staff));
-      when(notificationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+      when(staffRepository.findAllById(List.of(user.getId()))).thenReturn(List.of(staff));
+      when(notificationRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
 
       BddLogger.when("notify is called");
       service.notify(baseNotification);
 
       BddLogger.then("hasUnseenNotification is set to true on the staff and saved");
-      ArgumentCaptor<Staff> captor = ArgumentCaptor.forClass(Staff.class);
-      verify(staffRepository).save(captor.capture());
-      assertTrue(captor.getValue().isHasUnseenNotification());
+      ArgumentCaptor<List<Staff>> captor = forClass(List.class);
+      verify(staffRepository).saveAll(captor.capture());
+      assertTrue(captor.getValue().get(0).isHasUnseenNotification());
     }
 
     @Test
@@ -231,14 +230,14 @@ class NotificationServiceImplTest {
       Staff staff = StaffFixture.create().withUser(user).toModel();
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(buildNotification(user, EUserCategory.STAFF));
-      when(staffRepository.findById(user.getId())).thenReturn(Optional.of(staff));
-      when(notificationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+      when(staffRepository.findAllById(List.of(user.getId()))).thenReturn(List.of(staff));
+      when(notificationRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
 
       BddLogger.when("notify is called");
       service.notify(baseNotification);
 
       BddLogger.then("studentRepository is never queried");
-      verify(studentRepository, never()).findById(any());
+      verify(studentRepository, never()).findAllById(any());
     }
 
     @Test
@@ -251,21 +250,21 @@ class NotificationServiceImplTest {
       Notification notification = buildNotification(user, null);
       BaseNotification baseNotification = mock(BaseNotification.class);
       when(baseNotification.build()).thenReturn(notification);
-      when(studentRepository.findById(user.getId())).thenReturn(Optional.of(student));
-      when(staffRepository.findById(user.getId())).thenReturn(Optional.of(staff));
-      when(notificationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+      when(studentRepository.findAllById(List.of(user.getId()))).thenReturn(List.of(student));
+      when(staffRepository.findAllById(List.of(user.getId()))).thenReturn(List.of(staff));
+      when(notificationRepository.saveAll(any())).thenAnswer(inv -> inv.getArgument(0));
 
       BddLogger.when("notify is called");
       service.notify(baseNotification);
 
       BddLogger.then("hasUnseenNotification is set to true on both student and staff");
-      ArgumentCaptor<Student> studentCaptor = ArgumentCaptor.forClass(Student.class);
-      verify(studentRepository).save(studentCaptor.capture());
-      assertTrue(studentCaptor.getValue().isHasUnseenNotification());
+      ArgumentCaptor<List<Student>> studentCaptor = forClass(List.class);
+      verify(studentRepository).saveAll(studentCaptor.capture());
+      assertTrue(studentCaptor.getValue().get(0).isHasUnseenNotification());
 
-      ArgumentCaptor<Staff> staffCaptor = ArgumentCaptor.forClass(Staff.class);
-      verify(staffRepository).save(staffCaptor.capture());
-      assertTrue(staffCaptor.getValue().isHasUnseenNotification());
+      ArgumentCaptor<List<Staff>> staffCaptor = forClass(List.class);
+      verify(staffRepository).saveAll(staffCaptor.capture());
+      assertTrue(staffCaptor.getValue().get(0).isHasUnseenNotification());
     }
   }
 

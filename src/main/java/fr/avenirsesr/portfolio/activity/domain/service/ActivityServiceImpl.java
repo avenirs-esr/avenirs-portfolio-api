@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.activity.domain.service;
 
+import static fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityUpdatableField.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.constraints.FieldMaxLengths.*;
 import static fr.avenirsesr.portfolio.common.validation.domain.utils.FieldValidationUtils.*;
 
@@ -14,6 +15,7 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.ActivityDraft;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
+import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityUpdatableField;
 import fr.avenirsesr.portfolio.activity.domain.port.input.ActivityService;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
 import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
@@ -26,13 +28,17 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
+import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +53,7 @@ public class ActivityServiceImpl implements ActivityService {
   private final DeclaredActivityService declaredActivityService;
   private final LoggedInUserService loggedInUserService;
   private final StaffActivityOverviewRepository staffActivityOverviewRepository;
+  private final NotificationService notificationService;
 
   @Override
   public Activity create(
@@ -126,12 +133,10 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getLinks()));
 
     if (publishedActivity.isPresent()) {
-      if (hasEnrolledStudents(activity)) {
-        updateEngagedActivity(activity, draft);
-      } else {
-        updateUnEngagedActivity(activity, draft);
-      }
+      var enrolledStudents = declaredActivityService.getEnrolledStudents(activity);
+      var updatedFields = updateActivity(activity, draft, !enrolledStudents.isEmpty());
       activity.setStatus(EActivityStatus.PUBLISHED);
+      notifyActivityUpdated(activity, updatedFields, enrolledStudents);
     }
 
     var savedActivity = activityRepository.save(activity);
@@ -140,23 +145,73 @@ public class ActivityServiceImpl implements ActivityService {
     return savedActivity;
   }
 
-  private void updateUnEngagedActivity(Activity publishedActivity, ActivityDraft draft) {
-    updateEngagedActivity(publishedActivity, draft);
-    publishedActivity.setTraceAllowedAssociations(draft.getTraceAllowedAssociations());
-    publishedActivity.setFeedbackAllowedIterations(draft.getFeedbackAllowedIterations());
-    publishedActivity.setEnableReflection(draft.isEnableReflection());
+  private record FieldSync<T>(
+      EActivityUpdatableField field, T currentValue, T newValue, Consumer<T> setter) {
+    boolean applyIfChanged() {
+      if (Objects.equals(currentValue, newValue)) {
+        return false;
+      }
+      setter.accept(newValue);
+      return true;
+    }
   }
 
-  private void updateEngagedActivity(Activity publishedActivity, ActivityDraft draft) {
-    publishedActivity.setTitle(draft.getTitle());
-    publishedActivity.setThematic(draft.getThematic());
-    publishedActivity.setDescription(draft.getDescription().orElse(null));
-    publishedActivity.setSummary(draft.getSummary().orElse(null));
-    publishedActivity.setExecutionPeriodInfo(draft.getExecutionPeriodInfo().orElse(null));
-    publishedActivity.setExecutionPeriodInfoSummary(
-        draft.getExecutionPeriodInfoSummary().orElse(null));
-    publishedActivity.setBanner(draft.getBanner().orElse(null));
-    publishedActivity.setLinks(draft.getLinks());
+  private List<EActivityUpdatableField> updateActivity(
+      Activity activity, ActivityDraft draft, boolean hasEnrolledStudents) {
+    var syncs =
+        List.of(
+            new FieldSync<>(
+                ACTIVITY_TITLE, activity.getTitle(), draft.getTitle(), activity::setTitle),
+            new FieldSync<>(
+                SUMMARY,
+                activity.getSummary(),
+                draft.getSummary().orElse(null),
+                activity::setSummary),
+            new FieldSync<>(
+                DESCRIPTION,
+                activity.getDescription().orElse(null),
+                draft.getDescription().orElse(null),
+                activity::setDescription),
+            new FieldSync<>(
+                EXECUTION_PERIOD,
+                activity.getExecutionPeriodInfo().orElse(null),
+                draft.getExecutionPeriodInfo().orElse(null),
+                activity::setExecutionPeriodInfo),
+            new FieldSync<>(
+                THEMATIC, activity.getThematic(), draft.getThematic(), activity::setThematic),
+            new FieldSync<>(
+                BANNER,
+                activity.getBanner().orElse(null),
+                draft.getBanner().orElse(null),
+                activity::setBanner),
+            new FieldSync<>(
+                FILES_AND_LINKS, activity.getLinks(), draft.getLinks(), activity::setLinks));
+
+    var updatedFields =
+        syncs.stream().filter(FieldSync::applyIfChanged).map(FieldSync::field).toList();
+
+    activity.setExecutionPeriodInfoSummary(draft.getExecutionPeriodInfoSummary().orElse(null));
+
+    if (!hasEnrolledStudents) {
+      activity.setTraceAllowedAssociations(draft.getTraceAllowedAssociations());
+      activity.setFeedbackAllowedIterations(draft.getFeedbackAllowedIterations());
+      activity.setEnableReflection(draft.isEnableReflection());
+    }
+
+    return updatedFields;
+  }
+
+  private void notifyActivityUpdated(
+      Activity activity, List<EActivityUpdatableField> updatedFields, List<Student> students) {
+    if (students.isEmpty() || updatedFields.isEmpty()) {
+      return;
+    }
+    notificationService.notifyAll(
+        students.stream()
+            .map(
+                student ->
+                    new ActivityUpdatedNotification(student.getUser(), activity, updatedFields))
+            .toList());
   }
 
   @Override
