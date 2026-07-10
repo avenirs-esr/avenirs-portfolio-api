@@ -272,21 +272,28 @@ public class FileResourceServiceImpl implements FileResourceService {
 
   private void chekDownloadRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
 <span class="nc bnc" id="L274" title="All 4 branches missed.">    switch (fileCategory) {</span>
-      case ACTIVITY_FILE -&gt;
-<span class="nc" id="L276">          throw new UnsupportedOperationException(&quot;Operation not supported for ACTIVITY_FILE&quot;);</span>
+      case ACTIVITY_FILE -&gt; {
+<span class="nc" id="L276">        var draft = activityDraftRepository.findById(elementId);</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">        if (!draft.isPresent()) {</span>
+<span class="nc" id="L278">          var activity = activityRepository.findById(elementId);</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">          if (!activity.isPresent()) {</span>
+<span class="nc" id="L280">            throw new ActivityNotFoundException();</span>
+          }
+        }
+<span class="nc" id="L283">      }</span>
       case STUDENT_PROFILE_PICTURE,
           STUDENT_COVER_PICTURE,
           STAFF_PROFILE_PICTURE,
           STAFF_COVER_PICTURE,
           ACTIVITY_BANNER -&gt;
-<span class="nc" id="L282">          throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L289">          throw new UserNotAuthorizedException();</span>
       case TRACE_ATTACHMENT -&gt; {
-<span class="nc" id="L284">        var trace = traceService.getTraceById(elementId);</span>
-<span class="nc bnc" id="L285" title="All 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
-<span class="nc bnc" id="L286" title="All 2 branches missed.">        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();</span>
-<span class="nc bnc" id="L287" title="All 2 branches missed.">        if (trace.getAttachment().isEmpty()) throw new InvalidTraceTypeException();</span>
+<span class="nc" id="L291">        var trace = traceService.getTraceById(elementId);</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        if (trace.getAttachment().isEmpty()) throw new InvalidTraceTypeException();</span>
       }
     }
-<span class="nc" id="L290">  }</span>
+<span class="nc" id="L297">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
