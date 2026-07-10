@@ -272,8 +272,16 @@ public class FileResourceServiceImpl implements FileResourceService {
 
   private void chekDownloadRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
     switch (fileCategory) {
-      case ACTIVITY_FILE ->
-          throw new UnsupportedOperationException("Operation not supported for ACTIVITY_FILE");
+      case ACTIVITY_FILE -> {
+        var draft = activityDraftRepository.findById(elementId);
+        if (draft.isEmpty()) {
+          var activity = activityRepository.findById(elementId);
+          if (activity.isEmpty()) {
+            throw new ActivityNotFoundException();
+          }
+          // TODO for incomming refacto : check user is author or student enrolled in activity
+        }
+      }
       case STUDENT_PROFILE_PICTURE,
           STUDENT_COVER_PICTURE,
           STAFF_PROFILE_PICTURE,

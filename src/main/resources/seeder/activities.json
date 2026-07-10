@@ -16,7 +16,7 @@
     "traceAllowedAssociations": 4,
     "feedbackAllowedIterations": -1,
     "enableReflection": true,
-    "links": ["https://github.com/avenirs-esr/avenirs-portfolio-api/pull/376"],
+    "links": ["https://example.com/definir-ses-valeurs"],
     "createdAt": "2024-06-01T09:00:00Z",
     "updatedAt": "2024-06-01T09:00:00Z"
   },
@@ -583,7 +583,7 @@
     "traceAllowedAssociations": 2,
     "feedbackAllowedIterations": -1,
     "enableReflection": true,
-    "links": [],
+    "links": ["https://www.example.com/renforcer-sa-communication-orale"],
     "createdAt": "2024-06-01T14:00:00Z",
     "updatedAt": "2024-06-01T14:00:00Z"
   }
