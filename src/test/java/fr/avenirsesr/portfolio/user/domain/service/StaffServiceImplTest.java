@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
@@ -23,12 +24,15 @@ class StaffServiceImplTest {
   @Mock private StaffRepository staffRepository;
   @Mock private UserRepository userRepository;
   @Mock private LoggedInUserService loggedInUserService;
+  @Mock private FileResourceService fileResourceService;
 
   private StaffServiceImpl staffService;
 
   @BeforeEach
   void setUp() {
-    staffService = new StaffServiceImpl(staffRepository, userRepository, loggedInUserService);
+    staffService =
+        new StaffServiceImpl(
+            staffRepository, userRepository, loggedInUserService, fileResourceService);
   }
 
   @Nested

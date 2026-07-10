@@ -5,6 +5,8 @@ import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.trace.domain.data.*;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
@@ -88,4 +90,8 @@ public interface TraceService {
       UUID traceId, String keyword, PageCriteria pageCriteria);
 
   List<TraceLockedDeclaredActivitiesData> getLockedDeclaredActivities(List<UUID> traceIds);
+
+  File uploadAttachment(UUID traceId, String fileName, String mimeType, long size, byte[] content);
+
+  FileDownload downloadAttachment(UUID traceId);
 }

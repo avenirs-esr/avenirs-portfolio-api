@@ -18,7 +18,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityAlreadyFinishedException;
@@ -75,7 +75,7 @@ class TraceServiceImplTest {
   @Mock private AssociationService associationService;
   @Mock private AssociationSearchHelper associationSearchHelper;
   @Mock private FeedbackService feedbackService;
-  @Mock private FileRepository fileRepository;
+  @Mock private FileResourceService fileResourceService;
 
   @InjectMocks private TraceServiceImpl traceService;
 
@@ -628,13 +628,12 @@ class TraceServiceImplTest {
         when(traceRepository.findAllById(traceIds)).thenReturn(List.of(trace));
         when(feedbackService.findAttachmentIdsUsedByTraceSnapshots(List.of(), traceIds))
             .thenReturn(Set.of());
-        when(fileRepository.findAllById(List.of(fileId))).thenReturn(List.of(file));
 
         traceService.deleteAllByIds(traceIds);
 
         BddLogger.then("it should delete files, associations and traces from database");
 
-        verify(fileRepository).removeAllFromDatabase(List.of(file));
+        verify(fileResourceService).delete(fileId);
         verify(associationService).deleteAllOf(traceIds, Trace.class);
         verify(traceRepository).removeAllFromDatabase(List.of(trace));
       }
@@ -663,8 +662,7 @@ class TraceServiceImplTest {
 
         BddLogger.then("it should keep the protected file but delete associations and traces");
 
-        verify(fileRepository, never()).findAllById(anyList());
-        verify(fileRepository, never()).removeAllFromDatabase(anyList());
+        verify(fileResourceService, never()).delete(any());
         verify(associationService).deleteAllOf(traceIds, Trace.class);
         verify(traceRepository).removeAllFromDatabase(List.of(trace));
       }
@@ -688,7 +686,7 @@ class TraceServiceImplTest {
         when(traceRepository.findAllById(traceIds)).thenReturn(List.of(trace));
         when(feedbackService.findAttachmentIdsUsedByTraceSnapshots(List.of(), traceIds))
             .thenReturn(Set.of());
-        when(fileRepository.findAllById(List.of(fileId))).thenReturn(List.of());
+        doThrow(new FileNotFoundException()).when(fileResourceService).delete(fileId);
 
         assertThrows(FileNotFoundException.class, () -> traceService.deleteAllByIds(traceIds));
 
@@ -696,8 +694,7 @@ class TraceServiceImplTest {
 
         verify(associationService).deleteAllOf(traceIds, Trace.class);
         verify(traceRepository).removeAllFromDatabase(List.of(trace));
-        verify(fileRepository).findAllById(List.of(fileId));
-        verify(fileRepository, never()).removeAllFromDatabase(anyList());
+        verify(fileResourceService).delete(fileId);
       }
 
       @Test
@@ -717,7 +714,7 @@ class TraceServiceImplTest {
 
         verify(feedbackService, never())
             .findAttachmentIdsUsedByTraceSnapshots(anyList(), anyList());
-        verify(fileRepository, never()).findAllById(anyList());
+        verify(fileResourceService, never()).delete(any());
         verify(associationService, never()).deleteAllOf(anyList(), any());
         verify(traceRepository, never()).removeAllFromDatabase(anyList());
       }
@@ -740,7 +737,7 @@ class TraceServiceImplTest {
 
         verify(feedbackService, never())
             .findAttachmentIdsUsedByTraceSnapshots(anyList(), anyList());
-        verify(fileRepository, never()).findAllById(anyList());
+        verify(fileResourceService, never()).delete(any());
         verify(associationService, never()).deleteAllOf(anyList(), any());
         verify(traceRepository, never()).removeAllFromDatabase(anyList());
       }

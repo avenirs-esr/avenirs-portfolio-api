@@ -1,0 +1,170 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="iamgreendev" id="decouple-file-add-is-public">
+        <addColumn tableName="file">
+            <column name="is_public" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="file" columnName="is_public"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="decouple-file-create-activity-draft-files-table">
+        <createTable tableName="activity_draft_files">
+            <column name="activity_draft_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="activity_draft_files"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="decouple-file-create-activity-files-table">
+        <createTable tableName="activity_files">
+            <column name="activity_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="activity_files"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="decouple-file-add-activity-draft-files-fks">
+        <addForeignKeyConstraint
+                baseTableName="activity_draft_files"
+                baseColumnNames="activity_draft_id"
+                constraintName="FK_activity_draft_files_activity_draft"
+                referencedTableName="activity_draft"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="activity_draft_files"
+                baseColumnNames="file_id"
+                constraintName="FK_activity_draft_files_file"
+                referencedTableName="file"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="activity_draft_files"
+                    constraintName="FK_activity_draft_files_activity_draft"/>
+            <dropForeignKeyConstraint
+                    baseTableName="activity_draft_files"
+                    constraintName="FK_activity_draft_files_file"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="decouple-file-add-activity-files-fks">
+        <addForeignKeyConstraint
+                baseTableName="activity_files"
+                baseColumnNames="activity_id"
+                constraintName="FK_activity_files_activity"
+                referencedTableName="activity"
+                referencedColumnNames="id"/>
+        <addForeignKeyConstraint
+                baseTableName="activity_files"
+                baseColumnNames="file_id"
+                constraintName="FK_activity_files_file"
+                referencedTableName="file"
+                referencedColumnNames="id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="activity_files"
+                    constraintName="FK_activity_files_activity"/>
+            <dropForeignKeyConstraint
+                    baseTableName="activity_files"
+                    constraintName="FK_activity_files_file"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="decouple-file-backfill-is-public">
+        <sql>
+            UPDATE file
+            SET is_public = true
+            WHERE file_category IN (
+                'ACTIVITY_BANNER',
+                'STAFF_PROFILE_PICTURE',
+                'STAFF_COVER_PICTURE',
+                'STUDENT_PROFILE_PICTURE',
+                'STUDENT_COVER_PICTURE'
+            );
+        </sql>
+
+        <rollback/>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="decouple-file-backfill-activity-draft-files">
+        <sql>
+            INSERT INTO activity_draft_files (activity_draft_id, file_id)
+            SELECT f.element_id, f.id
+            FROM file f
+            WHERE f.file_category = 'ACTIVITY_FILE'
+              AND f.element_id IN (SELECT id FROM activity_draft);
+        </sql>
+
+        <rollback>
+            <sql>DELETE FROM activity_draft_files;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="decouple-file-backfill-activity-files">
+        <sql>
+            INSERT INTO activity_files (activity_id, file_id)
+            SELECT f.element_id, f.id
+            FROM file f
+            WHERE f.file_category = 'ACTIVITY_FILE'
+              AND f.element_id IN (SELECT id FROM activity);
+        </sql>
+
+        <rollback>
+            <sql>DELETE FROM activity_files;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="decouple-file-drop-element-id-index">
+        <dropIndex tableName="file" indexName="idx_file_element_id"/>
+
+        <rollback>
+            <createIndex tableName="file" indexName="idx_file_element_id">
+                <column name="element_id"/>
+            </createIndex>
+        </rollback>
+    </changeSet>
+
+    <changeSet author="iamgreendev" id="decouple-file-drop-element-id-and-category">
+        <dropColumn tableName="file" columnName="element_id"/>
+        <dropColumn tableName="file" columnName="file_category"/>
+
+        <rollback>
+            <addColumn tableName="file">
+                <column name="element_id" type="UUID"/>
+            </addColumn>
+            <addColumn tableName="file">
+                <column name="file_category" type="VARCHAR(255)"/>
+            </addColumn>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

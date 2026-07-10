@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.service;
 
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StudentService;
@@ -20,8 +21,13 @@ public class StudentServiceConfig {
   @Bean
   public StudentService studentService(
       @Lazy SelfKnowledgeService selfKnowledgeService,
-      @Lazy LoggedInUserService loggedInUserService) {
+      @Lazy LoggedInUserService loggedInUserService,
+      @Lazy FileResourceService fileResourceService) {
     return new StudentServiceImpl(
-        studentRepository, userRepository, selfKnowledgeService, loggedInUserService);
+        studentRepository,
+        userRepository,
+        selfKnowledgeService,
+        loggedInUserService,
+        fileResourceService);
   }
 }

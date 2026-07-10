@@ -34,6 +34,7 @@ public class FakeActivity {
             faker.bool().bool(),
             null,
             List.of(),
+            List.of(),
             Instant.now(),
             Instant.now()));
   }

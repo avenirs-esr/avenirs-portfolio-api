@@ -72,6 +72,13 @@ public class ActivityEntity extends AvenirsBaseEntity {
   private List<@Size(max = LINK_LENGTH, message = "link can not exceed {max} characters") String>
       links = new ArrayList<>();
 
+  @ManyToMany
+  @JoinTable(
+      name = "activity_files",
+      joinColumns = @JoinColumn(name = "activity_id"),
+      inverseJoinColumns = @JoinColumn(name = "file_id"))
+  private List<FileEntity> files = new ArrayList<>();
+
   private ActivityEntity(
       UUID id,
       StaffEntity author,
@@ -87,6 +94,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
       boolean enableReflection,
       FileEntity banner,
       List<String> links,
+      List<FileEntity> files,
       Instant createdAt,
       Instant updatedAt) {
     this.setId(id);
@@ -103,6 +111,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
     this.enableReflection = enableReflection;
     this.banner = banner;
     this.links = links;
+    this.files = files;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
   }
@@ -122,6 +131,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
       boolean enableReflection,
       FileEntity banner,
       List<String> links,
+      List<FileEntity> files,
       Instant createdAt,
       Instant updatedAt) {
 
@@ -140,6 +150,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
         enableReflection,
         banner,
         links,
+        files,
         createdAt,
         updatedAt);
   }

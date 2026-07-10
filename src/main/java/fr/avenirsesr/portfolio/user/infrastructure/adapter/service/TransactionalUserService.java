@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.user.infrastructure.adapter.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import fr.avenirsesr.portfolio.user.domain.port.input.UserService;
 import java.util.UUID;
@@ -44,5 +45,31 @@ public class TransactionalUserService implements UserService {
   @Override
   public UserQuickLinksData getQuickLinks(EUserCategory userCategory) {
     return delegate.getQuickLinks(userCategory);
+  }
+
+  @Override
+  @Transactional
+  public File uploadProfilePicture(
+      EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content) {
+    return delegate.uploadProfilePicture(userCategory, fileName, mimeType, size, content);
+  }
+
+  @Override
+  @Transactional
+  public void deleteProfilePicture(EUserCategory userCategory) {
+    delegate.deleteProfilePicture(userCategory);
+  }
+
+  @Override
+  @Transactional
+  public File uploadCoverPicture(
+      EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content) {
+    return delegate.uploadCoverPicture(userCategory, fileName, mimeType, size, content);
+  }
+
+  @Override
+  @Transactional
+  public void deleteCoverPicture(EUserCategory userCategory) {
+    delegate.deleteCoverPicture(userCategory);
   }
 }

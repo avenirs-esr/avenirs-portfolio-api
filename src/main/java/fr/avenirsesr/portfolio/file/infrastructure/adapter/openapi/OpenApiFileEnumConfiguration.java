@@ -9,10 +9,7 @@ public class OpenApiFileEnumConfiguration {
   @Bean
   public OpenApiCustomizer fileEnumCustomizer() {
     return openApi -> {
-      openApi
-          .getComponents()
-          .addSchemas("EFileType", SwaggerSchema.fileTypeSchema)
-          .addSchemas("EFileCategory", SwaggerSchema.fileCategorySchema);
+      openApi.getComponents().addSchemas("EFileType", SwaggerSchema.fileTypeSchema);
     };
   }
 }

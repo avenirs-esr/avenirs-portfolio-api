@@ -10,6 +10,9 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.DateFilter;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.*;
@@ -19,15 +22,19 @@ import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @AllArgsConstructor
@@ -43,6 +50,7 @@ public class TraceController {
   private final TracesSummaryMapper tracesSummaryMapper;
   private final TraceAssociationsMapper traceAssociationsMapper;
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
+  private final FileDtoMapper fileDtoMapper;
 
   @GetMapping("/overview")
   public ResponseEntity<List<TraceOverviewDTO>> getTraceOverview(Principal principal) {
@@ -333,5 +341,44 @@ public class TraceController {
     return ResponseEntity.ok(
         traceLockedDeclaredActivitiesMapper.toDTOs(
             traceService.getLockedDeclaredActivities(traceIds)));
+  }
+
+  @PostMapping(value = "/{traceId}/attachment", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<FileDTO> uploadAttachment(
+      Principal principal, @PathVariable UUID traceId, @RequestParam("file") MultipartFile file) {
+    log.debug(
+        "Received request to upload attachment for trace [{}] by user [{}]",
+        traceId,
+        principal.getName());
+    try {
+      var uploaded =
+          traceService.uploadAttachment(
+              traceId,
+              file.getOriginalFilename(),
+              file.getContentType(),
+              file.getSize(),
+              file.getBytes());
+      return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
+    } catch (IOException e) {
+      throw new FileStorageException("Failed to read uploaded file", e);
+    }
+  }
+
+  @GetMapping(
+      value = "/{traceId}/attachment/download",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> downloadAttachment(
+      Principal principal, @PathVariable UUID traceId) {
+    log.debug(
+        "Received request to download attachment of trace [{}] by user [{}]",
+        traceId,
+        principal.getName());
+    var downloadedFile = traceService.downloadAttachment(traceId);
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .header(
+            HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=\"" + downloadedFile.fileName() + "\"")
+        .body(downloadedFile.content());
   }
 }

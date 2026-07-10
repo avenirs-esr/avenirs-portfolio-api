@@ -1,7 +1,6 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
 import fr.avenirsesr.portfolio.common.utils.FileReader;
@@ -13,14 +12,18 @@ import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
+import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data.EUserPhotoSlot;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.data.UserPhotoCreationData;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeUserPhoto;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.UserRepository;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StaffEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.StudentEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.model.UserEntity;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,6 +37,8 @@ public class UserPhotoSeeder {
   private static final String PATH_FILE = "seeder/user-photos.json";
   private final FileReader fileReader;
   private final UserRepository userRepository;
+  private final StaffRepository staffRepository;
+  private final StudentRepository studentRepository;
   private final FileResourceService fileResourceService;
 
   @Value("${seeder.source}")
@@ -42,9 +47,13 @@ public class UserPhotoSeeder {
   public UserPhotoSeeder(
       FileReader fileReader,
       UserRepository userRepository,
+      StaffRepository staffRepository,
+      StudentRepository studentRepository,
       @Qualifier("MockFileResourceService") FileResourceService fileResourceService) {
     this.fileReader = fileReader;
     this.userRepository = userRepository;
+    this.staffRepository = staffRepository;
+    this.studentRepository = studentRepository;
     this.fileResourceService = fileResourceService;
   }
 
@@ -72,14 +81,11 @@ public class UserPhotoSeeder {
         var user = userRepository.findById(data.userId());
         RequestContext.set(new RequestData(user, ELanguage.FRENCH));
 
-        userPhotos.add(
+        var file =
             fileResourceService.upload(
-                data.userId(),
-                data.photoType(),
-                data.fileName(),
-                data.fileType().getMimeType(),
-                data.fileSize(),
-                null));
+                data.fileName(), data.fileType().getMimeType(), data.fileSize(), null, true);
+        linkPhotoToOwner(data.userId(), data.photoType(), file);
+        userPhotos.add(file);
       } catch (FileStorageException e) {
         log.error("Error uploading user photo", e);
       }
@@ -89,23 +95,44 @@ public class UserPhotoSeeder {
     return userPhotos.stream().map(FileMapper.INSTANCE::fromDomain).toList();
   }
 
-  private List<UserPhotoCreationData> buildFakePhotos(List<UserEntity> users) {
-    List<UserPhotoCreationData> fakePhotos = new ArrayList<>();
-    for (UserEntity user : users) {
-      var fakePhoto = FakeUserPhoto.of(user).toEntity();
-      fakePhotos.add(
-          new UserPhotoCreationData(
-              fakePhoto.getElementId(),
-              switch (fakePhoto.getFileCategory()) {
-                case STUDENT_COVER_PICTURE, STUDENT_PROFILE_PICTURE -> EUserCategory.STUDENT;
-                case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -> EUserCategory.STAFF;
-                default -> throw new IllegalStateException("Unexpected value: " + fakePhoto);
-              },
-              fakePhoto.getFileCategory(),
-              fakePhoto.getFileName(),
-              fakePhoto.getFileType(),
-              fakePhoto.getSize()));
+  private void linkPhotoToOwner(UUID userId, EUserPhotoSlot photoType, File file) {
+    switch (photoType) {
+      case STAFF_PROFILE_PICTURE ->
+          staffRepository
+              .findById(userId)
+              .ifPresent(
+                  staff -> {
+                    staff.setProfilePicture(file);
+                    staffRepository.save(staff);
+                  });
+      case STAFF_COVER_PICTURE ->
+          staffRepository
+              .findById(userId)
+              .ifPresent(
+                  staff -> {
+                    staff.setCoverPicture(file);
+                    staffRepository.save(staff);
+                  });
+      case STUDENT_PROFILE_PICTURE ->
+          studentRepository
+              .findById(userId)
+              .ifPresent(
+                  student -> {
+                    student.setProfilePicture(file);
+                    studentRepository.save(student);
+                  });
+      case STUDENT_COVER_PICTURE ->
+          studentRepository
+              .findById(userId)
+              .ifPresent(
+                  student -> {
+                    student.setCoverPicture(file);
+                    studentRepository.save(student);
+                  });
     }
-    return fakePhotos;
+  }
+
+  private List<UserPhotoCreationData> buildFakePhotos(List<UserEntity> users) {
+    return users.stream().map(FakeUserPhoto::of).toList();
   }
 }

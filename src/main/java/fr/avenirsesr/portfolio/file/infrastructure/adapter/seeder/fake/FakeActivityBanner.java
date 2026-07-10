@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
@@ -31,7 +30,6 @@ public class FakeActivityBanner {
         FileEntity.of(
             id,
             fileType,
-            EFileCategory.ACTIVITY_BANNER,
             fileDataGenerator.with("file-name").fileName(fileType),
             dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,
@@ -40,9 +38,9 @@ public class FakeActivityBanner {
                     FileStorageConstants.STORAGE_PATH,
                     FileStorageConstants.PLACEHOLDER_FILE_UUID,
                     fileType.name().toLowerCase()),
-            activity.getId(),
             null,
             Instant.now(),
+            true,
             Instant.now(),
             Instant.now()));
   }

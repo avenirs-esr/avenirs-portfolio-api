@@ -9,7 +9,6 @@ import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.StaffMapper;
@@ -42,14 +41,13 @@ class ActivityMapperTest {
   private final File banner =
       File.create(
           UUID.randomUUID(),
-          id,
-          EFileCategory.ACTIVITY_BANNER,
           EFileType.PNG,
           "activity banner",
           1000L,
           1,
           "exemple.com/image.png",
-          author.getUser());
+          author.getUser(),
+          true);
   private final Instant createdAt = Instant.parse("2023-01-01T00:00:00Z");
   private final Instant updatedAt = Instant.parse("2023-12-31T23:59:59Z");
   private final List<String> links =
@@ -73,6 +71,7 @@ class ActivityMapperTest {
             feedbackAllowedIterations,
             banner,
             links,
+            List.of(),
             createdAt,
             updatedAt);
   }

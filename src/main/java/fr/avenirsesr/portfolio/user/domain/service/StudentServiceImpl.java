@@ -2,7 +2,11 @@ package fr.avenirsesr.portfolio.user.domain.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.selfknowledge.domain.port.input.SelfKnowledgeService;
@@ -25,6 +29,7 @@ public class StudentServiceImpl implements StudentService {
   private UserRepository userRepository;
   private SelfKnowledgeService selfKnowledgeService;
   private final LoggedInUserService loggedInUserService;
+  private final FileResourceService fileResourceService;
 
   @Override
   public Student getStudentById(UUID studentId) {
@@ -86,5 +91,47 @@ public class StudentServiceImpl implements StudentService {
   public void removeSelfKnowledgeCategory(
       Student student, SelfKnowledgeCategory selfKnowledgeCategory) {
     studentRepository.removeSelfKnowledgeCategory(student, selfKnowledgeCategory);
+  }
+
+  @Override
+  public File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content) {
+    var student = loggedInUserService.getLoggedInStudent();
+    requireImage(mimeType);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    student.setProfilePicture(file);
+    studentRepository.save(student);
+    return file;
+  }
+
+  @Override
+  public void deleteProfilePicture() {
+    var student = loggedInUserService.getLoggedInStudent();
+    student.getProfilePicture().ifPresent(picture -> fileResourceService.delete(picture.getId()));
+    student.setProfilePicture(null);
+    studentRepository.save(student);
+  }
+
+  @Override
+  public File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content) {
+    var student = loggedInUserService.getLoggedInStudent();
+    requireImage(mimeType);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    student.setCoverPicture(file);
+    studentRepository.save(student);
+    return file;
+  }
+
+  @Override
+  public void deleteCoverPicture() {
+    var student = loggedInUserService.getLoggedInStudent();
+    student.getCoverPicture().ifPresent(picture -> fileResourceService.delete(picture.getId()));
+    student.setCoverPicture(null);
+    studentRepository.save(student);
+  }
+
+  private void requireImage(String mimeType) {
+    if (!EFileType.fromMimeType(mimeType).isImage()) {
+      throw new FileTypeNotSupportedException();
+    }
   }
 }

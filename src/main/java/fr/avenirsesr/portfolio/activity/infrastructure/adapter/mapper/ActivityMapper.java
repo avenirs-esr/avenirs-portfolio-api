@@ -27,6 +27,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         domain.isEnableReflection(),
         domain.getBanner().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         domain.getLinks(),
+        domain.getFiles().stream().map(FileMapper.INSTANCE::fromDomain).toList(),
         domain.getCreatedAt(),
         domain.getUpdatedAt());
   }
@@ -48,6 +49,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         entity.getFeedbackAllowedIterations(),
         entity.getBanner() == null ? null : FileMapper.INSTANCE.toDomain(entity.getBanner()),
         entity.getLinks(),
+        entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
@@ -72,6 +74,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
             ? FileMapper.INSTANCE.toDomain(entity.getBanner(), graph)
             : null,
         entity.getLinks(),
+        entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }

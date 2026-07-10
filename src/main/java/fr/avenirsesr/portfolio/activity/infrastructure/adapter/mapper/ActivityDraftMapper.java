@@ -26,6 +26,7 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
         activityDraft.isEnableReflection(),
         activityDraft.getBanner().map(FileMapper.INSTANCE::fromDomain).orElse(null),
         activityDraft.getLinks(),
+        activityDraft.getFiles().stream().map(FileMapper.INSTANCE::fromDomain).toList(),
         activityDraft.getCreatedAt(),
         activityDraft.getUpdatedAt());
   }
@@ -47,7 +48,8 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
         entity.getFeedbackAllowedIterations(),
         entity.isEnableReflection(),
         entity.getBanner() == null ? null : FileMapper.INSTANCE.toDomain(entity.getBanner()),
-        entity.getLinks());
+        entity.getLinks(),
+        entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList());
   }
 
   @Override
@@ -72,6 +74,7 @@ public class ActivityDraftMapper implements Mapper<ActivityDraftEntity, Activity
         attributes.contains("banner") && entity.getBanner() != null
             ? FileMapper.INSTANCE.toDomain(entity.getBanner(), graph)
             : null,
-        entity.getLinks());
+        entity.getLinks(),
+        entity.getFiles().stream().map(FileMapper.INSTANCE::toDomain).toList());
   }
 }

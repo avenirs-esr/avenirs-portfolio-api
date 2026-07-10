@@ -9,12 +9,12 @@ import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestContext;
 import fr.avenirsesr.portfolio.common.web.infrastructure.context.RequestData;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake.FakeTraceAttachment;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederConfig;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
+import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.mapper.TraceMapper;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.seeder.data.TraceAttachementCreationData;
@@ -40,6 +40,7 @@ public class TraceSeeder {
   private static final String PATH_FILE = "seeder/traces.json";
   private final FileReader fileReader;
   private final TraceService traceService;
+  private final TraceRepository traceRepository;
   private final FileResourceService fileResourceService;
 
   @Value("${seeder.source}")
@@ -48,9 +49,11 @@ public class TraceSeeder {
   public TraceSeeder(
       FileReader fileReader,
       TraceService traceService,
+      TraceRepository traceRepository,
       @Qualifier("MockFileResourceService") FileResourceService fileResourceService) {
     this.fileReader = fileReader;
     this.traceService = traceService;
+    this.traceRepository = traceRepository;
     this.fileResourceService = fileResourceService;
   }
 
@@ -89,13 +92,15 @@ public class TraceSeeder {
           data.attachements()
               .forEach(
                   attachment -> {
-                    fileResourceService.upload(
-                        trace.getId(),
-                        EFileCategory.TRACE_ATTACHMENT,
-                        attachment.title(),
-                        attachment.fileType().getMimeType(),
-                        attachment.size(),
-                        null);
+                    var file =
+                        fileResourceService.upload(
+                            attachment.title(),
+                            attachment.fileType().getMimeType(),
+                            attachment.size(),
+                            null,
+                            false);
+                    trace.setAttachment(file);
+                    traceRepository.save(trace);
                   });
         });
 

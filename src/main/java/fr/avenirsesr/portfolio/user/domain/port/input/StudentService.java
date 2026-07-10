@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.user.domain.port.input;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.selfknowledge.domain.model.SelfKnowledgeCategory;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
@@ -19,4 +20,12 @@ public interface StudentService {
   void addSelfKnowledgeCategories(Student student, List<SelfKnowledgeCategory> categories);
 
   void removeSelfKnowledgeCategory(Student student, SelfKnowledgeCategory selfKnowledgeCategory);
+
+  File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content);
+
+  void deleteProfilePicture();
+
+  File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content);
+
+  void deleteCoverPicture();
 }

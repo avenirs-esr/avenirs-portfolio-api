@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.user.infrastructure.adapter.service;
 
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.port.input.StaffService;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
@@ -17,7 +18,10 @@ public class StaffServiceConfig {
   private final UserRepository userRepository;
 
   @Bean
-  public StaffService staffService(@Lazy LoggedInUserService loggedInUserService) {
-    return new StaffServiceImpl(staffRepository, userRepository, loggedInUserService);
+  public StaffService staffService(
+      @Lazy LoggedInUserService loggedInUserService,
+      @Lazy FileResourceService fileResourceService) {
+    return new StaffServiceImpl(
+        staffRepository, userRepository, loggedInUserService, fileResourceService);
   }
 }

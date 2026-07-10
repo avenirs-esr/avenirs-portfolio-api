@@ -1,6 +1,5 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.openapi;
 
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
@@ -14,10 +13,4 @@ public final class SwaggerSchema {
           .name("EFileType")
           ._enum(Arrays.stream(EFileType.values()).map(Enum::name).toList())
           .description("Enum for file type");
-
-  public static final Schema<String> fileCategorySchema =
-      new StringSchema()
-          .name("EFileCategory")
-          ._enum(Arrays.stream(EFileCategory.values()).map(Enum::name).toList())
-          .description("Enum for file category");
 }

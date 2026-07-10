@@ -18,21 +18,26 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @AllArgsConstructor
@@ -40,7 +45,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/me/activities")
 public class ActivityController {
   private final ActivityService activityService;
-  private final FileResourceService fileResourceService;
   private final ActivityPresentationDtoMapper activityPresentationDtoMapper;
   private final ActivityContentDtoMapper activityContentDtoMapper;
   private final ActivityNavigationMapper activityNavigationMapper;
@@ -81,23 +85,30 @@ public class ActivityController {
     log.debug("Received request to get activity [{}] content", activityId);
 
     String baseUrl = extractOrigin(request);
-    List<FileDTO> files =
-        fileResourceService
-            .findAllByElementIdAndCategory(activityId, EFileCategory.ACTIVITY_FILE)
-            .stream()
-            .map(file -> new FileDTO(file.getId(), file.getFileName(), baseUrl + file.getUri()))
-            .toList();
     ActivityContentDTO dto =
         switch (activityStatus) {
-          case PUBLISHED, UNPUBLISHED ->
-              activityContentDtoMapper.toDTO(activityService.getActivityById(activityId), files);
+          case PUBLISHED, UNPUBLISHED -> {
+            var activity = activityService.getActivityById(activityId);
+            yield activityContentDtoMapper.toDTO(
+                activity, toFileDTOs(activity.getFiles(), baseUrl));
+          }
           case DRAFT -> {
             var draft = activityService.getActivityDraftById(activityId);
             yield activityContentDtoMapper.toDTO(
-                draft, activityService.hasEnrolledStudents(draft), files);
+                draft,
+                activityService.hasEnrolledStudents(draft),
+                toFileDTOs(draft.getFiles(), baseUrl));
           }
         };
     return ResponseEntity.ok(dto);
+  }
+
+  private List<FileDTO> toFileDTOs(List<File> files, String baseUrl) {
+    return files.stream().map(file -> toFileDTO(file, baseUrl)).toList();
+  }
+
+  private FileDTO toFileDTO(File file, String baseUrl) {
+    return new FileDTO(file.getId(), file.getFileName(), baseUrl + file.getUri());
   }
 
   @GetMapping("/staff/working-space")
@@ -288,5 +299,110 @@ public class ActivityController {
             body.enableReflection(),
             body.links());
     return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));
+  }
+
+  @PostMapping(
+      value = "/draft/{activityDraftId}/banner",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<FileDTO> uploadDraftBanner(
+      HttpServletRequest request,
+      Principal principal,
+      @PathVariable UUID activityDraftId,
+      @RequestParam("file") MultipartFile file) {
+    log.debug(
+        "Received request to upload banner for activity draft [{}] by user [{}]",
+        activityDraftId,
+        principal.getName());
+    var uploaded =
+        uploadFile(
+            () ->
+                activityService.uploadDraftBanner(
+                    activityDraftId,
+                    file.getOriginalFilename(),
+                    file.getContentType(),
+                    file.getSize(),
+                    file.getBytes()));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(toFileDTO(uploaded, extractOrigin(request)));
+  }
+
+  @DeleteMapping("/draft/{activityDraftId}/banner")
+  public ResponseEntity<Void> deleteDraftBanner(
+      Principal principal, @PathVariable UUID activityDraftId) {
+    log.debug(
+        "Received request to delete banner of activity draft [{}] by user [{}]",
+        activityDraftId,
+        principal.getName());
+    activityService.deleteDraftBanner(activityDraftId);
+    return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping(
+      value = "/draft/{activityDraftId}/files",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<FileDTO> addDraftFile(
+      HttpServletRequest request,
+      Principal principal,
+      @PathVariable UUID activityDraftId,
+      @RequestParam("file") MultipartFile file) {
+    log.debug(
+        "Received request to add file to activity draft [{}] by user [{}]",
+        activityDraftId,
+        principal.getName());
+    var uploaded =
+        uploadFile(
+            () ->
+                activityService.addDraftFile(
+                    activityDraftId,
+                    file.getOriginalFilename(),
+                    file.getContentType(),
+                    file.getSize(),
+                    file.getBytes()));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(toFileDTO(uploaded, extractOrigin(request)));
+  }
+
+  @DeleteMapping("/draft/{activityDraftId}/files/{fileId}")
+  public ResponseEntity<Void> deleteDraftFile(
+      Principal principal, @PathVariable UUID activityDraftId, @PathVariable UUID fileId) {
+    log.debug(
+        "Received request to delete file [{}] of activity draft [{}] by user [{}]",
+        fileId,
+        activityDraftId,
+        principal.getName());
+    activityService.deleteDraftFile(activityDraftId, fileId);
+    return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping(
+      value = "/{activityId}/files/{fileId}/download",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> downloadActivityFile(
+      Principal principal, @PathVariable UUID activityId, @PathVariable UUID fileId) {
+    log.debug(
+        "Received request to download file [{}] of activity [{}] by user [{}]",
+        fileId,
+        activityId,
+        principal.getName());
+    var downloadedFile = activityService.downloadActivityFile(activityId, fileId);
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .header(
+            HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=\"" + downloadedFile.fileName() + "\"")
+        .body(downloadedFile.content());
+  }
+
+  private File uploadFile(FileUpload upload) {
+    try {
+      return upload.get();
+    } catch (IOException e) {
+      throw new FileStorageException("Failed to read uploaded file", e);
+    }
+  }
+
+  @FunctionalInterface
+  private interface FileUpload {
+    File get() throws IOException;
   }
 }

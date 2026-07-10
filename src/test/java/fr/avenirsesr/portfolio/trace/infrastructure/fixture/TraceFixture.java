@@ -3,7 +3,6 @@ package fr.avenirsesr.portfolio.trace.infrastructure.fixture;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
@@ -40,15 +39,7 @@ public class TraceFixture {
     this.valorized = base.isValorized();
     this.attachment =
         File.create(
-            UUID.randomUUID(),
-            id,
-            EFileCategory.TRACE_ATTACHMENT,
-            EFileType.PDF,
-            "my fake pdf",
-            1000L,
-            1,
-            "fake-url",
-            user);
+            UUID.randomUUID(), EFileType.PDF, "my fake pdf", 1000L, 1, "fake-url", user, false);
   }
 
   public static TraceFixture create() {

@@ -1,28 +1,15 @@
 package fr.avenirsesr.portfolio.file.domain.service;
 
-import fr.avenirsesr.portfolio.activity.domain.exception.ActivityDraftNotFoundException;
-import fr.avenirsesr.portfolio.activity.domain.exception.ActivityNotFoundException;
-import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
-import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
-import fr.avenirsesr.portfolio.common.data.domain.model.User;
-import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileSizeTooBigException;
-import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
-import fr.avenirsesr.portfolio.file.domain.model.*;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
+import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
 import fr.avenirsesr.portfolio.file.domain.port.output.service.FileStorageService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
-import fr.avenirsesr.portfolio.trace.domain.exception.InvalidTraceTypeException;
-import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
-import fr.avenirsesr.portfolio.trace.domain.port.output.repository.TraceRepository;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StaffRepository;
-import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,59 +19,46 @@ import lombok.extern.slf4j.Slf4j;
 public class FileResourceServiceImpl implements FileResourceService {
   private final FileStorageService fileStorageService;
   private final FileRepository fileRepository;
-  private final TraceRepository traceRepository;
-  private final StaffRepository staffRepository;
-  private final StudentRepository studentRepository;
-  private final ActivityDraftRepository activityDraftRepository;
-  private final ActivityRepository activityRepository;
   private final LoggedInUserService loggedInUserService;
-  private final TraceService traceService;
 
   @Override
   public File upload(
-      UUID elementId,
-      EFileCategory fileCategory,
-      String fileName,
-      String mimeType,
-      long size,
-      byte[] content) {
+      String fileName, String mimeType, long size, byte[] content, boolean isPublic) {
     var loggedInUser = loggedInUserService.getLoggedInUser();
-
-    chekUploadRG(loggedInUser, elementId, fileCategory);
 
     var fileResource =
         new FileResource(
             UUID.randomUUID(), fileName, EFileType.fromMimeType(mimeType), size, content);
 
-    if (!fileCategory.allows(fileResource.fileType())) {
-      throw new FileTypeNotSupportedException();
-    }
     if (fileResource.fileType().getSizeLimit().isLessThan(size)) {
       throw new FileSizeTooBigException();
     }
 
     var uri = fileStorageService.upload(fileResource);
-    var allFiles = fileRepository.findAllByElement(elementId);
-    var version = allFiles.stream().map(File::getVersion).max(Integer::compareTo).orElse(0) + 1;
     var file =
         File.create(
             fileResource.id(),
-            elementId,
-            fileCategory,
             fileResource.fileType(),
             fileResource.fileName(),
             fileResource.size(),
-            version,
+            1,
             uri,
-            loggedInUser);
-    var savedFile = fileRepository.save(file);
-    saveFileOnElement(elementId, fileCategory, file);
-    return savedFile;
+            loggedInUser,
+            isPublic);
+    return fileRepository.save(file);
+  }
+
+  @Override
+  public File get(UUID fileId) {
+    return fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
   }
 
   @Override
   public FileResource fetchContent(UUID fileId) {
     var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
+    if (!file.isPublic()) {
+      throw new FileNotFoundException();
+    }
     byte[] content = fileStorageService.get(file.getUri());
     return new FileResource(
         file.getId(), file.getFileName(), file.getFileType(), file.getSize(), content);
@@ -92,208 +66,15 @@ public class FileResourceServiceImpl implements FileResourceService {
 
   @Override
   public FileDownload download(UUID fileId) {
-    var loggedInUser = loggedInUserService.getLoggedInUser();
     var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
-    chekDownloadRG(loggedInUser, file.getElementId(), file.getFileCategory());
     return new FileDownload(file.getFileName(), fileStorageService.get(file.getUri()));
   }
 
   @Override
   public void delete(UUID fileId) {
-    var loggedInUser = loggedInUserService.getLoggedInUser();
     var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
-    chekDeleteRG(loggedInUser, file.getElementId(), file.getFileCategory());
-
-    unlinkFileFromElement(file);
-
-    if (file.getUploadedBy().getId().equals(loggedInUser.getId())) {
-      log.debug(
-          "User {} is deleting their own file {}, this action is allowed but should be monitored",
-          loggedInUser.getId(),
-          fileId);
-      fileStorageService.deleteByPath(file.getUri());
-      fileRepository.removeFromDatabase(file);
-    }
-
+    fileStorageService.deleteByPath(file.getUri());
+    fileRepository.removeFromDatabase(file);
     log.info("File deleted: {}", file);
-  }
-
-  @Override
-  public List<File> findAllByElementIdAndCategory(UUID elementId, EFileCategory fileCategory) {
-    return fileRepository.findAllByElementIdAndCategory(elementId, fileCategory);
-  }
-
-  private void unlinkFileFromElement(File file) {
-    switch (file.getFileCategory()) {
-      case ACTIVITY_BANNER -> {
-        var draft =
-            activityDraftRepository
-                .findById(file.getElementId())
-                .orElseThrow(ActivityDraftNotFoundException::new);
-        draft.setBanner(null);
-        activityDraftRepository.save(draft);
-      }
-      case ACTIVITY_FILE -> {
-        break; // No action needed for ACTIVITY_FILE, as it is not linked to a specific entity
-      }
-      case STAFF_COVER_PICTURE -> {
-        var staff =
-            staffRepository.findById(file.getElementId()).orElseThrow(UserNotFoundException::new);
-        staff.setCoverPicture(null);
-        staffRepository.save(staff);
-      }
-      case STAFF_PROFILE_PICTURE -> {
-        var staff =
-            staffRepository.findById(file.getElementId()).orElseThrow(UserNotFoundException::new);
-        staff.setProfilePicture(null);
-        staffRepository.save(staff);
-      }
-      case STUDENT_COVER_PICTURE -> {
-        var student =
-            studentRepository.findById(file.getElementId()).orElseThrow(UserNotFoundException::new);
-        student.setCoverPicture(null);
-        studentRepository.save(student);
-      }
-      case STUDENT_PROFILE_PICTURE -> {
-        var student =
-            studentRepository.findById(file.getElementId()).orElseThrow(UserNotFoundException::new);
-        student.setProfilePicture(null);
-        studentRepository.save(student);
-      }
-      case TRACE_ATTACHMENT -> throw new UserNotAuthorizedException();
-    }
-  }
-
-  private void saveFileOnElement(UUID elementId, EFileCategory fileCategory, File file) {
-    switch (fileCategory) {
-      case ACTIVITY_BANNER -> {
-        var draft =
-            activityDraftRepository
-                .findById(elementId)
-                .orElseThrow(ActivityDraftNotFoundException::new);
-        draft.setBanner(file);
-        activityDraftRepository.save(draft);
-      }
-      case ACTIVITY_FILE -> {
-        break; // No action needed for ACTIVITY_FILE, as it is not linked to a specific entity
-      }
-      case STAFF_COVER_PICTURE -> {
-        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
-        staff.setCoverPicture(file);
-        staffRepository.save(staff);
-      }
-      case STAFF_PROFILE_PICTURE -> {
-        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
-        staff.setProfilePicture(file);
-        staffRepository.save(staff);
-      }
-      case STUDENT_COVER_PICTURE -> {
-        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
-        student.setCoverPicture(file);
-        studentRepository.save(student);
-      }
-      case STUDENT_PROFILE_PICTURE -> {
-        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
-        student.setProfilePicture(file);
-        studentRepository.save(student);
-      }
-      case TRACE_ATTACHMENT -> {
-        var trace = traceService.getTraceById(elementId);
-        trace.setAttachment(file);
-        traceRepository.save(trace);
-      }
-    }
-  }
-
-  private void chekUploadRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
-    switch (fileCategory) {
-      case ACTIVITY_BANNER -> {
-        var draft =
-            activityDraftRepository
-                .findById(elementId)
-                .orElseThrow(ActivityDraftNotFoundException::new);
-        if (!draft.getAuthor().getUser().equals(loggedInUser))
-          throw new UserNotAuthorizedException();
-      }
-      case ACTIVITY_FILE -> {
-        var draft = activityDraftRepository.findById(elementId);
-        if (!draft.isPresent()) {
-          var activity = activityRepository.findById(elementId);
-          if (!activity.isPresent()) {
-            throw new ActivityNotFoundException();
-          }
-          if (!activity.get().getAuthor().getUser().equals(loggedInUser)) {
-            throw new UserNotAuthorizedException();
-          }
-        } else {
-          if (!draft.get().getAuthor().getUser().equals(loggedInUser)) {
-            throw new UserNotAuthorizedException();
-          }
-        }
-      }
-      case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -> {
-        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
-        if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
-      }
-      case STUDENT_COVER_PICTURE, STUDENT_PROFILE_PICTURE -> {
-        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
-        if (!student.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
-      }
-      case TRACE_ATTACHMENT -> {
-        var trace = traceService.getTraceById(elementId);
-        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
-        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();
-      }
-    }
-  }
-
-  private void chekDeleteRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
-    switch (fileCategory) {
-      case ACTIVITY_BANNER, ACTIVITY_FILE -> {
-        var draft =
-            activityDraftRepository
-                .findById(elementId)
-                .orElseThrow(ActivityDraftNotFoundException::new);
-        if (!draft.getAuthor().getUser().equals(loggedInUser))
-          throw new UserNotAuthorizedException();
-      }
-      case STAFF_COVER_PICTURE, STAFF_PROFILE_PICTURE -> {
-        var staff = staffRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
-        if (!staff.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
-      }
-      case STUDENT_COVER_PICTURE, STUDENT_PROFILE_PICTURE -> {
-        var student = studentRepository.findById(elementId).orElseThrow(UserNotFoundException::new);
-        if (!student.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
-      }
-      case TRACE_ATTACHMENT -> throw new UserNotAuthorizedException();
-      default -> throw new IllegalArgumentException();
-    }
-  }
-
-  private void chekDownloadRG(User loggedInUser, UUID elementId, EFileCategory fileCategory) {
-    switch (fileCategory) {
-      case ACTIVITY_FILE -> {
-        var draft = activityDraftRepository.findById(elementId);
-        if (draft.isEmpty()) {
-          var activity = activityRepository.findById(elementId);
-          if (activity.isEmpty()) {
-            throw new ActivityNotFoundException();
-          }
-          // TODO for incomming refacto : check user is author or student enrolled in activity
-        }
-      }
-      case STUDENT_PROFILE_PICTURE,
-          STUDENT_COVER_PICTURE,
-          STAFF_PROFILE_PICTURE,
-          STAFF_COVER_PICTURE,
-          ACTIVITY_BANNER ->
-          throw new UserNotAuthorizedException();
-      case TRACE_ATTACHMENT -> {
-        var trace = traceService.getTraceById(elementId);
-        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();
-        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();
-        if (trace.getAttachment().isEmpty()) throw new InvalidTraceTypeException();
-      }
-    }
   }
 }

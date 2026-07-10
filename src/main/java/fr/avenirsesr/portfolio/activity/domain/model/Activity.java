@@ -6,6 +6,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,6 +37,7 @@ public class Activity extends AvenirsBaseModel {
   private File banner;
 
   private List<String> links;
+  private List<File> files;
 
   private Activity(
       UUID id,
@@ -52,6 +54,7 @@ public class Activity extends AvenirsBaseModel {
       int feedbackAllowedIterations,
       File banner,
       List<String> links,
+      List<File> files,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -68,6 +71,7 @@ public class Activity extends AvenirsBaseModel {
     this.feedbackAllowedIterations = feedbackAllowedIterations;
     this.banner = banner;
     this.links = links;
+    this.files = new ArrayList<>(files == null ? List.of() : files);
   }
 
   public static Activity create(
@@ -83,7 +87,8 @@ public class Activity extends AvenirsBaseModel {
       int traceAllowedAssociations,
       int feedbackAllowedIterations,
       File banner,
-      List<String> links) {
+      List<String> links,
+      List<File> files) {
     Instant now = Instant.now();
     return new Activity(
         id,
@@ -100,6 +105,7 @@ public class Activity extends AvenirsBaseModel {
         feedbackAllowedIterations,
         banner,
         links,
+        files,
         now,
         now);
   }
@@ -119,6 +125,7 @@ public class Activity extends AvenirsBaseModel {
       int feedbackAllowedIterations,
       File banner,
       List<String> links,
+      List<File> files,
       Instant createdAt,
       Instant updatedAt) {
     return new Activity(
@@ -136,6 +143,7 @@ public class Activity extends AvenirsBaseModel {
         feedbackAllowedIterations,
         banner,
         links,
+        files,
         createdAt,
         updatedAt);
   }
@@ -150,5 +158,13 @@ public class Activity extends AvenirsBaseModel {
 
   public Optional<File> getBanner() {
     return Optional.ofNullable(banner);
+  }
+
+  public void addFile(File file) {
+    this.files.add(file);
+  }
+
+  public void removeFile(UUID fileId) {
+    this.files.removeIf(file -> file.getId().equals(fileId));
   }
 }

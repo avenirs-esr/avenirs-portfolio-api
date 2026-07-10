@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.file.domain.model.enums;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.FileSize;
 import java.util.Arrays;
+import java.util.EnumSet;
 import lombok.Getter;
 
 @Getter
@@ -77,6 +78,8 @@ public enum EFileType {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
   ;
 
+  private static final EnumSet<EFileType> IMAGE_TYPES = EnumSet.of(PNG, JPEG, PJPEG, GIF, WEBP);
+
   private final FileSize sizeLimit;
   private final String mimeType;
 
@@ -90,5 +93,9 @@ public enum EFileType {
         .filter(ct -> ct.mimeType.equalsIgnoreCase(mimeType))
         .findFirst()
         .orElseThrow(() -> new FileTypeNotSupportedException("Unknown mime type: " + mimeType));
+  }
+
+  public boolean isImage() {
+    return IMAGE_TYPES.contains(this);
   }
 }
