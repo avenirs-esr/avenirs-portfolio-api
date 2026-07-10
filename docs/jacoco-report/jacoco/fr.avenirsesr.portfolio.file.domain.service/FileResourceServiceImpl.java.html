@@ -279,21 +279,22 @@ public class FileResourceServiceImpl implements FileResourceService {
 <span class="nc bnc" id="L279" title="All 2 branches missed.">          if (activity.isEmpty()) {</span>
 <span class="nc" id="L280">            throw new ActivityNotFoundException();</span>
           }
+          // TODO for incomming refacto : check user is author or student enrolled in activity
         }
-<span class="nc" id="L283">      }</span>
+<span class="nc" id="L284">      }</span>
       case STUDENT_PROFILE_PICTURE,
           STUDENT_COVER_PICTURE,
           STAFF_PROFILE_PICTURE,
           STAFF_COVER_PICTURE,
           ACTIVITY_BANNER -&gt;
-<span class="nc" id="L289">          throw new UserNotAuthorizedException();</span>
+<span class="nc" id="L290">          throw new UserNotAuthorizedException();</span>
       case TRACE_ATTACHMENT -&gt; {
-<span class="nc" id="L291">        var trace = traceService.getTraceById(elementId);</span>
-<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
-<span class="nc bnc" id="L293" title="All 2 branches missed.">        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();</span>
-<span class="nc bnc" id="L294" title="All 2 branches missed.">        if (trace.getAttachment().isEmpty()) throw new InvalidTraceTypeException();</span>
+<span class="nc" id="L292">        var trace = traceService.getTraceById(elementId);</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">        if (!trace.getUser().equals(loggedInUser)) throw new UserNotAuthorizedException();</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        if (trace.getLink().isPresent()) throw new InvalidTraceTypeException();</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        if (trace.getAttachment().isEmpty()) throw new InvalidTraceTypeException();</span>
       }
     }
-<span class="nc" id="L297">  }</span>
+<span class="nc" id="L298">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
