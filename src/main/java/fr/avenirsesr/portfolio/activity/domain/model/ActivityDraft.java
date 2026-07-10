@@ -5,6 +5,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.AvenirsBaseModel;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +24,7 @@ public class ActivityDraft extends AvenirsBaseModel {
   private String executionPeriodInfoSummary;
   private File banner;
   @Getter private List<String> links;
+  @Getter private List<File> files;
   @Getter private int traceAllowedAssociations;
   @Getter private int feedbackAllowedIterations;
   @Getter private boolean enableReflection;
@@ -45,7 +47,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       int feedbackAllowedIterations,
       boolean enableReflection,
       File banner,
-      List<String> links) {
+      List<String> links,
+      List<File> files) {
     super(id, createdAt, updatedAt);
     this.title = title;
     this.author = author;
@@ -59,6 +62,7 @@ public class ActivityDraft extends AvenirsBaseModel {
     this.feedbackAllowedIterations = feedbackAllowedIterations;
     this.banner = banner;
     this.links = links;
+    this.files = new ArrayList<>(files == null ? List.of() : files);
   }
 
   public static ActivityDraft create(String title, Staff createdBy) {
@@ -77,6 +81,7 @@ public class ActivityDraft extends AvenirsBaseModel {
         DEFAULT_FEEDBACK_ALLOWED_ITERATIONS,
         true,
         null,
+        List.of(),
         List.of());
   }
 
@@ -95,7 +100,8 @@ public class ActivityDraft extends AvenirsBaseModel {
       int feedbackAllowedIterations,
       boolean enableReflection,
       File banner,
-      List<String> links) {
+      List<String> links,
+      List<File> files) {
     return new ActivityDraft(
         id,
         createdAt,
@@ -111,7 +117,8 @@ public class ActivityDraft extends AvenirsBaseModel {
         feedbackAllowedIterations,
         enableReflection,
         banner,
-        links);
+        links,
+        files);
   }
 
   public Optional<String> getSummary() {
@@ -136,5 +143,13 @@ public class ActivityDraft extends AvenirsBaseModel {
 
   public void addLinks(List<String> links) {
     this.links.addAll(links);
+  }
+
+  public void addFile(File file) {
+    this.files.add(file);
+  }
+
+  public void removeFile(UUID fileId) {
+    this.files.removeIf(file -> file.getId().equals(fileId));
   }
 }

@@ -18,9 +18,9 @@ import fr.avenirsesr.portfolio.common.configuration.domain.model.TraceConfigurat
 import fr.avenirsesr.portfolio.common.data.domain.model.*;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.port.output.repository.FileRepository;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.shared.domain.model.enums.EPortfolioType;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.DeclaredActivityAssociationData;
@@ -39,6 +39,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.port.input.DeclaredSkillProgressService;
 import fr.avenirsesr.portfolio.trace.domain.data.*;
+import fr.avenirsesr.portfolio.trace.domain.exception.InvalidTraceTypeException;
 import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.*;
@@ -69,7 +70,7 @@ public class TraceServiceImpl implements TraceService {
   private final AssociationService associationService;
   private final AssociationSearchHelper associationSearchHelper;
   private final FeedbackService feedbackService;
-  private final FileRepository fileRepository;
+  private final FileResourceService fileResourceService;
 
   @Override
   public Trace getTraceById(UUID id) {
@@ -724,13 +725,7 @@ public class TraceServiceImpl implements TraceService {
       return;
     }
 
-    var files = fileRepository.findAllById(fileIds);
-
-    if (files.size() != fileIds.stream().distinct().count()) {
-      throw new FileNotFoundException();
-    }
-
-    fileRepository.removeAllFromDatabase(files);
+    fileIds.forEach(fileResourceService::delete);
 
     log.info("Deleted files {}", fileIds);
   }
@@ -744,5 +739,33 @@ public class TraceServiceImpl implements TraceService {
       DeclaredActivity declaredActivity, EDeclaredActivityStatus status) {
     return new TraceDeclaredActivityData(
         declaredActivity.getId(), declaredActivity.getActivity().getTitle(), status);
+  }
+
+  @Override
+  public File uploadAttachment(
+      UUID traceId, String fileName, String mimeType, long size, byte[] content) {
+    var loggedInUser = loggedInUserService.getLoggedInUser();
+    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
+    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    if (trace.getLink().isPresent()) {
+      throw new InvalidTraceTypeException();
+    }
+
+    var file = fileResourceService.upload(fileName, mimeType, size, content, false);
+    trace.setAttachment(file);
+    traceRepository.save(trace);
+    return file;
+  }
+
+  @Override
+  public FileDownload downloadAttachment(UUID traceId) {
+    var loggedInUser = loggedInUserService.getLoggedInUser();
+    var trace = traceRepository.findById(traceId).orElseThrow(TraceNotFoundException::new);
+    checkIfUserIsAuthorizedOnTrace(loggedInUser, trace);
+    if (trace.getLink().isPresent()) {
+      throw new InvalidTraceTypeException();
+    }
+    var attachment = trace.getAttachment().orElseThrow(InvalidTraceTypeException::new);
+    return fileResourceService.download(attachment.getId());
   }
 }

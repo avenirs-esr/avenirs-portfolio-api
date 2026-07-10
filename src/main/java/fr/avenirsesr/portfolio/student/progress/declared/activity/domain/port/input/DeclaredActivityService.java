@@ -77,4 +77,6 @@ public interface DeclaredActivityService {
   int countEnrolledStudents(Activity activity);
 
   List<DeclaredActivity> getEnrolledStudents(Activity activity);
+
+  boolean isEnrolled(Activity activity, Student student);
 }

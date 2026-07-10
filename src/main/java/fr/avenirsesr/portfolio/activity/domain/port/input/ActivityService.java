@@ -9,6 +9,8 @@ import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityStatus;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityThematic;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import java.util.List;
 import java.util.Map;
@@ -71,4 +73,16 @@ public interface ActivityService {
   ActivityDraft createDraftFromActivity(UUID activityId);
 
   Boolean hasEnrolledStudents(ActivityDraft draft);
+
+  File uploadDraftBanner(
+      UUID activityDraftId, String fileName, String mimeType, long size, byte[] content);
+
+  void deleteDraftBanner(UUID activityDraftId);
+
+  File addDraftFile(
+      UUID activityDraftId, String fileName, String mimeType, long size, byte[] content);
+
+  void deleteDraftFile(UUID activityDraftId, UUID fileId);
+
+  FileDownload downloadActivityFile(UUID activityId, UUID fileId);
 }

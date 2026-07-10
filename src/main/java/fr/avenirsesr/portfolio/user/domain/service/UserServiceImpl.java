@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.user.domain.exceptions.ExternalUserNotFoundException;
 import fr.avenirsesr.portfolio.common.user.domain.model.enums.EUserStatus;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.notification.domain.port.output.repository.NotificationRepository;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
@@ -107,6 +108,40 @@ public class UserServiceImpl implements UserService {
         hasUnseenNotification,
         unreadNotifications,
         user.isNotificationEnabled());
+  }
+
+  @Override
+  public File uploadProfilePicture(
+      EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content) {
+    return switch (userCategory) {
+      case STUDENT -> studentService.uploadProfilePicture(fileName, mimeType, size, content);
+      case STAFF -> staffService.uploadProfilePicture(fileName, mimeType, size, content);
+    };
+  }
+
+  @Override
+  public void deleteProfilePicture(EUserCategory userCategory) {
+    switch (userCategory) {
+      case STUDENT -> studentService.deleteProfilePicture();
+      case STAFF -> staffService.deleteProfilePicture();
+    }
+  }
+
+  @Override
+  public File uploadCoverPicture(
+      EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content) {
+    return switch (userCategory) {
+      case STUDENT -> studentService.uploadCoverPicture(fileName, mimeType, size, content);
+      case STAFF -> staffService.uploadCoverPicture(fileName, mimeType, size, content);
+    };
+  }
+
+  @Override
+  public void deleteCoverPicture(EUserCategory userCategory) {
+    switch (userCategory) {
+      case STUDENT -> studentService.deleteCoverPicture();
+      case STAFF -> staffService.deleteCoverPicture();
+    }
   }
 
   private User createUserFromExternalUser(String eppn) {

@@ -3,6 +3,7 @@ package fr.avenirsesr.portfolio.user.domain.port.input;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.common.user.domain.port.output.BaseUserService;
+import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.domain.data.UserQuickLinksData;
 import java.util.UUID;
 
@@ -17,4 +18,14 @@ public interface UserService extends BaseUserService {
   User createUser(UUID id, String firstname, String lastname, String email, String eppn);
 
   UserQuickLinksData getQuickLinks(EUserCategory userCategory);
+
+  File uploadProfilePicture(
+      EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content);
+
+  void deleteProfilePicture(EUserCategory userCategory);
+
+  File uploadCoverPicture(
+      EUserCategory userCategory, String fileName, String mimeType, long size, byte[] content);
+
+  void deleteCoverPicture(EUserCategory userCategory);
 }

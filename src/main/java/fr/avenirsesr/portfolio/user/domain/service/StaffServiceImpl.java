@@ -2,7 +2,11 @@ package fr.avenirsesr.portfolio.user.domain.service;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
+import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
@@ -21,6 +25,7 @@ public class StaffServiceImpl implements StaffService {
   private final StaffRepository staffRepository;
   private final UserRepository userRepository;
   private final LoggedInUserService loggedInUserService;
+  private final FileResourceService fileResourceService;
 
   @Override
   public Staff getStaffById(UUID id) {
@@ -68,5 +73,47 @@ public class StaffServiceImpl implements StaffService {
       userRepository.save(user);
     }
     return staff;
+  }
+
+  @Override
+  public File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    requireImage(mimeType);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    staff.setProfilePicture(file);
+    staffRepository.save(staff);
+    return file;
+  }
+
+  @Override
+  public void deleteProfilePicture() {
+    var staff = loggedInUserService.getLoggedInStaff();
+    staff.getProfilePicture().ifPresent(picture -> fileResourceService.delete(picture.getId()));
+    staff.setProfilePicture(null);
+    staffRepository.save(staff);
+  }
+
+  @Override
+  public File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    requireImage(mimeType);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    staff.setCoverPicture(file);
+    staffRepository.save(staff);
+    return file;
+  }
+
+  @Override
+  public void deleteCoverPicture() {
+    var staff = loggedInUserService.getLoggedInStaff();
+    staff.getCoverPicture().ifPresent(picture -> fileResourceService.delete(picture.getId()));
+    staff.setCoverPicture(null);
+    staffRepository.save(staff);
+  }
+
+  private void requireImage(String mimeType) {
+    if (!EFileType.fromMimeType(mimeType).isImage()) {
+      throw new FileTypeNotSupportedException();
+    }
   }
 }

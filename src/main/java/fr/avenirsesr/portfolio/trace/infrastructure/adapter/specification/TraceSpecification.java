@@ -4,7 +4,6 @@ import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.AssociationEntity;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.model.TraceEntity;
 import fr.avenirsesr.portfolio.user.infrastructure.adapter.mapper.UserMapper;
@@ -64,14 +63,9 @@ public class TraceSpecification {
           criteriaBuilder.like(criteriaBuilder.lower(root.get("personalNote")), pattern);
 
       // Attachment
-      Subquery<FileEntity> attachSub = query.subquery(FileEntity.class);
-      Root<FileEntity> attachRoot = attachSub.from(FileEntity.class);
-      attachSub
-          .select(attachRoot)
-          .where(
-              criteriaBuilder.equal(attachRoot.get("elementId"), root.get("id")),
-              criteriaBuilder.like(criteriaBuilder.lower(attachRoot.get("fileName")), pattern));
-      Predicate attachmentPredicate = criteriaBuilder.exists(attachSub);
+      var attachment = root.join("attachment", JoinType.LEFT);
+      Predicate attachmentPredicate =
+          criteriaBuilder.like(criteriaBuilder.lower(attachment.get("fileName")), pattern);
 
       return criteriaBuilder.or(
           titlePredicate, aiUsePredicate, personalNotePredicate, attachmentPredicate);

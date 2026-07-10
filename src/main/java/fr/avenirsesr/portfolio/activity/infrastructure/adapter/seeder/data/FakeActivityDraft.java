@@ -32,6 +32,7 @@ public class FakeActivityDraft {
             faker.bool().bool(),
             null,
             List.of(),
+            List.of(),
             Instant.now(),
             Instant.now()));
   }

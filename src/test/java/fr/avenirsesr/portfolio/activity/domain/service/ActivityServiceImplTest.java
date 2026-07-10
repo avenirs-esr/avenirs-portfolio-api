@@ -1007,6 +1007,7 @@ class ActivityServiceImplTest {
                 -1,
                 null,
                 List.of(),
+                List.of(),
                 Instant.now(),
                 Instant.now());
 
@@ -1061,6 +1062,7 @@ class ActivityServiceImplTest {
             -1,
             -1,
             null,
+            List.of(),
             List.of());
       }
     }

@@ -32,6 +32,7 @@ public class ActivityFixture {
   private EActivityStatus status = EActivityStatus.PUBLISHED;
   private final File banner = ActivityBannerFixture.create().toModel();
   private List<String> links = List.of("https://example.com/link1", "https://example.com/link2");
+  private List<File> files = List.of();
   private Instant createdAt = Instant.now();
   private Instant updatedAt = Instant.now();
 
@@ -114,6 +115,11 @@ public class ActivityFixture {
     return this;
   }
 
+  public ActivityFixture withFiles(List<File> files) {
+    this.files = files;
+    return this;
+  }
+
   public Activity toModel() {
     return Activity.toDomain(
         id,
@@ -130,6 +136,7 @@ public class ActivityFixture {
         feedbackAllowedIterations,
         banner,
         links,
+        files,
         createdAt,
         updatedAt);
   }

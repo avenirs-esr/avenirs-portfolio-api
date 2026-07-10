@@ -1,6 +1,8 @@
 package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityDraftRepository;
+import fr.avenirsesr.portfolio.activity.domain.port.output.repository.ActivityRepository;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityDraftEntity;
 import fr.avenirsesr.portfolio.activity.infrastructure.adapter.model.ActivityEntity;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.ESeederSource;
@@ -8,7 +10,6 @@ import fr.avenirsesr.portfolio.common.utils.FileReader;
 import fr.avenirsesr.portfolio.common.validation.infrastructure.adapter.utils.ValidationUtils;
 import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.mapper.FileMapper;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
@@ -30,15 +31,21 @@ public class ActivityFileSeeder {
   private static final String PATH_FILE = "seeder/activity-files.json";
   private final FileReader fileReader;
   private final FileResourceService fileResourceService;
+  private final ActivityDraftRepository activityDraftRepository;
+  private final ActivityRepository activityRepository;
 
   @Value("${seeder.source}")
   private ESeederSource seederSource;
 
   public ActivityFileSeeder(
       FileReader fileReader,
-      @Qualifier("MockFileResourceService") FileResourceService fileResourceService) {
+      @Qualifier("MockFileResourceService") FileResourceService fileResourceService,
+      ActivityDraftRepository activityDraftRepository,
+      ActivityRepository activityRepository) {
     this.fileReader = fileReader;
     this.fileResourceService = fileResourceService;
+    this.activityDraftRepository = activityDraftRepository;
+    this.activityRepository = activityRepository;
   }
 
   @Transactional
@@ -61,14 +68,11 @@ public class ActivityFileSeeder {
 
     for (ActivityFileCreationData data : creationData) {
       try {
-        activityFiles.add(
+        var file =
             fileResourceService.upload(
-                data.activityId(),
-                EFileCategory.ACTIVITY_FILE,
-                data.fileName(),
-                data.fileType().getMimeType(),
-                data.fileSize(),
-                null));
+                data.fileName(), data.fileType().getMimeType(), data.fileSize(), null, false);
+        linkFileToActivityOrDraft(data.activityId(), file);
+        activityFiles.add(file);
       } catch (FileStorageException e) {
         log.error("Error uploading activity file", e);
       }
@@ -78,17 +82,25 @@ public class ActivityFileSeeder {
     return activityFiles.stream().map(FileMapper.INSTANCE::fromDomain).toList();
   }
 
+  private void linkFileToActivityOrDraft(UUID activityId, File file) {
+    activityDraftRepository
+        .findById(activityId)
+        .ifPresentOrElse(
+            draft -> {
+              draft.addFile(file);
+              activityDraftRepository.save(draft);
+            },
+            () ->
+                activityRepository
+                    .findById(activityId)
+                    .ifPresent(
+                        activity -> {
+                          activity.addFile(file);
+                          activityRepository.save(activity);
+                        }));
+  }
+
   private List<ActivityFileCreationData> buildFakeActivityFile(List<UUID> activityIds) {
-    List<ActivityFileCreationData> fakeFiles = new ArrayList<>();
-    for (UUID activityId : activityIds) {
-      var fakeFile = FakeActivityFile.create(activityId).toEntity();
-      fakeFiles.add(
-          new ActivityFileCreationData(
-              fakeFile.getElementId(),
-              fakeFile.getFileName(),
-              fakeFile.getFileType(),
-              fakeFile.getSize()));
-    }
-    return fakeFiles;
+    return activityIds.stream().map(FakeActivityFile::create).toList();
   }
 }

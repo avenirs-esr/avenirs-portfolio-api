@@ -26,7 +26,12 @@ import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationExce
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.file.domain.data.FileData;
+import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
+import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
@@ -34,6 +39,8 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
+import fr.avenirsesr.portfolio.user.domain.model.Student;
+import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -53,6 +60,8 @@ public class ActivityServiceImpl implements ActivityService {
   private final LoggedInUserService loggedInUserService;
   private final StaffActivityOverviewRepository staffActivityOverviewRepository;
   private final NotificationService notificationService;
+  private final FileResourceService fileResourceService;
+  private final StudentRepository studentRepository;
 
   @Override
   public Activity create(
@@ -91,7 +100,8 @@ public class ActivityServiceImpl implements ActivityService {
             traceAllowedAssociations,
             feedbackAllowedIterations,
             null,
-            links);
+            links,
+            List.of());
     activityRepository.save(activity);
     return activity;
   }
@@ -134,7 +144,8 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getTraceAllowedAssociations(),
                 draft.getFeedbackAllowedIterations(),
                 draft.getBanner().orElse(null),
-                draft.getLinks()));
+                draft.getLinks(),
+                draft.getFiles()));
 
     if (publishedActivity.isPresent()) {
       var enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);
@@ -189,10 +200,12 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getBanner().orElse(null),
                 activity::setBanner),
             new FieldSync<>(
-                FILES_AND_LINKS, activity.getLinks(), draft.getLinks(), activity::setLinks));
+                FILES_AND_LINKS, activity.getLinks(), draft.getLinks(), activity::setLinks),
+            new FieldSync<>(
+                FILES_AND_LINKS, activity.getFiles(), draft.getFiles(), activity::setFiles));
 
     var updatedFields =
-        syncs.stream().filter(FieldSync::applyIfChanged).map(FieldSync::field).toList();
+        syncs.stream().filter(FieldSync::applyIfChanged).map(FieldSync::field).distinct().toList();
 
     activity.setExecutionPeriodInfoSummary(draft.getExecutionPeriodInfoSummary().orElse(null));
 
@@ -485,7 +498,8 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getFeedbackAllowedIterations(),
             activity.isEnableReflection(),
             activity.getBanner().orElse(null),
-            activity.getLinks());
+            activity.getLinks(),
+            activity.getFiles());
 
     var savedDraft = activityDraftRepository.save(draft);
 
@@ -505,5 +519,81 @@ public class ActivityServiceImpl implements ActivityService {
   @Override
   public Boolean hasEnrolledStudents(ActivityDraft draft) {
     return activityRepository.findById(draft.getId()).map(this::hasEnrolledStudents).orElse(false);
+  }
+
+  @Override
+  public File uploadDraftBanner(
+      UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
+    var draft = getOwnedDraft(activityDraftId);
+    if (!EFileType.fromMimeType(mimeType).isImage()) {
+      throw new FileTypeNotSupportedException();
+    }
+    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    draft.setBanner(file);
+    activityDraftRepository.save(draft);
+    return file;
+  }
+
+  @Override
+  public void deleteDraftBanner(UUID activityDraftId) {
+    var draft = getOwnedDraft(activityDraftId);
+    draft.getBanner().ifPresent(banner -> fileResourceService.delete(banner.getId()));
+    draft.setBanner(null);
+    activityDraftRepository.save(draft);
+  }
+
+  @Override
+  public File addDraftFile(
+      UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
+    var draft = getOwnedDraft(activityDraftId);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, false);
+    draft.addFile(file);
+    activityDraftRepository.save(draft);
+    return file;
+  }
+
+  @Override
+  public void deleteDraftFile(UUID activityDraftId, UUID fileId) {
+    var draft = getOwnedDraft(activityDraftId);
+    if (draft.getFiles().stream().noneMatch(file -> file.getId().equals(fileId))) {
+      throw new FileNotFoundException();
+    }
+    fileResourceService.delete(fileId);
+    draft.removeFile(fileId);
+    activityDraftRepository.save(draft);
+  }
+
+  @Override
+  public FileDownload downloadActivityFile(UUID activityId, UUID fileId) {
+    var loggedInUser = loggedInUserService.getLoggedInUser();
+    var activity =
+        activityRepository.findById(activityId).orElseThrow(ActivityNotFoundException::new);
+
+    boolean isAuthor = activity.getAuthor().getUser().equals(loggedInUser);
+    boolean isEnrolledStudent =
+        studentRepository
+            .findById(loggedInUser.getId())
+            .map(student -> declaredActivityService.isEnrolled(activity, student))
+            .orElse(false);
+
+    if (!isAuthor && !isEnrolledStudent) {
+      throw new UserNotAuthorizedException();
+    }
+    if (activity.getFiles().stream().noneMatch(file -> file.getId().equals(fileId))) {
+      throw new FileNotFoundException();
+    }
+    return fileResourceService.download(fileId);
+  }
+
+  private ActivityDraft getOwnedDraft(UUID activityDraftId) {
+    var staff = loggedInUserService.getLoggedInStaff();
+    var draft =
+        activityDraftRepository
+            .findById(activityDraftId)
+            .orElseThrow(ActivityDraftNotFoundException::new);
+    if (!draft.getAuthor().equals(staff)) {
+      throw new UserNotAuthorizedException();
+    }
+    return draft;
   }
 }

@@ -569,6 +569,11 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
     return declaredActivityRepository.findAllByActivity(activity, graph);
   }
 
+  @Override
+  public boolean isEnrolled(Activity activity, Student student) {
+    return declaredActivityRepository.findByActivity(student, activity).isPresent();
+  }
+
   private EAssociationType getAssociationType(EAssociationContextType contextType) {
     return switch (contextType) {
       case TRACE -> EAssociationType.DECLARED_ACTIVITY_TRACE;

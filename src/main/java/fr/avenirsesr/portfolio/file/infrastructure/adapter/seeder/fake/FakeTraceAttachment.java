@@ -2,7 +2,6 @@ package fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.fake;
 
 import fr.avenirsesr.portfolio.common.seeder.domain.port.output.SharedDataGenerator;
 import fr.avenirsesr.portfolio.common.seeder.infrastructure.adapter.data.DataGeneratorProvider;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.domain.port.output.seeder.FileDataGenerator;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
@@ -46,7 +45,6 @@ public class FakeTraceAttachment {
         FileEntity.of(
             id,
             fileType,
-            EFileCategory.TRACE_ATTACHMENT,
             fileDataGenerator.with("file-name").fileName(fileType),
             dataGenerator.with("fileSize").number((int) fileType.getSizeLimit().bytes()),
             1,
@@ -55,9 +53,9 @@ public class FakeTraceAttachment {
                     FileStorageConstants.STORAGE_PATH,
                     FileStorageConstants.PLACEHOLDER_FILE_UUID,
                     fileType.name().toLowerCase()),
-            trace.getId(),
             trace.getUser(),
             trace.getCreatedAt(),
+            false,
             trace.getCreatedAt(),
             trace.getUpdatedAt()));
   }

@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileCategory;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.model.FileEntity;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
@@ -208,17 +207,18 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
         FileEntity.of(
             UUID.randomUUID(),
             type,
-            EFileCategory.TRACE_ATTACHMENT,
             name,
             1L,
             1,
             "uri",
-            trace.getId(),
             user,
             Instant.now(),
+            false,
             Instant.now(),
             Instant.now());
     entityManager.persist(att);
+    trace.setAttachment(att);
+    entityManager.persist(trace);
     return att;
   }
 }

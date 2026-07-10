@@ -13,14 +13,13 @@ public class FileMapper implements Mapper<FileEntity, File> {
     return FileEntity.of(
         domain.getId(),
         domain.getFileType(),
-        domain.getFileCategory(),
         domain.getFileName(),
         domain.getSize(),
         domain.getVersion(),
         domain.getUri(),
-        domain.getElementId(),
         UserMapper.INSTANCE.fromDomain(domain.getUploadedBy()),
         domain.getUploadedAt(),
+        domain.isPublic(),
         domain.getCreatedAt(),
         domain.getUpdatedAt());
   }
@@ -29,15 +28,14 @@ public class FileMapper implements Mapper<FileEntity, File> {
   public File toDomain(FileEntity entity) {
     return File.toDomain(
         entity.getId(),
-        entity.getElementId(),
         entity.getFileType(),
-        entity.getFileCategory(),
         entity.getFileName(),
         entity.getSize(),
         entity.getVersion(),
         entity.getUri(),
         UserMapper.INSTANCE.toDomain(entity.getUploadedBy()),
         entity.getUploadedAt(),
+        entity.isPublic(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }
