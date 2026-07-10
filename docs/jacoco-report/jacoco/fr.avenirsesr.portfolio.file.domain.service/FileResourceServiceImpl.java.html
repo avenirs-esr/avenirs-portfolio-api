@@ -274,9 +274,9 @@ public class FileResourceServiceImpl implements FileResourceService {
 <span class="nc bnc" id="L274" title="All 4 branches missed.">    switch (fileCategory) {</span>
       case ACTIVITY_FILE -&gt; {
 <span class="nc" id="L276">        var draft = activityDraftRepository.findById(elementId);</span>
-<span class="nc bnc" id="L277" title="All 2 branches missed.">        if (!draft.isPresent()) {</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">        if (draft.isEmpty()) {</span>
 <span class="nc" id="L278">          var activity = activityRepository.findById(elementId);</span>
-<span class="nc bnc" id="L279" title="All 2 branches missed.">          if (!activity.isPresent()) {</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">          if (activity.isEmpty()) {</span>
 <span class="nc" id="L280">            throw new ActivityNotFoundException();</span>
           }
         }
