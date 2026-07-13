@@ -6,7 +6,7 @@ import fr.avenirsesr.portfolio.file.domain.model.FileResource;
 import java.util.UUID;
 
 public interface FileResourceService {
-  File upload(String fileName, String mimeType, long size, byte[] content, boolean isPublic);
+  File upload(String fileName, String mimeType, long size, byte[] content, boolean isRestricted);
 
   File get(UUID fileId);
 

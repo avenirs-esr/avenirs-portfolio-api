@@ -1,7 +1,10 @@
 package fr.avenirsesr.portfolio.shared.application.adapter;
 
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.URI;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 public interface Utils {
@@ -18,6 +21,14 @@ public interface Utils {
           .toUriString();
     } catch (Exception e) {
       return null;
+    }
+  }
+
+  static byte[] readBytes(MultipartFile file) {
+    try {
+      return file.getBytes();
+    } catch (IOException e) {
+      throw new FileStorageException("Failed to read uploaded file", e);
     }
   }
 }

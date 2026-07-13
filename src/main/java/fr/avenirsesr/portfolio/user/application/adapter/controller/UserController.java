@@ -1,12 +1,11 @@
 package fr.avenirsesr.portfolio.user.application.adapter.controller;
 
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
+import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
 
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.EUserCategory;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
-import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
-import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.ProfileOverviewDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.dto.QuickLinksDTO;
 import fr.avenirsesr.portfolio.user.application.adapter.mapper.ProfileOverviewMapper;
@@ -21,7 +20,6 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import java.security.Principal;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -134,14 +132,12 @@ public class UserController {
       @RequestParam("file") MultipartFile file) {
     log.debug("Received request to upload profile picture of user [{}]", principal.getName());
     var uploaded =
-        upload(
-            () ->
-                userService.uploadProfilePicture(
-                    userCategory,
-                    file.getOriginalFilename(),
-                    file.getContentType(),
-                    file.getSize(),
-                    file.getBytes()));
+        userService.uploadProfilePicture(
+            userCategory,
+            file.getOriginalFilename(),
+            file.getContentType(),
+            file.getSize(),
+            readBytes(file));
     return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 
@@ -175,14 +171,12 @@ public class UserController {
       @RequestParam("file") MultipartFile file) {
     log.debug("Received request to upload cover picture of user [{}]", principal.getName());
     var uploaded =
-        upload(
-            () ->
-                userService.uploadCoverPicture(
-                    userCategory,
-                    file.getOriginalFilename(),
-                    file.getContentType(),
-                    file.getSize(),
-                    file.getBytes()));
+        userService.uploadCoverPicture(
+            userCategory,
+            file.getOriginalFilename(),
+            file.getContentType(),
+            file.getSize(),
+            readBytes(file));
     return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 
@@ -199,18 +193,5 @@ public class UserController {
     log.debug("Received request to delete cover picture of user [{}]", principal.getName());
     userService.deleteCoverPicture(userCategory);
     return ResponseEntity.noContent().build();
-  }
-
-  private File upload(FileUpload upload) {
-    try {
-      return upload.get();
-    } catch (IOException e) {
-      throw new FileStorageException("Failed to read uploaded file", e);
-    }
-  }
-
-  @FunctionalInterface
-  private interface FileUpload {
-    File get() throws IOException;
   }
 }

@@ -39,7 +39,6 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.domain.port.output.repository.StudentRepository;
 import java.time.Duration;
 import java.time.Instant;
@@ -54,6 +53,14 @@ import lombok.extern.slf4j.Slf4j;
 public class ActivityServiceImpl implements ActivityService {
 
   private static final Duration DURATION_FOR_LATEST = Duration.ofDays(90);
+  private static final EnumSet<EFileType> ALLOWED_DRAFT_FILE_TYPES =
+      EnumSet.of(
+          EFileType.PDF,
+          EFileType.DOC,
+          EFileType.DOCX,
+          EFileType.ODT,
+          EFileType.JPEG,
+          EFileType.PNG);
   private final ActivityRepository activityRepository;
   private final ActivityDraftRepository activityDraftRepository;
   private final DeclaredActivityService declaredActivityService;
@@ -528,7 +535,7 @@ public class ActivityServiceImpl implements ActivityService {
     if (!EFileType.fromMimeType(mimeType).isImage()) {
       throw new FileTypeNotSupportedException();
     }
-    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, false);
     draft.setBanner(file);
     activityDraftRepository.save(draft);
     return file;
@@ -546,7 +553,10 @@ public class ActivityServiceImpl implements ActivityService {
   public File addDraftFile(
       UUID activityDraftId, String fileName, String mimeType, long size, byte[] content) {
     var draft = getOwnedDraft(activityDraftId);
-    var file = fileResourceService.upload(fileName, mimeType, size, content, false);
+    if (!ALLOWED_DRAFT_FILE_TYPES.contains(EFileType.fromMimeType(mimeType))) {
+      throw new FileTypeNotSupportedException();
+    }
+    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
     draft.addFile(file);
     activityDraftRepository.save(draft);
     return file;
@@ -592,7 +602,7 @@ public class ActivityServiceImpl implements ActivityService {
             .findById(activityDraftId)
             .orElseThrow(ActivityDraftNotFoundException::new);
     if (!draft.getAuthor().equals(staff)) {
-      throw new UserNotAuthorizedException();
+      throw new ActivityDraftNotFoundException();
     }
     return draft;
   }

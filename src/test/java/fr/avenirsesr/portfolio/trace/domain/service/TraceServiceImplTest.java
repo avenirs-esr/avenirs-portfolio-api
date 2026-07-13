@@ -579,15 +579,15 @@ class TraceServiceImplTest {
       }
 
       @Test
-      void thenItShouldThrowUserNotAuthorizedWhenTraceBelongsToAnotherUser() {
+      void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherUser() {
         BddLogger.when("updating a trace owned by another user");
 
         Trace trace = TraceFixture.create().withUser(UserFixture.create().toModel()).toModel();
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
 
-        UserNotAuthorizedException exception =
+        TraceNotFoundException exception =
             assertThrows(
-                UserNotAuthorizedException.class,
+                TraceNotFoundException.class,
                 () ->
                     traceService.updateTrace(
                         trace.getId(),
@@ -599,9 +599,9 @@ class TraceServiceImplTest {
                         null,
                         false));
 
-        BddLogger.then("it should throw USER_NOT_AUTHORIZED");
+        BddLogger.then("it should throw TRACE_NOT_FOUND");
 
-        assertEquals(EErrorCode.USER_NOT_AUTHORIZED, exception.getErrorCode());
+        assertEquals(EErrorCode.TRACE_NOT_FOUND, exception.getErrorCode());
         verify(traceRepository, never()).save(any());
       }
     }
@@ -720,7 +720,7 @@ class TraceServiceImplTest {
       }
 
       @Test
-      void thenItShouldThrowUserNotAuthorizedWhenOneTraceBelongsToAnotherUser() {
+      void thenItShouldThrowTraceNotFoundWhenOneTraceBelongsToAnotherUser() {
         BddLogger.when("deleting traces with one trace owned by another user");
 
         Trace ownedTrace = TraceFixture.create().withUser(student.getUser()).toModel();
@@ -731,9 +731,9 @@ class TraceServiceImplTest {
 
         when(traceRepository.findAllById(traceIds)).thenReturn(List.of(ownedTrace, otherUserTrace));
 
-        assertThrows(UserNotAuthorizedException.class, () -> traceService.deleteAllByIds(traceIds));
+        assertThrows(TraceNotFoundException.class, () -> traceService.deleteAllByIds(traceIds));
 
-        BddLogger.then("it should throw UserNotAuthorizedException");
+        BddLogger.then("it should throw TraceNotFoundException");
 
         verify(feedbackService, never())
             .findAttachmentIdsUsedByTraceSnapshots(anyList(), anyList());
@@ -807,20 +807,20 @@ class TraceServiceImplTest {
       }
 
       @Test
-      void thenItShouldThrowUserNotAuthorizedWhenTraceBelongsToAnotherUser() {
+      void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherUser() {
         BddLogger.when("getting trace detail of another user");
 
         Trace trace = TraceFixture.create().withUser(UserFixture.create().toModel()).toModel();
 
         when(traceRepository.findById(trace.getId())).thenReturn(Optional.of(trace));
 
-        UserNotAuthorizedException exception =
+        TraceNotFoundException exception =
             assertThrows(
-                UserNotAuthorizedException.class, () -> traceService.getTraceDetail(trace.getId()));
+                TraceNotFoundException.class, () -> traceService.getTraceDetail(trace.getId()));
 
-        BddLogger.then("it should throw USER_NOT_AUTHORIZED");
+        BddLogger.then("it should throw TRACE_NOT_FOUND");
 
-        assertEquals(EErrorCode.USER_NOT_AUTHORIZED, exception.getErrorCode());
+        assertEquals(EErrorCode.TRACE_NOT_FOUND, exception.getErrorCode());
       }
     }
 
@@ -904,7 +904,7 @@ class TraceServiceImplTest {
       }
 
       @Test
-      void thenItShouldThrowUserNotAuthorizedWhenTraceBelongsToAnotherUser() {
+      void thenItShouldThrowTraceNotFoundWhenTraceBelongsToAnotherUser() {
         BddLogger.when("getting trace associations of another user");
 
         UUID traceId = UUID.randomUUID();
@@ -917,10 +917,9 @@ class TraceServiceImplTest {
         when(traceRepository.findById(traceId)).thenReturn(Optional.of(trace));
 
         assertThrows(
-            UserNotAuthorizedException.class,
-            () -> traceService.getTraceAssociations(traceId, false));
+            TraceNotFoundException.class, () -> traceService.getTraceAssociations(traceId, false));
 
-        BddLogger.then("it should throw UserNotAuthorizedException");
+        BddLogger.then("it should throw TraceNotFoundException");
       }
     }
 
@@ -1310,7 +1309,7 @@ class TraceServiceImplTest {
       }
 
       @Test
-      void thenItShouldThrowUserNotAuthorizedWhenOneTraceBelongsToAnotherUser() {
+      void thenItShouldThrowTraceNotFoundWhenOneTraceBelongsToAnotherUser() {
         BddLogger.when("getting locked declared activities with one trace owned by another user");
 
         Trace ownedTrace = TraceFixture.create().withUser(student.getUser()).toModel();
@@ -1322,10 +1321,9 @@ class TraceServiceImplTest {
         when(traceRepository.findAllById(traceIds)).thenReturn(List.of(ownedTrace, otherUserTrace));
 
         assertThrows(
-            UserNotAuthorizedException.class,
-            () -> traceService.getLockedDeclaredActivities(traceIds));
+            TraceNotFoundException.class, () -> traceService.getLockedDeclaredActivities(traceIds));
 
-        BddLogger.then("it should throw UserNotAuthorizedException");
+        BddLogger.then("it should throw TraceNotFoundException");
 
         verify(associationService, never()).getAllOf(anyList(), any(), anyList());
       }

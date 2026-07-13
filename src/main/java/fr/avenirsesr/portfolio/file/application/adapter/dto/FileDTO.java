@@ -5,13 +5,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.UUID;
 
-@Schema(
-    requiredProperties = {"id", "fileName", "fileType", "fileSize", "url", "version", "uploadedAt"})
+@Schema(requiredProperties = {"id", "fileName", "fileType", "fileSize", "url", "uploadedAt"})
 public record FileDTO(
     UUID id,
     String fileName,
     @Schema(ref = "#/components/schemas/EFileType") EFileType fileType,
     long fileSize,
-    int version,
     String url,
     Instant uploadedAt) {}

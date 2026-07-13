@@ -9,15 +9,15 @@
         http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd
         http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet author="iamgreendev" id="decouple-file-add-is-public">
+    <changeSet author="iamgreendev" id="decouple-file-add-is-restricted">
         <addColumn tableName="file">
-            <column name="is_public" type="BOOLEAN" defaultValueBoolean="false">
+            <column name="is_restricted" type="BOOLEAN" defaultValueBoolean="true">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
 
         <rollback>
-            <dropColumn tableName="file" columnName="is_public"/>
+            <dropColumn tableName="file" columnName="is_restricted"/>
         </rollback>
     </changeSet>
 
@@ -99,10 +99,10 @@
         </rollback>
     </changeSet>
 
-    <changeSet author="iamgreendev" id="decouple-file-backfill-is-public">
+    <changeSet author="iamgreendev" id="decouple-file-backfill-is-restricted">
         <sql>
             UPDATE file
-            SET is_public = true
+            SET is_restricted = false
             WHERE file_category IN (
                 'ACTIVITY_BANNER',
                 'STAFF_PROFILE_PICTURE',

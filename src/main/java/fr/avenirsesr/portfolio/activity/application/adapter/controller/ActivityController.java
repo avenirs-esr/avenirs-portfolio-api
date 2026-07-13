@@ -1,6 +1,7 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
 import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
+import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
 
 import fr.avenirsesr.portfolio.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.activity.application.adapter.mapper.*;
@@ -18,15 +19,13 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.dto.PageInfoDTO;
 import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedResponse;
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
-import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
-import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.FileDTO;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
@@ -50,6 +49,7 @@ public class ActivityController {
   private final ActivityNavigationMapper activityNavigationMapper;
   private final ActivityOverviewDtoMapper activityOverviewDtoMapper;
   private final ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
+  private final FileDTOMapper fileDTOMapper;
 
   @GetMapping("/{activityStatus}/{activityId}/presentation")
   public ResponseEntity<ActivityPresentationDTO> getActivityPresentation(
@@ -90,25 +90,17 @@ public class ActivityController {
           case PUBLISHED, UNPUBLISHED -> {
             var activity = activityService.getActivityById(activityId);
             yield activityContentDtoMapper.toDTO(
-                activity, toFileDTOs(activity.getFiles(), baseUrl));
+                activity, fileDTOMapper.toFileDTOs(activity.getFiles(), baseUrl));
           }
           case DRAFT -> {
             var draft = activityService.getActivityDraftById(activityId);
             yield activityContentDtoMapper.toDTO(
                 draft,
                 activityService.hasEnrolledStudents(draft),
-                toFileDTOs(draft.getFiles(), baseUrl));
+                fileDTOMapper.toFileDTOs(draft.getFiles(), baseUrl));
           }
         };
     return ResponseEntity.ok(dto);
-  }
-
-  private List<FileDTO> toFileDTOs(List<File> files, String baseUrl) {
-    return files.stream().map(file -> toFileDTO(file, baseUrl)).toList();
-  }
-
-  private FileDTO toFileDTO(File file, String baseUrl) {
-    return new FileDTO(file.getId(), file.getFileName(), baseUrl + file.getUri());
   }
 
   @GetMapping("/staff/working-space")
@@ -314,16 +306,14 @@ public class ActivityController {
         activityDraftId,
         principal.getName());
     var uploaded =
-        uploadFile(
-            () ->
-                activityService.uploadDraftBanner(
-                    activityDraftId,
-                    file.getOriginalFilename(),
-                    file.getContentType(),
-                    file.getSize(),
-                    file.getBytes()));
+        activityService.uploadDraftBanner(
+            activityDraftId,
+            file.getOriginalFilename(),
+            file.getContentType(),
+            file.getSize(),
+            readBytes(file));
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(toFileDTO(uploaded, extractOrigin(request)));
+        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));
   }
 
   @DeleteMapping("/draft/{activityDraftId}/banner")
@@ -350,16 +340,14 @@ public class ActivityController {
         activityDraftId,
         principal.getName());
     var uploaded =
-        uploadFile(
-            () ->
-                activityService.addDraftFile(
-                    activityDraftId,
-                    file.getOriginalFilename(),
-                    file.getContentType(),
-                    file.getSize(),
-                    file.getBytes()));
+        activityService.addDraftFile(
+            activityDraftId,
+            file.getOriginalFilename(),
+            file.getContentType(),
+            file.getSize(),
+            readBytes(file));
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(toFileDTO(uploaded, extractOrigin(request)));
+        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));
   }
 
   @DeleteMapping("/draft/{activityDraftId}/files/{fileId}")
@@ -391,18 +379,5 @@ public class ActivityController {
             HttpHeaders.CONTENT_DISPOSITION,
             "attachment; filename=\"" + downloadedFile.fileName() + "\"")
         .body(downloadedFile.content());
-  }
-
-  private File uploadFile(FileUpload upload) {
-    try {
-      return upload.get();
-    } catch (IOException e) {
-      throw new FileStorageException("Failed to read uploaded file", e);
-    }
-  }
-
-  @FunctionalInterface
-  private interface FileUpload {
-    File get() throws IOException;
   }
 }

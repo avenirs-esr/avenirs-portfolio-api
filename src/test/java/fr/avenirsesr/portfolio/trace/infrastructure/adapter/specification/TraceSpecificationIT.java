@@ -209,11 +209,10 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
             type,
             name,
             1L,
-            1,
             "uri",
             user,
             Instant.now(),
-            false,
+            true,
             Instant.now(),
             Instant.now());
     entityManager.persist(att);
