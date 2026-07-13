@@ -623,6 +623,8 @@ class ActivityServiceImplTest {
         Student student2;
         User user1;
         User user2;
+        DeclaredActivity declaredActivity1;
+        DeclaredActivity declaredActivity2;
 
         @BeforeEach
         void setupAnd() {
@@ -631,10 +633,16 @@ class ActivityServiceImplTest {
           student2 = mock(Student.class);
           user1 = mock(User.class);
           user2 = mock(User.class);
+          declaredActivity1 = mock(DeclaredActivity.class);
+          declaredActivity2 = mock(DeclaredActivity.class);
           lenient().when(student1.getUser()).thenReturn(user1);
           lenient().when(student2.getUser()).thenReturn(user2);
+          lenient().when(declaredActivity1.getStudent()).thenReturn(student1);
+          lenient().when(declaredActivity2.getStudent()).thenReturn(student2);
+          lenient().when(declaredActivity1.getActivity()).thenReturn(existingActivity);
+          lenient().when(declaredActivity2.getActivity()).thenReturn(existingActivity);
           when(declaredActivityService.getEnrolledStudents(existingActivity))
-              .thenReturn(List.of(student1, student2));
+              .thenReturn(List.of(declaredActivity1, declaredActivity2));
         }
 
         @Test

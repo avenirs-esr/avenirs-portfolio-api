@@ -563,11 +563,9 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public List<Student> getEnrolledStudents(Activity activity) {
+  public List<DeclaredActivity> getEnrolledStudents(Activity activity) {
     var graph = FetchGraph.init().add("student").fetch("user");
-    return declaredActivityRepository.findAllByActivity(activity, graph).stream()
-        .map(DeclaredActivity::getStudent)
-        .toList();
+    return declaredActivityRepository.findAllByActivity(activity, graph);
   }
 
   private EAssociationType getAssociationType(EAssociationContextType contextType) {

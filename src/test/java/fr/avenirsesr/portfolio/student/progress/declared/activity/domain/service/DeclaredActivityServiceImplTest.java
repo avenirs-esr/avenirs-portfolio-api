@@ -1727,7 +1727,7 @@ class DeclaredActivityServiceImplTest {
   }
 
   @Test
-  void getEnrolledStudents_should_return_students_of_the_activity_declared_activities() {
+  void getEnrolledStudents_should_return_declared_activities_of_the_activity() {
     BddLogger.given("an activity with two enrolled students");
     Activity activity = ActivityFixture.create().toModel();
     Student student1 = StudentFixture.create().toModel();
@@ -1742,10 +1742,10 @@ class DeclaredActivityServiceImplTest {
         .thenReturn(List.of(declaredActivity1, declaredActivity2));
 
     BddLogger.when("getting the enrolled students");
-    List<Student> result = service.getEnrolledStudents(activity);
+    List<DeclaredActivity> result = service.getEnrolledStudents(activity);
 
-    BddLogger.then("it should return the students of each declared activity");
-    assertThat(result).containsExactly(student1, student2);
+    BddLogger.then("it should return the declared activities of the activity");
+    assertThat(result).containsExactly(declaredActivity1, declaredActivity2);
   }
 
   @Test
@@ -1756,7 +1756,7 @@ class DeclaredActivityServiceImplTest {
         .thenReturn(List.of());
 
     BddLogger.when("getting the enrolled students");
-    List<Student> result = service.getEnrolledStudents(activity);
+    List<DeclaredActivity> result = service.getEnrolledStudents(activity);
 
     BddLogger.then("it should return an empty list");
     assertThat(result).isEmpty();

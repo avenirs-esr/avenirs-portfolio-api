@@ -34,7 +34,6 @@ import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
-import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -138,10 +137,10 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getLinks()));
 
     if (publishedActivity.isPresent()) {
-      var enrolledStudents = declaredActivityService.getEnrolledStudents(activity);
-      var updatedFields = updateActivity(activity, draft, !enrolledStudents.isEmpty());
+      var enrolledDeclaredActivities = declaredActivityService.getEnrolledStudents(activity);
+      var updatedFields = updateActivity(activity, draft, !enrolledDeclaredActivities.isEmpty());
       activity.setStatus(EActivityStatus.PUBLISHED);
-      notifyActivityUpdated(activity, updatedFields, enrolledStudents);
+      notifyActivityUpdated(updatedFields, enrolledDeclaredActivities);
     }
 
     var savedActivity = activityRepository.save(activity);
@@ -207,15 +206,16 @@ public class ActivityServiceImpl implements ActivityService {
   }
 
   private void notifyActivityUpdated(
-      Activity activity, List<EActivityUpdatableField> updatedFields, List<Student> students) {
-    if (students.isEmpty() || updatedFields.isEmpty()) {
+      List<EActivityUpdatableField> updatedFields, List<DeclaredActivity> declaredActivities) {
+    if (declaredActivities.isEmpty() || updatedFields.isEmpty()) {
       return;
     }
     notificationService.notifyAll(
-        students.stream()
+        declaredActivities.stream()
             .map(
-                student ->
-                    new ActivityUpdatedNotification(student.getUser(), activity, updatedFields))
+                declaredActivity ->
+                    new ActivityUpdatedNotification(
+                        declaredActivity.getStudent().getUser(), declaredActivity, updatedFields))
             .toList());
   }
 
