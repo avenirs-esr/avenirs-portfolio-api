@@ -76,5 +76,5 @@ public interface DeclaredActivityService {
 
   int countEnrolledStudents(Activity activity);
 
-  List<Student> getEnrolledStudents(Activity activity);
+  List<DeclaredActivity> getEnrolledStudents(Activity activity);
 }
