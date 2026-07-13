@@ -24,8 +24,6 @@ public class Activity extends AvenirsBaseModel {
   private boolean enableReflection;
   private int traceAllowedAssociations;
   private int feedbackAllowedIterations;
-
-  @Getter(AccessLevel.NONE)
   private String description;
 
   @Getter(AccessLevel.NONE)
@@ -148,10 +146,6 @@ public class Activity extends AvenirsBaseModel {
 
   public Optional<String> getExecutionPeriodInfo() {
     return Optional.ofNullable(executionPeriodInfo);
-  }
-
-  public Optional<String> getDescription() {
-    return Optional.ofNullable(description);
   }
 
   public Optional<File> getBanner() {

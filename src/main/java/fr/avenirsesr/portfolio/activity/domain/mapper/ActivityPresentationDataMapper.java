@@ -16,7 +16,7 @@ public interface ActivityPresentationDataMapper {
         activity.getThematic(),
         Optional.ofNullable(subscribedDeclaredActivity),
         activity.getSummary(),
-        activity.getDescription().orElse(null),
+        activity.getDescription(),
         activity.getExecutionPeriodInfo().orElse(null),
         banner,
         activity.getCreatedAt(),
