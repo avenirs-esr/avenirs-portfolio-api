@@ -5,6 +5,18 @@
     "targetStatus": "NEW"
   },
   {
+    "declaredActivityId": "c1c9f6d2-6c2b-4a5e-9c4f-8e2a6b1d3f01",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "targetStatus": "SUBMITTED",
+    "feedbackText": "Excellente analyse de votre parcours de formation. Vous avez su identifier avec précision les compétences développées et leur articulation. Votre réflexion démontre une bonne capacité de recul sur votre propre progression académique."
+  },
+  {
+    "declaredActivityId": "c1c9f6d2-6c2b-4a5e-9c4f-8e2a6b1d3f01",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "targetStatus": "SUBMITTED",
+    "feedbackText": "Votre première itération révèle une réflexion approfondie sur vos motivations. J'apprécie la clarté avec laquelle vous avez articulé ce qui vous engage vraiment. Je vous invite à explorer davantage les actions concrètes qui en découlent."
+  },
+  {
     "declaredActivityId": "9a1d7c55-2f6b-4e88-9c2a-1e7b3d4f6c44",
     "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
     "targetStatus": "IN_PROCESS"
