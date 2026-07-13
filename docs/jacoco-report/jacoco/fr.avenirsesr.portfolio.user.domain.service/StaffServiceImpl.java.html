@@ -2,11 +2,7 @@
 
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.UserNotFoundException;
-import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
-import fr.avenirsesr.portfolio.file.domain.model.File;
-import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
-import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageConstants;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.user.domain.data.UserProfileOverviewData;
@@ -19,102 +15,59 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-<span class="fc" id="L22">@Slf4j</span>
+<span class="fc" id="L18">@Slf4j</span>
 @AllArgsConstructor
 public class StaffServiceImpl implements StaffService {
   private final StaffRepository staffRepository;
   private final UserRepository userRepository;
   private final LoggedInUserService loggedInUserService;
-  private final FileResourceService fileResourceService;
 
   @Override
   public Staff getStaffById(UUID id) {
-<span class="fc" id="L32">    return staffRepository</span>
-<span class="fc" id="L33">        .findById(id)</span>
-<span class="fc" id="L34">        .orElseThrow(</span>
+<span class="fc" id="L27">    return staffRepository</span>
+<span class="fc" id="L28">        .findById(id)</span>
+<span class="fc" id="L29">        .orElseThrow(</span>
             () -&gt; {
-<span class="fc" id="L36">              log.error(&quot;Staff {} not found&quot;, id);</span>
-<span class="fc" id="L37">              return new UserIsNotStaffException();</span>
+<span class="fc" id="L31">              log.error(&quot;Staff {} not found&quot;, id);</span>
+<span class="fc" id="L32">              return new UserIsNotStaffException();</span>
             });
   }
 
   @Override
   public UserProfileOverviewData getStaffProfile() {
-<span class="fc" id="L43">    var staff = loggedInUserService.getLoggedInStaff();</span>
+<span class="fc" id="L38">    var staff = loggedInUserService.getLoggedInStaff();</span>
 
-<span class="fc" id="L45">    return new UserProfileOverviewData(</span>
-<span class="fc" id="L46">        staff.getId(),</span>
-<span class="fc" id="L47">        staff.getUser().getFirstName(),</span>
-<span class="fc" id="L48">        staff.getUser().getLastName(),</span>
-<span class="fc" id="L49">        staff.getInstitutionEmail(),</span>
-<span class="fc" id="L50">        staff.getBio(),</span>
-<span class="fc" id="L51">        FileDataMapper.mapFileData(</span>
-<span class="fc" id="L52">            staff.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
-<span class="fc" id="L53">        FileDataMapper.mapFileData(</span>
-<span class="fc" id="L54">            staff.getProfilePicture().orElse(null), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));</span>
+<span class="fc" id="L40">    return new UserProfileOverviewData(</span>
+<span class="fc" id="L41">        staff.getId(),</span>
+<span class="fc" id="L42">        staff.getUser().getFirstName(),</span>
+<span class="fc" id="L43">        staff.getUser().getLastName(),</span>
+<span class="fc" id="L44">        staff.getInstitutionEmail(),</span>
+<span class="fc" id="L45">        staff.getBio(),</span>
+<span class="fc" id="L46">        FileDataMapper.mapFileData(</span>
+<span class="fc" id="L47">            staff.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
+<span class="fc" id="L48">        FileDataMapper.mapFileData(</span>
+<span class="fc" id="L49">            staff.getProfilePicture().orElse(null), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));</span>
   }
 
   @Override
   public void updateProfile(User user, String bio) {
-<span class="fc" id="L59">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
+<span class="fc" id="L54">    var staff = staffRepository.findById(user.getId()).orElseThrow(UserIsNotStaffException::new);</span>
 
-<span class="pc bpc" id="L61" title="1 of 2 branches missed.">    if (bio != null) staff.setBio(bio);</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">    if (bio != null) staff.setBio(bio);</span>
 
-<span class="fc" id="L63">    staffRepository.save(staff);</span>
-<span class="fc" id="L64">  }</span>
+<span class="fc" id="L58">    staffRepository.save(staff);</span>
+<span class="fc" id="L59">  }</span>
 
   @Override
   public Staff createStaff(UUID userId, String institutionEmail, String bio) {
-<span class="fc" id="L68">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
-<span class="fc" id="L69">    var staff = Staff.create(user, institutionEmail, bio);</span>
-<span class="fc" id="L70">    staffRepository.save(staff);</span>
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">    if (user.getEmail() == null) {</span>
-<span class="fc" id="L72">      user.setEmail(institutionEmail);</span>
-<span class="fc" id="L73">      userRepository.save(user);</span>
+<span class="fc" id="L63">    var user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);</span>
+<span class="fc" id="L64">    var staff = Staff.create(user, institutionEmail, bio);</span>
+<span class="fc" id="L65">    staffRepository.save(staff);</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">    if (user.getEmail() == null) {</span>
+<span class="fc" id="L67">      user.setEmail(institutionEmail);</span>
+<span class="fc" id="L68">      userRepository.save(user);</span>
     }
-<span class="fc" id="L75">    return staff;</span>
+<span class="fc" id="L70">    return staff;</span>
   }
-
-  @Override
-  public File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content) {
-<span class="nc" id="L80">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L81">    requireImage(mimeType);</span>
-<span class="nc" id="L82">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="nc" id="L83">    staff.setProfilePicture(file);</span>
-<span class="nc" id="L84">    staffRepository.save(staff);</span>
-<span class="nc" id="L85">    return file;</span>
-  }
-
-  @Override
-  public void deleteProfilePicture() {
-<span class="nc" id="L90">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L91">    staff.getProfilePicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
-<span class="nc" id="L92">    staff.setProfilePicture(null);</span>
-<span class="nc" id="L93">    staffRepository.save(staff);</span>
-<span class="nc" id="L94">  }</span>
-
-  @Override
-  public File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content) {
-<span class="nc" id="L98">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L99">    requireImage(mimeType);</span>
-<span class="nc" id="L100">    var file = fileResourceService.upload(fileName, mimeType, size, content, false);</span>
-<span class="nc" id="L101">    staff.setCoverPicture(file);</span>
-<span class="nc" id="L102">    staffRepository.save(staff);</span>
-<span class="nc" id="L103">    return file;</span>
-  }
-
-  @Override
-  public void deleteCoverPicture() {
-<span class="nc" id="L108">    var staff = loggedInUserService.getLoggedInStaff();</span>
-<span class="nc" id="L109">    staff.getCoverPicture().ifPresent(picture -&gt; fileResourceService.delete(picture.getId()));</span>
-<span class="nc" id="L110">    staff.setCoverPicture(null);</span>
-<span class="nc" id="L111">    staffRepository.save(staff);</span>
-<span class="nc" id="L112">  }</span>
-
-  private void requireImage(String mimeType) {
-<span class="nc bnc" id="L115" title="All 2 branches missed.">    if (!EFileType.fromMimeType(mimeType).isImage()) {</span>
-<span class="nc" id="L116">      throw new FileTypeNotSupportedException();</span>
-    }
-<span class="nc" id="L118">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
