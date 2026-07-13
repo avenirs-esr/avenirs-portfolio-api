@@ -27,9 +27,6 @@ public class FileEntity extends AvenirsBaseEntity {
   private long size;
 
   @Column(nullable = false)
-  private int version;
-
-  @Column(nullable = false)
   private String uri;
 
   @ManyToOne()
@@ -39,30 +36,28 @@ public class FileEntity extends AvenirsBaseEntity {
   @Column(nullable = false, name = "uploaded_at")
   private Instant uploadedAt;
 
-  @Column(nullable = false, name = "is_public")
-  private boolean isPublic;
+  @Column(nullable = false, name = "is_restricted")
+  private boolean isRestricted;
 
   private FileEntity(
       UUID id,
       EFileType fileType,
       String fileName,
       long size,
-      int version,
       String uri,
       UserEntity uploadedBy,
       Instant uploadedAt,
-      boolean isPublic,
+      boolean isRestricted,
       Instant createdAt,
       Instant updatedAt) {
     this.setId(id);
     this.fileType = fileType;
     this.fileName = fileName;
     this.size = size;
-    this.version = version;
     this.uri = uri;
     this.uploadedBy = uploadedBy;
     this.uploadedAt = uploadedAt;
-    this.isPublic = isPublic;
+    this.isRestricted = isRestricted;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
   }
@@ -72,11 +67,10 @@ public class FileEntity extends AvenirsBaseEntity {
       EFileType fileType,
       String fileName,
       long size,
-      int version,
       String uri,
       UserEntity uploadedBy,
       Instant uploadedAt,
-      boolean isPublic,
+      boolean isRestricted,
       Instant createdAt,
       Instant updatedAt) {
     return new FileEntity(
@@ -84,11 +78,10 @@ public class FileEntity extends AvenirsBaseEntity {
         fileType,
         fileName,
         size,
-        version,
         uri,
         uploadedBy,
         uploadedAt,
-        isPublic,
+        isRestricted,
         createdAt,
         updatedAt);
   }

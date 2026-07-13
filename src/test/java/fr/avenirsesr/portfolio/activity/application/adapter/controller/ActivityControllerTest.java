@@ -28,6 +28,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageInfo;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.enums.EDeclaredActivityStatus;
 import fr.avenirsesr.portfolio.user.domain.model.Staff;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.UserFixture;
@@ -51,6 +52,7 @@ class ActivityControllerTest {
   @Mock private ActivityOverviewDtoMapper activityOverviewDtoMapper;
   @Mock private ActivityStaffOverviewDtoMapper activityStaffOverviewDtoMapper;
   @Mock private ActivityContentDtoMapper activityContentDtoMapper;
+  @Mock private FileDTOMapper fileDTOMapper;
 
   @InjectMocks private ActivityController controller;
 
@@ -656,6 +658,7 @@ class ActivityControllerTest {
             Instant.now());
 
     when(activityService.getActivityById(activityId)).thenReturn(activity);
+    when(fileDTOMapper.toFileDTOs(activity.getFiles(), null)).thenReturn(List.of());
     when(activityContentDtoMapper.toDTO(activity, List.of())).thenReturn(dto);
 
     BddLogger.when("getting the activity content for status PUBLISHED");
@@ -693,6 +696,7 @@ class ActivityControllerTest {
             Instant.now());
 
     when(activityService.getActivityById(activityId)).thenReturn(activity);
+    when(fileDTOMapper.toFileDTOs(activity.getFiles(), null)).thenReturn(List.of());
     when(activityContentDtoMapper.toDTO(activity, List.of())).thenReturn(dto);
 
     BddLogger.when("getting the activity content for status UNPUBLISHED");
@@ -733,6 +737,7 @@ class ActivityControllerTest {
     when(activityService.getActivityDraftById(draftId)).thenReturn(draft);
     when(activityService.hasEnrolledStudents(draft)).thenReturn(true);
     when(draft.getFiles()).thenReturn(List.of());
+    when(fileDTOMapper.toFileDTOs(List.of(), null)).thenReturn(List.of());
     when(activityContentDtoMapper.toDTO(draft, true, List.of())).thenReturn(dto);
 
     BddLogger.when("getting the activity content for status DRAFT");

@@ -70,7 +70,7 @@ public class ActivityFileSeeder {
       try {
         var file =
             fileResourceService.upload(
-                data.fileName(), data.fileType().getMimeType(), data.fileSize(), null, false);
+                data.fileName(), data.fileType().getMimeType(), data.fileSize(), null, true);
         linkFileToActivityOrDraft(data.activityId(), file);
         activityFiles.add(file);
       } catch (FileStorageException e) {

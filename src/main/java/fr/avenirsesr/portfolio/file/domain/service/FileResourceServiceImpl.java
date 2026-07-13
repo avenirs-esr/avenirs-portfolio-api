@@ -23,7 +23,7 @@ public class FileResourceServiceImpl implements FileResourceService {
 
   @Override
   public File upload(
-      String fileName, String mimeType, long size, byte[] content, boolean isPublic) {
+      String fileName, String mimeType, long size, byte[] content, boolean isRestricted) {
     var loggedInUser = loggedInUserService.getLoggedInUser();
 
     var fileResource =
@@ -41,10 +41,9 @@ public class FileResourceServiceImpl implements FileResourceService {
             fileResource.fileType(),
             fileResource.fileName(),
             fileResource.size(),
-            1,
             uri,
             loggedInUser,
-            isPublic);
+            isRestricted);
     return fileRepository.save(file);
   }
 
@@ -56,7 +55,7 @@ public class FileResourceServiceImpl implements FileResourceService {
   @Override
   public FileResource fetchContent(UUID fileId) {
     var file = fileRepository.findById(fileId).orElseThrow(FileNotFoundException::new);
-    if (!file.isPublic()) {
+    if (file.isRestricted()) {
       throw new FileNotFoundException();
     }
     byte[] content = fileStorageService.get(file.getUri());

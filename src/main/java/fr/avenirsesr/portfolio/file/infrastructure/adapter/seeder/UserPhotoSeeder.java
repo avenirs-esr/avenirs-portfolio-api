@@ -83,7 +83,7 @@ public class UserPhotoSeeder {
 
         var file =
             fileResourceService.upload(
-                data.fileName(), data.fileType().getMimeType(), data.fileSize(), null, true);
+                data.fileName(), data.fileType().getMimeType(), data.fileSize(), null, false);
         linkPhotoToOwner(data.userId(), data.photoType(), file);
         userPhotos.add(file);
       } catch (FileStorageException e) {

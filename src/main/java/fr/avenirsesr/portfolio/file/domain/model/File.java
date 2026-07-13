@@ -14,33 +14,30 @@ public class File extends AvenirsBaseModel {
   private final EFileType fileType;
   private final String fileName;
   private final long size;
-  private final int version;
   private final String uri;
   private final User uploadedBy;
   private final Instant uploadedAt;
-  private final boolean isPublic;
+  private final boolean isRestricted;
 
   protected File(
       UUID id,
       String fileName,
       EFileType fileType,
       long size,
-      int version,
       String uri,
       User uploadedBy,
       Instant uploadedAt,
-      boolean isPublic,
+      boolean isRestricted,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
     this.fileName = fileName;
     this.fileType = fileType;
     this.size = size;
-    this.version = version;
     this.uri = uri;
     this.uploadedBy = uploadedBy;
     this.uploadedAt = uploadedAt;
-    this.isPublic = isPublic;
+    this.isRestricted = isRestricted;
   }
 
   public static File create(
@@ -48,20 +45,18 @@ public class File extends AvenirsBaseModel {
       EFileType fileType,
       String fileName,
       long size,
-      int version,
       String uri,
       User uploadedBy,
-      boolean isPublic) {
+      boolean isRestricted) {
     return new File(
         id,
         fileName,
         fileType,
         size,
-        version,
         uri,
         uploadedBy,
         Instant.now(),
-        isPublic,
+        isRestricted,
         Instant.now(),
         Instant.now());
   }
@@ -71,11 +66,10 @@ public class File extends AvenirsBaseModel {
       EFileType fileType,
       String fileName,
       long size,
-      int version,
       String uri,
       User uploadedBy,
       Instant uploadedAt,
-      boolean isPublic,
+      boolean isRestricted,
       Instant createdAt,
       Instant updatedAt) {
     return new File(
@@ -83,11 +77,10 @@ public class File extends AvenirsBaseModel {
         fileName,
         fileType,
         size,
-        version,
         uri,
         uploadedBy,
         uploadedAt,
-        isPublic,
+        isRestricted,
         createdAt,
         updatedAt);
   }

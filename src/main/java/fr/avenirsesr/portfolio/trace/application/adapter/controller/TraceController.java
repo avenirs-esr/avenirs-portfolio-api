@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.trace.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.readBytes;
+
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredExperienceDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredSkillIDTO;
@@ -12,7 +14,6 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.file.application.adapter.dto.FileDTO;
 import fr.avenirsesr.portfolio.file.application.adapter.mapper.FileDtoMapper;
-import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.trace.application.adapter.mapper.*;
@@ -22,7 +23,6 @@ import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import jakarta.validation.Valid;
-import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
@@ -350,18 +350,14 @@ public class TraceController {
         "Received request to upload attachment for trace [{}] by user [{}]",
         traceId,
         principal.getName());
-    try {
-      var uploaded =
-          traceService.uploadAttachment(
-              traceId,
-              file.getOriginalFilename(),
-              file.getContentType(),
-              file.getSize(),
-              file.getBytes());
-      return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
-    } catch (IOException e) {
-      throw new FileStorageException("Failed to read uploaded file", e);
-    }
+    var uploaded =
+        traceService.uploadAttachment(
+            traceId,
+            file.getOriginalFilename(),
+            file.getContentType(),
+            file.getSize(),
+            readBytes(file));
+    return ResponseEntity.status(HttpStatus.CREATED).body(fileDtoMapper.fromDomain(uploaded));
   }
 
   @GetMapping(

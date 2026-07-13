@@ -79,7 +79,7 @@ public class StaffServiceImpl implements StaffService {
   public File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content) {
     var staff = loggedInUserService.getLoggedInStaff();
     requireImage(mimeType);
-    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, false);
     staff.setProfilePicture(file);
     staffRepository.save(staff);
     return file;
@@ -97,7 +97,7 @@ public class StaffServiceImpl implements StaffService {
   public File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content) {
     var staff = loggedInUserService.getLoggedInStaff();
     requireImage(mimeType);
-    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, false);
     staff.setCoverPicture(file);
     staffRepository.save(staff);
     return file;

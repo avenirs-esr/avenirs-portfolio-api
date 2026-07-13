@@ -689,7 +689,7 @@ public class TraceServiceImpl implements TraceService {
 
   private void checkIfUserIsAuthorizedOnTrace(User user, Trace trace) {
     if (!trace.getUser().equals(user)) {
-      throw new UserNotAuthorizedException("%s does not own this %s".formatted(user, trace));
+      throw new TraceNotFoundException("%s does not own this %s".formatted(user, trace));
     }
   }
 
@@ -751,7 +751,7 @@ public class TraceServiceImpl implements TraceService {
       throw new InvalidTraceTypeException();
     }
 
-    var file = fileResourceService.upload(fileName, mimeType, size, content, false);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
     trace.setAttachment(file);
     traceRepository.save(trace);
     return file;

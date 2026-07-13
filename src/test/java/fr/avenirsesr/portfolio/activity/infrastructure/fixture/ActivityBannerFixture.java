@@ -12,7 +12,6 @@ public class ActivityBannerFixture {
   private final EFileType fileType = EFileType.PNG;
   private final String fileName = "activity banner";
   private final long size = 1000L;
-  private final int version = 1;
   private final String uri = "exemple.com/image.png";
   private final User uploadedBy = UserFixture.create().toModel();
   private final Instant uploadedAt = Instant.now();
@@ -23,16 +22,6 @@ public class ActivityBannerFixture {
 
   public File toModel() {
     return File.toDomain(
-        id,
-        fileType,
-        fileName,
-        size,
-        version,
-        uri,
-        uploadedBy,
-        uploadedAt,
-        true,
-        uploadedAt,
-        uploadedAt);
+        id, fileType, fileName, size, uri, uploadedBy, uploadedAt, false, uploadedAt, uploadedAt);
   }
 }

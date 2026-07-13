@@ -97,7 +97,7 @@ public class StudentServiceImpl implements StudentService {
   public File uploadProfilePicture(String fileName, String mimeType, long size, byte[] content) {
     var student = loggedInUserService.getLoggedInStudent();
     requireImage(mimeType);
-    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, false);
     student.setProfilePicture(file);
     studentRepository.save(student);
     return file;
@@ -115,7 +115,7 @@ public class StudentServiceImpl implements StudentService {
   public File uploadCoverPicture(String fileName, String mimeType, long size, byte[] content) {
     var student = loggedInUserService.getLoggedInStudent();
     requireImage(mimeType);
-    var file = fileResourceService.upload(fileName, mimeType, size, content, true);
+    var file = fileResourceService.upload(fileName, mimeType, size, content, false);
     student.setCoverPicture(file);
     studentRepository.save(student);
     return file;

@@ -24,7 +24,10 @@ import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
+import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
 import fr.avenirsesr.portfolio.file.domain.model.File;
+import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
+import fr.avenirsesr.portfolio.file.domain.port.input.FileResourceService;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
@@ -50,6 +53,7 @@ class ActivityServiceImplTest {
   @Mock private DeclaredActivityService declaredActivityService;
   @Mock private StaffActivityOverviewRepository staffActivityOverviewRepository;
   @Mock private NotificationService notificationService;
+  @Mock private FileResourceService fileResourceService;
 
   @InjectMocks private ActivityServiceImpl activityService;
 
@@ -336,6 +340,123 @@ class ActivityServiceImplTest {
                   activityService.updateActivityDraft(
                       draftId, "Titre", null, null, null, null, null, null, null, null, null));
 
+          verify(activityDraftRepository, never()).save(any());
+        }
+      }
+    }
+
+    @Nested
+    class WhenAddingADraftFile {
+
+      UUID draftId;
+      Staff loggedInStaff;
+      ActivityDraft draft;
+      byte[] content;
+
+      @BeforeEach
+      void setupWhen() {
+        BddLogger.when("adding a file to an activity draft");
+        draftId = UUID.randomUUID();
+        loggedInStaff = mock(Staff.class);
+        draft = mock(ActivityDraft.class);
+        content = new byte[] {1, 2, 3};
+        when(loggedInUserService.getLoggedInStaff()).thenReturn(loggedInStaff);
+      }
+
+      @Nested
+      class AndTheDraftExists {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the draft exists");
+          when(activityDraftRepository.findById(draftId)).thenReturn(Optional.of(draft));
+        }
+
+        @Nested
+        class AndTheLoggedInStaffIsTheAuthor {
+
+          @BeforeEach
+          void setupAnd() {
+            BddLogger.and("the logged-in staff is the author");
+            when(draft.getAuthor()).thenReturn(loggedInStaff);
+          }
+
+          @Test
+          void thenItShouldUploadAndAddFileWhenTypeIsAllowed() {
+            BddLogger.then("the file should be uploaded and added to the draft");
+
+            File uploaded = mock(File.class);
+            when(fileResourceService.upload("report.pdf", "application/pdf", 3L, content, true))
+                .thenReturn(uploaded);
+
+            File result =
+                activityService.addDraftFile(draftId, "report.pdf", "application/pdf", 3L, content);
+
+            assertEquals(uploaded, result);
+            verify(draft).addFile(uploaded);
+            verify(activityDraftRepository).save(draft);
+          }
+
+          @Test
+          void thenItShouldThrowFileTypeNotSupportedExceptionWhenTypeIsNotAllowed() {
+            BddLogger.then("the service should throw FileTypeNotSupportedException");
+
+            assertThrows(
+                FileTypeNotSupportedException.class,
+                () ->
+                    activityService.addDraftFile(
+                        draftId, "video.mp4", EFileType.MP4.getMimeType(), 3L, content));
+
+            verifyNoInteractions(fileResourceService);
+            verify(activityDraftRepository, never()).save(any());
+          }
+        }
+
+        @Nested
+        class AndTheLoggedInStaffIsNotTheAuthor {
+
+          @BeforeEach
+          void setupAnd() {
+            BddLogger.and("the logged-in staff is not the author");
+            when(draft.getAuthor()).thenReturn(mock(Staff.class));
+          }
+
+          @Test
+          void thenItShouldThrowActivityDraftNotFoundException() {
+            BddLogger.then("the service should throw ActivityDraftNotFoundException");
+
+            assertThrows(
+                ActivityDraftNotFoundException.class,
+                () ->
+                    activityService.addDraftFile(
+                        draftId, "report.pdf", "application/pdf", 3L, content));
+
+            verifyNoInteractions(fileResourceService);
+            verify(activityDraftRepository, never()).save(any());
+          }
+        }
+      }
+
+      @Nested
+      class AndTheDraftDoesNotExist {
+
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("the draft does not exist");
+          when(activityDraftRepository.findById(draftId)).thenReturn(Optional.empty());
+        }
+
+        @Test
+        void thenItShouldThrowActivityDraftNotFoundException() {
+          BddLogger.then("the service should throw ActivityDraftNotFoundException");
+
+          assertThrows(
+              ActivityDraftNotFoundException.class,
+              () ->
+                  activityService.addDraftFile(
+                      draftId, "report.pdf", "application/pdf", 3L, content));
+
+          verifyNoInteractions(fileResourceService);
           verify(activityDraftRepository, never()).save(any());
         }
       }

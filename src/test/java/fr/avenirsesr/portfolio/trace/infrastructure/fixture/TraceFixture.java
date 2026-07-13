@@ -38,8 +38,7 @@ public class TraceFixture {
     this.authorType = base.getAuthorType();
     this.valorized = base.isValorized();
     this.attachment =
-        File.create(
-            UUID.randomUUID(), EFileType.PDF, "my fake pdf", 1000L, 1, "fake-url", user, false);
+        File.create(UUID.randomUUID(), EFileType.PDF, "my fake pdf", 1000L, "fake-url", user, true);
   }
 
   public static TraceFixture create() {

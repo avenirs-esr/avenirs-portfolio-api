@@ -98,7 +98,7 @@ public class TraceSeeder {
                             attachment.fileType().getMimeType(),
                             attachment.size(),
                             null,
-                            false);
+                            true);
                     trace.setAttachment(file);
                     traceRepository.save(trace);
                   });
