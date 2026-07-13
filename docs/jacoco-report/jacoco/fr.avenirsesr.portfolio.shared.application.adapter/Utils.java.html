@@ -1,23 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Utils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">avenirs-portfolio-api</a> &gt; <a href="index.source.html" class="el_package">fr.avenirsesr.portfolio.shared.application.adapter</a> &gt; <span class="el_source">Utils.java</span></div><h1>Utils.java</h1><pre class="source lang-java linenums">package fr.avenirsesr.portfolio.shared.application.adapter;
 
+import fr.avenirsesr.portfolio.file.domain.exception.FileStorageException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.URI;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 public interface Utils {
   static String extractOrigin(HttpServletRequest request) {
     try {
-<span class="fc" id="L10">      URI referer = URI.create(request.getHeader(&quot;Referer&quot;));</span>
+<span class="fc" id="L13">      URI referer = URI.create(request.getHeader(&quot;Referer&quot;));</span>
 
-<span class="fc" id="L12">      return ServletUriComponentsBuilder.fromRequestUri(request)</span>
-<span class="fc" id="L13">          .replacePath(&quot;/apim&quot;)</span>
-<span class="fc bfc" id="L14" title="All 2 branches covered.">          .scheme(referer.getScheme() != null ? referer.getScheme() : request.getScheme())</span>
-<span class="fc bfc" id="L15" title="All 2 branches covered.">          .host(referer.getHost() != null ? referer.getHost() : request.getServerName())</span>
-<span class="fc bfc" id="L16" title="All 2 branches covered.">          .port(referer.getHost() != null ? referer.getPort() : request.getServerPort())</span>
-<span class="fc" id="L17">          .build()</span>
-<span class="fc" id="L18">          .toUriString();</span>
-<span class="fc" id="L19">    } catch (Exception e) {</span>
-<span class="fc" id="L20">      return null;</span>
+<span class="fc" id="L15">      return ServletUriComponentsBuilder.fromRequestUri(request)</span>
+<span class="fc" id="L16">          .replacePath(&quot;/apim&quot;)</span>
+<span class="fc bfc" id="L17" title="All 2 branches covered.">          .scheme(referer.getScheme() != null ? referer.getScheme() : request.getScheme())</span>
+<span class="fc bfc" id="L18" title="All 2 branches covered.">          .host(referer.getHost() != null ? referer.getHost() : request.getServerName())</span>
+<span class="fc bfc" id="L19" title="All 2 branches covered.">          .port(referer.getHost() != null ? referer.getPort() : request.getServerPort())</span>
+<span class="fc" id="L20">          .build()</span>
+<span class="fc" id="L21">          .toUriString();</span>
+<span class="fc" id="L22">    } catch (Exception e) {</span>
+<span class="fc" id="L23">      return null;</span>
+    }
+  }
+
+  static byte[] readBytes(MultipartFile file) {
+    try {
+<span class="nc" id="L29">      return file.getBytes();</span>
+<span class="nc" id="L30">    } catch (IOException e) {</span>
+<span class="nc" id="L31">      throw new FileStorageException(&quot;Failed to read uploaded file&quot;, e);</span>
     }
   }
 }
