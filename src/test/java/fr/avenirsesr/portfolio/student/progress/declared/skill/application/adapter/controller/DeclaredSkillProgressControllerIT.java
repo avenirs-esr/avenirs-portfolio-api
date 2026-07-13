@@ -434,4 +434,156 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
 
     BddLogger.then("it should succeed with empty associations");
   }
+
+  @Test
+  void shouldDeleteAssociations() throws Exception {
+    BddLogger.given(
+        "a declared skill progress associated with one of the logged-in student's activities");
+
+    var declaredSkill =
+        declaredSkillRepository.findAll().stream().skip(5).findFirst().orElseThrow();
+    var createResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildDeclaredSkillsJson(declaredSkill.getId()))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    UUID createdSkillId =
+        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+
+    var activityListResponse =
+        webTestClient
+            .get()
+            .uri("/me/activity-progress")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    UUID declaredActivityId =
+        UUID.fromString(
+            objectMapper.readTree(activityListResponse).get("data").get(0).get("id").asText());
+
+    var associateResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/" + createdSkillId + "/associate/declared-activities")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(
+                objectMapper.writeValueAsString(
+                    Map.of("idsToAssociate", List.of(declaredActivityId))))
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+    UUID associationId =
+        UUID.fromString(
+            objectMapper
+                .readTree(associateResponse)
+                .get("declaredActivityAssociations")
+                .get(0)
+                .get("associationId")
+                .asText());
+
+    BddLogger.when("performing a DELETE with that association id");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + createdSkillId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(Map.of("idsToDelete", List.of(associationId))))
+        .exchange()
+        .expectStatus()
+        .isNoContent();
+
+    BddLogger.then("it returns 204 and the association is gone");
+
+    webTestClient
+        .get()
+        .uri(BASE_PATH + "/" + createdSkillId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.declaredActivityAssociations")
+        .isArray()
+        .jsonPath("$.declaredActivityAssociations")
+        .isEmpty();
+  }
+
+  @Test
+  void shouldReturn404WhenDeletingAssociationsForNonExistentSkill() throws Exception {
+    BddLogger.given("a non-existent declared skill progress ID");
+
+    UUID nonExistentId = UUID.randomUUID();
+
+    BddLogger.when("performing a DELETE to delete associations");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + nonExistentId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue("{\"idsToDelete\":[]}")
+        .exchange()
+        .expectStatus()
+        .isNotFound()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("DECLARED_SKILL_PROGRESS_NOT_FOUND");
+
+    BddLogger.then("it should return 404 with appropriate error code");
+  }
+
+  @Test
+  void shouldReturn403WhenDeletingAssociationsForOtherStudentSkill() throws Exception {
+    BddLogger.given("a declared skill progress belonging to another student");
+
+    UUID otherStudentSkillId = UUID.fromString("72de2a8e-be49-437e-b759-15f8e3a06de3");
+
+    BddLogger.when("performing a DELETE to delete associations");
+
+    webTestClient
+        .method(HttpMethod.DELETE)
+        .uri(BASE_PATH + "/" + otherStudentSkillId + "/associations")
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue("{\"idsToDelete\":[]}")
+        .exchange()
+        .expectStatus()
+        .isForbidden()
+        .expectBody()
+        .jsonPath("$.code")
+        .isEqualTo("USER_NOT_AUTHORIZED");
+
+    BddLogger.then("it should return 403 forbidden");
+  }
 }

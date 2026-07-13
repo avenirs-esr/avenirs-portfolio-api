@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.common.data.application.adapter.response.PagedRes
 import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
+import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillAssociationsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.dto.DeclaredSkillProgressDetailsDTO;
@@ -172,6 +173,19 @@ public class DeclaredSkillProgressController {
         principal.getName());
     var newAssociations = declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);
     return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));
+  }
+
+  @DeleteMapping("/{declaredSkillProgressId}/associations")
+  public ResponseEntity<Void> deleteDeclaredSkillAssociations(
+      Principal principal,
+      @Valid @PathVariable UUID declaredSkillProgressId,
+      @Valid @RequestBody AssociationsDeleteRequest body) {
+    log.debug(
+        "Received request to delete declared skill [{}] associations for student [{}]",
+        declaredSkillProgressId,
+        principal.getName());
+    declaredSkillProgressService.deleteAssociations(declaredSkillProgressId, body.idsToDelete());
+    return ResponseEntity.noContent().build();
   }
 
   @PostMapping("/{declaredSkillProgressId}/associate/declared-activities")
