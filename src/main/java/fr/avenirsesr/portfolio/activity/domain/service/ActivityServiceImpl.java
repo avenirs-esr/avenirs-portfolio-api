@@ -113,6 +113,11 @@ public class ActivityServiceImpl implements ActivityService {
           EErrorCode.NOT_BLANK, "summary must be defined to publish an activity");
     }
 
+    if (draft.getDescription().isEmpty()) {
+      throw new FieldValidationException(
+          EErrorCode.NOT_BLANK, "description must be defined to publish an activity");
+    }
+
     var publishedActivity = activityRepository.findById(activityDraftId);
 
     Activity activity =
@@ -123,7 +128,7 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getTitle(),
                 draft.getThematic(),
                 draft.getSummary().orElseThrow(),
-                draft.getDescription().orElse(null),
+                draft.getDescription().orElseThrow(),
                 draft.getExecutionPeriodInfo().orElse(null),
                 draft.getExecutionPeriodInfoSummary().orElse(null),
                 draft.isEnableReflection(),
@@ -169,7 +174,7 @@ public class ActivityServiceImpl implements ActivityService {
                 activity::setSummary),
             new FieldSync<>(
                 DESCRIPTION,
-                activity.getDescription().orElse(null),
+                activity.getDescription(),
                 draft.getDescription().orElse(null),
                 activity::setDescription),
             new FieldSync<>(
@@ -473,7 +478,7 @@ public class ActivityServiceImpl implements ActivityService {
             activity.getAuthor(),
             activity.getThematic(),
             activity.getSummary(),
-            activity.getDescription().orElse(null),
+            activity.getDescription(),
             activity.getExecutionPeriodInfo().orElse(null),
             activity.getExecutionPeriodInfoSummary().orElse(null),
             activity.getTraceAllowedAssociations(),

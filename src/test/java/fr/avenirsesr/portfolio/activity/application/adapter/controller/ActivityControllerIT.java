@@ -511,7 +511,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenItShouldPublishActivityDraftAndReturnActivityId() throws Exception {
         BddLogger.and("given an existing activity draft with a summary");
         UUID draftId = createDraftAndGetId("Brouillon à publier");
-        fillDraftWithSummary(draftId);
+        fillDraftWithSummaryAndDescription(draftId);
 
         BddLogger.then("it should return 200 with the published activity id");
 
@@ -534,7 +534,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenItShouldPublishActivityDraftAndReturnSameIdAsDraft() throws Exception {
         BddLogger.and("given an existing activity draft with a summary");
         UUID draftId = createDraftAndGetId("Brouillon id conservé");
-        fillDraftWithSummary(draftId);
+        fillDraftWithSummaryAndDescription(draftId);
 
         BddLogger.then("it should return the same id as the draft");
 
@@ -555,7 +555,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenItShouldDeleteDraftAfterPublishing() throws Exception {
         BddLogger.and("given an existing activity draft with a summary");
         UUID draftId = createDraftAndGetId("Brouillon supprimé après publication");
-        fillDraftWithSummary(draftId);
+        fillDraftWithSummaryAndDescription(draftId);
 
         webTestClient
             .post()
@@ -581,7 +581,7 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       void thenItShouldMakeActivityAccessibleAfterPublishing() throws Exception {
         BddLogger.and("given an existing draft with a summary");
         UUID draftId = createDraftAndGetId("Brouillon accessible après publication");
-        fillDraftWithSummary(draftId);
+        fillDraftWithSummaryAndDescription(draftId);
 
         webTestClient
             .post()
@@ -648,10 +648,31 @@ class ActivityControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
+      void thenItShouldReturn400WhenDraftHasNoDescription() throws Exception {
+        BddLogger.and("given an existing draft with a summary but no description");
+        UUID draftId = createDraftAndGetId("Brouillon sans consigne");
+        fillDraftWithSummary(draftId);
+
+        BddLogger.then("it should return 400 because description is required to publish");
+
+        webTestClient
+            .post()
+            .uri(PUBLISH_PATH, draftId)
+            .headers(ActivityControllerIT.this::addStaffHeaders)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(400)
+            .expectBody()
+            .jsonPath("$.code")
+            .exists();
+      }
+
+      @Test
       void thenItShouldReturn403WhenStudentTriesToPublish() throws Exception {
         BddLogger.and("given an existing draft and a student account");
         UUID draftId = createDraftAndGetId("Brouillon publication refusée");
-        fillDraftWithSummary(draftId);
+        fillDraftWithSummaryAndDescription(draftId);
 
         BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
 
@@ -1558,9 +1579,36 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         .isOk();
   }
 
+  private void fillDraftWithSummaryAndDescription(UUID draftId) throws Exception {
+    String requestBody =
+        objectMapper.writeValueAsString(
+            new ActivityDraftUpdateRequest(
+                null,
+                EActivityThematic.EXPERIENCES,
+                "Un résumé valide pour la publication",
+                "Une consigne valide pour la publication",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null));
+
+    webTestClient
+        .patch()
+        .uri(DRAFT_UPDATE_PATH, draftId)
+        .headers(this::addStaffHeaders)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(requestBody)
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
   private UUID publishNewActivity(String title) throws Exception {
     UUID draftId = createDraftAndGetId(title);
-    fillDraftWithSummary(draftId);
+    fillDraftWithSummaryAndDescription(draftId);
 
     String body =
         webTestClient

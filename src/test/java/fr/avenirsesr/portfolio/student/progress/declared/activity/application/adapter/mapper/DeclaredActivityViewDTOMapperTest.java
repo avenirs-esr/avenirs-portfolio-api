@@ -49,7 +49,7 @@ class DeclaredActivityViewDTOMapperTest {
     assertEquals(activity.getTitle(), dto.title());
     assertEquals(activity.getThematic(), dto.thematic());
     assertEquals(activity.getSummary(), dto.summary());
-    assertEquals(activity.getDescription().get(), dto.description());
+    assertEquals(activity.getDescription(), dto.description());
     assertEquals(EDeclaredActivityStatus.SUBSCRIBED, dto.status());
   }
 }

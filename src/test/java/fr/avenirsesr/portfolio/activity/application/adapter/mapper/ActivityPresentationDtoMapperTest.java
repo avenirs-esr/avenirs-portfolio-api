@@ -39,7 +39,7 @@ class ActivityPresentationDtoMapperTest {
             activity.getThematic(),
             Optional.empty(),
             activity.getSummary(),
-            activity.getDescription().orElse(null),
+            activity.getDescription(),
             activity.getExecutionPeriodInfo().orElse(null),
             banner,
             activity.getCreatedAt(),

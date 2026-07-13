@@ -107,7 +107,7 @@ class ActivityServiceImplTest {
         assertEquals("This is a test activity", createdActivity.getSummary());
         assertEquals(
             "<h3>Objectives</h3><p>Test activity description</p>",
-            createdActivity.getDescription().get());
+            createdActivity.getDescription());
         assertEquals("2026", createdActivity.getExecutionPeriodInfo().get());
         assertEquals(links, createdActivity.getLinks());
 
@@ -409,14 +409,12 @@ class ActivityServiceImplTest {
           void thenItShouldMapOptionalFieldsAsEmptyOptionalsWhenNotPresent() {
             BddLogger.then("optional fields should be empty when absent from draft");
 
-            when(draft.getDescription()).thenReturn(Optional.empty());
             when(draft.getExecutionPeriodInfo()).thenReturn(Optional.empty());
             when(draft.getExecutionPeriodInfoSummary()).thenReturn(Optional.empty());
 
             Activity result = activityService.publish(draftId);
 
             assertNotNull(result);
-            assertTrue(result.getDescription().isEmpty());
             assertTrue(result.getExecutionPeriodInfo().isEmpty());
             assertTrue(result.getExecutionPeriodInfoSummary().isEmpty());
           }
@@ -443,7 +441,7 @@ class ActivityServiceImplTest {
             assertEquals("Titre complet", result.getTitle());
             assertEquals(EActivityThematic.SELF_KNOWLEDGE, result.getThematic());
             assertEquals("Résumé complet", result.getSummary());
-            assertEquals("<p>Description complète</p>", result.getDescription().get());
+            assertEquals("<p>Description complète</p>", result.getDescription());
             assertEquals("Avant entretien", result.getExecutionPeriodInfo().get());
             assertEquals("Label court", result.getExecutionPeriodInfoSummary().get());
             assertFalse(result.isEnableReflection());
@@ -457,6 +455,18 @@ class ActivityServiceImplTest {
             BddLogger.then("the service should throw FieldValidationException");
 
             when(draft.getSummary()).thenReturn(Optional.empty());
+
+            assertThrows(FieldValidationException.class, () -> activityService.publish(draftId));
+
+            verify(activityRepository, never()).save(any());
+            verify(activityDraftRepository, never()).removeFromDatabase(any());
+          }
+
+          @Test
+          void thenItShouldThrowFieldValidationExceptionWhenDescriptionIsEmpty() {
+            BddLogger.then("the service should throw FieldValidationException");
+
+            when(draft.getDescription()).thenReturn(Optional.empty());
 
             assertThrows(FieldValidationException.class, () -> activityService.publish(draftId));
 
@@ -697,7 +707,7 @@ class ActivityServiceImplTest {
             BddLogger.and("none of the notifiable fields differ from the draft");
             when(existingActivity.getTitle()).thenReturn("Nouveau titre");
             when(existingActivity.getSummary()).thenReturn("Nouveau résumé");
-            when(existingActivity.getDescription()).thenReturn(Optional.of("Nouvelle description"));
+            when(existingActivity.getDescription()).thenReturn("Nouvelle description");
             when(existingActivity.getExecutionPeriodInfo())
                 .thenReturn(Optional.of("Nouvelle période"));
             when(existingActivity.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
@@ -1254,7 +1264,7 @@ class ActivityServiceImplTest {
           when(activity.getThematic()).thenReturn(EActivityThematic.EXPERIENCES);
           when(activity.getSummary()).thenReturn("is a test activity");
           when(activity.getDescription())
-              .thenReturn(Optional.of("<h3>Objectives</h3><p>Test activity description</p>"));
+              .thenReturn("<h3>Objectives</h3><p>Test activity description</p>");
           when(activity.getExecutionPeriodInfo()).thenReturn(Optional.of("2026"));
           when(activity.getCreatedAt()).thenReturn(Instant.now());
           when(activity.getUpdatedAt()).thenReturn(Instant.now());

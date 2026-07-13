@@ -19,7 +19,7 @@ public class ActivityMapper implements Mapper<ActivityEntity, Activity> {
         domain.getThematic(),
         domain.getSummary(),
         domain.getStatus(),
-        domain.getDescription().orElse(null),
+        domain.getDescription(),
         domain.getExecutionPeriodInfo().orElse(null),
         domain.getExecutionPeriodInfoSummary().orElse(null),
         domain.getTraceAllowedAssociations(),

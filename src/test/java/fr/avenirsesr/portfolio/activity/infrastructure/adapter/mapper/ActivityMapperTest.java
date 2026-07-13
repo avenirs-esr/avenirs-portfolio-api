@@ -130,7 +130,7 @@ class ActivityMapperTest {
     assertEquals(title, mappedActivity.getTitle());
     assertEquals(thematic, mappedActivity.getThematic());
     assertEquals(summary, mappedActivity.getSummary());
-    assertEquals(description, mappedActivity.getDescription().get());
+    assertEquals(description, mappedActivity.getDescription());
     assertEquals(executionPeriodInfo, mappedActivity.getExecutionPeriodInfo().get());
     assertEquals(executionPeriodInfoSummary, mappedActivity.getExecutionPeriodInfoSummary().get());
     assertEquals(traceAllowedAssociations, mappedActivity.getTraceAllowedAssociations());

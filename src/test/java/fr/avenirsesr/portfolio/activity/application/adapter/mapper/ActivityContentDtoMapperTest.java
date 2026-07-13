@@ -40,7 +40,7 @@ class ActivityContentDtoMapperTest {
     assertEquals(activity.getTitle(), dto.title());
     assertEquals(activity.getThematic(), dto.thematic());
     assertEquals(activity.getSummary(), dto.summary());
-    assertEquals(activity.getDescription().orElse(null), dto.description());
+    assertEquals(activity.getDescription(), dto.description());
     assertEquals(activity.getExecutionPeriodInfo().orElse(null), dto.executionPeriodInfo());
     assertNull(dto.hasEnrolledStudent());
   }
