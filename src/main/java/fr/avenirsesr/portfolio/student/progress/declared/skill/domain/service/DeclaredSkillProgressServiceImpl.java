@@ -194,6 +194,29 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
     return getAssociationsOf(declaredSkillId);
   }
 
+  @Override
+  public void deleteAssociations(UUID declaredSkillProgressId, List<UUID> idsToDelete) {
+    var declaredSkillProgress = fetchAndCheckLoggedInStudentAuthorization(declaredSkillProgressId);
+
+    var associationIds =
+        associationService
+            .getAllOf(
+                declaredSkillProgress.getId(),
+                DeclaredSkillProgress.class,
+                List.of(
+                    EAssociationType.TRACE_DECLARED_SKILL,
+                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL))
+            .stream()
+            .map(Association::getId)
+            .toList();
+
+    if (!new HashSet<>(associationIds).containsAll(idsToDelete)) {
+      throw new UserNotAuthorizedException();
+    }
+
+    associationService.deleteAllByIds(idsToDelete);
+  }
+
   private DeclaredSkillProgress fetchAndCheckLoggedInStudentAuthorization(UUID declaredSkillId) {
     Student student = loggedInUserService.getLoggedInStudent();
     var skill =

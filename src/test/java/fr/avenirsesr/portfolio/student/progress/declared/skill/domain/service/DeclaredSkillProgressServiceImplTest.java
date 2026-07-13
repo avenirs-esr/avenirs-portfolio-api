@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import fr.avenirsesr.portfolio.association.domain.data.AssociationSearchResultData;
+import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationContextType;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
@@ -732,6 +733,127 @@ public class DeclaredSkillProgressServiceImplTest {
 
         verify(declaredSkillProgressRepository).findById(declaredSkillId);
         verifyNoInteractions(associationService);
+      }
+    }
+
+    @Nested
+    class WhenDeletingAssociations {
+
+      @Test
+      void deleteAssociations_should_delete_when_associations_belong_to_declaredSkillProgress() {
+        BddLogger.given("A logged-in student and a declared skill progress with associations");
+
+        DeclaredSkillProgress declaredSkillProgress =
+            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+        UUID declaredSkillProgressId = declaredSkillProgress.getId();
+        UUID associationId1 = randomUUID();
+        UUID associationId2 = randomUUID();
+
+        Association association1 = mock(Association.class);
+        Association association2 = mock(Association.class);
+
+        when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
+            .thenReturn(Optional.of(declaredSkillProgress));
+        when(associationService.getAllOf(
+                declaredSkillProgressId,
+                DeclaredSkillProgress.class,
+                List.of(
+                    EAssociationType.TRACE_DECLARED_SKILL,
+                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)))
+            .thenReturn(List.of(association1, association2));
+        when(association1.getId()).thenReturn(associationId1);
+        when(association2.getId()).thenReturn(associationId2);
+
+        BddLogger.when("deleteAssociations is called");
+
+        declaredSkillProgressService.deleteAssociations(
+            declaredSkillProgressId, List.of(associationId1));
+
+        BddLogger.then("deleteAllByIds should be called with the given ids");
+
+        verify(associationService).deleteAllByIds(List.of(associationId1));
+      }
+
+      @Test
+      void deleteAssociations_should_throw_when_declaredSkillProgress_not_found() {
+        BddLogger.given("A non-existent declared skill progress id");
+
+        UUID declaredSkillProgressId = randomUUID();
+
+        when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
+            .thenReturn(Optional.empty());
+
+        BddLogger.when("deleteAssociations is called");
+
+        BddLogger.then("it should throw DeclaredSkillProgressNotFoundException");
+
+        assertThrows(
+            DeclaredSkillProgressNotFoundException.class,
+            () ->
+                declaredSkillProgressService.deleteAssociations(
+                    declaredSkillProgressId, List.of(randomUUID())));
+
+        verify(associationService, never()).deleteAllByIds(anyList());
+      }
+
+      @Test
+      void deleteAssociations_should_throw_when_skill_belongs_to_other_student() {
+        BddLogger.given("A declared skill progress belonging to another student");
+
+        Student anotherStudent = StudentFixture.create().toModel();
+        UUID declaredSkillProgressId = randomUUID();
+        DeclaredSkillProgress declaredSkillProgress =
+            DeclaredSkillProgressFixture.create().withStudent(anotherStudent).toModel();
+
+        when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
+            .thenReturn(Optional.of(declaredSkillProgress));
+
+        BddLogger.when("deleteAssociations is called");
+
+        BddLogger.then("it should throw UserNotAuthorizedException");
+
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () ->
+                declaredSkillProgressService.deleteAssociations(
+                    declaredSkillProgressId, List.of(randomUUID())));
+
+        verify(associationService, never()).deleteAllByIds(anyList());
+      }
+
+      @Test
+      void deleteAssociations_should_throw_when_ids_not_associated() {
+        BddLogger.given("A declared skill progress and an id that is not one of its associations");
+
+        DeclaredSkillProgress declaredSkillProgress =
+            DeclaredSkillProgressFixture.create().withStudent(student).toModel();
+        UUID declaredSkillProgressId = declaredSkillProgress.getId();
+        UUID associationId = randomUUID();
+
+        Association association = mock(Association.class);
+
+        when(declaredSkillProgressRepository.findById(declaredSkillProgressId))
+            .thenReturn(Optional.of(declaredSkillProgress));
+        when(associationService.getAllOf(
+                declaredSkillProgressId,
+                DeclaredSkillProgress.class,
+                List.of(
+                    EAssociationType.TRACE_DECLARED_SKILL,
+                    EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL)))
+            .thenReturn(List.of(association));
+        when(association.getId()).thenReturn(associationId);
+
+        BddLogger.when("deleteAssociations is called with a non associated id");
+
+        BddLogger.then("it should throw UserNotAuthorizedException");
+
+        assertThrows(
+            UserNotAuthorizedException.class,
+            () ->
+                declaredSkillProgressService.deleteAssociations(
+                    declaredSkillProgressId, List.of(randomUUID())));
+
+        verify(associationService, never()).deleteAllByIds(anyList());
       }
     }
   }
