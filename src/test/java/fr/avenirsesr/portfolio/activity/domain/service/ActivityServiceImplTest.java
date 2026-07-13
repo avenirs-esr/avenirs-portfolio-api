@@ -26,6 +26,7 @@ import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorize
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.notification.domain.model.notification.ActivityUpdatedNotification;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import fr.avenirsesr.portfolio.shared.domain.port.input.LoggedInUserService;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
@@ -675,16 +676,17 @@ class ActivityServiceImplTest {
           assertEquals(user1, notifications.get(0).build().getUser());
           assertEquals(user2, notifications.get(1).build().getUser());
 
-          List<String> expectedUpdatedFields =
+          List<EActivityUpdatableField> expectedUpdatedFields =
               List.of(
-                  EActivityUpdatableField.ACTIVITY_TITLE.name(),
-                  EActivityUpdatableField.SUMMARY.name(),
-                  EActivityUpdatableField.DESCRIPTION.name(),
-                  EActivityUpdatableField.EXECUTION_PERIOD.name(),
-                  EActivityUpdatableField.THEMATIC.name(),
-                  EActivityUpdatableField.FILES_AND_LINKS.name());
-          List<String> parameters = notifications.getFirst().build().getParameters();
-          assertEquals(expectedUpdatedFields, parameters.subList(1, parameters.size()));
+                  EActivityUpdatableField.ACTIVITY_TITLE,
+                  EActivityUpdatableField.SUMMARY,
+                  EActivityUpdatableField.DESCRIPTION,
+                  EActivityUpdatableField.EXECUTION_PERIOD,
+                  EActivityUpdatableField.THEMATIC,
+                  EActivityUpdatableField.FILES_AND_LINKS);
+          ActivityModifiedParameters parameters =
+              (ActivityModifiedParameters) notifications.getFirst().build().getParameters();
+          assertEquals(expectedUpdatedFields, parameters.updatedFields());
         }
 
         @Nested

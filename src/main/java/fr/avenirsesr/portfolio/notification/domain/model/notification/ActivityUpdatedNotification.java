@@ -4,8 +4,8 @@ import fr.avenirsesr.portfolio.activity.domain.model.Activity;
 import fr.avenirsesr.portfolio.activity.domain.model.enums.EActivityUpdatableField;
 import fr.avenirsesr.portfolio.common.data.domain.model.User;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
-import java.util.ArrayList;
-import java.util.Collections;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.ActivityModifiedParameters;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.NotificationParameters;
 import java.util.List;
 
 public class ActivityUpdatedNotification extends BaseNotification {
@@ -20,9 +20,7 @@ public class ActivityUpdatedNotification extends BaseNotification {
   }
 
   @Override
-  protected List<String> buildParameters() {
-    var params = new ArrayList<>(Collections.singleton(activity.getTitle()));
-    params.addAll(updatedFields.stream().map(Enum::name).toList());
-    return params;
+  protected NotificationParameters buildParameters() {
+    return new ActivityModifiedParameters(activity.getTitle(), updatedFields);
   }
 }

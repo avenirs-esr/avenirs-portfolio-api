@@ -14,6 +14,7 @@ import fr.avenirsesr.portfolio.notification.application.adapter.dto.Notification
 import fr.avenirsesr.portfolio.notification.domain.exception.NotificationNotFoundException;
 import fr.avenirsesr.portfolio.notification.domain.model.Notification;
 import fr.avenirsesr.portfolio.notification.domain.model.enums.ENotificationType;
+import fr.avenirsesr.portfolio.notification.domain.model.notification.parameters.AskForFeedbackParameters;
 import fr.avenirsesr.portfolio.notification.domain.port.input.NotificationService;
 import java.security.Principal;
 import java.time.Instant;
@@ -93,7 +94,8 @@ class NotificationControllerTest {
     when(notif.getCreatedAt()).thenReturn(Instant.parse("2026-01-01T10:00:00Z"));
     when(notif.getType()).thenReturn(ENotificationType.ASK_FOR_FEEDBACK);
     when(notif.getElementId()).thenReturn(UUID.randomUUID());
-    when(notif.getParameters()).thenReturn(List.of("Alice", "Martin", "titre"));
+    when(notif.getParameters())
+        .thenReturn(new AskForFeedbackParameters("Alice", "Martin", "titre"));
     when(notif.isSeen()).thenReturn(false);
 
     when(notificationService.getNotifications(eq(EUserCategory.STAFF), any(PageCriteria.class)))

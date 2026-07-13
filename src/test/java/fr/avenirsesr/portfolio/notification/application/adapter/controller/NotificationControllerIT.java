@@ -94,7 +94,7 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
                     UUID.randomUUID(),
                     user,
                     null,
-                    List.of("notification universelle"),
+                    List.of("Prenom", "Nom", "titre universel"),
                     false))
             .getId()
             .toString();
