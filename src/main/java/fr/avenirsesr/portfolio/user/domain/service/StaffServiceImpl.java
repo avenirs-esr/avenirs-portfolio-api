@@ -49,9 +49,9 @@ public class StaffServiceImpl implements StaffService {
         staff.getInstitutionEmail(),
         staff.getBio(),
         FileDataMapper.mapFileData(
-            staff.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),
+            staff.getCoverPicture(), FileStorageConstants.DEFAULT_COVER_FILE_URL),
         FileDataMapper.mapFileData(
-            staff.getProfilePicture().orElse(null), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));
+            staff.getProfilePicture(), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));
   }
 
   @Override

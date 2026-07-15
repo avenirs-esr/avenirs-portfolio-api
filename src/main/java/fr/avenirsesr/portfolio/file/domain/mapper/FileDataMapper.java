@@ -6,6 +6,10 @@ import fr.avenirsesr.portfolio.file.infrastructure.configuration.FileStorageCons
 import java.util.Optional;
 
 public interface FileDataMapper {
+  static FileData mapFileData(Optional<File> file, String defaultUrl) {
+    return mapFileData(file.orElse(null), defaultUrl);
+  }
+
   static FileData mapFileData(File file, String defaultUrl) {
     if (file == null) {
       return new FileData(Optional.empty(), Optional.empty(), defaultUrl);

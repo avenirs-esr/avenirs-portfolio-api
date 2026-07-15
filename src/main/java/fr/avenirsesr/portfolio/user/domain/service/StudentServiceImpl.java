@@ -53,10 +53,9 @@ public class StudentServiceImpl implements StudentService {
         student.getUser().getEmail(),
         student.getBio(),
         FileDataMapper.mapFileData(
-            student.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),
+            student.getCoverPicture(), FileStorageConstants.DEFAULT_COVER_FILE_URL),
         FileDataMapper.mapFileData(
-            student.getProfilePicture().orElse(null),
-            FileStorageConstants.DEFAULT_PROFILE_FILE_URL));
+            student.getProfilePicture(), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));
   }
 
   @Override
