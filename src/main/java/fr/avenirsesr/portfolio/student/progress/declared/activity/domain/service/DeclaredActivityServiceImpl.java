@@ -564,7 +564,8 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public List<DeclaredActivity> getEnrolledStudents(Activity activity) {
-    var graph = FetchGraph.init().add("student").fetch("user");
+    var graph =
+        FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");
     return declaredActivityRepository.findAllByActivity(activity, graph);
   }
 
