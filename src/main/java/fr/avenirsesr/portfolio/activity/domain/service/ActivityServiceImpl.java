@@ -25,9 +25,9 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.error.domain.model.enums.EErrorCode;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
-import fr.avenirsesr.portfolio.file.domain.data.FileData;
 import fr.avenirsesr.portfolio.file.domain.exception.FileNotFoundException;
 import fr.avenirsesr.portfolio.file.domain.exception.FileTypeNotSupportedException;
+import fr.avenirsesr.portfolio.file.domain.mapper.FileDataMapper;
 import fr.avenirsesr.portfolio.file.domain.model.File;
 import fr.avenirsesr.portfolio.file.domain.model.FileDownload;
 import fr.avenirsesr.portfolio.file.domain.model.enums.EFileType;
@@ -297,34 +297,18 @@ public class ActivityServiceImpl implements ActivityService {
                 .getByActivity(activity)
                 .map(DeclaredActivity::getId)
                 .orElse(null),
-            activity
-                .getBanner()
-                .map(this::fileDataMapper)
-                .orElse(
-                    new FileData(
-                        Optional.empty(),
-                        Optional.empty(),
-                        FileStorageConstants.DEFAULT_COVER_FILE_URL)));
+            FileDataMapper.mapFileData(
+                activity.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));
       }
       case DRAFT -> {
         var draft =
             activityDraftRepository.findById(id).orElseThrow(ActivityDraftNotFoundException::new);
         yield ActivityPresentationDataMapper.toData(
             draft,
-            draft
-                .getBanner()
-                .map(this::fileDataMapper)
-                .orElse(
-                    new FileData(
-                        Optional.empty(),
-                        Optional.empty(),
-                        FileStorageConstants.DEFAULT_COVER_FILE_URL)));
+            FileDataMapper.mapFileData(
+                draft.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));
       }
     };
-  }
-
-  private FileData fileDataMapper(File file) {
-    return new FileData(Optional.of(file.getId()), Optional.of(file.getFileName()), file.getUri());
   }
 
   @Override
