@@ -45,7 +45,6 @@ public class TraceController {
   private final TraceViewMapper traceViewMapper;
   private final TraceOverviewMapper traceOverviewMapper;
   private final TraceDetailMapper traceDetailMapper;
-  private final TraceDeclaredActivityMapper traceDeclaredActivityMapper;
   private final TraceLockedDeclaredActivitiesMapper traceLockedDeclaredActivitiesMapper;
   private final TracesSummaryMapper tracesSummaryMapper;
   private final TraceAssociationsMapper traceAssociationsMapper;

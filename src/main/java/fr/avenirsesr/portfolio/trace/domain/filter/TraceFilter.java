@@ -8,11 +8,13 @@ public record TraceFilter(
     Boolean isAssociated,
     List<EFileType> fileTypes,
     List<UUID> skillIds,
-    List<ETraceStatus> statuses) {
+    List<ETraceStatus> statuses,
+    Boolean isValorized) {
   public Map<ETraceFilterKey, Object> toMap() {
     Map<ETraceFilterKey, Object> map = new EnumMap<>(ETraceFilterKey.class);
 
     map.put(ETraceFilterKey.IS_ASSOCIATED, isAssociated);
+    map.put(ETraceFilterKey.IS_VALORIZED, isValorized);
 
     if (statuses != null && !statuses.isEmpty()) {
       map.put(ETraceFilterKey.STATUS, statuses);
