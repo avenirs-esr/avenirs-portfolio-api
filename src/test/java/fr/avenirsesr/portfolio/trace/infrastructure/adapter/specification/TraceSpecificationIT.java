@@ -125,6 +125,28 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
   }
 
   @Test
+  void shouldFilterValorizedTraces() {
+    TraceEntity valorized = persistTrace("valorized");
+    valorized.setValorized(true);
+    TraceEntity notValorized = persistTrace("not-valorized");
+
+    entityManager.flush();
+    entityManager.clear();
+
+    List<TraceEntity> valorizedResult =
+        traceJpaRepository.findAll(
+            ofTestUser(user.getId()).and(TraceSpecification.valorized(true)));
+    List<TraceEntity> notValorizedResult =
+        traceJpaRepository.findAll(
+            ofTestUser(user.getId()).and(TraceSpecification.valorized(false)));
+
+    assertThat(valorizedResult).extracting(TraceEntity::getId).contains(valorized.getId());
+    assertThat(valorizedResult).extracting(TraceEntity::getId).doesNotContain(notValorized.getId());
+    assertThat(notValorizedResult).extracting(TraceEntity::getId).contains(notValorized.getId());
+    assertThat(notValorizedResult).extracting(TraceEntity::getId).doesNotContain(valorized.getId());
+  }
+
+  @Test
   void shouldCoverAssociatedQueryNullBranch() {
     Root<TraceEntity> root = mock(Root.class);
     CriteriaBuilder cb = mock(CriteriaBuilder.class);
@@ -154,6 +176,15 @@ class TraceSpecificationIT extends ContainerConfigurationTest {
     assertThat(fileTypeSpec.toPredicate(root, query, cb)).isNull();
     assertThat(skillSpec.toPredicate(root, query, cb)).isNull();
     assertThat(statusSpec.toPredicate(root, query, cb)).isNull();
+  }
+
+  @Test
+  void shouldReturnNullSpecificationWhenIsValorizedIsNull() {
+    TraceFilterSpecificationBuilder builder = new TraceFilterSpecificationBuilder();
+
+    Specification<TraceEntity> spec = builder.getSpecification(ETraceFilterKey.IS_VALORIZED, null);
+
+    assertThat(spec).isNull();
   }
 
   private Specification<TraceEntity> ofTestUser(UUID userId) {

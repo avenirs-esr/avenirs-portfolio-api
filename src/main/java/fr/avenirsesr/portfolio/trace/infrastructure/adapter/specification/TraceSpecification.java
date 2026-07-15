@@ -45,6 +45,10 @@ public class TraceSpecification {
     };
   }
 
+  public static Specification<TraceEntity> valorized(boolean value) {
+    return (root, query, cb) -> cb.equal(root.get("valorized"), value);
+  }
+
   public static Specification<TraceEntity> search(String keyword, ELanguage language) {
     return (root, query, criteriaBuilder) -> {
       if (keyword == null || keyword.trim().isEmpty() || query == null) {

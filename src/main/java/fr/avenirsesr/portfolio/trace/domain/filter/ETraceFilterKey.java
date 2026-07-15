@@ -4,5 +4,6 @@ public enum ETraceFilterKey {
   IS_ASSOCIATED,
   FILE_TYPE,
   STATUS,
-  SKILL
+  SKILL,
+  IS_VALORIZED
 }

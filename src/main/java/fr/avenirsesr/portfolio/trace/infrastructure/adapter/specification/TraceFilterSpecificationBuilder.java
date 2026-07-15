@@ -30,6 +30,10 @@ public class TraceFilterSpecificationBuilder
             ? TraceSpecification.associated()
             : TraceSpecification.unassociated();
       }
+      case IS_VALORIZED -> {
+        if (value == null) yield null;
+        yield TraceSpecification.valorized((Boolean) value);
+      }
     };
   }
 

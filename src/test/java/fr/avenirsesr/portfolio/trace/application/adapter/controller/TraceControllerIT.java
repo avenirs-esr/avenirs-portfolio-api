@@ -13,6 +13,8 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreati
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
 import fr.avenirsesr.portfolio.trace.application.adapter.dto.CreateTraceDTO;
+import fr.avenirsesr.portfolio.trace.application.adapter.dto.UpdateTraceDTO;
+import fr.avenirsesr.portfolio.trace.domain.filter.TraceFilter;
 import fr.avenirsesr.portfolio.trace.domain.model.enums.ETraceAuthorType;
 import fr.avenirsesr.portfolio.trace.infrastructure.adapter.client.TraceConfigurationClient;
 import java.util.List;
@@ -191,6 +193,47 @@ class TraceControllerIT extends ContainerConfigurationTest {
     return UUID.fromString(data.get(0).get("id").asText());
   }
 
+  private UUID createTrace(String title) throws Exception {
+    CreateTraceDTO dto =
+        new CreateTraceDTO(title, ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null);
+
+    String body =
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .contentType(APPLICATION_JSON)
+            .bodyValue(objectMapper.writeValueAsString(dto))
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    return UUID.fromString(objectMapper.readTree(body).get("traceId").asText());
+  }
+
+  private void updateTraceValorized(UUID traceId, String title, boolean valorized) {
+    UpdateTraceDTO dto =
+        new UpdateTraceDTO(
+            title, ELanguage.FRENCH, ETraceAuthorType.PERSONAL, null, null, null, valorized);
+
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/{traceId}", traceId)
+        .contentType(APPLICATION_JSON)
+        .bodyValue(dto)
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk();
+  }
+
   @Test
   void shouldReturnTraceOverview() {
     BddLogger.given("seeded traces");
@@ -280,6 +323,62 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .exists();
 
     BddLogger.then("it should create a new trace");
+  }
+
+  @Test
+  void shouldFilterTracesViewByIsValorized() throws Exception {
+    BddLogger.given("a valorized trace and a non-valorized trace");
+
+    UUID valorizedTraceId = createTrace("Trace valorisee");
+    updateTraceValorized(valorizedTraceId, "Trace valorisee", true);
+
+    UUID notValorizedTraceId = createTrace("Trace non valorisee");
+
+    when("requesting traces view filtered by isValorized=true");
+
+    TraceFilter valorizedFilter = new TraceFilter(null, null, null, null, true);
+
+    webTestClient
+        .post()
+        .uri(uriBuilder -> uriBuilder.path(VIEW_BASE_PATH).queryParam("pageSize", 100).build())
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(valorizedFilter))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data[?(@.id == '" + valorizedTraceId + "')]")
+        .exists()
+        .jsonPath("$.data[?(@.id == '" + notValorizedTraceId + "')]")
+        .doesNotExist();
+
+    BddLogger.then("it should only return the valorized trace");
+
+    when("requesting traces view filtered by isValorized=false");
+
+    TraceFilter notValorizedFilter = new TraceFilter(null, null, null, null, false);
+
+    webTestClient
+        .post()
+        .uri(uriBuilder -> uriBuilder.path(VIEW_BASE_PATH).queryParam("pageSize", 100).build())
+        .contentType(APPLICATION_JSON)
+        .bodyValue(objectMapper.writeValueAsString(notValorizedFilter))
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.data[?(@.id == '" + notValorizedTraceId + "')]")
+        .exists()
+        .jsonPath("$.data[?(@.id == '" + valorizedTraceId + "')]")
+        .doesNotExist();
+
+    BddLogger.then("it should only return the non-valorized trace");
   }
 
   //  TODO: Refacto in #1887 beacause the JSON request is incompatible with H2

@@ -135,7 +135,7 @@ class TraceServiceImplTest {
                     .withCreatedAt(Instant.now().minus(84, ChronoUnit.DAYS))
                     .toModel());
 
-        var filter = new TraceFilter(false, null, null, null);
+        var filter = new TraceFilter(false, null, null, null, null);
         var pageCriteria = new PageCriteria(pageNumber, pageSize);
 
         when(traceRepository.findAll(student.getUser(), null, filter, null, pageCriteria))
@@ -164,7 +164,7 @@ class TraceServiceImplTest {
         Trace trace =
             TraceFixture.create().withUser(student.getUser()).withCreatedAt(createdAt).toModel();
 
-        var filter = new TraceFilter(false, null, null, null);
+        var filter = new TraceFilter(false, null, null, null, null);
         var pageCriteria = new PageCriteria(0, 8);
 
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
@@ -195,7 +195,7 @@ class TraceServiceImplTest {
 
         Trace trace = TraceFixture.create().withUser(student.getUser()).toModel();
 
-        var filter = new TraceFilter(false, null, null, null);
+        var filter = new TraceFilter(false, null, null, null, null);
         var pageCriteria = new PageCriteria(0, 8);
 
         when(traceConfigurationClient.getTraceConfiguration()).thenReturn(DEFAULT_CONFIG);
