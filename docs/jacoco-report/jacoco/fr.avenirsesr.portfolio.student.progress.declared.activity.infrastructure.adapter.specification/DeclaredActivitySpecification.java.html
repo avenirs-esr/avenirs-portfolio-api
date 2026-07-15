@@ -22,7 +22,7 @@ public final class DeclaredActivitySpecification {
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; hasActivityId(UUID activityId) {
-<span class="nc" id="L25">    return (root, query, cb) -&gt; cb.equal(root.get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
+<span class="fc" id="L25">    return (root, query, cb) -&gt; cb.equal(root.get(&quot;activity&quot;).get(&quot;id&quot;), activityId);</span>
   }
 
   public static Specification&lt;DeclaredActivityEntity&gt; search(String keyword) {
