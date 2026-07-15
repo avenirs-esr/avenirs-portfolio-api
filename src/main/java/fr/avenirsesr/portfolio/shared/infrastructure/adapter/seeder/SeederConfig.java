@@ -58,4 +58,7 @@ public class SeederConfig {
   // Declared Activities
   public static final int NB_DECLARED_ACTIVITIES_PER_STUDENT = 2;
   public static final int NB_DECLARED_ACTIVITIES_TRACE_ASSOCIATION = 5;
+
+  // Notifications
+  public static final int NB_OF_ACTIVITY_UPDATED_NOTIFICATIONS = 2;
 }

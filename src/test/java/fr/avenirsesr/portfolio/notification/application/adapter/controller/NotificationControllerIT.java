@@ -160,7 +160,7 @@ public class NotificationControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.data")
         .isArray()
         .jsonPath("$.page.totalElements")
-        .isEqualTo(2);
+        .isEqualTo(4);
   }
 
   @Test

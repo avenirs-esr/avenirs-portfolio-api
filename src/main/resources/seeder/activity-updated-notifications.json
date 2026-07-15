@@ -1,0 +1,14 @@
+[
+  {
+    "activityId": "2a9f6c4d-8b1e-4d33-9c7a-5e2b8f1c6d77",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "createdAt": "2026-07-10T09:00:00Z",
+    "updatedFields": ["ACTIVITY_TITLE"]
+  },
+  {
+    "activityId": "7b3d4e91-6f2a-4c88-9a1e-5d3f7b2c8e44",
+    "studentId": "0a8700ab-90b6-4a38-8338-acbdd4fbcd3d",
+    "createdAt": "2026-07-12T14:30:00Z",
+    "updatedFields": ["ACTIVITY_TITLE", "THEMATIC"]
+  }
+]
