@@ -75,34 +75,34 @@ public class TraceDatabaseRepository extends GenericJpaRepositoryAdapter&lt;Trac
       DateFilter dateFilter,
       PageCriteria pageCriteria) {
 
-<span class="nc" id="L78">    Specification&lt;TraceEntity&gt; specification = TraceSpecification.ofUser(user);</span>
+<span class="fc" id="L78">    Specification&lt;TraceEntity&gt; specification = TraceSpecification.ofUser(user);</span>
 
-<span class="nc" id="L80">    var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());</span>
-<span class="nc bnc" id="L81" title="All 2 branches missed.">    if (filterSpecification.isPresent()) {</span>
-<span class="nc" id="L82">      specification = specification.and(filterSpecification.get());</span>
+<span class="fc" id="L80">    var filterSpecification = new TraceFilterSpecificationBuilder().build(filter.toMap());</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">    if (filterSpecification.isPresent()) {</span>
+<span class="fc" id="L82">      specification = specification.and(filterSpecification.get());</span>
     }
 
-<span class="nc bnc" id="L85" title="All 2 branches missed.">    if (dateFilter != null) {</span>
-<span class="nc" id="L86">      var dateFilterSpecification =</span>
-<span class="nc" id="L87">          new DateFilterSpecificationBuilder&lt;TraceEntity&gt;().build(dateFilter.toMap());</span>
-<span class="nc bnc" id="L88" title="All 2 branches missed.">      if (dateFilterSpecification.isPresent())</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">    if (dateFilter != null) {</span>
+<span class="fc" id="L86">      var dateFilterSpecification =</span>
+<span class="fc" id="L87">          new DateFilterSpecificationBuilder&lt;TraceEntity&gt;().build(dateFilter.toMap());</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">      if (dateFilterSpecification.isPresent())</span>
 <span class="nc" id="L89">        specification = specification.and(dateFilterSpecification.get());</span>
     }
 
-<span class="nc bnc" id="L92" title="All 2 branches missed.">    if (keyword != null) {</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">    if (keyword != null) {</span>
 <span class="nc" id="L93">      specification =</span>
 <span class="nc" id="L94">          specification.and(</span>
 <span class="nc" id="L95">              TraceSpecification.search(keyword, TranslationUtil.getRequestLanguage()));</span>
     }
 
     Sort sort =
-<span class="nc bnc" id="L99" title="All 4 branches missed.">        filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
+<span class="pc bpc" id="L99" title="3 of 4 branches missed.">        filter.isAssociated() != null &amp;&amp; !filter.isAssociated()</span>
 <span class="nc" id="L100">            ? Sort.by(Sort.Direction.ASC, &quot;createdAt&quot;)</span>
-<span class="nc" id="L101">            : Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
-<span class="nc" id="L102">                .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
+<span class="fc" id="L101">            : Sort.by(Sort.Direction.DESC, &quot;updatedAt&quot;)</span>
+<span class="fc" id="L102">                .and(Sort.by(Sort.Direction.DESC, &quot;createdAt&quot;));</span>
 
-<span class="nc" id="L104">    return findAll(</span>
-<span class="nc" id="L105">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
+<span class="fc" id="L104">    return findAll(</span>
+<span class="fc" id="L105">        specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));</span>
   }
 
   @Override

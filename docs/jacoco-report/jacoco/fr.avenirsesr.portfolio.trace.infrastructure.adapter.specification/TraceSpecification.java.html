@@ -45,29 +45,33 @@ import org.springframework.data.jpa.domain.Specification;
     };
   }
 
+  public static Specification&lt;TraceEntity&gt; valorized(boolean value) {
+<span class="fc" id="L49">    return (root, query, cb) -&gt; cb.equal(root.get(&quot;valorized&quot;), value);</span>
+  }
+
   public static Specification&lt;TraceEntity&gt; search(String keyword, ELanguage language) {
-<span class="fc" id="L49">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="fc bfc" id="L50" title="All 6 branches covered.">      if (keyword == null || keyword.trim().isEmpty() || query == null) {</span>
-<span class="fc" id="L51">        return criteriaBuilder.conjunction();</span>
+<span class="fc" id="L53">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L54" title="All 6 branches covered.">      if (keyword == null || keyword.trim().isEmpty() || query == null) {</span>
+<span class="fc" id="L55">        return criteriaBuilder.conjunction();</span>
       }
 
-<span class="fc" id="L54">      query.distinct(true);</span>
+<span class="fc" id="L58">      query.distinct(true);</span>
 
-<span class="fc" id="L56">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
+<span class="fc" id="L60">      String pattern = &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;;</span>
 
       // Trace
-<span class="fc" id="L59">      var titlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;title&quot;)), pattern);</span>
-<span class="fc" id="L60">      var aiUsePredicate =</span>
-<span class="fc" id="L61">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;aiUseJustification&quot;)), pattern);</span>
-<span class="fc" id="L62">      var personalNotePredicate =</span>
-<span class="fc" id="L63">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;personalNote&quot;)), pattern);</span>
+<span class="fc" id="L63">      var titlePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;title&quot;)), pattern);</span>
+<span class="fc" id="L64">      var aiUsePredicate =</span>
+<span class="fc" id="L65">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;aiUseJustification&quot;)), pattern);</span>
+<span class="fc" id="L66">      var personalNotePredicate =</span>
+<span class="fc" id="L67">          criteriaBuilder.like(criteriaBuilder.lower(root.get(&quot;personalNote&quot;)), pattern);</span>
 
       // Attachment
-<span class="fc" id="L66">      var attachment = root.join(&quot;attachment&quot;, JoinType.LEFT);</span>
-<span class="fc" id="L67">      Predicate attachmentPredicate =</span>
-<span class="fc" id="L68">          criteriaBuilder.like(criteriaBuilder.lower(attachment.get(&quot;fileName&quot;)), pattern);</span>
+<span class="fc" id="L70">      var attachment = root.join(&quot;attachment&quot;, JoinType.LEFT);</span>
+<span class="fc" id="L71">      Predicate attachmentPredicate =</span>
+<span class="fc" id="L72">          criteriaBuilder.like(criteriaBuilder.lower(attachment.get(&quot;fileName&quot;)), pattern);</span>
 
-<span class="fc" id="L70">      return criteriaBuilder.or(</span>
+<span class="fc" id="L74">      return criteriaBuilder.or(</span>
           titlePredicate, aiUsePredicate, personalNotePredicate, attachmentPredicate);
     };
   }

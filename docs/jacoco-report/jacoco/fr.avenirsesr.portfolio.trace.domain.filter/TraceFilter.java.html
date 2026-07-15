@@ -8,25 +8,27 @@ import java.util.*;
     Boolean isAssociated,
     List&lt;EFileType&gt; fileTypes,
     List&lt;UUID&gt; skillIds,
-    List&lt;ETraceStatus&gt; statuses) {
+    List&lt;ETraceStatus&gt; statuses,
+    Boolean isValorized) {
   public Map&lt;ETraceFilterKey, Object&gt; toMap() {
-<span class="fc" id="L13">    Map&lt;ETraceFilterKey, Object&gt; map = new EnumMap&lt;&gt;(ETraceFilterKey.class);</span>
+<span class="fc" id="L14">    Map&lt;ETraceFilterKey, Object&gt; map = new EnumMap&lt;&gt;(ETraceFilterKey.class);</span>
 
-<span class="fc" id="L15">    map.put(ETraceFilterKey.IS_ASSOCIATED, isAssociated);</span>
+<span class="fc" id="L16">    map.put(ETraceFilterKey.IS_ASSOCIATED, isAssociated);</span>
+<span class="fc" id="L17">    map.put(ETraceFilterKey.IS_VALORIZED, isValorized);</span>
 
-<span class="fc bfc" id="L17" title="All 4 branches covered.">    if (statuses != null &amp;&amp; !statuses.isEmpty()) {</span>
-<span class="fc" id="L18">      map.put(ETraceFilterKey.STATUS, statuses);</span>
+<span class="fc bfc" id="L19" title="All 4 branches covered.">    if (statuses != null &amp;&amp; !statuses.isEmpty()) {</span>
+<span class="fc" id="L20">      map.put(ETraceFilterKey.STATUS, statuses);</span>
     }
 
-<span class="fc bfc" id="L21" title="All 4 branches covered.">    if (fileTypes != null &amp;&amp; !fileTypes.isEmpty()) {</span>
-<span class="fc" id="L22">      map.put(ETraceFilterKey.FILE_TYPE, fileTypes);</span>
+<span class="fc bfc" id="L23" title="All 4 branches covered.">    if (fileTypes != null &amp;&amp; !fileTypes.isEmpty()) {</span>
+<span class="fc" id="L24">      map.put(ETraceFilterKey.FILE_TYPE, fileTypes);</span>
     }
 
-<span class="fc bfc" id="L25" title="All 4 branches covered.">    if (skillIds != null &amp;&amp; !skillIds.isEmpty()) {</span>
-<span class="fc" id="L26">      map.put(ETraceFilterKey.SKILL, skillIds);</span>
+<span class="fc bfc" id="L27" title="All 4 branches covered.">    if (skillIds != null &amp;&amp; !skillIds.isEmpty()) {</span>
+<span class="fc" id="L28">      map.put(ETraceFilterKey.SKILL, skillIds);</span>
     }
 
-<span class="fc" id="L29">    return map;</span>
+<span class="fc" id="L31">    return map;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
