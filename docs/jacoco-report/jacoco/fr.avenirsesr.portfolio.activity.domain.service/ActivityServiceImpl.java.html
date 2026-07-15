@@ -298,7 +298,7 @@ public class ActivityServiceImpl implements ActivityService {
 <span class="fc" id="L298">                .map(DeclaredActivity::getId)</span>
 <span class="fc" id="L299">                .orElse(null),</span>
 <span class="fc" id="L300">            FileDataMapper.mapFileData(</span>
-<span class="fc" id="L301">                activity.getBanner().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
+<span class="fc" id="L301">                activity.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
       }
       case DRAFT -&gt; {
 <span class="fc" id="L304">        var draft =</span>
@@ -306,7 +306,7 @@ public class ActivityServiceImpl implements ActivityService {
 <span class="nc" id="L306">        yield ActivityPresentationDataMapper.toData(</span>
             draft,
 <span class="nc" id="L308">            FileDataMapper.mapFileData(</span>
-<span class="nc" id="L309">                draft.getBanner().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
+<span class="nc" id="L309">                draft.getBanner(), FileStorageConstants.DEFAULT_COVER_FILE_URL));</span>
       }
     };
   }

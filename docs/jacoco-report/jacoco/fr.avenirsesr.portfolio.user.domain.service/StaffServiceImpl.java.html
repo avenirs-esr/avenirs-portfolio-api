@@ -49,9 +49,9 @@ public class StaffServiceImpl implements StaffService {
 <span class="fc" id="L49">        staff.getInstitutionEmail(),</span>
 <span class="fc" id="L50">        staff.getBio(),</span>
 <span class="fc" id="L51">        FileDataMapper.mapFileData(</span>
-<span class="fc" id="L52">            staff.getCoverPicture().orElse(null), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
+<span class="fc" id="L52">            staff.getCoverPicture(), FileStorageConstants.DEFAULT_COVER_FILE_URL),</span>
 <span class="fc" id="L53">        FileDataMapper.mapFileData(</span>
-<span class="fc" id="L54">            staff.getProfilePicture().orElse(null), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));</span>
+<span class="fc" id="L54">            staff.getProfilePicture(), FileStorageConstants.DEFAULT_PROFILE_FILE_URL));</span>
   }
 
   @Override
