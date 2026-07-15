@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.common.seeder.infrastructure.configuration.Seedin
 import fr.avenirsesr.portfolio.declaredskill.infrastructure.adapter.seeder.DeclaredSkillSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.ActivityFileSeeder;
 import fr.avenirsesr.portfolio.file.infrastructure.adapter.seeder.UserPhotoSeeder;
+import fr.avenirsesr.portfolio.notification.infrastructure.adapter.seeder.NotificationSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.InstitutionSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.ProgramSeeder;
 import fr.avenirsesr.portfolio.program.infrastructure.adapter.seeder.SkillSeeder;
@@ -84,6 +85,7 @@ public class SeederOrchestrator {
   private final ActivityFileSeeder activityFileSeeder;
   private final FeedbackSeeder feedbackSeeder;
   private final AssociationSeeder associationSeeder;
+  private final NotificationSeeder notificationSeeder;
 
   private final SeedingState seedingState;
 
@@ -136,6 +138,8 @@ public class SeederOrchestrator {
       activityFileSeeder.seed(savedActivityDrafts, savedActivities);
 
       feedbackSeeder.seed(savedStudents, declaredActivities);
+
+      notificationSeeder.seed(savedActivities, declaredActivities);
 
       log.info("✔ Seeding successfully finished");
       seedingState.markCompleted();
