@@ -207,7 +207,10 @@ public class ActivityServiceImpl implements ActivityService {
                 draft.getBanner().orElse(null),
                 activity::setBanner),
             new FieldSync<>(
-                FILES_AND_LINKS, activity.getLinks(), draft.getLinks(), activity::setLinks),
+                FILES_AND_LINKS,
+                new HashSet<>(activity.getLinks()),
+                new HashSet<>(draft.getLinks()),
+                links -> activity.setLinks(links.stream().toList())),
             new FieldSync<>(
                 FILES_AND_LINKS, activity.getFiles(), draft.getFiles(), activity::setFiles));
 
