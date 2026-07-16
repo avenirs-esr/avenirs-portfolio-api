@@ -77,6 +77,7 @@ public class ActivityEntity extends AvenirsBaseEntity {
       name = "activity_files",
       joinColumns = @JoinColumn(name = "activity_id"),
       inverseJoinColumns = @JoinColumn(name = "file_id"))
+  @OrderBy("createdAt")
   private List<FileEntity> files = new ArrayList<>();
 
   private ActivityEntity(
