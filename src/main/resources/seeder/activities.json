@@ -331,7 +331,7 @@
     "traceAllowedAssociations": -1,
     "feedbackAllowedIterations": 3,
     "enableReflection": true,
-    "links": [],
+    "links": ["https://example.com/identifier-ses-centres-d-interet"],
     "createdAt": "2024-06-01T10:00:00Z",
     "updatedAt": "2024-06-01T10:00:00Z"
   },
