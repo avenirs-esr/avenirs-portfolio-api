@@ -120,7 +120,11 @@ public class TraceServiceImpl implements TraceService {
                       trace.getUpdatedAt(),
                       isAssociated
                           ? Optional.empty()
-                          : Optional.of(computeDeletionDateForUnassociatedTrace(trace, config)));
+                          : Optional.of(computeDeletionDateForUnassociatedTrace(trace, config)),
+                      trace.getAttachment(),
+                      trace.getAuthorType(),
+                      trace.getPersonalNote().orElse(null),
+                      trace.getAiUseJustification().orElse(null));
                 })
             .toList(),
         pagedResult.pageInfo());
