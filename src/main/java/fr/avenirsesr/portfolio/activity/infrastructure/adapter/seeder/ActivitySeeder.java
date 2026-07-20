@@ -102,8 +102,12 @@ public class ActivitySeeder {
     creationData.forEach(
         data -> {
           try {
-            var now = clockService.now();
-            clockService.fixed(now.minus(20, ChronoUnit.DAYS));
+            if (data.updatedAt() != null) {
+              clockService.fixed(data.updatedAt());
+            } else {
+              var now = clockService.now();
+              clockService.fixed(now.minus(20, ChronoUnit.DAYS));
+            }
 
             var activity =
                 activityService.create(

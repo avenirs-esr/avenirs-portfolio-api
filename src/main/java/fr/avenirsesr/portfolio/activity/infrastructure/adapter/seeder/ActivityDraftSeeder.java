@@ -114,7 +114,11 @@ public class ActivityDraftSeeder {
           try {
             var now = clockService.now();
             var createdAt = now.minus(20, ChronoUnit.DAYS);
-            clockService.fixed(createdAt);
+            if (data.updatedAt() != null) {
+              clockService.fixed(data.updatedAt());
+            } else {
+              clockService.fixed(createdAt);
+            }
 
             var draft = activityService.createActivityDraft(data.title());
 
