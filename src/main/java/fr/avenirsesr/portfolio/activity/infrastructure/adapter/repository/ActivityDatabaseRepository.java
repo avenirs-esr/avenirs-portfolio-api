@@ -39,7 +39,7 @@ public class ActivityDatabaseRepository
   public PagedResult<ActivityStaffOverviewData> findAllStaffOverview(
       EActivityThematic thematic, PageCriteria pageCriteria) {
     var specification = thematic != null ? ActivitySpecification.withThematic(thematic) : null;
-    var sort = Sort.by(Sort.Direction.DESC, "createdAt");
+    var sort = Sort.by(Sort.Direction.DESC, "updatedAt");
     var pagedActivities =
         findAll(specification, PageRequest.of(pageCriteria.page(), pageCriteria.pageSize(), sort));
     return new PagedResult<>(
