@@ -61,7 +61,7 @@ public class ActivityDraft extends AvenirsBaseModel {
     this.enableReflection = enableReflection;
     this.feedbackAllowedIterations = feedbackAllowedIterations;
     this.banner = banner;
-    this.links = links;
+    this.links = new ArrayList<>(links == null ? List.of() : links);
     this.files = new ArrayList<>(files == null ? List.of() : files);
   }
 
