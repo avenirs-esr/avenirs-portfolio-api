@@ -17,7 +17,6 @@ public interface ActivityContentDtoMapper {
   ActivityContentDTO toDTO(Activity activity, List<FileDTO> files);
 
   @Mapping(target = "hasEnrolledStudent", expression = "java(null)")
-  @Mapping(target = "files", expression = "java(java.util.List.of())")
   ActivityContentDTO toDTO(Activity activity);
 
   @Mapping(target = "hasEnrolledStudent", source = "hasEnrolledStudent")

@@ -466,7 +466,13 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       UUID declaredActivityId) {
     Student student = loggedInUserService.getLoggedInStudent();
     var graph =
-        FetchGraph.init().add("student").fetch("user").root().add("activity").fetch("author");
+        FetchGraph.init()
+            .add("student")
+            .fetch("user")
+            .root()
+            .add("activity")
+            .fetch("author")
+            .fetch("files");
 
     DeclaredActivity declaredActivity =
         declaredActivityRepository

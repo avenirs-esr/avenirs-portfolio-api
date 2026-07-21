@@ -1,5 +1,7 @@
 package fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.controller;
 
+import static fr.avenirsesr.portfolio.shared.application.adapter.Utils.extractOrigin;
+
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultDeclaredActivityDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.dto.AssociationSearchResultTraceDTO;
 import fr.avenirsesr.portfolio.association.application.adapter.mapper.AssociationSearchResultDTOMapper;
@@ -12,6 +14,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreationRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
+import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityAssociationsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityPeriodRequest;
@@ -25,6 +28,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.D
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -54,6 +58,7 @@ public class DeclaredActivityController {
   private final DeclaredActivityDetailsDTOMapper declaredActivityDetailsDTOMapper;
   private final DeclaredActivityAssociationsDTOMapper declaredActivityAssociationsDTOMapper;
   private final AssociationSearchResultDTOMapper associationSearchResultDTOMapper;
+  private final FileDTOMapper fileDTOMapper;
 
   @GetMapping
   public ResponseEntity<PagedResponse<DeclaredActivityViewDTO>> getDeclaredActivitiesView(
@@ -136,15 +141,23 @@ public class DeclaredActivityController {
 
   @GetMapping("/{declaredActivityId}")
   public ResponseEntity<DeclaredActivityDetailsDTO> getDeclaredActivityDetails(
-      Principal principal, @Valid @PathVariable UUID declaredActivityId) {
+      HttpServletRequest request,
+      Principal principal,
+      @Valid @PathVariable UUID declaredActivityId) {
     log.debug(
         "Received request to get declared activity [{}] details for student [{}]",
         declaredActivityId,
         principal.getName());
+    String baseUrl = extractOrigin(request);
     var details = declaredActivityService.getDeclaredActivityDetails(declaredActivityId);
     var status = declaredActivityService.getDeclaredActivityStatus(details.declaredActivity());
 
-    return ResponseEntity.ok(declaredActivityDetailsDTOMapper.toDTO(details, status));
+    return ResponseEntity.ok(
+        declaredActivityDetailsDTOMapper.toDTO(
+            details,
+            status,
+            fileDTOMapper.toFileDTOs(
+                details.declaredActivity().getActivity().getFiles(), baseUrl)));
   }
 
   @GetMapping("/{declaredActivityId}/associations")
