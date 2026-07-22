@@ -66,6 +66,7 @@ class TraceControllerTest {
                 trace.getTitle(),
                 "Program Name",
                 ETraceAuthorType.PERSONAL,
+                "Some justification for ia use",
                 null,
                 null));
 
