@@ -251,6 +251,12 @@ class TraceControllerIT extends ContainerConfigurationTest {
         .isOk()
         .expectBody()
         .jsonPath("$[0].id")
+        .exists()
+        .jsonPath("$[0].title")
+        .exists()
+        .jsonPath("$[0].programName")
+        .exists()
+        .jsonPath("$[0].aiUseJustification")
         .exists();
 
     BddLogger.then("it should return trace overview");

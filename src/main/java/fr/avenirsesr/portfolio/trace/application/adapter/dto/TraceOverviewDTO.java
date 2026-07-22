@@ -11,5 +11,6 @@ public record TraceOverviewDTO(
     String title,
     String programName,
     @Schema(ref = "#/components/schemas/ETraceAuthorType") ETraceAuthorType authorType,
+    String aiUseJustification,
     Instant createdAt,
     Instant updatedAt) {}
