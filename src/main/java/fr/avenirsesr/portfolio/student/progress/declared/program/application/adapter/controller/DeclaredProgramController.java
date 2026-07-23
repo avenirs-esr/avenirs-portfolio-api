@@ -78,7 +78,8 @@ public class DeclaredProgramController {
             declaredProgramRequestDTO.result(),
             declaredProgramRequestDTO.sourceOfInformation(),
             declaredProgramRequestDTO.startDate(),
-            declaredProgramRequestDTO.endDate());
+            declaredProgramRequestDTO.endDate(),
+            declaredProgramRequestDTO.valorized());
     return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));
   }
 

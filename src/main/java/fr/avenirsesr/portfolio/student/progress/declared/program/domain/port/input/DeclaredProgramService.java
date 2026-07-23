@@ -41,7 +41,8 @@ public interface DeclaredProgramService {
       String result,
       String sourceOfInformation,
       LocalDate startDate,
-      LocalDate endDate);
+      LocalDate endDate,
+      boolean valorized);
 
   void delete(List<UUID> declaredProgramIds);
 }

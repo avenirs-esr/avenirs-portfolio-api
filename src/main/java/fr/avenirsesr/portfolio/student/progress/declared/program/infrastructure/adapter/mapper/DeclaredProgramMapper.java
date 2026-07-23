@@ -22,6 +22,7 @@ public class DeclaredProgramMapper implements Mapper<DeclaredProgramEntity, Decl
         declaredProgram.getSourceOfInformation(),
         declaredProgram.getStartDate(),
         declaredProgram.getEndDate(),
+        declaredProgram.isValorized(),
         declaredProgram.getCreatedAt(),
         declaredProgram.getUpdatedAt());
   }
@@ -39,6 +40,7 @@ public class DeclaredProgramMapper implements Mapper<DeclaredProgramEntity, Decl
         declaredProgram.getSourceOfInformation(),
         declaredProgram.getStartDate(),
         declaredProgram.getEndDate(),
+        declaredProgram.isValorized(),
         declaredProgram.getCreatedAt(),
         declaredProgram.getUpdatedAt());
   }
@@ -60,6 +62,7 @@ public class DeclaredProgramMapper implements Mapper<DeclaredProgramEntity, Decl
         declaredProgram.getSourceOfInformation(),
         declaredProgram.getStartDate(),
         declaredProgram.getEndDate(),
+        declaredProgram.isValorized(),
         declaredProgram.getCreatedAt(),
         declaredProgram.getUpdatedAt());
   }

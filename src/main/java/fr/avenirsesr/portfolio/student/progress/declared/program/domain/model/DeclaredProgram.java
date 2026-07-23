@@ -21,6 +21,7 @@ public class DeclaredProgram extends AvenirsBaseModel {
   private String sourceOfInformation;
   private LocalDate startDate;
   private LocalDate endDate;
+  private boolean valorized;
 
   private DeclaredProgram(
       UUID id,
@@ -33,6 +34,7 @@ public class DeclaredProgram extends AvenirsBaseModel {
       String sourceOfInformation,
       LocalDate startDate,
       LocalDate endDate,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -45,6 +47,7 @@ public class DeclaredProgram extends AvenirsBaseModel {
     this.endDate = endDate;
     this.result = result;
     this.sourceOfInformation = sourceOfInformation;
+    this.valorized = valorized;
   }
 
   public static DeclaredProgram create(
@@ -68,6 +71,7 @@ public class DeclaredProgram extends AvenirsBaseModel {
         sourceOfInformation,
         startDate,
         endDate,
+        false,
         Instant.now(),
         Instant.now());
   }
@@ -83,6 +87,7 @@ public class DeclaredProgram extends AvenirsBaseModel {
       String sourceOfInformation,
       LocalDate startDate,
       LocalDate endDate,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     return new DeclaredProgram(
@@ -96,6 +101,7 @@ public class DeclaredProgram extends AvenirsBaseModel {
         sourceOfInformation,
         startDate,
         endDate,
+        valorized,
         createdAt,
         updatedAt);
   }
