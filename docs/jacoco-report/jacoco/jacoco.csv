@@ -10,7 +10,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.filter,ETraceFilterKe
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.domain.filter,TraceFilter,0,76,0,12,0,11,0,8,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification,SelfKnowledgeCategorySpecification,15,96,3,3,0,22,4,7,1,7
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.infrastructure.adapter.specification,SelfKnowledgeElementSpecification,35,0,4,0,7,0,7,0,5,0
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.controller,DeclaredSkillProgressController,121,147,0,0,31,37,6,6,6,6
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.controller,DeclaredSkillProgressController,123,147,0,0,32,37,6,6,6,6
 avenirs-portfolio-api,fr.avenirsesr.portfolio.trace.application.adapter.controller,TraceController,141,462,0,0,33,107,5,15,5,15
 avenirs-portfolio-api,fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller,SelfKnowledgeController,53,113,0,0,10,34,2,8,2,8
 avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.specification,DeclaredProgramSpecification,5,34,1,5,2,5,2,3,1,1
@@ -41,7 +41,7 @@ avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.reposi
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,GenericUserJpaRepositoryAdapter,0,10,0,0,0,3,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,StaffDatabaseRepository,0,10,0,0,0,3,0,1,0,1
 avenirs-portfolio-api,fr.avenirsesr.portfolio.user.infrastructure.adapter.repository,UserDatabaseRepository,0,11,0,0,0,3,0,2,0,2
-avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service,DeclaredSkillProgressServiceImpl,53,539,5,28,13,140,13,35,8,23
+avenirs-portfolio-api,fr.avenirsesr.portfolio.student.progress.declared.skill.domain.service,DeclaredSkillProgressServiceImpl,53,542,5,28,13,141,13,35,8,23
 avenirs-portfolio-api,fr.avenirsesr.portfolio.activity.infrastructure.adapter.specification,ActivitySpecification,33,19,4,0,8,3,7,4,5,4
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,CustomDateTimeProvider,0,11,0,0,0,4,0,2,0,2
 avenirs-portfolio-api,fr.avenirsesr.portfolio.shared.infrastructure.context,PrometheusLogFilter,5,11,3,3,1,3,2,3,0,2
