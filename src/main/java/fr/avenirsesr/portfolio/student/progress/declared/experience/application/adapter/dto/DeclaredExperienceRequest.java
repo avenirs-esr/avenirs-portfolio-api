@@ -26,4 +26,4 @@ public record DeclaredExperienceRequest(
     String externalLink,
     LocalDate startDate,
     LocalDate endDate,
-    boolean valorized) {}
+    Boolean valorized) {}

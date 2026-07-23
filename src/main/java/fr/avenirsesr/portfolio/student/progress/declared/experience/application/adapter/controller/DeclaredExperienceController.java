@@ -95,7 +95,7 @@ public class DeclaredExperienceController {
             request.externalLink(),
             request.startDate(),
             request.endDate(),
-            request.valorized());
+            Boolean.TRUE.equals(request.valorized()));
 
     return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));
   }
