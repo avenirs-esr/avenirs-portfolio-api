@@ -86,7 +86,9 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.id")
         .exists()
         .jsonPath("$.title")
-        .isEqualTo("My Experience");
+        .isEqualTo("My Experience")
+        .jsonPath("$.valorized")
+        .isEqualTo(false);
   }
 
   @Transactional
@@ -272,6 +274,65 @@ public class DeclaredExperienceControllerIT extends ContainerConfigurationTest {
         .isEqualTo("Lyon")
         .jsonPath("$.externalLink")
         .isEqualTo("https://updated.com");
+  }
+
+  @Transactional
+  @Test
+  void shouldUpdateDeclaredExperienceValorizedFlag() throws Exception {
+    BddLogger.given("an existing declared experience");
+    String responseBody =
+        webTestClient
+            .post()
+            .uri(BASE_PATH + "/")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildCreateExperienceJson())
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    String createdId = extractIdFromResponse(responseBody);
+
+    String updateJson =
+        "{\n"
+            + "  \"title\": \"My Experience\",\n"
+            + "  \"experienceType\": \"PROFESSIONAL\",\n"
+            + "  \"organization\": \"ACME Inc\",\n"
+            + "  \"activitySector\": \"IT\",\n"
+            + "  \"location\": \"Paris\",\n"
+            + "  \"description\": \"Some description\",\n"
+            + "  \"sourceOfInformation\": \"SELF_DECLARED\",\n"
+            + "  \"summary\": \"Summary text\",\n"
+            + "  \"externalLink\": \"https://example.com\",\n"
+            + "  \"startDate\": \"2024-01-01\",\n"
+            + "  \"endDate\": \"2024-03-01\",\n"
+            + "  \"valorized\": true\n"
+            + "}\n";
+
+    BddLogger.when("performing PUT with valorized set to true");
+    BddLogger.then("it should return the experience marked as valorized");
+
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + createdId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(updateJson)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(createdId)
+        .jsonPath("$.valorized")
+        .isEqualTo(true);
   }
 
   @Test

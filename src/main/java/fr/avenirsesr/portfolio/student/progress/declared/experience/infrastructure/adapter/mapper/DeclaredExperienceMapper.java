@@ -27,7 +27,8 @@ public class DeclaredExperienceMapper
         declaredExperience.getSummary(),
         declaredExperience.getExternalLink(),
         declaredExperience.getStartDate(),
-        declaredExperience.getEndDate());
+        declaredExperience.getEndDate(),
+        declaredExperience.isValorized());
   }
 
   @Override
@@ -47,7 +48,8 @@ public class DeclaredExperienceMapper
         entity.getSummary(),
         entity.getExternalLink(),
         entity.getStartDate(),
-        entity.getEndDate());
+        entity.getEndDate(),
+        entity.isValorized());
   }
 
   @Override
@@ -71,6 +73,7 @@ public class DeclaredExperienceMapper
         entity.getSummary(),
         entity.getExternalLink(),
         entity.getStartDate(),
-        entity.getEndDate());
+        entity.getEndDate(),
+        entity.isValorized());
   }
 }

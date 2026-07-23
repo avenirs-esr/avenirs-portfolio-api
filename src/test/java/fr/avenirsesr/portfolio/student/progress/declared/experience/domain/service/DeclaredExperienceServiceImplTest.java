@@ -454,7 +454,8 @@ class DeclaredExperienceServiceImplTest {
             "Summary",
             "https://test.fr",
             start,
-            end);
+            end,
+            false);
 
     assertNotNull(result);
     verify(loggedInUserService).getLoggedInStudent();
@@ -482,7 +483,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "https://test.fr",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -510,7 +512,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "https://test.fr",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -537,7 +540,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "https://test.fr",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -565,7 +569,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "https://test.fr",
                 start,
-                wrongEnd));
+                wrongEnd,
+                false));
   }
 
   @Test
@@ -592,7 +597,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "https://test.fr",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -620,7 +626,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "https://test.fr",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -648,7 +655,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "https://test.fr",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -676,7 +684,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "https://test.fr",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -704,7 +713,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "https://test.fr",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -732,7 +742,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "https://test.fr",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -760,7 +771,8 @@ class DeclaredExperienceServiceImplTest {
                 tooLong,
                 "https://test.fr",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -787,7 +799,8 @@ class DeclaredExperienceServiceImplTest {
                 "Summary",
                 "not-an-url",
                 start,
-                end));
+                end,
+                false));
   }
 
   @Test
@@ -817,7 +830,8 @@ class DeclaredExperienceServiceImplTest {
             "New Summary",
             "https://new.link",
             start,
-            end);
+            end,
+            true);
 
     // THEN
     assertNotNull(result);
@@ -834,8 +848,69 @@ class DeclaredExperienceServiceImplTest {
     verify(experience).setExternalLink("https://new.link");
     verify(experience).setStartDate(start);
     verify(experience).setEndDate(end);
+    verify(experience).setValorized(true);
 
     verify(experienceRepository).save(experience);
+  }
+
+  @Test
+  void thenItShouldUpdateValorizedFieldToTrue() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    DeclaredExperience saved = mock(DeclaredExperience.class);
+    UUID expId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(expId)).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+    when(experienceRepository.save(any())).thenReturn(saved);
+
+    service.update(
+        expId,
+        "Titre",
+        EExperienceType.PROFESSIONAL,
+        "Org",
+        "Sector",
+        "Paris",
+        "Desc",
+        "Source",
+        "Summary",
+        "https://test.fr",
+        start,
+        end,
+        true);
+
+    verify(experience).setValorized(true);
+  }
+
+  @Test
+  void thenItShouldUpdateValorizedFieldToFalse() {
+    Student loggedIn = student;
+    DeclaredExperience experience = mock(DeclaredExperience.class);
+    DeclaredExperience saved = mock(DeclaredExperience.class);
+    UUID expId = UUID.randomUUID();
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findById(expId)).thenReturn(Optional.of(experience));
+    when(experience.getStudent()).thenReturn(loggedIn);
+    when(experienceRepository.save(any())).thenReturn(saved);
+
+    service.update(
+        expId,
+        "Titre",
+        EExperienceType.PROFESSIONAL,
+        "Org",
+        "Sector",
+        "Paris",
+        "Desc",
+        "Source",
+        "Summary",
+        "https://test.fr",
+        start,
+        end,
+        false);
+
+    verify(experience).setValorized(false);
   }
 
   @Test

@@ -8,7 +8,9 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model
 import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model.enums.EExperienceType;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
@@ -55,5 +57,36 @@ class DeclaredExperienceMapperTest {
     assertEquals(experience.getTitle(), dto.title());
     assertEquals(EExperienceType.PROFESSIONAL, dto.experienceType());
     assertEquals("Tech Corp", dto.organization());
+    assertFalse(dto.valorized());
+  }
+
+  @Test
+  void shouldMapValorizedExperienceToViewDTO() {
+    BddLogger.given("a valorized declared experience");
+    Student student = StudentFixture.create().toModel();
+    DeclaredExperience experience =
+        DeclaredExperience.toDomain(
+            UUID.randomUUID(),
+            Instant.now(),
+            Instant.now(),
+            student,
+            "Software Experience",
+            EExperienceType.PROFESSIONAL,
+            "Tech Corp",
+            "Software",
+            "Paris",
+            "Backend development",
+            "LinkedIn",
+            "Built REST APIs",
+            "https://techcorp.com",
+            LocalDate.now().minusMonths(6),
+            LocalDate.now(),
+            true);
+
+    BddLogger.when("mapping to DeclaredExperienceViewDTO");
+    DeclaredExperienceViewDTO dto = mapper.toDTO(experience);
+
+    BddLogger.then("it should reflect the valorized flag");
+    assertTrue(dto.valorized());
   }
 }

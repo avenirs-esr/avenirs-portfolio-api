@@ -162,7 +162,8 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
       String summary,
       String externalLink,
       LocalDate startDate,
-      LocalDate endDate) {
+      LocalDate endDate,
+      boolean valorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     log.info("Update experienceId {} by {}", experienceId, student);
 
@@ -196,6 +197,7 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
     experience.setExternalLink(externalLink);
     experience.setStartDate(startDate);
     experience.setEndDate(endDate);
+    experience.setValorized(valorized);
     experience = experienceRepository.save(experience);
 
     log.info("{} updated successfully", experience);
