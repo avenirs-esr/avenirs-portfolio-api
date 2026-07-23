@@ -145,69 +145,65 @@ import org.springframework.stereotype.Repository;
 <span class="fc" id="L145">            .setFirstResult(pageCriteria.page() * pageCriteria.pageSize())</span>
 <span class="fc" id="L146">            .setMaxResults(pageCriteria.pageSize());</span>
 
-<span class="pc bpc" id="L148" title="1 of 4 branches missed.">    if (activityStatus == EActivityStatus.PUBLISHED</span>
+<span class="fc" id="L148">    Query countQuery = em.createNativeQuery(countSql).setParameter(&quot;authorId&quot;, author.getId());</span>
+
+<span class="pc bpc" id="L150" title="1 of 4 branches missed.">    if (activityStatus == EActivityStatus.PUBLISHED</span>
         || activityStatus == EActivityStatus.UNPUBLISHED) {
-<span class="fc" id="L150">      dataQuery.setParameter(&quot;activityStatus&quot;, activityStatus.name());</span>
+<span class="fc" id="L152">      dataQuery.setParameter(&quot;activityStatus&quot;, activityStatus.name());</span>
+<span class="fc" id="L153">      countQuery.setParameter(&quot;activityStatus&quot;, activityStatus.name());</span>
     }
 
-<span class="fc" id="L153">    Query countQuery = em.createNativeQuery(countSql).setParameter(&quot;authorId&quot;, author.getId());</span>
+<span class="fc" id="L156">    List&lt;Object[]&gt; rows = dataQuery.getResultList();</span>
+<span class="fc" id="L157">    long total = ((Number) countQuery.getSingleResult()).longValue();</span>
 
-<span class="pc bpc" id="L155" title="1 of 4 branches missed.">    if (activityStatus == EActivityStatus.PUBLISHED</span>
-        || activityStatus == EActivityStatus.UNPUBLISHED) {
-<span class="fc" id="L157">      countQuery.setParameter(&quot;activityStatus&quot;, activityStatus.name());</span>
-    }
+<span class="fc" id="L159">    List&lt;ActivityStaffOverviewData&gt; content =</span>
+<span class="fc" id="L160">        rows.stream().map(row -&gt; mapRow(row, author)).toList();</span>
 
-<span class="fc" id="L160">    List&lt;Object[]&gt; rows = dataQuery.getResultList();</span>
-<span class="fc" id="L161">    long total = ((Number) countQuery.getSingleResult()).longValue();</span>
-
-<span class="fc" id="L163">    List&lt;ActivityStaffOverviewData&gt; content =</span>
-<span class="fc" id="L164">        rows.stream().map(row -&gt; mapRow(row, author)).toList();</span>
-
-<span class="fc" id="L166">    return new PagedResult&lt;&gt;(</span>
-<span class="fc" id="L167">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));</span>
+<span class="fc" id="L162">    return new PagedResult&lt;&gt;(</span>
+<span class="fc" id="L163">        content, new PageInfo(pageCriteria.page(), pageCriteria.pageSize(), total));</span>
   }
 
   private ActivityStaffOverviewData mapRow(Object[] row, Staff author) {
-<span class="fc" id="L171">    return new ActivityStaffOverviewData(</span>
-<span class="fc" id="L172">        toUUID(row[0]),</span>
-<span class="fc" id="L173">        toString(row[1]),</span>
-<span class="fc" id="L174">        EActivityThematic.valueOf(toString(row[2])),</span>
+<span class="fc" id="L167">    return new ActivityStaffOverviewData(</span>
+<span class="fc" id="L168">        toUUID(row[0]),</span>
+<span class="fc" id="L169">        toString(row[1]),</span>
+<span class="fc" id="L170">        EActivityThematic.valueOf(toString(row[2])),</span>
         author,
-<span class="fc" id="L176">        EActivityStatus.valueOf(toString(row[4])),</span>
-<span class="fc" id="L177">        toInstant(row[5]));</span>
+<span class="fc" id="L172">        EActivityStatus.valueOf(toString(row[4])),</span>
+<span class="fc" id="L173">        toInstant(row[5]));</span>
   }
 
   private String toString(Object value) {
-<span class="pc bpc" id="L181" title="2 of 3 branches missed.">    return switch (value) {</span>
-<span class="fc" id="L182">      case String s -&gt; s;</span>
-<span class="nc" id="L183">      case byte[] b -&gt; new String(b, StandardCharsets.UTF_8);</span>
+<span class="pc bpc" id="L177" title="2 of 3 branches missed.">    return switch (value) {</span>
+<span class="fc" id="L178">      case String s -&gt; s;</span>
+<span class="nc" id="L179">      case byte[] b -&gt; new String(b, StandardCharsets.UTF_8);</span>
       default -&gt;
-<span class="nc" id="L185">          throw new IllegalArgumentException(&quot;Type inattendu pour String : &quot; + value.getClass());</span>
+<span class="nc" id="L181">          throw new IllegalArgumentException(&quot;Type inattendu pour String : &quot; + value.getClass());</span>
     };
   }
 
   private UUID toUUID(Object value) {
-<span class="pc bpc" id="L190" title="3 of 4 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L191">      case UUID u -&gt; u;</span>
-<span class="nc" id="L192">      case String s -&gt; UUID.fromString(s);</span>
-<span class="fc" id="L193">      case byte[] b -&gt; {</span>
-<span class="fc" id="L194">        ByteBuffer bb = ByteBuffer.wrap(b);</span>
-<span class="fc" id="L195">        yield new UUID(bb.getLong(), bb.getLong());</span>
+<span class="pc bpc" id="L186" title="3 of 4 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L187">      case UUID u -&gt; u;</span>
+<span class="nc" id="L188">      case String s -&gt; UUID.fromString(s);</span>
+<span class="fc" id="L189">      case byte[] b -&gt; {</span>
+<span class="fc" id="L190">        ByteBuffer bb = ByteBuffer.wrap(b);</span>
+<span class="fc" id="L191">        yield new UUID(bb.getLong(), bb.getLong());</span>
       }
       default -&gt;
-<span class="nc" id="L198">          throw new IllegalArgumentException(&quot;Type inattendu pour UUID : &quot; + value.getClass());</span>
+<span class="nc" id="L194">          throw new IllegalArgumentException(&quot;Type inattendu pour UUID : &quot; + value.getClass());</span>
     };
   }
 
   private Instant toInstant(Object value) {
-<span class="pc bpc" id="L203" title="5 of 6 branches missed.">    return switch (value) {</span>
-<span class="nc" id="L204">      case Instant i -&gt; i;</span>
-<span class="nc" id="L205">      case Timestamp ts -&gt; ts.getTimestamp().toInstant();</span>
-<span class="fc" id="L206">      case OffsetDateTime odt -&gt; odt.toInstant();</span>
-<span class="nc" id="L207">      case LocalDateTime ldt -&gt; ldt.toInstant(ZoneOffset.UTC);</span>
-<span class="nc" id="L208">      case byte[] b -&gt; Instant.parse(new String(b, StandardCharsets.UTF_8));</span>
+<span class="pc bpc" id="L199" title="5 of 6 branches missed.">    return switch (value) {</span>
+<span class="nc" id="L200">      case Instant i -&gt; i;</span>
+<span class="nc" id="L201">      case Timestamp ts -&gt; ts.getTimestamp().toInstant();</span>
+<span class="fc" id="L202">      case OffsetDateTime odt -&gt; odt.toInstant();</span>
+<span class="nc" id="L203">      case LocalDateTime ldt -&gt; ldt.toInstant(ZoneOffset.UTC);</span>
+<span class="nc" id="L204">      case byte[] b -&gt; Instant.parse(new String(b, StandardCharsets.UTF_8));</span>
       default -&gt;
-<span class="nc" id="L210">          throw new IllegalArgumentException(&quot;Type inattendu pour Instant : &quot; + value.getClass());</span>
+<span class="nc" id="L206">          throw new IllegalArgumentException(&quot;Type inattendu pour Instant : &quot; + value.getClass());</span>
     };
   }
 }

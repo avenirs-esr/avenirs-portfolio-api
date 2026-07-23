@@ -18,23 +18,19 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="fc" id="L18">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;thematic&quot;), thematic);</span>
   }
 
-  public static Specification&lt;ActivityEntity&gt; withStatus(EActivityStatus status) {
-<span class="nc" id="L22">    return (root, query, criteriaBuilder) -&gt; criteriaBuilder.equal(root.get(&quot;status&quot;), status);</span>
-  }
-
   public static Specification&lt;ActivityEntity&gt; latest(Duration duration) {
-<span class="nc" id="L26">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc" id="L27">      Instant threshold = Instant.now().minus(duration);</span>
-<span class="nc" id="L28">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
+<span class="nc" id="L22">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc" id="L23">      Instant threshold = Instant.now().minus(duration);</span>
+<span class="nc" id="L24">      return criteriaBuilder.greaterThan(root.get(&quot;createdAt&quot;), threshold);</span>
     };
   }
 
   public static Specification&lt;ActivityEntity&gt; exclude(List&lt;ActivityEntity&gt; activities) {
-<span class="nc" id="L33">    return (root, query, criteriaBuilder) -&gt; {</span>
-<span class="nc bnc" id="L34" title="All 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
-<span class="nc" id="L35">        return criteriaBuilder.conjunction();</span>
+<span class="nc" id="L29">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="nc bnc" id="L30" title="All 4 branches missed.">      if (activities == null || activities.isEmpty()) {</span>
+<span class="nc" id="L31">        return criteriaBuilder.conjunction();</span>
       }
-<span class="nc" id="L37">      return root.in(activities).not();</span>
+<span class="nc" id="L33">      return root.in(activities).not();</span>
     };
   }
 }
