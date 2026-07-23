@@ -30,113 +30,113 @@ import org.springframework.stereotype.Repository;
   public PagedResult&lt;ActivityStaffOverviewData&gt; findAllByAuthorAndStatus(
       Staff author, EActivityStatus activityStatus, PageCriteria pageCriteria) {
 
+<span class="fc" id="L33">    String activitySelect =</span>
+        &quot;&quot;&quot;
+        SELECT
+            a.id         AS activity_id,
+            a.title      AS title,
+            a.thematic   AS thematic,
+            a.author_id  AS author_id,
+            a.status     AS status,
+            a.updated_at AS updated_at
+        FROM activity a
+        WHERE a.author_id = :authorId
+        &quot;&quot;&quot;;
+
+<span class="fc" id="L46">    String activitySelectWithStatus = activitySelect + &quot; AND a.status = :activityStatus&quot;;</span>
+
+<span class="fc" id="L48">    String draftSelect =</span>
+        &quot;&quot;&quot;
+        SELECT
+            d.id         AS activity_id,
+            d.title      AS title,
+            d.thematic   AS thematic,
+            d.author_id  AS author_id,
+            'DRAFT'      AS status,
+            d.updated_at AS updated_at
+        FROM activity_draft d
+        WHERE d.author_id = :authorId
+        &quot;&quot;&quot;;
+
     String unionSql;
-
-<span class="fc bfc" id="L35" title="All 3 branches covered.">    switch (activityStatus) {</span>
-      case DRAFT -&gt;
-<span class="fc" id="L37">          unionSql =</span>
-              &quot;&quot;&quot;
-              SELECT *
-              FROM (
-                  SELECT
-                      d.id         AS activity_id,
-                      d.title      AS title,
-                      d.thematic   AS thematic,
-                      d.author_id  AS author_id,
-                      'DRAFT'      AS status,
-                      d.updated_at AS updated_at
-                  FROM activity_draft d
-                  WHERE d.author_id = :authorId
-              ) AS unified
-              ORDER BY updated_at DESC
-              &quot;&quot;&quot;;
-
-      case PUBLISHED, UNPUBLISHED -&gt;
-<span class="fc" id="L55">          unionSql =</span>
-              &quot;&quot;&quot;
-              SELECT *
-              FROM (
-                  SELECT
-                      a.id         AS activity_id,
-                      a.title      AS title,
-                      a.thematic   AS thematic,
-                      a.author_id  AS author_id,
-                      a.status     AS status,
-                      a.updated_at AS updated_at
-                  FROM activity a
-                  WHERE a.author_id = :authorId
-                    AND a.status = :activityStatus
-              ) AS unified
-              ORDER BY updated_at DESC
-              &quot;&quot;&quot;;
-
-      case null -&gt;
-<span class="fc" id="L74">          unionSql =</span>
-              &quot;&quot;&quot;
-              SELECT *
-              FROM (
-                  SELECT
-                      a.id         AS activity_id,
-                      a.title      AS title,
-                      a.thematic   AS thematic,
-                      a.author_id  AS author_id,
-                      a.status     AS status,
-                      a.updated_at AS updated_at
-                  FROM activity a
-                  WHERE a.author_id = :authorId
-
-                  UNION ALL
-
-                  SELECT
-                      d.id         AS activity_id,
-                      d.title      AS title,
-                      d.thematic   AS thematic,
-                      d.author_id  AS author_id,
-                      'DRAFT'      AS status,
-                      d.updated_at AS updated_at
-                  FROM activity_draft d
-                  WHERE d.author_id = :authorId
-              ) AS unified
-              ORDER BY updated_at DESC
-              &quot;&quot;&quot;;
-    }
-
     String countSql;
 
-<span class="fc bfc" id="L106" title="All 3 branches covered.">    switch (activityStatus) {</span>
-      case DRAFT -&gt;
-<span class="fc" id="L108">          countSql =</span>
-              &quot;&quot;&quot;
-              SELECT COUNT(*)
-              FROM activity_draft d
-              WHERE d.author_id = :authorId
-              &quot;&quot;&quot;;
+<span class="fc bfc" id="L64" title="All 3 branches covered.">    switch (activityStatus) {</span>
+      case DRAFT -&gt; {
+<span class="fc" id="L66">        unionSql =</span>
+            &quot;&quot;&quot;
+            SELECT *
+            FROM (
+            &quot;&quot;&quot;
+                + draftSelect
+                + &quot;&quot;&quot;
+                ) AS unified
+                ORDER BY updated_at DESC
+                &quot;&quot;&quot;;
 
-      case PUBLISHED, UNPUBLISHED -&gt;
-<span class="fc" id="L116">          countSql =</span>
-              &quot;&quot;&quot;
-              SELECT COUNT(*)
-              FROM activity a
-              WHERE a.author_id = :authorId
-                AND a.status = :activityStatus
-              &quot;&quot;&quot;;
+<span class="fc" id="L77">        countSql =</span>
+            &quot;&quot;&quot;
+            SELECT COUNT(*)
+            FROM activity_draft d
+            WHERE d.author_id = :authorId
+            &quot;&quot;&quot;;
+<span class="fc" id="L83">      }</span>
 
-      case null -&gt;
-<span class="fc" id="L125">          countSql =</span>
-              &quot;&quot;&quot;
-              SELECT COUNT(*)
-              FROM (
-                  SELECT id
-                  FROM activity
-                  WHERE author_id = :authorId
+      case PUBLISHED, UNPUBLISHED -&gt; {
+<span class="fc" id="L86">        unionSql =</span>
+            &quot;&quot;&quot;
+            SELECT *
+            FROM (
+            &quot;&quot;&quot;
+                + activitySelectWithStatus
+                + &quot;&quot;&quot;
+                ) AS unified
+                ORDER BY updated_at DESC
+                &quot;&quot;&quot;;
 
-                  UNION ALL
+<span class="fc" id="L97">        countSql =</span>
+            &quot;&quot;&quot;
+            SELECT COUNT(*)
+            FROM activity a
+            WHERE a.author_id = :authorId
+              AND a.status = :activityStatus
+            &quot;&quot;&quot;;
+<span class="fc" id="L104">      }</span>
 
-                  SELECT id
-                  FROM activity_draft
-                  WHERE author_id = :authorId
-              ) AS total
-              &quot;&quot;&quot;;
+      case null -&gt; {
+<span class="fc" id="L107">        unionSql =</span>
+            &quot;&quot;&quot;
+            SELECT *
+            FROM (
+            &quot;&quot;&quot;
+                + activitySelect
+                + &quot;&quot;&quot;
+
+                UNION ALL
+
+                &quot;&quot;&quot;
+                + draftSelect
+                + &quot;&quot;&quot;
+                ) AS unified
+                ORDER BY updated_at DESC
+                &quot;&quot;&quot;;
+
+<span class="fc" id="L124">        countSql =</span>
+            &quot;&quot;&quot;
+            SELECT COUNT(*)
+            FROM (
+                SELECT id
+                FROM activity
+                WHERE author_id = :authorId
+
+                UNION ALL
+
+                SELECT id
+                FROM activity_draft
+                WHERE author_id = :authorId
+            ) AS total
+            &quot;&quot;&quot;;
+      }
     }
 
 <span class="fc" id="L142">    Query dataQuery =</span>
