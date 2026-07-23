@@ -197,7 +197,41 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
         .jsonPath("$.id")
         .exists()
         .jsonPath("$.title")
-        .isEqualTo("New");
+        .isEqualTo("New")
+        .jsonPath("$.valorized")
+        .isEqualTo(false);
+  }
+
+  @Test
+  void shouldUpdateSelfKnowledgeElementValorizedFlag() throws Exception {
+    String categoryId = getLinkedCategoryId();
+    String elementId = createElement(categoryId, "Test", "Desc", 3);
+
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/element/{elementId}", elementId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            """
+            {
+              "title": "Test",
+              "description": "Desc",
+              "rating": 3,
+              "valorized": true
+            }
+            """)
+        .header("Accept-Language", ELanguage.FRENCH.getCode())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody()
+        .jsonPath("$.id")
+        .isEqualTo(elementId)
+        .jsonPath("$.valorized")
+        .isEqualTo(true);
   }
 
   @Test

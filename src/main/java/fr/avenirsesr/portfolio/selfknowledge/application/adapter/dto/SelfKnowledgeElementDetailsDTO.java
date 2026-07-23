@@ -10,5 +10,6 @@ public record SelfKnowledgeElementDetailsDTO(
     String title,
     String description,
     Integer rating,
+    boolean valorized,
     Instant createdAt,
     Instant updatedAt) {}

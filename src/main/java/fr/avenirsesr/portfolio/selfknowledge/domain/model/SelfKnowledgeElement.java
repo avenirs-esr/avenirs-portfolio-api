@@ -15,6 +15,7 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
   private String description;
   private Integer rating;
   private final SelfKnowledgeCategory selfKnowledgeCategory;
+  private boolean valorized;
 
   private SelfKnowledgeElement(
       UUID id,
@@ -23,6 +24,7 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
       String description,
       Integer rating,
       SelfKnowledgeCategory selfKnowledgeCategory,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -31,6 +33,7 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
     this.description = description;
     this.rating = rating;
     this.selfKnowledgeCategory = selfKnowledgeCategory;
+    this.valorized = valorized;
   }
 
   public static SelfKnowledgeElement create(
@@ -47,6 +50,7 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
         description,
         rating,
         selfKnowledgeCategory,
+        false,
         Instant.now(),
         Instant.now());
   }
@@ -58,9 +62,18 @@ public class SelfKnowledgeElement extends AvenirsBaseModel {
       String description,
       Integer rating,
       SelfKnowledgeCategory selfKnowledgeCategory,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     return new SelfKnowledgeElement(
-        id, student, title, description, rating, selfKnowledgeCategory, createdAt, updatedAt);
+        id,
+        student,
+        title,
+        description,
+        rating,
+        selfKnowledgeCategory,
+        valorized,
+        createdAt,
+        updatedAt);
   }
 }

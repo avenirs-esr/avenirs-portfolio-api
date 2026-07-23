@@ -28,5 +28,6 @@ class SelfKnowledgeElementDetailsMapperTest {
     assertEquals(element.getTitle(), dto.title());
     assertEquals(element.getDescription(), dto.description());
     assertEquals(element.getRating(), dto.rating());
+    assertEquals(element.isValorized(), dto.valorized());
   }
 }

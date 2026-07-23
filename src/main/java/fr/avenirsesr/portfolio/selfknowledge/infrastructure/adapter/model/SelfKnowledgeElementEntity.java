@@ -46,6 +46,9 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
   @JoinColumn(name = "self_knowledge_category_id", nullable = false)
   private SelfKnowledgeCategoryEntity selfKnowledgeCategory;
 
+  @Column(nullable = false)
+  private boolean valorized;
+
   private SelfKnowledgeElementEntity(
       UUID id,
       StudentEntity student,
@@ -53,6 +56,7 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
       String description,
       Integer rating,
       SelfKnowledgeCategoryEntity selfKnowledgeCategory,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     this.setId(id);
@@ -61,6 +65,7 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
     this.description = description;
     this.rating = rating;
     this.selfKnowledgeCategory = selfKnowledgeCategory;
+    this.valorized = valorized;
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
   }
@@ -72,9 +77,18 @@ public class SelfKnowledgeElementEntity extends AvenirsBaseEntity {
       String description,
       Integer rating,
       SelfKnowledgeCategoryEntity selfKnowledgeCategory,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     return new SelfKnowledgeElementEntity(
-        id, student, title, description, rating, selfKnowledgeCategory, createdAt, updatedAt);
+        id,
+        student,
+        title,
+        description,
+        rating,
+        selfKnowledgeCategory,
+        valorized,
+        createdAt,
+        updatedAt);
   }
 }

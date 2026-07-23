@@ -16,6 +16,7 @@ public class SelfKnowledgeElementFixture {
   private String description;
   private Integer rating;
   private SelfKnowledgeCategory selfKnowledgeCategory;
+  private boolean valorized;
   private Instant createdAt;
   private Instant updatedAt;
 
@@ -28,6 +29,7 @@ public class SelfKnowledgeElementFixture {
             + " mes projets scolaires et personnels.";
     this.rating = 1;
     this.selfKnowledgeCategory = SelfKnowledgeCategoryFixture.create().toModel();
+    this.valorized = false;
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }
@@ -75,6 +77,11 @@ public class SelfKnowledgeElementFixture {
     return this;
   }
 
+  public SelfKnowledgeElementFixture withValorized(boolean valorized) {
+    this.valorized = valorized;
+    return this;
+  }
+
   public SelfKnowledgeElementFixture withCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
     return this;
@@ -87,6 +94,14 @@ public class SelfKnowledgeElementFixture {
 
   public SelfKnowledgeElement toModel() {
     return SelfKnowledgeElement.toDomain(
-        id, student, title, description, rating, selfKnowledgeCategory, createdAt, updatedAt);
+        id,
+        student,
+        title,
+        description,
+        rating,
+        selfKnowledgeCategory,
+        valorized,
+        createdAt,
+        updatedAt);
   }
 }

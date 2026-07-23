@@ -20,7 +20,11 @@ public interface SelfKnowledgeService {
       UUID selfKnowledgeCategoryId, String title, String description, Integer rating);
 
   SelfKnowledgeElement updateSelfKnowledgeElement(
-      UUID selfKnowledgeElementId, String title, String description, Integer rating);
+      UUID selfKnowledgeElementId,
+      String title,
+      String description,
+      Integer rating,
+      boolean valorized);
 
   void deleteSelfKnowledgeElements(List<UUID> selfKnowledgeElementIds);
 
