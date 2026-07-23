@@ -120,6 +120,7 @@ public class FeedbackMapper implements Mapper<FeedbackEntity, Feedback> {
                         skills.get(snap.skillId()),
                         snap.level(),
                         snap.reflection(),
+                        false,
                         snap.createdAt(),
                         snap.updatedAt()))
             .toList();

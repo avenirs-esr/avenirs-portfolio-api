@@ -87,7 +87,8 @@ public class DeclaredSkillProgressController {
         declaredSkillProgressService.updateDeclaredSkillProgress(
             declaredSkillProgressId,
             declaredSkillProgressRequest.level(),
-            declaredSkillProgressRequest.reflection());
+            declaredSkillProgressRequest.reflection(),
+            declaredSkillProgressRequest.valorized());
     return ResponseEntity.ok(
         declaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));
   }

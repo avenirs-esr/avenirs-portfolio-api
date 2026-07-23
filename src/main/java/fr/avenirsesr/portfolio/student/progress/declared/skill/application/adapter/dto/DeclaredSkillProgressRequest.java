@@ -9,4 +9,5 @@ import jakarta.validation.constraints.Size;
 @Schema(requiredProperties = {"level", "reflection"})
 public record DeclaredSkillProgressRequest(
     @Schema(ref = "#/components/schemas/EDeclaredSkillLevel") EDeclaredSkillLevel level,
-    @Size(max = RICH_TEXT_LENGTH) String reflection) {}
+    @Size(max = RICH_TEXT_LENGTH) String reflection,
+    boolean valorized) {}

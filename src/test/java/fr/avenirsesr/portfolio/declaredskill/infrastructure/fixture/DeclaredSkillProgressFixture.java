@@ -28,6 +28,7 @@ public class DeclaredSkillProgressFixture {
   private DeclaredSkill skill;
   private EDeclaredSkillLevel level;
   private String reflection;
+  private boolean valorized;
   private Instant createdAt;
   private Instant updatedAt;
 
@@ -42,6 +43,7 @@ public class DeclaredSkillProgressFixture {
             List.of("Category", "Subcategory"));
     this.level = dataGenerator.with("level").pickIn(EDeclaredSkillLevel.class);
     this.reflection = declaredSkillProgressGenerator.with("sentence").reflection();
+    this.valorized = false;
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }
@@ -75,6 +77,11 @@ public class DeclaredSkillProgressFixture {
     return this;
   }
 
+  public DeclaredSkillProgressFixture withValorized(boolean valorized) {
+    this.valorized = valorized;
+    return this;
+  }
+
   public DeclaredSkillProgressFixture withCreatedAt(Instant createdAt) {
     this.createdAt = createdAt;
     return this;
@@ -87,6 +94,6 @@ public class DeclaredSkillProgressFixture {
 
   public DeclaredSkillProgress toModel() {
     return DeclaredSkillProgress.toDomain(
-        id, student, skill, level, reflection, createdAt, updatedAt);
+        id, student, skill, level, reflection, valorized, createdAt, updatedAt);
   }
 }

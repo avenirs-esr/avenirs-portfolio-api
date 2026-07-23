@@ -97,7 +97,10 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
 
   @Override
   public DeclaredSkillProgress updateDeclaredSkillProgress(
-      UUID declaredSkillProgressId, EDeclaredSkillLevel level, String reflection) {
+      UUID declaredSkillProgressId,
+      EDeclaredSkillLevel level,
+      String reflection,
+      boolean valorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     validateOptionalEnrichedTextMaxLength("reflection", reflection, RICH_DESCRIPTION_LENGTH);
 
@@ -112,6 +115,7 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
 
     declaredSkillProgress.setLevel(level);
     declaredSkillProgress.setReflection(reflection);
+    declaredSkillProgress.setValorized(valorized);
 
     return declaredSkillProgressRepository.save(declaredSkillProgress);
   }

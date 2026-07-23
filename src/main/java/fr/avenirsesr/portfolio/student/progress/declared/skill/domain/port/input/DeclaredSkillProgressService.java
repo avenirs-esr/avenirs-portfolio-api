@@ -20,7 +20,10 @@ public interface DeclaredSkillProgressService {
       UUID declaredSkillId, EExternalSkillType type, EDeclaredSkillLevel level, String reflection);
 
   DeclaredSkillProgress updateDeclaredSkillProgress(
-      UUID declaredSkillProgressId, EDeclaredSkillLevel level, String reflection);
+      UUID declaredSkillProgressId,
+      EDeclaredSkillLevel level,
+      String reflection,
+      boolean valorized);
 
   DeclaredSkillProgressDetails getDeclaredSkillProgressDetails(UUID declaredSkillProgressId);
 
