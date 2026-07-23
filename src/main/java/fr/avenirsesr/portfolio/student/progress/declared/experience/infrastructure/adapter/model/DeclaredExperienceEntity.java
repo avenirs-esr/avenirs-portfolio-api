@@ -68,6 +68,9 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
   @Column(name = "external_link")
   private String externalLink;
 
+  @Column(nullable = false)
+  private boolean valorized;
+
   private DeclaredExperienceEntity(
       UUID id,
       Instant createdAt,
@@ -83,7 +86,8 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
       String summary,
       String externalLink,
       LocalDate startDate,
-      LocalDate endDate) {
+      LocalDate endDate,
+      boolean valorized) {
     this.setId(id);
     this.setCreatedAt(createdAt);
     this.setUpdatedAt(updatedAt);
@@ -99,6 +103,7 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
     this.externalLink = externalLink;
     this.startDate = startDate;
     this.endDate = endDate;
+    this.valorized = valorized;
   }
 
   public static DeclaredExperienceEntity of(
@@ -116,7 +121,8 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
       String summary,
       String externalLink,
       LocalDate startDate,
-      LocalDate endDate) {
+      LocalDate endDate,
+      boolean valorized) {
     return new DeclaredExperienceEntity(
         id,
         createdAt,
@@ -132,6 +138,7 @@ public class DeclaredExperienceEntity extends PeriodEntity<LocalDate> {
         summary,
         externalLink,
         startDate,
-        endDate);
+        endDate,
+        valorized);
   }
 }

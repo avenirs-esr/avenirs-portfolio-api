@@ -20,5 +20,6 @@ public record DeclaredExperienceViewDTO(
     String externalLink,
     LocalDate startDate,
     LocalDate endDate,
+    boolean valorized,
     Instant createdAt,
     Instant updatedAt) {}

@@ -39,7 +39,8 @@ public class FakeDeclaredExperience {
             "fake summary",
             faker.internet().url(),
             LocalDate.now().minusWeeks(5),
-            null));
+            null,
+            false));
   }
 
   public DeclaredExperienceEntity toEntity() {

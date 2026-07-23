@@ -51,7 +51,8 @@ public interface DeclaredExperienceService {
       String summary,
       String externalLink,
       LocalDate startDate,
-      LocalDate endDate);
+      LocalDate endDate,
+      boolean valorized);
 
   void delete(List<UUID> experienceIds);
 

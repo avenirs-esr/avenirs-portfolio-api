@@ -24,6 +24,7 @@ public class DeclaredExperience extends AvenirsBaseModel {
   private String externalLink;
   private LocalDate startDate;
   private LocalDate endDate;
+  private boolean valorized;
 
   private DeclaredExperience(
       UUID id,
@@ -40,7 +41,8 @@ public class DeclaredExperience extends AvenirsBaseModel {
       String summary,
       String externalLink,
       LocalDate startDate,
-      LocalDate endDate) {
+      LocalDate endDate,
+      boolean valorized) {
     super(id, createdAt, updatedAt);
     this.student = student;
     this.title = title;
@@ -54,6 +56,7 @@ public class DeclaredExperience extends AvenirsBaseModel {
     this.externalLink = externalLink;
     this.startDate = startDate;
     this.endDate = endDate;
+    this.valorized = valorized;
   }
 
   public static DeclaredExperience create(
@@ -84,7 +87,8 @@ public class DeclaredExperience extends AvenirsBaseModel {
         summary,
         externalLink,
         startDate,
-        endDate);
+        endDate,
+        false);
   }
 
   public static DeclaredExperience toDomain(
@@ -102,7 +106,8 @@ public class DeclaredExperience extends AvenirsBaseModel {
       String summary,
       String externalLink,
       LocalDate startDate,
-      LocalDate endDate) {
+      LocalDate endDate,
+      boolean valorized) {
     return new DeclaredExperience(
         id,
         createdAt,
@@ -118,6 +123,7 @@ public class DeclaredExperience extends AvenirsBaseModel {
         summary,
         externalLink,
         startDate,
-        endDate);
+        endDate,
+        valorized);
   }
 }
