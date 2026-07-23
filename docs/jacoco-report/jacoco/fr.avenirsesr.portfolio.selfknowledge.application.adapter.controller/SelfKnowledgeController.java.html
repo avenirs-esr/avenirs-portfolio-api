@@ -98,55 +98,56 @@ public class SelfKnowledgeController {
   public ResponseEntity&lt;SelfKnowledgeElementViewDTO&gt; updateSelfKnowledgeElement(
       @PathVariable(&quot;selfKnowledgeElementId&quot;) UUID selfKnowledgeElementId,
       @Valid @RequestBody SelfKnowledgeElementRequest selfKnowledgeElementRequest) {
-<span class="nc" id="L101">    log.debug(</span>
+<span class="fc" id="L101">    log.debug(</span>
         &quot;Received request to update self knowledge element [{}] with infos [{}]&quot;,
         selfKnowledgeElementId,
         selfKnowledgeElementRequest);
 
-<span class="nc" id="L106">    SelfKnowledgeElement selfKnowledgeElement =</span>
-<span class="nc" id="L107">        selfKnowledgeService.updateSelfKnowledgeElement(</span>
+<span class="fc" id="L106">    SelfKnowledgeElement selfKnowledgeElement =</span>
+<span class="fc" id="L107">        selfKnowledgeService.updateSelfKnowledgeElement(</span>
             selfKnowledgeElementId,
-<span class="nc" id="L109">            selfKnowledgeElementRequest.title(),</span>
-<span class="nc" id="L110">            selfKnowledgeElementRequest.description(),</span>
-<span class="nc" id="L111">            selfKnowledgeElementRequest.rating());</span>
+<span class="fc" id="L109">            selfKnowledgeElementRequest.title(),</span>
+<span class="fc" id="L110">            selfKnowledgeElementRequest.description(),</span>
+<span class="fc" id="L111">            selfKnowledgeElementRequest.rating(),</span>
+<span class="fc" id="L112">            selfKnowledgeElementRequest.valorized());</span>
 
-<span class="nc" id="L113">    return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));</span>
+<span class="fc" id="L114">    return ResponseEntity.ok(selfKnowledgeElementViewMapper.toDTO(selfKnowledgeElement));</span>
   }
 
   @DeleteMapping(&quot;/elements&quot;)
   public ResponseEntity&lt;String&gt; deleteSelfKnowledgeElements(
       @RequestBody List&lt;UUID&gt; selfKnowledgeElementIds) {
-<span class="fc" id="L119">    log.debug(&quot;Received request to delete self knowledge elements [{}]&quot;, selfKnowledgeElementIds);</span>
-<span class="fc" id="L120">    selfKnowledgeService.deleteSelfKnowledgeElements(selfKnowledgeElementIds);</span>
-<span class="fc" id="L121">    return ResponseEntity.ok(&quot;Self knowledge elements successfully deleted&quot;);</span>
+<span class="fc" id="L120">    log.debug(&quot;Received request to delete self knowledge elements [{}]&quot;, selfKnowledgeElementIds);</span>
+<span class="fc" id="L121">    selfKnowledgeService.deleteSelfKnowledgeElements(selfKnowledgeElementIds);</span>
+<span class="fc" id="L122">    return ResponseEntity.ok(&quot;Self knowledge elements successfully deleted&quot;);</span>
   }
 
   @GetMapping(&quot;/categories&quot;)
   public ResponseEntity&lt;List&lt;SelfKnowledgeCategoryDTO&gt;&gt; getSelfKnowledgeCategories() {
-<span class="fc" id="L126">    return ResponseEntity.ok(</span>
-<span class="fc" id="L127">        selfKnowledgeService.getSelfKnowledgeCategories().stream()</span>
-<span class="fc" id="L128">            .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
-<span class="fc" id="L129">            .toList());</span>
+<span class="fc" id="L127">    return ResponseEntity.ok(</span>
+<span class="fc" id="L128">        selfKnowledgeService.getSelfKnowledgeCategories().stream()</span>
+<span class="fc" id="L129">            .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
+<span class="fc" id="L130">            .toList());</span>
   }
 
   @PostMapping(&quot;/categories&quot;)
   public ResponseEntity&lt;String&gt; addSelfKnowledgeCategories(@RequestBody List&lt;String&gt; categories) {
-<span class="fc" id="L134">    selfKnowledgeService.addSelfKnowledgeCategories(categories);</span>
-<span class="fc" id="L135">    return ResponseEntity.ok(&quot;Categories successfully associated with user&quot;);</span>
+<span class="fc" id="L135">    selfKnowledgeService.addSelfKnowledgeCategories(categories);</span>
+<span class="fc" id="L136">    return ResponseEntity.ok(&quot;Categories successfully associated with user&quot;);</span>
   }
 
   @GetMapping(&quot;/categories/available&quot;)
   public ResponseEntity&lt;List&lt;SelfKnowledgeCategoryDTO&gt;&gt; getSelfKnowledgeCategoriesAvailable() {
-<span class="fc" id="L140">    return ResponseEntity.ok(</span>
-<span class="fc" id="L141">        selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()</span>
-<span class="fc" id="L142">            .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
-<span class="fc" id="L143">            .toList());</span>
+<span class="fc" id="L141">    return ResponseEntity.ok(</span>
+<span class="fc" id="L142">        selfKnowledgeService.getSelfKnowledgeCategoriesAvailable().stream()</span>
+<span class="fc" id="L143">            .map(selfKnowledgeCategoryMapper::toSelfKnowledgeCategoryDTO)</span>
+<span class="fc" id="L144">            .toList());</span>
   }
 
   @DeleteMapping(&quot;/categories/{categoryId}&quot;)
   public ResponseEntity&lt;String&gt; removeSelfKnowledgeCategory(@PathVariable UUID categoryId) {
-<span class="nc" id="L148">    selfKnowledgeService.removeSelfKnowledgeCategory(categoryId);</span>
-<span class="nc" id="L149">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
+<span class="nc" id="L149">    selfKnowledgeService.removeSelfKnowledgeCategory(categoryId);</span>
+<span class="nc" id="L150">    return ResponseEntity.ok(&quot;Categories successfully deleted&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

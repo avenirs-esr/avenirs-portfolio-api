@@ -87,39 +87,38 @@ public class DeclaredSkillProgressController {
 <span class="nc" id="L87">        declaredSkillProgressService.updateDeclaredSkillProgress(</span>
             declaredSkillProgressId,
 <span class="nc" id="L89">            declaredSkillProgressRequest.level(),</span>
-<span class="nc" id="L90">            declaredSkillProgressRequest.reflection(),</span>
-<span class="nc" id="L91">            declaredSkillProgressRequest.valorized());</span>
-<span class="nc" id="L92">    return ResponseEntity.ok(</span>
-<span class="nc" id="L93">        declaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));</span>
+<span class="nc" id="L90">            declaredSkillProgressRequest.reflection());</span>
+<span class="nc" id="L91">    return ResponseEntity.ok(</span>
+<span class="nc" id="L92">        declaredSkillProgressMapper.toDeclaredSkillProgressDTO(declaredSkillProgress));</span>
   }
 
   @GetMapping(&quot;/{declaredSkillProgressId}&quot;)
   public ResponseEntity&lt;DeclaredSkillProgressDetailsDTO&gt; getDeclaredSkillProgressDetails(
       Principal principal, @PathVariable UUID declaredSkillProgressId) {
-<span class="nc" id="L99">    log.debug(</span>
+<span class="nc" id="L98">    log.debug(</span>
         &quot;Received request to detailed declared skill progress [{}] for student [{}]&quot;,
         declaredSkillProgressId,
-<span class="nc" id="L102">        principal.getName());</span>
-<span class="nc" id="L103">    DeclaredSkillProgressDetails declaredSkillProgressDetails =</span>
-<span class="nc" id="L104">        declaredSkillProgressService.getDeclaredSkillProgressDetails(declaredSkillProgressId);</span>
+<span class="nc" id="L101">        principal.getName());</span>
+<span class="nc" id="L102">    DeclaredSkillProgressDetails declaredSkillProgressDetails =</span>
+<span class="nc" id="L103">        declaredSkillProgressService.getDeclaredSkillProgressDetails(declaredSkillProgressId);</span>
 
-<span class="nc" id="L106">    return ResponseEntity.ok(</span>
-<span class="nc" id="L107">        declaredSkillProgressMapper.toDeclaredSkillProgressDetailsDTO(</span>
+<span class="nc" id="L105">    return ResponseEntity.ok(</span>
+<span class="nc" id="L106">        declaredSkillProgressMapper.toDeclaredSkillProgressDetailsDTO(</span>
             declaredSkillProgressDetails));
   }
 
   @DeleteMapping(&quot;/{declaredSkillProgressId}&quot;)
   public ResponseEntity&lt;String&gt; deleteDeclaredSkillProgress(
       @PathVariable UUID declaredSkillProgressId) {
-<span class="nc" id="L114">    declaredSkillProgressService.deleteDeclaredSkillProgresses(List.of(declaredSkillProgressId));</span>
-<span class="nc" id="L115">    return ResponseEntity.ok(&quot;Declared skill progress successfully deleted&quot;);</span>
+<span class="nc" id="L113">    declaredSkillProgressService.deleteDeclaredSkillProgresses(List.of(declaredSkillProgressId));</span>
+<span class="nc" id="L114">    return ResponseEntity.ok(&quot;Declared skill progress successfully deleted&quot;);</span>
   }
 
   @DeleteMapping()
   public ResponseEntity&lt;String&gt; deleteDeclaredSkillProgresses(
       @RequestBody List&lt;UUID&gt; declaredSkillProgressIds) {
-<span class="nc" id="L121">    declaredSkillProgressService.deleteDeclaredSkillProgresses(declaredSkillProgressIds);</span>
-<span class="nc" id="L122">    return ResponseEntity.ok(&quot;Declared skill progresses successfully deleted&quot;);</span>
+<span class="nc" id="L120">    declaredSkillProgressService.deleteDeclaredSkillProgresses(declaredSkillProgressIds);</span>
+<span class="nc" id="L121">    return ResponseEntity.ok(&quot;Declared skill progresses successfully deleted&quot;);</span>
   }
 
   @PostMapping(&quot;/{declaredSkillProgressId}/unassociate/traces&quot;)
@@ -127,7 +126,7 @@ public class DeclaredSkillProgressController {
       Principal principal,
       @PathVariable UUID declaredSkillProgressId,
       @RequestBody List&lt;UUID&gt; traceIds) {
-<span class="nc" id="L130">    return ResponseEntity.status(410).build();</span>
+<span class="nc" id="L129">    return ResponseEntity.status(410).build();</span>
   }
 
   @GetMapping(&quot;/search-for-association&quot;)
@@ -141,39 +140,39 @@ public class DeclaredSkillProgressController {
           @RequestParam(required = false) String keyword,
           @RequestParam(required = false) Integer page,
           @RequestParam(required = false) Integer pageSize) {
-<span class="nc" id="L144">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="nc" id="L145">    log.debug(</span>
+<span class="nc" id="L143">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="nc" id="L144">    log.debug(</span>
         &quot;Received request to search declared skills for association (contextType={},&quot;
             + &quot; excludeAssociatedWithElementId={}) by student [{}] (keyword={}, page={},&quot;
             + &quot; pageSize={})&quot;,
         contextType,
         excludeAssociatedWithElementId,
-<span class="nc" id="L151">        principal.getName(),</span>
+<span class="nc" id="L150">        principal.getName(),</span>
         keyword,
-<span class="nc" id="L153">        pageCriteria.page(),</span>
-<span class="nc" id="L154">        pageCriteria.pageSize());</span>
+<span class="nc" id="L152">        pageCriteria.page(),</span>
+<span class="nc" id="L153">        pageCriteria.pageSize());</span>
 
-<span class="nc" id="L156">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
-<span class="nc" id="L157">        declaredSkillProgressService.searchDeclaredSkillsForAssociation(</span>
+<span class="nc" id="L155">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
+<span class="nc" id="L156">        declaredSkillProgressService.searchDeclaredSkillsForAssociation(</span>
             excludeAssociatedWithElementId, contextType, keyword, pageCriteria);
 
-<span class="nc" id="L160">    return ResponseEntity.ok(</span>
+<span class="nc" id="L159">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="nc" id="L162">            pagedResult.content().stream()</span>
-<span class="nc" id="L163">                .map(associationSearchResultDTOMapper::toDeclaredSkillDTO)</span>
-<span class="nc" id="L164">                .toList(),</span>
-<span class="nc" id="L165">            PageInfoDTO.fromDomain(pagedResult.pageInfo())));</span>
+<span class="nc" id="L161">            pagedResult.content().stream()</span>
+<span class="nc" id="L162">                .map(associationSearchResultDTOMapper::toDeclaredSkillDTO)</span>
+<span class="nc" id="L163">                .toList(),</span>
+<span class="nc" id="L164">            PageInfoDTO.fromDomain(pagedResult.pageInfo())));</span>
   }
 
   @GetMapping(&quot;/{declaredSkillProgressId}/associations&quot;)
   public ResponseEntity&lt;DeclaredSkillAssociationsDTO&gt; getDeclaredSkillWithDeclaredActivities(
       Principal principal, @Valid @PathVariable UUID declaredSkillProgressId) {
-<span class="fc" id="L171">    log.debug(</span>
+<span class="fc" id="L170">    log.debug(</span>
         &quot;Received request to get declared skill [{}] associations for student [{}]&quot;,
         declaredSkillProgressId,
-<span class="fc" id="L174">        principal.getName());</span>
-<span class="fc" id="L175">    var newAssociations = declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);</span>
-<span class="fc" id="L176">    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));</span>
+<span class="fc" id="L173">        principal.getName());</span>
+<span class="fc" id="L174">    var newAssociations = declaredSkillProgressService.getAssociationsOf(declaredSkillProgressId);</span>
+<span class="fc" id="L175">    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));</span>
   }
 
   @DeleteMapping(&quot;/{declaredSkillProgressId}/associations&quot;)
@@ -181,12 +180,12 @@ public class DeclaredSkillProgressController {
       Principal principal,
       @Valid @PathVariable UUID declaredSkillProgressId,
       @Valid @RequestBody AssociationsDeleteRequest body) {
-<span class="fc" id="L184">    log.debug(</span>
+<span class="fc" id="L183">    log.debug(</span>
         &quot;Received request to delete declared skill [{}] associations for student [{}]&quot;,
         declaredSkillProgressId,
-<span class="fc" id="L187">        principal.getName());</span>
-<span class="fc" id="L188">    declaredSkillProgressService.deleteAssociations(declaredSkillProgressId, body.idsToDelete());</span>
-<span class="fc" id="L189">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L186">        principal.getName());</span>
+<span class="fc" id="L187">    declaredSkillProgressService.deleteAssociations(declaredSkillProgressId, body.idsToDelete());</span>
+<span class="fc" id="L188">    return ResponseEntity.noContent().build();</span>
   }
 
   @PostMapping(&quot;/{declaredSkillProgressId}/associate/declared-activities&quot;)
@@ -194,16 +193,16 @@ public class DeclaredSkillProgressController {
       Principal principal,
       @Valid @PathVariable UUID declaredSkillProgressId,
       @Valid @RequestBody AssociationsCreationRequest body) {
-<span class="fc" id="L197">    log.debug(</span>
+<span class="fc" id="L196">    log.debug(</span>
         &quot;Received request to associate declared skill [{}] with declared activities [{}] by student&quot;
             + &quot; [{}]&quot;,
         declaredSkillProgressId,
-<span class="fc" id="L201">        body.idsToAssociate(),</span>
-<span class="fc" id="L202">        principal.getName());</span>
-<span class="fc" id="L203">    var newAssociations =</span>
-<span class="fc" id="L204">        declaredSkillProgressService.associateDeclaredSkillWithActivities(</span>
-<span class="fc" id="L205">            declaredSkillProgressId, body.idsToAssociate());</span>
-<span class="fc" id="L206">    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));</span>
+<span class="fc" id="L200">        body.idsToAssociate(),</span>
+<span class="fc" id="L201">        principal.getName());</span>
+<span class="fc" id="L202">    var newAssociations =</span>
+<span class="fc" id="L203">        declaredSkillProgressService.associateDeclaredSkillWithActivities(</span>
+<span class="fc" id="L204">            declaredSkillProgressId, body.idsToAssociate());</span>
+<span class="fc" id="L205">    return ResponseEntity.ok(declaredSkillAssociationsDTOMapper.toDTO(newAssociations));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

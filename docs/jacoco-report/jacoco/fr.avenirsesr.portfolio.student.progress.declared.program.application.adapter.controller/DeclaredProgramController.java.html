@@ -78,21 +78,22 @@ public class DeclaredProgramController {
 <span class="fc" id="L78">            declaredProgramRequestDTO.result(),</span>
 <span class="fc" id="L79">            declaredProgramRequestDTO.sourceOfInformation(),</span>
 <span class="fc" id="L80">            declaredProgramRequestDTO.startDate(),</span>
-<span class="fc" id="L81">            declaredProgramRequestDTO.endDate());</span>
-<span class="fc" id="L82">    return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));</span>
+<span class="fc" id="L81">            declaredProgramRequestDTO.endDate(),</span>
+<span class="fc" id="L82">            Boolean.TRUE.equals(declaredProgramRequestDTO.valorized()));</span>
+<span class="fc" id="L83">    return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));</span>
   }
 
   @GetMapping(&quot;/{declaredProgramId}&quot;)
   public ResponseEntity&lt;DeclaredProgramDetailedDTO&gt; getDeclaredProgram(
       @PathVariable(&quot;declaredProgramId&quot;) UUID declaredProgramId) {
-<span class="fc" id="L88">    DeclaredProgram declaredProgram = declaredProgramService.getById(declaredProgramId);</span>
-<span class="fc" id="L89">    return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));</span>
+<span class="fc" id="L89">    DeclaredProgram declaredProgram = declaredProgramService.getById(declaredProgramId);</span>
+<span class="fc" id="L90">    return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));</span>
   }
 
   @DeleteMapping
   public ResponseEntity&lt;String&gt; deleteDeclaredProgram(@RequestBody List&lt;UUID&gt; declaredProgramIds) {
-<span class="fc" id="L94">    declaredProgramService.delete(declaredProgramIds);</span>
-<span class="fc" id="L95">    return ResponseEntity.ok(&quot;Declared programs deleted successfully.&quot;);</span>
+<span class="fc" id="L95">    declaredProgramService.delete(declaredProgramIds);</span>
+<span class="fc" id="L96">    return ResponseEntity.ok(&quot;Declared programs deleted successfully.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

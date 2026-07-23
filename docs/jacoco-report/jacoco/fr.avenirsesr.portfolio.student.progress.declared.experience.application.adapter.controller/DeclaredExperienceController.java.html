@@ -94,15 +94,16 @@ public class DeclaredExperienceController {
 <span class="fc" id="L94">            request.summary(),</span>
 <span class="fc" id="L95">            request.externalLink(),</span>
 <span class="fc" id="L96">            request.startDate(),</span>
-<span class="fc" id="L97">            request.endDate());</span>
+<span class="fc" id="L97">            request.endDate(),</span>
+<span class="fc" id="L98">            Boolean.TRUE.equals(request.valorized()));</span>
 
-<span class="fc" id="L99">    return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));</span>
+<span class="fc" id="L100">    return ResponseEntity.ok(declaredExperienceMapper.toDTO(experience));</span>
   }
 
   @DeleteMapping(&quot;/&quot;)
   public ResponseEntity&lt;String&gt; deleteDeclaredExperiences(@RequestBody List&lt;UUID&gt; experienceIds) {
-<span class="fc" id="L104">    declaredExperienceService.delete(experienceIds);</span>
-<span class="fc" id="L105">    return ResponseEntity.ok(&quot;Declared experiences successfully deleted&quot;);</span>
+<span class="fc" id="L105">    declaredExperienceService.delete(experienceIds);</span>
+<span class="fc" id="L106">    return ResponseEntity.ok(&quot;Declared experiences successfully deleted&quot;);</span>
   }
 
   @GetMapping(&quot;/search-for-association&quot;)
@@ -116,41 +117,41 @@ public class DeclaredExperienceController {
           @RequestParam(required = false) String keyword,
           @RequestParam(required = false) Integer page,
           @RequestParam(required = false) Integer pageSize) {
-<span class="nc" id="L119">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="nc" id="L120">    log.debug(</span>
+<span class="nc" id="L120">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="nc" id="L121">    log.debug(</span>
         &quot;Received request to search declared experiences for association (contextType={},&quot;
             + &quot; excludeAssociatedWithElementId={}) by student [{}] (keyword={}, page={},&quot;
             + &quot; pageSize={})&quot;,
         contextType,
         excludeAssociatedWithElementId,
-<span class="nc" id="L126">        principal.getName(),</span>
+<span class="nc" id="L127">        principal.getName(),</span>
         keyword,
-<span class="nc" id="L128">        pageCriteria.page(),</span>
-<span class="nc" id="L129">        pageCriteria.pageSize());</span>
+<span class="nc" id="L129">        pageCriteria.page(),</span>
+<span class="nc" id="L130">        pageCriteria.pageSize());</span>
 
-<span class="nc" id="L131">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
-<span class="nc" id="L132">        declaredExperienceService.searchDeclaredExperiencesForAssociation(</span>
+<span class="nc" id="L132">    PagedResult&lt;AssociationSearchResultData&gt; pagedResult =</span>
+<span class="nc" id="L133">        declaredExperienceService.searchDeclaredExperiencesForAssociation(</span>
             excludeAssociatedWithElementId, contextType, keyword, pageCriteria);
 
-<span class="nc" id="L135">    return ResponseEntity.ok(</span>
+<span class="nc" id="L136">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="nc" id="L137">            pagedResult.content().stream()</span>
-<span class="nc" id="L138">                .map(associationSearchResultDTOMapper::toDeclaredExperienceDTO)</span>
-<span class="nc" id="L139">                .toList(),</span>
-<span class="nc" id="L140">            PageInfoDTO.fromDomain(pagedResult.pageInfo())));</span>
+<span class="nc" id="L138">            pagedResult.content().stream()</span>
+<span class="nc" id="L139">                .map(associationSearchResultDTOMapper::toDeclaredExperienceDTO)</span>
+<span class="nc" id="L140">                .toList(),</span>
+<span class="nc" id="L141">            PageInfoDTO.fromDomain(pagedResult.pageInfo())));</span>
   }
 
   @GetMapping(&quot;/{experienceId}/associations&quot;)
   public ResponseEntity&lt;DeclaredExperienceAssociationsDTO&gt; getDeclaredExperienceAssociations(
       Principal principal, @PathVariable UUID experienceId) {
-<span class="fc" id="L146">    log.debug(</span>
+<span class="fc" id="L147">    log.debug(</span>
         &quot;Received request to get declared experience[{}] associations by student [{}]&quot;,
         experienceId,
-<span class="fc" id="L149">        principal.getName());</span>
+<span class="fc" id="L150">        principal.getName());</span>
 
-<span class="fc" id="L151">    var associations = declaredExperienceService.getAssociations(experienceId);</span>
+<span class="fc" id="L152">    var associations = declaredExperienceService.getAssociations(experienceId);</span>
 
-<span class="fc" id="L153">    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));</span>
+<span class="fc" id="L154">    return ResponseEntity.ok(declaredExperienceMapper.toAssociationsDTO(associations));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
