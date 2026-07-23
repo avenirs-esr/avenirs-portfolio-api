@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.activity.application.adapter.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -926,193 +927,298 @@ class ActivityControllerIT extends ContainerConfigurationTest {
         BddLogger.when("performing a GET on " + WORKING_SPACE_PATH);
       }
 
-      @Test
-      void thenItShouldReturnStaffActivityWorkingSpace() {
-        BddLogger.then("it should return paged activities with data and page info");
+      @Nested
+      class AndStatusIsNotProvided {
 
-        webTestClient
-            .get()
-            .uri(
-                uriBuilder ->
-                    uriBuilder
-                        .path(WORKING_SPACE_PATH)
-                        .queryParam("page", "0")
-                        .queryParam("pageSize", "8")
-                        .build())
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.data")
-            .isArray()
-            .jsonPath("$.page.page")
-            .isEqualTo(0)
-            .jsonPath("$.page.pageSize")
-            .isEqualTo(8)
-            .jsonPath("$.page.totalElements")
-            .exists();
-      }
-
-      @Test
-      void thenItShouldReturnDefaultPaginationWhenNoParamsProvided() {
-        BddLogger.then("it should return 200 with default pagination applied");
-
-        webTestClient
-            .get()
-            .uri(WORKING_SPACE_PATH)
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.data")
-            .isArray()
-            .jsonPath("$.page.page")
-            .isEqualTo(0)
-            .jsonPath("$.page.pageSize")
-            .isEqualTo(8)
-            .jsonPath("$.page.totalElements")
-            .exists();
-      }
-
-      @Test
-      void thenItShouldReturnOnlyStaffOwnActivities() throws Exception {
-        BddLogger.and("given a staff user with created drafts");
-        createDraftAndGetId("Mon brouillon working space");
-
-        BddLogger.then("it should return at least one activity belonging to the staff");
-
-        String body =
-            webTestClient
-                .get()
-                .uri(
-                    uriBuilder ->
-                        uriBuilder
-                            .path(WORKING_SPACE_PATH)
-                            .queryParam("page", "0")
-                            .queryParam("pageSize", "12")
-                            .build())
-                .headers(ActivityControllerIT.this::addStaffHeaders)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        JsonNode data = objectMapper.readTree(body).get("data");
-
-        assertTrue(data.isArray());
-        assertTrue(data.size() > 0);
-
-        JsonNode first = data.get(0);
-        assertTrue(first.hasNonNull("activityId"));
-        assertTrue(first.hasNonNull("title"));
-        assertTrue(first.hasNonNull("activityStatus"));
-      }
-
-      @Test
-      void thenItShouldReturnItemsWithExpectedShape() throws Exception {
-        BddLogger.and("given a staff user with at least one activity or draft");
-        createDraftAndGetId("Brouillon pour vérifier la shape");
-
-        BddLogger.then(
-            "each item should have activityId, title, thematic and activityStatus fields");
-
-        String body =
-            webTestClient
-                .get()
-                .uri(
-                    uriBuilder ->
-                        uriBuilder
-                            .path(WORKING_SPACE_PATH)
-                            .queryParam("page", "0")
-                            .queryParam("pageSize", "12")
-                            .build())
-                .headers(ActivityControllerIT.this::addStaffHeaders)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(String.class)
-                .returnResult()
-                .getResponseBody();
-
-        JsonNode data = objectMapper.readTree(body).get("data");
-
-        if (data.isEmpty()) {
-          return;
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("status is not provided");
         }
 
-        for (JsonNode item : data) {
-          assertTrue(item.hasNonNull("activityId"), "missing activityId");
-          assertTrue(item.hasNonNull("title"), "missing title");
-          assertTrue(item.hasNonNull("activityStatus"), "missing activityStatus");
+        @Test
+        void thenItShouldReturnStaffActivityWorkingSpace() {
+          BddLogger.then("it should return paged activities with data and page info");
 
-          String status = item.get("activityStatus").asText();
-          assertTrue(
-              status.equals("DRAFT") || status.equals("PUBLISHED") || status.equals("UNPUBLISHED"),
-              "unexpected status: " + status);
+          webTestClient
+              .get()
+              .uri(
+                  uriBuilder ->
+                      uriBuilder
+                          .path(WORKING_SPACE_PATH)
+                          .queryParam("page", "0")
+                          .queryParam("pageSize", "8")
+                          .build())
+              .headers(ActivityControllerIT.this::addStaffHeaders)
+              .accept(MediaType.APPLICATION_JSON)
+              .exchange()
+              .expectStatus()
+              .isOk()
+              .expectBody()
+              .jsonPath("$.data")
+              .isArray()
+              .jsonPath("$.page.page")
+              .isEqualTo(0)
+              .jsonPath("$.page.pageSize")
+              .isEqualTo(8)
+              .jsonPath("$.page.totalElements")
+              .exists();
+        }
+
+        @Test
+        void thenItShouldReturnDefaultPaginationWhenNoParamsProvided() {
+          BddLogger.then("it should return 200 with default pagination applied");
+
+          webTestClient
+              .get()
+              .uri(WORKING_SPACE_PATH)
+              .headers(ActivityControllerIT.this::addStaffHeaders)
+              .accept(MediaType.APPLICATION_JSON)
+              .exchange()
+              .expectStatus()
+              .isOk()
+              .expectBody()
+              .jsonPath("$.data")
+              .isArray()
+              .jsonPath("$.page.page")
+              .isEqualTo(0)
+              .jsonPath("$.page.pageSize")
+              .isEqualTo(8)
+              .jsonPath("$.page.totalElements")
+              .exists();
+        }
+
+        @Test
+        void thenItShouldReturnOnlyStaffOwnActivities() throws Exception {
+          BddLogger.and("given a staff user with created drafts");
+          createDraftAndGetId("Mon brouillon working space");
+
+          BddLogger.then("it should return at least one activity belonging to the staff");
+
+          String body =
+              webTestClient
+                  .get()
+                  .uri(
+                      uriBuilder ->
+                          uriBuilder
+                              .path(WORKING_SPACE_PATH)
+                              .queryParam("page", "0")
+                              .queryParam("pageSize", "12")
+                              .build())
+                  .headers(ActivityControllerIT.this::addStaffHeaders)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .exchange()
+                  .expectStatus()
+                  .isOk()
+                  .expectBody(String.class)
+                  .returnResult()
+                  .getResponseBody();
+
+          JsonNode data = objectMapper.readTree(body).get("data");
+
+          assertTrue(data.isArray());
+          assertTrue(data.size() > 0);
+
+          JsonNode first = data.get(0);
+          assertTrue(first.hasNonNull("activityId"));
+          assertTrue(first.hasNonNull("title"));
+          assertTrue(first.hasNonNull("activityStatus"));
+        }
+
+        @Test
+        void thenItShouldReturnItemsWithExpectedShape() throws Exception {
+          BddLogger.and("given a staff user with at least one activity or draft");
+          createDraftAndGetId("Brouillon pour vérifier la shape");
+
+          BddLogger.then(
+              "each item should have activityId, title, thematic and activityStatus fields");
+
+          String body =
+              webTestClient
+                  .get()
+                  .uri(
+                      uriBuilder ->
+                          uriBuilder
+                              .path(WORKING_SPACE_PATH)
+                              .queryParam("page", "0")
+                              .queryParam("pageSize", "12")
+                              .build())
+                  .headers(ActivityControllerIT.this::addStaffHeaders)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .exchange()
+                  .expectStatus()
+                  .isOk()
+                  .expectBody(String.class)
+                  .returnResult()
+                  .getResponseBody();
+
+          JsonNode data = objectMapper.readTree(body).get("data");
+
+          if (data.isEmpty()) {
+            return;
+          }
+
+          for (JsonNode item : data) {
+            assertTrue(item.hasNonNull("activityId"), "missing activityId");
+            assertTrue(item.hasNonNull("title"), "missing title");
+            assertTrue(item.hasNonNull("activityStatus"), "missing activityStatus");
+
+            String status = item.get("activityStatus").asText();
+            assertTrue(
+                status.equals("DRAFT")
+                    || status.equals("PUBLISHED")
+                    || status.equals("UNPUBLISHED"),
+                "unexpected status: " + status);
+          }
+        }
+
+        @Test
+        void thenItShouldRespectPageSizeLimit() {
+          BddLogger.then("it should cap the pageSize to the maximum allowed value");
+
+          webTestClient
+              .get()
+              .uri(
+                  uriBuilder ->
+                      uriBuilder
+                          .path(WORKING_SPACE_PATH)
+                          .queryParam("page", "0")
+                          .queryParam("pageSize", "999")
+                          .build())
+              .headers(ActivityControllerIT.this::addStaffHeaders)
+              .accept(MediaType.APPLICATION_JSON)
+              .exchange()
+              .expectStatus()
+              .isOk()
+              .expectBody()
+              .jsonPath("$.page.pageSize")
+              .isEqualTo(100);
+        }
+
+        @Test
+        void thenItShouldReturn401WhenNotAuthenticated() {
+          BddLogger.then("it should return 401");
+
+          webTestClient
+              .get()
+              .uri(WORKING_SPACE_PATH)
+              .accept(MediaType.APPLICATION_JSON)
+              .exchange()
+              .expectStatus()
+              .isUnauthorized();
+        }
+
+        @Test
+        void shouldReturn403WhenUserIsNotStaff() {
+          BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
+          BddLogger.when("performing a GET with a student account");
+          BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+
+          webTestClient
+              .get()
+              .uri(WORKING_SPACE_PATH)
+              .headers(ActivityControllerIT.this::addSecondStudentHeaders)
+              .accept(MediaType.APPLICATION_JSON)
+              .exchange()
+              .expectStatus()
+              .isForbidden()
+              .expectBody()
+              .jsonPath("$.code")
+              .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
         }
       }
 
-      @Test
-      void thenItShouldRespectPageSizeLimit() {
-        BddLogger.then("it should cap the pageSize to the maximum allowed value");
+      @Nested
+      class AndStatusIsSetToDraft {
 
-        webTestClient
-            .get()
-            .uri(
-                uriBuilder ->
-                    uriBuilder
-                        .path(WORKING_SPACE_PATH)
-                        .queryParam("page", "0")
-                        .queryParam("pageSize", "999")
-                        .build())
-            .headers(ActivityControllerIT.this::addStaffHeaders)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .expectBody()
-            .jsonPath("$.page.pageSize")
-            .isEqualTo(100);
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("status is set to draft");
+        }
+
+        @Test
+        void thenItShouldReturnOnlyDraftActivities() throws Exception {
+          BddLogger.and("given a staff user with created drafts");
+          createDraftAndGetId("Mon brouillon working space");
+          publishNewActivity("Activité publiée working space");
+
+          BddLogger.then("it should return at least one draft activity");
+
+          String body =
+              webTestClient
+                  .get()
+                  .uri(
+                      uriBuilder ->
+                          uriBuilder
+                              .path(WORKING_SPACE_PATH)
+                              .queryParam("page", "0")
+                              .queryParam("pageSize", "12")
+                              .queryParam("status", "DRAFT")
+                              .build())
+                  .headers(ActivityControllerIT.this::addStaffHeaders)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .exchange()
+                  .expectStatus()
+                  .isOk()
+                  .expectBody(String.class)
+                  .returnResult()
+                  .getResponseBody();
+
+          JsonNode data = objectMapper.readTree(body).get("data");
+
+          assertTrue(data.isArray());
+          assertTrue(data.size() > 0);
+
+          for (JsonNode item : data) {
+            assertEquals("DRAFT", item.get("activityStatus").asText());
+          }
+        }
       }
 
-      @Test
-      void thenItShouldReturn401WhenNotAuthenticated() {
-        BddLogger.then("it should return 401");
+      @Nested
+      class AndStatusIsSetToPublished {
 
-        webTestClient
-            .get()
-            .uri(WORKING_SPACE_PATH)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized();
-      }
+        @BeforeEach
+        void setupAnd() {
+          BddLogger.and("status is set to published");
+        }
 
-      @Test
-      void shouldReturn403WhenUserIsNotStaff() {
-        BddLogger.given("the " + WORKING_SPACE_PATH + " endpoint");
-        BddLogger.when("performing a GET with a student account");
-        BddLogger.then("it should return 403 with USER_IS_NOT_STAFF error code");
+        @Test
+        void thenItShouldReturnOnlyPublishedActivities() throws Exception {
+          BddLogger.and("given a staff user with created drafts");
+          createDraftAndGetId("Mon brouillon working space");
+          publishNewActivity("Activité publiée working space");
 
-        webTestClient
-            .get()
-            .uri(WORKING_SPACE_PATH)
-            .headers(ActivityControllerIT.this::addSecondStudentHeaders)
-            .accept(MediaType.APPLICATION_JSON)
-            .exchange()
-            .expectStatus()
-            .isForbidden()
-            .expectBody()
-            .jsonPath("$.code")
-            .isEqualTo("USER_IS_NOT_STAFF_EXCEPTION");
+          BddLogger.then("it should return at least one published activity");
+
+          String body =
+              webTestClient
+                  .get()
+                  .uri(
+                      uriBuilder ->
+                          uriBuilder
+                              .path(WORKING_SPACE_PATH)
+                              .queryParam("page", "0")
+                              .queryParam("pageSize", "12")
+                              .queryParam("status", "PUBLISHED")
+                              .build())
+                  .headers(ActivityControllerIT.this::addStaffHeaders)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .exchange()
+                  .expectStatus()
+                  .isOk()
+                  .expectBody(String.class)
+                  .returnResult()
+                  .getResponseBody();
+
+          JsonNode data = objectMapper.readTree(body).get("data");
+
+          assertTrue(data.isArray());
+          assertTrue(data.size() > 0);
+
+          for (JsonNode item : data) {
+            assertEquals("PUBLISHED", item.get("activityStatus").asText());
+          }
+        }
       }
     }
 

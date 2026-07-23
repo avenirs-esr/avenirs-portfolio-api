@@ -327,9 +327,11 @@ public class ActivityServiceImpl implements ActivityService {
 
   @Override
   public PagedResult<ActivityStaffOverviewData> staffActivityWorkingSpace(
-      PageCriteria pageCriteria) {
+      PageCriteria pageCriteria, EActivityStatus activityStatus) {
     var staff = loggedInUserService.getLoggedInStaff();
-    var pagedActivities = staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria);
+    var pagedActivities =
+        staffActivityOverviewRepository.findAllByAuthorAndStatus(
+            staff, activityStatus, pageCriteria);
 
     return new PagedResult<>(
         pagedActivities.content().stream()

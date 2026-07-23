@@ -50,7 +50,8 @@ public interface ActivityService {
 
   PagedResult<ActivityWithStudentStatusData> latestActivitiesView(PageCriteria pageCriteria);
 
-  PagedResult<ActivityStaffOverviewData> staffActivityWorkingSpace(PageCriteria pageCriteria);
+  PagedResult<ActivityStaffOverviewData> staffActivityWorkingSpace(
+      PageCriteria pageCriteria, EActivityStatus activityStatus);
 
   PagedResult<ActivityStaffOverviewData> staffActivityLibrary(
       EActivityThematic thematic, PageCriteria pageCriteria);

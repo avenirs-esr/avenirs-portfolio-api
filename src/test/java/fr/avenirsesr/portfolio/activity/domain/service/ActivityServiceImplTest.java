@@ -1461,10 +1461,10 @@ class ActivityServiceImplTest {
                 EActivityStatus.PUBLISHED,
                 Instant.now());
 
-        when(staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria))
+        when(staffActivityOverviewRepository.findAllByAuthorAndStatus(staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(overviewData), pageInfo));
 
-        var result = activityService.staffActivityWorkingSpace(pageCriteria);
+        var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
 
         assertNotNull(result);
         assertEquals(1, result.content().size());
@@ -1476,10 +1476,10 @@ class ActivityServiceImplTest {
       void thenItShouldReturnEmptyWhenNoActivitiesExist() {
         BddLogger.then("an empty paged result should be returned");
 
-        when(staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria))
+        when(staffActivityOverviewRepository.findAllByAuthorAndStatus(staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(), new PageInfo(0, 8, 0)));
 
-        var result = activityService.staffActivityWorkingSpace(pageCriteria);
+        var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
 
         assertNotNull(result);
         assertTrue(result.content().isEmpty());
@@ -1514,11 +1514,11 @@ class ActivityServiceImplTest {
                 EActivityStatus.UNPUBLISHED,
                 Instant.now().minusSeconds(7200));
 
-        when(staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria))
+        when(staffActivityOverviewRepository.findAllByAuthorAndStatus(staff, null, pageCriteria))
             .thenReturn(
                 new PagedResult<>(List.of(draft, published, unpublished), new PageInfo(0, 8, 3)));
 
-        var result = activityService.staffActivityWorkingSpace(pageCriteria);
+        var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
 
         assertEquals(3, result.content().size());
         var statuses =
@@ -1533,13 +1533,14 @@ class ActivityServiceImplTest {
         BddLogger.then("the logged-in staff should be used as repository filter");
 
         Staff otherStaff = mock(Staff.class);
-        when(staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria))
+        when(staffActivityOverviewRepository.findAllByAuthorAndStatus(staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(), new PageInfo(0, 8, 0)));
 
-        activityService.staffActivityWorkingSpace(pageCriteria);
+        activityService.staffActivityWorkingSpace(pageCriteria, null);
 
-        verify(staffActivityOverviewRepository).findAllByAuthor(staff, pageCriteria);
-        verify(staffActivityOverviewRepository, never()).findAllByAuthor(eq(otherStaff), any());
+        verify(staffActivityOverviewRepository).findAllByAuthorAndStatus(staff, null, pageCriteria);
+        verify(staffActivityOverviewRepository, never())
+            .findAllByAuthorAndStatus(eq(otherStaff), eq(null), any());
       }
 
       @Test
@@ -1558,10 +1559,10 @@ class ActivityServiceImplTest {
                 EActivityStatus.DRAFT,
                 expectedUpdatedAt);
 
-        when(staffActivityOverviewRepository.findAllByAuthor(staff, pageCriteria))
+        when(staffActivityOverviewRepository.findAllByAuthorAndStatus(staff, null, pageCriteria))
             .thenReturn(new PagedResult<>(List.of(overviewData), pageInfo));
 
-        var result = activityService.staffActivityWorkingSpace(pageCriteria);
+        var result = activityService.staffActivityWorkingSpace(pageCriteria, null);
         var data = result.content().getFirst();
 
         assertEquals(expectedId, data.activityId());
