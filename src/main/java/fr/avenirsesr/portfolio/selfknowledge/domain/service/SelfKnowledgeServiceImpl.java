@@ -86,7 +86,11 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
 
   @Override
   public SelfKnowledgeElement updateSelfKnowledgeElement(
-      UUID selfKnowledgeElementId, String title, String description, Integer rating) {
+      UUID selfKnowledgeElementId,
+      String title,
+      String description,
+      Integer rating,
+      boolean valorized) {
     Student student = loggedInUserService.getLoggedInStudent();
 
     checkTitleField(title);
@@ -108,6 +112,8 @@ public class SelfKnowledgeServiceImpl implements SelfKnowledgeService {
     if (rating != null) {
       selfKnowledgeElement.setRating(rating);
     }
+
+    selfKnowledgeElement.setValorized(valorized);
 
     return selfKnowledgeElementRepository.save(selfKnowledgeElement);
   }

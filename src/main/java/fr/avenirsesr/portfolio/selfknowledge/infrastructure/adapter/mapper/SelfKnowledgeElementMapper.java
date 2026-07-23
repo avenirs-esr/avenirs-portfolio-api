@@ -18,6 +18,7 @@ public class SelfKnowledgeElementMapper
         element.getDescription(),
         element.getRating(),
         SelfKnowledgeCategoryMapper.INSTANCE.fromDomain(element.getSelfKnowledgeCategory()),
+        element.isValorized(),
         element.getCreatedAt(),
         element.getUpdatedAt());
   }
@@ -31,6 +32,7 @@ public class SelfKnowledgeElementMapper
         entity.getDescription(),
         entity.getRating(),
         SelfKnowledgeCategoryMapper.INSTANCE.toDomain(entity.getSelfKnowledgeCategory()),
+        entity.isValorized(),
         entity.getCreatedAt(),
         entity.getUpdatedAt());
   }

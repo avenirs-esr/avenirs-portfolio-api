@@ -395,16 +395,40 @@ class SelfKnowledgeServiceImplTest {
             BddLogger.when("updating self knowledge element");
             SelfKnowledgeElement result =
                 selfKnowledgeService.updateSelfKnowledgeElement(
-                    selfKnowledgeElementId, newTitle, newDescription, newRating);
+                    selfKnowledgeElementId, newTitle, newDescription, newRating, true);
 
             BddLogger.then("it should update self knowledge element");
 
             assertThat(result.getTitle()).isEqualTo(newTitle);
             assertThat(result.getDescription()).isEqualTo(newDescription);
             assertThat(result.getRating()).isEqualTo(newRating);
+            assertThat(result.isValorized()).isTrue();
 
             verify(loggedInUserService).getLoggedInStudent();
             verify(selfKnowledgeElementRepository).findById(selfKnowledgeElementId);
+            verify(selfKnowledgeElementRepository).save(selfKnowledgeElement);
+          }
+        }
+
+        @Nested
+        class WhenUpdatingSelfKnowledgeElementValorizedFlagToFalse {
+
+          @Test
+          void thenItShouldSetValorizedToFalse() {
+            BddLogger.when("updating self knowledge element with valorized set to false");
+
+            when(selfKnowledgeElementRepository.findById(selfKnowledgeElementId))
+                .thenReturn(Optional.of(selfKnowledgeElement));
+            when(selfKnowledgeElementRepository.save(any(SelfKnowledgeElement.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+            SelfKnowledgeElement result =
+                selfKnowledgeService.updateSelfKnowledgeElement(
+                    selfKnowledgeElementId, "Title", "Description", 1, false);
+
+            BddLogger.then("it should set valorized to false");
+            assertThat(result.isValorized()).isFalse();
+
             verify(selfKnowledgeElementRepository).save(selfKnowledgeElement);
           }
         }
@@ -423,7 +447,7 @@ class SelfKnowledgeServiceImplTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
             selfKnowledgeService.updateSelfKnowledgeElement(
-                selfKnowledgeElementId, "New title", "New desc", null);
+                selfKnowledgeElementId, "New title", "New desc", null, false);
 
             BddLogger.then("it should keep previous rating");
             assertThat(selfKnowledgeElement.getRating()).isEqualTo(existingRating);
@@ -450,7 +474,7 @@ class SelfKnowledgeServiceImplTest {
                 UserNotAuthorizedException.class,
                 () ->
                     selfKnowledgeService.updateSelfKnowledgeElement(
-                        selfKnowledgeElementId, "Title", "Description", 1));
+                        selfKnowledgeElementId, "Title", "Description", 1, false));
 
             verify(selfKnowledgeElementRepository).findById(selfKnowledgeElementId);
             verify(selfKnowledgeElementRepository, never()).save(any());
@@ -469,7 +493,7 @@ class SelfKnowledgeServiceImplTest {
                 SelfKnowledgeInvalidTitleException.class,
                 () ->
                     selfKnowledgeService.updateSelfKnowledgeElement(
-                        selfKnowledgeElementId, tooLong, "Description", 1));
+                        selfKnowledgeElementId, tooLong, "Description", 1, false));
 
             verifyNoInteractions(selfKnowledgeElementRepository);
           }
@@ -487,7 +511,7 @@ class SelfKnowledgeServiceImplTest {
                 SelfKnowledgeInvalidDescriptionException.class,
                 () ->
                     selfKnowledgeService.updateSelfKnowledgeElement(
-                        selfKnowledgeElementId, "Title", tooLong, 1));
+                        selfKnowledgeElementId, "Title", tooLong, 1, false));
 
             verifyNoInteractions(selfKnowledgeElementRepository);
           }
@@ -505,7 +529,7 @@ class SelfKnowledgeServiceImplTest {
                 SelfKnowledgeInvalidRatingException.class,
                 () ->
                     selfKnowledgeService.updateSelfKnowledgeElement(
-                        selfKnowledgeElementId, "Title", "Description", invalid));
+                        selfKnowledgeElementId, "Title", "Description", invalid, false));
 
             verifyNoInteractions(selfKnowledgeElementRepository);
           }
@@ -634,7 +658,7 @@ class SelfKnowledgeServiceImplTest {
                 SelfKnowledgeElementNotFoundException.class,
                 () ->
                     selfKnowledgeService.updateSelfKnowledgeElement(
-                        unknownId, "Title", "Description", 1));
+                        unknownId, "Title", "Description", 1, false));
           }
         }
       }
@@ -1071,7 +1095,7 @@ class SelfKnowledgeServiceImplTest {
               UserNotFoundException.class,
               () ->
                   selfKnowledgeService.updateSelfKnowledgeElement(
-                      UUID.randomUUID(), "Title", "Description", 1));
+                      UUID.randomUUID(), "Title", "Description", 1, false));
         }
       }
 
@@ -1233,7 +1257,7 @@ class SelfKnowledgeServiceImplTest {
               UserIsNotStudentException.class,
               () ->
                   selfKnowledgeService.updateSelfKnowledgeElement(
-                      UUID.randomUUID(), "Title", "Description", 1));
+                      UUID.randomUUID(), "Title", "Description", 1, false));
         }
       }
 
