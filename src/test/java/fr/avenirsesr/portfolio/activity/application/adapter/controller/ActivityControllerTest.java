@@ -313,7 +313,7 @@ class ActivityControllerTest {
 
     var pagedResult = new PagedResult<>(List.of(overviewData), pageInfo);
 
-    when(activityService.staffActivityWorkingSpace(any(PageCriteria.class)))
+    when(activityService.staffActivityWorkingSpace(any(PageCriteria.class), eq(null)))
         .thenReturn(pagedResult);
 
     var expectedDto =
@@ -327,7 +327,7 @@ class ActivityControllerTest {
     when(activityStaffOverviewDtoMapper.toDTO(overviewData)).thenReturn(expectedDto);
 
     BddLogger.when("getting staff activity working space");
-    var response = controller.getStaffActivityWorkingSpace(principal, 0, 8);
+    var response = controller.getStaffActivityWorkingSpace(principal, 0, 8, null);
 
     BddLogger.then("it should return the working space with correct data");
 
@@ -339,7 +339,7 @@ class ActivityControllerTest {
     assertEquals(overviewData.activityId(), dto.activityId());
     assertEquals(EActivityStatus.PUBLISHED, dto.activityStatus());
 
-    verify(activityService).staffActivityWorkingSpace(any(PageCriteria.class));
+    verify(activityService).staffActivityWorkingSpace(any(PageCriteria.class), eq(null));
     verify(activityStaffOverviewDtoMapper).toDTO(overviewData);
   }
 
@@ -349,11 +349,11 @@ class ActivityControllerTest {
 
     PageInfo pageInfo = new PageInfo(0, 8, 0);
 
-    when(activityService.staffActivityWorkingSpace(any(PageCriteria.class)))
+    when(activityService.staffActivityWorkingSpace(any(PageCriteria.class), eq(null)))
         .thenReturn(new PagedResult<>(List.of(), pageInfo));
 
     BddLogger.when("getting staff activity working space with no results");
-    var response = controller.getStaffActivityWorkingSpace(principal, 0, 8);
+    var response = controller.getStaffActivityWorkingSpace(principal, 0, 8, null);
 
     BddLogger.then("it should return empty content");
 
@@ -361,7 +361,7 @@ class ActivityControllerTest {
     assertNotNull(response.getBody());
     assertTrue(response.getBody().data().isEmpty());
 
-    verify(activityService).staffActivityWorkingSpace(any(PageCriteria.class));
+    verify(activityService).staffActivityWorkingSpace(any(PageCriteria.class), eq(null));
     verifyNoInteractions(activityStaffOverviewDtoMapper);
   }
 
@@ -389,7 +389,7 @@ class ActivityControllerTest {
             EActivityStatus.PUBLISHED,
             Instant.now().minusSeconds(3600));
 
-    when(activityService.staffActivityWorkingSpace(any(PageCriteria.class)))
+    when(activityService.staffActivityWorkingSpace(any(PageCriteria.class), eq(null)))
         .thenReturn(new PagedResult<>(List.of(draft, published), pageInfo));
 
     when(activityStaffOverviewDtoMapper.toDTO(draft))
@@ -412,7 +412,7 @@ class ActivityControllerTest {
                 Instant.now()));
 
     BddLogger.when("getting staff activity working space");
-    var response = controller.getStaffActivityWorkingSpace(principal, 0, 8);
+    var response = controller.getStaffActivityWorkingSpace(principal, 0, 8, null);
 
     BddLogger.then("it should return both draft and published activities");
 
@@ -425,7 +425,7 @@ class ActivityControllerTest {
     assertTrue(statuses.contains(EActivityStatus.DRAFT));
     assertTrue(statuses.contains(EActivityStatus.PUBLISHED));
 
-    verify(activityService).staffActivityWorkingSpace(any(PageCriteria.class));
+    verify(activityService).staffActivityWorkingSpace(any(PageCriteria.class), eq(null));
     verify(activityStaffOverviewDtoMapper).toDTO(draft);
     verify(activityStaffOverviewDtoMapper).toDTO(published);
   }
@@ -436,17 +436,17 @@ class ActivityControllerTest {
 
     PageInfo pageInfo = new PageInfo(2, 5, 0);
 
-    when(activityService.staffActivityWorkingSpace(any(PageCriteria.class)))
+    when(activityService.staffActivityWorkingSpace(any(PageCriteria.class), eq(null)))
         .thenReturn(new PagedResult<>(List.of(), pageInfo));
 
     BddLogger.when("getting staff activity working space with page=2 and pageSize=5");
-    controller.getStaffActivityWorkingSpace(principal, 2, 5);
+    controller.getStaffActivityWorkingSpace(principal, 2, 5, null);
 
     BddLogger.then("it should forward the pagination params to the service");
 
     verify(activityService)
         .staffActivityWorkingSpace(
-            argThat(criteria -> criteria.page() == 2 && criteria.pageSize() == 5));
+            argThat(criteria -> criteria.page() == 2 && criteria.pageSize() == 5), eq(null));
   }
 
   @Test
@@ -616,7 +616,7 @@ class ActivityControllerTest {
             EActivityStatus.DRAFT,
             Instant.now());
 
-    when(activityService.staffActivityWorkingSpace(any(PageCriteria.class)))
+    when(activityService.staffActivityWorkingSpace(any(PageCriteria.class), eq(null)))
         .thenReturn(new PagedResult<>(List.of(data1, data2, data3), pageInfo));
 
     when(activityStaffOverviewDtoMapper.toDTO(any()))
@@ -625,7 +625,7 @@ class ActivityControllerTest {
                 UUID.randomUUID(), AUTHOR, null, null, EActivityStatus.DRAFT, Instant.now()));
 
     BddLogger.when("getting staff activity working space");
-    var response = controller.getStaffActivityWorkingSpace(principal, 0, 8);
+    var response = controller.getStaffActivityWorkingSpace(principal, 0, 8, null);
 
     BddLogger.then("the mapper should be called once per item");
 

@@ -107,7 +107,10 @@ public class ActivityController {
   public ResponseEntity<PagedResponse<ActivityStaffOverviewDTO>> getStaffActivityWorkingSpace(
       Principal principal,
       @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
+      @RequestParam(required = false) Integer pageSize,
+      @Parameter(schema = @Schema(ref = "#/components/schemas/EActivityStatus"))
+          @RequestParam(required = false)
+          EActivityStatus status) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
         "Received request to get activity working space view of user [{}] (page= {}, fileSize= {})",
@@ -116,7 +119,7 @@ public class ActivityController {
         pageCriteria.pageSize());
 
     PagedResult<ActivityStaffOverviewData> pagedResult =
-        activityService.staffActivityWorkingSpace(pageCriteria);
+        activityService.staffActivityWorkingSpace(pageCriteria, status);
 
     var viewResponse =
         new PagedResponse<>(
@@ -162,7 +165,7 @@ public class ActivityController {
           EActivityThematic thematic) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to activities view of user [{}] (page= {}, fileSize= {})",
+        "Received request to activities view of user [{}] (page= {}, pageSize= {})",
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());
@@ -185,7 +188,7 @@ public class ActivityController {
       @RequestParam(required = false) Integer pageSize) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to latest activities view by user [{}] (page= {}, fileSize= {})",
+        "Received request to latest activities view by user [{}] (page= {}, pageSize= {})",
         principal.getName(),
         pageCriteria.page(),
         pageCriteria.pageSize());

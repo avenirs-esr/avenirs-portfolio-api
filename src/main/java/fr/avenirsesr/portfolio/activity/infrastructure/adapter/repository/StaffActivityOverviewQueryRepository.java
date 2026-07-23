@@ -15,7 +15,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
@@ -25,47 +27,117 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
   @PersistenceContext private EntityManager em;
 
   @Override
-  public PagedResult<ActivityStaffOverviewData> findAllByAuthor(
-      Staff author, PageCriteria pageCriteria) {
+  public PagedResult<ActivityStaffOverviewData> findAllByAuthorAndStatus(
+      Staff author, EActivityStatus activityStatus, PageCriteria pageCriteria) {
 
-    String unionSql =
+    String activitySelect =
         """
-        SELECT *
-          FROM (
-              SELECT
-                  a.id            AS activity_id,
-                  a.title         AS title,
-                  a.thematic      AS thematic,
-                  a.author_id     AS author_id,
-                  a.status        AS status,
-                  a.updated_at    AS updated_at
-              FROM activity a
-              WHERE a.author_id = :authorId
-
-              UNION ALL
-
-              SELECT
-                  d.id            AS activity_id,
-                  d.title         AS title,
-                  d.thematic      AS thematic,
-                  d.author_id     AS author_id,
-                  'DRAFT'         AS status,
-                  d.updated_at    AS updated_at
-              FROM activity_draft d
-              WHERE d.author_id = :authorId
-          ) AS unified
-
-          ORDER BY updated_at DESC
+        SELECT
+            a.id         AS activity_id,
+            a.title      AS title,
+            a.thematic   AS thematic,
+            a.author_id  AS author_id,
+            a.status     AS status,
+            a.updated_at AS updated_at
+        FROM activity a
+        WHERE a.author_id = :authorId
         """;
 
-    String countSql =
+    String activitySelectWithStatus = activitySelect + " AND a.status = :activityStatus";
+
+    String draftSelect =
         """
-            SELECT COUNT(*) FROM (
-                SELECT id FROM activity       WHERE author_id = :authorId
+        SELECT
+            d.id         AS activity_id,
+            d.title      AS title,
+            d.thematic   AS thematic,
+            d.author_id  AS author_id,
+            'DRAFT'      AS status,
+            d.updated_at AS updated_at
+        FROM activity_draft d
+        WHERE d.author_id = :authorId
+        """;
+
+    String unionSql;
+    String countSql;
+
+    switch (activityStatus) {
+      case DRAFT -> {
+        unionSql =
+            """
+            SELECT *
+            FROM (
+            """
+                + draftSelect
+                + """
+                ) AS unified
+                ORDER BY updated_at DESC
+                """;
+
+        countSql =
+            """
+            SELECT COUNT(*)
+            FROM activity_draft d
+            WHERE d.author_id = :authorId
+            """;
+      }
+
+      case PUBLISHED, UNPUBLISHED -> {
+        unionSql =
+            """
+            SELECT *
+            FROM (
+            """
+                + activitySelectWithStatus
+                + """
+                ) AS unified
+                ORDER BY updated_at DESC
+                """;
+
+        countSql =
+            """
+            SELECT COUNT(*)
+            FROM activity a
+            WHERE a.author_id = :authorId
+              AND a.status = :activityStatus
+            """;
+      }
+
+      case null -> {
+        unionSql =
+            """
+            SELECT *
+            FROM (
+            """
+                + activitySelect
+                + """
+
                 UNION ALL
-                SELECT id FROM activity_draft WHERE author_id = :authorId
+
+                """
+                + draftSelect
+                + """
+                ) AS unified
+                ORDER BY updated_at DESC
+                """;
+
+        countSql =
+            """
+            SELECT COUNT(*)
+            FROM (
+                SELECT id
+                FROM activity
+                WHERE author_id = :authorId
+
+                UNION ALL
+
+                SELECT id
+                FROM activity_draft
+                WHERE author_id = :authorId
             ) AS total
-        """;
+            """;
+      }
+    }
 
     Query dataQuery =
         em.createNativeQuery(unionSql)
@@ -74,6 +146,12 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
             .setMaxResults(pageCriteria.pageSize());
 
     Query countQuery = em.createNativeQuery(countSql).setParameter("authorId", author.getId());
+
+    if (activityStatus == EActivityStatus.PUBLISHED
+        || activityStatus == EActivityStatus.UNPUBLISHED) {
+      dataQuery.setParameter("activityStatus", activityStatus.name());
+      countQuery.setParameter("activityStatus", activityStatus.name());
+    }
 
     List<Object[]> rows = dataQuery.getResultList();
     long total = ((Number) countQuery.getSingleResult()).longValue();
@@ -122,6 +200,7 @@ public class StaffActivityOverviewQueryRepository implements StaffActivityOvervi
       case Instant i -> i;
       case Timestamp ts -> ts.getTimestamp().toInstant();
       case OffsetDateTime odt -> odt.toInstant();
+      case LocalDateTime ldt -> ldt.toInstant(ZoneOffset.UTC);
       case byte[] b -> Instant.parse(new String(b, StandardCharsets.UTF_8));
       default ->
           throw new IllegalArgumentException("Type inattendu pour Instant : " + value.getClass());
