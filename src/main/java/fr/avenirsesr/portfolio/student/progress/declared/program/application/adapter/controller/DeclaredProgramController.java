@@ -79,7 +79,7 @@ public class DeclaredProgramController {
             declaredProgramRequestDTO.sourceOfInformation(),
             declaredProgramRequestDTO.startDate(),
             declaredProgramRequestDTO.endDate(),
-            declaredProgramRequestDTO.valorized());
+            Boolean.TRUE.equals(declaredProgramRequestDTO.valorized()));
     return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));
   }
 
