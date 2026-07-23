@@ -156,7 +156,8 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
       String result,
       String sourceOfInformation,
       LocalDate startDate,
-      LocalDate endDate) {
+      LocalDate endDate,
+      boolean valorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     log.info("Update declaredProgramId {} by {}", declaredProgramId, student);
     DeclaredProgram declaredProgram =
@@ -176,6 +177,7 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
     declaredProgram.setStartDate(startDate);
     declaredProgram.setEndDate(endDate);
     declaredProgram.setStatus(getProgramStatus(startDate, endDate));
+    declaredProgram.setValorized(valorized);
     return declaredProgramRepository.save(declaredProgram);
   }
 

@@ -524,7 +524,8 @@ class DeclaredProgramServiceImplTest {
                         result,
                         sourceOfInformation,
                         startDate,
-                        endDate));
+                        endDate,
+                        false));
 
             verify(loggedInUserService).getLoggedInStudent();
             verify(declaredProgramRepository).findById(declaredProgramId);
@@ -572,7 +573,8 @@ class DeclaredProgramServiceImplTest {
                           result,
                           sourceOfInformation,
                           startDate,
-                          endDate));
+                          endDate,
+                          false));
 
               verify(loggedInUserService).getLoggedInStudent();
               verify(declaredProgramRepository).findById(declaredProgramId);
@@ -607,7 +609,8 @@ class DeclaredProgramServiceImplTest {
                       result,
                       sourceOfInformation,
                       startDate,
-                      endDate);
+                      endDate,
+                      true);
 
               assertNotNull(resultProgram);
               assertEquals(savedProgram, resultProgram);
@@ -623,10 +626,53 @@ class DeclaredProgramServiceImplTest {
               verify(declaredProgram).setSourceOfInformation(sourceOfInformation);
               verify(declaredProgram).setStartDate(startDate);
               verify(declaredProgram).setEndDate(endDate);
+              verify(declaredProgram).setValorized(true);
 
               verify(declaredProgram).setStatus(EProgramStatus.IN_PROGRESS);
 
               verify(declaredProgramRepository).save(declaredProgram);
+            }
+
+            @Test
+            void thenItShouldUpdateValorizedFieldToTrue() {
+              BddLogger.then("it should update valorized to true");
+
+              DeclaredProgram savedProgram = mock(DeclaredProgram.class);
+              when(declaredProgramRepository.save(declaredProgram)).thenReturn(savedProgram);
+
+              declaredProgramService.update(
+                  declaredProgramId,
+                  title,
+                  description,
+                  organization,
+                  result,
+                  sourceOfInformation,
+                  startDate,
+                  endDate,
+                  true);
+
+              verify(declaredProgram).setValorized(true);
+            }
+
+            @Test
+            void thenItShouldUpdateValorizedFieldToFalse() {
+              BddLogger.then("it should update valorized to false");
+
+              DeclaredProgram savedProgram = mock(DeclaredProgram.class);
+              when(declaredProgramRepository.save(declaredProgram)).thenReturn(savedProgram);
+
+              declaredProgramService.update(
+                  declaredProgramId,
+                  title,
+                  description,
+                  organization,
+                  result,
+                  sourceOfInformation,
+                  startDate,
+                  endDate,
+                  false);
+
+              verify(declaredProgram).setValorized(false);
             }
 
             @Test
@@ -644,7 +690,8 @@ class DeclaredProgramServiceImplTest {
                   result,
                   sourceOfInformation,
                   futureStartDate,
-                  futureEndDate);
+                  futureEndDate,
+                  false);
 
               verify(declaredProgram).setStatus(EProgramStatus.NOT_STARTED);
               verify(declaredProgramRepository).save(declaredProgram);
@@ -665,7 +712,8 @@ class DeclaredProgramServiceImplTest {
                   result,
                   sourceOfInformation,
                   pastStartDate,
-                  pastEndDate);
+                  pastEndDate,
+                  false);
 
               verify(declaredProgram).setStatus(EProgramStatus.COMPLETED);
               verify(declaredProgramRepository).save(declaredProgram);
@@ -689,7 +737,8 @@ class DeclaredProgramServiceImplTest {
                             result,
                             sourceOfInformation,
                             startDate,
-                            endDate));
+                            endDate,
+                            false));
 
                 verify(declaredProgramRepository, never()).save(any());
                 verify(declaredProgram, never()).setTitle(any());
@@ -710,7 +759,8 @@ class DeclaredProgramServiceImplTest {
                             result,
                             sourceOfInformation,
                             startDate,
-                            endDate));
+                            endDate,
+                            false));
 
                 verify(declaredProgramRepository, never()).save(any());
                 verify(declaredProgram, never()).setOrganization(any());
@@ -731,7 +781,8 @@ class DeclaredProgramServiceImplTest {
                             result,
                             sourceOfInformation,
                             null,
-                            endDate));
+                            endDate,
+                            false));
 
                 verify(declaredProgramRepository, never()).save(any());
                 verify(declaredProgram, never()).setStartDate(any());
@@ -755,7 +806,8 @@ class DeclaredProgramServiceImplTest {
                             result,
                             sourceOfInformation,
                             s,
-                            e));
+                            e,
+                            false));
 
                 verify(declaredProgramRepository, never()).save(any());
                 verify(declaredProgram, never()).setEndDate(any());
@@ -790,7 +842,8 @@ class DeclaredProgramServiceImplTest {
                       result,
                       sourceOfInformation,
                       startDate,
-                      endDate));
+                      endDate,
+                      false));
 
           verify(declaredProgramRepository, never()).findById(any());
           verify(declaredProgramRepository, never()).save(any());

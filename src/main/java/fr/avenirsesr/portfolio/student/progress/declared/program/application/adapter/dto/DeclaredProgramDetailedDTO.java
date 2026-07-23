@@ -17,5 +17,6 @@ public record DeclaredProgramDetailedDTO(
     String sourceOfInformation,
     LocalDate startDate,
     LocalDate endDate,
+    boolean valorized,
     Instant createdAt,
     Instant updatedAt) {}

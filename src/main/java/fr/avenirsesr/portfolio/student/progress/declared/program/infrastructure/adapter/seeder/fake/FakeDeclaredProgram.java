@@ -43,6 +43,7 @@ public class FakeDeclaredProgram {
             "Source - %s".formatted(truncate(faker.lorem().sentence(3), 100)),
             startDate,
             endDate,
+            false,
             Instant.now(),
             Instant.now()));
   }

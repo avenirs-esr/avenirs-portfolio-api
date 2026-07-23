@@ -110,7 +110,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Acquisition de premières compétences techniques",
                 "Conseiller d'orientation",
                 LocalDate.now().minusMonths(1),
-                LocalDate.now());
+                LocalDate.now(),
+                false);
 
         webTestClient
             .post()
@@ -145,7 +146,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Résultat",
                 "Source",
                 LocalDate.now().minusMonths(1),
-                LocalDate.now());
+                LocalDate.now(),
+                false);
 
         webTestClient
             .post()
@@ -182,7 +184,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Résultat",
                 "Source",
                 LocalDate.now().minusMonths(1),
-                LocalDate.now());
+                LocalDate.now(),
+                false);
 
         webTestClient
             .post()
@@ -217,7 +220,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Résultat",
                 "Source",
                 LocalDate.now().minusMonths(1),
-                LocalDate.now());
+                LocalDate.now(),
+                false);
 
         webTestClient
             .post()
@@ -252,7 +256,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Acquisition de premières compétences techniques",
                 "Conseiller d'orientation",
                 null,
-                LocalDate.now());
+                LocalDate.now(),
+                false);
 
         webTestClient
             .post()
@@ -293,7 +298,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Acquisition de premières compétences techniques",
                     "Conseiller d'orientation",
                     LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
+                    LocalDate.now(),
+                    false),
                 studentPayload,
                 studentSignature);
 
@@ -389,7 +395,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Result",
                     "Source",
                     LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
+                    LocalDate.now(),
+                    false),
                 secondStudentPayload,
                 secondStudentSignature);
 
@@ -461,7 +468,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Acquisition de premières compétences techniques",
                     "Conseiller d'orientation",
                     LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
+                    LocalDate.now(),
+                    false),
                 studentPayload,
                 studentSignature);
 
@@ -474,7 +482,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Nouveau résultat",
                 "Nouvelle source",
                 LocalDate.now().minusDays(5),
-                LocalDate.now().plusDays(5));
+                LocalDate.now().plusDays(5),
+                false);
 
         webTestClient
             .put()
@@ -531,6 +540,56 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
       }
 
       @Test
+      void shouldUpdateDeclaredProgramValorizedFlag() {
+        BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} PUT endpoint");
+        BddLogger.when("performing a PUT with valorized set to true");
+        BddLogger.then("it should return the declared program marked as valorized");
+
+        String id =
+            createDeclaredProgramAndReturnId(
+                new DeclaredProgramRequestDTO(
+                    "Stage d'observation",
+                    "Participation aux activités d'une équipe technique",
+                    "Tech4Future",
+                    "Acquisition de premières compétences techniques",
+                    "Conseiller d'orientation",
+                    LocalDate.now().minusMonths(1),
+                    LocalDate.now(),
+                    false),
+                studentPayload,
+                studentSignature);
+
+        DeclaredProgramRequestDTO updateBody =
+            new DeclaredProgramRequestDTO(
+                "Stage d'observation",
+                "Participation aux activités d'une équipe technique",
+                "Tech4Future",
+                "Acquisition de premières compétences techniques",
+                "Conseiller d'orientation",
+                LocalDate.now().minusMonths(1),
+                LocalDate.now(),
+                true);
+
+        webTestClient
+            .put()
+            .uri(BASE_PATH + "/" + id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(updateBody))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody()
+            .jsonPath("$.id")
+            .isEqualTo(id)
+            .jsonPath("$.valorized")
+            .isEqualTo(true);
+      }
+
+      @Test
       void shouldReturn404WhenDeclaredProgramNotFound() {
         BddLogger.given("the " + BASE_PATH + "/{declaredProgramId} PUT endpoint");
         BddLogger.when("performing a PUT for a non-existing declared program");
@@ -546,7 +605,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Result",
                 "Source",
                 LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(5));
+                LocalDate.now().minusDays(5),
+                false);
 
         webTestClient
             .put()
@@ -580,7 +640,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Result",
                     "Source",
                     LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
+                    LocalDate.now(),
+                    false),
                 secondStudentPayload,
                 secondStudentSignature);
 
@@ -592,7 +653,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Result",
                 "Source",
                 LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(5));
+                LocalDate.now().minusDays(5),
+                false);
 
         webTestClient
             .put()
@@ -622,7 +684,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Result",
                 "Source",
                 LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(5));
+                LocalDate.now().minusDays(5),
+                false);
 
         webTestClient
             .put()
@@ -653,13 +716,14 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Result",
                     "Source",
                     LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
+                    LocalDate.now(),
+                    false),
                 studentPayload,
                 studentSignature);
 
         DeclaredProgramRequestDTO updateBody =
             new DeclaredProgramRequestDTO(
-                "Title", "Description", "Org", "Result", "Source", null, LocalDate.now());
+                "Title", "Description", "Org", "Result", "Source", null, LocalDate.now(), false);
 
         webTestClient
             .put()
@@ -695,7 +759,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Result",
                     "Source",
                     LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
+                    LocalDate.now(),
+                    false),
                 studentPayload,
                 studentSignature);
 
@@ -709,7 +774,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Result",
                 "Source",
                 LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(5));
+                LocalDate.now().minusDays(5),
+                false);
 
         webTestClient
             .put()
@@ -743,7 +809,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Result",
                     "Source",
                     LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
+                    LocalDate.now(),
+                    false),
                 studentPayload,
                 studentSignature);
 
@@ -755,7 +822,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                 "Result",
                 "Source",
                 LocalDate.now().minusDays(10),
-                LocalDate.now().minusDays(5));
+                LocalDate.now().minusDays(5),
+                false);
 
         webTestClient
             .put()
@@ -793,7 +861,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Result",
                     "Source",
                     LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
+                    LocalDate.now(),
+                    false),
                 studentPayload,
                 studentSignature);
 
@@ -806,7 +875,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Result",
                     "Source",
                     LocalDate.now().minusMonths(2),
-                    LocalDate.now().minusMonths(1)),
+                    LocalDate.now().minusMonths(1),
+                    false),
                 studentPayload,
                 studentSignature);
 
@@ -870,7 +940,8 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
                     "Result",
                     "Source",
                     LocalDate.now().minusMonths(1),
-                    LocalDate.now()),
+                    LocalDate.now(),
+                    false),
                 secondStudentPayload,
                 secondStudentSignature);
 
