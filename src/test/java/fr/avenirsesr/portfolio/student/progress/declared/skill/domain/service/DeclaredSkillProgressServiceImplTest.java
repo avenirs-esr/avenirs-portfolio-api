@@ -264,23 +264,25 @@ public class DeclaredSkillProgressServiceImplTest {
         BddLogger.given("the method updateDeclaredSkillProgress");
         EDeclaredSkillLevel level = EDeclaredSkillLevel.ADVANCED;
         String reflection = "Reflection for declared skill progress test";
+        boolean valorized = true;
         DeclaredSkillProgress declaredSkillProgress =
             DeclaredSkillProgressFixture.create()
                 .withStudent(student)
                 .withLevel(EDeclaredSkillLevel.BEGINNER)
                 .withReflection(null)
+                .withValorized(false)
                 .toModel();
 
         BddLogger.when(
-            "calling the method with a given student, declaredSkillProgressId, level and"
-                + " reflection");
+            "calling the method with a given student, declaredSkillProgressId, level, reflection"
+                + " and valorized");
         when(declaredSkillProgressRepository.findById(declaredSkillProgress.getId()))
             .thenReturn(Optional.of(declaredSkillProgress));
 
         declaredSkillProgressService.updateDeclaredSkillProgress(
-            declaredSkillProgress.getId(), level, reflection);
+            declaredSkillProgress.getId(), level, reflection, valorized);
 
-        BddLogger.then("it should save level and reflection in declared skill progress");
+        BddLogger.then("it should save level, reflection and valorized in declared skill progress");
         ArgumentCaptor<DeclaredSkillProgress> captor =
             ArgumentCaptor.forClass(DeclaredSkillProgress.class);
         verify(declaredSkillProgressRepository).save(captor.capture());
@@ -291,6 +293,7 @@ public class DeclaredSkillProgressServiceImplTest {
         assertEquals(declaredSkillProgress.getSkill(), savedDeclaredSkillProgress.getSkill());
         assertEquals(level, savedDeclaredSkillProgress.getLevel());
         assertEquals(reflection, savedDeclaredSkillProgress.getReflection());
+        assertEquals(valorized, savedDeclaredSkillProgress.isValorized());
       }
 
       @Test
@@ -313,7 +316,7 @@ public class DeclaredSkillProgressServiceImplTest {
             FieldValidationException.class,
             () ->
                 declaredSkillProgressService.updateDeclaredSkillProgress(
-                    declaredSkillProgress.getId(), level, reflection));
+                    declaredSkillProgress.getId(), level, reflection, false));
       }
 
       @Test
@@ -329,7 +332,7 @@ public class DeclaredSkillProgressServiceImplTest {
             DeclaredSkillProgressNotFoundException.class,
             () ->
                 declaredSkillProgressService.updateDeclaredSkillProgress(
-                    declaredSkillProgress.getId(), level, reflection));
+                    declaredSkillProgress.getId(), level, reflection, false));
       }
 
       @Test
@@ -348,7 +351,7 @@ public class DeclaredSkillProgressServiceImplTest {
             UserNotAuthorizedException.class,
             () ->
                 declaredSkillProgressService.updateDeclaredSkillProgress(
-                    declaredSkillProgress.getId(), level, reflection));
+                    declaredSkillProgress.getId(), level, reflection, false));
       }
     }
 

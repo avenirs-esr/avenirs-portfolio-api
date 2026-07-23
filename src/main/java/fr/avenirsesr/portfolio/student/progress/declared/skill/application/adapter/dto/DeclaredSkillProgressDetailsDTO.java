@@ -18,7 +18,8 @@ import java.util.UUID;
       "level",
       "traceAssociations",
       "createdAt",
-      "updatedAt"
+      "updatedAt",
+      "valorized"
     })
 public record DeclaredSkillProgressDetailsDTO(
     UUID id,
@@ -29,4 +30,5 @@ public record DeclaredSkillProgressDetailsDTO(
     @Schema(ref = "#/components/schemas/EDeclaredSkillLevel") EDeclaredSkillLevel level,
     List<TraceOverviewDTO> traceAssociations,
     Instant createdAt,
-    Instant updatedAt) {}
+    Instant updatedAt,
+    boolean valorized) {}

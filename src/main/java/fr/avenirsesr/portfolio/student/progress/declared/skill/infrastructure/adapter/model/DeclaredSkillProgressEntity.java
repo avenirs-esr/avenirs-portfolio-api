@@ -38,12 +38,16 @@ public class DeclaredSkillProgressEntity extends AvenirsBaseEntity {
   @Column(length = RICH_TEXT_LENGTH)
   private String reflection;
 
+  @Column(name = "is_valorized", nullable = false)
+  private boolean valorized;
+
   private DeclaredSkillProgressEntity(
       UUID id,
       StudentEntity student,
       DeclaredSkillEntity declaredSkill,
       EDeclaredSkillLevel level,
       String reflection,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     setId(id);
@@ -51,6 +55,7 @@ public class DeclaredSkillProgressEntity extends AvenirsBaseEntity {
     this.declaredSkill = declaredSkill;
     this.level = level;
     this.reflection = reflection;
+    this.valorized = valorized;
     setCreatedAt(createdAt);
     setUpdatedAt(updatedAt);
   }
@@ -61,9 +66,10 @@ public class DeclaredSkillProgressEntity extends AvenirsBaseEntity {
       DeclaredSkillEntity declaredSkill,
       EDeclaredSkillLevel level,
       String reflection,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     return new DeclaredSkillProgressEntity(
-        id, student, declaredSkill, level, reflection, createdAt, updatedAt);
+        id, student, declaredSkill, level, reflection, valorized, createdAt, updatedAt);
   }
 }

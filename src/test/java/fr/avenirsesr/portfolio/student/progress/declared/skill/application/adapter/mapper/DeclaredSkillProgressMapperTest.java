@@ -50,5 +50,6 @@ class DeclaredSkillProgressMapperTest {
     assertEquals("Java Programming", dto.title());
     assertEquals(EExternalSkillType.ROME4, dto.type());
     assertEquals(EDeclaredSkillLevel.BEGINNER, dto.level());
+    assertFalse(dto.valorized());
   }
 }

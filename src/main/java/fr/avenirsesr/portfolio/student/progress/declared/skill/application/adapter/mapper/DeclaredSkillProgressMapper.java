@@ -29,6 +29,7 @@ public interface DeclaredSkillProgressMapper {
   @Mapping(source = "declaredSkillProgress.level", target = "level")
   @Mapping(source = "declaredSkillProgress.createdAt", target = "createdAt")
   @Mapping(source = "declaredSkillProgress.updatedAt", target = "updatedAt")
+  @Mapping(source = "declaredSkillProgress.valorized", target = "valorized")
   DeclaredSkillProgressDetailsDTO toDeclaredSkillProgressDetailsDTO(
       DeclaredSkillProgressDetails declaredSkillProgressDetails);
 

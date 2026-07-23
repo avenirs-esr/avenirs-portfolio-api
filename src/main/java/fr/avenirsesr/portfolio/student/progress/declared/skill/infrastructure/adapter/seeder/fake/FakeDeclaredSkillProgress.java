@@ -38,6 +38,7 @@ public class FakeDeclaredSkillProgress {
             randomSkill,
             dataGenerator.with("EDeclaredSkillLevel").pickIn(EDeclaredSkillLevel.class),
             declaredSkillProgressGenerator.with("sentence").reflection(),
+            false,
             Instant.now(),
             Instant.now()));
   }
