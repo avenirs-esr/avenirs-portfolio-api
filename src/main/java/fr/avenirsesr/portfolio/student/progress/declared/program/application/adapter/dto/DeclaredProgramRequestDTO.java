@@ -17,4 +17,4 @@ public record DeclaredProgramRequestDTO(
     @Size(max = SOURCE_OF_INFORMATION_LENGTH) String sourceOfInformation,
     @NotNull LocalDate startDate,
     LocalDate endDate,
-    boolean valorized) {}
+    Boolean valorized) {}
