@@ -51,5 +51,6 @@ class DeclaredActivityViewDTOMapperTest {
     assertEquals(activity.getSummary(), dto.summary());
     assertEquals(activity.getDescription(), dto.description());
     assertEquals(EDeclaredActivityStatus.SUBSCRIBED, dto.status());
+    assertFalse(dto.valorized());
   }
 }

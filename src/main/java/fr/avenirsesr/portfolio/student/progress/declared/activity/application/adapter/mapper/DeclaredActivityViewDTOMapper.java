@@ -19,6 +19,7 @@ public interface DeclaredActivityViewDTOMapper {
       source = "declaredActivity.activity.executionPeriodInfoSummary",
       target = "executionPeriodInfoSummary")
   @Mapping(source = "status", target = "status")
+  @Mapping(source = "declaredActivity.valorized", target = "valorized")
   DeclaredActivityViewDTO toDTO(DeclaredActivity declaredActivity, EDeclaredActivityStatus status);
 
   default String unwrap(Optional<String> value) {

@@ -29,6 +29,7 @@ public interface DeclaredActivityDetailsDTOMapper {
   @Mapping(source = "data.declaredActivity.startDate", target = "startDate")
   @Mapping(source = "data.declaredActivity.endDate", target = "endDate")
   @Mapping(source = "data.declaredActivity.finishedAt", target = "finishedAt")
+  @Mapping(source = "data.declaredActivity.valorized", target = "valorized")
   @Mapping(source = "data.declaredActivity.createdAt", target = "createdAt")
   @Mapping(source = "data.declaredActivity.updatedAt", target = "updatedAt")
   DeclaredActivityDetailsDTO toDTO(
@@ -44,12 +45,14 @@ public interface DeclaredActivityDetailsDTOMapper {
   @Mapping(source = "data.declaredActivity.startDate", target = "startDate")
   @Mapping(source = "data.declaredActivity.endDate", target = "endDate")
   @Mapping(source = "data.declaredActivity.finishedAt", target = "finishedAt")
+  @Mapping(source = "data.declaredActivity.valorized", target = "valorized")
   @Mapping(source = "data.declaredActivity.createdAt", target = "createdAt")
   @Mapping(source = "data.declaredActivity.updatedAt", target = "updatedAt")
   DeclaredActivityDetailsDTO toDTO(
       DeclaredActivityDetailsData data, EDeclaredActivityStatus status, List<FileDTO> files);
 
   @Mapping(source = "activity", target = "activity")
+  @Mapping(source = "valorized", target = "valorized")
   @Mapping(target = "status", ignore = true)
   @Mapping(target = "feedbacks", ignore = true)
   DeclaredActivityDetailsDTO toDTO(DeclaredActivity declaredActivity);

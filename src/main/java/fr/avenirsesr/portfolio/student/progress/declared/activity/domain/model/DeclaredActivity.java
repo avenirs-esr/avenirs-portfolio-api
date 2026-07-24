@@ -27,6 +27,8 @@ public class DeclaredActivity extends AvenirsBaseModel {
   @Getter(AccessLevel.NONE)
   private Instant finishedAt;
 
+  private boolean valorized;
+
   private DeclaredActivity(
       UUID id,
       Student student,
@@ -36,6 +38,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
       LocalDate startDate,
       LocalDate endDate,
       Instant finishedAt,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     super(id, createdAt, updatedAt);
@@ -46,6 +49,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
     this.startDate = startDate;
     this.endDate = endDate;
     this.finishedAt = finishedAt;
+    this.valorized = valorized;
   }
 
   public static DeclaredActivity create(
@@ -66,6 +70,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
         startDate,
         endDate,
         finishedAt,
+        false,
         Instant.now(),
         Instant.now());
   }
@@ -79,6 +84,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
       LocalDate startDate,
       LocalDate endDate,
       Instant finishedAt,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     return new DeclaredActivity(
@@ -90,6 +96,7 @@ public class DeclaredActivity extends AvenirsBaseModel {
         startDate,
         endDate,
         finishedAt,
+        valorized,
         createdAt,
         updatedAt);
   }

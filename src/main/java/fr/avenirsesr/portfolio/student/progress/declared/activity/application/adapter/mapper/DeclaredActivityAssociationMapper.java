@@ -29,6 +29,7 @@ public interface DeclaredActivityAssociationMapper {
         status,
         declaredActivity.getStartDate(),
         declaredActivity.getEndDate(),
+        declaredActivity.isValorized(),
         declaredActivity.getUpdatedAt());
   }
 }

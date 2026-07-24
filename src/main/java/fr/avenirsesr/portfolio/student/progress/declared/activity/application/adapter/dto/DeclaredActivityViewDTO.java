@@ -28,4 +28,5 @@ public record DeclaredActivityViewDTO(
     @Schema(ref = "#/components/schemas/EDeclaredActivityStatus") EDeclaredActivityStatus status,
     LocalDate startDate,
     LocalDate endDate,
+    boolean valorized,
     Instant updatedAt) {}

@@ -2,6 +2,7 @@ package fr.avenirsesr.portfolio.student.progress.declared.activity.domain.servic
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -600,7 +601,7 @@ class DeclaredActivityServiceImplTest {
 
     // When
     BddLogger.when("The service is called with valid dates.");
-    declaredActivityService.updateDeclaredActivity(declaredActivityId, startDate, endDate);
+    declaredActivityService.updateDeclaredActivity(declaredActivityId, startDate, endDate, null);
 
     // Then
     BddLogger.then("The DeclaredActivity receives the new dates.");
@@ -623,11 +624,51 @@ class DeclaredActivityServiceImplTest {
     when(declaredActivity.getStudent()).thenReturn(student);
 
     BddLogger.when("The service is called without any period field");
-    declaredActivityService.updateDeclaredActivity(declaredActivityId, null, null);
+    declaredActivityService.updateDeclaredActivity(declaredActivityId, null, null, null);
 
     BddLogger.then("The DeclaredActivity dates are left untouched but it is still saved");
     verify(declaredActivity, never()).setStartDate(any());
     verify(declaredActivity, never()).setEndDate(any());
+    verify(declaredActivityRepository).save(declaredActivity);
+  }
+
+  @Test
+  void updateDeclaredActivity_should_update_valorized_when_provided() {
+    BddLogger.given("A logged-in student and his existing declared activity");
+    UUID declaredActivityId = UUID.randomUUID();
+    var student = mock(Student.class);
+    var declaredActivity = mock(DeclaredActivity.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivity.getStudent()).thenReturn(student);
+
+    BddLogger.when("The service is called with valorized set to true");
+    declaredActivityService.updateDeclaredActivity(declaredActivityId, null, null, true);
+
+    BddLogger.then("The DeclaredActivity valorized flag is updated and it is saved");
+    verify(declaredActivity).setValorized(true);
+    verify(declaredActivityRepository).save(declaredActivity);
+  }
+
+  @Test
+  void updateDeclaredActivity_should_leave_valorized_untouched_when_not_provided() {
+    BddLogger.given("A logged-in student and his existing declared activity");
+    UUID declaredActivityId = UUID.randomUUID();
+    var student = mock(Student.class);
+    var declaredActivity = mock(DeclaredActivity.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivity.getStudent()).thenReturn(student);
+
+    BddLogger.when("The service is called without the valorized field");
+    declaredActivityService.updateDeclaredActivity(declaredActivityId, null, null, null);
+
+    BddLogger.then("The DeclaredActivity valorized flag is left untouched but it is still saved");
+    verify(declaredActivity, never()).setValorized(anyBoolean());
     verify(declaredActivityRepository).save(declaredActivity);
   }
 
@@ -651,7 +692,7 @@ class DeclaredActivityServiceImplTest {
             FieldValidationException.class,
             () ->
                 declaredActivityService.updateDeclaredActivity(
-                    declaredActivityId, startDate, endDate));
+                    declaredActivityId, startDate, endDate, null));
 
     Assertions.assertEquals(EErrorCode.END_DATE_BEFORE_START_DATE, ex.getErrorCode());
   }
@@ -678,7 +719,7 @@ class DeclaredActivityServiceImplTest {
             BusinessException.class,
             () ->
                 declaredActivityService.updateDeclaredActivity(
-                    declaredActivityId, startDate, endDate));
+                    declaredActivityId, startDate, endDate, null));
 
     Assertions.assertEquals(
         EErrorCode.DECLARED_ACTIVITY_START_DATE_BEFORE_SUBSCRIPTION, ex.getErrorCode());

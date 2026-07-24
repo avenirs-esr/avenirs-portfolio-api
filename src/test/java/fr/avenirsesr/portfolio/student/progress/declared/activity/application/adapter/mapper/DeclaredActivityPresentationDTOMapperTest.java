@@ -73,6 +73,7 @@ class DeclaredActivityPresentationDTOMapperTest {
     assertEquals(activity.getId(), dto.activity().id());
     assertEquals(activity.getTitle(), dto.activity().title());
     assertEquals(EDeclaredActivityStatus.SUBSCRIBED, dto.status());
+    assertFalse(dto.valorized());
   }
 
   @Test

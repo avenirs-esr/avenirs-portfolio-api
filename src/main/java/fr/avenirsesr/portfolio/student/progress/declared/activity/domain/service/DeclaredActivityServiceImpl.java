@@ -221,7 +221,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
 
   @Override
   public void updateDeclaredActivity(
-      UUID declaredActivityId, LocalDate startDate, LocalDate endDate) {
+      UUID declaredActivityId, LocalDate startDate, LocalDate endDate, Boolean valorized) {
 
     var student = loggedInUserService.getLoggedInStudent();
     log.debug("Authenticated student id: {}", student.getId());
@@ -242,6 +242,10 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       validateActivityDates(startDate, endDate, declaredActivity.getCreatedAt());
       declaredActivity.setStartDate(startDate);
       declaredActivity.setEndDate(endDate);
+    }
+
+    if (valorized != null) {
+      declaredActivity.setValorized(valorized);
     }
 
     declaredActivityRepository.save(declaredActivity);

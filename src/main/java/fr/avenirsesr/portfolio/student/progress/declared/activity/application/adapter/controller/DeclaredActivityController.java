@@ -189,7 +189,8 @@ public class DeclaredActivityController {
     var optionalPeriod = Optional.ofNullable(declaredActivityUpdateRequest.period());
     LocalDate startDate = optionalPeriod.map(DeclaredActivityPeriodDTO::startDate).orElse(null);
     LocalDate endDate = optionalPeriod.map(DeclaredActivityPeriodDTO::endDate).orElse(null);
-    declaredActivityService.updateDeclaredActivity(declaredActivityId, startDate, endDate);
+    declaredActivityService.updateDeclaredActivity(
+        declaredActivityId, startDate, endDate, declaredActivityUpdateRequest.valorized());
     return ResponseEntity.ok("Declared activity successfully updated");
   }
 
