@@ -2,20 +2,31 @@
 
 import fr.avenirsesr.portfolio.common.data.domain.model.SortCriteria;
 import fr.avenirsesr.portfolio.common.data.domain.model.enums.ESortOrder;
+import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.model.DeclaredProgramEntity;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
-<span class="nc" id="L7">public class DeclaredProgramSpecification {</span>
+<span class="nc" id="L9">public class DeclaredProgramSpecification {</span>
   public static Sort toSort(SortCriteria sortCriteria) {
-<span class="pc bpc" id="L9" title="1 of 2 branches missed.">    if (sortCriteria == null) {</span>
-<span class="nc" id="L10">      return Sort.unsorted();</span>
+<span class="pc bpc" id="L11" title="1 of 2 branches missed.">    if (sortCriteria == null) {</span>
+<span class="nc" id="L12">      return Sort.unsorted();</span>
     }
 
     Sort.Direction direction =
-<span class="fc bfc" id="L14" title="All 2 branches covered.">        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;</span>
 
-<span class="fc bfc" id="L16" title="All 2 branches covered.">    return switch (sortCriteria.field()) {</span>
-<span class="fc" id="L17">      case NAME -&gt; Sort.by(direction, &quot;title&quot;);</span>
-<span class="fc" id="L18">      case DATE -&gt; Sort.by(direction, &quot;endDate&quot;);</span>
+<span class="fc bfc" id="L18" title="All 2 branches covered.">    return switch (sortCriteria.field()) {</span>
+<span class="fc" id="L19">      case NAME -&gt; Sort.by(direction, &quot;title&quot;);</span>
+<span class="fc" id="L20">      case DATE -&gt; Sort.by(direction, &quot;endDate&quot;);</span>
+    };
+  }
+
+  public static Specification&lt;DeclaredProgramEntity&gt; isValorized(Boolean isValorized) {
+<span class="fc" id="L25">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">      if (isValorized == null) {</span>
+<span class="fc" id="L27">        return criteriaBuilder.conjunction();</span>
+      }
+<span class="fc" id="L29">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
     };
   }
 }
