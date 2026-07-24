@@ -38,5 +38,14 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="fc" id="L38">          criteriaBuilder.lower(root.get(&quot;title&quot;)), &quot;%&quot; + keyword.toLowerCase() + &quot;%&quot;);</span>
     };
   }
+
+  public static Specification&lt;DeclaredExperienceEntity&gt; isValorized(Boolean isValorized) {
+<span class="fc" id="L43">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">      if (isValorized == null) {</span>
+<span class="fc" id="L45">        return criteriaBuilder.conjunction();</span>
+      }
+<span class="fc" id="L47">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
+    };
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
