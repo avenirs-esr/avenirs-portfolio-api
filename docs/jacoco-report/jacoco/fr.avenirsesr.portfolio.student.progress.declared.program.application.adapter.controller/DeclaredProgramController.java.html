@@ -32,70 +32,68 @@ public class DeclaredProgramController {
   @GetMapping
   public ResponseEntity&lt;PagedResponse&lt;DeclaredProgramViewDTO&gt;&gt; getDeclaredPrograms(
       @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize,
-      @RequestParam(required = false) Boolean isValorized) {
-<span class="fc" id="L37">    var pageCriteria = new PageCriteria(page, pageSize);</span>
-<span class="fc" id="L38">    log.debug(</span>
-        &quot;Received request to get declared programs (page= {}, fileSize= {}, isValorized={})&quot;,
-<span class="fc" id="L40">        pageCriteria.page(),</span>
-<span class="fc" id="L41">        pageCriteria.pageSize(),</span>
-        isValorized);
-<span class="fc" id="L43">    PagedResult&lt;DeclaredProgram&gt; declaredProgramPagedResult =</span>
-<span class="fc" id="L44">        declaredProgramService.getDeclaredPrograms(pageCriteria, isValorized);</span>
+      @RequestParam(required = false) Integer pageSize) {
+<span class="fc" id="L36">    var pageCriteria = new PageCriteria(page, pageSize);</span>
+<span class="fc" id="L37">    log.debug(</span>
+        &quot;Received request to get declared programs (page= {}, fileSize= {})&quot;,
+<span class="fc" id="L39">        pageCriteria.page(),</span>
+<span class="fc" id="L40">        pageCriteria.pageSize());</span>
+<span class="fc" id="L41">    PagedResult&lt;DeclaredProgram&gt; declaredProgramPagedResult =</span>
+<span class="fc" id="L42">        declaredProgramService.getDeclaredPrograms(pageCriteria);</span>
 
-<span class="fc" id="L46">    return ResponseEntity.ok(</span>
+<span class="fc" id="L44">    return ResponseEntity.ok(</span>
         new PagedResponse&lt;&gt;(
-<span class="fc" id="L48">            declaredProgramPagedResult.content().stream()</span>
-<span class="fc" id="L49">                .map(declaredProgramViewMapper::toDTO)</span>
-<span class="fc" id="L50">                .toList(),</span>
-<span class="fc" id="L51">            PageInfoDTO.fromDomain(declaredProgramPagedResult.pageInfo())));</span>
+<span class="fc" id="L46">            declaredProgramPagedResult.content().stream()</span>
+<span class="fc" id="L47">                .map(declaredProgramViewMapper::toDTO)</span>
+<span class="fc" id="L48">                .toList(),</span>
+<span class="fc" id="L49">            PageInfoDTO.fromDomain(declaredProgramPagedResult.pageInfo())));</span>
   }
 
   @PostMapping
   public ResponseEntity&lt;DeclaredProgramViewDTO&gt; createDeclaredProgram(
       @Valid @RequestBody DeclaredProgramRequestDTO declaredProgramRequestDTO) {
-<span class="fc" id="L57">    DeclaredProgram declaredProgram =</span>
-<span class="fc" id="L58">        declaredProgramService.create(</span>
-<span class="fc" id="L59">            declaredProgramRequestDTO.title(),</span>
-<span class="fc" id="L60">            declaredProgramRequestDTO.description(),</span>
-<span class="fc" id="L61">            declaredProgramRequestDTO.organization(),</span>
-<span class="fc" id="L62">            declaredProgramRequestDTO.result(),</span>
-<span class="fc" id="L63">            declaredProgramRequestDTO.sourceOfInformation(),</span>
-<span class="fc" id="L64">            declaredProgramRequestDTO.startDate(),</span>
-<span class="fc" id="L65">            declaredProgramRequestDTO.endDate());</span>
-<span class="fc" id="L66">    return ResponseEntity.created(URI.create(&quot;/me/declared/programs/&quot; + declaredProgram.getId()))</span>
-<span class="fc" id="L67">        .body(declaredProgramViewMapper.toDTO(declaredProgram));</span>
+<span class="fc" id="L55">    DeclaredProgram declaredProgram =</span>
+<span class="fc" id="L56">        declaredProgramService.create(</span>
+<span class="fc" id="L57">            declaredProgramRequestDTO.title(),</span>
+<span class="fc" id="L58">            declaredProgramRequestDTO.description(),</span>
+<span class="fc" id="L59">            declaredProgramRequestDTO.organization(),</span>
+<span class="fc" id="L60">            declaredProgramRequestDTO.result(),</span>
+<span class="fc" id="L61">            declaredProgramRequestDTO.sourceOfInformation(),</span>
+<span class="fc" id="L62">            declaredProgramRequestDTO.startDate(),</span>
+<span class="fc" id="L63">            declaredProgramRequestDTO.endDate());</span>
+<span class="fc" id="L64">    return ResponseEntity.created(URI.create(&quot;/me/declared/programs/&quot; + declaredProgram.getId()))</span>
+<span class="fc" id="L65">        .body(declaredProgramViewMapper.toDTO(declaredProgram));</span>
   }
 
   @PutMapping(&quot;/{declaredProgramId}&quot;)
   public ResponseEntity&lt;DeclaredProgramDetailedDTO&gt; updateDeclaredProgram(
       @Valid @PathVariable(&quot;declaredProgramId&quot;) UUID declaredProgramId,
       @Valid @RequestBody DeclaredProgramRequestDTO declaredProgramRequestDTO) {
-<span class="fc" id="L74">    DeclaredProgram declaredProgram =</span>
-<span class="fc" id="L75">        declaredProgramService.update(</span>
+<span class="fc" id="L72">    DeclaredProgram declaredProgram =</span>
+<span class="fc" id="L73">        declaredProgramService.update(</span>
             declaredProgramId,
-<span class="fc" id="L77">            declaredProgramRequestDTO.title(),</span>
-<span class="fc" id="L78">            declaredProgramRequestDTO.description(),</span>
-<span class="fc" id="L79">            declaredProgramRequestDTO.organization(),</span>
-<span class="fc" id="L80">            declaredProgramRequestDTO.result(),</span>
-<span class="fc" id="L81">            declaredProgramRequestDTO.sourceOfInformation(),</span>
-<span class="fc" id="L82">            declaredProgramRequestDTO.startDate(),</span>
-<span class="fc" id="L83">            declaredProgramRequestDTO.endDate(),</span>
-<span class="fc" id="L84">            Boolean.TRUE.equals(declaredProgramRequestDTO.valorized()));</span>
-<span class="fc" id="L85">    return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));</span>
+<span class="fc" id="L75">            declaredProgramRequestDTO.title(),</span>
+<span class="fc" id="L76">            declaredProgramRequestDTO.description(),</span>
+<span class="fc" id="L77">            declaredProgramRequestDTO.organization(),</span>
+<span class="fc" id="L78">            declaredProgramRequestDTO.result(),</span>
+<span class="fc" id="L79">            declaredProgramRequestDTO.sourceOfInformation(),</span>
+<span class="fc" id="L80">            declaredProgramRequestDTO.startDate(),</span>
+<span class="fc" id="L81">            declaredProgramRequestDTO.endDate(),</span>
+<span class="fc" id="L82">            Boolean.TRUE.equals(declaredProgramRequestDTO.valorized()));</span>
+<span class="fc" id="L83">    return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));</span>
   }
 
   @GetMapping(&quot;/{declaredProgramId}&quot;)
   public ResponseEntity&lt;DeclaredProgramDetailedDTO&gt; getDeclaredProgram(
       @PathVariable(&quot;declaredProgramId&quot;) UUID declaredProgramId) {
-<span class="fc" id="L91">    DeclaredProgram declaredProgram = declaredProgramService.getById(declaredProgramId);</span>
-<span class="fc" id="L92">    return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));</span>
+<span class="fc" id="L89">    DeclaredProgram declaredProgram = declaredProgramService.getById(declaredProgramId);</span>
+<span class="fc" id="L90">    return ResponseEntity.ok(declaredProgramDetailedMapper.toDTO(declaredProgram));</span>
   }
 
   @DeleteMapping
   public ResponseEntity&lt;String&gt; deleteDeclaredProgram(@RequestBody List&lt;UUID&gt; declaredProgramIds) {
-<span class="fc" id="L97">    declaredProgramService.delete(declaredProgramIds);</span>
-<span class="fc" id="L98">    return ResponseEntity.ok(&quot;Declared programs deleted successfully.&quot;);</span>
+<span class="fc" id="L95">    declaredProgramService.delete(declaredProgramIds);</span>
+<span class="fc" id="L96">    return ResponseEntity.ok(&quot;Declared programs deleted successfully.&quot;);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

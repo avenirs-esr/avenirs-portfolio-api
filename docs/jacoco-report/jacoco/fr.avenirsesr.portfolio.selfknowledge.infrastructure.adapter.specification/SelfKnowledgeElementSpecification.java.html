@@ -7,16 +7,25 @@ import org.springframework.data.jpa.domain.Specification;
 <span class="nc" id="L7">public class SelfKnowledgeElementSpecification {</span>
 
   public static Specification&lt;SelfKnowledgeElementEntity&gt; hasStudentId(UUID studentId) {
-<span class="nc" id="L10">    return (root, query, cb) -&gt;</span>
-<span class="nc bnc" id="L11" title="All 2 branches missed.">        studentId == null ? null : cb.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId);</span>
+<span class="fc" id="L10">    return (root, query, cb) -&gt;</span>
+<span class="pc bpc" id="L11" title="1 of 2 branches missed.">        studentId == null ? null : cb.equal(root.get(&quot;student&quot;).get(&quot;id&quot;), studentId);</span>
   }
 
   public static Specification&lt;SelfKnowledgeElementEntity&gt; hasSelfKnowledgeCategoryId(
       UUID categoryId) {
-<span class="nc" id="L16">    return (root, query, cb) -&gt;</span>
-<span class="nc bnc" id="L17" title="All 2 branches missed.">        categoryId == null</span>
+<span class="fc" id="L16">    return (root, query, cb) -&gt;</span>
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">        categoryId == null</span>
 <span class="nc" id="L18">            ? null</span>
-<span class="nc" id="L19">            : cb.equal(root.get(&quot;selfKnowledgeCategory&quot;).get(&quot;id&quot;), categoryId);</span>
+<span class="fc" id="L19">            : cb.equal(root.get(&quot;selfKnowledgeCategory&quot;).get(&quot;id&quot;), categoryId);</span>
+  }
+
+  public static Specification&lt;SelfKnowledgeElementEntity&gt; isValorized(Boolean isValorized) {
+<span class="fc" id="L23">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">      if (isValorized == null) {</span>
+<span class="nc" id="L25">        return criteriaBuilder.conjunction();</span>
+      }
+<span class="fc" id="L27">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
+    };
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
