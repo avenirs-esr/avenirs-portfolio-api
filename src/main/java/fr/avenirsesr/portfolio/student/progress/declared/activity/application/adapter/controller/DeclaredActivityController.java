@@ -15,12 +15,7 @@ import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsCreati
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.AssociationsDeleteRequest;
 import fr.avenirsesr.portfolio.shared.application.adapter.dto.CreationResponse;
 import fr.avenirsesr.portfolio.shared.application.adapter.mapper.FileDTOMapper;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityAssociationsDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityDetailsDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityPeriodRequest;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.DeclaredActivityViewDTO;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.SubscribeDeclaredActivityRequest;
-import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.UpdateReflectionRequest;
+import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.dto.*;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityAssociationsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityDetailsDTOMapper;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.application.adapter.mapper.DeclaredActivityViewDTOMapper;
@@ -33,6 +28,7 @@ import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +36,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -185,20 +182,15 @@ public class DeclaredActivityController {
     return ResponseEntity.ok("Declared activities associations successfully deleted");
   }
 
-  @PutMapping("/{declaredActivityId}/period")
-  public ResponseEntity<String> updatePeriod(
-      @Valid @RequestBody DeclaredActivityPeriodRequest declaredActivityPeriodRequest,
+  @PatchMapping("/{declaredActivityId}")
+  public ResponseEntity<String> updateDeclaredActivity(
+      @Valid @RequestBody DeclaredActivityUpdateRequest declaredActivityUpdateRequest,
       @PathVariable UUID declaredActivityId) {
-    LocalDate startDate =
-        declaredActivityPeriodRequest.period() != null
-            ? declaredActivityPeriodRequest.period().startDate()
-            : null;
-    LocalDate endDate =
-        declaredActivityPeriodRequest.period() != null
-            ? declaredActivityPeriodRequest.period().endDate()
-            : null;
-    declaredActivityService.updateDeclaredActivityDates(declaredActivityId, startDate, endDate);
-    return ResponseEntity.ok("Declared activities dates successfully updated");
+    var optionalPeriod = Optional.ofNullable(declaredActivityUpdateRequest.period());
+    LocalDate startDate = optionalPeriod.map(DeclaredActivityPeriodDTO::startDate).orElse(null);
+    LocalDate endDate = optionalPeriod.map(DeclaredActivityPeriodDTO::endDate).orElse(null);
+    declaredActivityService.updateDeclaredActivity(declaredActivityId, startDate, endDate);
+    return ResponseEntity.ok("Declared activity successfully updated");
   }
 
   @PostMapping("/{declaredActivityId}/associate/traces")

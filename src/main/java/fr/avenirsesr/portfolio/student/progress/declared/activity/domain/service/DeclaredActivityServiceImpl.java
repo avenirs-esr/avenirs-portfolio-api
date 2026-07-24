@@ -220,7 +220,7 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
   }
 
   @Override
-  public void updateDeclaredActivityDates(
+  public void updateDeclaredActivity(
       UUID declaredActivityId, LocalDate startDate, LocalDate endDate) {
 
     var student = loggedInUserService.getLoggedInStudent();
@@ -238,10 +238,11 @@ public class DeclaredActivityServiceImpl implements DeclaredActivityService {
       throw new UserNotAuthorizedException();
     }
 
-    validateActivityDates(startDate, endDate, declaredActivity.getCreatedAt());
-
-    declaredActivity.setStartDate(startDate);
-    declaredActivity.setEndDate(endDate);
+    if (startDate != null || endDate != null) {
+      validateActivityDates(startDate, endDate, declaredActivity.getCreatedAt());
+      declaredActivity.setStartDate(startDate);
+      declaredActivity.setEndDate(endDate);
+    }
 
     declaredActivityRepository.save(declaredActivity);
   }

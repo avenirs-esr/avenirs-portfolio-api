@@ -600,13 +600,34 @@ class DeclaredActivityServiceImplTest {
 
     // When
     BddLogger.when("The service is called with valid dates.");
-    declaredActivityService.updateDeclaredActivityDates(declaredActivityId, startDate, endDate);
+    declaredActivityService.updateDeclaredActivity(declaredActivityId, startDate, endDate);
 
     // Then
     BddLogger.then("The DeclaredActivity receives the new dates.");
     verify(declaredActivity).setStartDate(startDate);
     verify(declaredActivity).setEndDate(endDate);
 
+    verify(declaredActivityRepository).save(declaredActivity);
+  }
+
+  @Test
+  void updateDeclaredActivity_should_leave_dates_untouched_when_none_provided() {
+    BddLogger.given("A logged-in student and his existing declared activity");
+    UUID declaredActivityId = UUID.randomUUID();
+    var student = mock(Student.class);
+    var declaredActivity = mock(DeclaredActivity.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(student);
+    when(declaredActivityRepository.findById(declaredActivityId))
+        .thenReturn(Optional.of(declaredActivity));
+    when(declaredActivity.getStudent()).thenReturn(student);
+
+    BddLogger.when("The service is called without any period field");
+    declaredActivityService.updateDeclaredActivity(declaredActivityId, null, null);
+
+    BddLogger.then("The DeclaredActivity dates are left untouched but it is still saved");
+    verify(declaredActivity, never()).setStartDate(any());
+    verify(declaredActivity, never()).setEndDate(any());
     verify(declaredActivityRepository).save(declaredActivity);
   }
 
@@ -629,7 +650,7 @@ class DeclaredActivityServiceImplTest {
         Assertions.assertThrows(
             FieldValidationException.class,
             () ->
-                declaredActivityService.updateDeclaredActivityDates(
+                declaredActivityService.updateDeclaredActivity(
                     declaredActivityId, startDate, endDate));
 
     Assertions.assertEquals(EErrorCode.END_DATE_BEFORE_START_DATE, ex.getErrorCode());
@@ -656,7 +677,7 @@ class DeclaredActivityServiceImplTest {
         Assertions.assertThrows(
             BusinessException.class,
             () ->
-                declaredActivityService.updateDeclaredActivityDates(
+                declaredActivityService.updateDeclaredActivity(
                     declaredActivityId, startDate, endDate));
 
     Assertions.assertEquals(
