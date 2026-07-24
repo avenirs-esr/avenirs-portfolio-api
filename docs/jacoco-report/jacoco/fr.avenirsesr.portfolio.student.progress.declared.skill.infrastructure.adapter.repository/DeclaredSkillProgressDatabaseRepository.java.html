@@ -48,34 +48,35 @@ public class DeclaredSkillProgressDatabaseRepository
 
   @Override
   public PagedResult&lt;DeclaredSkillProgress&gt; findAllByStudent(
-      Student student, PageCriteria pageCriteria, SortCriteria sortCriteria) {
-<span class="fc" id="L52">    var specification = hasStudent(student);</span>
-<span class="fc" id="L53">    return findAll(</span>
+      Student student, PageCriteria pageCriteria, Boolean isValorized, SortCriteria sortCriteria) {
+<span class="fc" id="L52">    var specification =</span>
+<span class="fc" id="L53">        hasStudent(student).and(DeclaredSkillProgressSpecification.isValorized(isValorized));</span>
+<span class="fc" id="L54">    return findAll(</span>
         specification,
-<span class="fc" id="L55">        PageRequest.of(</span>
-<span class="fc" id="L56">            pageCriteria.page(),</span>
-<span class="fc" id="L57">            pageCriteria.pageSize(),</span>
-<span class="fc" id="L58">            DeclaredSkillProgressSpecification.toSort(sortCriteria)),</span>
-<span class="fc" id="L59">        FetchGraph.init().fetch(&quot;student&quot;).fetch(&quot;declaredSkill&quot;));</span>
+<span class="fc" id="L56">        PageRequest.of(</span>
+<span class="fc" id="L57">            pageCriteria.page(),</span>
+<span class="fc" id="L58">            pageCriteria.pageSize(),</span>
+<span class="fc" id="L59">            DeclaredSkillProgressSpecification.toSort(sortCriteria)),</span>
+<span class="fc" id="L60">        FetchGraph.init().fetch(&quot;student&quot;).fetch(&quot;declaredSkill&quot;));</span>
   }
 
   @Override
   public PagedResult&lt;DeclaredSkillProgress&gt; findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword, SortCriteria sortCriteria) {
-<span class="fc" id="L65">    var specification = hasStudent(student).and(DeclaredSkillProgressSpecification.search(keyword));</span>
-<span class="fc" id="L66">    return findAllByStudent(specification, pageCriteria, sortCriteria);</span>
+<span class="fc" id="L66">    var specification = hasStudent(student).and(DeclaredSkillProgressSpecification.search(keyword));</span>
+<span class="fc" id="L67">    return findAllByStudent(specification, pageCriteria, sortCriteria);</span>
   }
 
   private PagedResult&lt;DeclaredSkillProgress&gt; findAllByStudent(
       Specification&lt;DeclaredSkillProgressEntity&gt; specification,
       PageCriteria pageCriteria,
       SortCriteria sortCriteria) {
-<span class="fc" id="L73">    return findAll(</span>
+<span class="fc" id="L74">    return findAll(</span>
         specification,
-<span class="fc" id="L75">        PageRequest.of(</span>
-<span class="fc" id="L76">            pageCriteria.page(),</span>
-<span class="fc" id="L77">            pageCriteria.pageSize(),</span>
-<span class="fc" id="L78">            DeclaredSkillProgressSpecification.toSort(sortCriteria)));</span>
+<span class="fc" id="L76">        PageRequest.of(</span>
+<span class="fc" id="L77">            pageCriteria.page(),</span>
+<span class="fc" id="L78">            pageCriteria.pageSize(),</span>
+<span class="fc" id="L79">            DeclaredSkillProgressSpecification.toSort(sortCriteria)));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

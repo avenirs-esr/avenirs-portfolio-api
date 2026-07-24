@@ -30,17 +30,26 @@ import org.springframework.data.jpa.domain.Specification;
     };
   }
 
+  public static Specification&lt;DeclaredSkillProgressEntity&gt; isValorized(Boolean isValorized) {
+<span class="fc" id="L34">    return (root, query, criteriaBuilder) -&gt; {</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">      if (isValorized == null) {</span>
+<span class="fc" id="L36">        return criteriaBuilder.conjunction();</span>
+      }
+<span class="fc" id="L38">      return criteriaBuilder.equal(root.get(&quot;valorized&quot;), isValorized);</span>
+    };
+  }
+
   public static Sort toSort(SortCriteria sortCriteria) {
-<span class="pc bpc" id="L34" title="1 of 2 branches missed.">    if (sortCriteria == null) {</span>
-<span class="nc" id="L35">      return Sort.unsorted();</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">    if (sortCriteria == null) {</span>
+<span class="nc" id="L44">      return Sort.unsorted();</span>
     }
 
     Sort.Direction direction =
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        sortCriteria.order() == ESortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;</span>
 
-<span class="pc bpc" id="L41" title="1 of 2 branches missed.">    return switch (sortCriteria.field()) {</span>
-<span class="fc" id="L42">      case NAME -&gt; Sort.by(direction, &quot;declaredSkill.libelle&quot;);</span>
-<span class="nc" id="L43">      case DATE -&gt; Sort.by(direction, &quot;createdAt&quot;);</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">    return switch (sortCriteria.field()) {</span>
+<span class="fc" id="L51">      case NAME -&gt; Sort.by(direction, &quot;declaredSkill.libelle&quot;);</span>
+<span class="nc" id="L52">      case DATE -&gt; Sort.by(direction, &quot;createdAt&quot;);</span>
     };
   }
 }
