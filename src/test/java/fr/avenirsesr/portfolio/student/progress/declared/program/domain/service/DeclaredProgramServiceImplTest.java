@@ -427,16 +427,17 @@ class DeclaredProgramServiceImplTest {
                 .collect(Collectors.toList());
         loggedStudent = mock(Student.class);
         when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedStudent);
-        when(declaredProgramRepository.findAllByStudent(
-                loggedStudent, pageCriteria, sortByDate, sortByName))
-            .thenReturn(new PagedResult<>(declaredProgramList, pageInfo));
       }
 
       @Test
       void thenItShouldReturnDeclaredPrograms() {
-        BddLogger.when("getDeclaredPrograms(PageCriteria pageCriteria) is called");
+        BddLogger.when("getDeclaredPrograms(PageCriteria pageCriteria, null) is called");
+        when(declaredProgramRepository.findAllByStudent(
+                loggedStudent, pageCriteria, null, sortByDate, sortByName))
+            .thenReturn(new PagedResult<>(declaredProgramList, pageInfo));
+
         PagedResult<DeclaredProgram> result =
-            declaredProgramService.getDeclaredPrograms(pageCriteria);
+            declaredProgramService.getDeclaredPrograms(pageCriteria, null);
 
         assertNotNull(result);
 
@@ -455,7 +456,24 @@ class DeclaredProgramServiceImplTest {
 
         verify(loggedInUserService).getLoggedInStudent();
         verify(declaredProgramRepository)
-            .findAllByStudent(loggedStudent, pageCriteria, sortByDate, sortByName);
+            .findAllByStudent(loggedStudent, pageCriteria, null, sortByDate, sortByName);
+      }
+
+      @Test
+      void thenItShouldDelegateIsValorizedFilterToRepository() {
+        BddLogger.when(
+            "getDeclaredPrograms(PageCriteria pageCriteria, Boolean isValorized) is called with"
+                + " isValorized=true");
+        when(declaredProgramRepository.findAllByStudent(
+                loggedStudent, pageCriteria, true, sortByDate, sortByName))
+            .thenReturn(new PagedResult<>(declaredProgramList, pageInfo));
+
+        PagedResult<DeclaredProgram> result =
+            declaredProgramService.getDeclaredPrograms(pageCriteria, true);
+
+        assertNotNull(result);
+        verify(declaredProgramRepository)
+            .findAllByStudent(loggedStudent, pageCriteria, true, sortByDate, sortByName);
       }
     }
 

@@ -26,9 +26,12 @@ public class DeclaredProgramDatabaseRepository
 
   @Override
   public PagedResult<DeclaredProgram> findAllByStudent(
-      Student student, PageCriteria pageCriteria, SortCriteria... sortCriterias) {
+      Student student,
+      PageCriteria pageCriteria,
+      Boolean isValorized,
+      SortCriteria... sortCriterias) {
     return findAll(
-        hasStudent(student),
+        hasStudent(student).and(DeclaredProgramSpecification.isValorized(isValorized)),
         PageRequest.of(
             pageCriteria.page(),
             pageCriteria.pageSize(),

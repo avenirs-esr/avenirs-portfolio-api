@@ -138,11 +138,13 @@ public class DeclaredProgramServiceImpl implements DeclaredProgramService {
   }
 
   @Override
-  public PagedResult<DeclaredProgram> getDeclaredPrograms(PageCriteria pageCriteria) {
+  public PagedResult<DeclaredProgram> getDeclaredPrograms(
+      PageCriteria pageCriteria, Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     return declaredProgramRepository.findAllByStudent(
         student,
         pageCriteria,
+        isValorized,
         new SortCriteria(ESortField.DATE, ESortOrder.DESC),
         new SortCriteria(ESortField.NAME, ESortOrder.ASC));
   }

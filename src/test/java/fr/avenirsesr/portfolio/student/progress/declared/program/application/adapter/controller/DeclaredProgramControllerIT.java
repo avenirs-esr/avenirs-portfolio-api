@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.program.application.adapter.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +13,7 @@ import fr.avenirsesr.portfolio.student.progress.declared.program.application.ada
 import fr.avenirsesr.portfolio.student.progress.declared.program.domain.model.enums.EProgramStatus;
 import fr.avenirsesr.portfolio.student.progress.declared.program.infrastructure.adapter.repository.DeclaredProgramJpaRepository;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
@@ -446,6 +448,103 @@ class DeclaredProgramControllerIT extends ContainerConfigurationTest {
             .isEqualTo("LeadPro")
             .jsonPath("$.data[?(@.title == 'Séminaire leadership et communication')].result")
             .isEqualTo("Certificat obtenu");
+      }
+
+      @Test
+      void shouldFilterDeclaredProgramsByIsValorized() throws Exception {
+        BddLogger.given("a declared program marked as valorized");
+
+        String id =
+            createDeclaredProgramAndReturnId(
+                new DeclaredProgramRequestDTO(
+                    "Stage isValorized filter",
+                    "Description",
+                    "Tech4Future",
+                    "Result",
+                    "Source",
+                    LocalDate.now().minusMonths(1),
+                    LocalDate.now(),
+                    false),
+                studentPayload,
+                studentSignature);
+
+        DeclaredProgramRequestDTO updateBody =
+            new DeclaredProgramRequestDTO(
+                "Stage isValorized filter",
+                "Description",
+                "Tech4Future",
+                "Result",
+                "Source",
+                LocalDate.now().minusMonths(1),
+                LocalDate.now(),
+                true);
+
+        webTestClient
+            .put()
+            .uri(BASE_PATH + "/" + id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(writeValueAsString(updateBody))
+            .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk();
+
+        BddLogger.when("performing a GET with isValorized=true");
+
+        String valorizedOnlyResponse =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder ->
+                        uriBuilder.path(BASE_PATH).queryParam("isValorized", true).build())
+                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        BddLogger.then("it should contain the valorized declared program");
+        List<String> valorizedIds = new ArrayList<>();
+        objectMapper
+            .readTree(valorizedOnlyResponse)
+            .get("data")
+            .forEach(node -> valorizedIds.add(node.get("id").asText()));
+        assertThat(valorizedIds).contains(id);
+
+        BddLogger.when("performing a GET with isValorized=false");
+
+        String nonValorizedOnlyResponse =
+            webTestClient
+                .get()
+                .uri(
+                    uriBuilder ->
+                        uriBuilder.path(BASE_PATH).queryParam("isValorized", false).build())
+                .header(HttpHeaders.ACCEPT_LANGUAGE, ELanguage.FRENCH.getCode())
+                .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+                .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+                .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
+
+        BddLogger.then("it should not contain the valorized declared program");
+        List<String> nonValorizedIds = new ArrayList<>();
+        objectMapper
+            .readTree(nonValorizedOnlyResponse)
+            .get("data")
+            .forEach(node -> nonValorizedIds.add(node.get("id").asText()));
+        assertThat(nonValorizedIds).doesNotContain(id);
       }
     }
 

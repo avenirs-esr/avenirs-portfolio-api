@@ -9,5 +9,8 @@ import fr.avenirsesr.portfolio.user.domain.model.Student;
 
 public interface DeclaredProgramRepository extends GenericRepositoryPort<DeclaredProgram> {
   PagedResult<DeclaredProgram> findAllByStudent(
-      Student student, PageCriteria pageCriteria, SortCriteria... sortCriterias);
+      Student student,
+      PageCriteria pageCriteria,
+      Boolean isValorized,
+      SortCriteria... sortCriterias);
 }
