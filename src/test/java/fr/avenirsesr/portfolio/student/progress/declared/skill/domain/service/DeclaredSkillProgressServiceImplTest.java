@@ -99,20 +99,48 @@ public class DeclaredSkillProgressServiceImplTest {
         PageCriteria criteria = new PageCriteria(1, 8);
         PagedResult<DeclaredSkillProgress> expected = mock(PagedResult.class);
 
-        BddLogger.when("calling the method with a given student");
+        BddLogger.when("calling the method with a given student and no isValorized filter");
         when(declaredSkillProgressRepository.findAllByStudent(
-                student, criteria, new SortCriteria(ESortField.NAME, ESortOrder.ASC)))
+                student,
+                criteria,
+                (Boolean) null,
+                new SortCriteria(ESortField.NAME, ESortOrder.ASC)))
             .thenReturn(expected);
 
         PagedResult<DeclaredSkillProgress> result =
-            declaredSkillProgressService.getDeclaredSkillsProgresses(criteria);
+            declaredSkillProgressService.getDeclaredSkillsProgresses(criteria, null);
 
         BddLogger.then(
             "it should return the expected paged declared skill progress and delegate to"
                 + " repository");
         assertThat(result).isSameAs(expected);
         verify(declaredSkillProgressRepository)
-            .findAllByStudent(student, criteria, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
+            .findAllByStudent(
+                student,
+                criteria,
+                (Boolean) null,
+                new SortCriteria(ESortField.NAME, ESortOrder.ASC));
+      }
+
+      @Test
+      void getDeclaredSkillsProgresses_shouldDelegateIsValorizedFilterToRepository() {
+        BddLogger.given("the method getDeclaredSkillsProgresses");
+        PageCriteria criteria = new PageCriteria(1, 8);
+        PagedResult<DeclaredSkillProgress> expected = mock(PagedResult.class);
+
+        BddLogger.when("calling the method with a given student and isValorized=true");
+        when(declaredSkillProgressRepository.findAllByStudent(
+                student, criteria, true, new SortCriteria(ESortField.NAME, ESortOrder.ASC)))
+            .thenReturn(expected);
+
+        PagedResult<DeclaredSkillProgress> result =
+            declaredSkillProgressService.getDeclaredSkillsProgresses(criteria, true);
+
+        BddLogger.then("it should delegate the isValorized filter to the repository");
+        assertThat(result).isSameAs(expected);
+        verify(declaredSkillProgressRepository)
+            .findAllByStudent(
+                student, criteria, true, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
       }
 
       @Test

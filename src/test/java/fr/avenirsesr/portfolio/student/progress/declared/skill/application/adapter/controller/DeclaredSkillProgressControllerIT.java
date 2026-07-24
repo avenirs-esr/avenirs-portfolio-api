@@ -1,5 +1,6 @@
 package fr.avenirsesr.portfolio.student.progress.declared.skill.application.adapter.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -8,6 +9,7 @@ import fr.avenirsesr.portfolio.common.testutils.BddLogger;
 import fr.avenirsesr.portfolio.declaredskill.domain.port.output.repository.DeclaredSkillRepository;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -65,6 +67,95 @@ public class DeclaredSkillProgressControllerIT extends ContainerConfigurationTes
         .expectBody()
         .jsonPath("$.data")
         .exists();
+  }
+
+  @Test
+  void shouldFilterDeclaredSkillProgressesByIsValorized() throws Exception {
+    BddLogger.given("a declared skill progress marked as valorized");
+
+    var declaredSkill =
+        declaredSkillRepository.findAll().stream().skip(2).findFirst().orElseThrow();
+
+    var createResponse =
+        webTestClient
+            .post()
+            .uri(BASE_PATH)
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(buildDeclaredSkillsJson(declaredSkill.getId()))
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    UUID createdSkillId =
+        objectMapper.readTree(createResponse).get("id").textValue().transform(UUID::fromString);
+
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/" + createdSkillId)
+        .header("X-Signed-Context", studentPayload)
+        .header("X-Context-Kid", secretKey)
+        .header("X-Context-Signature", studentSignature)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            objectMapper.writeValueAsString(
+                Map.of("level", "BEGINNER", "reflection", "reflection", "valorized", true)))
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    BddLogger.when("performing a GET with isValorized=true");
+
+    var valorizedOnlyResponse =
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "?isValorized=true")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should contain the valorized declared skill progress");
+    List<String> valorizedIds = new ArrayList<>();
+    objectMapper
+        .readTree(valorizedOnlyResponse)
+        .get("data")
+        .forEach(node -> valorizedIds.add(node.get("id").asText()));
+    assertThat(valorizedIds).contains(createdSkillId.toString());
+
+    BddLogger.when("performing a GET with isValorized=false");
+
+    var nonValorizedOnlyResponse =
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "?isValorized=false")
+            .header("X-Signed-Context", studentPayload)
+            .header("X-Context-Kid", secretKey)
+            .header("X-Context-Signature", studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    BddLogger.then("it should not contain the valorized declared skill progress");
+    List<String> nonValorizedIds = new ArrayList<>();
+    objectMapper
+        .readTree(nonValorizedOnlyResponse)
+        .get("data")
+        .forEach(node -> nonValorizedIds.add(node.get("id").asText()));
+    assertThat(nonValorizedIds).doesNotContain(createdSkillId.toString());
   }
 
   @Test

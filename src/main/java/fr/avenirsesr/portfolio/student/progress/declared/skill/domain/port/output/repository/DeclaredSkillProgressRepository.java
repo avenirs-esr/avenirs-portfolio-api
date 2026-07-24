@@ -13,7 +13,7 @@ public interface DeclaredSkillProgressRepository
   boolean declaredSkillProgressAlreadyExists(DeclaredSkillProgress declaredSkillProgress);
 
   PagedResult<DeclaredSkillProgress> findAllByStudent(
-      Student student, PageCriteria pageCriteria, SortCriteria sortCriteria);
+      Student student, PageCriteria pageCriteria, Boolean isValorized, SortCriteria sortCriteria);
 
   PagedResult<DeclaredSkillProgress> findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword, SortCriteria sortCriteria);
