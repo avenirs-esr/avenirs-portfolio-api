@@ -31,7 +31,7 @@ public interface DeclaredProgramService {
 
   DeclaredProgram getById(UUID declaredProgramId);
 
-  PagedResult<DeclaredProgram> getDeclaredPrograms(PageCriteria pageCriteria);
+  PagedResult<DeclaredProgram> getDeclaredPrograms(PageCriteria pageCriteria, Boolean isValorized);
 
   DeclaredProgram update(
       UUID declaredProgramId,

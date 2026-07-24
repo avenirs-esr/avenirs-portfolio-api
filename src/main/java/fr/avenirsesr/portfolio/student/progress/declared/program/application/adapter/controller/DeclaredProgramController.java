@@ -32,14 +32,16 @@ public class DeclaredProgramController {
   @GetMapping
   public ResponseEntity<PagedResponse<DeclaredProgramViewDTO>> getDeclaredPrograms(
       @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
+      @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Boolean isValorized) {
     var pageCriteria = new PageCriteria(page, pageSize);
     log.debug(
-        "Received request to get declared programs (page= {}, fileSize= {})",
+        "Received request to get declared programs (page= {}, fileSize= {}, isValorized={})",
         pageCriteria.page(),
-        pageCriteria.pageSize());
+        pageCriteria.pageSize(),
+        isValorized);
     PagedResult<DeclaredProgram> declaredProgramPagedResult =
-        declaredProgramService.getDeclaredPrograms(pageCriteria);
+        declaredProgramService.getDeclaredPrograms(pageCriteria, isValorized);
 
     return ResponseEntity.ok(
         new PagedResponse<>(
