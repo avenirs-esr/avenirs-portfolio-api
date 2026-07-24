@@ -11,9 +11,11 @@ import fr.avenirsesr.portfolio.association.domain.exception.AssociationDoesNotEx
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.output.repository.AssociationRepository;
+import fr.avenirsesr.portfolio.trace.domain.model.Trace;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import fr.avenirsesr.portfolio.user.infrastructure.fixture.StudentFixture;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,5 +121,29 @@ class AssociationServiceImplTest {
         .isInstanceOf(AssociationDoesNotExistException.class);
 
     verify(associationRepository, never()).removeAllFromDatabase(anyList());
+  }
+
+  @Test
+  void countAllOf_should_delegate_to_repository() {
+    UUID traceId = UUID.randomUUID();
+    Map<UUID, Long> expected = Map.of(traceId, 2L);
+
+    when(associationRepository.countAllOf(
+            List.of(traceId), Trace.class, EAssociationType.DECLARED_ACTIVITY_TRACE))
+        .thenReturn(expected);
+
+    var result =
+        service.countAllOf(List.of(traceId), Trace.class, EAssociationType.DECLARED_ACTIVITY_TRACE);
+
+    assertThat(result).isSameAs(expected);
+  }
+
+  @Test
+  void countAllOf_should_return_empty_map_without_querying_when_ids_empty() {
+    var result =
+        service.countAllOf(List.of(), Trace.class, EAssociationType.DECLARED_ACTIVITY_TRACE);
+
+    assertThat(result).isEmpty();
+    verify(associationRepository, never()).countAllOf(any(), any(), any());
   }
 }

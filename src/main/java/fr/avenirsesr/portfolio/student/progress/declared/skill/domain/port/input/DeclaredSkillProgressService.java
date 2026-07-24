@@ -7,6 +7,7 @@ import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.externalskill.domain.model.enums.EExternalSkillType;
 import fr.avenirsesr.portfolio.declaredskill.domain.model.enums.EDeclaredSkillLevel;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationsData;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 public interface DeclaredSkillProgressService {
 
-  PagedResult<DeclaredSkillProgress> getDeclaredSkillsProgresses(
+  PagedResult<DeclaredSkillProgressData> getDeclaredSkillsProgresses(
       PageCriteria criteria, Boolean isValorized);
 
   DeclaredSkillProgress createDeclaredSkillProgress(

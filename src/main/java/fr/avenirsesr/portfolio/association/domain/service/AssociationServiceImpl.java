@@ -9,6 +9,7 @@ import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
 import fr.avenirsesr.portfolio.association.domain.port.output.repository.AssociationRepository;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
@@ -47,6 +48,16 @@ public class AssociationServiceImpl implements AssociationService {
     }
 
     return associationRepository.findAllOf(ids, clazz, associationTypes);
+  }
+
+  @Override
+  public Map<UUID, Long> countAllOf(
+      List<UUID> ids, Class<?> clazz, EAssociationType associationType) {
+    if (ids.isEmpty()) {
+      return Map.of();
+    }
+
+    return associationRepository.countAllOf(ids, clazz, associationType);
   }
 
   @Override
