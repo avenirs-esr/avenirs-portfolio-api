@@ -49,6 +49,9 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
   @Formula("CASE WHEN finished_at IS NULL THEN 0 ELSE 1 END")
   private Integer isFinishedOrder;
 
+  @Column(nullable = false)
+  private boolean valorized;
+
   private DeclaredActivityEntity(
       UUID id,
       StudentEntity student,
@@ -58,6 +61,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       LocalDate startDate,
       LocalDate endDate,
       Instant finishedAt,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     setId(id);
@@ -70,6 +74,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
     this.startDate = startDate;
     this.endDate = endDate;
     this.finishedAt = finishedAt;
+    this.valorized = valorized;
   }
 
   public static DeclaredActivityEntity of(
@@ -81,6 +86,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
       LocalDate startDate,
       LocalDate endDate,
       Instant finishedAt,
+      boolean valorized,
       Instant createdAt,
       Instant updatedAt) {
     return new DeclaredActivityEntity(
@@ -92,6 +98,7 @@ public class DeclaredActivityEntity extends PeriodEntity<LocalDate> {
         startDate,
         endDate,
         finishedAt,
+        valorized,
         createdAt,
         updatedAt);
   }

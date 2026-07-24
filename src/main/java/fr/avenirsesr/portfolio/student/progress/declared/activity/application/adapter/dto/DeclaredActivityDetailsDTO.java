@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-@Schema(requiredProperties = {"id", "activity", "status", "createdAt", "updatedAt"})
+@Schema(requiredProperties = {"id", "activity", "valorized", "status", "createdAt", "updatedAt"})
 public record DeclaredActivityDetailsDTO(
     UUID id,
     ActivityContentDTO activity,
@@ -17,6 +17,7 @@ public record DeclaredActivityDetailsDTO(
     LocalDate startDate,
     LocalDate endDate,
     Instant finishedAt,
+    boolean valorized,
     Instant createdAt,
     Instant updatedAt,
     List<FeedbackOverviewDTO> feedbacks) {}
