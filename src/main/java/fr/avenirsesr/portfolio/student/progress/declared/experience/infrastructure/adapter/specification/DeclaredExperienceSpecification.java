@@ -38,4 +38,13 @@ public class DeclaredExperienceSpecification {
           criteriaBuilder.lower(root.get("title")), "%" + keyword.toLowerCase() + "%");
     };
   }
+
+  public static Specification<DeclaredExperienceEntity> isValorized(Boolean isValorized) {
+    return (root, query, criteriaBuilder) -> {
+      if (isValorized == null) {
+        return criteriaBuilder.conjunction();
+      }
+      return criteriaBuilder.equal(root.get("valorized"), isValorized);
+    };
+  }
 }

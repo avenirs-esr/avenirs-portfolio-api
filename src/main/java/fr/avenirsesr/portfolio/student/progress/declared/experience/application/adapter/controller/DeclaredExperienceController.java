@@ -67,9 +67,10 @@ public class DeclaredExperienceController {
   @GetMapping("/view")
   public ResponseEntity<PagedResponse<DeclaredExperienceViewDTO>> getDeclaredExperienceView(
       @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
+      @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Boolean isValorized) {
     PagedResult<DeclaredExperience> pagedExperiences =
-        declaredExperienceService.getView(new PageCriteria(page, pageSize));
+        declaredExperienceService.getView(new PageCriteria(page, pageSize), isValorized);
 
     return ResponseEntity.ok(
         new PagedResponse<>(

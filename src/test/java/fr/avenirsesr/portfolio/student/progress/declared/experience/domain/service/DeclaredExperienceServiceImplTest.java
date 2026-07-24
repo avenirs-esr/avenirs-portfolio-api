@@ -7,6 +7,8 @@ import static org.mockito.Mockito.*;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import fr.avenirsesr.portfolio.association.domain.port.input.AssociationService;
+import fr.avenirsesr.portfolio.common.data.domain.model.PageCriteria;
+import fr.avenirsesr.portfolio.common.data.domain.model.PagedResult;
 import fr.avenirsesr.portfolio.common.error.domain.exception.FieldValidationException;
 import fr.avenirsesr.portfolio.common.security.domain.exception.UserNotAuthorizedException;
 import fr.avenirsesr.portfolio.common.testutils.BddLogger;
@@ -994,6 +996,37 @@ class DeclaredExperienceServiceImplTest {
     service.delete(List.of(id));
 
     verify(experienceRepository).removeAllFromDatabase(List.of(exp));
+  }
+
+  @Test
+  void getView_shouldDelegateToRepositoryAndReturnResult() {
+    Student loggedIn = student;
+    PageCriteria criteria = new PageCriteria(1, 8);
+    PagedResult<DeclaredExperience> expected = mock(PagedResult.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findAllByStudent(loggedIn, criteria, (Boolean) null))
+        .thenReturn(expected);
+
+    PagedResult<DeclaredExperience> result = service.getView(criteria, null);
+
+    assertSame(expected, result);
+    verify(experienceRepository).findAllByStudent(loggedIn, criteria, (Boolean) null);
+  }
+
+  @Test
+  void getView_shouldDelegateIsValorizedFilterToRepository() {
+    Student loggedIn = student;
+    PageCriteria criteria = new PageCriteria(1, 8);
+    PagedResult<DeclaredExperience> expected = mock(PagedResult.class);
+
+    when(loggedInUserService.getLoggedInStudent()).thenReturn(loggedIn);
+    when(experienceRepository.findAllByStudent(loggedIn, criteria, true)).thenReturn(expected);
+
+    PagedResult<DeclaredExperience> result = service.getView(criteria, true);
+
+    assertSame(expected, result);
+    verify(experienceRepository).findAllByStudent(loggedIn, criteria, true);
   }
 
   @Test
