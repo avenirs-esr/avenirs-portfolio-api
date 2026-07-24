@@ -38,7 +38,7 @@ public class DeclaredSkillProgressEntity extends AvenirsBaseEntity {
   @Column(length = RICH_TEXT_LENGTH)
   private String reflection;
 
-  @Column(name = "is_valorized", nullable = false)
+  @Column(nullable = false)
   private boolean valorized;
 
   private DeclaredSkillProgressEntity(
