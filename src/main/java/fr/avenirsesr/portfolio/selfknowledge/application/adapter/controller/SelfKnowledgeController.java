@@ -44,16 +44,18 @@ public class SelfKnowledgeController {
   public ResponseEntity<PagedResponse<SelfKnowledgeElementViewDTO>> getSelfKnowledgeElements(
       @PathVariable("selfKnowledgeCategoryId") UUID selfKnowledgeCategoryId,
       @RequestParam(required = false) Integer page,
-      @RequestParam(required = false) Integer pageSize) {
+      @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Boolean isValorized) {
     log.debug(
         "Received request to get elements of self knowledge category [{}], with"
-            + " pagination (page={}, pageSize={})",
+            + " pagination (page={}, pageSize={}, isValorized={})",
         selfKnowledgeCategoryId,
         page,
-        pageSize);
+        pageSize,
+        isValorized);
     PagedResult<SelfKnowledgeElement> selfKnowledgeElementPagedResult =
         selfKnowledgeService.getSelfKnowledgeElements(
-            selfKnowledgeCategoryId, new PageCriteria(page, pageSize));
+            selfKnowledgeCategoryId, new PageCriteria(page, pageSize), isValorized);
 
     return ResponseEntity.ok(
         new PagedResponse<>(

@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface SelfKnowledgeElementRepository
     extends GenericRepositoryPort<SelfKnowledgeElement> {
   PagedResult<SelfKnowledgeElement> findAllByStudentIdAndCategoryId(
-      UUID studentId, UUID selfKnowledgeCategoryId, PageCriteria pageCriteria);
+      UUID studentId, UUID selfKnowledgeCategoryId, PageCriteria pageCriteria, Boolean isValorized);
 
   void deleteAllByStudentAndCategory(Student student, SelfKnowledgeCategory category);
 }

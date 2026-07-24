@@ -1,11 +1,14 @@
 package fr.avenirsesr.portfolio.selfknowledge.application.adapter.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.avenirsesr.portfolio.common.language.domain.model.enums.ELanguage;
 import fr.avenirsesr.portfolio.common.security.infrastructure.adapter.model.AvenirsSecurityHeaders;
 import fr.avenirsesr.portfolio.shared.infrastructure.ContainerConfigurationTest;
 import fr.avenirsesr.portfolio.shared.infrastructure.adapter.seeder.SeederRunner;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -232,6 +235,77 @@ class SelfKnowledgeControllerIT extends ContainerConfigurationTest {
         .isEqualTo(elementId)
         .jsonPath("$.valorized")
         .isEqualTo(true);
+  }
+
+  @Test
+  void shouldFilterSelfKnowledgeElementsByIsValorized() throws Exception {
+    String categoryId = getLinkedCategoryId();
+    String elementId = createElement(categoryId, "Filter me", "Desc", 3);
+
+    webTestClient
+        .put()
+        .uri(BASE_PATH + "/element/{elementId}", elementId)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(
+            """
+            {
+              "title": "Filter me",
+              "description": "Desc",
+              "rating": 3,
+              "valorized": true
+            }
+            """)
+        .header("Accept-Language", ELanguage.FRENCH.getCode())
+        .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+        .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+        .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+        .exchange()
+        .expectStatus()
+        .isOk();
+
+    String valorizedOnlyResponse =
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/{categoryId}/elements?isValorized=true", categoryId)
+            .header("Accept-Language", ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    List<String> valorizedIds = new ArrayList<>();
+    objectMapper
+        .readTree(valorizedOnlyResponse)
+        .get("data")
+        .forEach(node -> valorizedIds.add(node.get("id").asText()));
+    assertThat(valorizedIds).contains(elementId);
+
+    String nonValorizedOnlyResponse =
+        webTestClient
+            .get()
+            .uri(BASE_PATH + "/{categoryId}/elements?isValorized=false", categoryId)
+            .header("Accept-Language", ELanguage.FRENCH.getCode())
+            .header(AvenirsSecurityHeaders.SIGNED_CONTEXT, studentPayload)
+            .header(AvenirsSecurityHeaders.CONTEXT_KID, secretKey)
+            .header(AvenirsSecurityHeaders.CONTEXT_SIGNATURE, studentSignature)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(String.class)
+            .returnResult()
+            .getResponseBody();
+
+    List<String> nonValorizedIds = new ArrayList<>();
+    objectMapper
+        .readTree(nonValorizedOnlyResponse)
+        .get("data")
+        .forEach(node -> nonValorizedIds.add(node.get("id").asText()));
+    assertThat(nonValorizedIds).doesNotContain(elementId);
   }
 
   @Test

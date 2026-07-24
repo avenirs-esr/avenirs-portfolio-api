@@ -266,7 +266,7 @@ class SelfKnowledgeServiceImplTest {
                 SelfKnowledgeCategoryNotFoundException.class,
                 () ->
                     selfKnowledgeService.getSelfKnowledgeElements(
-                        unknownId, new PageCriteria(0, 8)));
+                        unknownId, new PageCriteria(0, 8), null));
           }
         }
 
@@ -317,13 +317,13 @@ class SelfKnowledgeServiceImplTest {
             when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
                 .thenReturn(Optional.of(selfKnowledgeCategory));
             when(selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
-                    student.getId(), selfKnowledgeCategoryId, pageCriteria))
+                    student.getId(), selfKnowledgeCategoryId, pageCriteria, null))
                 .thenReturn(expectedResult);
 
             BddLogger.when("getting self knowledge elements paginated");
             PagedResult<SelfKnowledgeElement> actualResult =
                 selfKnowledgeService.getSelfKnowledgeElements(
-                    selfKnowledgeCategoryId, pageCriteria);
+                    selfKnowledgeCategoryId, pageCriteria, null);
 
             BddLogger.then("it should retrieve self knowledge elements paginated");
             assertThat(actualResult).isEqualTo(expectedResult);
@@ -332,7 +332,30 @@ class SelfKnowledgeServiceImplTest {
             verify(selfKnowledgeCategoryRepository).findById(selfKnowledgeCategoryId);
             verify(selfKnowledgeElementRepository)
                 .findAllByStudentIdAndCategoryId(
-                    student.getId(), selfKnowledgeCategoryId, pageCriteria);
+                    student.getId(), selfKnowledgeCategoryId, pageCriteria, null);
+          }
+
+          @Test
+          void thenItShouldDelegateIsValorizedFilterToRepository() {
+            PagedResult<SelfKnowledgeElement> expectedResult =
+                new PagedResult<>(List.of(selfKnowledgeElement), new PageInfo(0, 8, 1));
+
+            when(selfKnowledgeCategoryRepository.findById(selfKnowledgeCategoryId))
+                .thenReturn(Optional.of(selfKnowledgeCategory));
+            when(selfKnowledgeElementRepository.findAllByStudentIdAndCategoryId(
+                    student.getId(), selfKnowledgeCategoryId, pageCriteria, true))
+                .thenReturn(expectedResult);
+
+            BddLogger.when("getting self knowledge elements paginated with isValorized=true");
+            PagedResult<SelfKnowledgeElement> actualResult =
+                selfKnowledgeService.getSelfKnowledgeElements(
+                    selfKnowledgeCategoryId, pageCriteria, true);
+
+            BddLogger.then("it should delegate the isValorized filter to the repository");
+            assertThat(actualResult).isEqualTo(expectedResult);
+            verify(selfKnowledgeElementRepository)
+                .findAllByStudentIdAndCategoryId(
+                    student.getId(), selfKnowledgeCategoryId, pageCriteria, true);
           }
         }
 
@@ -1049,7 +1072,7 @@ class SelfKnowledgeServiceImplTest {
               UserNotFoundException.class,
               () ->
                   selfKnowledgeService.getSelfKnowledgeElements(
-                      UUID.randomUUID(), new PageCriteria(0, 8)));
+                      UUID.randomUUID(), new PageCriteria(0, 8), null));
         }
       }
 
@@ -1211,7 +1234,7 @@ class SelfKnowledgeServiceImplTest {
               UserIsNotStudentException.class,
               () ->
                   selfKnowledgeService.getSelfKnowledgeElements(
-                      UUID.randomUUID(), new PageCriteria(0, 8)));
+                      UUID.randomUUID(), new PageCriteria(0, 8), null));
         }
       }
 

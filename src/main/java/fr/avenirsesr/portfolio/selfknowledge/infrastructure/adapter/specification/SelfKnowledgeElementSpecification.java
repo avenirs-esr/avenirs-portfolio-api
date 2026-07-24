@@ -18,4 +18,13 @@ public class SelfKnowledgeElementSpecification {
             ? null
             : cb.equal(root.get("selfKnowledgeCategory").get("id"), categoryId);
   }
+
+  public static Specification<SelfKnowledgeElementEntity> isValorized(Boolean isValorized) {
+    return (root, query, criteriaBuilder) -> {
+      if (isValorized == null) {
+        return criteriaBuilder.conjunction();
+      }
+      return criteriaBuilder.equal(root.get("valorized"), isValorized);
+    };
+  }
 }
