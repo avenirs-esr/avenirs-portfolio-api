@@ -267,11 +267,11 @@ public class DeclaredExperienceServiceImpl implements DeclaredExperienceService 
   }
 
   @Override
-  public PagedResult<DeclaredExperience> getView(PageCriteria pageCriteria) {
+  public PagedResult<DeclaredExperience> getView(PageCriteria pageCriteria, Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
     log.info("Get experience view by {}", student);
 
-    return experienceRepository.findAllByStudent(student, pageCriteria);
+    return experienceRepository.findAllByStudent(student, pageCriteria, isValorized);
   }
 
   @Override

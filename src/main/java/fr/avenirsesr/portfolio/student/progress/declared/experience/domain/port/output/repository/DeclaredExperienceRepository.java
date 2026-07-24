@@ -7,7 +7,8 @@ import fr.avenirsesr.portfolio.student.progress.declared.experience.domain.model
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 
 public interface DeclaredExperienceRepository extends GenericRepositoryPort<DeclaredExperience> {
-  PagedResult<DeclaredExperience> findAllByStudent(Student student, PageCriteria pageCriteria);
+  PagedResult<DeclaredExperience> findAllByStudent(
+      Student student, PageCriteria pageCriteria, Boolean isValorized);
 
   PagedResult<DeclaredExperience> findAllByStudent(
       Student student, PageCriteria pageCriteria, String keyword);

@@ -27,9 +27,11 @@ public class DeclaredExperienceDatabaseRepository
 
   @Override
   public PagedResult<DeclaredExperience> findAllByStudent(
-      Student student, PageCriteria pageCriteria) {
+      Student student, PageCriteria pageCriteria, Boolean isValorized) {
     return findAll(
-        hasStudent(student).and(DeclaredExperienceSpecification.ordered()),
+        hasStudent(student)
+            .and(DeclaredExperienceSpecification.ordered())
+            .and(DeclaredExperienceSpecification.isValorized(isValorized)),
         PageRequest.of(pageCriteria.page(), pageCriteria.pageSize()));
   }
 
