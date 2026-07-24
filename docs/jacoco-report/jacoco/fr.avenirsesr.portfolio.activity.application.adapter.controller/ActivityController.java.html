@@ -289,11 +289,13 @@ public class ActivityController {
 <span class="fc" id="L289">            body.description(),</span>
 <span class="fc" id="L290">            body.executionPeriodInfo(),</span>
 <span class="fc" id="L291">            body.executionPeriodInfoSummary(),</span>
-<span class="fc" id="L292">            body.traceAllowedAssociations(),</span>
-<span class="fc" id="L293">            body.feedbackAllowedIterations(),</span>
-<span class="fc" id="L294">            body.enableReflection(),</span>
-<span class="fc" id="L295">            body.links());</span>
-<span class="fc" id="L296">    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));</span>
+<span class="fc" id="L292">            body.startDate(),</span>
+<span class="fc" id="L293">            body.endDate(),</span>
+<span class="fc" id="L294">            body.traceAllowedAssociations(),</span>
+<span class="fc" id="L295">            body.feedbackAllowedIterations(),</span>
+<span class="fc" id="L296">            body.enableReflection(),</span>
+<span class="fc" id="L297">            body.links());</span>
+<span class="fc" id="L298">    return ResponseEntity.ok(new ActivityDraftUpdateResponse(draft.getId()));</span>
   }
 
   @PostMapping(
@@ -304,30 +306,30 @@ public class ActivityController {
       Principal principal,
       @PathVariable UUID activityDraftId,
       @RequestParam(&quot;file&quot;) MultipartFile file) {
-<span class="nc" id="L307">    log.debug(</span>
+<span class="nc" id="L309">    log.debug(</span>
         &quot;Received request to upload banner for activity draft [{}] by user [{}]&quot;,
         activityDraftId,
-<span class="nc" id="L310">        principal.getName());</span>
-<span class="nc" id="L311">    var uploaded =</span>
-<span class="nc" id="L312">        activityService.uploadDraftBanner(</span>
+<span class="nc" id="L312">        principal.getName());</span>
+<span class="nc" id="L313">    var uploaded =</span>
+<span class="nc" id="L314">        activityService.uploadDraftBanner(</span>
             activityDraftId,
-<span class="nc" id="L314">            file.getOriginalFilename(),</span>
-<span class="nc" id="L315">            file.getContentType(),</span>
-<span class="nc" id="L316">            file.getSize(),</span>
-<span class="nc" id="L317">            readBytes(file));</span>
-<span class="nc" id="L318">    return ResponseEntity.status(HttpStatus.CREATED)</span>
-<span class="nc" id="L319">        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));</span>
+<span class="nc" id="L316">            file.getOriginalFilename(),</span>
+<span class="nc" id="L317">            file.getContentType(),</span>
+<span class="nc" id="L318">            file.getSize(),</span>
+<span class="nc" id="L319">            readBytes(file));</span>
+<span class="nc" id="L320">    return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L321">        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));</span>
   }
 
   @DeleteMapping(&quot;/draft/{activityDraftId}/banner&quot;)
   public ResponseEntity&lt;Void&gt; deleteDraftBanner(
       Principal principal, @PathVariable UUID activityDraftId) {
-<span class="nc" id="L325">    log.debug(</span>
+<span class="nc" id="L327">    log.debug(</span>
         &quot;Received request to delete banner of activity draft [{}] by user [{}]&quot;,
         activityDraftId,
-<span class="nc" id="L328">        principal.getName());</span>
-<span class="nc" id="L329">    activityService.deleteDraftBanner(activityDraftId);</span>
-<span class="nc" id="L330">    return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L330">        principal.getName());</span>
+<span class="nc" id="L331">    activityService.deleteDraftBanner(activityDraftId);</span>
+<span class="nc" id="L332">    return ResponseEntity.noContent().build();</span>
   }
 
   @PostMapping(
@@ -338,31 +340,31 @@ public class ActivityController {
       Principal principal,
       @PathVariable UUID activityDraftId,
       @RequestParam(&quot;file&quot;) MultipartFile file) {
-<span class="nc" id="L341">    log.debug(</span>
+<span class="nc" id="L343">    log.debug(</span>
         &quot;Received request to add file to activity draft [{}] by user [{}]&quot;,
         activityDraftId,
-<span class="nc" id="L344">        principal.getName());</span>
-<span class="nc" id="L345">    var uploaded =</span>
-<span class="nc" id="L346">        activityService.addDraftFile(</span>
+<span class="nc" id="L346">        principal.getName());</span>
+<span class="nc" id="L347">    var uploaded =</span>
+<span class="nc" id="L348">        activityService.addDraftFile(</span>
             activityDraftId,
-<span class="nc" id="L348">            file.getOriginalFilename(),</span>
-<span class="nc" id="L349">            file.getContentType(),</span>
-<span class="nc" id="L350">            file.getSize(),</span>
-<span class="nc" id="L351">            readBytes(file));</span>
-<span class="nc" id="L352">    return ResponseEntity.status(HttpStatus.CREATED)</span>
-<span class="nc" id="L353">        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));</span>
+<span class="nc" id="L350">            file.getOriginalFilename(),</span>
+<span class="nc" id="L351">            file.getContentType(),</span>
+<span class="nc" id="L352">            file.getSize(),</span>
+<span class="nc" id="L353">            readBytes(file));</span>
+<span class="nc" id="L354">    return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L355">        .body(fileDTOMapper.toFileDTO(uploaded, extractOrigin(request)));</span>
   }
 
   @DeleteMapping(&quot;/draft/{activityDraftId}/files/{fileId}&quot;)
   public ResponseEntity&lt;Void&gt; deleteDraftFile(
       Principal principal, @PathVariable UUID activityDraftId, @PathVariable UUID fileId) {
-<span class="nc" id="L359">    log.debug(</span>
+<span class="nc" id="L361">    log.debug(</span>
         &quot;Received request to delete file [{}] of activity draft [{}] by user [{}]&quot;,
         fileId,
         activityDraftId,
-<span class="nc" id="L363">        principal.getName());</span>
-<span class="nc" id="L364">    activityService.deleteDraftFile(activityDraftId, fileId);</span>
-<span class="nc" id="L365">    return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L365">        principal.getName());</span>
+<span class="nc" id="L366">    activityService.deleteDraftFile(activityDraftId, fileId);</span>
+<span class="nc" id="L367">    return ResponseEntity.noContent().build();</span>
   }
 
   @GetMapping(
@@ -370,18 +372,18 @@ public class ActivityController {
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity&lt;byte[]&gt; downloadActivityFile(
       Principal principal, @PathVariable UUID activityId, @PathVariable UUID fileId) {
-<span class="nc" id="L373">    log.debug(</span>
+<span class="nc" id="L375">    log.debug(</span>
         &quot;Received request to download file [{}] of activity [{}] by user [{}]&quot;,
         fileId,
         activityId,
-<span class="nc" id="L377">        principal.getName());</span>
-<span class="nc" id="L378">    var downloadedFile = activityService.downloadActivityFile(activityId, fileId);</span>
-<span class="nc" id="L379">    return ResponseEntity.ok()</span>
-<span class="nc" id="L380">        .contentType(MediaType.APPLICATION_OCTET_STREAM)</span>
-<span class="nc" id="L381">        .header(</span>
+<span class="nc" id="L379">        principal.getName());</span>
+<span class="nc" id="L380">    var downloadedFile = activityService.downloadActivityFile(activityId, fileId);</span>
+<span class="nc" id="L381">    return ResponseEntity.ok()</span>
+<span class="nc" id="L382">        .contentType(MediaType.APPLICATION_OCTET_STREAM)</span>
+<span class="nc" id="L383">        .header(</span>
             HttpHeaders.CONTENT_DISPOSITION,
-<span class="nc" id="L383">            &quot;attachment; filename=\&quot;&quot; + downloadedFile.fileName() + &quot;\&quot;&quot;)</span>
-<span class="nc" id="L384">        .body(downloadedFile.content());</span>
+<span class="nc" id="L385">            &quot;attachment; filename=\&quot;&quot; + downloadedFile.fileName() + &quot;\&quot;&quot;)</span>
+<span class="nc" id="L386">        .body(downloadedFile.content());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
