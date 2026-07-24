@@ -36,8 +36,8 @@ public class DeclaredActivityControllerIT extends ContainerConfigurationTest {
   @Value("${user.second.student.signature}")
   private String otherStudentSignature;
 
-  private final String notFoundId = "00000000-0000-0000-0000-000000000000";
   private final String activityId = "3f7c9a2e-5d44-4b7a-9c6f-2a6e8e91b1a1";
+  private final String notFoundId = "00000000-0000-0000-0000-000000000000";
   private String declaredActivityId;
 
   @BeforeAll
