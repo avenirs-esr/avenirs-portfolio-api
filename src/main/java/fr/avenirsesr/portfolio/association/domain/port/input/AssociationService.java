@@ -4,6 +4,7 @@ import fr.avenirsesr.portfolio.association.domain.data.AssociationData;
 import fr.avenirsesr.portfolio.association.domain.model.Association;
 import fr.avenirsesr.portfolio.association.domain.model.EAssociationType;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface AssociationService {
@@ -13,6 +14,8 @@ public interface AssociationService {
 
   List<Association> getAllOf(
       List<UUID> ids, Class<?> clazz, List<EAssociationType> associationTypes);
+
+  Map<UUID, Long> countAllOf(List<UUID> ids, Class<?> clazz, EAssociationType associationType);
 
   void deleteAllByIds(List<UUID> ids);
 

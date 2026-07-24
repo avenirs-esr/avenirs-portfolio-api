@@ -32,7 +32,9 @@ import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.data.De
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.exception.DeclaredActivityNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.model.DeclaredActivity;
 import fr.avenirsesr.portfolio.student.progress.declared.activity.domain.port.input.DeclaredActivityService;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationCount;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillAssociationsData;
+import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillProgressData;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.data.DeclaredSkillProgressDetails;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.exception.DeclaredSkillProgressNotFoundException;
 import fr.avenirsesr.portfolio.student.progress.declared.skill.domain.model.DeclaredSkillProgress;
@@ -43,6 +45,8 @@ import fr.avenirsesr.portfolio.trace.domain.exception.TraceNotFoundException;
 import fr.avenirsesr.portfolio.trace.domain.port.input.TraceService;
 import fr.avenirsesr.portfolio.user.domain.model.Student;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,11 +63,50 @@ public class DeclaredSkillProgressServiceImpl implements DeclaredSkillProgressSe
   private final AssociationSearchHelper associationSearchHelper;
 
   @Override
-  public PagedResult<DeclaredSkillProgress> getDeclaredSkillsProgresses(
+  public PagedResult<DeclaredSkillProgressData> getDeclaredSkillsProgresses(
       PageCriteria pageCriteria, Boolean isValorized) {
     Student student = loggedInUserService.getLoggedInStudent();
-    return declaredSkillProgressRepository.findAllByStudent(
-        student, pageCriteria, isValorized, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
+    var pagedDeclaredSkillProgresses =
+        declaredSkillProgressRepository.findAllByStudent(
+            student, pageCriteria, isValorized, new SortCriteria(ESortField.NAME, ESortOrder.ASC));
+
+    var associationsCountByDeclaredSkillProgress =
+        getAssociationCounts(pagedDeclaredSkillProgresses.content());
+
+    return new PagedResult<>(
+        pagedDeclaredSkillProgresses.content().stream()
+            .map(
+                declaredSkillProgress ->
+                    new DeclaredSkillProgressData(
+                        declaredSkillProgress,
+                        associationsCountByDeclaredSkillProgress.get(declaredSkillProgress)))
+            .toList(),
+        pagedDeclaredSkillProgresses.pageInfo());
+  }
+
+  private Map<DeclaredSkillProgress, DeclaredSkillAssociationCount> getAssociationCounts(
+      List<DeclaredSkillProgress> declaredSkillProgresses) {
+    var ids = declaredSkillProgresses.stream().map(DeclaredSkillProgress::getId).toList();
+
+    var traceAssociationsCountById =
+        associationService.countAllOf(
+            ids, DeclaredSkillProgress.class, EAssociationType.TRACE_DECLARED_SKILL);
+    var declaredActivityAssociationsCountById =
+        associationService.countAllOf(
+            ids, DeclaredSkillProgress.class, EAssociationType.DECLARED_ACTIVITY_DECLARED_SKILL);
+
+    return declaredSkillProgresses.stream()
+        .collect(
+            Collectors.toMap(
+                Function.identity(),
+                declaredSkillProgress ->
+                    new DeclaredSkillAssociationCount(
+                        traceAssociationsCountById
+                            .getOrDefault(declaredSkillProgress.getId(), 0L)
+                            .intValue(),
+                        declaredActivityAssociationsCountById
+                            .getOrDefault(declaredSkillProgress.getId(), 0L)
+                            .intValue())));
   }
 
   @Override

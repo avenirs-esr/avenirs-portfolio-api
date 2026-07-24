@@ -9,7 +9,9 @@ import fr.avenirsesr.portfolio.association.infrastructure.adapter.model.Associat
 import fr.avenirsesr.portfolio.association.infrastructure.adapter.specification.AssociationSpecification;
 import fr.avenirsesr.portfolio.common.data.infrastructure.adapter.repository.GenericJpaRepositoryAdapter;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
@@ -71,6 +73,30 @@ public class AssociationDatabaseRepository
     return jpaRepository.findAll(specification, DEFAULT_SORT).stream()
         .map(AssociationMapper.INSTANCE::toDomain)
         .toList();
+  }
+
+  @Override
+  public Map<UUID, Long> countAllOf(
+      List<UUID> ids, Class<?> clazz, EAssociationType associationType) {
+    if (ids.isEmpty()) {
+      return Map.of();
+    }
+
+    List<AssociationJpaRepository.AssociationCountRow> rows;
+    if (associationType.getKey1().equals(clazz)) {
+      rows = jpaRepository.countGroupedById1(associationType, ids);
+    } else if (associationType.getKey2().equals(clazz)) {
+      rows = jpaRepository.countGroupedById2(associationType, ids);
+    } else {
+      throw new IllegalArgumentException(
+          "Class " + clazz + " not compatible with association type " + associationType);
+    }
+
+    return rows.stream()
+        .collect(
+            Collectors.toMap(
+                AssociationJpaRepository.AssociationCountRow::getSubjectId,
+                AssociationJpaRepository.AssociationCountRow::getTotal));
   }
 
   @Override
